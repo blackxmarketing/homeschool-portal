@@ -1,8 +1,22 @@
 import Link from "next/link";
 import { logoutAction } from "../actions";
+import MissionButton from "@/components/MissionButton";
 import { requireKid } from "@/lib/auth";
-import { gradeProgress } from "@/lib/engine/planner";
-import { extendPlan, minutesOnDay, placementStatus, skillStates, streak, today, todaysPlan } from "@/lib/store";
+import { levelInfo } from "@/lib/game";
+import { THEME_LABEL } from "@/lib/quests";
+import {
+  capStatus,
+  extendPlan,
+  getFocus,
+  kidBadges,
+  missionBoard,
+  placementStatus,
+  questLog,
+  sprintsToday,
+  streak,
+  today,
+  todaysPlan,
+} from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
@@ -10,114 +24,168 @@ export default async function KidHome({ searchParams }: { searchParams: Promise<
   const { kid } = await requireKid();
   if ((await searchParams).more) extendPlan(kid.id);
 
-  const minutes = minutesOnDay(kid.id, today());
-  const goalPct = Math.min(100, Math.round((minutes / kid.daily_goal_minutes) * 100));
+  const focus = getFocus(kid.id);
+  const cap = capStatus(kid.id);
+  const goalPct = Math.min(100, Math.round((cap.minutes / kid.daily_goal_minutes) * 100));
+  const lvl = levelInfo(kid.xp);
   const placement = placementStatus(kid.id);
   const plan = kid.placement_done ? todaysPlan(kid.id) : [];
   const allDone = plan.length > 0 && plan.every((p) => p.done);
-  const grades = gradeProgress(skillStates(kid.id)).filter((g) => g.mastered > 0 || g.grade <= kid.grade + 1);
+  const missions = missionBoard(kid.id);
+  const todaysQuests = new Map(questLog(kid.id, today()).map((r) => [r.quest_id, r.status]));
+  const earned = kidBadges(kid);
+  const days = streak(kid.id);
 
   return (
     <main className="wrap">
       <div className="topbar">
-        <h1>
-          {kid.avatar} Hi, {kid.name}!
-        </h1>
+        <div className="hero">
+          <div className="hero-avatar">{kid.avatar}</div>
+          <div>
+            <div className="eyebrow">Welcome back</div>
+            <h1>{kid.name}</h1>
+            <div className="rank">
+              {lvl.rank.icon} Level {lvl.level} · {lvl.rank.title}
+            </div>
+          </div>
+        </div>
         <nav>
-          <Link href="/kid/map">My skill map</Link>
+          <Link href="/kid/map" className="kbtn ghost">
+            🗺️ Quest map
+          </Link>
           <form action={logoutAction}>
             <button className="linkbtn">Log out</button>
           </form>
         </nav>
       </div>
 
-      <div className="stats" style={{ marginBottom: 18 }}>
-        <div className="stat">
-          <div className="v">{kid.xp.toLocaleString()}</div>
-          <div className="k">XP</div>
+      <div className="xpbar-wrap">
+        <div className="xpbar">
+          <span style={{ width: `${lvl.pct}%` }} />
         </div>
-        <div className="stat">
-          <div className="v">{streak(kid.id)} 🔥</div>
-          <div className="k">day streak</div>
-        </div>
-        <div className="stat">
-          <div className="v">
-            {minutes}/{kid.daily_goal_minutes}
-          </div>
-          <div className="k">math minutes today</div>
-          <div className="bar" style={{ marginTop: 6 }}>
-            <span style={{ width: `${goalPct}%` }} />
-          </div>
+        <div className="kmuted small">
+          {kid.xp.toLocaleString()} XP · {lvl.needed - lvl.into} XP to level {lvl.level + 1}
         </div>
       </div>
 
+      <div className="kstats">
+        <div className="kstat">
+          <div className="v">{days} 🔥</div>
+          <div className="k">day streak</div>
+        </div>
+        <div className="kstat">
+          <div className="v">
+            {cap.minutes}/{kid.daily_goal_minutes}
+          </div>
+          <div className="k">minutes toward today&apos;s goal</div>
+          <div className="mini-bar">
+            <span style={{ width: `${goalPct}%` }} />
+          </div>
+        </div>
+        <div className="kstat">
+          <div className="v">{sprintsToday(kid.id)} ⏱️</div>
+          <div className="k">focus sprints today ({focus.sprintMinutes} min each)</div>
+        </div>
+        <div className="kstat">
+          <div className="v">{Math.max(0, cap.cap - cap.minutes)}</div>
+          <div className="k">screen minutes left today</div>
+        </div>
+      </div>
+
+      {cap.reached && (
+        <div className="kcard callout">
+          <h2>🌅 Screen time&apos;s done for today!</h2>
+          <p>Great work. Now go make something happen in the real world. Pick a mission below.</p>
+        </div>
+      )}
+
       {!kid.placement_done ? (
-        <div className="card">
+        <div className="kcard">
           <h2>🗺️ Placement quest</h2>
           <p>
-            Before we build your plan, let's find out what you already know. Some questions will be easy and some will be
-            tricky. Just do your best! You can stop and come back any time.
+            Before we build your map, let&apos;s find out what you already know. Some questions will be easy and some will be
+            tricky. Do your best. You can stop and come back any time.
           </p>
           {placement.done > 0 && (
-            <p className="muted">
+            <p className="kmuted">
               Progress: {placement.done} of {placement.total} parts done.
             </p>
           )}
-          <Link href="/kid/placement" className="btn big">
-            {placement.done > 0 ? "Keep going" : "Start the quest"}
-          </Link>
+          {!cap.reached && (
+            <Link href="/kid/placement" className="kbtn big">
+              {placement.done > 0 ? "Keep going →" : "Start the quest →"}
+            </Link>
+          )}
         </div>
       ) : (
-        <div className="card">
-          <h2>Today's math plan</h2>
+        <div className="kcard">
+          <h2>⚔️ Today&apos;s training</h2>
           {plan.length === 0 ? (
-            <p>You've mastered everything available right now. Amazing! Ask a parent what's next.</p>
+            <p>You&apos;ve mastered everything available right now. Legendary! Ask a parent what&apos;s next.</p>
           ) : (
-            <ul className="plan">
+            <div className="quest-list">
               {plan.map((p) => (
-                <li key={`${p.type}:${p.skillId}`}>
-                  <div>
-                    <div className={p.done ? "done" : ""}>
-                      {p.type === "review" ? "🔁 Review: " : "⭐ Learn: "}
-                      {p.title}
+                <div key={`${p.type}:${p.skillId}`} className={`quest-item ${p.done ? "done" : ""}`}>
+                  <div className="quest-icon">{p.done ? "✅" : p.type === "review" ? "🔁" : "⭐"}</div>
+                  <div className="quest-body">
+                    <div className="quest-name">{p.title}</div>
+                    <div className="kmuted small">
+                      {p.type === "review" ? "Power review" : "New skill"} · grade {p.grade} level
                     </div>
-                    <div className="muted small">Grade {p.grade} level</div>
                   </div>
                   {p.done ? (
-                    <span className="pill mastered">Done</span>
-                  ) : (
-                    <Link href={`/kid/practice?skill=${p.skillId}&mode=${p.type}`} className="btn">
+                    <span className="tag ok">Done</span>
+                  ) : cap.reached ? null : (
+                    <Link href={`/kid/practice?skill=${p.skillId}&mode=${p.type}`} className="kbtn">
                       {p.answeredToday > 0 ? "Continue" : "Start"}
                     </Link>
                   )}
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
-          {allDone && (
-            <div className="notice" style={{ marginTop: 12 }}>
-              Plan complete for today! 🎉{" "}
-              <Link href="/kid?more=1">Want to keep going?</Link>
+          {allDone && !cap.reached && (
+            <div className="callout small-callout">
+              Training complete for today! 🎉 <Link href="/kid?more=1">Want more?</Link>
             </div>
           )}
         </div>
       )}
 
-      {kid.placement_done ? (
-        <div className="card">
-          <h2>How far you've come</h2>
-          {grades.map((g) => (
-            <div key={g.grade} style={{ marginBottom: 10 }}>
-              <div className="small">
-                Grade {g.grade}: {g.mastered} of {g.total} skills
+      <div className="kcard" id="missions">
+        <h2>🌍 Real-world missions</h2>
+        <p className="kmuted">
+          Get off the screen and make it real. Tap &quot;I did it!&quot; when you&apos;re done. A parent checks it, then you get
+          the XP.
+        </p>
+        <div className="mission-grid">
+          {missions.map((m) => (
+            <div key={m.id} className="mission">
+              <div className="eyebrow">{THEME_LABEL[m.theme]}</div>
+              <h3>{m.title}</h3>
+              <p>{m.text}</p>
+              <div className="mission-foot">
+                <span className="tag">+{m.xp} XP</span>
+                <span className="tag">~{m.minutes} min</span>
               </div>
-              <div className="bar">
-                <span style={{ width: `${(g.mastered / g.total) * 100}%` }} />
-              </div>
+              <MissionButton questId={m.id} initial={todaysQuests.get(m.id) ?? "open"} />
             </div>
           ))}
         </div>
-      ) : null}
+      </div>
+
+      <div className="kcard">
+        <h2>🏅 Badges</h2>
+        <div className="badge-grid">
+          {earned.map((b) => (
+            <div key={b.id} className={`badge ${b.earned ? "earned" : ""}`} title={b.how}>
+              <div className="badge-icon">{b.earned ? b.icon : "🔒"}</div>
+              <div className="badge-title">{b.title}</div>
+              <div className="badge-how">{b.how}</div>
+            </div>
+          ))}
+        </div>
+      </div>
     </main>
   );
 }

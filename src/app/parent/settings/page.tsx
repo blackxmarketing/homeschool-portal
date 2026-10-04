@@ -1,7 +1,19 @@
 import ParentNav from "@/components/ParentNav";
-import { addKidAction, resetPlacementAction, schoolYearAction, updateKidAction } from "@/app/actions";
+import { addKidAction, focusAction, resetPlacementAction, schoolYearAction, updateKidAction } from "@/app/actions";
 import { requireParent } from "@/lib/auth";
-import { AVATARS, getFamily, listKids } from "@/lib/store";
+import { LIMITS, PRESETS } from "@/lib/focus";
+import { AVATARS, getFamily, getFocus, listKids } from "@/lib/store";
+
+const ATTENTION_OPTIONS = [
+  { value: "no", label: "No" },
+  { value: "yes", label: "Yes (diagnosed or strongly suspected)" },
+  { value: "unsure", label: "Not sure / prefer not to say" },
+];
+
+function presetText(key: "yes" | "no" | "unsure") {
+  const p = PRESETS[key];
+  return `${p.sprintMinutes}-min sprints, ${p.breakMinutes}-min breaks, a side quest every ${p.sideQuestEvery} questions, ${p.dailyCapMinutes} min/day screen cap`;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +64,19 @@ export default async function Settings({
               </label>
             ))}
           </div>
+          <label htmlFor="attention">Does this child have ADHD or trouble keeping focus?</label>
+          <select id="attention" name="attention" defaultValue="unsure">
+            {ATTENTION_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+          <p className="muted small">
+            Every kid gets focus sprints, brain breaks, side quests and a daily screen cap. This answer only sets the starting
+            values. Yes: {presetText("yes")}. No: {presetText("no")}. You can change them any time. Only parents see this
+            answer.
+          </p>
           <p className="muted small">
             The grade is what you report to the district. The portal finds each kid's real level with its placement test, so
             they can work above or below it.
@@ -84,6 +109,7 @@ export default async function Settings({
             <p />
             <button className="btn">Save</button>
           </form>
+          <FocusForm kidId={kid.id} name={kid.name} />
           <form action={resetPlacementAction} style={{ marginTop: 12 }}>
             <input type="hidden" name="kidId" value={kid.id} />
             <button className="linkbtn small">Redo placement test</button>{" "}
@@ -105,5 +131,48 @@ export default async function Settings({
         </form>
       </div>
     </main>
+  );
+}
+
+function FocusForm({ kidId, name }: { kidId: number; name: string }) {
+  const f = getFocus(kidId);
+  const num = (field: keyof typeof LIMITS, label: string, value: number) => (
+    <div>
+      <label>{label}</label>
+      <input name={field} type="number" min={LIMITS[field][0]} max={LIMITS[field][1]} defaultValue={value} required />
+    </div>
+  );
+  return (
+    <form action={focusAction} className="focus-box">
+      <input type="hidden" name="kidId" value={kidId} />
+      <h3>Focus and learning toolkit</h3>
+      <label>Does {name} have ADHD or trouble keeping focus?</label>
+      <select name="attention" defaultValue={f.attention}>
+        {ATTENTION_OPTIONS.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      <div className="row">
+        {num("sprintMinutes", "Sprint length (min)", f.sprintMinutes)}
+        {num("breakMinutes", "Break length (min)", f.breakMinutes)}
+        {num("sideQuestEvery", "Side quest every N questions", f.sideQuestEvery)}
+        {num("dailyCapMinutes", "Daily screen cap (min)", f.dailyCapMinutes)}
+      </div>
+      <p className="muted small">
+        Sprints are timed work blocks (the Pomodoro method) followed by a movement break. Side quests mix in puzzles and creative
+        challenges to keep things fresh. After the screen cap, the portal stops giving questions and points to off-screen
+        missions.
+      </p>
+      <div className="row" style={{ alignItems: "center" }}>
+        <button className="btn" style={{ flex: "0 0 auto" }}>
+          Save focus settings
+        </button>
+        <button className="btn secondary" name="preset" value="1" style={{ flex: "0 0 auto" }}>
+          Reset to recommended for this answer
+        </button>
+      </div>
+    </form>
   );
 }

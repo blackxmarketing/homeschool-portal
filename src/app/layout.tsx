@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
+import { Lexend } from "next/font/google";
 import "./globals.css";
+import "./game.css";
+
+// Lexend was designed to reduce visual stress and improve reading speed.
+const kidFont = Lexend({ subsets: ["latin"], variable: "--font-kid", display: "swap" });
 
 export const metadata: Metadata = {
   title: "Learning Portal",
@@ -8,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={kidFont.variable}>
       <body>{children}</body>
     </html>
   );

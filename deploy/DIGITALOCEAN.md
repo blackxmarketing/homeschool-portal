@@ -49,7 +49,7 @@ This key works for this one repository only, and only for reading.
 Back in the console, paste this and press Enter:
 
 ```bash
-ssh-keyscan -q github.com >> ~/.ssh/known_hosts && git clone git@github.com:blackxmarketing/homeschool-portal.git /opt/homeschool-portal && bash /opt/homeschool-portal/deploy/setup.sh
+ssh-keyscan github.com 2>/dev/null >> ~/.ssh/known_hosts && git clone git@github.com:blackxmarketing/homeschool-portal.git /opt/homeschool-portal && bash /opt/homeschool-portal/deploy/setup.sh
 ```
 
 The first run takes about 5–10 minutes: it installs Docker, sets up the

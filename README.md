@@ -23,10 +23,28 @@ Colorado records.
 - **Hints.** The AI tutor gives a hint that never reveals the answer, falling back
   to a built-in hint when there's no API key. A hinted answer doesn't count toward
   mastery.
-- **XP, streaks, a daily-minutes goal, and a skill map.** Kids can work ahead of
-  grade level as fast as they show mastery.
+- **Game layer.** XP, levels and ranks (Apprentice to Legend), streaks, combos,
+  badges, and a quest map where each math strand is a world. Kids can work ahead
+  of grade level as fast as they show mastery.
+- **Pictures with the questions.** Percent grids, ratio tapes, balance scales,
+  coordinate planes, shapes, marbles and charts, drawn from the question's own
+  numbers. They show the setup, never the answer.
+- **"Show me one first."** A worked example (plan, solve, answer) before the kid
+  tries a new skill.
+- **Focus toolkit, for every kid.** Timed focus sprints (Pomodoro-style) with a
+  countdown and "2 minutes left" cues, movement breaks, side quests every few
+  questions (brain benders and creative challenges), and a daily screen-time
+  cap. After the cap, kids are pointed to real-world missions.
+- **Real-world missions.** Off-screen tasks about money, business, leadership,
+  character, science, history and civics. A parent approves each one, which
+  awards XP and logs the minutes under the right subject for records.
 
 **For parents**
+- **Focus settings per kid.** One question ("ADHD or trouble keeping focus?")
+  sets the starting values: shorter sprints, more breaks, more side quests and
+  a tighter screen cap for kids who need them. Every value can be changed.
+- **Missions to check.** Approve or decline the missions kids say they finished,
+  and read their creative-challenge answers on each kid's page.
 - **Overview.** The level each kid is working at, minutes, accuracy, and flags
   (guessing or rushing, or stuck on a skill).
 - **Per-kid detail.** Every skill with its standard code, status and next review
@@ -98,6 +116,10 @@ src/lib/engine/mastery.ts      Mastery rule, spaced-review intervals, rushing/st
 src/lib/engine/placement.ts    Adaptive placement (binary search per strand)
 src/lib/engine/planner.ts      Daily plan builder
 src/lib/compliance.ts          Colorado day/hour/subject tracking
+src/lib/game.ts                Levels, ranks, worlds and badges
+src/lib/focus.ts               Focus profile presets (sprints, breaks, side quests, screen cap)
+src/lib/quests.ts              Side quests and real-world missions
+src/components/Visual.tsx      SVG pictures drawn alongside questions
 src/lib/store.ts               Database operations
 src/lib/ai.ts                  Optional Claude hints and summaries
 src/app/                       Pages (kid portal, parent dashboard) and API routes

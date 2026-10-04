@@ -4,9 +4,13 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { endSession, requireParent, startSession } from "@/lib/auth";
 import { SUBJECTS } from "@/lib/compliance";
+import { clampProfile, defaultProfile, PRESETS, type AttentionAnswer } from "@/lib/focus";
 import {
   AVATARS,
   addKid,
+  PortalError,
+  reviewMission,
+  setFocus,
   createFamily,
   deleteActivity,
   getKid,
@@ -82,7 +86,7 @@ export async function addKidAction(form: FormData) {
   const fields = parseKidFields(form, "/parent/settings");
   if (!name) back("/parent/settings", "Every kid needs a name.");
   if (!fields.pin) back("/parent/settings", "Set a 4-digit PIN for the kid to log in with.");
-  addKid(s.familyId, { name, avatar, ...fields });
+  addKid(s.familyId, { name, avatar, ...fields, focus: defaultProfile(attentionAnswer(form)) });
   revalidatePath("/parent/settings");
   redirect("/parent/settings?saved=1");
 }
@@ -100,6 +104,44 @@ export async function updateKidAction(form: FormData) {
   updateKid(kid.id, { grade: fields.grade, dailyGoal: fields.dailyGoal, pin: fields.pin || undefined });
   revalidatePath("/parent/settings");
   redirect("/parent/settings?saved=1");
+}
+
+function attentionAnswer(form: FormData): AttentionAnswer {
+  const v = str(form, "attention");
+  return v === "yes" || v === "no" ? v : "unsure";
+}
+
+export async function focusAction(form: FormData) {
+  const kid = await ownKid(Number(form.get("kidId")));
+  const attention = attentionAnswer(form);
+  // "Use recommended" resets the numbers to the preset for the attention answer.
+  const numbers = form.get("preset")
+    ? PRESETS[attention]
+    : {
+        sprintMinutes: Number(form.get("sprintMinutes")),
+        breakMinutes: Number(form.get("breakMinutes")),
+        sideQuestEvery: Number(form.get("sideQuestEvery")),
+        dailyCapMinutes: Number(form.get("dailyCapMinutes")),
+      };
+  const profile = clampProfile({ attention, ...numbers });
+  if (profile.dailyCapMinutes < kid.daily_goal_minutes) {
+    back("/parent/settings", `The daily screen cap can't be less than ${kid.name}'s daily goal (${kid.daily_goal_minutes} min).`);
+  }
+  setFocus(kid.id, profile);
+  revalidatePath("/parent/settings");
+  redirect("/parent/settings?saved=1");
+}
+
+export async function reviewMissionAction(form: FormData) {
+  const s = await requireParent();
+  try {
+    reviewMission(s.familyId, Number(form.get("logId")), form.get("approve") === "1");
+  } catch (e) {
+    if (e instanceof PortalError) back("/parent", e.message);
+    throw e;
+  }
+  revalidatePath("/parent");
+  redirect("/parent");
 }
 
 export async function resetPlacementAction(form: FormData) {

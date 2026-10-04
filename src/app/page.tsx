@@ -12,9 +12,10 @@ export default async function Home() {
   const kids = listKids();
 
   return (
+    <div className="kidworld">
     <main className="wrap">
       <div className="topbar">
-        <h1>Who's learning today?</h1>
+        <h1>Who&apos;s ready to level up? 🚀</h1>
         <nav>
           <Link href={s?.role === "parent" ? "/parent" : "/parent/login"}>Parent dashboard</Link>
         </nav>
@@ -34,5 +35,6 @@ export default async function Home() {
         </div>
       )}
     </main>
+    </div>
   );
 }

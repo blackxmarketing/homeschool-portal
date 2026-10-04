@@ -64,6 +64,9 @@ SHELL=/bin/bash
 15 2 * * * root [ -f $APP_DIR/data/learning.db ] && sqlite3 $APP_DIR/data/learning.db ".backup '$BACKUP_DIR/learning-\$(date +\%F).db'" && find $BACKUP_DIR -name 'learning-*.db' -mtime +30 -delete
 CRON
 
+echo "==> Turning on automatic updates from GitHub"
+bash "$APP_DIR/deploy/enable-auto-update.sh"
+
 SITE="$(grep '^SITE_ADDRESS=' .env | cut -d= -f2)"
 echo
 echo "All set! Open https://$SITE"

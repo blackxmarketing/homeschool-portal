@@ -16,6 +16,7 @@ export default async function KidLogin({
   if (!kid) notFound();
   const { error } = await searchParams;
   return (
+    <div className="kidworld">
     <main className="wrap" style={{ maxWidth: 420, textAlign: "center" }}>
       <div style={{ fontSize: "4rem" }}>{kid.avatar}</div>
       <h1>Hi, {kid.name}!</h1>
@@ -36,9 +37,10 @@ export default async function KidLogin({
           required
         />
         <p />
-        <button className="btn big">Let's go!</button>
+        <button className="kbtn big">Let&apos;s go! 🚀</button>
       </form>
       <Link href="/">← Not you?</Link>
     </main>
+    </div>
   );
 }

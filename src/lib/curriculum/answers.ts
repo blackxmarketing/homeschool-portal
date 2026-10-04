@@ -2,9 +2,31 @@ import { simplify, type Frac } from "./math";
 
 export type AnswerKind = "number" | "fraction" | "choice" | "remainder" | "pair" | "expr";
 
+/**
+ * A picture drawn alongside a question (see components/Visual.tsx). It shows
+ * the setup of the problem, never the answer.
+ */
+export type Visual =
+  | { type: "fraction-bars"; bars: { n: number; d: number; label?: string }[] }
+  | { type: "percent-grid"; percent: number; label: string }
+  | { type: "tape"; parts: { label: string; units: number; color: "a" | "b" | "c" }[]; caption?: string }
+  | { type: "number-line"; min: number; max: number; marks: { value: number; label?: string }[]; jump?: number }
+  | { type: "coord"; points: { x: number; y: number; label: string }[]; line?: boolean }
+  | { type: "shape"; shape: "triangle" | "parallelogram" | "rectangle"; base: string; height: string }
+  | { type: "right-triangle"; a: string; b: string; c: string }
+  | { type: "circle"; radius: string }
+  | { type: "marbles"; groups: { color: "red" | "blue" | "green"; count: number }[] }
+  | { type: "bars"; values: number[] }
+  | { type: "balance"; left: string; right: string }
+  | { type: "price-tag"; price: number; badge: string }
+  | { type: "groups"; groups: number; each: number; icon: string }
+  | { type: "power"; base: number; exp: number };
+
 /** A generated question. `answer` is the canonical correct answer. */
 export interface Question {
   prompt: string;
+  /** Optional picture of the problem's setup. */
+  visual?: Visual;
   kind: AnswerKind;
   answer: string;
   choices?: string[];

@@ -15,6 +15,10 @@ import {
 } from "./engine/placement";
 import { buildPlan, isAvailable, DAILY_QUESTION_CAP, type PlanItem, type SkillState } from "./engine/planner";
 import { schoolYearStart, summarize, type DayMinutes } from "./compliance";
+import { clampProfile, defaultProfile, parseProfile, type FocusProfile } from "./focus";
+import { badges, levelInfo, type BadgeStats } from "./game";
+import { pickQuest, QUEST_BY_ID, type Quest, type QuestKind } from "./quests";
+import type { Visual } from "./curriculum/answers";
 
 export type Mode = "learn" | "review" | "placement";
 
@@ -78,11 +82,31 @@ export function setSchoolYearStart(familyId: number, monthDay: string): void {
   getDb().prepare("UPDATE families SET school_year_start = ? WHERE id = ?").run(monthDay, familyId);
 }
 
-export function addKid(familyId: number, input: { name: string; avatar: string; grade: number; pin: string; dailyGoal: number }): number {
+export function addKid(
+  familyId: number,
+  input: { name: string; avatar: string; grade: number; pin: string; dailyGoal: number; focus?: FocusProfile },
+): number {
   const res = getDb()
-    .prepare("INSERT INTO kids (family_id, name, avatar, grade, pin_hash, daily_goal_minutes) VALUES (?, ?, ?, ?, ?, ?)")
-    .run(familyId, input.name, input.avatar, input.grade, bcrypt.hashSync(input.pin, 10), input.dailyGoal);
+    .prepare("INSERT INTO kids (family_id, name, avatar, grade, pin_hash, daily_goal_minutes, focus) VALUES (?, ?, ?, ?, ?, ?, ?)")
+    .run(
+      familyId,
+      input.name,
+      input.avatar,
+      input.grade,
+      bcrypt.hashSync(input.pin, 10),
+      input.dailyGoal,
+      JSON.stringify(clampProfile(input.focus ?? defaultProfile())),
+    );
   return Number(res.lastInsertRowid);
+}
+
+export function getFocus(kidId: number): FocusProfile {
+  const row = getDb().prepare("SELECT focus FROM kids WHERE id = ?").get(kidId) as { focus: string | null } | undefined;
+  return parseProfile(row?.focus);
+}
+
+export function setFocus(kidId: number, profile: FocusProfile): void {
+  getDb().prepare("UPDATE kids SET focus = ? WHERE id = ?").run(JSON.stringify(clampProfile(profile)), kidId);
 }
 
 export function updateKid(kidId: number, input: { grade: number; dailyGoal: number; pin?: string }): void {
@@ -233,10 +257,20 @@ export interface PublicQuestion {
   prompt: string;
   kind: AnswerKind;
   choices?: string[];
+  visual?: Visual;
   formatHelp: string;
 }
 
 export class PortalError extends Error {}
+
+/** Thrown when today's screen-time cap is used up. */
+export class CapReachedError extends PortalError {}
+
+export function capStatus(kidId: number): { minutes: number; cap: number; reached: boolean } {
+  const minutes = minutesOnDay(kidId, today());
+  const cap = getFocus(kidId).dailyCapMinutes;
+  return { minutes, cap, reached: minutes >= cap };
+}
 
 function getPlacementState(kidId: number): PlacementState {
   const row = getDb().prepare("SELECT placement_state FROM kids WHERE id = ?").get(kidId) as {
@@ -258,6 +292,9 @@ export function issueQuestion(kidId: number, mode: Mode, skillId?: string): Publ
   }
   const skill = skillId ? getSkill(skillId) : undefined;
   if (!skill) throw new PortalError("Unknown skill.");
+  if (capStatus(kidId).reached) {
+    throw new CapReachedError("You've hit today's screen-time limit. Great work! Time for a real-world mission.");
+  }
 
   const row = kidSkill(kidId, skill.id);
   if (mode === "learn" && !row && !isAvailable(skill, skillStates(kidId))) {
@@ -281,8 +318,20 @@ export function issueQuestion(kidId: number, mode: Mode, skillId?: string): Publ
     prompt: q.prompt,
     kind: q.kind,
     choices: q.choices,
+    visual: q.visual,
     formatHelp: formatHelp(q.kind),
   };
+}
+
+/** A fully worked example for "watch one first". Not saved and not graded. */
+export function workedExample(kidId: number, skillId: string) {
+  const skill = getSkill(skillId);
+  if (!skill) throw new PortalError("Unknown skill.");
+  if (!kidSkill(kidId, skill.id) && !isAvailable(skill, skillStates(kidId))) {
+    throw new PortalError("This skill is still locked.");
+  }
+  const q = skill.generate(Math.random);
+  return { skillTitle: skill.title, prompt: q.prompt, visual: q.visual, hint: q.hint, answer: q.answer, explanation: q.explanation };
 }
 
 interface IssuedRow {
@@ -564,4 +613,151 @@ export function compliance(kidId: number, familyId: number) {
   const fam = getFamily(familyId);
   const start = schoolYearStart(today(), fam?.school_year_start ?? "08-01");
   return { start, ...summarize(complianceRows(kidId, start)) };
+}
+
+// ---------------- Side quests, missions & sprints ----------------
+
+/** Quests turned in during the last 30 days (optionally not counting today). */
+function recentQuestIds(kidId: number, includeToday = true): Set<string> {
+  const rows = getDb()
+    .prepare("SELECT quest_id FROM quest_log WHERE kid_id = ? AND day >= ? AND day <= ?")
+    .all(kidId, addDays(today(), -30), includeToday ? today() : addDays(today(), -1)) as { quest_id: string }[];
+  return new Set(rows.map((r) => r.quest_id));
+}
+
+export function nextSideQuest(kidId: number, kinds: QuestKind[]): Quest {
+  return pickQuest(recentQuestIds(kidId), kinds);
+}
+
+/** Missions offered on the kid's home page. Same three all day, new ones tomorrow. */
+export function missionBoard(kidId: number, count = 3): Quest[] {
+  let state = [...`${kidId}:${today()}`].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+  const rand = () => {
+    state = (Math.imul(state, 1103515245) + 12345) >>> 0;
+    return state / 2 ** 32;
+  };
+  // Today's turned-in missions stay on the board so the kid sees their status.
+  const exclude = recentQuestIds(kidId, false);
+  const picked: Quest[] = [];
+  for (let i = 0; i < count; i++) {
+    const q = pickQuest(exclude, ["mission"], rand);
+    if (picked.some((p) => p.id === q.id)) break;
+    picked.push(q);
+    exclude.add(q.id);
+  }
+  return picked;
+}
+
+export function completeQuest(kidId: number, questId: string, response = ""): { status: string; xpGained: number } {
+  const quest = QUEST_BY_ID.get(questId);
+  if (!quest) throw new PortalError("Unknown quest.");
+  const db = getDb();
+  const day = today();
+  if (db.prepare("SELECT 1 FROM quest_log WHERE kid_id = ? AND quest_id = ? AND day = ?").get(kidId, questId, day)) {
+    throw new PortalError("You already turned in that quest today.");
+  }
+  if (quest.kind === "create" && response.trim().length < 10) {
+    throw new PortalError("Write a little more so a parent can see your thinking.");
+  }
+  const status = quest.kind === "mission" ? "pending" : "done";
+  db.prepare("INSERT INTO quest_log (kid_id, quest_id, kind, status, response, day) VALUES (?, ?, ?, ?, ?, ?)").run(
+    kidId,
+    questId,
+    quest.kind,
+    status,
+    response.trim().slice(0, 1000),
+    day,
+  );
+  // Missions earn their XP when a parent approves them.
+  const xp = quest.kind === "mission" ? 0 : quest.xp;
+  addXp(kidId, xp);
+  return { status, xpGained: xp };
+}
+
+type QuestLogBase = {
+  id: number;
+  kid_id: number;
+  quest_id: string;
+  kind: QuestKind;
+  status: "done" | "pending" | "approved" | "declined";
+  response: string;
+  day: string;
+};
+
+export type QuestLogRow = QuestLogBase & { title: string; xp: number; minutes: number; subject: string };
+
+function withQuest<T extends QuestLogBase>(r: T): T & QuestLogRow {
+  const q = QUEST_BY_ID.get(r.quest_id);
+  return { ...r, title: q?.title ?? r.quest_id, xp: q?.xp ?? 0, minutes: q?.minutes ?? 0, subject: q?.subject ?? "Other" };
+}
+
+export function questLog(kidId: number, sinceDay: string): QuestLogRow[] {
+  return (getDb()
+    .prepare("SELECT id, kid_id, quest_id, kind, status, response, day FROM quest_log WHERE kid_id = ? AND day >= ? ORDER BY id DESC")
+    .all(kidId, sinceDay) as QuestLogBase[]).map(withQuest);
+}
+
+export function pendingMissions(familyId: number) {
+  return (getDb()
+    .prepare(
+      `SELECT q.id, q.kid_id, q.quest_id, q.kind, q.status, q.response, q.day, k.name AS kidName, k.avatar
+       FROM quest_log q JOIN kids k ON k.id = q.kid_id
+       WHERE k.family_id = ? AND q.status = 'pending' ORDER BY q.id`,
+    )
+    .all(familyId) as (QuestLogBase & { kidName: string; avatar: string })[]).map(withQuest);
+}
+
+/** Approving a mission awards its XP and logs its minutes under its subject for records. */
+export function reviewMission(familyId: number, logId: number, approve: boolean): void {
+  const db = getDb();
+  const row = db
+    .prepare(
+      "SELECT q.kid_id, q.quest_id, q.day, q.status FROM quest_log q JOIN kids k ON k.id = q.kid_id WHERE q.id = ? AND k.family_id = ?",
+    )
+    .get(logId, familyId) as { kid_id: number; quest_id: string; day: string; status: string } | undefined;
+  if (!row || row.status !== "pending") throw new PortalError("That mission isn't waiting for review.");
+  const quest = QUEST_BY_ID.get(row.quest_id);
+  db.transaction(() => {
+    db.prepare("UPDATE quest_log SET status = ?, reviewed_at = datetime('now') WHERE id = ?").run(
+      approve ? "approved" : "declined",
+      logId,
+    );
+    if (approve && quest) {
+      addXp(row.kid_id, quest.xp);
+      if (quest.minutes && quest.subject) {
+        logActivity(row.kid_id, { day: row.day, subject: quest.subject, minutes: quest.minutes, note: `Mission: ${quest.title}` });
+      }
+    }
+  })();
+}
+
+export function recordSprint(kidId: number): void {
+  getDb().prepare("INSERT INTO sprint_log (kid_id, day) VALUES (?, ?)").run(kidId, today());
+}
+
+export function sprintsToday(kidId: number): number {
+  return (getDb().prepare("SELECT COUNT(*) AS n FROM sprint_log WHERE kid_id = ? AND day = ?").get(kidId, today()) as { n: number }).n;
+}
+
+export function gameStats(kid: Kid): BadgeStats {
+  const db = getDb();
+  const count = (sql: string) => (db.prepare(sql).get(kid.id) as { n: number }).n;
+  const rows = kidSkillRows(kid.id);
+  const mastered = new Set(rows.filter((r) => r.status === "mastered").map((r) => r.skill_id));
+  const strands = [...new Set(SKILLS.map((s) => s.strand))];
+  return {
+    mastered: mastered.size,
+    streak: streak(kid.id),
+    // Each passed review moves a skill up one stage. Placement skills start at stage 1.
+    reviewsPassed: rows.reduce((t, r) => t + Math.max(0, r.review_stage - (r.source === "placement" ? 1 : 0)), 0),
+    questsDone: count("SELECT COUNT(*) AS n FROM quest_log WHERE kid_id = ? AND status IN ('done', 'approved')"),
+    missionsApproved: count("SELECT COUNT(*) AS n FROM quest_log WHERE kid_id = ? AND status = 'approved'"),
+    sprintsDone: count("SELECT COUNT(*) AS n FROM sprint_log WHERE kid_id = ?"),
+    level: levelInfo(kid.xp).level,
+    worldsComplete: strands.filter((st) => SKILLS.filter((s) => s.strand === st).every((s) => mastered.has(s.id))).length,
+  };
+}
+
+export function kidBadges(kid: Kid) {
+  return badges(gameStats(kid));
 }

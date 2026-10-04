@@ -8,7 +8,8 @@ import { requireParent } from "@/lib/auth";
 import { SUBJECTS } from "@/lib/compliance";
 import { STRANDS } from "@/lib/curriculum/skills";
 import { addDays } from "@/lib/engine/mastery";
-import { activities, getKid, kidFlags, recentMastered, skillTable, today, weekStats } from "@/lib/store";
+import { KIND_LABEL } from "@/lib/quests";
+import { activities, getKid, kidFlags, questLog, recentMastered, skillTable, today, weekStats } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,7 @@ export default async function KidDetail({
   const flags = kidFlags(kid.id);
   const mastered = recentMastered(kid.id, addDays(today(), -30));
   const log = activities(kid.id, addDays(today(), -14));
+  const quests = questLog(kid.id, addDays(today(), -30));
   const strandLabel = Object.fromEntries(STRANDS.map((x) => [x.id, x.label]));
 
   return (
@@ -73,6 +75,41 @@ export default async function KidDetail({
           <SummaryButton kidId={kid.id} />
         ) : (
           <p className="muted small">Add an ANTHROPIC_API_KEY on the server to get AI-written weekly summaries and tutor hints.</p>
+        )}
+      </div>
+
+      <div className="card">
+        <h2>Side quests and missions (last 30 days)</h2>
+        {quests.length === 0 ? (
+          <p className="muted">None yet. Side quests pop up during practice, and missions are on the kid&apos;s home page.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Quest</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {quests.map((q) => (
+                <tr key={q.id}>
+                  <td>{q.day}</td>
+                  <td className="small">{KIND_LABEL[q.kind]}</td>
+                  <td>
+                    {q.title}
+                    {q.response && <div className="quote">&ldquo;{q.response}&rdquo;</div>}
+                  </td>
+                  <td>
+                    <span className={`pill ${q.status === "approved" || q.status === "done" ? "mastered" : q.status === "pending" ? "learning" : ""}`}>
+                      {q.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
 

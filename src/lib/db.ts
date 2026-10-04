@@ -104,7 +104,43 @@ CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL
 );
+
+-- Side quests. Brain benders and creative challenges finish right away;
+-- real-world missions wait for a parent to approve them.
+CREATE TABLE IF NOT EXISTS quest_log (
+  id INTEGER PRIMARY KEY,
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  quest_id TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('done', 'pending', 'approved', 'declined')),
+  response TEXT NOT NULL DEFAULT '',
+  day TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  reviewed_at TEXT
+);
+CREATE INDEX IF NOT EXISTS quest_log_kid ON quest_log (kid_id, day);
+
+-- Finished focus sprints (Pomodoro-style work blocks).
+CREATE TABLE IF NOT EXISTS sprint_log (
+  id INTEGER PRIMARY KEY,
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  day TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 `;
+
+/** Columns added after the first release. Existing databases get them on startup. */
+const ADDED_COLUMNS: { table: string; column: string; ddl: string }[] = [
+  // JSON FocusProfile (see lib/focus.ts). NULL means defaults.
+  { table: "kids", column: "focus", ddl: "ALTER TABLE kids ADD COLUMN focus TEXT" },
+];
+
+function migrate(conn: Database.Database): void {
+  for (const c of ADDED_COLUMNS) {
+    const cols = conn.prepare(`PRAGMA table_info(${c.table})`).all() as { name: string }[];
+    if (!cols.some((x) => x.name === c.column)) conn.exec(c.ddl);
+  }
+}
 
 let db: Database.Database | null = null;
 
@@ -115,6 +151,7 @@ export function openDb(file?: string): Database.Database {
   conn.pragma("journal_mode = WAL");
   conn.pragma("foreign_keys = ON");
   conn.exec(SCHEMA);
+  migrate(conn);
   return conn;
 }
 

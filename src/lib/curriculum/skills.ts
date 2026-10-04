@@ -231,6 +231,7 @@ export const SKILLS: Skill[] = [
       const d = pick(r, [2, 3, 4, 6, 8]);
       const n = int(r, 1, d - 1);
       return {
+        visual: { type: "fraction-bars", bars: [{ n, d, label: "pizza" }] },
         prompt: `A pizza is cut into ${d} equal slices. You eat ${n}. What fraction of the pizza did you eat?`,
         kind: "fraction",
         answer: `${n}/${d}`,
@@ -312,6 +313,7 @@ export const SKILLS: Skill[] = [
       const w = int(r, 2, 9);
       if (r() < 0.5) {
         return {
+          visual: { type: "shape", shape: "rectangle", base: `${l} cm`, height: `${w} cm` },
           prompt: `A rectangle is ${l} cm long and ${w} cm wide. What is its area in square centimeters?`,
           kind: "number",
           answer: String(l * w),
@@ -320,6 +322,7 @@ export const SKILLS: Skill[] = [
         };
       }
       return {
+        visual: { type: "shape", shape: "rectangle", base: `${l} m`, height: `${w} m` },
         prompt: `A rectangle is ${l} m long and ${w} m wide. What is its perimeter in meters?`,
         kind: "number",
         answer: String(2 * (l + w)),
@@ -1022,6 +1025,7 @@ export const SKILLS: Skill[] = [
       const dx = int(r, 1, 6);
       const dy = int(r, 1, 6);
       return {
+        visual: { type: "coord", points: [{ x, y, label: "start" }] },
         prompt: `Start at the point (${x}, ${y}). Move ${dx} right and ${dy} up. Where are you now?`,
         kind: "pair",
         answer: `(${x + dx}, ${y + dy})`,
@@ -1045,6 +1049,7 @@ export const SKILLS: Skill[] = [
       const k = int(r, 2, 8);
       const name = pick(r, NAMES);
       return {
+        visual: { type: "tape", parts: [{ label: "flour", units: a, color: "a" }, { label: "milk", units: b, color: "b" }], caption: `Every batch: ${a} flour for ${b} milk` },
         prompt: `${name}'s recipe uses ${a} cups of flour for every ${b} cups of milk. How much flour goes with ${b * k} cups of milk?`,
         kind: "number",
         answer: String(a * k),
@@ -1069,6 +1074,7 @@ export const SKILLS: Skill[] = [
         { what: "pages in", unit: "days", ask: "How many pages per day is that?" },
       ]);
       return {
+        visual: { type: "tape", parts: [{ label: `${rate * n} total`, units: n, color: "a" }], caption: `Split into ${n} equal parts` },
         prompt: `${rate * n} ${item.what} ${n} ${item.unit}. ${item.ask}`,
         kind: "number",
         answer: String(rate),
@@ -1088,6 +1094,7 @@ export const SKILLS: Skill[] = [
       const p = pick(r, [10, 20, 25, 30, 40, 50, 60, 75, 80, 5, 15]);
       const base = int(r, 2, 40) * (p % 10 === 0 ? 10 : 20);
       return {
+        visual: { type: "percent-grid", percent: p, label: `${p} out of every 100` },
         prompt: `What is ${p}% of ${base}?`,
         kind: "number",
         answer: dec((p / 100) * base),
@@ -1108,6 +1115,7 @@ export const SKILLS: Skill[] = [
       const b = { n: int(r, 1, 8), d: int(r, 2, 9) };
       const res = simplify({ n: a.n * b.d, d: a.d * b.n });
       return {
+        visual: { type: "fraction-bars", bars: [{ ...a, label: "how much you have" }, { ...b, label: "size of each group" }] },
         prompt: `${a.n}/${a.d} ÷ ${b.n}/${b.d} = ?`,
         kind: "fraction",
         answer: fracToString(res),
@@ -1181,6 +1189,7 @@ export const SKILLS: Skill[] = [
       if (r() < 0.5) {
         const n = int(r, -50, 50);
         return {
+          visual: { type: "number-line", min: -50, max: 50, marks: [{ value: n, label: String(n) }] },
           prompt: `What is the absolute value of ${n}?  ( |${n}| )`,
           kind: "number",
           answer: String(Math.abs(n)),
@@ -1213,6 +1222,7 @@ export const SKILLS: Skill[] = [
       const base = int(r, 2, 10);
       const exp = base <= 3 ? int(r, 2, 5) : base <= 5 ? int(r, 2, 4) : int(r, 2, 3);
       return {
+        visual: { type: "power", base, exp },
         prompt: `${base}^${exp} = ?  (that's ${base} to the power of ${exp})`,
         kind: "number",
         answer: String(base ** exp),
@@ -1262,6 +1272,7 @@ export const SKILLS: Skill[] = [
       const a = int(r, 2, 12);
       if (r() < 0.5) {
         return {
+          visual: { type: "balance", left: `x + ${a}`, right: String(x + a) },
           prompt: `Solve for x:  x + ${a} = ${x + a}`,
           kind: "number",
           answer: String(x),
@@ -1270,6 +1281,7 @@ export const SKILLS: Skill[] = [
         };
       }
       return {
+        visual: { type: "balance", left: `${a}x`, right: String(a * x) },
         prompt: `Solve for x:  ${a}x = ${a * x}`,
         kind: "number",
         answer: String(x),
@@ -1290,6 +1302,7 @@ export const SKILLS: Skill[] = [
       const h = int(r, 2, 15);
       if (r() < 0.6) {
         return {
+          visual: { type: "shape", shape: "triangle", base: `${b} in`, height: `${h} in` },
           prompt: `A triangle has a base of ${b} in and a height of ${h} in. What is its area in square inches?`,
           kind: "number",
           answer: dec((b * h) / 2),
@@ -1298,6 +1311,7 @@ export const SKILLS: Skill[] = [
         };
       }
       return {
+        visual: { type: "shape", shape: "parallelogram", base: `${b} m`, height: `${h} m` },
         prompt: `A parallelogram has a base of ${b} m and a height of ${h} m. What is its area in square meters?`,
         kind: "number",
         answer: String(b * h),
@@ -1325,6 +1339,7 @@ export const SKILLS: Skill[] = [
         vals[vals.length - 1] += fix;
         const mean = vals.reduce((s, v) => s + v, 0) / count;
         return {
+          visual: { type: "bars", values: [...vals] },
           prompt: `Find the mean (average) of: ${vals.join(", ")}`,
           kind: "number",
           answer: String(mean),
@@ -1335,6 +1350,7 @@ export const SKILLS: Skill[] = [
       if (which === 1) {
         const med = sorted[(count - 1) / 2];
         return {
+          visual: { type: "bars", values: [...vals] },
           prompt: `Find the median of: ${vals.join(", ")}`,
           kind: "number",
           answer: String(med),
@@ -1343,6 +1359,7 @@ export const SKILLS: Skill[] = [
         };
       }
       return {
+        visual: { type: "bars", values: [...vals] },
         prompt: `Find the range of: ${vals.join(", ")}`,
         kind: "number",
         answer: String(sorted[count - 1] - sorted[0]),
@@ -1366,6 +1383,7 @@ export const SKILLS: Skill[] = [
       const show = (n: number) => (n < 0 ? `(${n})` : String(n));
       if (r() < 0.5) {
         return {
+          visual: { type: "number-line", min: -50, max: 50, marks: [{ value: a, label: "start" }] },
           prompt: `${a} + ${show(b)} = ?`,
           kind: "number",
           answer: String(a + b),
@@ -1374,6 +1392,7 @@ export const SKILLS: Skill[] = [
         };
       }
       return {
+        visual: { type: "number-line", min: -50, max: 50, marks: [{ value: a, label: "start" }] },
         prompt: `${a} − ${show(b)} = ?`,
         kind: "number",
         answer: String(a - b),
@@ -1444,6 +1463,7 @@ export const SKILLS: Skill[] = [
       if (r() < 0.5) {
         const sale = price - (price * p) / 100;
         return {
+          visual: { type: "price-tag", price, badge: `${p}% OFF` },
           prompt: `A jacket costs $${price}. It is on sale for ${p}% off. What is the sale price, in dollars?`,
           kind: "number",
           answer: dec(sale),
@@ -1454,6 +1474,7 @@ export const SKILLS: Skill[] = [
       const t = pick(r, [5, 8, 10]);
       const total = price + (price * t) / 100;
       return {
+        visual: { type: "price-tag", price, badge: `+${t}% tax` },
         prompt: `A game costs $${price}. Sales tax is ${t}%. What is the total cost, in dollars?`,
         kind: "number",
         answer: dec(total),
@@ -1501,6 +1522,7 @@ export const SKILLS: Skill[] = [
       const rhs = a * x + b;
       const bTxt = b < 0 ? `− ${Math.abs(b)}` : `+ ${b}`;
       return {
+        visual: { type: "balance", left: `${a}x ${bTxt}`, right: String(rhs) },
         prompt: `Solve for x:  ${a}x ${bTxt} = ${rhs}`,
         kind: "number",
         answer: String(x),
@@ -1521,6 +1543,7 @@ export const SKILLS: Skill[] = [
       if (r() < 0.5) {
         const c = 2 * 3.14 * rad;
         return {
+          visual: { type: "circle", radius: `${rad} cm` },
           prompt: `A circle has a radius of ${rad} cm. Using π ≈ 3.14, what is its circumference in cm?`,
           kind: "number",
           answer: dec(c),
@@ -1531,6 +1554,7 @@ export const SKILLS: Skill[] = [
       }
       const a = 3.14 * rad * rad;
       return {
+        visual: { type: "circle", radius: `${rad} cm` },
         prompt: `A circle has a radius of ${rad} cm. Using π ≈ 3.14, what is its area in square cm?`,
         kind: "number",
         answer: dec(a),
@@ -1555,6 +1579,7 @@ export const SKILLS: Skill[] = [
       const color = pick(r, ["red", "blue"]);
       const n = color === "red" ? red : blue;
       return {
+        visual: { type: "marbles", groups: [{ color: "red", count: red }, { color: "blue", count: blue }, { color: "green", count: green }] },
         prompt: `A bag has ${red} red, ${blue} blue${green ? ` and ${green} green` : ""} marbles. You pick one without looking. What is the probability it is ${color}? (Give a fraction.)`,
         kind: "fraction",
         answer: fracToString({ n, d: total }),
@@ -1612,6 +1637,7 @@ export const SKILLS: Skill[] = [
       const y2 = y1 + dy;
       const m = simplify({ n: dy, d: dx });
       return {
+        visual: { type: "coord", points: [{ x: x1, y: y1, label: "A" }, { x: x2, y: y2, label: "B" }], line: true },
         prompt: `What is the slope of the line through (${x1}, ${y1}) and (${x2}, ${y2})?`,
         kind: "fraction",
         answer: fracToString(m),
@@ -1638,6 +1664,7 @@ export const SKILLS: Skill[] = [
       const [a, b, c] = [a0 * k, b0 * k, c0 * k];
       if (r() < 0.6) {
         return {
+          visual: { type: "right-triangle", a: String(a), b: String(b), c: "?" },
           prompt: `A right triangle has legs of ${a} and ${b}. How long is the hypotenuse?`,
           kind: "number",
           answer: String(c),
@@ -1646,6 +1673,7 @@ export const SKILLS: Skill[] = [
         };
       }
       return {
+        visual: { type: "right-triangle", a: String(a), b: "?", c: String(c) },
         prompt: `A right triangle has a hypotenuse of ${c} and one leg of ${a}. How long is the other leg?`,
         kind: "number",
         answer: String(b),
@@ -1670,6 +1698,7 @@ export const SKILLS: Skill[] = [
       const d = a * x + b - c * x;
       const s = (n: number) => (n < 0 ? `− ${Math.abs(n)}` : `+ ${n}`);
       return {
+        visual: { type: "balance", left: `${a}x ${s(b)}`, right: `${c}x ${s(d)}` },
         prompt: `Solve for x:  ${a}x ${s(b)} = ${c}x ${s(d)}`,
         kind: "number",
         answer: String(x),

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { kidFromRequest } from "@/lib/auth";
-import { issueQuestion, PortalError, skillProgress, placementStatus, type Mode } from "@/lib/store";
+import { CapReachedError, issueQuestion, PortalError, skillProgress, placementStatus, type Mode } from "@/lib/store";
 
 const MODES: Mode[] = ["learn", "review", "placement"];
 
@@ -14,6 +14,7 @@ export async function POST(req: Request) {
     const progress = body.mode === "placement" ? placementStatus(kid.id) : skillProgress(kid.id, q.skillId);
     return NextResponse.json({ question: q, progress });
   } catch (e) {
+    if (e instanceof CapReachedError) return NextResponse.json({ error: e.message, capReached: true }, { status: 400 });
     if (e instanceof PortalError) return NextResponse.json({ error: e.message }, { status: 400 });
     throw e;
   }
