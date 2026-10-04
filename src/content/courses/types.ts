@@ -81,12 +81,61 @@ export interface ThinkQuestion {
   hints: string[];
 }
 
+// ---------------- Interactive questions ("probes") ----------------
+
+/** A specific wrong answer and the coaching for it. `match` is a wrong word/number the kid might enter. */
+export interface Mistake {
+  match: string;
+  coach: string;
+}
+
+/**
+ * Interactive questions that replace multiple choice: the kid fills in,
+ * places, matches, builds or moves things to show what they know. Graded on
+ * the server (answers never reach the browser), with partial credit.
+ */
+export type Probe = (
+  /** Fill in the blanks. Write blanks as {0}, {1}... in `text`. Each blank lists accepted answers (case-insensitive).
+   *  With `bank`, kids tap words from the bank (include the right words plus 2-4 distractors); without it they type. */
+  | { type: "cloze"; text: string; blanks: { answers: string[] }[]; bank?: string[] }
+  /** Type a number. */
+  | { type: "number"; prompt: string; answer: number; tolerance?: number; unit?: string }
+  /** Drag markers onto a number line or timeline. Each item has its true value; `tolerance` is how close counts. */
+  | { type: "place"; prompt: string; min: number; max: number; step: number; tolerance: number; items: { label: string; value: number }[] }
+  /** Match each left item to its right partner (shown shuffled). */
+  | { type: "match"; prompt: string; pairs: { left: string; right: string }[] }
+  /** Build a sentence/equation/argument by tapping tiles in order. `tiles` are in the correct order; `distractors` are extra tiles that don't belong. */
+  | { type: "build"; prompt: string; tiles: string[]; distractors?: string[] }
+  /** Use a simulation to hit a goal (see lib/probes.ts for each goal):
+   *  lever: make the push at most `maxPush` kg with a `load` kg load;
+   *  profit: set the price so profit is at least `minProfit` (cost, fixed, units given);
+   *  compound: find how many years until `principal` at `rate`% reaches `target`;
+   *  seasons: pick the month when the Northern Hemisphere has `season`. */
+  | { type: "target"; prompt: string; goal:
+      | { sim: "lever"; load: number; maxPush: number }
+      | { sim: "profit"; cost: number; fixed: number; units: number; minProfit: number }
+      | { sim: "compound"; principal: number; rate: number; target: number }
+      | { sim: "seasons"; season: "summer" | "winter" } }
+  /** The activity widgets can also be probes. */
+  | Extract<Widget, { type: "sort" | "sequence" | "highlight" }>
+) & {
+  /** General coaching when the answer is wrong. */
+  hint?: string;
+  /** Coaching for specific wrong answers. */
+  mistakes?: Mistake[];
+  /** Expected seconds for a kid who knows it (used to measure speed of knowledge). */
+  seconds?: number;
+};
+
 /** One small chunk of teaching: explain, show, then a quick think. */
 export interface Segment {
   title: string;
   /** 60-130 words, plain text. */
   teach: string;
   visual?: Widget;
+  /** The interactive check for this part. When present it replaces the multiple-choice think. */
+  probe?: Probe;
+  /** Multiple-choice check: the fallback when there's no probe, and its hints still power the coaching ladder. */
   think: ThinkQuestion;
   /** Different ways in, used when a kid is struggling. */
   approaches: {
@@ -118,6 +167,8 @@ export interface Lesson {
   activity?: Widget;
   /** "Explain it back": the kid explains in their own words; the coach checks for these points. */
   explain?: { prompt: string; keyPoints: string[] };
+  /** "Show what you know": interactive probes that replace the multiple-choice check (pass = 80% score). */
+  mastery?: Probe[];
   check: CheckQuestion[];
   task?: Task;
 }

@@ -53,6 +53,19 @@ export const money: Course = {
               { front: "Skill", back: "Something you have learned to do well. Rare, useful skills raise your pay." },
             ],
           },
+          probe: {
+            type: "cloze",
+            text: "When you do something useful for another person, you create {0}. They gladly pay you when what they get is worth {1} to them than the money they hand over.",
+            blanks: [{ answers: ["value"] }, { answers: ["more"] }],
+            bank: ["value", "more", "less", "effort", "luck", "the same"],
+            hint: "Think about why the neighbor would choose to trade their money for your dog walk.",
+            mistakes: [
+              { match: "effort", coach: "Effort matters, but people pay for how much better off they are, not for how hard you tried." },
+              { match: "less", coach: "If your help were worth less to them than the money, would they still pay? Flip it around." },
+              { match: "luck", coach: "Luck does not make someone better off. What does your work actually give them?" },
+            ],
+            seconds: 25,
+          },
           think: {
             q: "Why would a busy neighbor gladly pay you $15 to walk their dog?",
             choices: [
@@ -107,6 +120,20 @@ export const money: Course = {
               points: ["One set price per task", "Hours can change", "Working faster raises your hourly rate", "Rewards skill and speed"],
             },
           },
+          probe: {
+            type: "number",
+            prompt: "You help at a farm stand for $13 an hour and work 7 hours on Saturday. How much do you earn?",
+            answer: 91,
+            tolerance: 0.01,
+            unit: "$",
+            hint: "Hourly pay means you earn the same rate again for every hour you work.",
+            mistakes: [
+              { match: "20", coach: "You added 13 and 7. You earn $13 seven separate times, so multiply." },
+              { match: "84", coach: "Close! Check your multiplication: that is 12 x 7. Your rate is $13." },
+              { match: "137", coach: "That looks like the numbers stuck together. Multiply the rate by the hours instead." },
+            ],
+            seconds: 25,
+          },
           think: {
             q: "You earn $9 an hour and work 5 hours. How much do you earn?",
             choices: ["$14", "$54", "$45", "$95"],
@@ -141,6 +168,22 @@ export const money: Course = {
           title: "Per-job pay and your real hourly rate",
           teach:
             "With per-job pay, you charge one price for the whole task. Mowing a lawn might be $24, whether it takes you 2 hours or 1. To see how good the deal really is, find your real hourly rate: divide the price by the hours it took. At $24 for 1.5 hours, that is 24 / 1.5 = $16 an hour. Now here is the exciting part. If practice makes you faster and you finish in 1 hour, the same $24 job now pays $24 an hour. With per-job pay, every bit of skill and speed you gain goes straight into your pocket.",
+          probe: {
+            type: "match",
+            prompt: "Match each job to its real hourly rate (job price divided by hours).",
+            pairs: [
+              { left: "$30 car wash that takes 2 hours", right: "$15 an hour" },
+              { left: "$30 car wash that takes 1.5 hours", right: "$20 an hour" },
+              { left: "$24 lawn mowed in 1 hour", right: "$24 an hour" },
+              { left: "$40 garage cleanout that takes 4 hours", right: "$10 an hour" },
+            ],
+            hint: "For each job, split the price evenly across the hours it took.",
+            mistakes: [
+              { match: "Matched the 1.5-hour wash to $15", coach: "$15 an hour was the slower 2-hour wash. Finishing faster means each hour earns more." },
+              { match: "Multiplied price by hours", coach: "Multiplying makes the number bigger than the price. To find pay per hour, divide the price by the hours." },
+            ],
+            seconds: 45,
+          },
           think: {
             q: "You charge $30 to wash a car. It takes you 2 hours at first. Later you finish in 1.5 hours. What is your new real hourly rate?",
             choices: ["$20 an hour", "$15 an hour", "$45 an hour", "$30 an hour"],
@@ -185,6 +228,27 @@ export const money: Course = {
               title: "Rare, useful skill",
               points: ["Few people can do it well", "Customers seek you out", "Higher pay", "Example: a full interior detail, $35"],
             },
+          },
+          probe: {
+            type: "sort",
+            prompt: "Sort each skill: is it common (lower pay) or rare and useful (higher pay)?",
+            buckets: ["Common skill", "Rare, useful skill"],
+            items: [
+              { text: "Handing out flyers", bucket: 0 },
+              { text: "Carrying grocery bags", bucket: 0 },
+              { text: "Washing the outside of a car", bucket: 0 },
+              { text: "Raking leaves", bucket: 0 },
+              { text: "Fixing bike brakes and gears", bucket: 1 },
+              { text: "A full interior car detail with stain removal", bucket: 1 },
+              { text: "Safely wiring a house", bucket: 1 },
+              { text: "Building a website for a small shop", bucket: 1 },
+            ],
+            hint: "Ask yourself: could almost anyone do this today, or does it take practice and know-how?",
+            mistakes: [
+              { match: "Put washing the outside of a car in rare", coach: "Almost anyone with a bucket and sponge can wash the outside. Leo earned more only after learning interior detailing." },
+              { match: "Put fixing bikes in common", coach: "Fixing gears and brakes takes knowledge and practice, so fewer people can do it well." },
+            ],
+            seconds: 40,
           },
           think: {
             q: "Which plan is most likely to raise how much you can charge for your time?",
@@ -245,6 +309,70 @@ export const money: Course = {
           "Getting faster or more skilled means fewer hours, so more money per hour",
         ],
       },
+      mastery: [
+        {
+          type: "number",
+          prompt: "You charge $36 to paint a fence, and it takes you 2.5 hours. What is your real hourly rate?",
+          answer: 14.4,
+          tolerance: 0.01,
+          unit: "$",
+          hint: "The $36 is for the whole job, so share it across all 2.5 hours.",
+          mistakes: [
+            { match: "90", coach: "You multiplied 36 by 2.5. Pay per hour means dividing the job price by the hours." },
+            { match: "33.5", coach: "You subtracted the hours from the price. Divide the price by the hours instead." },
+            { match: "18", coach: "That would be the rate if the job took 2 hours. It took 2.5 hours, so each hour earns a bit less." },
+          ],
+          seconds: 50,
+        },
+        {
+          type: "build",
+          prompt: "Build the rule for finding your real hourly rate on a per-job task.",
+          tiles: ["Real hourly rate", "equals", "job price", "divided by", "hours worked"],
+          distractors: ["times", "plus"],
+          hint: "Start with what you want to find, then think about splitting the price across the time.",
+          mistakes: [
+            { match: "Used times instead of divided by", coach: "Multiplying the price by hours makes the number bigger than the price. You want to split the price across the hours." },
+            { match: "Put hours before job price", coach: "Hours divided by price gives a tiny number. The price goes first, then divide by the hours." },
+          ],
+          seconds: 35,
+        },
+        {
+          type: "place",
+          prompt: "Place each job on the number line at its real pay per hour.",
+          min: 0,
+          max: 40,
+          step: 1,
+          tolerance: 1,
+          items: [
+            { label: "$20 for a 2-hour job", value: 10 },
+            { label: "Babysitting at $12 an hour", value: 12 },
+            { label: "$24 lawn mowed in 1 hour", value: 24 },
+            { label: "$35 car detail done in 1.25 hours", value: 28 },
+          ],
+          hint: "Hourly jobs already tell you the rate. For per-job pay, divide the price by the hours.",
+          mistakes: [
+            { match: "Placed the $35 detail at 35", coach: "The detail took longer than an hour, so each hour earns less than $35. Try 35 divided by 1.25." },
+            { match: "Placed the $20 job at 20", coach: "That job took 2 hours, so split $20 into two equal parts." },
+          ],
+          seconds: 70,
+        },
+        {
+          type: "cloze",
+          text: "Hourly pay rewards the {0} you put in. Per-job pay rewards skill and {1}, because finishing faster raises your real hourly rate. Skills that are useful and {2} let you charge more.",
+          blanks: [
+            { answers: ["time", "hours"] },
+            { answers: ["speed", "being faster", "efficiency", "working faster"] },
+            { answers: ["rare", "hard to find", "uncommon", "scarce"] },
+          ],
+          hint: "Think about what makes each kind of pay go up: more hours, or getting quicker and better?",
+          mistakes: [
+            { match: "effort", coach: "Both kinds of pay take effort. Hourly pay grows only when you add more time." },
+            { match: "common", coach: "If lots of people can do it, customers have plenty of choices. Which kind of skill makes them seek you out?" },
+            { match: "money", coach: "Every job pays money. What does a per-job worker get better at to earn more per hour?" },
+          ],
+          seconds: 50,
+        },
+      ],
       check: [
         {
           q: "You earn $10 an hour and work 4 hours. How much do you earn?",
@@ -334,6 +462,26 @@ export const money: Course = {
               points: ["A new video game", "A fancy smoothie", "A third hoodie", "The newest phone case"],
             },
           },
+          probe: {
+            type: "highlight",
+            prompt: "Tap every sentence that describes a need.",
+            sentences: [
+              "Maya has to replace her only pair of shoes, which now has a hole in the sole.",
+              "She would love a glow-in-the-dark skateboard.",
+              "Her family needs groceries for the week.",
+              "A new game skin is on sale for $5.",
+              "Her math class requires a calculator, and she does not own one.",
+              "She is thinking about a third hoodie in a new color.",
+            ],
+            correct: [0, 2, 4],
+            hint: "For each sentence, ask: what would happen if she skipped it? Could she still live, stay healthy, and do her schoolwork?",
+            mistakes: [
+              { match: "Tapped the skateboard", coach: "A skateboard is fun, but she can get through life without it. That makes it a want." },
+              { match: "Tapped the third hoodie", coach: "She already has two hoodies. A third one is nice to have, so it is a want." },
+              { match: "Missed the calculator", coach: "School requires it and she does not have one, so it is a supply she needs for her work." },
+            ],
+            seconds: 35,
+          },
           think: {
             q: "Your only pair of shoes has a hole in the bottom. You also want a new skateboard. What should come first?",
             choices: [
@@ -379,6 +527,20 @@ export const money: Course = {
               { label: "Give", pct: 10 },
             ],
           },
+          probe: {
+            type: "number",
+            prompt: "You earn $70 pet sitting. Using spend 60%, save 30%, give 10%, how many dollars go into savings?",
+            answer: 21,
+            tolerance: 0.01,
+            unit: "$",
+            hint: "Turn the save percent into a decimal and multiply it by what you earned.",
+            mistakes: [
+              { match: "30", coach: "30 percent is not the same as $30. Find 30 out of every 100 dollars of $70." },
+              { match: "42", coach: "That is the spend slice, 60 percent. Savings is the 30 percent slice." },
+              { match: "7", coach: "That is the give slice, 10 percent. Savings is three times as big." },
+            ],
+            seconds: 30,
+          },
           think: {
             q: "You earn $60. Using spend 60%, save 30%, give 10%, how much do you save?",
             choices: ["$30", "$6", "$36", "$18"],
@@ -421,6 +583,25 @@ export const money: Course = {
               { label: "Wants", pct: 30 },
               { label: "Savings", pct: 20 },
             ],
+          },
+          probe: {
+            type: "place",
+            prompt: "An adult takes home $2,500 a month. Using the 50/30/20 rule, place each slice at its dollar amount.",
+            min: 0,
+            max: 2500,
+            step: 50,
+            tolerance: 50,
+            items: [
+              { label: "Needs (50%)", value: 1250 },
+              { label: "Wants (30%)", value: 750 },
+              { label: "Savings (20%)", value: 500 },
+            ],
+            hint: "Find each slice by multiplying $2,500 by the percent written as a decimal. Half is a good place to start.",
+            mistakes: [
+              { match: "Placed savings at 20", coach: "20 percent is not $20. It is 20 out of every 100 dollars, so 0.20 x 2,500." },
+              { match: "Swapped wants and savings", coach: "Wants get 30 percent and savings get 20 percent, so the wants marker should sit further right." },
+            ],
+            seconds: 55,
           },
           think: {
             q: "An adult takes home $2,000 a month. Using 50/30/20, how much goes to savings?",
@@ -466,6 +647,18 @@ export const money: Course = {
               title: "Save what is left",
               points: ["Spend first, save later", "Small buys eat the leftovers", "Often nothing gets saved", "Ava's friend: still waiting"],
             },
+          },
+          probe: {
+            type: "cloze",
+            text: "Moving savings aside the moment money arrives is called paying {0} first. Ava's cousin puts $15 in a jar every week before spending. Her $90 goal will take {1} weeks.",
+            blanks: [{ answers: ["yourself"] }, { answers: ["6", "six"] }],
+            hint: "For the weeks, count how many $15 deposits it takes to build up to $90.",
+            mistakes: [
+              { match: "75", coach: "That came from subtracting 15 from 90. You need how many groups of $15 fit into $90." },
+              { match: "15", coach: "That is how much she saves each week, not how many weeks. Divide the goal by $15." },
+              { match: "last", coach: "Saving last usually means nothing is left. The trick is to save before you spend anything." },
+            ],
+            seconds: 35,
           },
           think: {
             q: "You save $8 every week before spending. How many weeks until you reach $96?",
@@ -523,6 +716,65 @@ export const money: Course = {
           "Weeks to a goal = goal divided by weekly savings",
         ],
       },
+      mastery: [
+        {
+          type: "match",
+          prompt: "Match each money idea to what it means.",
+          pairs: [
+            { left: "Need", right: "Something you must have to live, stay healthy, or do your work" },
+            { left: "Want", right: "Something nice to have that you could live without" },
+            { left: "Budget", right: "A plan that tells your money where to go before you spend it" },
+            { left: "Pay yourself first", right: "Move savings aside the moment money comes in" },
+            { left: "50/30/20 rule", right: "An adult plan: half to needs, then wants, then savings" },
+          ],
+          hint: "Start with the pairs you are sure of, then match the rest by what is left.",
+          mistakes: [
+            { match: "Mixed up need and want", coach: "A need is something you cannot do without. A want makes life nicer but is optional." },
+            { match: "Matched budget to saving first", coach: "A budget is the whole plan for every dollar. Paying yourself first is one trick inside that plan." },
+          ],
+          seconds: 50,
+        },
+        {
+          type: "number",
+          prompt: "You earn $45 a week and save 30 percent of it the moment you get paid. How many weeks until you have $108 for a goal?",
+          answer: 8,
+          tolerance: 0,
+          unit: "weeks",
+          hint: "Two steps: first find how much you save each week, then see how many of those fit into $108.",
+          mistakes: [
+            { match: "3.6", coach: "You divided by 30 as if you saved $30 a week. First find 30 percent of $45." },
+            { match: "2.4", coach: "You divided by your whole paycheck. Only the savings slice goes toward the goal." },
+            { match: "13.5", coach: "That is how much you save each week. Now divide the $108 goal by that amount." },
+          ],
+          seconds: 70,
+        },
+        {
+          type: "build",
+          prompt: "Build the rule for figuring out how long a savings goal will take.",
+          tiles: ["Weeks to goal", "equals", "goal amount", "divided by", "savings each week"],
+          distractors: ["times", "minus"],
+          hint: "Ask how many weekly deposits fit into the goal. Which operation answers 'how many fit'?",
+          mistakes: [
+            { match: "Used times", coach: "Multiplying the goal by weekly savings gives a huge number, not a count of weeks. Divide instead." },
+            { match: "Used minus", coach: "Subtracting one deposit tells you what is left after one week, not how many weeks you need." },
+          ],
+          seconds: 35,
+        },
+        {
+          type: "number",
+          prompt: "A small leak can sink a great ship. If you buy a $2.50 drink every day for 30 days, how much do you spend in total?",
+          answer: 75,
+          tolerance: 0.01,
+          unit: "$",
+          hint: "The same small amount is spent again every single day, so multiply.",
+          mistakes: [
+            { match: "32.5", coach: "You added 2.50 and 30. You spend $2.50 thirty separate times." },
+            { match: "60", coach: "That would be $2 a day. Do not forget the extra 50 cents each day, which is $15 more." },
+            { match: "7.5", coach: "Check your decimal. 2.50 x 30 is the same as 25 x 3, which is 75." },
+          ],
+          seconds: 35,
+        },
+      ],
       check: [
         {
           q: "Which of these is a need?",
@@ -612,6 +864,22 @@ export const money: Course = {
               { front: "Balance", back: "How much is in your account right now, principal plus any interest added." },
             ],
           },
+          probe: {
+            type: "match",
+            prompt: "Match each savings word to its meaning.",
+            pairs: [
+              { left: "Principal", right: "The money you first put in" },
+              { left: "Interest", right: "What the bank pays you for using your money" },
+              { left: "Interest rate", right: "The percent you earn each year" },
+              { left: "Balance", right: "Everything in the account right now, interest included" },
+            ],
+            hint: "Principal is where you start, interest is what gets added, and the rate tells you how fast it is added.",
+            mistakes: [
+              { match: "Mixed up principal and balance", coach: "Principal is only what you first deposited. The balance also includes any interest added since." },
+              { match: "Mixed up interest and interest rate", coach: "The rate is a percent, like 4 percent. Interest is the actual dollars you get." },
+            ],
+            seconds: 35,
+          },
           think: {
             q: "You put $500 in a savings account that pays 4 percent a year. How much interest do you earn in one year?",
             choices: ["$4", "$20", "$504", "$200"],
@@ -647,6 +915,20 @@ export const money: Course = {
           teach:
             "With simple interest, you earn interest only on your original principal. The amount never changes from year to year. Put $1,000 in at 5 percent simple interest, and you earn $50 every single year. After 3 years: 50 x 3 = $150 of interest, so your balance is $1,000 + $150 = $1,150. A quick way to think about it: simple interest grows in a straight line, like climbing stairs that are all the same height. Find one year's interest, multiply by the number of years, then add it to the principal. Watch the simple-interest line in the simulator climb at a steady slope.",
           visual: { type: "compound", principal: 1000, rate: 5, years: 3 },
+          probe: {
+            type: "number",
+            prompt: "You save $600 at 5 percent simple interest for 4 years. What is your balance at the end?",
+            answer: 720,
+            tolerance: 0.01,
+            unit: "$",
+            hint: "Find one year's interest on the principal, multiply by the number of years, then add the principal back.",
+            mistakes: [
+              { match: "120", coach: "That is the interest alone. The balance also includes the $600 you put in." },
+              { match: "630", coach: "That adds just one year of interest. Simple interest pays $30 every year for 4 years." },
+              { match: "729.3", coach: "That is compound interest. Simple interest is figured only on the original $600 each year." },
+            ],
+            seconds: 45,
+          },
           think: {
             q: "You save $400 at 5 percent simple interest for 3 years. What is your balance at the end?",
             choices: ["$420", "$460", "$60", "$415"],
@@ -682,6 +964,17 @@ export const money: Course = {
           teach:
             "Compound interest is where things get exciting. Each year, the interest you earned gets added to your balance, and next year you earn interest on that bigger balance. Start with $1,000 at 5 percent. Year 1: 1,000 x 1.05 = $1,050. Year 2: 1,050 x 1.05 = $1,102.50. Year 3: 1,102.50 x 1.05 = about $1,157.63. Why multiply by 1.05? It keeps the whole balance (the 1) and adds 5 percent (the 0.05) in one step. After 3 years, compounding is only $7.63 ahead of simple interest. But slide the years higher and watch the gap explode.",
           visual: { type: "compound", principal: 1000, rate: 5, years: 30 },
+          probe: {
+            type: "target",
+            prompt: "You put $1,000 in an account paying 10 percent a year, compounded yearly. Slide the years to find the first year your balance reaches at least $1,500.",
+            goal: { sim: "compound", principal: 1000, rate: 10, target: 1500 },
+            hint: "Each year multiplies the balance by 1.10. Keep going until you pass $1,500, and stop at the first year that does.",
+            mistakes: [
+              { match: "4 years", coach: "So close! After 4 years you have about $1,464, still just short of $1,500. One more year does it." },
+              { match: "6 years", coach: "You get there earlier than that. Check the balance a year sooner: it has already passed $1,500." },
+            ],
+            seconds: 45,
+          },
           think: {
             q: "You save $200 at 10 percent interest compounded yearly. What is your balance after 2 years?",
             choices: ["$240", "$220", "$420", "$242"],
@@ -717,6 +1010,26 @@ export const money: Course = {
           teach:
             "Want a quick way to see how fast money grows? Use the rule of 72. Divide 72 by the yearly interest rate, and you get roughly how many years it takes your money to double. At 6 percent, 72 / 6 = 12 years. That means $100 becomes about $200 in 12 years, about $400 in 24 years, and about $800 in 36 years. Look at that last step: the jump from $400 to $800 is bigger than all the growth before it. This is why time is the secret ingredient. Money saved at age 12 gets more doublings than money saved at 30.",
           visual: { type: "compound", principal: 100, rate: 6, years: 36 },
+          probe: {
+            type: "place",
+            prompt: "Use the rule of 72 to place each interest rate at about how many years it takes money to double.",
+            min: 0,
+            max: 30,
+            step: 1,
+            tolerance: 1,
+            items: [
+              { label: "3 percent a year", value: 24 },
+              { label: "6 percent a year", value: 12 },
+              { label: "9 percent a year", value: 8 },
+              { label: "18 percent a year", value: 4 },
+            ],
+            hint: "For each rate, divide 72 by the rate. A higher rate should double faster, so it sits further left.",
+            mistakes: [
+              { match: "Placed each rate at its own number", coach: "The rate is not the doubling time. Divide 72 by each rate to get the years." },
+              { match: "Put 18 percent furthest right", coach: "A bigger rate grows money faster, so it doubles in fewer years, not more." },
+            ],
+            seconds: 55,
+          },
           think: {
             q: "Using the rule of 72, about how many years does it take money to double at 12 percent a year?",
             choices: ["12 years", "84 years", "6 years", "60 years"],
@@ -771,6 +1084,69 @@ export const money: Course = {
           "Starting earlier means more doublings",
         ],
       },
+      mastery: [
+        {
+          type: "target",
+          prompt: "You save $500 at 6 percent a year, compounded yearly, and never add more. Slide to the first year your balance reaches at least $1,000.",
+          goal: { sim: "compound", principal: 500, rate: 6, target: 1000 },
+          hint: "Doubling $500 gets you to $1,000. The rule of 72 gives a great first guess, then check the balance in the simulator.",
+          mistakes: [
+            { match: "11 years", coach: "After 11 years you have about $949, not quite there yet. Try one more year." },
+            { match: "6 years", coach: "That is the interest rate, not the years. Divide 72 by 6 for a first guess." },
+            { match: "17 years", coach: "That is how long simple interest would take. Compounding gets there sooner because interest earns interest." },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "number",
+          prompt: "You save $2,000 at 5 percent a year, compounded yearly. What is your balance after 2 years?",
+          answer: 2205,
+          tolerance: 0.01,
+          unit: "$",
+          hint: "Multiply by 1.05 once for each year, using the new balance each time.",
+          mistakes: [
+            { match: "2200", coach: "That is simple interest, $100 each year. In year 2, the interest is figured on $2,100, not $2,000." },
+            { match: "2100", coach: "That is only after 1 year. Multiply by 1.05 one more time." },
+            { match: "205", coach: "That is the total interest. The question asks for the whole balance." },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "cloze",
+          text: "With {0} interest you earn the same amount every year, because interest is figured only on the {1}. With {2} interest, the interest you already earned starts earning interest too.",
+          blanks: [
+            { answers: ["simple"] },
+            { answers: ["principal", "original amount", "starting amount"] },
+            { answers: ["compound", "compounding", "compounded"] },
+          ],
+          bank: ["simple", "principal", "compound", "balance", "rate", "dividend"],
+          hint: "One kind of interest grows in a straight line and the other grows like a snowball. Which is which?",
+          mistakes: [
+            { match: "balance", coach: "The balance includes interest already added. Simple interest ignores that and uses only what you first put in." },
+            { match: "rate", coach: "The rate is the percent. The question asks what amount the interest is figured on." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "sort",
+          prompt: "Sort each statement: does it describe simple interest or compound interest?",
+          buckets: ["Simple interest", "Compound interest"],
+          items: [
+            { text: "Earns the exact same dollars every year", bucket: 0 },
+            { text: "Grows in a straight line, like even stairs", bucket: 0 },
+            { text: "$1,000 at 5 percent earns $50 in year 1 and $50 in year 10", bucket: 0 },
+            { text: "Interest earns interest of its own", bucket: 1 },
+            { text: "Grows like a snowball rolling downhill", bucket: 1 },
+            { text: "$1,000 at 5 percent becomes $1,050, then $1,102.50", bucket: 1 },
+          ],
+          hint: "Check whether each year's interest stays the same or gets bigger as the balance grows.",
+          mistakes: [
+            { match: "Put $1,050 then $1,102.50 in simple", coach: "Year 2 earned $52.50, more than year 1's $50. Growing interest means compounding." },
+            { match: "Put straight line in compound", coach: "Compound growth curves upward and speeds up. A straight line means the same amount every year." },
+          ],
+          seconds: 45,
+        },
+      ],
       check: [
         {
           q: "You save $200 at 10% simple interest for 2 years. How much interest do you earn?",
@@ -859,6 +1235,20 @@ export const money: Course = {
               { front: "Index fund", back: "One investment that holds small pieces of hundreds of companies at once." },
             ],
           },
+          probe: {
+            type: "number",
+            prompt: "A bike company is split into 25,000 shares. You own 250 of them. What percent of the company do you own?",
+            answer: 1,
+            tolerance: 0.001,
+            unit: "%",
+            hint: "Divide your shares by the total shares, then turn that decimal into a percent.",
+            mistakes: [
+              { match: "0.01", coach: "You divided correctly but stopped at the decimal. Multiply by 100 to turn it into a percent." },
+              { match: "10", coach: "Check the decimal places. 250 out of 25,000 is one out of every hundred." },
+              { match: "250", coach: "That treats your 250 shares as if the company had only 100. It has 25,000 shares." },
+            ],
+            seconds: 40,
+          },
           think: {
             q: "A company is split into 10,000 shares. You own 50 of them. What percent of the company do you own?",
             choices: ["50 percent", "5 percent", "0.05 percent", "0.5 percent"],
@@ -903,6 +1293,25 @@ export const money: Course = {
               title: "Stocks",
               points: ["Can grow much more over many years", "Can drop sharply in a bad year", "Better for money you will not need for a long time", "Higher reward comes with higher risk"],
             },
+          },
+          probe: {
+            type: "sort",
+            prompt: "Sort each pile of money: should it sit safely in a savings account, or could it be invested in stocks for the long haul?",
+            buckets: ["Savings account", "Long-term investing"],
+            items: [
+              { text: "Summer camp payment due in 3 months", bucket: 0 },
+              { text: "Money for a friend's birthday gift next month", bucket: 0 },
+              { text: "Emergency money in case your bike needs repairs", bucket: 0 },
+              { text: "Money you will not touch until you are 40", bucket: 1 },
+              { text: "Birthday money you plan to leave alone for 20 years", bucket: 1 },
+              { text: "Savings for when you retire many decades from now", bucket: 1 },
+            ],
+            hint: "Ask: if stocks dropped next month, would there be time to wait for them to recover before you need this money?",
+            mistakes: [
+              { match: "Put camp money in investing", coach: "Stocks can drop right before camp is due, with no time to bounce back. Money needed soon should stay safe." },
+              { match: "Put retirement money in savings", coach: "Savings is safe, but over decades it grows slowly. Money you will not need for a long time can ride out the ups and downs." },
+            ],
+            seconds: 40,
           },
           think: {
             q: "You need your money in 3 months to pay for summer camp. Where does it make most sense to keep it?",
@@ -951,6 +1360,20 @@ export const money: Course = {
               points: ["$100 in each of 10 companies", "If one fails, you lose $100", "Winners can make up for losers"],
             },
           },
+          probe: {
+            type: "number",
+            prompt: "You invest $1,200 by putting $150 into each of 8 companies. Two of them fail and drop to $0. The rest stay the same. How much do you have now?",
+            answer: 900,
+            tolerance: 0.01,
+            unit: "$",
+            hint: "Figure out how much was in the companies that failed, then take that away from what you started with.",
+            mistakes: [
+              { match: "1050", coach: "Two companies failed, not one. Subtract $150 twice." },
+              { match: "300", coach: "That is how much you lost. The question asks what you have left." },
+              { match: "0", coach: "Only two companies failed. Spreading out means the other six still hold their value." },
+            ],
+            seconds: 40,
+          },
           think: {
             q: "You put $100 into each of 6 companies. One fails and drops to $0. The rest stay the same. How much do you have now?",
             choices: ["$500", "$0", "$100", "$600"],
@@ -995,6 +1418,24 @@ export const money: Course = {
               title: "Red flags",
               points: ["Guaranteed huge returns", "Says there is no risk", "Fast riches in days or weeks", "Hurry, the deal ends soon"],
             },
+          },
+          probe: {
+            type: "highlight",
+            prompt: "You found an ad online. Tap every sentence that is a red flag.",
+            sentences: [
+              "Turn $100 into $500 in just 30 days, guaranteed!",
+              "Our fund holds small pieces of hundreds of companies.",
+              "There is zero risk. You simply cannot lose.",
+              "This offer ends tonight, so decide right now.",
+              "Values can go down in some years, so invest only money you will not need soon.",
+            ],
+            correct: [0, 2, 3],
+            hint: "Look for promises that are too good, claims of no risk, and pressure to hurry.",
+            mistakes: [
+              { match: "Tapped the warning that values can go down", coach: "Warning you about risk is a sign of honesty. Scammers hide the risks." },
+              { match: "Missed the deadline pressure", coach: "Rushing you so you cannot think it over is a classic trick. Honest investments do not need you to decide tonight." },
+            ],
+            seconds: 35,
           },
           think: {
             q: "Which offer is the biggest red flag?",
@@ -1056,6 +1497,71 @@ export const money: Course = {
           "Guaranteed fast riches are a red flag",
         ],
       },
+      mastery: [
+        {
+          type: "match",
+          prompt: "Match each investing word to what it means.",
+          pairs: [
+            { left: "Stock", right: "A small piece of ownership in a company" },
+            { left: "Dividend", right: "A slice of company profits paid to its owners" },
+            { left: "Diversification", right: "Spreading money across many different investments" },
+            { left: "Index fund", right: "One investment holding pieces of hundreds of companies" },
+            { left: "Ponzi scheme", right: "Paying early investors with money from newer ones" },
+          ],
+          hint: "Think about which words describe owning, which describe spreading out, and which describe a trap.",
+          mistakes: [
+            { match: "Mixed up diversification and index fund", coach: "Diversification is the idea of spreading out. An index fund is one tool that does it for you." },
+            { match: "Mixed up stock and dividend", coach: "The stock is what you own. The dividend is cash the company sends you for owning it." },
+          ],
+          seconds: 50,
+        },
+        {
+          type: "number",
+          prompt: "A lemonade company is split into 800 shares, and you own 40. This year it pays out $2,000 of its profits as dividends to all its owners. How much is your share?",
+          answer: 100,
+          tolerance: 0.01,
+          unit: "$",
+          hint: "First find what fraction of the company you own, then take that same fraction of the $2,000.",
+          mistakes: [
+            { match: "5", coach: "That is the percent of the company you own. Now take 5 percent of $2,000." },
+            { match: "40", coach: "That is how many shares you own. Your dividend depends on your fraction of the company." },
+            { match: "50", coach: "Check the fraction: 40 out of 800 is one twentieth. One twentieth of $2,000 is how much?" },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "place",
+          prompt: "You split your money evenly among some companies, and exactly one fails and goes to $0. Place each plan at the percent of your money you lose.",
+          min: 0,
+          max: 100,
+          step: 1,
+          tolerance: 2,
+          items: [
+            { label: "1 company out of 2", value: 50 },
+            { label: "1 company out of 4", value: 25 },
+            { label: "1 company out of 10", value: 10 },
+            { label: "1 company out of 20", value: 5 },
+          ],
+          hint: "If you split evenly, each company holds the same slice. Losing one company means losing one slice.",
+          mistakes: [
+            { match: "Placed more companies further right", coach: "The more companies you own, the smaller each slice. One failure hurts less, not more." },
+            { match: "Placed 1 out of 4 at 4", coach: "One out of 4 is a quarter of your money. What percent is a quarter?" },
+          ],
+          seconds: 55,
+        },
+        {
+          type: "build",
+          prompt: "Build the rule that protects every investor.",
+          tiles: ["Bigger possible rewards", "always come with", "bigger risk"],
+          distractors: ["zero risk", "a guarantee"],
+          hint: "Remember the sledding hill: the fast hill is also the one where you might wipe out.",
+          mistakes: [
+            { match: "Used zero risk", coach: "No real investment offers big rewards with zero risk. That promise is a red flag." },
+            { match: "Used a guarantee", coach: "Honest investments cannot guarantee big gains. What always travels with a bigger reward?" },
+          ],
+          seconds: 25,
+        },
+      ],
       check: [
         {
           q: "What do you own when you buy a share of stock?",
@@ -1155,6 +1661,20 @@ export const money: Course = {
               points: ["A lender gives you money", "You pay the lender interest", "Things cost more than their price", "Interest works against you"],
             },
           },
+          probe: {
+            type: "number",
+            prompt: "You borrow $700 for one year at 9 percent simple interest. How much do you pay back in total?",
+            answer: 763,
+            tolerance: 0.01,
+            unit: "$",
+            hint: "Find the interest first, then remember you must also return every dollar you borrowed.",
+            mistakes: [
+              { match: "63", coach: "That is the interest alone. You also have to pay back the $700 you borrowed." },
+              { match: "709", coach: "You added 9 dollars instead of 9 percent. Find 9 out of every 100 dollars of $700." },
+              { match: "1330", coach: "Check your decimal: 9 percent is 0.09, so the interest is far less than the loan itself." },
+            ],
+            seconds: 40,
+          },
           think: {
             q: "You borrow $500 for one year at 8 percent simple interest. How much do you pay back in total?",
             choices: ["$540", "$40", "$508", "$580"],
@@ -1190,6 +1710,18 @@ export const money: Course = {
           teach:
             "A credit card lets you buy now and pay later. Each swipe is a small loan from the card company. Here is the important part. If you pay the full balance by the due date, most cards charge no interest on purchases. But if you carry a balance, rates are often 20 percent a year or more. At 24 percent a year, that is about 2 percent a month. Owe $1,000, and you pay about $20 in interest in just one month. If you do not pay it off, next month you pay interest on the interest too. That is compounding, working against you.",
           visual: { type: "compound", principal: 1000, rate: 24, years: 5 },
+          probe: {
+            type: "cloze",
+            text: "Your card charges about 2 percent a month. If you carry a $900 balance, this month's interest is about ${0}. To pay no interest on purchases with most cards, pay the {1} balance by the due date.",
+            blanks: [{ answers: ["18", "18.00"] }, { answers: ["full", "whole", "entire", "total"] }],
+            hint: "For the interest, find 2 out of every 100 dollars. For the second blank, think about what leaves no balance to charge interest on.",
+            mistakes: [
+              { match: "2", coach: "2 percent is not $2. Multiply $900 by 0.02." },
+              { match: "180", coach: "That would be 20 percent. Check the decimal: 2 percent is 0.02." },
+              { match: "minimum", coach: "Paying only the minimum leaves a balance, and interest is charged on it. What would leave nothing owed?" },
+            ],
+            seconds: 40,
+          },
           think: {
             q: "Your credit card charges about 2 percent a month. You carry an $800 balance. About how much interest do you owe this month?",
             choices: ["$2", "$160", "$16", "$80"],
@@ -1234,6 +1766,25 @@ export const money: Course = {
               title: "Usually a bad deal",
               points: ["Loses value fast", "Fun fades before payments end", "Easy to borrow too much", "Example: the newest phone on a credit card"],
             },
+          },
+          probe: {
+            type: "highlight",
+            prompt: "Tap every borrowing choice that can make sense because it helps someone earn money or build value.",
+            sentences: [
+              "Borrowing $200 for a pressure washer to clean driveways for pay.",
+              "Putting concert tickets on a credit card you cannot pay off.",
+              "A small loan for a sewing machine to make and sell pillows.",
+              "Borrowing for a phone upgrade when your current phone works fine.",
+              "A loan for baking pans for a cupcake business that already has orders.",
+            ],
+            correct: [0, 2, 4],
+            hint: "For each one, ask: will this purchase earn money or last long enough to be worth the interest?",
+            mistakes: [
+              { match: "Tapped the concert tickets", coach: "The concert is fun for one night, but the payments and interest keep going. It earns nothing back." },
+              { match: "Tapped the phone upgrade", coach: "The old phone still works, and a new one loses value fast. That loan does not pay for itself." },
+              { match: "Missed the cupcake pans", coach: "The business already has orders, so the pans can earn money to repay the loan." },
+            ],
+            seconds: 35,
           },
           think: {
             q: "Which is the best example of debt that can make sense?",
@@ -1283,6 +1834,25 @@ export const money: Course = {
               title: "His sister: save, then buy",
               points: ["Saves $100 a month", "Waits 12 months", "Pays exactly $1,200 in cash", "Owes nothing"],
             },
+          },
+          probe: {
+            type: "place",
+            prompt: "You decide to wait and pay cash. Place each goal on the line at how many weeks of saving it takes.",
+            min: 0,
+            max: 24,
+            step: 1,
+            tolerance: 0.5,
+            items: [
+              { label: "$600 console, saving $50 a week", value: 12 },
+              { label: "$240 headphones, saving $30 a week", value: 8 },
+              { label: "$400 tablet, saving $20 a week", value: 20 },
+            ],
+            hint: "For each goal, divide the price by how much you save each week.",
+            mistakes: [
+              { match: "Placed the tablet at 10", coach: "At $20 a week, 10 weeks only gets you $200. How many $20s make $400?" },
+              { match: "Placed by weekly savings amount", coach: "The weekly amount is not the number of weeks. Divide the price by it." },
+            ],
+            seconds: 50,
           },
           think: {
             q: "A $600 game console tempts you. You can save $50 a week. How many weeks until you can buy it with cash?",
@@ -1344,6 +1914,67 @@ export const money: Course = {
           "Delayed gratification: waiting now pays off later",
         ],
       },
+      mastery: [
+        {
+          type: "target",
+          prompt: "Compounding can work against you. You owe $1,000 on a card charging 24 percent a year and pay nothing. Slide to the first year the debt reaches at least $2,000.",
+          goal: { sim: "compound", principal: 1000, rate: 24, target: 2000 },
+          hint: "Each year the debt is multiplied by 1.24, interest on interest. Watch for the first year it crosses $2,000.",
+          mistakes: [
+            { match: "3 years", coach: "The rule of 72 says about 3, but check the simulator: after 3 years you owe about $1,907, just short. One more year." },
+            { match: "5 years", coach: "It happens sooner than that. Look at the balance one year earlier: it has already passed $2,000." },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "number",
+          prompt: "You owe $400 on a card that charges 2 percent a month, and you pay nothing for 2 months. Interest is added each month. How much do you owe after 2 months?",
+          answer: 416.16,
+          tolerance: 0.01,
+          unit: "$",
+          hint: "Multiply the balance by 1.02 for month 1, then multiply that new balance by 1.02 again for month 2.",
+          mistakes: [
+            { match: "416", coach: "That is $8 each month on the original $400. In month 2 the interest is charged on $408, so it is a bit more." },
+            { match: "408", coach: "That is only after 1 month. Do month 2 on the new balance." },
+            { match: "16.16", coach: "That is the interest alone. The question asks for the whole amount you owe." },
+          ],
+          seconds: 70,
+        },
+        {
+          type: "match",
+          prompt: "Match each borrowing idea to what it means.",
+          pairs: [
+            { left: "Debt", right: "Borrowed money you must pay back" },
+            { left: "Interest on a loan", right: "The extra you pay for using someone else's money" },
+            { left: "Carrying a balance", right: "Not paying the full card bill by the due date" },
+            { left: "Debt that can make sense", right: "Borrowing that helps you earn money or build value" },
+            { left: "Delayed gratification", right: "Waiting now so you get something better later" },
+          ],
+          hint: "Match the easy ones first, like debt and delayed gratification, then fit the rest.",
+          mistakes: [
+            { match: "Mixed up debt and interest", coach: "Debt is the amount you borrowed. Interest is the extra fee charged on top of it." },
+            { match: "Mixed up carrying a balance and delayed gratification", coach: "Carrying a balance means owing money after the due date. Delayed gratification is about waiting before you buy." },
+          ],
+          seconds: 50,
+        },
+        {
+          type: "sequence",
+          prompt: "Put the steps of a smart, debt-free purchase in order.",
+          steps: [
+            "Notice something you really want to buy.",
+            "Ask yourself whether it is a need or a want.",
+            "Make a savings plan: price divided by weekly savings gives the number of weeks.",
+            "Each payday, move your savings aside before spending anything.",
+            "Buy it with cash when you reach the goal, and owe nothing.",
+          ],
+          hint: "You cannot save toward something until you have a plan, and you cannot plan until you know what you want.",
+          mistakes: [
+            { match: "Buying before saving", coach: "Buying first means borrowing, which adds interest. The cash purchase comes at the very end." },
+            { match: "Saving before making a plan", coach: "A plan tells you how much to save each week and for how long. Make it before you start saving." },
+          ],
+          seconds: 40,
+        },
+      ],
       check: [
         {
           q: "You borrow $300 for one year at 10% simple interest. How much interest do you owe?",

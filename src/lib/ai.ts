@@ -90,7 +90,7 @@ function leaksAnswer(text: string, answer: string): boolean {
   return new RegExp(`(^|[^\\d./])${escaped}($|[^\\d/])`).test(text);
 }
 
-const SUMMARY_SYSTEM = `You write a short weekly progress note for a homeschooling parent about one child's math work in their learning portal.
+const SUMMARY_SYSTEM = `You write a short weekly progress note for a homeschooling parent about one child's learning in their portal: math practice plus the learner profile for each subject (accuracy, speed, help needed, early warnings, and how the coach is adapting).
 Use only the data given. Be specific and honest: celebrate real wins, name the skill that needs attention, and suggest one or two concrete things the parent can do this week (for example a hands-on activity for a stuck skill).
 Keep it under 180 words. Plain text, short paragraphs, no markdown headings.`;
 

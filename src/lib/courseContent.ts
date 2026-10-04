@@ -1,4 +1,4 @@
-import type { CheckQuestion, Course, Lesson, Segment, Stage, TaskKind, ThinkQuestion, Widget } from "@/content/courses/types";
+import type { CheckQuestion, Course, Lesson, Probe, Segment, Stage, TaskKind, ThinkQuestion, Widget } from "@/content/courses/types";
 import { SUBJECTS, type Subject } from "./compliance";
 
 /**
@@ -199,18 +199,20 @@ function sanitizeSegment(raw: unknown): Segment | null {
   const simpler = sanitizeThink(ap.simpler);
   if (!title || !teach || !think || !simpler) return null;
   const visual = raw.visual ? sanitizeWidget(raw.visual) : null;
+  const probe = raw.probe ? sanitizeProbe(raw.probe) : null;
   return {
     title,
     teach,
     ...(visual ? { visual } : {}),
+    ...(probe ? { probe } : {}),
     think,
     approaches: { analogy: str(ap.analogy, 2000) || teach, example: str(ap.example, 2000) || teach, simpler },
   };
 }
 
 /** The interactive parts of a lesson; anything invalid is dropped rather than breaking the lesson. */
-export function sanitizeTeaching(raw: Record<string, unknown>): Pick<Lesson, "hook" | "teach" | "activity" | "explain"> {
-  const out: Pick<Lesson, "hook" | "teach" | "activity" | "explain"> = {};
+export function sanitizeTeaching(raw: Record<string, unknown>): Pick<Lesson, "hook" | "teach" | "activity" | "explain" | "mastery"> {
+  const out: Pick<Lesson, "hook" | "teach" | "activity" | "explain" | "mastery"> = {};
   if (isObj(raw.hook) && str(raw.hook.text)) {
     const visual = raw.hook.visual ? sanitizeWidget(raw.hook.visual) : null;
     out.hook = { text: str(raw.hook.text, 1000), ...(visual ? { visual } : {}) };
@@ -222,5 +224,95 @@ export function sanitizeTeaching(raw: Record<string, unknown>): Pick<Lesson, "ho
   if (isObj(raw.explain) && str(raw.explain.prompt)) {
     out.explain = { prompt: str(raw.explain.prompt, 600), keyPoints: strList(raw.explain.keyPoints, 6) };
   }
+  const mastery = (Array.isArray(raw.mastery) ? raw.mastery : []).map(sanitizeProbe).filter((x): x is Probe => !!x).slice(0, 10);
+  if (mastery.length) out.mastery = mastery;
   return out;
+}
+
+// ---------------- Interactive question validation ----------------
+
+export function sanitizeProbe(raw: unknown): Probe | null {
+  if (!isObj(raw)) return null;
+  const extras = {
+    ...(str(raw.hint) ? { hint: str(raw.hint, 600) } : {}),
+    ...(Array.isArray(raw.mistakes)
+      ? {
+          mistakes: raw.mistakes
+            .filter(isObj)
+            .map((m) => ({ match: str(m.match, 200), coach: str(m.coach, 600) }))
+            .filter((m) => m.match && m.coach)
+            .slice(0, 8),
+        }
+      : {}),
+    ...(raw.seconds !== undefined ? { seconds: int(raw.seconds, 5, 600, 45) } : {}),
+  };
+  const num = (v: unknown, d: number) => (Number.isFinite(Number(v)) ? Number(v) : d);
+  let core: Probe | null = null;
+  switch (raw.type) {
+    case "cloze": {
+      const text = str(raw.text, 2000);
+      const blanks = (Array.isArray(raw.blanks) ? raw.blanks : [])
+        .filter(isObj)
+        .map((b) => ({ answers: strList(b.answers, 12, 100) }))
+        .filter((b) => b.answers.length);
+      const count = (text.match(/\{\d+\}/g) ?? []).length;
+      if (text && blanks.length && count === blanks.length)
+        core = { type: "cloze", text, blanks, ...(Array.isArray(raw.bank) ? { bank: strList(raw.bank, 16, 100) } : {}) };
+      break;
+    }
+    case "number":
+      if (str(raw.prompt) && Number.isFinite(Number(raw.answer)))
+        core = {
+          type: "number",
+          prompt: str(raw.prompt, 1000),
+          answer: Number(raw.answer),
+          ...(raw.tolerance !== undefined ? { tolerance: Math.abs(num(raw.tolerance, 0)) } : {}),
+          ...(str(raw.unit) ? { unit: str(raw.unit, 20) } : {}),
+        };
+      break;
+    case "place": {
+      const items = (Array.isArray(raw.items) ? raw.items : [])
+        .filter(isObj)
+        .map((i) => ({ label: str(i.label, 120), value: num(i.value, NaN) }))
+        .filter((i) => i.label && Number.isFinite(i.value))
+        .slice(0, 6);
+      const min = num(raw.min, NaN);
+      const max = num(raw.max, NaN);
+      if (items.length && min < max)
+        core = { type: "place", prompt: str(raw.prompt, 1000), min, max, step: Math.abs(num(raw.step, 1)) || 1, tolerance: Math.abs(num(raw.tolerance, 0)), items };
+      break;
+    }
+    case "match": {
+      const pairs = (Array.isArray(raw.pairs) ? raw.pairs : [])
+        .filter(isObj)
+        .map((p) => ({ left: str(p.left, 200), right: str(p.right, 200) }))
+        .filter((p) => p.left && p.right)
+        .slice(0, 8);
+      if (pairs.length >= 2) core = { type: "match", prompt: str(raw.prompt, 1000), pairs };
+      break;
+    }
+    case "build": {
+      const tiles = strList(raw.tiles, 12, 120);
+      if (tiles.length >= 2)
+        core = { type: "build", prompt: str(raw.prompt, 1000), tiles, ...(Array.isArray(raw.distractors) ? { distractors: strList(raw.distractors, 6, 120) } : {}) };
+      break;
+    }
+    case "target": {
+      const g = isObj(raw.goal) ? raw.goal : {};
+      const prompt = str(raw.prompt, 1000);
+      if (g.sim === "lever") core = { type: "target", prompt, goal: { sim: "lever", load: num(g.load, 40), maxPush: num(g.maxPush, 10) } };
+      else if (g.sim === "profit")
+        core = { type: "target", prompt, goal: { sim: "profit", cost: num(g.cost, 1), fixed: num(g.fixed, 0), units: Math.max(1, num(g.units, 10)), minProfit: num(g.minProfit, 10) } };
+      else if (g.sim === "compound")
+        core = { type: "target", prompt, goal: { sim: "compound", principal: num(g.principal, 100), rate: num(g.rate, 5), target: num(g.target, 200) } };
+      else if (g.sim === "seasons") core = { type: "target", prompt, goal: { sim: "seasons", season: g.season === "winter" ? "winter" : "summer" } };
+      break;
+    }
+    case "sort":
+    case "sequence":
+    case "highlight":
+      core = sanitizeWidget(raw) as Probe | null;
+      break;
+  }
+  return core ? ({ ...core, ...extras } as Probe) : null;
 }

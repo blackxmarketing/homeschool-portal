@@ -53,6 +53,28 @@ Not every problem makes a good business for you. A good one is a problem that re
               { front: "Entrepreneur", back: "A person who spots a problem, builds a way to solve it, and offers it to others." },
             ],
           },
+          probe: {
+            type: "cloze",
+            text: "A bike repair shop stays open because customers say, 'My bike is {0} and I can't fix it myself.' An entrepreneur spots a {1}, builds a way to solve it, and offers it to others.",
+            blanks: [
+              { answers: ["broken"] },
+              { answers: ["problem"] },
+            ],
+            bank: ["broken", "problem", "shiny", "product", "famous", "cheap"],
+            hint: "Think about what is going wrong for the customer before they walk into the shop.",
+            mistakes: [
+              {
+                match: "shiny",
+                coach: "Nobody brings a bike to a repair shop because it's shiny. What's wrong with it?",
+              },
+              {
+                match: "product",
+                coach: "Entrepreneurs start with what's going wrong for people, not with a thing to sell.",
+              },
+              { match: "famous", coach: "Fame doesn't keep a shop open. Fixing something people need does." },
+            ],
+            seconds: 30,
+          },
           think: {
             q: "What problem does a bike repair shop solve?",
             choices: [
@@ -105,6 +127,31 @@ Not every problem makes a good business for you. A good one is a problem that re
               { text: "Dinner was delicious tonight.", bucket: 1 },
             ],
           },
+          probe: {
+            type: "highlight",
+            prompt: "You overheard these at a family picnic. Tap every sentence that is a clue to a possible business.",
+            sentences: [
+              "I wish someone would pull the weeds in my garden. My back hurts too much.",
+              "These burgers are delicious!",
+              "Ugh, I never have time to wash the car anymore.",
+              "What a beautiful sunset.",
+              "My little brother still can't ride his bike, and I don't know how to teach him.",
+              "I love this song.",
+            ],
+            correct: [0, 2, 4],
+            hint: "Listen for sighs, complaints, and 'I wish' sentences: they describe something someone wants changed.",
+            mistakes: [
+              {
+                match: "Tapped a happy sentence",
+                coach: "Happy sentences are nice, but nothing needs fixing. Look for something going wrong.",
+              },
+              {
+                match: "Missed the bike-riding sentence",
+                coach: "It doesn't say 'I wish,' but it describes a problem a kid could help with.",
+              },
+            ],
+            seconds: 35,
+          },
           think: {
             q: "Your neighbor says, 'I wish someone would pull the weeds in my garden. My back hurts too much.' What did you just hear?",
             choices: [
@@ -154,6 +201,29 @@ Not every problem makes a good business for you. A good one is a problem that re
               "Build or sketch the solution",
               "Offer it to the people who need it",
             ],
+          },
+          probe: {
+            type: "sequence",
+            prompt: "Put Mary Anderson's story in order, from problem to invention.",
+            steps: [
+              "Sleet piles up on the streetcar's front window",
+              "The driver struggles to see, and passengers freeze",
+              "Mary notices the problem while other riders grumble",
+              "She designs an arm with a rubber blade to clear the glass",
+              "She receives a patent in 1903",
+            ],
+            hint: "Start with the weather, and remember that noticing comes before designing.",
+            mistakes: [
+              {
+                match: "Put the design before noticing the problem",
+                coach: "Mary couldn't design a fix until she noticed what was wrong. Noticing comes first.",
+              },
+              {
+                match: "Put the patent before the design",
+                coach: "A patent protects an invention that already exists, so the design comes first.",
+              },
+            ],
+            seconds: 40,
           },
           think: {
             q: "What made Mary Anderson different from the other passengers?",
@@ -221,6 +291,31 @@ Not every problem makes a good business for you. A good one is a problem that re
               ],
             },
           },
+          probe: {
+            type: "sort",
+            prompt: "Run each idea through the three tests: real problem, worth paying for, and you can solve it. Where does it go?",
+            buckets: ["Passes all three", "Fails a test"],
+            items: [
+              { text: "Rolling neighbors' trash cans to the curb each week", bucket: 0 },
+              { text: "Building cars in your garage", bucket: 1 },
+              { text: "Watering plants for families on vacation", bucket: 0 },
+              { text: "Selling stickers that only you think are cool", bucket: 1 },
+              { text: "Opening a restaurant next week", bucket: 1 },
+              { text: "Walking a friendly neighbor dog after school", bucket: 0 },
+            ],
+            hint: "For each idea ask: do real people have it, would they pay a little, and can a kid do it safely with a parent's okay?",
+            mistakes: [
+              {
+                match: "Put cars or the restaurant in passes",
+                coach: "Those need big money, licenses, or adult skills, so they fail the 'can you solve it?' test.",
+              },
+              {
+                match: "Put the stickers in passes",
+                coach: "If only you want it, it fails the first test: real people must have the problem.",
+              },
+            ],
+            seconds: 50,
+          },
           think: {
             q: "Which idea passes all three tests for a 12-year-old?",
             choices: [
@@ -286,6 +381,89 @@ Not every problem makes a good business for you. A good one is a problem that re
           "Collect many problems before choosing one",
         ],
       },
+      mastery: [
+        {
+          type: "match",
+          prompt: "Match each business to the problem it solves.",
+          pairs: [
+            { left: "Grocery store", right: "I need food, but I can't grow it all myself." },
+            { left: "Windshield wipers", right: "Sleet covers the window and the driver can't see." },
+            { left: "Band-Aid", right: "Big bandages keep falling off small kitchen cuts." },
+            { left: "Dog walker", right: "My dog is home alone all day and needs exercise." },
+            { left: "Trash-can curb service", right: "My cans are too heavy to drag to the street." },
+          ],
+          hint: "For each business, ask: what was going wrong for the customer before it existed?",
+          mistakes: [
+            {
+              match: "Mixed up wipers and Band-Aid",
+              coach: "Mary Anderson's wipers came from a snowy streetcar ride. The Band-Aid came from kitchen cuts.",
+            },
+          ],
+          seconds: 50,
+        },
+        {
+          type: "build",
+          prompt: "Build the definition of an entrepreneur.",
+          tiles: [
+            "An entrepreneur",
+            "spots a problem,",
+            "builds a way to solve it,",
+            "and offers it to other people.",
+          ],
+          distractors: ["copies the most popular store,", "and waits for an idea to strike."],
+          hint: "It starts with noticing something that's wrong for people.",
+          mistakes: [
+            {
+              match: "Used 'copies the most popular store'",
+              coach: "Copying skips the most important step: finding a problem real people have.",
+            },
+            {
+              match: "Used 'waits for an idea to strike'",
+              coach: "Ideas come from noticing complaints and wishes, not from waiting.",
+            },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "cloze",
+          text: "Before choosing a business, run three tests: the problem must be {0} (other people actually have it), people must be willing to {1} a little to fix it, and you must be able to {2} it with your skills, time, and a parent's okay.",
+          blanks: [
+            { answers: ["real", "true", "common"] },
+            { answers: ["pay", "spend"] },
+            { answers: ["solve", "fix", "handle", "do"] },
+          ],
+          hint: "Remember the three questions: is it real, is it worth money, and can you do it?",
+          mistakes: [
+            {
+              match: "fun",
+              coach: "Enjoying it helps, but the first test is whether other people really have the problem.",
+            },
+            { match: "sell", coach: "The second test is about the customer: would they pay to fix it?" },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "sort",
+          prompt: "Sort each item: a PROBLEM someone has, or a SOLUTION a business offers?",
+          buckets: ["Problem", "Solution"],
+          items: [
+            { text: "My garden dries out every time we travel", bucket: 0 },
+            { text: "A vacation plant-watering service", bucket: 1 },
+            { text: "My little brother can't ride a bike yet", bucket: 0 },
+            { text: "Weekend bike-riding lessons", bucket: 1 },
+            { text: "Our car is always dusty and I'm too busy", bucket: 0 },
+            { text: "A driveway car wash", bucket: 1 },
+          ],
+          hint: "A problem is something going wrong for someone. A solution is what a business offers to fix it.",
+          mistakes: [
+            {
+              match: "Put a service or lesson in Problem",
+              coach: "Services and lessons are offers that fix things, so they're solutions.",
+            },
+          ],
+          seconds: 45,
+        },
+      ],
       check: [
         {
           q: "What is the main reason every business exists?",
@@ -391,6 +569,26 @@ Always interview people you know or who your parents know, and always have a par
               { front: "Feedback", back: "What customers tell you, good or bad, that helps you improve." },
             ],
           },
+          probe: {
+            type: "cloze",
+            text: "Edison's vote recorder worked {0}, but the lawmakers liked {1} voting because it gave them time to argue. The lesson: find out what the {2} wants before you build.",
+            blanks: [
+              { answers: ["perfectly", "well", "fine"] },
+              { answers: ["slow", "slower"] },
+              { answers: ["customer", "customers"] },
+            ],
+            bank: ["perfectly", "slow", "customer", "badly", "fast", "inventor"],
+            hint: "Remember: the machine itself was fine. The trouble was what the buyers wanted.",
+            mistakes: [
+              { match: "badly", coach: "The machine actually worked. Its problem was something else." },
+              {
+                match: "fast",
+                coach: "If the lawmakers liked fast voting, they would have bought it! What did they prefer?",
+              },
+              { match: "inventor", coach: "Edison already knew what HE wanted. Who should he have asked?" },
+            ],
+            seconds: 35,
+          },
           think: {
             q: "Why did Edison's vote recorder fail?",
             choices: [
@@ -448,6 +646,31 @@ Always interview people you know or who your parents know, and always have a par
               { text: "How do you handle this problem right now?", bucket: 0 },
               { text: "Is five dollars okay?", bucket: 1 },
             ],
+          },
+          probe: {
+            type: "sort",
+            prompt: "You're preparing to interview a neighbor about leaf raking. Sort each question.",
+            buckets: ["Open-ended (great)", "Yes or no (weak)"],
+            items: [
+              { text: "Tell me about raking leaves last fall.", bucket: 0 },
+              { text: "Do you have trees?", bucket: 1 },
+              { text: "What's the hardest part of keeping your yard clean?", bucket: 0 },
+              { text: "Would you hire me?", bucket: 1 },
+              { text: "What did you do the last time the leaves piled up?", bucket: 0 },
+              { text: "Is my idea good?", bucket: 1 },
+            ],
+            hint: "Try answering each one yourself. If 'yes' or 'no' is a complete answer, it's a weak question.",
+            mistakes: [
+              {
+                match: "Put 'Would you hire me?' in open-ended",
+                coach: "Kind neighbors often say yes just to be nice, and it only needs one word.",
+              },
+              {
+                match: "Put a 'Tell me' or 'What' question in yes or no",
+                coach: "Questions that start with 'Tell me' or 'What did you do' invite a whole story.",
+              },
+            ],
+            seconds: 45,
           },
           think: {
             q: "Which question will teach you the MOST?",
@@ -513,6 +736,31 @@ Always interview people you know or who your parents know, and always have a par
               ],
             },
           },
+          probe: {
+            type: "match",
+            prompt: "Match each interview moment to what a great listener does.",
+            pairs: [
+              { left: "The customer starts a long story", right: "Listen and write down their exact words" },
+              { left: "There's a quiet pause", right: "Wait patiently; they may keep going" },
+              {
+                left: "The customer disagrees with your idea",
+                right: "Say 'Tell me more' instead of arguing",
+              },
+              { left: "The customer finishes one part of the story", right: "Ask 'What happened next?'" },
+            ],
+            hint: "In every moment, your job is to learn, not to sell or argue.",
+            mistakes: [
+              {
+                match: "Matched the disagreement to writing exact words",
+                coach: "Notes are always good, but when someone disagrees, invite them to explain more.",
+              },
+              {
+                match: "Mixed up the pause and the story",
+                coach: "A pause isn't a signal to jump in. Silence often brings out the best details.",
+              },
+            ],
+            seconds: 45,
+          },
           think: {
             q: "During an interview, a customer starts telling a long story about their problem. What should you do?",
             choices: [
@@ -562,6 +810,29 @@ Always interview people you know or who your parents know, and always have a par
               "Write down the customer's exact words",
               "Look for patterns and adjust your idea",
             ],
+          },
+          probe: {
+            type: "build",
+            prompt: "Three of four neighbors want garage cleanup, not car washes. Build the smart entrepreneur's next move.",
+            tiles: [
+              "Notice the pattern",
+              "in what customers said,",
+              "then adjust your idea",
+              "toward what they need.",
+            ],
+            distractors: ["ignore them", "and give up."],
+            hint: "Changing your plan isn't quitting. Start with what you heard, then decide what to do about it.",
+            mistakes: [
+              {
+                match: "Used 'ignore them'",
+                coach: "Ignoring three of four customers is how Edison ended up with zero sales.",
+              },
+              {
+                match: "Used 'and give up.'",
+                coach: "Surprises are useful information. Persistence means adjusting, not quitting.",
+              },
+            ],
+            seconds: 35,
           },
           think: {
             q: "Three of the four people you interview say they don't need car washes, but they do need help cleaning out their garages. What's the best move?",
@@ -622,6 +893,93 @@ Always interview people you know or who your parents know, and always have a par
           "Learn what customers want before building, and adjust if needed",
         ],
       },
+      mastery: [
+        {
+          type: "highlight",
+          prompt: "Jada is planning interviews for a pet-sitting idea. Tap every OPEN-ENDED question.",
+          sentences: [
+            "Do you have a cat?",
+            "Tell me about the last time you went away overnight. Who cared for your pets?",
+            "Would you pay me $5 a visit?",
+            "What worries you most when your pets are home alone?",
+            "Is my idea good?",
+            "How do you handle pet care right now when you travel?",
+          ],
+          correct: [1, 3, 5],
+          hint: "An open-ended question can't be fully answered with just yes or no. It invites a story.",
+          mistakes: [
+            {
+              match: "Tapped 'Would you pay me $5 a visit?'",
+              coach: "People often say yes to be polite, and it's a yes-or-no question.",
+            },
+            {
+              match: "Missed 'How do you handle pet care...'",
+              coach: "'How do you...' asks for an explanation, so it's open-ended.",
+            },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "cloze",
+          text: "Your customer is the person who has the {0} and would {1} to solve it. In an interview, ask about real {2} experiences instead of 'Would you buy this?'",
+          blanks: [
+            { answers: ["problem"] },
+            { answers: ["pay"] },
+            { answers: ["past"] },
+          ],
+          hint: "A customer is defined by two things: what's bothering them and whether they'd spend money on it.",
+          mistakes: [
+            {
+              match: "future",
+              coach: "Guesses about the future are less honest than stories about what really happened.",
+            },
+            { match: "product", coach: "Customers have problems first. Your product comes later." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "sequence",
+          prompt: "Put Sam's customer research in the right order.",
+          steps: [
+            "Ask a parent to help pick neighbors to interview",
+            "Write open-ended questions about yards and gardens",
+            "Interview neighbors and let them do most of the talking",
+            "Write down their exact words, like 'Squirrels dig up my bulbs!'",
+            "Spot the pattern: 4 of 5 mention squirrels, only 1 feeds birds",
+            "Adjust the idea away from bird feeders",
+          ],
+          hint: "You can't find a pattern until you have notes, and you can't take notes until you've interviewed.",
+          mistakes: [
+            {
+              match: "Put adjusting the idea before spotting the pattern",
+              coach: "Adjust only after you see what many customers are saying.",
+            },
+            {
+              match: "Put writing questions after the interviews",
+              coach: "Good questions are prepared ahead of time.",
+            },
+          ],
+          seconds: 55,
+        },
+        {
+          type: "match",
+          prompt: "Match each idea to what it means.",
+          pairs: [
+            { left: "Customer", right: "The person with the problem who would pay to solve it" },
+            { left: "Open-ended question", right: "A question that can't be answered with just yes or no" },
+            { left: "Pivot", right: "Adjusting your idea toward what customers really want" },
+            { left: "Edison's vote recorder", right: "A perfect machine nobody wanted to buy" },
+          ],
+          hint: "Think back through the lesson: who, how to ask, what to do with surprises, and the warning story.",
+          mistakes: [
+            {
+              match: "Mixed up pivot and open-ended question",
+              coach: "A pivot is a change in your plan. An open-ended question is a way of asking.",
+            },
+          ],
+          seconds: 45,
+        },
+      ],
       check: [
         {
           q: "Why couldn't Edison sell his electric vote recorder?",
@@ -729,6 +1087,23 @@ Milton Hershey learned these lessons the hard way. His first candy business in P
               { front: "Break-even point", back: "How many sales it takes to pay back your startup costs." },
             ],
           },
+          probe: {
+            type: "number",
+            prompt: "A batch of 16 muffins costs $8 in ingredients and paper cups. What is the cost per muffin?",
+            answer: 0.5,
+            tolerance: 0.01,
+            unit: "$",
+            hint: "Share the batch cost across all the muffins: divide the total cost by how many the batch makes.",
+            mistakes: [
+              {
+                match: "2",
+                coach: "That's 16 divided by 8, with the numbers flipped. Divide the COST by the number of muffins.",
+              },
+              { match: "8", coach: "That's the whole batch. How much is just one muffin?" },
+              { match: "128", coach: "That multiplied. Splitting a cost among items means dividing." },
+            ],
+            seconds: 30,
+          },
           think: {
             q: "A batch of 12 brownies costs $6 to make. What is the cost per brownie?",
             choices: ["$2.00", "$0.50", "$6.00", "$0.72"],
@@ -764,6 +1139,23 @@ Milton Hershey learned these lessons the hard way. His first candy business in P
           teach:
             "Price is what the customer pays you. Profit per unit is what you keep from each sale after paying for what went into it. The formula is price minus cost per unit. If each cookie costs you $0.40 to make and you sell it for $1.00, your profit per cookie is $1.00 minus $0.40, which equals $0.60. Sell 20 cookies and that's 20 times $0.60, or $12 of profit, before any one-time costs. Try the calculator: slide the price up and down and watch what happens to profit. What happens if the price drops below the cost?",
           visual: { type: "profit", price: 1, cost: 0.4, fixed: 0, units: 20 },
+          probe: {
+            type: "target",
+            prompt: "Each cup of lemonade costs you $0.25 to make, and you expect to sell 20 cups. Slide the price until you earn at least $15 profit.",
+            goal: { sim: "profit", cost: 0.25, fixed: 0, units: 20, minProfit: 15 },
+            hint: "You keep price minus cost on every cup. How much do you need to keep per cup so 20 cups add up to $15?",
+            mistakes: [
+              {
+                match: "Price at or below $0.25",
+                coach: "At that price you keep nothing (or lose money) on each cup. The price must be above the cost.",
+              },
+              {
+                match: "Price around $0.75",
+                coach: "Careful: $0.75 is the profit you need per cup, not the price. Add the $0.25 cost back on.",
+              },
+            ],
+            seconds: 45,
+          },
           think: {
             q: "You sell lemonade for $1.00 a cup, and each cup costs $0.25 to make. What is your profit per cup?",
             choices: ["$1.25", "$0.25", "$0.75", "$4.00"],
@@ -799,6 +1191,31 @@ Milton Hershey learned these lessons the hard way. His first candy business in P
           teach:
             "Some costs happen only once, no matter how many items you sell. A poster board, markers, and a tablecloth for your stand might cost $12. These are startup costs, and your profits must pay them back first. How many cookies until you're even? Divide startup costs by profit per unit: $12 divided by $0.60 equals 20 cookies. That's your break-even point. At 20 cookies, the calculator shows exactly zero profit. Cookie number 21 is where real profit begins. Try sliding the units below 20 and then above 20, and watch the loss turn into profit.",
           visual: { type: "profit", price: 1, cost: 0.4, fixed: 12, units: 20 },
+          probe: {
+            type: "place",
+            prompt: "Each stand has $12 in startup costs. Drag each one to its break-even point (number of items sold).",
+            min: 0,
+            max: 40,
+            step: 1,
+            tolerance: 0,
+            items: [
+              { label: "Cookies: $0.60 profit each", value: 20 },
+              { label: "Bracelets: $1.20 profit each", value: 10 },
+              { label: "Lemonade: $0.40 profit each", value: 30 },
+            ],
+            hint: "Break-even = startup costs divided by profit per item. Smaller profit per item means more sales needed.",
+            mistakes: [
+              {
+                match: "Bracelets placed past cookies",
+                coach: "Bracelets earn more per sale, so they pay back the $12 faster, with fewer sales.",
+              },
+              {
+                match: "Multiplied instead of dividing",
+                coach: "Ask: how many times does the profit per item fit into $12? That's division.",
+              },
+            ],
+            seconds: 60,
+          },
           think: {
             q: "Your startup costs are $15 and you make $0.50 profit per item. How many must you sell to break even?",
             choices: ["30", "7.5", "15", "75"],
@@ -854,6 +1271,32 @@ Milton Hershey learned these lessons the hard way. His first candy business in P
               ],
             },
           },
+          probe: {
+            type: "cloze",
+            text: "A smart price is higher than your {0} per unit, fair compared to {1} products nearby, and close to what {2} told you it's worth.",
+            blanks: [
+              { answers: ["cost"] },
+              { answers: ["similar", "other", "comparable", "competing"] },
+              { answers: ["customers", "customer", "buyers", "people"] },
+            ],
+            bank: ["cost", "similar", "customers", "profit", "fancy", "friends"],
+            hint: "Think of the three checks: your own math, the shop down the street, and your interviews.",
+            mistakes: [
+              {
+                match: "profit",
+                coach: "Profit is what you keep after the price. The price must beat what each item costs you to make.",
+              },
+              {
+                match: "fancy",
+                coach: "The comparison is with products like yours, so your price feels fair.",
+              },
+              {
+                match: "friends",
+                coach: "Friends are kind, but the real test is what customers said in interviews.",
+              },
+            ],
+            seconds: 35,
+          },
           think: {
             q: "Your cookies cost $0.40 each. Similar cookies nearby sell for $1.00, and neighbors said they'd pay about $1. Which price makes the most sense?",
             choices: ["$0.30", "$5.00", "$0.40", "$1.00"],
@@ -906,6 +1349,81 @@ Milton Hershey learned these lessons the hard way. His first candy business in P
           "The price must be higher than the cost per unit",
         ],
       },
+      mastery: [
+        {
+          type: "number",
+          prompt: "Beads cost $4 and string costs $2. Together they make 12 bracelets. What is the cost per bracelet?",
+          answer: 0.5,
+          tolerance: 0.01,
+          unit: "$",
+          hint: "Add up the whole batch cost first, then divide by the number of bracelets.",
+          mistakes: [
+            {
+              match: "0.33",
+              coach: "That's only the beads ($4 / 12). Add the string to the batch cost first.",
+            },
+            {
+              match: "2",
+              coach: "That's 12 divided by 6, flipped. Divide the cost by the number of bracelets.",
+            },
+            { match: "6", coach: "That's the whole batch. How much is one bracelet?" },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "target",
+          prompt: "Ana's rock-painting kits cost $1.20 each to make, and her startup costs are $14. She expects to sell 10 kits. Slide the price until she earns at least $10 profit after paying back startup costs.",
+          goal: { sim: "profit", cost: 1.2, fixed: 14, units: 10, minProfit: 10 },
+          hint: "She needs $14 + $10 = $24 from her 10 kits after paying for each kit. What must each kit earn?",
+          mistakes: [
+            {
+              match: "Price around $2.40",
+              coach: "$2.40 per kit is what she needs to KEEP. The price must also cover the $1.20 each kit costs.",
+            },
+            {
+              match: "Price that only covers startup costs",
+              coach: "Breaking even isn't the goal here. She wants $10 of real profit on top.",
+            },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "build",
+          prompt: "Build the break-even formula.",
+          tiles: ["Break-even", "=", "startup costs", "÷", "profit per unit"],
+          distractors: ["x", "price"],
+          hint: "Break-even tells you how many sales it takes to pay back one-time costs. How many times does each sale's profit fit into them?",
+          mistakes: [
+            {
+              match: "Used 'x'",
+              coach: "Multiplying makes the number huge. You want to know how many profits fit into the startup costs, so divide.",
+            },
+            {
+              match: "Used 'price'",
+              coach: "Part of the price pays for the item itself. Only the profit per unit pays back startup costs.",
+            },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "match",
+          prompt: "A cookie stand: batch of 20 costs $8, price $1.00, sign and tablecloth $12. Match each term to its number.",
+          pairs: [
+            { left: "Cost per unit", right: "$0.40" },
+            { left: "Profit per unit", right: "$0.60" },
+            { left: "Startup costs", right: "$12" },
+            { left: "Break-even point", right: "20 cookies" },
+          ],
+          hint: "Work in order: cost per unit first, then profit per unit, then break-even.",
+          mistakes: [
+            {
+              match: "Swapped cost per unit and profit per unit",
+              coach: "Cost per unit is $8 / 20. Profit per unit is the price minus that.",
+            },
+          ],
+          seconds: 50,
+        },
+      ],
       check: [
         {
           q: "A batch of 10 bracelets costs $5 in beads and string. What is the cost per bracelet?",
@@ -997,6 +1515,26 @@ Finally, practice out loud. Say it to a mirror, then to a pet, then to your fami
               { front: "Ask", back: "Telling the listener how to say yes, like 'Can I walk Max on Monday?'" },
             ],
           },
+          probe: {
+            type: "cloze",
+            text: "An elevator pitch takes about one {0}, because busy listeners lose interest. It uses {1} words and leaves the listener knowing how to say {2}.",
+            blanks: [
+              { answers: ["minute"] },
+              { answers: ["plain", "simple", "everyday"] },
+              { answers: ["yes"] },
+            ],
+            bank: ["minute", "plain", "yes", "hour", "fancy", "no"],
+            hint: "Picture a short elevator ride with a busy person who might become your customer.",
+            mistakes: [
+              { match: "hour", coach: "An hour is a speech! An elevator ride is much shorter." },
+              {
+                match: "fancy",
+                coach: "Fancy words make listeners work harder. A pitch should sound like a friendly conversation.",
+              },
+              { match: "no", coach: "A good pitch makes saying YES easy, like 'Can I walk Max on Monday?'" },
+            ],
+            seconds: 30,
+          },
           think: {
             q: "Why should an elevator pitch be short?",
             choices: [
@@ -1040,6 +1578,28 @@ Finally, practice out loud. Say it to a mirror, then to a pet, then to your fami
             type: "sequence",
             prompt: "Put the four parts of a pitch in order.",
             steps: ["The problem", "The solution", "The customer", "Why you"],
+          },
+          probe: {
+            type: "match",
+            prompt: "Match each line of a plant-watering pitch to its part.",
+            pairs: [
+              { left: "Lots of gardens dry out while neighbors are on vacation.", right: "The problem" },
+              { left: "I water indoor and outdoor plants for $4 a visit.", right: "The solution" },
+              { left: "It's for families on our street who travel.", right: "The customer" },
+              { left: "I've kept our family's 15 houseplants alive for a year.", right: "Why you" },
+            ],
+            hint: "Ask of each line: is it what's wrong, what I offer, who it's for, or why I'm the right person?",
+            mistakes: [
+              {
+                match: "Swapped problem and customer",
+                coach: "The problem line describes what's going wrong. The customer line names who it's for.",
+              },
+              {
+                match: "Swapped solution and why you",
+                coach: "The solution is what you offer. 'Why you' is proof about you.",
+              },
+            ],
+            seconds: 40,
           },
           think: {
             q: "Which part of a pitch is this sentence? 'Lots of neighbors' gardens dry out while they're on vacation.'",
@@ -1087,6 +1647,30 @@ Finally, practice out loud. Say it to a mirror, then to a pet, then to your fami
               { text: "I've sold 40 bracelets this summer.", bucket: 0 },
               { text: "Nobody does it better than me.", bucket: 1 },
             ],
+          },
+          probe: {
+            type: "highlight",
+            prompt: "You're pitching a spelling-tutoring service. Tap every line that gives PROOF.",
+            sentences: [
+              "I'm super smart.",
+              "My little brother went from 6 to 18 out of 20 on spelling tests after I helped him.",
+              "I'm the greatest tutor in town.",
+              "I've won our school spelling bee two years in a row.",
+              "Trust me, you'll love it.",
+            ],
+            correct: [1, 3],
+            hint: "Proof is a specific fact someone could check. Claims about how great you are don't count.",
+            mistakes: [
+              {
+                match: "Tapped 'I'm super smart.' or 'greatest tutor'",
+                coach: "Those are claims anyone could say. How would a listener check them?",
+              },
+              {
+                match: "Missed the spelling bee line",
+                coach: "Winning a spelling bee twice is a real, checkable fact, so it counts as proof.",
+              },
+            ],
+            seconds: 30,
           },
           think: {
             q: "Which line gives the best proof that you're good at tutoring spelling?",
@@ -1150,6 +1734,29 @@ Finally, practice out loud. Say it to a mirror, then to a pet, then to your fami
               ],
             },
           },
+          probe: {
+            type: "sequence",
+            prompt: "Put Lily's pitch practice plan in order, from easiest audience to a real customer.",
+            steps: [
+              "Write the pitch: problem, solution, customer, why you",
+              "Say it out loud to the mirror",
+              "Pitch to the cat and trim extra words",
+              "Pitch to the family with a sample bracelet",
+              "Pitch to a family friend and ask for the sale",
+            ],
+            hint: "Practice builds up: start alone, then add friendly listeners, then a real customer.",
+            mistakes: [
+              {
+                match: "Put the family friend before practicing",
+                coach: "Practice first with easy audiences so you're ready for a real customer.",
+              },
+              {
+                match: "Put the mirror before writing",
+                coach: "You need words to practice. Writing comes first.",
+              },
+            ],
+            seconds: 40,
+          },
           think: {
             q: "You're nervous about giving your pitch. What's the best plan?",
             choices: [
@@ -1212,6 +1819,91 @@ Finally, practice out loud. Say it to a mirror, then to a pet, then to your fami
           "Practice out loud many times",
         ],
       },
+      mastery: [
+        {
+          type: "build",
+          prompt: "Build a strong pitch by putting its parts in order.",
+          tiles: ["The problem", "The solution", "The customer", "Why you"],
+          distractors: ["Your favorite color", "A long story about your day"],
+          hint: "Start with what people care about most: their own problem.",
+          mistakes: [
+            {
+              match: "Started with 'Why you'",
+              coach: "People care about their problems before they care about you. Proof comes last.",
+            },
+            {
+              match: "Used a distractor",
+              coach: "Every part of a pitch must help the listener say yes. Extra stories just use up the minute.",
+            },
+          ],
+          seconds: 30,
+        },
+        {
+          type: "sort",
+          prompt: "You're pitching a lawn-mowing service. Sort each line.",
+          buckets: ["Proof or a real number", "Just bragging"],
+          items: [
+            { text: "I've mowed our lawn every week for two summers.", bucket: 0 },
+            { text: "I'm the best mower in the universe.", bucket: 1 },
+            { text: "It's $10 for a front and back yard.", bucket: 0 },
+            { text: "Mr. Patel says his yard has never looked better.", bucket: 0 },
+            { text: "Nobody works harder than me.", bucket: 1 },
+            { text: "Trust me, you won't regret it.", bucket: 1 },
+          ],
+          hint: "Could the listener check it? Then it's proof. If it's just a big claim, it's bragging.",
+          mistakes: [
+            {
+              match: "Put the price in bragging",
+              coach: "A price is a real number. It helps listeners decide, so it belongs with proof.",
+            },
+            {
+              match: "Put 'Nobody works harder than me.' in proof",
+              coach: "It sounds strong, but nobody can check it. That makes it a claim.",
+            },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "cloze",
+          text: "On New Year's Eve {0}, Edison lit up the area around his lab in Menlo Park instead of giving a long speech. That's showing instead of {1}. You can do the same by bringing a {2} to your pitch.",
+          blanks: [
+            { answers: ["1879"] },
+            { answers: ["telling", "talking"] },
+            { answers: ["sample", "photo", "demonstration", "demo", "picture"] },
+          ],
+          hint: "Think about what the crowds saw with their own eyes, and how you could let customers see or touch what you offer.",
+          mistakes: [
+            {
+              match: "1903",
+              coach: "1903 is when Mary Anderson got her wiper patent. Edison's light show was earlier, in the 1800s.",
+            },
+            {
+              match: "bragging",
+              coach: "Bragging is the opposite of proof. The contrast here is showing versus telling.",
+            },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "match",
+          prompt: "Match each pitch tip to the reason it works.",
+          pairs: [
+            { left: "Keep it to about a minute", right: "Busy listeners stay interested" },
+            { left: "Start with the problem", right: "People care about their own problems first" },
+            { left: "Give proof, not brags", right: "Listeners can judge the facts for themselves" },
+            { left: "Practice out loud many times", right: "Your words flow and you feel confident" },
+            { left: "End with a clear ask", right: "The listener knows exactly how to say yes" },
+          ],
+          hint: "For each tip, imagine the listener: what does it do for them, or for you?",
+          mistakes: [
+            {
+              match: "Mixed up practice and keep it short",
+              coach: "Practice is about your confidence. Short is about the listener's attention.",
+            },
+          ],
+          seconds: 55,
+        },
+      ],
       check: [
         {
           q: "What is an elevator pitch?",
@@ -1330,6 +2022,31 @@ Always run your business with a parent nearby, and only with customers your fami
               ],
             },
           },
+          probe: {
+            type: "sort",
+            prompt: "Launch day at your cookie stand. Sort each response.",
+            buckets: ["Helpful selling", "Pushy selling"],
+            items: [
+              { text: "'Okay, thanks anyway! Have a great day.'", bucket: 0 },
+              { text: "'Are you sure? Please, please buy one!'", bucket: 1 },
+              { text: "'Hi! Fresh cookies, a dollar each.'", bucket: 0 },
+              { text: "Following someone down the sidewalk to keep explaining", bucket: 1 },
+              { text: "Mumbling the price so nobody hears it", bucket: 1 },
+              { text: "Smiling and greeting everyone who walks by", bucket: 0 },
+            ],
+            hint: "Helpful selling respects the customer's choice and is clear about the offer and price.",
+            mistakes: [
+              {
+                match: "Put 'Are you sure? Please...' in helpful",
+                coach: "Begging after a no makes people uncomfortable. Respect the no and thank them.",
+              },
+              {
+                match: "Put mumbling the price in helpful",
+                coach: "Hiding the price makes people trust you less. Say it clearly.",
+              },
+            ],
+            seconds: 45,
+          },
           think: {
             q: "A man walks by and says, 'No thanks, not today.' What's the best response?",
             choices: [
@@ -1386,6 +2103,27 @@ Always run your business with a parent nearby, and only with customers your fami
               { text: "Cutting the walk short without telling anyone", bucket: 1 },
             ],
           },
+          probe: {
+            type: "match",
+            prompt: "Match each launch-day problem to the great-service fix.",
+            pairs: [
+              {
+                left: "A bracelet broke on the first day",
+                right: "Fix it, replace it, or refund it without arguing",
+              },
+              { left: "A cookie crumbles as you hand it over", right: "Replace it right away with a smile" },
+              { left: "You promised a 30-minute dog walk", right: "Walk the full 30 minutes" },
+              { left: "You're scheduled to start at 4:00", right: "Arrive right on time" },
+            ],
+            hint: "Great service means keeping your promises and making mistakes right quickly and kindly.",
+            mistakes: [
+              {
+                match: "Mixed up the bracelet and the cookie",
+                coach: "Both get made right, but a crumbled cookie is easiest to simply replace on the spot.",
+              },
+            ],
+            seconds: 40,
+          },
           think: {
             q: "A customer says the bracelet you sold her broke on the first day. What should you do?",
             choices: [
@@ -1433,6 +2171,23 @@ Always run your business with a parent nearby, and only with customers your fami
               { front: "You made a mistake on an order", back: "Admit it, apologize, and fix it." },
               { front: "Someone asks if your bracelets are real silver, and they aren't", back: "Tell the truth: 'They're silver-colored beads.'" },
             ],
+          },
+          probe: {
+            type: "number",
+            prompt: "A cup of lemonade and a cookie cost $2.25 together. A customer hands you a $5 bill. How much change do you count out?",
+            answer: 2.75,
+            tolerance: 0.01,
+            unit: "$",
+            hint: "Count up from the price to $5: a quarter gets you to $2.50, then keep going.",
+            mistakes: [
+              { match: "3.25", coach: "Check by adding: $2.25 + $3.25 = $5.50. That is 50 cents too much." },
+              { match: "2.25", coach: "That's the price, not the change. Subtract the price from $5.00." },
+              {
+                match: "7.25",
+                coach: "That added the price to $5. Change is what's left AFTER paying, so subtract.",
+              },
+            ],
+            seconds: 35,
           },
           think: {
             q: "A cookie costs $1.50. A customer hands you $5. How much change should you count out?",
@@ -1492,6 +2247,28 @@ Always run your business with a parent nearby, and only with customers your fami
                 "Plan next time with facts",
               ],
             },
+          },
+          probe: {
+            type: "cloze",
+            text: "Every time you sell something, write down what you sold, how {0}, and how much {1} you received. Also write down every {2} you pay, like extra ice or bags.",
+            blanks: [
+              { answers: ["many"] },
+              { answers: ["money", "cash"] },
+              { answers: ["cost", "costs", "expense", "expenses"] },
+            ],
+            bank: ["many", "money", "cost", "guess", "color", "friend"],
+            hint: "A sales log needs both sides: the money coming in and the money going out.",
+            mistakes: [
+              {
+                match: "guess",
+                coach: "The whole point of a log is to stop guessing and write down the facts.",
+              },
+              {
+                match: "color",
+                coach: "The color doesn't help you know if you made money. What did you spend?",
+              },
+            ],
+            seconds: 30,
           },
           think: {
             q: "Which of these should go in your sales log?",
@@ -1555,6 +2332,94 @@ Always run your business with a parent nearby, and only with customers your fami
           "Record every sale and every cost",
         ],
       },
+      mastery: [
+        {
+          type: "sequence",
+          prompt: "Put one sale at a lemonade stand in order.",
+          steps: [
+            "Set up the stand with a parent nearby",
+            "Smile and say, 'Hi! Fresh lemonade, $1 a cup.'",
+            "Pour the cup and take the customer's money",
+            "Count the change out loud",
+            "Write the sale in your sales log",
+          ],
+          hint: "Follow the customer's experience from walking up to walking away, then the record-keeping.",
+          mistakes: [
+            {
+              match: "Put the sales log before the sale",
+              coach: "You can only write down a sale after it happens, but do it right away so you don't forget.",
+            },
+            {
+              match: "Put the change before taking money",
+              coach: "You can't make change until you know how much they handed you.",
+            },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "number",
+          prompt: "Two cookies and a lemonade cost $3.60. The customer pays with a $10 bill. How much change do you give back?",
+          answer: 6.4,
+          tolerance: 0.01,
+          unit: "$",
+          hint: "Count up from $3.60: 40 cents gets you to $4.00, then how many dollars to reach $10?",
+          mistakes: [
+            { match: "7.4", coach: "Check by adding: $3.60 + $7.40 = $11.00. That's a dollar too much." },
+            { match: "6.6", coach: "Close! Count up: $3.60 + $0.40 = $4.00, not $0.60." },
+            { match: "13.6", coach: "That added. Change is what's left after paying, so subtract." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "sort",
+          prompt: "Sort each launch-day choice.",
+          buckets: ["Honest", "Dishonest"],
+          items: [
+            { text: "Telling every customer your cookies contain nuts", bucket: 0 },
+            { text: "Keeping an accidental overpayment as a 'tip'", bucket: 1 },
+            { text: "Saying silver-colored beads are real silver", bucket: 1 },
+            { text: "Counting change out loud so the customer can see it", bucket: 0 },
+            { text: "Admitting you mixed up an order and fixing it", bucket: 0 },
+            { text: "Leaving a sale out of your log because it was small", bucket: 1 },
+          ],
+          hint: "Ask: would the customer feel fooled if they knew exactly what happened?",
+          mistakes: [
+            {
+              match: "Put the overpayment in honest",
+              coach: "Money paid by accident isn't yours. Call them back and return it.",
+            },
+            {
+              match: "Put skipping a small sale in honest",
+              coach: "Your records should tell the whole truth, even about small sales.",
+            },
+          ],
+          seconds: 50,
+        },
+        {
+          type: "highlight",
+          prompt: "Read Ben's launch day. Tap every moment of great customer service or honesty.",
+          sentences: [
+            "Ben set up his cookie stand at 9:00, right when his sign said he'd open.",
+            "A girl's cookie crumbled, and Ben handed her a new one with a smile.",
+            "When a man said 'no thanks,' Ben followed him to keep explaining.",
+            "A woman asked about nuts, and Ben told her two kinds had walnuts.",
+            "Ben didn't bother writing down the last few sales.",
+          ],
+          correct: [0, 1, 3],
+          hint: "Look for kept promises, mistakes made right, and the truth told clearly.",
+          mistakes: [
+            {
+              match: "Tapped following the man",
+              coach: "Following someone after a no is pushy. Great service respects the no.",
+            },
+            {
+              match: "Tapped skipping the sales log",
+              coach: "Skipping records means guessing later. Every sale should be written down.",
+            },
+          ],
+          seconds: 40,
+        },
+      ],
       check: [
         {
           q: "What did young Edison sell on the train?",
@@ -1662,6 +2527,20 @@ So ask yourself three questions. What worked? What did not? What will I change n
               { front: "Margin", back: "The share of revenue you kept as profit. $5 profit on $20 of revenue is a 25% margin." },
             ],
           },
+          probe: {
+            type: "number",
+            prompt: "You sold 12 bracelets at $3 each. What is your revenue?",
+            answer: 36,
+            tolerance: 0.01,
+            unit: "$",
+            hint: "Revenue is all the money customers paid: number sold times the price.",
+            mistakes: [
+              { match: "15", coach: "That added 12 and 3. Revenue is number sold TIMES price." },
+              { match: "4", coach: "That divided. Each of 12 customers paid $3, so multiply." },
+              { match: "9", coach: "That subtracted. Revenue comes from multiplying: 12 x $3." },
+            ],
+            seconds: 25,
+          },
           think: {
             q: "You sold 10 cups of lemonade at $2 each. What is your revenue?",
             choices: ["$12", "$5", "$20", "$8"],
@@ -1707,6 +2586,24 @@ So ask yourself three questions. What worked? What did not? What will I change n
               "Label the answer a profit or a loss",
             ],
           },
+          probe: {
+            type: "build",
+            prompt: "Revenue was $40 and costs were $28. Build the P&L equation with its answer.",
+            tiles: ["$40 revenue", "minus", "$28 costs", "equals", "$12 profit"],
+            distractors: ["plus", "$12 loss"],
+            hint: "Profit starts with the money that came in, then takes away what went out.",
+            mistakes: [
+              {
+                match: "Used 'plus'",
+                coach: "Adding costs to revenue makes no sense: costs are money that LEFT. Subtract them.",
+              },
+              {
+                match: "Used '$12 loss'",
+                coach: "Revenue is bigger than costs, so the leftover is a profit, not a loss.",
+              },
+            ],
+            seconds: 35,
+          },
           think: {
             q: "Revenue was $40 and costs were $28. What is the result?",
             choices: ["$68 profit", "$12 loss", "$28 profit", "$12 profit"],
@@ -1742,6 +2639,23 @@ So ask yourself three questions. What worked? What did not? What will I change n
           teach:
             "A P&L isn't just a score; it tells a story. In the cookie example, you baked 40 cookies but sold only 34, so 6 didn't sell. At $0.40 each, those 6 cookies cost you $2.40 in ingredients. Next time, maybe bake fewer, or sell at a busier spot. The calculator shows what would have happened if you had sold all 40: revenue $40, ingredients $16, startup costs $12, profit $12. That's double your real profit! Try changing the units, the price, or the cost, and see which change helps the most.",
           visual: { type: "profit", price: 1, cost: 0.4, fixed: 12, units: 40 },
+          probe: {
+            type: "number",
+            prompt: "You baked 30 cookies at $0.40 each but sold only 24. How much did the unsold cookies cost you in ingredients?",
+            answer: 2.4,
+            tolerance: 0.01,
+            unit: "$",
+            hint: "First find how many cookies didn't sell, then multiply by what each one cost to make.",
+            mistakes: [
+              { match: "6", coach: "6 is how many didn't sell. Now multiply by the $0.40 each one cost." },
+              {
+                match: "9.6",
+                coach: "That's the cost of the 24 you sold. Find the cost of the leftovers instead.",
+              },
+              { match: "0.4", coach: "That's the cost of one cookie. How many were left over?" },
+            ],
+            seconds: 35,
+          },
           think: {
             q: "Each cookie cost $0.40 to make, and 6 cookies didn't sell. How much did the unsold cookies cost you?",
             choices: ["$2.40", "$6.00", "$0.40", "$4.60"],
@@ -1794,6 +2708,31 @@ So ask yourself three questions. What worked? What did not? What will I change n
                 "Business can grow each time",
               ],
             },
+          },
+          probe: {
+            type: "sort",
+            prompt: "You made $20 profit. Sort each way of using it.",
+            buckets: ["Reinvesting in the business", "Not reinvesting"],
+            items: [
+              { text: "Supplies for a bigger batch next week", bucket: 0 },
+              { text: "A sturdier sign for your stand", bucket: 0 },
+              { text: "Snacks for yourself", bucket: 1 },
+              { text: "A cooler to keep lemonade cold", bucket: 0 },
+              { text: "Putting $10 in your savings jar", bucket: 1 },
+              { text: "A new video game", bucket: 1 },
+            ],
+            hint: "Reinvesting means the money buys something that helps the business improve or grow.",
+            mistakes: [
+              {
+                match: "Put the savings jar in reinvesting",
+                coach: "Saving is wise, but money in a jar doesn't help the business grow. It's saving, not reinvesting.",
+              },
+              {
+                match: "Put the sign or cooler in not reinvesting",
+                coach: "A better sign or a cooler helps you sell more, so it's reinvesting.",
+              },
+            ],
+            seconds: 45,
           },
           think: {
             q: "You made $20 profit. Which plan best helps your business grow while still being wise?",
@@ -1860,6 +2799,88 @@ So ask yourself three questions. What worked? What did not? What will I change n
           "Save some profit and reinvest some to grow",
         ],
       },
+      mastery: [
+        {
+          type: "target",
+          prompt: "Next Saturday you expect to sell 34 cookies again. Each costs $0.40 to make, and you still owe $12 for your sign and tablecloth. Slide the price until your P&L shows at least $10 profit.",
+          goal: { sim: "profit", cost: 0.4, fixed: 12, units: 34, minProfit: 10 },
+          hint: "Your revenue has to cover the ingredients for 34 cookies, the $12 startup costs, AND $10 of profit.",
+          mistakes: [
+            {
+              match: "Price at $1.00",
+              coach: "At $1.00 the P&L shows only $8.40 profit. Nudge the price up a little.",
+            },
+            {
+              match: "Price below $0.40",
+              coach: "Below cost, every cookie loses money. The price must be above $0.40.",
+            },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "number",
+          prompt: "Bracelet P&L: you sold 15 bracelets at $3 each. Beads and string cost $0.50 per bracelet, and you bought a $10 display board. What is your profit?",
+          answer: 27.5,
+          tolerance: 0.01,
+          unit: "$",
+          hint: "Find revenue (15 x $3), then total costs (15 x $0.50 plus $10), then subtract.",
+          mistakes: [
+            {
+              match: "35",
+              coach: "You forgot the bead-and-string cost for each bracelet: 15 x $0.50 = $7.50.",
+            },
+            { match: "37.5", coach: "You forgot the $10 display board. Every cost goes on the P&L." },
+            { match: "45", coach: "That's revenue. Profit is what's left after subtracting all the costs." },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "place",
+          prompt: "Drag each day's result onto the profit line. Left of zero is a loss.",
+          min: -10,
+          max: 30,
+          step: 1,
+          tolerance: 0,
+          items: [
+            { label: "Revenue $12, costs $15", value: -3 },
+            { label: "Revenue $40, costs $28", value: 12 },
+            { label: "Revenue $30, costs $7", value: 23 },
+            { label: "Revenue $20, costs $20", value: 0 },
+          ],
+          hint: "For each day, subtract costs from revenue. If costs are bigger, the answer is below zero.",
+          mistakes: [
+            {
+              match: "Placed the $12/$15 day at +3",
+              coach: "Costs were bigger than revenue, so that day was a $3 LOSS: left of zero.",
+            },
+            { match: "Added revenue and costs", coach: "Profit is revenue MINUS costs." },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "match",
+          prompt: "Match each P&L word to its meaning.",
+          pairs: [
+            { left: "Revenue", right: "All the money customers paid you" },
+            { left: "Costs", right: "All the money you spent to run the business" },
+            { left: "Loss", right: "When costs are bigger than revenue" },
+            { left: "Margin", right: "The share of each revenue dollar you kept as profit" },
+            { left: "Reinvesting", right: "Putting some profit back into the business" },
+          ],
+          hint: "Picture a cookie jar: coins going in, coins going out, and what's left.",
+          mistakes: [
+            {
+              match: "Swapped revenue and costs",
+              coach: "Revenue is money coming IN from customers. Costs are money going OUT.",
+            },
+            {
+              match: "Swapped margin and reinvesting",
+              coach: "Margin measures how much you kept. Reinvesting is what you do with it.",
+            },
+          ],
+          seconds: 50,
+        },
+      ],
       check: [
         {
           q: "What is the profit and loss equation?",

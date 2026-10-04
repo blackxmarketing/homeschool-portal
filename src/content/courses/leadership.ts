@@ -56,6 +56,23 @@ export const leadership: Course = {
               { label: "Self-control", icon: "🧭", detail: "Being the master of your wants instead of their servant. The ancients called it temperance." },
             ],
           },
+          probe: {
+            type: "cloze",
+            text: "Marcus wrote the Meditations for no audience but himself, so he was training his real {0}, not his reputation. He learned that the cardinal virtues get their name from the Latin word for {1}, because the rest of good character {2} on them.",
+            blanks: [
+              { answers: ["character"] },
+              { answers: ["hinge"] },
+              { answers: ["swings", "turns", "hangs"] },
+            ],
+            bank: ["character", "hinge", "swings", "fame", "bird", "reputation", "sleeps"],
+            hint: "Remember that nobody else was meant to read his notebook, and think about what a door swings on.",
+            mistakes: [
+              { match: "fame", coach: "Marcus never planned to publish his notes. Fame needs an audience, and he had none but himself." },
+              { match: "reputation", coach: "Reputation is what others think of you. Private notes nobody reads cannot change that, so what was he really training?" },
+              { match: "bird", coach: "The red bird shares the name, but the word for the virtues means the part a door turns on." },
+            ],
+            seconds: 35,
+          },
           think: {
             q: "Marcus wrote the Meditations for nobody but himself. What does that tell us about him?",
             choices: [
@@ -103,6 +120,26 @@ export const leadership: Course = {
               { front: "Courage", back: "Doing right even when afraid. Its opposite is cowardice: running from what is right because it is hard." },
               { front: "Self-control", back: "Mastering your wants. Its opposite is giving in to every urge the moment you feel it." },
             ],
+          },
+          probe: {
+            type: "sort",
+            prompt: "Is each choice mostly about how you think ahead (wisdom) or how you treat others fairly (justice)?",
+            buckets: ["Wisdom", "Justice"],
+            items: [
+              { text: "Splitting 12 prize cookies so each of the 4 workers gets 3", bucket: 1 },
+              { text: "Planning two pages a night for a report due Friday", bucket: 0 },
+              { text: "Returning your cousin's bike before she has to ask", bucket: 1 },
+              { text: "Packing a raincoat after checking tomorrow's forecast", bucket: 0 },
+              { text: "Thanking your sister in your report for finding a quote", bucket: 1 },
+              { text: "Saving half your allowance for something you want next month", bucket: 0 },
+            ],
+            hint: "Ask yourself: is this choice mostly about looking ahead, or about giving another person what they are owed?",
+            mistakes: [
+              { match: "Cookie split sorted as wisdom", coach: "Sharing evenly is about giving each teammate what they earned. That is fairness to others, which is justice." },
+              { match: "Thanking your sister sorted as wisdom", coach: "Giving someone credit for their help gives them what they are owed. That points to justice." },
+              { match: "Saving allowance sorted as justice", coach: "No one else is owed anything here. Saving is about thinking ahead for your future self, which is wisdom." },
+            ],
+            seconds: 45,
           },
           think: {
             q: "Your team wins a prize of 12 cookies. Four of you did the work. Which choice shows justice?",
@@ -164,6 +201,26 @@ export const leadership: Course = {
               ],
             },
           },
+          probe: {
+            type: "highlight",
+            prompt: "Tap every sentence that shows real courage, not recklessness or fearlessness.",
+            sentences: [
+              "Tess told her coach she left the gate open, even though her voice was shaking.",
+              "Max rode his bike off a ramp with no helmet because his friends dared him.",
+              "Ruby tried out for the play, knowing she might not get a part.",
+              "Eli said he never feels scared of anything, so he must be brave.",
+              "Jonah told his friends he would not join in teasing the new kid, even though he was afraid they would laugh at him.",
+              "Kara climbed onto the garage roof to get likes on a video.",
+            ],
+            correct: [0, 2, 4],
+            hint: "Look for someone who feels afraid and still does the right thing for a good reason.",
+            mistakes: [
+              { match: "Tapped the bike ramp dare", coach: "A dangerous stunt for a dare has no good reason behind it. That is recklessness, not courage." },
+              { match: "Tapped Eli who never feels scared", coach: "Courage is not the absence of fear. Eli has not done anything right in spite of fear." },
+              { match: "Tapped the garage roof video", coach: "Taking a risk just to show off is recklessness. Courage takes risks for a good reason." },
+            ],
+            seconds: 40,
+          },
           think: {
             q: "Which of these is real courage?",
             choices: [
@@ -212,6 +269,25 @@ export const leadership: Course = {
               "It becomes a habit and gets easier",
               "The habit becomes part of who you are",
             ],
+          },
+          probe: {
+            type: "build",
+            prompt: "Jordan wants to grow in courage. Build the path from one small choice to real character.",
+            tiles: [
+              "Face a small choice, like whether to speak up in class",
+              "Choose the right thing, even though it is a little hard",
+              "Repeat that choice day after day",
+              "It becomes a habit and gets easier",
+              "The habit becomes part of who he is",
+            ],
+            distractors: ["Wait for a big emergency to be a hero", "Do a dangerous stunt to prove himself"],
+            hint: "Think about how a muscle grows: one small rep, then many reps, then real strength.",
+            mistakes: [
+              { match: "Used the big emergency tile", coach: "Big moments are rare. If Jordan waits for one, he will not have practiced when it comes." },
+              { match: "Used the dangerous stunt tile", coach: "A stunt is recklessness, and it skips the daily practice that builds real courage." },
+              { match: "Put habit before repeating", coach: "A habit only forms after you repeat a choice many times. Which has to come first?" },
+            ],
+            seconds: 40,
           },
           think: {
             q: "Jordan wants to become more courageous. What is the best plan?",
@@ -273,6 +349,71 @@ export const leadership: Course = {
           "Explains that virtues grow through small, repeated choices",
         ],
       },
+      mastery: [
+        {
+          type: "match",
+          prompt: "Match each moment to the virtue it shows best.",
+          pairs: [
+            { left: "Asking a trusted adult for advice before a big choice", right: "Wisdom" },
+            { left: "Paying back a friend the five dollars you owe", right: "Justice" },
+            { left: "Inviting the new kid to sit with you when others will not", right: "Courage" },
+            { left: "Closing the game when your screen time is up", right: "Self-control" },
+          ],
+          hint: "For each moment, ask: is this about thinking ahead, being fair, acting despite fear, or mastering a want?",
+          mistakes: [
+            { match: "Swapped wisdom and self-control", coach: "Wisdom is about seeing clearly and choosing well. Self-control is about saying no to a want in the moment." },
+            { match: "Matched inviting the new kid to justice", coach: "Kindness is fair, but the hard part here is the fear of what others think. Which virtue acts in spite of fear?" },
+            { match: "Matched paying back money to self-control", coach: "Paying back gives your friend what they are owed. That is the heart of justice." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "cloze",
+          text: "Courage is not the absence of {0}. It is doing what is right anyway. Taking a foolish risk just to show off is called {1}, and the ancients called self-control {2}.",
+          blanks: [
+            { answers: ["fear", "being afraid", "feeling afraid"] },
+            { answers: ["recklessness", "reckless"] },
+            { answers: ["temperance"] },
+          ],
+          hint: "Think back to the courage versus recklessness comparison and the old name for mastering your wants.",
+          mistakes: [
+            { match: "danger", coach: "Courage often faces danger. The lesson says it is not the absence of a feeling. Which feeling?" },
+            { match: "bravery", coach: "Bravery is another word for courage. The word you want names the opposite: risk with no good reason." },
+            { match: "prudence", coach: "Prudence is the old name for wisdom. Self-control had a different old name." },
+          ],
+          seconds: 50,
+        },
+        {
+          type: "place",
+          prompt: "Marcus Aurelius ruled Rome while writing the Meditations. Place the start and end of his reign on the timeline (AD).",
+          min: 100,
+          max: 250,
+          step: 1,
+          tolerance: 5,
+          items: [
+            { label: "Marcus Aurelius becomes emperor", value: 161 },
+            { label: "Marcus Aurelius dies, ending his reign", value: 180 },
+          ],
+          hint: "He ruled for about twenty years in the second century AD, the years starting with 1.",
+          mistakes: [
+            { match: "Placed his reign in the 200s", coach: "Marcus ruled in the second century AD, in the 100s, not the 200s." },
+            { match: "Placed the reign much longer than twenty years", coach: "His reign lasted only about nineteen years. Bring the two markers closer together." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "build",
+          prompt: "Build Marcus's big secret about how good character is made.",
+          tiles: ["Virtues", "grow like muscles", "through", "small", "repeated", "choices"],
+          distractors: ["all at once", "on one heroic day"],
+          hint: "Think of push-ups: strength comes from many small reps, not one giant lift.",
+          mistakes: [
+            { match: "Used all at once", coach: "Nobody becomes brave or wise in a single day. Character is built slowly." },
+            { match: "Used on one heroic day", coach: "Big heroic moments are rare. The lesson says ordinary days of small choices do the work." },
+          ],
+          seconds: 35,
+        },
+      ],
       check: [
         {
           q: "Why are the four virtues called cardinal virtues?",
@@ -383,6 +524,23 @@ export const leadership: Course = {
               ],
             },
           },
+          probe: {
+            type: "cloze",
+            text: "Integrity shares a root with {0}, which means a {1} number. Ellie is kind only when the teacher is around, so she is missing integrity: a person of integrity acts the same whether or not anyone is {2}.",
+            blanks: [
+              { answers: ["integer"] },
+              { answers: ["whole", "complete"] },
+              { answers: ["watching", "looking"] },
+            ],
+            bank: ["integer", "interrupt", "whole", "broken", "watching", "laughing", "sleeping"],
+            hint: "Look for the math word that means a number not split into pieces, then think about what changes for Ellie at recess.",
+            mistakes: [
+              { match: "interrupt", coach: "Interrupt starts with the same letters but means to break in. Integrity is about being whole." },
+              { match: "broken", coach: "A person of integrity is the opposite of broken or split. Which word means all in one piece?" },
+              { match: "laughing", coach: "The difference for Ellie is not who is laughing, but whether an adult can see her." },
+            ],
+            seconds: 35,
+          },
           think: {
             q: "Ellie is kind to the new girl when the teacher is around, but makes fun of her at recess. What is missing?",
             choices: [
@@ -429,6 +587,26 @@ export const leadership: Course = {
               { label: "Keep promises", icon: "🤝", detail: "Do what you said you would, even small things like calling back or being on time." },
               { label: "Do right unseen", icon: "🌙", detail: "Act the same when nobody is watching, because your conscience is always there." },
             ],
+          },
+          probe: {
+            type: "sort",
+            prompt: "Sort each action into the way it shows integrity.",
+            buckets: ["Tell the truth", "Keep promises", "Do right unseen"],
+            items: [
+              { text: "Admitting you ate the last brownie when your mom asks", bucket: 0 },
+              { text: "Telling your teacher you forgot your homework instead of making up an excuse", bucket: 0 },
+              { text: "Watering the neighbor's plants every day, just as you said you would", bucket: 1 },
+              { text: "Showing up at 9 sharp to help, because that is the time you agreed to", bucket: 1 },
+              { text: "Handing back five extra dollars a cashier gave you by mistake when nobody noticed", bucket: 2 },
+              { text: "Sweeping every corner of the garage even though no one will check", bucket: 2 },
+            ],
+            hint: "Ask: is the person being honest when asked, doing what they said they would, or doing right when nobody would ever know?",
+            mistakes: [
+              { match: "Cashier money sorted as tell the truth", coach: "Nobody asked and nobody noticed. The key is that no one was watching, so this is doing right unseen." },
+              { match: "Watering plants sorted as do right unseen", coach: "It happens unseen, but the reason it matters is that you gave your word. That is keeping a promise." },
+              { match: "Forgotten homework sorted as keep promises", coach: "The choice here is between an excuse and the truth. That is telling the truth." },
+            ],
+            seconds: 55,
           },
           think: {
             q: "A cashier hands you five dollars too much in change. Nobody noticed. What shows integrity?",
@@ -483,6 +661,26 @@ export const leadership: Course = {
               { year: 1806, label: "Cherry tree legend appears", detail: "The cherry tree story is added to an edition of Mason Locke Weems's biography. There is no evidence it really happened." },
             ],
           },
+          probe: {
+            type: "place",
+            prompt: "Be a historian. Place each event on the timeline, then notice when the cherry tree story first appeared.",
+            min: 1720,
+            max: 1820,
+            step: 1,
+            tolerance: 2,
+            items: [
+              { label: "Washington is born", value: 1732 },
+              { label: "Washington copies the Rules of Civility", value: 1748 },
+              { label: "Washington dies", value: 1799 },
+              { label: "Cherry tree story added to Weems's biography", value: 1806 },
+            ],
+            hint: "The real notebook comes from when he was about sixteen. The cherry tree story only shows up after his death.",
+            mistakes: [
+              { match: "Placed the cherry tree story before Washington's death", coach: "The story first appeared in print several years after Washington died. That late date is a big reason historians doubt it." },
+              { match: "Placed the Rules of Civility in the 1770s", coach: "He copied the rules as a teenager, around age sixteen. Add sixteen to his birth year." },
+            ],
+            seconds: 50,
+          },
           think: {
             q: "Why do historians call the cherry tree story a legend?",
             choices: [
@@ -522,6 +720,23 @@ export const leadership: Course = {
           title: "Trust Is a Brick Wall",
           teach:
             "Integrity builds trust, and trust is how people decide whether to rely on you. Picture trust as a brick wall. Every promise you keep and every true thing you say adds one brick. It takes a long time to build a strong wall. But a single lie can knock out many bricks at once, because now people wonder what else you have not been honest about. Washington was not a perfect man, but people trusted him because he worked to keep his word. When the war ended in 1783, he gave up command of the army and went home to his farm. That choice added a lot of bricks.",
+          probe: {
+            type: "match",
+            prompt: "Match each choice to what it does to the wall of trust.",
+            pairs: [
+              { left: "Keeping one small promise", right: "Adds one brick" },
+              { left: "Mateo lying once about his homework", right: "Knocks out many bricks at once" },
+              { left: "Telling the truth again and again after a lie", right: "Slowly rebuilds the wall" },
+              { left: "Washington giving up command in 1783", right: "Added a lot of bricks" },
+            ],
+            hint: "Remember the rule: trust is slow to build and quick to lose.",
+            mistakes: [
+              { match: "Matched one lie to adds one brick", coach: "A lie never adds trust. It makes people wonder what else was not true, so it tears out many bricks." },
+              { match: "Matched one lie to slowly rebuilds", coach: "Rebuilding comes after a lie, through honesty over time. The lie itself does damage." },
+              { match: "Matched Washington to adds one brick", coach: "Giving up great power when he could have kept it was a huge act of keeping his word, not a small one." },
+            ],
+            seconds: 40,
+          },
           think: {
             q: "Mateo has kept his word to his parents for months. Then he lies about finishing his homework. What most likely happens?",
             choices: [
@@ -577,6 +792,69 @@ export const leadership: Course = {
           "It builds trust, which is slow to build and quick to lose",
         ],
       },
+      mastery: [
+        {
+          type: "highlight",
+          prompt: "Think like a historian. Tap every sentence that is real history, not legend.",
+          sentences: [
+            "As a teenager, Washington copied out 110 Rules of Civility by hand.",
+            "Young Washington chopped down his father's cherry tree and confessed.",
+            "Washington's handwritten copy of the Rules of Civility still survives.",
+            "In 1783, Washington gave up command of the army and went home to his farm.",
+            "Washington wrote in his diary that he could not tell a lie.",
+          ],
+          correct: [0, 2, 3],
+          hint: "Ask for each sentence: is there a surviving record from the time, or did it only appear later with no evidence?",
+          mistakes: [
+            { match: "Tapped the cherry tree sentence", coach: "The cherry tree story first appeared in Weems's biography after Washington died, with no evidence behind it." },
+            { match: "Tapped the diary sentence", coach: "Washington never wrote about the cherry tree or that line at all. It comes from the legend." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "number",
+          prompt: "How many Rules of Civility did teenage Washington copy out by hand?",
+          answer: 110,
+          unit: "rules",
+          hint: "It was a long list, more than a hundred rules, and the notebook still survives.",
+          mistakes: [
+            { match: "16", coach: "Sixteen was about his age when he copied them. The number of rules was much larger." },
+            { match: "10", coach: "Ten is far too few. The list had more than one hundred rules." },
+          ],
+          seconds: 20,
+        },
+        {
+          type: "cloze",
+          text: "Trust is slow to {0} and quick to {1}. Every kept promise adds a brick, but a single {2} can knock out many bricks at once.",
+          blanks: [
+            { answers: ["build", "grow", "earn"] },
+            { answers: ["lose", "break", "lost"] },
+            { answers: ["lie"] },
+          ],
+          hint: "Picture the brick wall: one direction takes a long time, the other can happen in a moment.",
+          mistakes: [
+            { match: "mistake", coach: "Honest mistakes happen to everyone. The thing that knocks out many bricks is choosing to be dishonest." },
+            { match: "forget", coach: "Think about the wall falling, not about memory. What happens to trust quickly after a lie?" },
+          ],
+          seconds: 35,
+        },
+        {
+          type: "match",
+          prompt: "Match each person to the way they showed integrity.",
+          pairs: [
+            { left: "Grace tells her teacher she accidentally saw a classmate's answers", right: "Telling the truth when a lie would be easier" },
+            { left: "Diego waters the plants on a rainy Sunday because he said every day", right: "Keeping a promise, even a small one" },
+            { left: "Priya returns a found wallet with every dollar inside", right: "Doing right when no one is watching" },
+            { left: "A kid who is polite to adults and kind to classmates at recess", right: "Being whole: the same person everywhere" },
+          ],
+          hint: "Look for the key detail in each story: a confession, a promise, an unseen choice, or being consistent.",
+          mistakes: [
+            { match: "Matched Diego to doing right unseen", coach: "Nobody was checking, true, but the story turns on what Diego said he would do. That is a promise." },
+            { match: "Matched Priya to telling the truth", coach: "Nobody asked Priya anything. She chose right when nobody would ever have known." },
+          ],
+          seconds: 50,
+        },
+      ],
       check: [
         {
           q: "The word integrity is related to which word?",
@@ -687,6 +965,22 @@ export const leadership: Course = {
               "Ask: what would a person of good character do?",
             ],
           },
+          probe: {
+            type: "cloze",
+            text: "A friend posts something mean about you and you feel furious. The first step is to {0}. Feelings are {1}, but careful thinking is slower, so a pause lets your thinking catch up.",
+            blanks: [
+              { answers: ["stop", "pause"] },
+              { answers: ["fast", "quick"] },
+            ],
+            bank: ["stop", "ask", "post", "fast", "wise", "slow"],
+            hint: "Which of the four steps comes before you do anything at all?",
+            mistakes: [
+              { match: "post", coach: "Posting back right away is acting on anger before thinking. The first move is to pause." },
+              { match: "ask", coach: "Ask is the last step. Something has to happen before you can think clearly at all." },
+              { match: "slow", coach: "The lesson says thinking is the slow one. Feelings are the opposite, which is why we need to pause." },
+            ],
+            seconds: 25,
+          },
           think: {
             q: "Your friend posts something mean about you, and you feel furious. What is the best first move?",
             choices: [
@@ -745,6 +1039,24 @@ export const leadership: Course = {
               ],
             },
           },
+          probe: {
+            type: "highlight",
+            prompt: "A classmate asks to copy your homework. Tap every option that is a good third path: not just yes, and not just a cold no.",
+            sentences: [
+              "Offer to explain how you solved the problems so they can do it themselves.",
+              "Hand over your homework so they will like you.",
+              "Suggest working on the next assignment together at lunch.",
+              "Ignore them and never talk to them again.",
+              "Point them to the teacher's help session after class and offer to walk there with them.",
+            ],
+            correct: [0, 2, 4],
+            hint: "A third path stays honest and still helps your classmate actually learn.",
+            mistakes: [
+              { match: "Tapped handing over homework", coach: "That is just saying yes. Copying is dishonest and does not help them learn." },
+              { match: "Tapped ignoring them forever", coach: "That is an unkind no. A third path finds a way to say no to copying and still help." },
+            ],
+            seconds: 35,
+          },
           think: {
             q: "A classmate asks to copy your homework. Which is a good third path?",
             choices: [
@@ -794,6 +1106,23 @@ export const leadership: Course = {
               { label: "In a year?", icon: "📅", detail: "Will this matter, and will you be proud of it?" },
             ],
           },
+          probe: {
+            type: "sequence",
+            prompt: "Follow the chain. Put what happens in order if you play a game until 2 a.m. the night before a big test.",
+            steps: [
+              "You have fun playing late into the night",
+              "You wake up exhausted with too little sleep",
+              "You struggle to focus during the test",
+              "You get a lower grade than you could have",
+              "You feel stressed and wish you had gone to bed",
+            ],
+            hint: "Start with the fun part, then keep asking: and then what?",
+            mistakes: [
+              { match: "Put the lower grade before the test", coach: "You cannot get a grade before you take the test. Walk through the morning step by step." },
+              { match: "Put feeling stressed first", coach: "Regret usually comes last, after you see the results. The fun comes first, which is why the choice is tempting." },
+            ],
+            seconds: 35,
+          },
           think: {
             q: "You could stay up until 2 a.m. playing a game the night before a big test. Using And then what?, what is the best thinking?",
             choices: [
@@ -833,6 +1162,22 @@ export const leadership: Course = {
           title: "Ask: What Would a Person of Good Character Do?",
           teach:
             "The last step is a single powerful question: what would a person of good character do? Picture someone you admire for their honesty and wisdom, maybe a grandparent, a coach, or a hero from history. Imagine them in your shoes. This question often cuts through confusion instantly. Suppose you promised to help your grandmother on Saturday, and then friends invite you on a fun trip that day. A person of good character would not just skip her. They would either keep the promise or honestly ask her whether another day works. Good decisions are rarely about being clever. They are about slowing down and letting your values lead.",
+          probe: {
+            type: "match",
+            prompt: "Ask what a person of good character would do. Match each situation to the best choice.",
+            pairs: [
+              { left: "You promised to help Grandma Saturday, then get invited on a trip", right: "Keep the promise, or honestly ask her if another day works" },
+              { left: "You find a test answer key in a shared folder", right: "Close it and tell the teacher so she can fix it" },
+              { left: "Friends want to sneak into a movie without paying", right: "Suggest everyone buys tickets or does something else" },
+              { left: "You broke your sister's headphones by accident", right: "Tell her right away and offer to help replace them" },
+            ],
+            hint: "For each one, picture someone you admire for honesty in your shoes. What would they do?",
+            mistakes: [
+              { match: "Matched Grandma to suggesting another plan to friends", coach: "The Grandma situation is about a promise you already made. The honest choice keeps it or openly asks to change it." },
+              { match: "Matched the answer key to telling her right away", coach: "The answer key is not anyone's lost item. The fair move is to close it and let the teacher know." },
+            ],
+            seconds: 50,
+          },
           think: {
             q: "You promised to help your grandmother Saturday, and then you are invited on a fun trip that day. Which choice fits good character?",
             choices: [
@@ -893,6 +1238,73 @@ export const leadership: Course = {
           "Ask: what would a person of good character do?",
         ],
       },
+      mastery: [
+        {
+          type: "build",
+          prompt: "Build the four-finger decision method in the right order.",
+          tiles: ["Stop", "List", "Think", "Ask"],
+          distractors: ["Act fast", "Guess"],
+          hint: "First calm down, then find your options, then follow the consequences, then check your character.",
+          mistakes: [
+            { match: "Started with Act fast", coach: "Acting fast is the trap this method protects you from. The first step is the opposite." },
+            { match: "Put Ask first", coach: "Ask is the final check, after you know your options and their consequences." },
+            { match: "Put Think before List", coach: "You cannot think through options you have not named yet. List them first." },
+          ],
+          seconds: 25,
+        },
+        {
+          type: "sort",
+          prompt: "Isla has two birthday parties on the same afternoon. Sort each thought into the step it belongs to.",
+          buckets: ["Stop", "List", "Think", "Ask"],
+          items: [
+            { text: "I feel panicky, so I will take a breath before texting anyone back", bucket: 0 },
+            { text: "I could go to one, go to both for an hour each, or celebrate with one friend tomorrow", bucket: 1 },
+            { text: "If I skip one party with no word, that friend will feel hurt for weeks", bucket: 2 },
+            { text: "What would a kind and honest friend do here?", bucket: 3 },
+            { text: "I will sleep on it tonight before I decide", bucket: 0 },
+            { text: "How will I feel about this choice a year from now?", bucket: 2 },
+          ],
+          hint: "Pausing is Stop, naming options is List, following consequences is Think, and checking character is Ask.",
+          mistakes: [
+            { match: "Sleeping on it sorted as Think", coach: "Sleeping on it is a way of pausing so your feelings settle. That is the Stop step." },
+            { match: "A year from now sorted as Ask", coach: "Imagining your future self follows the consequences forward. That is part of Think." },
+            { match: "Listing three plans sorted as Think", coach: "This thought names the options without judging them yet. That is List." },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "cloze",
+          text: "Under pressure, it feels like there are only two choices, but there are almost always more than {0}. In the Think step you ask what happens next, and then what happens {1} that. Good decisions are less about being clever and more about letting your {2} lead.",
+          blanks: [
+            { answers: ["two", "2"] },
+            { answers: ["after"] },
+            { answers: ["values", "character", "conscience"] },
+          ],
+          hint: "Remember the third path, the and-then-what chain, and the closing line of the lesson.",
+          mistakes: [
+            { match: "one", coach: "Pressure makes it feel like there are two choices, yes or no. The lesson says there are more than that." },
+            { match: "feelings", coach: "Feelings are fast and useful, but the whole method is about not letting them make the choice alone." },
+            { match: "friends", coach: "Friends matter, but the lesson ends by saying what should lead your decisions is inside you." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "match",
+          prompt: "Match each step to the question it asks.",
+          pairs: [
+            { left: "Stop", right: "Have I paused long enough for my feelings to settle?" },
+            { left: "List", right: "What are all my options, including a third path?" },
+            { left: "Think", right: "What happens next, after that, and who is affected?" },
+            { left: "Ask", right: "What would a person of good character do?" },
+          ],
+          hint: "Each step has a single job. Match the job to the question.",
+          mistakes: [
+            { match: "Swapped List and Think", coach: "List names the options. Think follows each one forward to its consequences." },
+            { match: "Matched Stop to the character question", coach: "Stop is just the pause. The character question is the final step." },
+          ],
+          seconds: 35,
+        },
+      ],
       check: [
         {
           q: "Why is the first step to stop?",
@@ -995,6 +1407,25 @@ export const leadership: Course = {
               { year: 1916, label: "Everyone rescued", detail: "After several failed attempts, Shackleton returns on the Chilean ship Yelcho on August 30, 1916. All 22 men on Elephant Island are alive." },
             ],
           },
+          probe: {
+            type: "place",
+            prompt: "Place each moment of the Endurance story on the timeline. Notice how long the men were stranded.",
+            min: 1910,
+            max: 1920,
+            step: 1,
+            tolerance: 0,
+            items: [
+              { label: "Endurance sets sail for Antarctica", value: 1914 },
+              { label: "The ice crushes Endurance and it sinks", value: 1915 },
+              { label: "Shackleton rescues everyone on Elephant Island", value: 1916 },
+            ],
+            hint: "The ship left the year a great war began in Europe, and each big step after that came one year later.",
+            mistakes: [
+              { match: "Placed the sinking in 1914", coach: "The ship was not trapped until January 1915, and it drifted for months before it sank that November." },
+              { match: "Placed the rescue in 1915", coach: "After the ship sank, the men camped on the ice for months. The rescue did not come until August of the next year." },
+            ],
+            seconds: 35,
+          },
           think: {
             q: "After the Endurance sank, the crew was far from any help. What made the situation so dangerous?",
             choices: [
@@ -1054,6 +1485,23 @@ export const leadership: Course = {
               ],
             },
           },
+          probe: {
+            type: "cloze",
+            text: "When sleeping bags were handed out by drawing lots, Shackleton and his officers ended up with the thinner {0} bags, leaving the warmer {1} ones for the crew. A boss expects to be served, but a leader {2}.",
+            blanks: [
+              { answers: ["wool", "woolen", "woollen"] },
+              { answers: ["fur", "reindeer-fur", "reindeer fur", "reindeer"] },
+              { answers: ["serves"] },
+            ],
+            bank: ["wool", "fur", "serves", "commands", "silk", "rests"],
+            hint: "Picture who got the warmest gear and who took the worse gear on purpose.",
+            mistakes: [
+              { match: "commands", coach: "Giving orders is what a boss does. Shackleton's example was putting his men's needs before his own." },
+              { match: "rests", coach: "Shackleton did hard work himself. A leader does not sit back while others work." },
+              { match: "silk", coach: "There was no silk on the ice. The bags were either warm reindeer fur or thinner wool." },
+            ],
+            seconds: 35,
+          },
           think: {
             q: "You are captain of a team cleaning up after a party. Which choice best follows Shackleton's example?",
             choices: [
@@ -1105,6 +1553,24 @@ export const leadership: Course = {
               { label: "Takes responsibility", icon: "🛡️", detail: "Never blamed his crew. The decisions and the duty to rescue them were his." },
             ],
           },
+          probe: {
+            type: "build",
+            prompt: "Your family's beach day is rained out and everyone is grumpy. Build what a Shackleton-style leader does when plans change.",
+            tiles: [
+              "Admit the old plan no longer works",
+              "Choose one clear new goal, like an indoor picnic and game afternoon",
+              "Tell everyone plainly what the new plan is",
+              "Drop anything that does not help the new goal",
+            ],
+            distractors: ["Insist on the beach in the rain anyway", "Go to your room and sulk"],
+            hint: "Shackleton first accepted that crossing Antarctica was impossible, then named one new goal everyone could understand.",
+            mistakes: [
+              { match: "Used the beach in the rain tile", coach: "Clinging to a plan that no longer works is not leadership. Shackleton changed his goal when he had to." },
+              { match: "Used the sulk tile", coach: "Sulking leaves the group without direction. Someone needs to set the new goal." },
+              { match: "Announced the plan before choosing it", coach: "You need to decide on the new goal before you can tell everyone clearly what it is." },
+            ],
+            seconds: 40,
+          },
           think: {
             q: "Your family's beach day is rained out, and everyone is grumpy. What would a Shackleton-style leader do?",
             choices: [
@@ -1149,6 +1615,22 @@ export const leadership: Course = {
               { front: "When things go wrong...", back: "A leader takes responsibility instead of blaming others." },
               { front: "Frank Worsley", back: "The navigator whose careful work guided the James Caird about 800 miles to South Georgia." },
             ],
+          },
+          probe: {
+            type: "match",
+            prompt: "Window or mirror? Match each moment to what a good leader does.",
+            pairs: [
+              { left: "Worsley's navigation guides the James Caird to South Georgia", right: "Shackleton makes sure everyone knows Worsley's skill" },
+              { left: "The Endurance is lost in the ice", right: "Shackleton never blames his crew and owns the duty to get them out" },
+              { left: "Your group gets a poor grade because you forgot to submit a section", right: "Say it was your mistake and suggest a fix for next time" },
+              { left: "Your soccer team wins thanks to great saves", right: "Tell people the goalie's saves made the difference" },
+            ],
+            hint: "When things go well, a leader points to the team. When things go wrong, a leader points to himself.",
+            mistakes: [
+              { match: "Matched the forgotten section to praising someone else", coach: "Things went wrong here, and it was your doing. That calls for the mirror, not the window." },
+              { match: "Matched the soccer win to taking responsibility", coach: "A win is a time to look out the window and give credit to the people who earned it." },
+            ],
+            seconds: 45,
           },
           think: {
             q: "Your group project gets a poor grade because you forgot to submit one section. What should you say?",
@@ -1209,6 +1691,71 @@ export const leadership: Course = {
           "A leader gives credit to others and takes responsibility for problems",
         ],
       },
+      mastery: [
+        {
+          type: "sequence",
+          prompt: "Put the Endurance survival story in order, from setting sail to the rescue.",
+          steps: [
+            "Endurance sails from South Georgia toward Antarctica",
+            "The ship is frozen into the pack ice of the Weddell Sea",
+            "The ice crushes the ship and it sinks",
+            "The men row three lifeboats to Elephant Island",
+            "Shackleton and five men sail the James Caird about 800 miles to South Georgia",
+            "They cross South Georgia's icy mountains to a whaling station",
+            "Shackleton returns and rescues everyone on Elephant Island",
+          ],
+          hint: "Follow the men from ship, to ice, to island, to the small boat, to the mountains, and back again.",
+          mistakes: [
+            { match: "Put Elephant Island before the ship sank", coach: "The men only rowed to Elephant Island after months camped on the ice once the ship was gone." },
+            { match: "Put crossing the mountains before the James Caird voyage", coach: "South Georgia's mountains were on the far side of the ocean. They had to sail there first." },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "number",
+          prompt: "How many men were stranded on the ice when the Endurance sank, and every one of them survived?",
+          answer: 28,
+          unit: "men",
+          hint: "The lesson's hook gives the number. It is a little less than thirty.",
+          mistakes: [
+            { match: "22", coach: "Twenty-two is how many waited on Elephant Island. Add the six who sailed the James Caird." },
+            { match: "6", coach: "Six men sailed the James Caird. The whole crew was much bigger." },
+          ],
+          seconds: 25,
+        },
+        {
+          type: "match",
+          prompt: "Match each leadership habit to Shackleton's real example.",
+          pairs: [
+            { left: "Serves first", right: "Ended up with a thin wool sleeping bag so his men got warmer fur ones" },
+            { left: "Sets the example", right: "Stayed calm and cheerful so his freezing men would too" },
+            { left: "Gives a clear goal", right: "Told the crew the new mission was to bring everyone home alive" },
+            { left: "Gives credit", right: "Praised Frank Worsley's navigation of the James Caird" },
+            { left: "Takes responsibility", right: "Never blamed his crew for the disaster" },
+          ],
+          hint: "Each habit has one story that fits it best. Look for the key action in each.",
+          mistakes: [
+            { match: "Swapped serves first and sets the example", coach: "Serving first means giving others the better share. Setting the example means showing the attitude you want." },
+            { match: "Swapped gives credit and takes responsibility", coach: "Credit points to others when things go well. Responsibility points to yourself when things go wrong." },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "cloze",
+          text: "A good leader is like a window and a mirror. When things go well, they look out the {0} to see who deserves credit. When things go wrong, they look in the {1}. People follow what a leader {2} far more than what a leader says.",
+          blanks: [
+            { answers: ["window"] },
+            { answers: ["mirror"] },
+            { answers: ["does"] },
+          ],
+          hint: "Credit goes outward to others, and responsibility comes back to yourself.",
+          mistakes: [
+            { match: "orders", coach: "Orders are just words. The lesson says people watch the leader's actions most." },
+            { match: "wants", coach: "Followers cannot see what a leader wants. They can see what the leader actually does." },
+          ],
+          seconds: 35,
+        },
+      ],
       check: [
         {
           q: "What happened to the ship Endurance?",
@@ -1302,6 +1849,23 @@ export const leadership: Course = {
               { year: 1863, label: "The Gettysburg Address", detail: "On November 19, 1863, Lincoln speaks for about two minutes at the new cemetery. Edward Everett spoke for about two hours before him." },
             ],
           },
+          probe: {
+            type: "cloze",
+            text: "At Gettysburg, Edward Everett spoke for about two {0}, while Lincoln spoke for about two {1}, using only around 270 words. People still memorize Lincoln's speech because it was short and {2}.",
+            blanks: [
+              { answers: ["hours"] },
+              { answers: ["minutes"] },
+              { answers: ["clear", "powerful", "focused"] },
+            ],
+            bank: ["hours", "minutes", "clear", "loud", "long", "days"],
+            hint: "One speech was about sixty times longer than the other. Which one lasted in people's memories, and why?",
+            mistakes: [
+              { match: "loud", coach: "Volume helps a crowd hear, but it is not why a speech is remembered for more than 150 years." },
+              { match: "long", coach: "Lincoln's speech was the short one. Its power came from being focused, not from length." },
+              { match: "days", coach: "No speech lasted days. The famous orator spoke for about two hours." },
+            ],
+            seconds: 30,
+          },
           think: {
             q: "Why do people remember Lincoln's two-minute speech more than Everett's two-hour one?",
             choices: [
@@ -1351,6 +1915,25 @@ export const leadership: Course = {
               "Third main point with an example",
               "Strong close: repeat your big idea or ask the audience to act",
             ],
+          },
+          probe: {
+            type: "build",
+            prompt: "Build a short speech about honesty, from first line to last. Leave out the parts that do not belong.",
+            tiles: [
+              "Hook: Have you ever told a tiny lie that grew into a giant problem?",
+              "Point 1: Honesty builds trust brick by brick",
+              "Point 2: Honesty takes courage when the truth is awkward",
+              "Point 3: Honesty gets easier every time you practice it",
+              "Close: So the next time a small lie is tempting, choose the truth",
+            ],
+            distractors: ["Today I will talk about honesty, I guess", "Honesty is a word with seven letters"],
+            hint: "Open with a spark that makes listeners curious, give three points, then end with your big idea.",
+            mistakes: [
+              { match: "Started with Today I will talk about honesty", coach: "That names the topic but does not make anyone curious. A hook needs a spark, like a question about the listener's life." },
+              { match: "Used the seven letters fact", coach: "It is a fact, but not one that makes people care. A good hook connects to your big idea." },
+              { match: "Put the close before the points", coach: "The close comes last, so your big idea is the final thing people hear." },
+            ],
+            seconds: 45,
           },
           think: {
             q: "Which is the strongest hook for a speech about honesty?",
@@ -1410,6 +1993,26 @@ export const leadership: Course = {
               ],
             },
           },
+          probe: {
+            type: "sort",
+            prompt: "You are on stage. Sort each move: nervous habit or confident habit?",
+            buckets: ["Nervous habit", "Confident habit"],
+            items: [
+              { text: "You forget a line, pause calmly and glance at your note card", bucket: 1 },
+              { text: "You forget a line and say sorry over and over", bucket: 0 },
+              { text: "Standing tall with your feet planted", bucket: 1 },
+              { text: "Speeding up to get to the end faster", bucket: 0 },
+              { text: "Counting your three points on your fingers", bucket: 1 },
+              { text: "Staring at the floor while you talk", bucket: 0 },
+            ],
+            hint: "Confident speakers look calm and in control, even when their hearts are racing.",
+            mistakes: [
+              { match: "Pausing sorted as nervous", coach: "A short, calm pause actually makes you look in control, and it gives listeners time to think." },
+              { match: "Saying sorry sorted as confident", coach: "Apologizing draws attention to a slip most listeners would never notice." },
+              { match: "Speeding up sorted as confident", coach: "Nerves make people rush. Confident speakers go a little slower than feels normal." },
+            ],
+            seconds: 40,
+          },
           think: {
             q: "Halfway through your speech you forget your next line. What is the best move?",
             choices: [
@@ -1459,6 +2062,26 @@ export const leadership: Course = {
               "Give it to one person",
               "Give it to a small group",
             ],
+          },
+          probe: {
+            type: "highlight",
+            prompt: "Your speech is on Friday and you feel nervous. Tap every part of a strong practice plan.",
+            sentences: [
+              "Monday: say the whole speech out loud alone, twice.",
+              "Tuesday: read it silently in your head once.",
+              "Wednesday: practice out loud in front of a mirror.",
+              "Thursday: give it to your family using one small key-word card.",
+              "Friday: write every word on a full page so you can read it straight through.",
+              "Until Friday: avoid thinking about it so you do not get nervous.",
+            ],
+            correct: [0, 2, 3],
+            hint: "Look for plans that use your voice out loud and build up to a real audience.",
+            mistakes: [
+              { match: "Tapped reading silently", coach: "Running it in your head is not the same as saying it. Your mouth and voice need practice too." },
+              { match: "Tapped writing every word on a page", coach: "A full page feels safe, but reading it stops you from looking at your listeners." },
+              { match: "Tapped avoiding thinking about it", coach: "Avoiding a speech usually makes nerves grow. Practice is what shrinks them." },
+            ],
+            seconds: 40,
           },
           think: {
             q: "You have a speech on Friday and feel nervous. Which plan will help most?",
@@ -1518,6 +2141,72 @@ export const leadership: Course = {
           "Short and clear can be powerful, like the Gettysburg Address",
         ],
       },
+      mastery: [
+        {
+          type: "place",
+          prompt: "Lincoln opened with four score and seven years ago. Place the year he was pointing back to, and the year he gave the speech.",
+          min: 1750,
+          max: 1900,
+          step: 1,
+          tolerance: 1,
+          items: [
+            { label: "The year Lincoln pointed back to (a new nation)", value: 1776 },
+            { label: "Lincoln gives the Gettysburg Address", value: 1863 },
+          ],
+          hint: "A score is twenty. Count back four score and seven years from the year of the speech.",
+          mistakes: [
+            { match: "Placed the first marker at 1816", coach: "That counts back only forty-seven years. Four score is eighty, not forty." },
+            { match: "Placed the first marker at 1789", coach: "That counts back seventy-four years. You may have flipped the numbers: it is eighty plus seven." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "number",
+          prompt: "About how many words long was the Gettysburg Address?",
+          answer: 270,
+          tolerance: 30,
+          unit: "words",
+          hint: "It took Lincoln only about two minutes to say. Think a few hundred words, not thousands.",
+          mistakes: [
+            { match: "2", coach: "Two was the number of minutes Lincoln spoke. The question asks how many words he used." },
+            { match: "87", coach: "Eighty-seven is the four score and seven years. The speech had a few hundred words." },
+          ],
+          seconds: 25,
+        },
+        {
+          type: "match",
+          prompt: "Match each line from a speech about courage to its part in the speech.",
+          pairs: [
+            { left: "What is scarier, a lion or a classroom full of faces?", right: "Hook" },
+            { left: "Courage is not having no fear.", right: "First main point" },
+            { left: "Courage grows with practice.", right: "Third main point" },
+            { left: "So next time you feel afraid, remember that fear is where courage begins.", right: "Strong close" },
+          ],
+          hint: "A hook sparks curiosity, the points teach, and the close sends the big idea home.",
+          mistakes: [
+            { match: "Matched the lion question to the close", coach: "A surprising question belongs at the start, to make people want to listen." },
+            { match: "Matched the so next time line to a main point", coach: "Starting with so next time sums up the big idea and asks listeners to act. That is how a speech ends." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "cloze",
+          text: "When you speak, stand tall and look at people's {0}. Speak a little slower and a little {1} than feels normal. A short {2} makes you look calm and gives listeners time to think.",
+          blanks: [
+            { answers: ["faces", "eyes"] },
+            { answers: ["louder"] },
+            { answers: ["pause"] },
+          ],
+          bank: ["faces", "notes", "louder", "faster", "pause", "apology"],
+          hint: "Think of the confident habits: eyes on the audience, steady voice, and calm silence.",
+          mistakes: [
+            { match: "notes", coach: "Staring at notes is a nervous habit. Your eyes should move around the room to your listeners." },
+            { match: "faster", coach: "Nerves already make people rush. Slower and louder helps listeners follow you." },
+            { match: "apology", coach: "Apologizing draws attention to nerves. A quiet, calm moment does the opposite." },
+          ],
+          seconds: 35,
+        },
+      ],
       check: [
         {
           q: "About how long was Lincoln's Gettysburg Address?",

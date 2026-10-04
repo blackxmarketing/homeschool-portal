@@ -3,7 +3,7 @@ import { currentSession } from "@/lib/auth";
 import { weeklySummary, aiEnabled } from "@/lib/ai";
 import { addDays } from "@/lib/engine/mastery";
 import { gradeProgress } from "@/lib/engine/planner";
-import { getKid, kidFlags, recentMastered, skillStates, today, weekStats } from "@/lib/store";
+import { getKid, kidFlags, learnerProfiles, recentMastered, skillStates, today, weekStats } from "@/lib/store";
 
 export async function POST(req: Request) {
   const s = await currentSession();
@@ -20,6 +20,17 @@ export async function POST(req: Request) {
     skillsMasteredThisWeek: recentMastered(kid.id, addDays(today(), -6)).map((m) => m.title),
     masteryByGrade: gradeProgress(skillStates(kid.id)),
     flags: kidFlags(kid.id).map((f) => ({ kind: f.kind, skill: f.skillTitle, detail: f.message })),
+    learnerProfileBySubject: learnerProfiles(kid.id).map((s) => ({
+      subject: s.title,
+      status: s.profile.status,
+      firstTryAccuracy: s.profile.accuracy,
+      timeVsExpected: s.profile.speed,
+      helpRate: s.profile.helpRate,
+      reasons: s.profile.reasons,
+      weakestIdeas: s.weakest.map((w) => w.title),
+      whatHelpsWhenStuck: s.helps.best,
+      howTheCoachIsAdapting: s.adaptation.mode === "standard" ? [] : s.adaptation.why.slice(0, 3),
+    })),
   });
   if (!summary) return NextResponse.json({ error: "Couldn't write a summary right now. Try again later." }, { status: 502 });
   return NextResponse.json({ summary });

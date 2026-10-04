@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import LessonPlayer from "./LessonPlayer";
-import TeachPlayer, { type PublicSegment, type TeachInitial } from "./TeachPlayer";
+import TeachPlayer, { type AdaptView, type PublicSegment, type TeachInitial } from "./TeachPlayer";
+import { MasteryCheck } from "./Assess";
 import type { PublicWidget } from "@/lib/teaching";
+import type { PublicProbe } from "@/lib/probes";
 
 type PlayerProps = React.ComponentProps<typeof LessonPlayer>;
 
@@ -23,10 +25,14 @@ export default function LessonFlow({
     activity?: PublicWidget;
     explain?: { prompt: string };
     initial: TeachInitial;
+    adaptation?: AdaptView;
+    review?: { lessonId: string; seg: number; title: string; probe: PublicProbe }[];
+    mastery?: PublicProbe[];
   };
   interactiveDone: boolean;
 }) {
   const [teachingDone, setTeachingDone] = useState(interactiveDone);
+  const [checkPassed, setCheckPassed] = useState(player.initial.checkPassed);
   if (!teachingDone) {
     return (
       <TeachPlayer
@@ -38,9 +44,26 @@ export default function LessonFlow({
         activity={teach.activity}
         explain={teach.explain}
         initial={teach.initial}
-        onFinished={() => setTeachingDone(true)}
+        adaptation={teach.adaptation}
+        review={teach.review}
+        mastery={teach.mastery}
+        onFinished={(how) => {
+          setTeachingDone(true);
+          if (how === "tested-out") setCheckPassed(true);
+        }}
       />
     );
   }
-  return <LessonPlayer {...player} startAt="check" />;
+  // Interactive "show what you know" replaces the multiple-choice check.
+  if (teach.mastery?.length && !checkPassed) {
+    return (
+      <MasteryCheck
+        courseId={player.courseId}
+        lessonId={player.lesson.id}
+        probes={teach.mastery}
+        onPassed={() => setCheckPassed(true)}
+      />
+    );
+  }
+  return <LessonPlayer key={String(checkPassed)} {...player} initial={{ ...player.initial, checkPassed }} startAt="check" />;
 }

@@ -5,6 +5,10 @@ import { aiLimits, features } from "@/lib/content";
 import { keywordExplainCheck } from "@/lib/teaching";
 import {
   answerActivity,
+  answerMasteryItem,
+  retryMastery,
+  answerProbe,
+  answerReview,
   answerSimpler,
   answerThink,
   checkSegmentVisual,
@@ -38,6 +42,11 @@ export async function POST(req: Request) {
     answer?: unknown;
     text?: string;
     picks?: string[];
+    ms?: unknown;
+    answers?: unknown;
+    testOut?: boolean;
+    attempt?: number;
+    index?: number;
   };
   if (!b.courseId || !b.lessonId) return NextResponse.json({ error: "Bad request." }, { status: 400 });
   const { courseId, lessonId } = b;
@@ -71,6 +80,43 @@ export async function POST(req: Request) {
       }
       const { seg: _s, lesson: _l, course: _c, ...rest } = r as typeof r & { seg?: unknown; lesson?: unknown; course?: unknown };
       return NextResponse.json({ ...rest, rescue });
+    }
+
+    if (b.action === "probe") {
+      const r = answerProbe(kid.id, courseId, lessonId, seg, b.answer, Number(b.ms) || 0);
+      let rescue: { approach: string; explanation: string; tryThis: string } | null = null;
+      if (r.needsAi && r.seg && r.course && aiOk()) {
+        rescue = await coachRescue({
+          teacher: r.course.teacher,
+          lessonTitle: r.lesson!.title,
+          segmentTitle: r.seg.title,
+          teachText: r.seg.teach,
+          // The AI sees the multiple-choice version of the same idea, which names the misconceptions.
+          question: r.seg.think.q,
+          choices: r.seg.think.choices,
+          answer: r.seg.think.answer,
+          wrongPicks: [JSON.stringify(b.answer).slice(0, 300)],
+          alreadyTried: [r.seg.teach, r.seg.approaches.analogy],
+        });
+        if (rescue) {
+          noteAiRescue(kid.id, courseId, lessonId, seg);
+          const base = { questionId: null, skillId: `course:${courseId}`, teacherId: `course:${courseId}`, kind: "chat" as const };
+          logTutor(kid.id, { ...base, role: "kid", content: `Stuck on "${r.seg.title}" (answered: ${JSON.stringify(b.answer).slice(0, 200)})` });
+          logTutor(kid.id, { ...base, role: "teacher", content: `${rescue.explanation} ${rescue.tryThis}` });
+        }
+      }
+      const { seg: _s, lesson: _l, course: _c, ...rest } = r as typeof r & { seg?: unknown; lesson?: unknown; course?: unknown };
+      return NextResponse.json({ ...rest, rescue });
+    }
+
+    if (b.action === "mastery") {
+      return NextResponse.json(answerMasteryItem(kid.id, courseId, lessonId, Number(b.index), b.answer, Number(b.ms) || 0, !!b.testOut));
+    }
+
+    if (b.action === "mastery-retry") return NextResponse.json(retryMastery(kid.id, courseId, lessonId));
+
+    if (b.action === "review") {
+      return NextResponse.json(answerReview(kid.id, courseId, lessonId, seg, b.answer, Number(b.ms) || 0, Number(b.attempt) || 1));
     }
 
     if (b.action === "visual" && Array.isArray(b.answer)) {

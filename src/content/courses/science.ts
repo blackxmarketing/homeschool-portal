@@ -52,6 +52,19 @@ export const science: Course = {
               { front: "Conclusion", back: "What the data shows, and whether it supports your hypothesis." },
             ],
           },
+          probe: {
+            type: "build",
+            prompt: "Build a testable hypothesis about bean plants by tapping the tiles in order.",
+            tiles: ["If", "a bean plant gets more hours of light,", "then", "it will grow taller in two weeks,", "because plants use light to make food."],
+            distractors: ["Bean plants are the best plants.", "Why do plants grow?"],
+            hint: "A hypothesis starts with what you will change (if), then predicts what you will measure (then), then gives a reason (because).",
+            mistakes: [
+              { match: "Used 'Bean plants are the best plants.'", coach: "That is an opinion. No measurement can prove 'best', so it cannot be part of a testable hypothesis." },
+              { match: "Used 'Why do plants grow?'", coach: "That is a question, which comes before the hypothesis. The hypothesis is your predicted answer." },
+              { match: "Put 'then' before 'If'", coach: "The if-part names what you change; the then-part predicts the result. The cause comes first." },
+            ],
+            seconds: 40,
+          },
           think: {
             q: "Which of these is a testable hypothesis?",
             choices: [
@@ -103,6 +116,23 @@ export const science: Course = {
               { text: "The same cup for every trial", bucket: 2 },
               { text: "Stirring 10 times", bucket: 2 },
             ],
+          },
+          probe: {
+            type: "cloze",
+            text: "You test whether hours of light change how tall bean plants grow. Hours of light is the {0} variable, plant height is the {1} variable, and the type of soil is a {2} variable.",
+            blanks: [
+              { answers: ["independent", "independent variable"] },
+              { answers: ["dependent", "dependent variable"] },
+              { answers: ["controlled", "control", "controlled variable", "constant"] },
+            ],
+            bank: ["independent", "dependent", "controlled", "hypothesis", "random"],
+            hint: "Ask yourself: which one do I change on purpose, which one do I measure, and which one do I keep the same?",
+            mistakes: [
+              { match: "dependent", coach: "If you put dependent first: hours of light is something YOU choose, so it is independent. The dependent variable is the result you measure." },
+              { match: "independent", coach: "Plant height is what you measure at the end. It depends on the light, so it is the dependent variable." },
+              { match: "hypothesis", coach: "A hypothesis is a prediction, not a variable. Each blank here names a kind of variable." },
+            ],
+            seconds: 35,
           },
           think: {
             q: "You test whether the number of hours of light changes how tall bean plants grow. What is the dependent variable?",
@@ -159,6 +189,26 @@ export const science: Course = {
               ],
             },
           },
+          probe: {
+            type: "highlight",
+            prompt: "Maya wants to test ONLY fertilizer. Tap the sentences that show a second difference that ruins her fair test.",
+            sentences: [
+              "Plant A gets fertilizer and Plant B does not.",
+              "Both plants are the same kind of bean.",
+              "Plant A sits on a sunny windowsill.",
+              "Plant B sits in a dark closet.",
+              "Each plant gets 100 mL of water a day.",
+              "Both plants are in the same size pot.",
+            ],
+            correct: [2, 3],
+            hint: "Fertilizer is supposed to be the only difference. Look for anything else that is not the same for both plants.",
+            mistakes: [
+              { match: "Tapped the fertilizer sentence", coach: "Fertilizer is the variable Maya is testing on purpose, so it is supposed to differ. Look for a second difference." },
+              { match: "Tapped water or pot size", coach: "Those are the same for both plants, so they are controlled. They do not spoil the test." },
+              { match: "Tapped only one light sentence", coach: "The windowsill and the closet together show that light changed. Tap both sides of that difference." },
+            ],
+            seconds: 30,
+          },
           think: {
             q: "Maya tests whether fertilizer helps plants grow. She gives fertilizer to a plant on a sunny windowsill and no fertilizer to a plant in a dark closet. What is wrong?",
             choices: [
@@ -209,6 +259,20 @@ export const science: Course = {
               "Run repeated trials and record data",
               "Analyze the data and draw a conclusion",
             ],
+          },
+          probe: {
+            type: "number",
+            prompt: "A paper towel holds 11 mL, 15 mL, and 16 mL of water in three trials. What is the average?",
+            answer: 14,
+            tolerance: 0,
+            unit: "mL",
+            hint: "Add up all three results, then divide by the number of trials.",
+            mistakes: [
+              { match: "42", coach: "42 is the total of all three trials. To get the average, divide that total by 3." },
+              { match: "16", coach: "16 is just the biggest result. The average combines all three: add them and divide by 3." },
+              { match: "15", coach: "15 is the middle number in the list, not the average. Add all three and divide by 3." },
+            ],
+            seconds: 30,
           },
           think: {
             q: "A towel holds 10 mL, 12 mL, and 14 mL in three trials. What is the average?",
@@ -263,6 +327,69 @@ export const science: Course = {
           "Repeat trials and record the data honestly",
         ],
       },
+      mastery: [
+        {
+          type: "build",
+          prompt: "Build the steps of the scientific method in order. One tile does not belong in science at all.",
+          tiles: ["Ask a question", "Write a hypothesis", "Plan a fair test", "Run repeated trials", "Record the data", "Draw a conclusion"],
+          distractors: ["Change the data to fit your prediction"],
+          hint: "You cannot predict before you have a question, and you cannot conclude before you have data.",
+          mistakes: [
+            { match: "Used 'Change the data to fit your prediction'", coach: "Changing data is never allowed. If the data disagrees with your hypothesis, that is still a real result." },
+            { match: "Hypothesis before the question", coach: "A hypothesis is a predicted answer, so the question has to come first." },
+            { match: "Conclusion before the data", coach: "A conclusion is based on evidence. You need recorded data before you can draw one." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "sort",
+          prompt: "Toy car test: does ramp height change how far the car rolls? Sort each variable.",
+          buckets: ["Independent (I change it)", "Dependent (I measure it)", "Controlled (I keep it the same)"],
+          items: [
+            { text: "Height of the ramp", bucket: 0 },
+            { text: "Distance the car rolls in centimeters", bucket: 1 },
+            { text: "The same toy car every trial", bucket: 2 },
+            { text: "The same floor surface", bucket: 2 },
+            { text: "Releasing the car without a push", bucket: 2 },
+          ],
+          hint: "There is only one thing you change on purpose and one thing you measure. Everything else must stay the same.",
+          mistakes: [
+            { match: "Distance sorted as independent", coach: "You do not choose the distance; you measure it after the car stops. That makes it dependent." },
+            { match: "Releasing without a push sorted as independent", coach: "How you release the car must be the same every time, or a push could explain the result. It is controlled." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "number",
+          prompt: "Three warm-water trials take 48, 52, and 47 seconds to dissolve the sugar. What is the average time?",
+          answer: 49,
+          tolerance: 0.1,
+          unit: "seconds",
+          hint: "Find the total of the three trials first, then share it evenly across the trials.",
+          mistakes: [
+            { match: "147", coach: "147 is the total. The average is the total divided by the number of trials, 3." },
+            { match: "48", coach: "48 is one of the trial results, not the average. Add all three and divide by 3." },
+            { match: "50", coach: "Close, but check your addition: 48 + 52 + 47. Then divide by 3." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "cloze",
+          text: "In Redi's experiment, the {0} on each jar was the independent variable, and whether {1} appeared on the meat was the dependent variable.",
+          blanks: [
+            { answers: ["cover", "covering", "gauze", "lid"] },
+            { answers: ["maggots", "maggot", "fly larvae", "larvae"] },
+          ],
+          bank: ["cover", "maggots", "meat", "air", "jar size"],
+          hint: "Redi changed one thing about the jars on purpose, and then watched for one result.",
+          mistakes: [
+            { match: "meat", coach: "Redi used the same kind of meat in every jar, so meat was a controlled variable, not what he changed." },
+            { match: "air", coach: "Air could reach the meat in every jar, even the gauze ones. What he changed was whether flies could get in, through the cover." },
+            { match: "jar size", coach: "The jars were the same, so jar size was controlled. Only the cover differed." },
+          ],
+          seconds: 35,
+        },
+      ],
       check: [
         {
           q: "What did Francesco Redi's covered jars show?",
@@ -366,6 +493,19 @@ export const science: Course = {
               { front: "Unbalanced force", back: "When forces do not cancel out, so the motion changes." },
             ],
           },
+          probe: {
+            type: "number",
+            prompt: "In a tug of war, Team A pulls left with 500 N and Team B pulls right with 500 N. What is the unbalanced (net) force on the rope?",
+            answer: 0,
+            tolerance: 0,
+            unit: "N",
+            hint: "When forces point in opposite directions, they work against each other, so subtract instead of add.",
+            mistakes: [
+              { match: "1000", coach: "Adding works only when forces point the same way. These pulls are opposite, so they cancel." },
+              { match: "500", coach: "Each team pulls with 500 N, but they pull in opposite directions. What is left after they cancel?" },
+            ],
+            seconds: 20,
+          },
           think: {
             q: "In a tug of war, Team A pulls with 500 N one way and Team B pulls with 500 N the other way. The rope starts still. What happens?",
             choices: ["It moves toward Team A", "It stays where it is", "It moves toward Team B", "It breaks immediately"],
@@ -401,6 +541,22 @@ export const science: Course = {
           teach:
             "Newton's first law says an object at rest stays at rest, and a moving object keeps moving at the same speed in the same direction, unless an unbalanced force acts on it. This tendency to keep doing what it is already doing is called inertia. On Earth, moving things usually stop, so people once thought stopping was natural. Galileo realized friction was the hidden force doing the stopping. In space, with almost nothing to slow it, the Voyager 1 probe has coasted outward for decades without its engines pushing it along. More mass means more inertia, which is why a loaded truck is harder to start and stop than a bicycle.",
           visual: { type: "ramp" },
+          probe: {
+            type: "cloze",
+            text: "A soccer ball rolling across grass slows and stops because {0} pushes against its motion. On perfectly smooth, endless ice, the ball's {1} would keep it rolling forever.",
+            blanks: [
+              { answers: ["friction"] },
+              { answers: ["inertia"] },
+            ],
+            bank: ["friction", "inertia", "gravity", "magnetism", "fuel"],
+            hint: "One word is the force that rubs against motion; the other is the tendency to keep doing what you are already doing.",
+            mistakes: [
+              { match: "gravity", coach: "Gravity pulls down, not backward along flat ground. The backward force from the grass is something else." },
+              { match: "fuel", coach: "A ball does not carry fuel or a supply of force that runs out. It keeps moving unless a force stops it." },
+              { match: "magnetism", coach: "Grass is not magnetic. Think about the force made when surfaces rub together." },
+            ],
+            seconds: 25,
+          },
           think: {
             q: "A soccer ball rolls across a field and slowly stops. Why?",
             choices: [
@@ -451,6 +607,20 @@ export const science: Course = {
               points: ["Push: 20 N", "Acceleration: 20 / 40 = 0.5 m/s each second", "Hard to start and stop"],
             },
           },
+          probe: {
+            type: "number",
+            prompt: "You push a 5 kg wagon with 20 N of unbalanced force. What is its acceleration, in meters per second each second?",
+            answer: 4,
+            tolerance: 0,
+            unit: "m/s each second",
+            hint: "Rearrange F = ma so that acceleration is by itself on one side.",
+            mistakes: [
+              { match: "100", coach: "That is force times mass. Acceleration is force divided by mass: a = F / m." },
+              { match: "15", coach: "That is 20 minus 5. The second law uses division: a = F / m." },
+              { match: "0.25", coach: "That is mass divided by force, which is upside down. Put the force on top." },
+            ],
+            seconds: 25,
+          },
           think: {
             q: "You push a 4 kg wagon with 12 N of unbalanced force. What is its acceleration?",
             choices: ["48 m/s each second", "8 m/s each second", "3 m/s each second", "16 m/s each second"],
@@ -493,6 +663,22 @@ export const science: Course = {
               { front: "A rocket pushes gas down", back: "The gas pushes the rocket up." },
               { front: "Your feet push the ground backward", back: "The ground pushes you forward, so you can walk." },
             ],
+          },
+          probe: {
+            type: "match",
+            prompt: "Match each action force to its reaction force.",
+            pairs: [
+              { left: "A small car pushes on a big truck in a crash", right: "The truck pushes on the car with an equal force" },
+              { left: "You jump forward off a skateboard", right: "The skateboard rolls backward" },
+              { left: "A loose balloon squeezes air out the back", right: "The air pushes the balloon forward" },
+              { left: "You sit down and push on a chair", right: "The chair pushes up on you" },
+            ],
+            hint: "A reaction force acts on the other object, with the same size, in the opposite direction.",
+            mistakes: [
+              { match: "Matched the car crash to a bigger force", coach: "The truck does not push harder. Action-reaction forces are always equal; the car is affected more because it has less mass." },
+              { match: "Mixed up the skateboard and balloon", coach: "Look for the pair that involves the same two objects. The skateboard's partner involves you and the board." },
+            ],
+            seconds: 40,
           },
           think: {
             q: "A small car bumps into a big truck. Which is true about the forces during the crash?",
@@ -552,6 +738,77 @@ export const science: Course = {
           "Forces come in equal and opposite pairs",
         ],
       },
+      mastery: [
+        {
+          type: "sort",
+          prompt: "New situations: which of Newton's laws best explains each one?",
+          buckets: ["First law (inertia)", "Second law (F = ma)", "Third law (action-reaction)"],
+          items: [
+            { text: "A tablecloth yanked quickly leaves the dishes in place", bucket: 0 },
+            { text: "A hockey puck glides a long way on smooth ice", bucket: 0 },
+            { text: "A bowling ball needs a bigger push than a tennis ball to reach the same speed", bucket: 1 },
+            { text: "Doubling the push on a cart doubles its acceleration", bucket: 1 },
+            { text: "A cannon kicks backward when it fires", bucket: 2 },
+            { text: "A rowboat moves forward as the oars push water back", bucket: 2 },
+          ],
+          hint: "First law: things keep doing what they were doing. Second law: force, mass, and acceleration. Third law: two objects pushing on each other.",
+          mistakes: [
+            { match: "Cannon sorted as first law", coach: "The cannon pushes the cannonball forward and the cannonball pushes the cannon back. That pair of forces is the third law." },
+            { match: "Bowling ball sorted as first law", coach: "This compares how much force different masses need for the same acceleration. That is F = ma." },
+            { match: "Tablecloth sorted as third law", coach: "The dishes simply stay where they were because of inertia. Nothing is pushing back on the cloth." },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "number",
+          prompt: "How much unbalanced force does it take to give a 60 kg sled an acceleration of 2 meters per second each second?",
+          answer: 120,
+          tolerance: 0,
+          unit: "N",
+          hint: "Here you know the mass and the acceleration, so use F = ma directly.",
+          mistakes: [
+            { match: "30", coach: "That is 60 divided by 2. To find force, multiply mass by acceleration." },
+            { match: "62", coach: "That is 60 plus 2. F = ma means multiply." },
+          ],
+          seconds: 30,
+        },
+        {
+          type: "place",
+          prompt: "Place the net force for each situation on the line. Right is positive and left is negative.",
+          min: -200,
+          max: 200,
+          step: 5,
+          tolerance: 5,
+          items: [
+            { label: "Push 50 N right, friction 30 N left", value: 20 },
+            { label: "Two teams each pull 400 N, opposite ways", value: 0 },
+            { label: "Team pulls 450 N right, other team 300 N left", value: 150 },
+            { label: "Team pulls 600 N left, other team 450 N right", value: -150 },
+          ],
+          hint: "Subtract the smaller force from the bigger one, and the net force points the way the bigger force points.",
+          mistakes: [
+            { match: "Added opposite forces", coach: "Forces pointing in opposite directions work against each other. Subtract them instead of adding." },
+            { match: "Placed the 600 N left case on the right", coach: "The bigger pull is to the left, so the net force points left, which is negative on this line." },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "cloze",
+          text: "When a small car hits a big truck, the two push on each other with {0} force. The car is affected more because it has less {1}.",
+          blanks: [
+            { answers: ["equal", "the same", "same", "equal and opposite"] },
+            { answers: ["mass", "weight"] },
+          ],
+          bank: ["equal", "mass", "greater", "smaller", "speed"],
+          hint: "The third law tells you about the size of the two forces; the second law tells you why the effects differ.",
+          mistakes: [
+            { match: "greater", coach: "It feels like the truck should push harder, but action-reaction forces are always equal in size." },
+            { match: "smaller", coach: "The car does not push with less force. The two forces in a pair are always equal." },
+            { match: "speed", coach: "The difference in damage comes from mass: the same force gives a lighter object a bigger acceleration." },
+          ],
+          seconds: 35,
+        },
+      ],
       check: [
         {
           q: "When a car brakes hard, your body lurches forward. Which law explains this?",
@@ -657,6 +914,20 @@ export const science: Course = {
               { text: "Wind blowing through trees", bucket: 0 },
             ],
           },
+          probe: {
+            type: "number",
+            prompt: "Gravity pulls with about 10 N on each kilogram. About how many joules of gravitational potential energy does a 2 kg rock store on a 5 m high ledge? (Energy = mass x 10 x height)",
+            answer: 100,
+            tolerance: 0,
+            unit: "J",
+            hint: "Multiply all three numbers together: the mass, the pull of gravity per kilogram, and the height.",
+            mistakes: [
+              { match: "10", coach: "That is just mass times height. Do not forget gravity's pull of about 10 N for every kilogram." },
+              { match: "50", coach: "That is 10 times the height, which leaves out the mass. A heavier rock stores more energy, so multiply by 2 too." },
+              { match: "17", coach: "That adds the numbers. Potential energy multiplies mass, gravity, and height." },
+            ],
+            seconds: 35,
+          },
           think: {
             q: "Which has the MOST gravitational potential energy?",
             choices: [
@@ -697,6 +968,24 @@ export const science: Course = {
           teach:
             "Energy constantly changes from one form to another. On a roller coaster, the chain lifts the car to the top of the first hill, giving it lots of potential energy. As the car plunges down, potential energy turns into kinetic energy, so it speeds up and is fastest at the bottom. Climbing the next hill, kinetic energy turns back into potential energy and the car slows. A swinging pendulum does the same dance: most potential energy at the high points, most speed at the bottom. Other changes happen all around you: chemical energy in food becomes motion in your muscles, and electrical energy becomes light and heat in a lamp.",
           visual: { type: "ramp" },
+          probe: {
+            type: "build",
+            prompt: "Build the energy story of one pendulum swing, from release to the far side.",
+            tiles: [
+              "Held high: most potential energy, not moving",
+              "Swinging down: potential energy becomes kinetic energy",
+              "At the bottom: most kinetic energy, moving fastest",
+              "Swinging up: kinetic energy becomes potential energy",
+              "At the far high point: stops for an instant",
+            ],
+            distractors: ["At the bottom: stops for an instant"],
+            hint: "Follow the height: as the pendulum loses height it gains speed, and as it gains height it loses speed.",
+            mistakes: [
+              { match: "Used 'At the bottom: stops for an instant'", coach: "The pendulum never stops at the bottom; that is where it moves fastest. It stops only at the high points, where it turns around." },
+              { match: "Put 'most kinetic energy' at a high point", coach: "At the high points the pendulum is barely moving, so kinetic energy is smallest there. Speed peaks at the lowest point." },
+            ],
+            seconds: 45,
+          },
           think: {
             q: "Where is a swinging pendulum moving fastest?",
             choices: [
@@ -737,6 +1026,23 @@ export const science: Course = {
           teach:
             "In the 1840s, James Prescott Joule built a device in which a falling weight spun paddles inside a container of water. The water warmed slightly, and the same drop always produced the same warming. His work helped establish the law of conservation of energy: energy cannot be created or destroyed, only changed from one form to another. So why does a dropped ball bounce lower each time? With every bounce, some energy turns into heat in the ball and floor and into the sound you hear. The energy still exists, but it has spread out into forms the ball cannot use to bounce. That is also why machines get warm and why no perpetual motion machine can work.",
           visual: { type: "bounce", efficiency: 0.6 },
+          probe: {
+            type: "cloze",
+            text: "A ball dropped from 100 cm bounces back to only 70 cm. The missing energy was not {0}. It changed into {1} and {2} during the bounce.",
+            blanks: [
+              { answers: ["destroyed", "deleted", "erased"] },
+              { answers: ["heat", "thermal energy", "thermal", "sound", "sound energy"] },
+              { answers: ["sound", "sound energy", "heat", "thermal energy", "thermal"] },
+            ],
+            bank: ["destroyed", "heat", "sound", "mass", "gravity", "created"],
+            hint: "Energy is never destroyed. Think about what you can hear and what you could feel if you touched the floor right where the ball hit.",
+            mistakes: [
+              { match: "created", coach: "The first sentence is about energy disappearing, not appearing. Energy can never be destroyed, so that is the word you need." },
+              { match: "gravity", coach: "Gravity is a force that changes potential energy into kinetic energy, not a form the energy turns into." },
+              { match: "mass", coach: "The ball does not lose mass when it bounces. The energy spreads out as forms you can feel and hear." },
+            ],
+            seconds: 30,
+          },
           think: {
             q: "A ball dropped from 100 cm bounces to 70 cm. What happened to the missing energy?",
             choices: [
@@ -797,6 +1103,73 @@ export const science: Course = {
           "The total energy stays the same; it just spreads out",
         ],
       },
+      mastery: [
+        {
+          type: "place",
+          prompt: "A ball keeps 60 percent of its height on every bounce. It is dropped from 100 cm. Place the heights of its first three bounces.",
+          min: 0,
+          max: 100,
+          step: 1,
+          tolerance: 3,
+          items: [
+            { label: "1st bounce", value: 60 },
+            { label: "2nd bounce", value: 36 },
+            { label: "3rd bounce", value: 21.6 },
+          ],
+          hint: "Each bounce is 60 percent of the bounce before it, not 60 percent of the starting height.",
+          mistakes: [
+            { match: "Dropped 40 cm every bounce (60, 20, ...)", coach: "The ball loses a percentage each time, not the same number of centimeters. Take 60 percent of 60 cm for the second bounce." },
+            { match: "Every bounce at 60 cm", coach: "Energy spreads out as heat and sound on every bounce, so each bounce must be lower than the one before." },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "match",
+          prompt: "Match each example to the main form of energy it shows.",
+          pairs: [
+            { left: "A stretched slingshot", right: "Elastic potential energy" },
+            { left: "A book on a high shelf", right: "Gravitational potential energy" },
+            { left: "A sandwich in your lunchbox", right: "Chemical potential energy" },
+            { left: "A skateboarder speeding downhill", right: "Kinetic energy" },
+            { left: "The floor warming slightly where a ball bounced", right: "Heat (thermal energy)" },
+          ],
+          hint: "Ask: is it moving, is it stored by height, stored by a stretch, stored in food or fuel, or spread out as warmth?",
+          mistakes: [
+            { match: "Slingshot matched to kinetic energy", coach: "Before it is released, the slingshot is not moving. Its energy is stored in the stretch." },
+            { match: "Sandwich matched to gravitational potential energy", coach: "A sandwich's energy is stored in its chemicals, which your body unlocks when you digest it." },
+          ],
+          seconds: 50,
+        },
+        {
+          type: "number",
+          prompt: "A 2 kg ball held 5 m up stores about 100 J of potential energy. Ignoring air resistance, how much kinetic energy does it have when it has fallen to 1 m above the ground? (Potential energy = mass x 10 x height)",
+          answer: 80,
+          tolerance: 0,
+          unit: "J",
+          hint: "First find how much potential energy is still left at 1 m. The rest has become kinetic energy.",
+          mistakes: [
+            { match: "20", coach: "20 J is the potential energy still stored at 1 m. The question asks for the energy that has turned into motion." },
+            { match: "100", coach: "100 J is the total. At 1 m up, some is still stored as potential energy, so the kinetic part is less." },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "cloze",
+          text: "In Joule's experiment, a falling weight spun paddles that {0} the water, proving that motion can turn into {1}. Energy can change form, but it can never be created or {2}.",
+          blanks: [
+            { answers: ["warmed", "heated", "warmed up", "heated up"] },
+            { answers: ["heat", "thermal energy", "thermal"] },
+            { answers: ["destroyed"] },
+          ],
+          bank: ["warmed", "heat", "destroyed", "froze", "sound", "moved"],
+          hint: "Joule measured the temperature of the water before and after. Think about what changed.",
+          mistakes: [
+            { match: "froze", coach: "Churning water does not freeze it. The paddles' motion made the water slightly warmer." },
+            { match: "sound", coach: "Joule measured temperature, not sound. Motion was turned into heat." },
+          ],
+          seconds: 40,
+        },
+      ],
       check: [
         {
           q: "A book sitting on a high shelf has mostly which kind of energy?",
@@ -897,6 +1270,24 @@ export const science: Course = {
               { label: "Screw", icon: "🔩", detail: "A ramp wrapped around a post. Each turn pulls the screw a short distance with great force." },
             ],
           },
+          probe: {
+            type: "match",
+            prompt: "Match each everyday object to the simple machine it is.",
+            pairs: [
+              { left: "Doorstop", right: "Wedge" },
+              { left: "Flagpole rope and wheel", right: "Pulley" },
+              { left: "Threads on a jar lid", right: "Screw" },
+              { left: "Seesaw", right: "Lever" },
+              { left: "Doorknob", right: "Wheel and axle" },
+            ],
+            hint: "Look at the shape: a pivoting bar, a wheel with a rope, a big wheel on a rod, a thin sloped block, or a ramp wrapped in a spiral.",
+            mistakes: [
+              { match: "Doorstop matched to lever", coach: "A doorstop does not pivot. It is a thin sloped block that squeezes into a gap, which makes it a wedge." },
+              { match: "Jar lid matched to wedge", coach: "The lid's threads spiral around the jar like a ramp wrapped around a post. That is a screw." },
+              { match: "Doorknob matched to pulley", coach: "A doorknob has no rope. Its big handle turns a small rod inside the door: a wheel and axle." },
+            ],
+            seconds: 40,
+          },
           think: {
             q: "A doorstop is which simple machine?",
             choices: ["A wedge", "A pulley", "A lever", "A screw"],
@@ -942,6 +1333,20 @@ export const science: Course = {
               points: ["Force: about 100 N", "Distance: 5 m", "Work: 100 x 5 = 500 J"],
             },
           },
+          probe: {
+            type: "number",
+            prompt: "Lifting a 600 N crate straight up 1 m takes 600 J of work. About how much force would you need to push it up a smooth 4 m ramp to the same height?",
+            answer: 150,
+            tolerance: 0,
+            unit: "N",
+            hint: "The work stays about the same. Work is force times distance, so spread the 600 J over the longer distance.",
+            mistakes: [
+              { match: "2400", coach: "That multiplies by the ramp length. A longer ramp means LESS force, so divide the work by the distance." },
+              { match: "600", coach: "That is the force for lifting straight up. The ramp spreads the work over 4 m, so you need less force." },
+              { match: "596", coach: "That subtracts the length. Work = force x distance, so divide 600 J by 4 m." },
+            ],
+            seconds: 35,
+          },
           think: {
             q: "Moving a box up a long, gentle ramp instead of a short, steep one means you...",
             choices: [
@@ -982,6 +1387,17 @@ export const science: Course = {
           teach:
             "A lever balances when effort force times effort distance equals load force times load distance, with distances measured from the fulcrum. Picture a 100 N rock 20 cm from the fulcrum. Push down 80 cm from the fulcrum on the other side and you need only 25 N, because 25 x 80 = 2,000 and 100 x 20 = 2,000. The farther your hands are from the fulcrum, the less force you need. That is why a long crowbar can pry up heavy things, and why a door is easiest to push near the handle, far from the hinges.",
           visual: { type: "lever" },
+          probe: {
+            type: "target",
+            prompt: "A 40 kg load sits at the left end of the lever and you push down on the right end. Slide the fulcrum until a push of 10 kg or less can lift the load.",
+            goal: { sim: "lever", load: 40, maxPush: 10 },
+            hint: "The farther your push is from the fulcrum compared with the load, the less push you need.",
+            mistakes: [
+              { match: "Moved the fulcrum toward the push end", coach: "Moving the fulcrum close to your hands makes your side short, so you need MORE push. Slide it toward the load." },
+              { match: "Fulcrum in the middle", coach: "With the fulcrum in the middle, both distances are equal, so you would have to push the full 40 kg. Your side needs to be much longer." },
+            ],
+            seconds: 45,
+          },
           think: {
             q: "A 90 N load sits 10 cm from the fulcrum. You push 30 cm from the fulcrum. What effort balances it?",
             choices: ["270 N", "30 N", "90 N", "3 N"],
@@ -1024,6 +1440,19 @@ export const science: Course = {
               { front: "Fulcrum", back: "The fixed point a lever pivots around." },
               { front: "Mechanical advantage", back: "How many times a machine multiplies your force. For a lever: effort distance / load distance." },
             ],
+          },
+          probe: {
+            type: "number",
+            prompt: "A crowbar has an effort distance of 90 cm and a load distance of 18 cm. What is its mechanical advantage?",
+            answer: 5,
+            tolerance: 0,
+            hint: "Mechanical advantage for a lever is one distance divided by the other. Put the longer, effort distance on top.",
+            mistakes: [
+              { match: "72", coach: "That is 90 minus 18. Mechanical advantage is a division: effort distance divided by load distance." },
+              { match: "1620", coach: "That is 90 times 18. Divide instead: 90 / 18." },
+              { match: "0.2", coach: "That is 18 divided by 90, which is upside down. A crowbar multiplies your force, so its advantage is more than 1." },
+            ],
+            seconds: 30,
           },
           think: {
             q: "A lever has an effort distance of 60 cm and a load distance of 15 cm. What is its mechanical advantage?",
@@ -1080,6 +1509,69 @@ export const science: Course = {
           "Machines do not create energy",
         ],
       },
+      mastery: [
+        {
+          type: "number",
+          prompt: "A 120 N load sits 15 cm from a lever's fulcrum. You push down 45 cm from the fulcrum on the other side. What effort force balances the load?",
+          answer: 40,
+          tolerance: 0,
+          unit: "N",
+          hint: "Use the lever rule: effort x effort distance = load x load distance. Find the load side first.",
+          mistakes: [
+            { match: "360", coach: "That is more than the load. Your hands are farther from the fulcrum, so you need LESS force than 120 N." },
+            { match: "120", coach: "That would balance only if both distances were equal. Your side is 3 times longer, so the effort is smaller." },
+            { match: "3", coach: "3 is the mechanical advantage (45 / 15). Use it: divide the 120 N load by 3." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "target",
+          prompt: "Harder load: a 60 kg load sits at the left end. Slide the fulcrum so that a push of 12 kg or less lifts it.",
+          goal: { sim: "lever", load: 60, maxPush: 12 },
+          hint: "You need a mechanical advantage of at least 5, so your side of the lever must be at least 5 times longer than the load's side.",
+          mistakes: [
+            { match: "Fulcrum near the push end", coach: "That makes your side short and the load's side long, so the push gets bigger. Slide the fulcrum close to the load." },
+            { match: "Fulcrum only a little left of center", coach: "Closer, but not enough. A 60 kg load with a 12 kg push needs your distance to be 5 times the load distance." },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "cloze",
+          text: "A screw is an {0} wrapped around a post. Like every simple machine, it does not create energy; it trades {1} for force.",
+          blanks: [
+            { answers: ["inclined plane", "ramp", "incline"] },
+            { answers: ["distance"] },
+          ],
+          bank: ["inclined plane", "distance", "pulley", "energy", "mass", "lever"],
+          hint: "Picture the threads on a jar lid as a path climbing in a spiral. Then remember what you give up when you push with less force.",
+          mistakes: [
+            { match: "lever", coach: "A lever is a bar that pivots. A screw's threads are a sloped path wound around a post." },
+            { match: "energy", coach: "Machines never create or trade away energy. You push with less force over a longer distance." },
+            { match: "pulley", coach: "A pulley uses a wheel and rope. The screw's spiral thread is a ramp." },
+          ],
+          seconds: 35,
+        },
+        {
+          type: "place",
+          prompt: "Place each machine on the line by its mechanical advantage.",
+          min: 0,
+          max: 6,
+          step: 0.5,
+          tolerance: 0.25,
+          items: [
+            { label: "Lever: effort 80 cm, load 20 cm", value: 4 },
+            { label: "Ramp 6 m long, rising 2 m", value: 3 },
+            { label: "Ramp 5 m long, rising 1 m", value: 5 },
+            { label: "Forearm: effort 5 cm, load 10 cm", value: 0.5 },
+          ],
+          hint: "For a lever, divide effort distance by load distance. For a ramp, divide its length by its height.",
+          mistakes: [
+            { match: "Forearm placed at 2", coach: "The effort distance (5 cm) is shorter than the load distance (10 cm), so 5 / 10 gives less than 1. Your forearm trades force for speed." },
+            { match: "Ramp 6 m placed at 12 or off the line", coach: "Divide the length by the height, 6 / 2, instead of multiplying." },
+          ],
+          seconds: 60,
+        },
+      ],
       check: [
         {
           q: "What is the pivot point of a lever called?",
@@ -1165,6 +1657,23 @@ export const science: Course = {
               { front: "Cell theory", back: "All living things are made of cells, cells are the basic unit of life, and cells come from other cells." },
             ],
           },
+          probe: {
+            type: "cloze",
+            text: "Cell theory says: all living things are made of {0}, the cell is the basic {1} of life, and new cells come only from {2} cells.",
+            blanks: [
+              { answers: ["cells", "cell"] },
+              { answers: ["unit"] },
+              { answers: ["existing", "other", "living", "older", "parent", "earlier"] },
+            ],
+            bank: ["cells", "unit", "existing", "atoms", "nonliving", "organs"],
+            hint: "Remember Redi's jars: life does not appear out of nonliving stuff. Apply that idea to cells.",
+            mistakes: [
+              { match: "nonliving", coach: "That is the old idea of life popping out of nonliving things, like flies from meat. Cells only come from cells that already exist." },
+              { match: "atoms", coach: "Everything is made of atoms, even rocks. Cell theory is about what makes up LIVING things." },
+              { match: "organs", coach: "Bacteria have no organs, but they are alive. The building block shared by every living thing is smaller." },
+            ],
+            seconds: 35,
+          },
           think: {
             q: "Which statement is part of cell theory?",
             choices: [
@@ -1215,6 +1724,24 @@ export const science: Course = {
               { label: "Cytoplasm", icon: "💧", detail: "Jelly-like fluid that fills the cell and holds the organelles." },
               { label: "Ribosomes", icon: "🔧", detail: "Tiny builders that make proteins by following instructions from DNA." },
             ],
+          },
+          probe: {
+            type: "match",
+            prompt: "Match each organelle to its job.",
+            pairs: [
+              { left: "Cell membrane", right: "Controls what enters and leaves the cell" },
+              { left: "Nucleus", right: "Holds the DNA instructions" },
+              { left: "Mitochondria", right: "Release energy from sugar" },
+              { left: "Cytoplasm", right: "Jelly-like fluid that holds the organelles" },
+              { left: "Ribosomes", right: "Build proteins" },
+            ],
+            hint: "Think of the cell as a school: a front entrance, a main office with the rulebook, a power plant, hallways, and workshops.",
+            mistakes: [
+              { match: "Mitochondria matched to holding DNA", coach: "Mitochondria are the power plants that release energy from sugar. The DNA rulebook is kept in the nucleus." },
+              { match: "Membrane matched to holding organelles", coach: "The membrane is the gatekeeper around the outside. The jelly that holds the organelles is the cytoplasm." },
+              { match: "Ribosomes matched to releasing energy", coach: "Ribosomes are tiny builders that make proteins. Releasing energy is the mitochondria's job." },
+            ],
+            seconds: 45,
           },
           think: {
             q: "Muscle cells use lots of energy. Which organelle would you expect them to have plenty of?",
@@ -1272,6 +1799,19 @@ export const science: Course = {
                 "Nucleus, mitochondria, cytoplasm",
               ],
             },
+          },
+          probe: {
+            type: "build",
+            prompt: "Build the path energy takes inside a leaf cell, from the Sun to energy the cell can use.",
+            tiles: ["Sunlight", "Chloroplast", "Sugar", "Mitochondria", "Energy the cell can use"],
+            distractors: ["Cell wall"],
+            hint: "One organelle stores the Sun's energy in food; another unlocks the energy from that food.",
+            mistakes: [
+              { match: "Mitochondria before chloroplast", coach: "Mitochondria need sugar to work on, and the chloroplast makes that sugar. So the chloroplast comes first." },
+              { match: "Used 'Cell wall'", coach: "The cell wall gives the cell support and shape. It is not part of the energy path." },
+              { match: "Skipped mitochondria", coach: "Chloroplasts make sugar, but the cell still needs mitochondria to release the energy stored in it." },
+            ],
+            seconds: 35,
           },
           think: {
             q: "Why do plant cells need mitochondria if they already have chloroplasts?",
@@ -1331,6 +1871,74 @@ export const science: Course = {
           "Plant cells also have a cell wall, chloroplasts, and a large vacuole",
         ],
       },
+      mastery: [
+        {
+          type: "highlight",
+          prompt: "A student wrote this description of an ANIMAL cell. Tap every sentence that contains a mistake.",
+          sentences: [
+            "It has a nucleus that holds DNA.",
+            "A stiff cell wall gives it a boxy shape.",
+            "Its mitochondria release energy from sugar.",
+            "Its chloroplasts make sugar from sunlight.",
+            "Its membrane controls what enters and leaves.",
+            "Ribosomes in its cytoplasm build proteins.",
+          ],
+          correct: [1, 3],
+          hint: "Two of these parts belong only in plant cells.",
+          mistakes: [
+            { match: "Tapped the mitochondria sentence", coach: "Animal cells do have mitochondria; that is how your muscles get energy. Look for parts found only in plants." },
+            { match: "Tapped the nucleus sentence", coach: "Both plant and animal cells have a nucleus holding DNA. That sentence is correct." },
+            { match: "Missed the cell wall sentence", coach: "Animal cells have only a flexible membrane, no stiff wall. That is why they are usually rounder." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "match",
+          prompt: "Match each clue to the cell part it describes.",
+          pairs: [
+            { left: "Celery goes limp when this loses water", right: "Central vacuole" },
+            { left: "Leaves are green because of this", right: "Chloroplasts" },
+            { left: "Muscle cells are packed with these", right: "Mitochondria" },
+            { left: "Helps a tree stand upright", right: "Cell wall" },
+            { left: "Follows DNA instructions to make proteins", right: "Ribosomes" },
+          ],
+          hint: "Think about what each clue needs: water storage, sunlight capture, energy, stiffness, or building.",
+          mistakes: [
+            { match: "Celery matched to cell wall", coach: "The wall stays put when celery wilts. What changes is the water stored in the vacuoles pressing against the walls." },
+            { match: "Muscle matched to chloroplasts", coach: "Muscle cells are animal cells and have no chloroplasts. They release energy from sugar using mitochondria." },
+          ],
+          seconds: 50,
+        },
+        {
+          type: "number",
+          prompt: "A typical human cell is about 0.01 mm across. How many cells lined up side by side would make a row 1 cm (10 mm) long?",
+          answer: 1000,
+          tolerance: 0,
+          unit: "cells",
+          hint: "Find how many cells fit in 1 mm first, then scale up to 10 mm.",
+          mistakes: [
+            { match: "100", coach: "100 cells make a row only 1 mm long. A centimeter is 10 mm, so you need 10 times as many." },
+            { match: "0.1", coach: "That multiplies 0.01 by 10. Instead, divide the length of the row by the width of one cell: 10 / 0.01." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "cloze",
+          text: "In cork, Robert Hooke saw the empty {0} of dead plant cells. Later, van Leeuwenhoek became the first person to see {1} single-celled creatures in pond water.",
+          blanks: [
+            { answers: ["walls", "cell walls", "wall"] },
+            { answers: ["living", "live", "alive", "swimming"] },
+          ],
+          bank: ["walls", "living", "nuclei", "dead", "chloroplasts"],
+          hint: "Cork is dead tissue, so only a sturdy outer part was left. Van Leeuwenhoek's creatures were wiggling.",
+          mistakes: [
+            { match: "nuclei", coach: "Cork cells are dead and empty, so their insides, like nuclei, were gone. Hooke saw what was left around the outside." },
+            { match: "chloroplasts", coach: "Cork comes from tree bark, which is dead and not green. Hooke saw only the leftover boxes around each cell." },
+            { match: "dead", coach: "Van Leeuwenhoek's big discovery was creatures that moved and swam. They were alive." },
+          ],
+          seconds: 35,
+        },
+      ],
       check: [
         {
           q: "What did Robert Hooke actually see when he looked at cork?",
@@ -1431,6 +2039,22 @@ export const science: Course = {
               { label: "Neptune", icon: "🌀", detail: "The farthest planet, an ice giant with the fastest winds in the solar system." },
             ],
           },
+          probe: {
+            type: "cloze",
+            text: "Earth {0} on its axis once every day, which gives us day and night. It {1} the Sun once every year.",
+            blanks: [
+              { answers: ["spins", "rotates", "turns", "spins around", "turns around"] },
+              { answers: ["orbits", "circles", "revolves around", "travels around", "goes around", "orbits around"] },
+            ],
+            bank: ["spins", "orbits", "stops", "blocks", "shrinks"],
+            hint: "One motion is fast, once a day. The other is slow, one trip around the Sun per year.",
+            mistakes: [
+              { match: "orbits", coach: "If you put orbits first: one orbit takes a whole year, far too slow for day and night. The daily motion is Earth spinning." },
+              { match: "blocks", coach: "Earth does not block the Sun to make night. Your side of Earth simply turns away from the Sun." },
+              { match: "stops", coach: "Earth never stops moving. It spins and orbits at the same time." },
+            ],
+            seconds: 25,
+          },
           think: {
             q: "What causes day and night on Earth?",
             choices: [
@@ -1471,6 +2095,17 @@ export const science: Course = {
           teach:
             "Earth's axis is tilted about 23.5 degrees, and it keeps pointing the same direction in space all year. So for part of the orbit, the Northern Hemisphere leans toward the Sun. Sunlight hits it more directly, concentrating energy on each patch of ground, and days are longer. That is summer. Six months later, the Northern Hemisphere leans away. Sunlight arrives at a low slant, spreading the same energy over a bigger area, and days are shorter. That is winter. The Southern Hemisphere always has the opposite season, which is why people in Australia celebrate New Year's Day in summer.",
           visual: { type: "seasons" },
+          probe: {
+            type: "target",
+            prompt: "Move Earth around its orbit to a month when the Northern Hemisphere has summer. Watch which way the north end of the axis leans.",
+            goal: { sim: "seasons", season: "summer" },
+            hint: "Summer comes when the northern half of Earth leans toward the Sun and gets the most direct light, not when Earth is closest.",
+            mistakes: [
+              { match: "Picked January (Earth closest to the Sun)", coach: "Earth is closest to the Sun in early January, but that is winter in the north. Distance is not the cause; look for when the north tilts toward the Sun." },
+              { match: "Picked December", coach: "In December the north leans away from the Sun, so sunlight is slanted and days are short. Go halfway around the orbit." },
+            ],
+            seconds: 30,
+          },
           think: {
             q: "Why is it summer in the Northern Hemisphere in July?",
             choices: [
@@ -1520,6 +2155,19 @@ export const science: Course = {
               "Multiply the 800 km between the cities by 50 to get about 40,000 km",
             ],
           },
+          probe: {
+            type: "number",
+            prompt: "Suppose the shadow angle in Alexandria had been 9 degrees instead of 7.2. How many times would that angle fit into a full 360 degree circle? (That tells you what fraction of Earth's circumference lies between the cities.)",
+            answer: 40,
+            tolerance: 0,
+            hint: "A full circle is 360 degrees. Find how many 9 degree slices fit into it.",
+            mistakes: [
+              { match: "50", coach: "50 goes with the real angle of 7.2 degrees. A bigger angle means fewer slices fit around the circle." },
+              { match: "3240", coach: "That multiplies 360 by 9. You want to know how many 9s fit into 360, so divide." },
+              { match: "9", coach: "9 is the angle itself. Divide 360 by 9 to find the number of slices." },
+            ],
+            seconds: 30,
+          },
           think: {
             q: "If the shadow angle had been 9 degrees instead, what fraction of the full circle would the distance between the cities be?",
             choices: ["1/9", "1/40", "1/50", "1/360"],
@@ -1558,6 +2206,22 @@ export const science: Course = {
             type: "sequence",
             prompt: "Put the Moon's phases in order, starting from new moon.",
             steps: ["New moon", "Waxing crescent", "First quarter", "Waxing gibbous", "Full moon", "Waning gibbous"],
+          },
+          probe: {
+            type: "match",
+            prompt: "Match each Moon phase to where the Moon is and what we see.",
+            pairs: [
+              { left: "New moon", right: "Between Earth and the Sun; its lit side faces away from us" },
+              { left: "First quarter", right: "About a week after new moon; we see the right half lit" },
+              { left: "Full moon", right: "On the far side of Earth from the Sun; we see its whole lit face" },
+              { left: "Third quarter", right: "About three weeks after new moon; we see the left half lit" },
+            ],
+            hint: "The Sun always lights half the Moon. Where the Moon sits in its orbit decides how much of that lit half faces us.",
+            mistakes: [
+              { match: "Full moon matched to between Earth and the Sun", coach: "Between Earth and the Sun, the lit side faces away from us. That is new moon. A full moon is on the opposite side of Earth from the Sun." },
+              { match: "Swapped first and third quarter", coach: "The lit part grows first and shrinks later. First quarter comes about a week after new moon; third quarter about three weeks after." },
+            ],
+            seconds: 45,
           },
           think: {
             q: "Where is the Moon during a full moon?",
@@ -1617,6 +2281,70 @@ export const science: Course = {
           "The two hemispheres have opposite seasons",
         ],
       },
+      mastery: [
+        {
+          type: "target",
+          prompt: "Now find winter: move Earth to a month when the Northern Hemisphere has winter.",
+          goal: { sim: "seasons", season: "winter" },
+          hint: "Winter comes when the northern half leans away from the Sun, so sunlight arrives at a low slant and days are short.",
+          mistakes: [
+            { match: "Picked July", coach: "In July the north leans toward the Sun, which makes summer. Winter is on the opposite side of the orbit." },
+            { match: "Picked a month when Earth is farthest from the Sun", coach: "Earth is farthest from the Sun in early July, during northern summer. Follow the tilt, not the distance." },
+          ],
+          seconds: 30,
+        },
+        {
+          type: "place",
+          prompt: "Place each phase on the Moon's 29.5 day cycle, counting from new moon on day 0.",
+          min: 0,
+          max: 30,
+          step: 0.5,
+          tolerance: 1.5,
+          items: [
+            { label: "First quarter", value: 7.4 },
+            { label: "Full moon", value: 14.8 },
+            { label: "Third quarter", value: 22.1 },
+            { label: "Next new moon", value: 29.5 },
+          ],
+          hint: "The cycle splits into four roughly equal parts of about a week each.",
+          mistakes: [
+            { match: "Full moon placed near day 29.5", coach: "Full moon comes halfway through the cycle. After it, the Moon wanes for two more weeks back to new." },
+            { match: "Third quarter placed before full moon", coach: "The lit part grows (waxes) to full first, then shrinks (wanes). Third quarter comes after full moon." },
+          ],
+          seconds: 50,
+        },
+        {
+          type: "number",
+          prompt: "Imagine two cities 500 km apart, one due north of the other. At noon, the Sun is straight overhead in one, and a stick in the other casts a shadow at 4.5 degrees. Using Eratosthenes' method, what circumference does that give for Earth?",
+          answer: 40000,
+          tolerance: 0,
+          unit: "km",
+          hint: "First find how many times 4.5 degrees fits into 360 degrees. Then multiply by the distance between the cities.",
+          mistakes: [
+            { match: "80", coach: "80 is how many slices fit around the circle. Now multiply by the 500 km length of each slice." },
+            { match: "2250", coach: "That multiplies the angle by the distance. First find 360 / 4.5, then multiply by 500 km." },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "build",
+          prompt: "Build a correct explanation of why July is summer in the Northern Hemisphere.",
+          tiles: [
+            "Earth's axis is tilted about 23.5 degrees,",
+            "so in July the northern half leans toward the Sun.",
+            "Sunlight hits the ground more directly,",
+            "and days are longer,",
+            "so the north warms up.",
+          ],
+          distractors: ["because Earth is closest to the Sun in July", "because the Sun burns hotter in summer"],
+          hint: "Start with the cause, the tilt, then describe what the tilt does to sunlight and day length.",
+          mistakes: [
+            { match: "Used 'because Earth is closest to the Sun in July'", coach: "Earth is actually closest in early January, during northern winter. Distance is not the cause of seasons." },
+            { match: "Used 'because the Sun burns hotter in summer'", coach: "The Sun's output stays almost the same all year. What changes is how directly its light hits us." },
+          ],
+          seconds: 50,
+        },
+      ],
       check: [
         {
           q: "What is the main cause of Earth's seasons?",

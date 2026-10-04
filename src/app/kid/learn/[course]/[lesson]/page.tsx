@@ -5,7 +5,8 @@ import LessonPlayer from "@/components/LessonPlayer";
 import { requireKid } from "@/lib/auth";
 import { features } from "@/lib/content";
 import { interactiveDone, publicThink, publicWidget } from "@/lib/teaching";
-import { lessonView, teachProgress } from "@/lib/store";
+import { adaptationFor, lessonView, reviewItems, teachProgress } from "@/lib/store";
+import { publicProbe } from "@/lib/probes";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +38,13 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
   const L = v.lesson;
   const seed = `${kid.id}:${L.id}`;
   const state = L.teach?.length ? teachProgress(kid.id, v.course.id, L.id) : null;
+  // The learner model decides how to adapt this lesson for this kid.
+  const adaptation = state ? adaptationFor(kid.id, v.course.id) : null;
+  const fresh = state ? !state.segments.some((s) => s.done || s.misses) : false;
+  const review =
+    adaptation?.reviewFirst && fresh
+      ? reviewItems(kid.id, v.course.id).filter((r) => r.lessonId !== L.id).map((r, i) => ({ ...r, probe: publicProbe(r.probe, `${seed}:review${i}`) }))
+      : [];
 
   return (
     <main className="wrap" style={{ maxWidth: 860 }}>
@@ -60,9 +68,14 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
               teach: s.teach,
               visual: s.visual ? publicWidget(s.visual, `${seed}:${i}`) : undefined,
               think: publicThink(s.think),
+              ...(s.probe ? { probe: publicProbe(s.probe, `${seed}:p${i}`) } : {}),
+              ...(adaptation?.exampleFirst ? { example: s.approaches.example } : {}),
             })),
             activity: L.activity ? publicWidget(L.activity, `${seed}:activity`) : undefined,
             explain: L.explain ? { prompt: L.explain.prompt } : undefined,
+            adaptation: adaptation ? { mode: adaptation.mode, message: adaptation.message, offerTestOut: adaptation.offerTestOut && fresh } : undefined,
+            review: review.map(({ lessonId, seg, title, probe }) => ({ lessonId, seg, title, probe })),
+            mastery: L.mastery?.length ? L.mastery.map((m, i) => publicProbe(m, `${seed}:m${i}`)) : undefined,
             initial: {
               segmentsDone: state.segments.map((s) => !!s.done),
               activityDone: state.activity.done,

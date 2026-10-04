@@ -53,6 +53,48 @@ His student Plato wrote down many of Socrates' conversations and founded a schoo
               { year: -335, label: "335 BC: Aristotle's Lyceum", detail: "Aristotle opens his own school, the Lyceum, and studies everything from animals to governments." },
             ],
           },
+          probe: {
+            type: "cloze",
+            text: "The Greek word demokratia joins two parts: demos, meaning the {0}, and kratos, meaning power or {1}.",
+            blanks: [
+              {
+                answers: [
+                  "people",
+                  "the people",
+                  "citizens"
+                ]
+              },
+              {
+                answers: [
+                  "rule"
+                ]
+              }
+            ],
+            bank: [
+              "people",
+              "rule",
+              "wise",
+              "gods",
+              "wealthy",
+              "army"
+            ],
+            hint: "Think of the word democracy today and who is supposed to hold the power in it.",
+            mistakes: [
+              {
+                match: "wise",
+                coach: "A rule by the wise was a philosopher's dream, but demos points to ordinary citizens, not experts."
+              },
+              {
+                match: "gods",
+                coach: "The Greeks honored many gods, but demos is about human citizens gathered together."
+              },
+              {
+                match: "wealthy",
+                coach: "Rule by the wealthy few is oligarchy, the very thing Cleisthenes was trying to break up."
+              }
+            ],
+            seconds: 25
+          },
           think: {
             q: "What does the Greek word demokratia mean?",
             choices: ["Rule by the wise", "Rule by one strong leader", "Rule by the people", "Rule by the wealthy"],
@@ -98,6 +140,52 @@ His student Plato wrote down many of Socrates' conversations and founded a schoo
               { label: "Jury Courts", icon: "⚖️", detail: "Large juries of citizens, often hundreds strong, decided cases. Socrates' jury had 501 members." },
               { label: "Generals", icon: "🛡️", detail: "Ten generals were elected each year, because leading an army took real skill, not luck." },
             ],
+          },
+          probe: {
+            type: "cloze",
+            text: "Athens chose many officials by {0} so that any citizen, rich or {1}, had a fair chance to serve. But the ten {2} were elected, because leading an army took real skill.",
+            blanks: [
+              {
+                answers: [
+                  "lottery",
+                  "lot"
+                ]
+              },
+              {
+                answers: [
+                  "poor"
+                ]
+              },
+              {
+                answers: [
+                  "generals"
+                ]
+              }
+            ],
+            bank: [
+              "lottery",
+              "poor",
+              "generals",
+              "election",
+              "noble",
+              "priests"
+            ],
+            hint: "Picture drawing names from a hat: who gets a chance, and which job was too important to leave to luck?",
+            mistakes: [
+              {
+                match: "election",
+                coach: "Elections tend to favor the famous and well-connected. Athens used a different method so anyone could be picked."
+              },
+              {
+                match: "noble",
+                coach: "The whole point was to give ordinary citizens a turn, not just the nobles. Who is the opposite of rich?"
+              },
+              {
+                match: "priests",
+                coach: "Priests did not lead armies. Think about which officials needed military skill."
+              }
+            ],
+            seconds: 35
           },
           think: {
             q: "Why did Athens choose many officials by lottery?",
@@ -147,6 +235,38 @@ His student Plato wrote down many of Socrates' conversations and founded a schoo
               { front: "Philosophy", back: "From Greek words meaning love of wisdom: the search for truth about life, knowledge and right action." },
               { front: "Academy", back: "The school Plato founded near Athens. Our word academy comes from its name." },
             ],
+          },
+          probe: {
+            type: "highlight",
+            prompt: "Tap every moment that shows the Socratic method in action.",
+            sentences: [
+              "Socrates asks a soldier, \"What is courage?\"",
+              "Socrates reads aloud from a textbook he wrote for his students.",
+              "When the soldier says courage means never retreating, Socrates asks whether a general who retreats in order to win later is a coward.",
+              "Socrates gives a speech ordering the Assembly to pass a new law.",
+              "Socrates asks a friend what justice really is, then questions each answer the friend gives."
+            ],
+            correct: [
+              0,
+              2,
+              4
+            ],
+            hint: "Look for moments where Socrates is asking, not telling.",
+            mistakes: [
+              {
+                match: "Picked the textbook",
+                coach: "Socrates never wrote a book. We know his ideas because Plato wrote them down."
+              },
+              {
+                match: "Picked the speech",
+                coach: "Giving orders is telling, not questioning. The Socratic method makes the other person do the thinking."
+              },
+              {
+                match: "Missed a follow-up question",
+                coach: "The method is a chain of questions. A follow-up question that tests an answer counts too."
+              }
+            ],
+            seconds: 40
           },
           think: {
             q: "How did Socrates mostly teach people?",
@@ -208,6 +328,32 @@ His student Plato wrote down many of Socrates' conversations and founded a schoo
               ],
             },
           },
+          probe: {
+            type: "sequence",
+            prompt: "Put these Greek milestones in order, from earliest to latest.",
+            steps: [
+              "Cleisthenes reorganizes Athens so ordinary citizens can govern",
+              "Socrates questions people in the marketplace",
+              "Socrates' student Plato founds the Academy",
+              "Plato's student Aristotle opens the Lyceum"
+            ],
+            hint: "Each philosopher learned from the one before him, and Athens' democracy came first of all.",
+            mistakes: [
+              {
+                match: "Aristotle before Plato",
+                coach: "Aristotle was Plato's student, so Plato's school had to come first."
+              },
+              {
+                match: "Plato before Socrates",
+                coach: "Plato recorded his teacher's conversations. The teacher, Socrates, came first."
+              },
+              {
+                match: "Cleisthenes after the philosophers",
+                coach: "Cleisthenes' reforms of 508 BC came about a century before Socrates' trial."
+              }
+            ],
+            seconds: 30
+          },
           think: {
             q: "Which chain of teacher and student is correct?",
             choices: [
@@ -267,6 +413,127 @@ His student Plato wrote down many of Socrates' conversations and founded a schoo
           "Greek ideas influenced later governments, including America's Founders.",
         ],
       },
+      mastery: [
+        {
+          type: "place",
+          prompt: "Place these events of ancient Athens on the timeline. BC years count down toward year 1.",
+          min: -520,
+          max: -320,
+          step: 1,
+          tolerance: 10,
+          items: [
+            {
+              label: "Cleisthenes' reforms",
+              value: -508
+            },
+            {
+              label: "Trial of Socrates",
+              value: -399
+            },
+            {
+              label: "Aristotle opens the Lyceum",
+              value: -335
+            }
+          ],
+          hint: "Democracy came first, then Socrates' trial, and Aristotle was two generations after Socrates.",
+          mistakes: [
+            {
+              match: "Lyceum before the trial",
+              coach: "Aristotle was Plato's student, and Plato was Socrates' student, so the Lyceum came well after 399 BC."
+            },
+            {
+              match: "Reforms near 400 BC",
+              coach: "Cleisthenes' reforms came about a century before Socrates' trial, around 508 BC."
+            }
+          ],
+          seconds: 45
+        },
+        {
+          type: "match",
+          prompt: "Match each part of Athenian democracy to what it did.",
+          pairs: [
+            {
+              left: "Assembly",
+              right: "Citizens debated and voted directly on laws"
+            },
+            {
+              left: "Council of 500",
+              right: "Chosen by lottery to prepare questions for votes"
+            },
+            {
+              left: "Generals",
+              right: "Ten leaders elected each year for their skill"
+            },
+            {
+              left: "Jury courts",
+              right: "Hundreds of citizens decided cases"
+            },
+            {
+              left: "Pnyx",
+              right: "The rocky hill where citizens gathered to vote"
+            }
+          ],
+          hint: "Ask which parts were chosen by lottery, which were elected, and which was a place rather than a group.",
+          mistakes: [
+            {
+              match: "Swapped Council and Generals",
+              coach: "The Council was chosen by lottery. Generals were elected because leading an army took skill."
+            },
+            {
+              match: "Swapped Assembly and Pnyx",
+              coach: "The Pnyx was the place; the Assembly was the meeting of citizens that happened there."
+            }
+          ],
+          seconds: 60
+        },
+        {
+          type: "number",
+          prompt: "How many citizens sat on the jury that condemned Socrates in 399 BC?",
+          answer: 501,
+          tolerance: 0,
+          unit: "jurors",
+          hint: "Athenian juries were huge and often had an odd number so there could be no tie.",
+          mistakes: [
+            {
+              match: "500",
+              coach: "Close, but 500 is the Council. The jury had one extra member so the vote could not tie."
+            },
+            {
+              match: "12",
+              coach: "Twelve is the size of many modern juries. Athenian juries were far larger."
+            }
+          ],
+          seconds: 20
+        },
+        {
+          type: "cloze",
+          text: "Athens practiced {0} democracy, where citizens voted on laws themselves. The United States is a {1} republic, where citizens elect people to make laws for them.",
+          blanks: [
+            {
+              answers: [
+                "direct"
+              ]
+            },
+            {
+              answers: [
+                "representative"
+              ]
+            }
+          ],
+          hint: "One system skips the middleman; the other sends someone to represent you.",
+          mistakes: [
+            {
+              match: "indirect",
+              coach: "Athenians voted in person, with no one in between. That is the opposite of indirect."
+            },
+            {
+              match: "elected",
+              coach: "Close idea, but the word describes leaders who represent the people."
+            }
+          ],
+          seconds: 30
+        }
+      ],
       check: [
         {
           q: "What does the Greek word demokratia mean?",
@@ -361,6 +628,46 @@ Over time, however, the republic weakened. Rome grew rich and powerful, and ambi
               { year: -27, label: "27 BC: Augustus", detail: "Caesar's heir Octavian takes the title Augustus and becomes Rome's first emperor." },
             ],
           },
+          probe: {
+            type: "cloze",
+            text: "The word republic comes from the Latin res {0}, the people's business. In a republic, leaders are {1} for limited terms, and their power is shared.",
+            blanks: [
+              {
+                answers: [
+                  "publica"
+                ]
+              },
+              {
+                answers: [
+                  "elected",
+                  "chosen"
+                ]
+              }
+            ],
+            bank: [
+              "publica",
+              "elected",
+              "born",
+              "crowned",
+              "romana"
+            ],
+            hint: "The Romans had just thrown out a king. How would they pick leaders instead?",
+            mistakes: [
+              {
+                match: "born",
+                coach: "Leaders who are born into power are kings. That is exactly what Rome rejected in 509 BC."
+              },
+              {
+                match: "crowned",
+                coach: "Crowns belong to monarchs. Romans vowed never to be ruled by one man again."
+              },
+              {
+                match: "romana",
+                coach: "Close guess, but the phrase means the public thing, the people's business."
+              }
+            ],
+            seconds: 30
+          },
           think: {
             q: "What is a republic?",
             choices: [
@@ -411,6 +718,34 @@ Over time, however, the republic weakened. Rome grew rich and powerful, and ambi
               { label: "Assemblies", icon: "🗳️", detail: "Gatherings of citizens who elected officials and voted on laws and on war and peace." },
               { label: "Dictator", icon: "⏳", detail: "In an emergency, a dictator could be appointed for up to six months. The office was meant to be temporary." },
             ],
+          },
+          probe: {
+            type: "build",
+            prompt: "Build the reason Rome elected two consuls each year.",
+            tiles: [
+              "Each consul",
+              "could veto",
+              "the other,",
+              "so neither one",
+              "could become",
+              "a tyrant"
+            ],
+            distractors: [
+              "the Senate",
+              "rule for life"
+            ],
+            hint: "Start with what each consul could do to the other, then say what that prevented.",
+            mistakes: [
+              {
+                match: "Used rule for life",
+                coach: "Consuls served just one year. The design was meant to stop anyone from ruling for life."
+              },
+              {
+                match: "Used the Senate",
+                coach: "The Senate advised the consuls, but the check here is between the two consuls themselves."
+              }
+            ],
+            seconds: 35
           },
           think: {
             q: "Why did Rome elect two consuls instead of one?",
@@ -472,6 +807,42 @@ Over time, however, the republic weakened. Rome grew rich and powerful, and ambi
               ],
             },
           },
+          probe: {
+            type: "cloze",
+            text: "Around 450 BC, Romans displayed their laws on the {0} Tables in the Forum, so that the same rules applied to {1} and leaders could not invent rules on the spot.",
+            blanks: [
+              {
+                answers: [
+                  "Twelve",
+                  "12"
+                ]
+              },
+              {
+                answers: [
+                  "everyone",
+                  "everybody",
+                  "all",
+                  "all citizens"
+                ]
+              }
+            ],
+            hint: "Think about why you post rules where every player can read them.",
+            mistakes: [
+              {
+                match: "ten",
+                coach: "Close! Count again: the famous Roman law code is named for the number of tablets, which was more than ten."
+              },
+              {
+                match: "nobles",
+                coach: "Public laws protected ordinary Romans too. The point was that the rules applied to every citizen."
+              },
+              {
+                match: "senators",
+                coach: "The Tables were not just for the Senate. Posting them in the Forum let anyone read them."
+              }
+            ],
+            seconds: 30
+          },
           think: {
             q: "Why did displaying the Twelve Tables in the Forum matter?",
             choices: [
@@ -522,6 +893,52 @@ Over time, however, the republic weakened. Rome grew rich and powerful, and ambi
               "Senators assassinate Caesar in 44 BC",
               "Octavian becomes Augustus, the first emperor, in 27 BC",
             ],
+          },
+          probe: {
+            type: "sort",
+            prompt: "Did each leader act like Cincinnatus or like Caesar?",
+            buckets: [
+              "Gave power back",
+              "Grabbed or kept power"
+            ],
+            items: [
+              {
+                text: "Cincinnatus returns to his plow weeks after saving Rome",
+                bucket: 0
+              },
+              {
+                text: "Washington resigns his army command in 1783",
+                bucket: 0
+              },
+              {
+                text: "Washington steps down after two terms as President",
+                bucket: 0
+              },
+              {
+                text: "Caesar leads his army across the Rubicon",
+                bucket: 1
+              },
+              {
+                text: "Caesar is named dictator for life",
+                bucket: 1
+              },
+              {
+                text: "Octavian becomes emperor",
+                bucket: 1
+              }
+            ],
+            hint: "Ask of each leader: when the job was done, did he hand power back or hold on to it?",
+            mistakes: [
+              {
+                match: "Washington in the wrong bucket",
+                coach: "Washington was called the Cincinnatus of America because he gave up power twice."
+              },
+              {
+                match: "Octavian in the wrong bucket",
+                coach: "Octavian ended the republic and became Rome's first emperor. He kept power, he did not return it."
+              }
+            ],
+            seconds: 40
           },
           think: {
             q: "What made Cincinnatus a hero to the Romans?",
@@ -584,6 +1001,134 @@ Over time, however, the republic weakened. Rome grew rich and powerful, and ambi
           "The republic ended when Octavian became Augustus, the first emperor.",
         ],
       },
+      mastery: [
+        {
+          type: "match",
+          prompt: "Match each Roman office to its job.",
+          pairs: [
+            {
+              left: "Consuls",
+              right: "Two leaders elected for one year who could veto each other"
+            },
+            {
+              left: "Senate",
+              right: "Experienced leaders who guided money and foreign affairs"
+            },
+            {
+              left: "Tribunes",
+              right: "Protected ordinary citizens with a veto"
+            },
+            {
+              left: "Assemblies",
+              right: "Citizens who elected officials and voted on laws"
+            },
+            {
+              left: "Dictator",
+              right: "Emergency leader for up to six months"
+            }
+          ],
+          hint: "Look for clues in the numbers: two, one year, six months.",
+          mistakes: [
+            {
+              match: "Swapped Consuls and Tribunes",
+              coach: "Both could veto, but tribunes existed to protect ordinary citizens. Consuls ran the government and armies."
+            },
+            {
+              match: "Swapped Senate and Assemblies",
+              coach: "The Senate was a council of experienced leaders. Assemblies were gatherings of ordinary citizens."
+            }
+          ],
+          seconds: 60
+        },
+        {
+          type: "place",
+          prompt: "Place these turning points of the Roman Republic on the timeline. BC years count down toward year 1.",
+          min: -520,
+          max: -20,
+          step: 1,
+          tolerance: 15,
+          items: [
+            {
+              label: "Last king expelled",
+              value: -509
+            },
+            {
+              label: "Twelve Tables displayed",
+              value: -450
+            },
+            {
+              label: "Caesar crosses the Rubicon",
+              value: -49
+            },
+            {
+              label: "Octavian becomes Augustus",
+              value: -27
+            }
+          ],
+          hint: "The republic began and wrote its laws early on. Caesar and Augustus came almost 500 years later.",
+          mistakes: [
+            {
+              match: "Augustus before the Rubicon",
+              coach: "Caesar's crossing started the civil wars. Octavian became emperor only after Caesar's death."
+            },
+            {
+              match: "Twelve Tables near the end",
+              coach: "The Twelve Tables came early, about 60 years after the republic began."
+            }
+          ],
+          seconds: 60
+        },
+        {
+          type: "cloze",
+          text: "When a consul or tribune blocked an action, he said \"Veto,\" which is Latin for \"I {0}.\"",
+          blanks: [
+            {
+              answers: [
+                "forbid"
+              ]
+            }
+          ],
+          hint: "A veto stops something from happening.",
+          mistakes: [
+            {
+              match: "agree",
+              coach: "A veto blocks an action, so it cannot mean agreeing."
+            },
+            {
+              match: "command",
+              coach: "A command makes something happen. A veto stops it."
+            }
+          ],
+          seconds: 20
+        },
+        {
+          type: "build",
+          prompt: "Build Cicero's warning about what keeps a republic alive.",
+          tiles: [
+            "A republic",
+            "survives only",
+            "when citizens and leaders",
+            "respect",
+            "its laws"
+          ],
+          distractors: [
+            "obey the emperor",
+            "build bigger armies"
+          ],
+          hint: "Cicero believed the republic depended on everyone honoring the rules, not on any one man.",
+          mistakes: [
+            {
+              match: "Used obey the emperor",
+              coach: "Cicero defended the republic. Emperors were what replaced it."
+            },
+            {
+              match: "Used build bigger armies",
+              coach: "Armies loyal to generals helped destroy the republic. Cicero's point was about the law."
+            }
+          ],
+          seconds: 35
+        }
+      ],
       check: [
         {
           q: "Why did Rome elect two consuls instead of one?",
@@ -685,6 +1230,46 @@ The Declaration continues that governments are created to secure these rights an
               { year: 1776, label: "1776: Independence declared", detail: "Common Sense appears in January. On July 4, Congress approves the Declaration of Independence." },
             ],
           },
+          probe: {
+            type: "cloze",
+            text: "Colonists protested the Stamp Act with the cry \"No {0} without {1}!\" because they had no members in the Parliament that taxed them.",
+            blanks: [
+              {
+                answers: [
+                  "taxation"
+                ]
+              },
+              {
+                answers: [
+                  "representation"
+                ]
+              }
+            ],
+            bank: [
+              "taxation",
+              "representation",
+              "liberty",
+              "tea",
+              "soldiers",
+              "kings"
+            ],
+            hint: "The complaint was about paying money to a body where the colonists had no voice.",
+            mistakes: [
+              {
+                match: "liberty",
+                coach: "Liberty mattered, but the slogan names exactly what the colonists lacked in Parliament: a voice."
+              },
+              {
+                match: "tea",
+                coach: "The tea tax came later, in the 1770s. The slogan was about the principle behind all such taxes."
+              },
+              {
+                match: "soldiers",
+                coach: "Soldiers were a separate complaint. This slogan is about paying taxes without a say."
+              }
+            ],
+            seconds: 25
+          },
           think: {
             q: "Why did many colonists object to the Stamp Act?",
             choices: [
@@ -734,6 +1319,44 @@ The Declaration continues that governments are created to secure these rights an
               { front: "Robert Livingston", back: "A New York lawyer on the committee. He was called home before the signing, so his name is not on the Declaration." },
               { front: "Thomas Paine", back: "Author of Common Sense, the January 1776 pamphlet that persuaded many colonists to support independence." },
             ],
+          },
+          probe: {
+            type: "match",
+            prompt: "Match each person to his role in 1776.",
+            pairs: [
+              {
+                left: "Thomas Paine",
+                right: "Wrote Common Sense, urging independence"
+              },
+              {
+                left: "Thomas Jefferson",
+                right: "Wrote the first draft of the Declaration"
+              },
+              {
+                left: "Benjamin Franklin",
+                right: "70-year-old printer and scientist who suggested edits"
+              },
+              {
+                left: "John Adams",
+                right: "Massachusetts lawyer and leading voice for independence"
+              },
+              {
+                left: "Robert Livingston",
+                right: "New York lawyer called home before the signing"
+              }
+            ],
+            hint: "Two of these men were named Thomas: one was a pamphlet writer and one was a delegate in Congress.",
+            mistakes: [
+              {
+                match: "Swapped Paine and Jefferson",
+                coach: "Paine wrote the pamphlet in January 1776. Jefferson, a delegate, drafted the Declaration in June."
+              },
+              {
+                match: "Swapped Franklin and Adams",
+                coach: "Franklin was the famous older scientist from Pennsylvania. Adams was the Massachusetts lawyer."
+              }
+            ],
+            seconds: 50
           },
           think: {
             q: "What was Thomas Paine's role in the move toward independence?",
@@ -786,6 +1409,52 @@ The Declaration continues that governments are created to secure these rights an
               { label: "Signatures", icon: "✍️", detail: "The signers pledge their Lives, their Fortunes and their sacred Honor. John Hancock, president of Congress, signed first and large." },
             ],
           },
+          probe: {
+            type: "sort",
+            prompt: "Each line comes from the Declaration. Is it a grievance against the king or a statement of beliefs?",
+            buckets: [
+              "Grievance against the king",
+              "Statement of beliefs"
+            ],
+            items: [
+              {
+                text: "For cutting off our Trade with all parts of the world:",
+                bucket: 0
+              },
+              {
+                text: "For depriving us in many cases, of the benefits of Trial by Jury:",
+                bucket: 0
+              },
+              {
+                text: "He has dissolved Representative Houses repeatedly, for opposing with manly firmness his invasions on the rights of the people.",
+                bucket: 0
+              },
+              {
+                text: "We hold these truths to be self-evident, that all men are created equal",
+                bucket: 1
+              },
+              {
+                text: "Governments are instituted among Men, deriving their just powers from the consent of the governed",
+                bucket: 1
+              },
+              {
+                text: "Whenever any Form of Government becomes destructive of these ends, it is the Right of the People to alter or to abolish it",
+                bucket: 1
+              }
+            ],
+            hint: "Grievances describe something the king did wrong. Beliefs describe what is true about rights and government in general.",
+            mistakes: [
+              {
+                match: "Put a He has line in beliefs",
+                coach: "Lines that begin with He has describe the king's actions. Those are complaints."
+              },
+              {
+                match: "Put the right to alter government in grievances",
+                coach: "That line does not accuse the king of anything. It states a general belief about the people's rights."
+              }
+            ],
+            seconds: 60
+          },
           think: {
             q: "What are the grievances in the Declaration?",
             choices: [
@@ -834,6 +1503,46 @@ The Declaration continues that governments are created to secure these rights an
               { front: "Consent of the governed", back: "The people's agreement. A just government gets its power from the people it governs." },
               { front: "Grievance", back: "A complaint about something unfair." },
             ],
+          },
+          probe: {
+            type: "cloze",
+            text: "\"That to {0} these rights, Governments are instituted among Men, deriving their just powers from the {1} of the governed.\"",
+            blanks: [
+              {
+                answers: [
+                  "secure"
+                ]
+              },
+              {
+                answers: [
+                  "consent"
+                ]
+              }
+            ],
+            bank: [
+              "secure",
+              "consent",
+              "grant",
+              "give",
+              "fear",
+              "wealth"
+            ],
+            hint: "In the Declaration, people already have their rights. What is government's job toward something you already have?",
+            mistakes: [
+              {
+                match: "grant",
+                coach: "The Declaration says rights come from the Creator, so government cannot grant them. It protects them."
+              },
+              {
+                match: "give",
+                coach: "Government does not give rights; people already have them. Think lifeguard, not gift-giver."
+              },
+              {
+                match: "fear",
+                coach: "Power based on fear is what a tyrant uses. The Declaration says just power comes from the people's agreement."
+              }
+            ],
+            seconds: 30
           },
           think: {
             q: "According to the Declaration, why do governments exist?",
@@ -898,6 +1607,126 @@ The Declaration continues that governments are created to secure these rights an
           "When a government destroys those rights, the people may change it.",
         ],
       },
+      mastery: [
+        {
+          type: "cloze",
+          text: "\"We hold these truths to be self-evident, that all men are created {0}, that they are endowed by their Creator with certain {1} Rights, that among these are Life, {2} and the pursuit of Happiness.\"",
+          blanks: [
+            {
+              answers: [
+                "equal"
+              ]
+            },
+            {
+              answers: [
+                "unalienable",
+                "inalienable"
+              ]
+            },
+            {
+              answers: [
+                "Liberty"
+              ]
+            }
+          ],
+          hint: "These are the most famous words in the Declaration. The middle word means rights that cannot rightly be taken away.",
+          mistakes: [
+            {
+              match: "free",
+              coach: "Freedom is in this sentence, but under a different word. The first blank is about everyone being the same in their rights."
+            },
+            {
+              match: "Property",
+              coach: "John Locke wrote of life, liberty and property, but Jefferson's line uses a different word here."
+            },
+            {
+              match: "natural",
+              coach: "They are natural rights, but the Declaration uses a word meaning they cannot rightly be taken away."
+            }
+          ],
+          seconds: 45
+        },
+        {
+          type: "place",
+          prompt: "Place these steps on the road to independence.",
+          min: 1760,
+          max: 1780,
+          step: 1,
+          tolerance: 1,
+          items: [
+            {
+              label: "Stamp Act",
+              value: 1765
+            },
+            {
+              label: "Boston Tea Party",
+              value: 1773
+            },
+            {
+              label: "Lexington and Concord",
+              value: 1775
+            },
+            {
+              label: "Declaration approved",
+              value: 1776
+            }
+          ],
+          hint: "The Stamp Act came about a decade before the shooting started, and the Declaration came the year after the fighting began.",
+          mistakes: [
+            {
+              match: "Declaration before Lexington",
+              coach: "The fighting began in April 1775. Independence was declared more than a year later."
+            },
+            {
+              match: "Stamp Act in the 1770s",
+              coach: "The Stamp Act was passed in 1765 and repealed the next year, years before the Tea Party."
+            }
+          ],
+          seconds: 50
+        },
+        {
+          type: "number",
+          prompt: "Congress approved the Declaration on July 4, 1776. On what day in July did Congress vote for independence itself?",
+          answer: 2,
+          tolerance: 0,
+          unit: "July",
+          hint: "The vote came a couple of days before the final wording was approved.",
+          mistakes: [
+            {
+              match: "4",
+              coach: "July 4 is when Congress approved the wording of the Declaration. The vote for independence came first."
+            },
+            {
+              match: "1",
+              coach: "Close. The decisive vote came one day later."
+            }
+          ],
+          seconds: 20
+        },
+        {
+          type: "sequence",
+          prompt: "Put the parts of the Declaration in the order they appear.",
+          steps: [
+            "Introduction: a people breaking away owes the world its reasons",
+            "Statement of beliefs about rights and government",
+            "List of grievances against King George III",
+            "Announcement that the colonies are free and independent states",
+            "Pledge of Lives, Fortunes and sacred Honor"
+          ],
+          hint: "It reads like a persuasive essay: introduction, main belief, evidence, conclusion, then the signers' promise.",
+          mistakes: [
+            {
+              match: "Grievances before beliefs",
+              coach: "The argument states its principles first, then lists the evidence against the king."
+            },
+            {
+              match: "Pledge not last",
+              coach: "The pledge is the closing promise right before the signatures."
+            }
+          ],
+          seconds: 45
+        }
+      ],
       check: [
         {
           q: "What did \"No taxation without representation\" mean?",
@@ -1012,6 +1841,60 @@ The Constitution also creates federalism, sharing power between the national gov
               ],
             },
           },
+          probe: {
+            type: "sort",
+            prompt: "Does each feature belong to the Articles of Confederation or the Constitution?",
+            buckets: [
+              "Articles of Confederation",
+              "U.S. Constitution"
+            ],
+            items: [
+              {
+                text: "Congress could only ask the states for money",
+                bucket: 0
+              },
+              {
+                text: "No president to carry out laws",
+                bucket: 0
+              },
+              {
+                text: "Every state had to agree to any change",
+                bucket: 0
+              },
+              {
+                text: "No national court system",
+                bucket: 0
+              },
+              {
+                text: "Congress can collect taxes",
+                bucket: 1
+              },
+              {
+                text: "A President leads the executive branch",
+                bucket: 1
+              },
+              {
+                text: "A Supreme Court decides cases",
+                bucket: 1
+              },
+              {
+                text: "Amendments need three-fourths of the states",
+                bucket: 1
+              }
+            ],
+            hint: "The Articles were weak on purpose. Features that are missing or powerless belong to them.",
+            mistakes: [
+              {
+                match: "Put taxing power under the Articles",
+                coach: "Under the Articles, Congress could only request money. The power to tax came with the Constitution."
+              },
+              {
+                match: "Put a President under the Articles",
+                coach: "There was no President at all under the Articles. That office was created in 1787."
+              }
+            ],
+            seconds: 50
+          },
           think: {
             q: "What was a major weakness of the Articles of Confederation?",
             choices: [
@@ -1061,6 +1944,46 @@ The Constitution also creates federalism, sharing power between the national gov
               { front: "Promote the general Welfare", back: "Help create conditions in which everyone can prosper." },
               { front: "Secure the Blessings of Liberty", back: "Protect freedom for people now and for future generations, which the Preamble calls our Posterity." },
             ],
+          },
+          probe: {
+            type: "cloze",
+            text: "The Constitution opens with \"We the {0} of the United States,\" which shows that the government's authority comes from the {1}, not from a king.",
+            blanks: [
+              {
+                answers: [
+                  "People"
+                ]
+              },
+              {
+                answers: [
+                  "people",
+                  "citizens"
+                ]
+              }
+            ],
+            bank: [
+              "People",
+              "citizens",
+              "States",
+              "Congress",
+              "President"
+            ],
+            hint: "Read the famous first three words of the Constitution and ask who is doing the creating.",
+            mistakes: [
+              {
+                match: "States",
+                coach: "Some delegates wanted the states named first, but the Constitution speaks for the people themselves."
+              },
+              {
+                match: "Congress",
+                coach: "Congress is created by the Constitution, so it cannot be the source of the Constitution's authority."
+              },
+              {
+                match: "President",
+                coach: "The President is one official. The Founders put the source of power with everyone."
+              }
+            ],
+            seconds: 25
           },
           think: {
             q: "Why does it matter that the Constitution begins with We the People?",
@@ -1126,6 +2049,44 @@ The Constitution also creates federalism, sharing power between the national gov
               },
             ],
           },
+          probe: {
+            type: "match",
+            prompt: "Match each part of the government to its job.",
+            pairs: [
+              {
+                left: "Legislative branch",
+                right: "Makes the laws"
+              },
+              {
+                left: "Executive branch",
+                right: "Carries out and enforces the laws"
+              },
+              {
+                left: "Judicial branch",
+                right: "Decides what the laws mean in court cases"
+              },
+              {
+                left: "House of Representatives",
+                right: "Seats based on each state's population"
+              },
+              {
+                left: "Senate",
+                right: "Two members from every state"
+              }
+            ],
+            hint: "Legislate means to make laws, execute means to carry out, and judges decide cases.",
+            mistakes: [
+              {
+                match: "Swapped executive and legislative",
+                coach: "Congress writes the laws; the President carries them out. Execute means to do or carry out."
+              },
+              {
+                match: "Swapped House and Senate",
+                coach: "Big states get more seats in the House. In the Senate, every state is equal with two."
+              }
+            ],
+            seconds: 45
+          },
           think: {
             q: "Which branch carries out and enforces the laws?",
             choices: ["The legislative branch", "The judicial branch", "The executive branch"],
@@ -1169,6 +2130,37 @@ The Constitution also creates federalism, sharing power between the national gov
               "The President signs the bill or vetoes it",
               "If it is vetoed, Congress can override with a two-thirds vote in both houses",
             ],
+          },
+          probe: {
+            type: "build",
+            prompt: "Build the path of a bill, including the check Congress has on the President.",
+            tiles: [
+              "A member of Congress introduces a bill",
+              "A committee studies and revises it",
+              "The House and the Senate each pass it",
+              "The President vetoes it",
+              "Congress overrides with a two-thirds vote in both houses"
+            ],
+            distractors: [
+              "The Supreme Court signs it",
+              "The states vote on it"
+            ],
+            hint: "A bill starts and ends in Congress, with the President's choice in the middle.",
+            mistakes: [
+              {
+                match: "Used The Supreme Court signs it",
+                coach: "Courts do not sign bills. They decide cases about laws after the laws exist."
+              },
+              {
+                match: "Override before veto",
+                coach: "Congress can only override a veto after the President has vetoed the bill."
+              },
+              {
+                match: "Used The states vote on it",
+                coach: "States vote on constitutional amendments, not ordinary bills."
+              }
+            ],
+            seconds: 50
           },
           think: {
             q: "Which is an example of checks and balances?",
@@ -1231,6 +2223,130 @@ The Constitution also creates federalism, sharing power between the national gov
           "The Founders learned from history, including Rome's fall to one-man rule.",
         ],
       },
+      mastery: [
+        {
+          type: "build",
+          prompt: "Build the six goals of the Preamble in order.",
+          tiles: [
+            "form a more perfect Union",
+            "establish Justice",
+            "insure domestic Tranquility",
+            "provide for the common defence",
+            "promote the general Welfare",
+            "secure the Blessings of Liberty"
+          ],
+          distractors: [
+            "crown a wise king",
+            "abolish the states"
+          ],
+          hint: "The goals move from uniting the states, to fairness and peace at home, to defense, prosperity and freedom.",
+          mistakes: [
+            {
+              match: "Used crown a wise king",
+              coach: "The Preamble begins with We the People. There is no king anywhere in the Constitution."
+            },
+            {
+              match: "Liberty not last",
+              coach: "Securing the Blessings of Liberty to ourselves and our Posterity is the final goal."
+            },
+            {
+              match: "Used abolish the states",
+              coach: "The Constitution keeps the states and shares power with them. That is federalism."
+            }
+          ],
+          seconds: 60
+        },
+        {
+          type: "cloze",
+          text: "If the President vetoes a bill, Congress can still make it law with a {0} vote in both the House and the {1}.",
+          blanks: [
+            {
+              answers: [
+                "two-thirds",
+                "two thirds",
+                "2/3"
+              ]
+            },
+            {
+              answers: [
+                "Senate"
+              ]
+            }
+          ],
+          hint: "An override needs much more than a simple majority, in both houses of Congress.",
+          mistakes: [
+            {
+              match: "majority",
+              coach: "A simple majority passed the bill the first time. Overriding a veto takes more."
+            },
+            {
+              match: "three-fourths",
+              coach: "Three-fourths is the share of states needed to ratify an amendment. A veto override needs a different fraction."
+            },
+            {
+              match: "Supreme Court",
+              coach: "The Supreme Court is not part of Congress. Congress has two houses."
+            }
+          ],
+          seconds: 30
+        },
+        {
+          type: "number",
+          prompt: "In what year did delegates meet in Philadelphia to write the Constitution?",
+          answer: 1787,
+          tolerance: 0,
+          hint: "It was the year after Shays' Rebellion in 1786.",
+          mistakes: [
+            {
+              match: "1776",
+              coach: "1776 was the Declaration of Independence. The Constitution came about eleven years later."
+            },
+            {
+              match: "1791",
+              coach: "1791 is when the Bill of Rights was ratified, a few years after the Constitution was written."
+            }
+          ],
+          seconds: 15
+        },
+        {
+          type: "match",
+          prompt: "Match each part of the system to the check or balance it provides.",
+          pairs: [
+            {
+              left: "President",
+              right: "Can veto a bill passed by Congress"
+            },
+            {
+              left: "Congress",
+              right: "Can override a veto with a two-thirds vote"
+            },
+            {
+              left: "Senate",
+              right: "Approves treaties and federal judges"
+            },
+            {
+              left: "Supreme Court",
+              right: "Can rule that a law conflicts with the Constitution"
+            },
+            {
+              left: "Federalism",
+              right: "Shares power between the nation and the states"
+            }
+          ],
+          hint: "Each branch has a way to stop or approve what another branch does.",
+          mistakes: [
+            {
+              match: "Swapped President and Congress",
+              coach: "The President vetoes; Congress overrides. The veto has to come first."
+            },
+            {
+              match: "Swapped Senate and Supreme Court",
+              coach: "The Senate approves judges. The Court decides whether laws fit the Constitution."
+            }
+          ],
+          seconds: 60
+        }
+      ],
       check: [
         {
           q: "Who is often called the \"Father of the Constitution\"?",
@@ -1327,6 +2443,48 @@ The Bill of Rights reminds us that government exists to protect liberty, not to 
               { year: 1791, label: "1791: Bill of Rights ratified", detail: "On December 15, ten amendments are ratified and become the Bill of Rights." },
             ],
           },
+          probe: {
+            type: "cloze",
+            text: "The Anti-{0} feared that a strong {1} government might trample the people's freedoms, so they demanded a written list of rights.",
+            blanks: [
+              {
+                answers: [
+                  "Federalists",
+                  "federalist"
+                ]
+              },
+              {
+                answers: [
+                  "national",
+                  "federal",
+                  "central"
+                ]
+              }
+            ],
+            bank: [
+              "Federalists",
+              "national",
+              "state",
+              "Loyalists",
+              "royal"
+            ],
+            hint: "Their very name says what they were against, and their worry was about the new, more powerful level of government.",
+            mistakes: [
+              {
+                match: "state",
+                coach: "Anti-Federalists were strong defenders of state governments. Their fear was the national government."
+              },
+              {
+                match: "royal",
+                coach: "There was no king in the Constitution. The worry was a powerful national government."
+              },
+              {
+                match: "Loyalists",
+                coach: "Loyalists sided with Britain during the Revolution. This debate was among Americans in 1787."
+              }
+            ],
+            seconds: 30
+          },
           think: {
             q: "Why did Anti-Federalists want a bill of rights?",
             choices: [
@@ -1375,6 +2533,51 @@ The Bill of Rights reminds us that government exists to protect liberty, not to 
               { front: "Assembly", back: "People may gather together peacefully." },
               { front: "Petition", back: "People may ask the government to correct wrongs." },
             ],
+          },
+          probe: {
+            type: "cloze",
+            text: "\"Congress shall make no law respecting an establishment of religion, or prohibiting the free exercise thereof; or abridging the freedom of {0}, or of the {1}; or the right of the people peaceably to {2}, and to petition the Government for a redress of grievances.\"",
+            blanks: [
+              {
+                answers: [
+                  "speech"
+                ]
+              },
+              {
+                answers: [
+                  "press"
+                ]
+              },
+              {
+                answers: [
+                  "assemble"
+                ]
+              }
+            ],
+            bank: [
+              "speech",
+              "press",
+              "assemble",
+              "vote",
+              "travel",
+              "bear arms"
+            ],
+            hint: "Use RAPPS: religion and petition are already in the sentence. Find the other three.",
+            mistakes: [
+              {
+                match: "bear arms",
+                coach: "The right to keep and bear arms is in the Second Amendment, not the First."
+              },
+              {
+                match: "vote",
+                coach: "Voting rights came in later amendments. The First protects religion, speech, press, assembly and petition."
+              },
+              {
+                match: "travel",
+                coach: "Travel is not one of the five RAPPS freedoms."
+              }
+            ],
+            seconds: 40
           },
           think: {
             q: "Which of these is protected by the First Amendment?",
@@ -1428,6 +2631,44 @@ The Bill of Rights reminds us that government exists to protect liberty, not to 
               { label: "7th Amendment", icon: "📜", detail: "A jury trial in many civil lawsuits, such as disputes over money or property." },
               { label: "8th Amendment", icon: "🚫", detail: "No excessive bail or fines, and no cruel and unusual punishment." },
             ],
+          },
+          probe: {
+            type: "match",
+            prompt: "Match each amendment to the right it protects.",
+            pairs: [
+              {
+                left: "3rd Amendment",
+                right: "No soldiers housed in your home in peacetime without consent"
+              },
+              {
+                left: "4th Amendment",
+                right: "No unreasonable searches and seizures"
+              },
+              {
+                left: "5th Amendment",
+                right: "No one forced to testify against himself"
+              },
+              {
+                left: "6th Amendment",
+                right: "A speedy and public trial with a lawyer"
+              },
+              {
+                left: "8th Amendment",
+                right: "No cruel and unusual punishment"
+              }
+            ],
+            hint: "The 3rd and 4th both guard the home: one from soldiers moving in, one from searches.",
+            mistakes: [
+              {
+                match: "Swapped 3rd and 4th",
+                coach: "The 3rd is about quartering soldiers; the 4th is about searches. Both protect the home."
+              },
+              {
+                match: "Swapped 5th and 6th",
+                coach: "The 5th protects you from testifying against yourself. The 6th guarantees a speedy, public trial."
+              }
+            ],
+            seconds: 50
           },
           think: {
             q: "Officials want to search a family's house without good reason. Which amendment protects the family?",
@@ -1483,6 +2724,52 @@ The Bill of Rights reminds us that government exists to protect liberty, not to 
                 "Leaders included George Mason and Patrick Henry",
               ],
             },
+          },
+          probe: {
+            type: "sort",
+            prompt: "Which amendment does each describe: the Ninth or the Tenth?",
+            buckets: [
+              "Ninth Amendment",
+              "Tenth Amendment"
+            ],
+            items: [
+              {
+                text: "Listing some rights does not deny other rights the people keep",
+                bucket: 0
+              },
+              {
+                text: "People have rights even if the Constitution does not name them",
+                bucket: 0
+              },
+              {
+                text: "Answers Madison's worry that a list might seem complete",
+                bucket: 0
+              },
+              {
+                text: "Powers not given to the national government belong to the states or the people",
+                bucket: 1
+              },
+              {
+                text: "A state sets the age for a learner's permit",
+                bucket: 1
+              },
+              {
+                text: "The national government has only the powers listed for it",
+                bucket: 1
+              }
+            ],
+            hint: "The Ninth is about rights the people keep. The Tenth is about powers and who holds them.",
+            mistakes: [
+              {
+                match: "Put the learner's permit under the Ninth",
+                coach: "Driver's licenses are a power left to the states. That is the Tenth Amendment's idea of reserved powers."
+              },
+              {
+                match: "Put unlisted rights under the Tenth",
+                coach: "Unlisted rights are the Ninth Amendment's job. The Tenth deals with government powers."
+              }
+            ],
+            seconds: 45
           },
           think: {
             q: "What does the Tenth Amendment say?",
@@ -1549,6 +2836,131 @@ The Bill of Rights reminds us that government exists to protect liberty, not to 
           "Other amendments protect homes, fair trials, and powers reserved to the states and the people.",
         ],
       },
+      mastery: [
+        {
+          type: "number",
+          prompt: "How many amendments make up the Bill of Rights?",
+          answer: 10,
+          tolerance: 0,
+          unit: "amendments",
+          hint: "Congress sent more to the states than were ratified in 1791.",
+          mistakes: [
+            {
+              match: "12",
+              coach: "Congress sent twelve amendments to the states, but only some were ratified as the Bill of Rights."
+            },
+            {
+              match: "5",
+              coach: "Five is the number of First Amendment freedoms, not the number of amendments."
+            }
+          ],
+          seconds: 15
+        },
+        {
+          type: "match",
+          prompt: "Match each First Amendment freedom to an example of it.",
+          pairs: [
+            {
+              left: "Religion",
+              right: "Worshiping at the church of your choice"
+            },
+            {
+              left: "Speech",
+              right: "Sharing your opinion at a town meeting"
+            },
+            {
+              left: "Press",
+              right: "Publishing a newspaper article that criticizes officials"
+            },
+            {
+              left: "Assembly",
+              right: "Gathering peacefully in the town square"
+            },
+            {
+              left: "Petition",
+              right: "Signing a letter asking officials to fix a road"
+            }
+          ],
+          hint: "Press means printing and publishing; petition means asking the government to fix a wrong.",
+          mistakes: [
+            {
+              match: "Swapped Press and Speech",
+              coach: "Speech is saying your ideas; press is printing or publishing them."
+            },
+            {
+              match: "Swapped Petition and Assembly",
+              coach: "Assembly is gathering together. A petition is a request to the government."
+            }
+          ],
+          seconds: 50
+        },
+        {
+          type: "place",
+          prompt: "Place each step toward the Bill of Rights on the timeline.",
+          min: 1785,
+          max: 1795,
+          step: 1,
+          tolerance: 0,
+          items: [
+            {
+              label: "Constitution signed",
+              value: 1787
+            },
+            {
+              label: "Constitution ratified",
+              value: 1788
+            },
+            {
+              label: "Madison proposes amendments",
+              value: 1789
+            },
+            {
+              label: "Bill of Rights ratified",
+              value: 1791
+            }
+          ],
+          hint: "Each step followed the last, and the final one took about two years after Madison proposed it.",
+          mistakes: [
+            {
+              match: "Bill of Rights in 1789",
+              coach: "Madison proposed the amendments in 1789, but the states did not finish ratifying them until December 1791."
+            },
+            {
+              match: "Constitution signed in 1776",
+              coach: "1776 was the Declaration. The Constitution was signed in Philadelphia in September 1787."
+            }
+          ],
+          seconds: 50
+        },
+        {
+          type: "cloze",
+          text: "The Fourth Amendment says: \"The right of the people to be secure in their persons, houses, papers, and effects, against unreasonable {0} and {1}, shall not be violated.\"",
+          blanks: [
+            {
+              answers: [
+                "searches"
+              ]
+            },
+            {
+              answers: [
+                "seizures"
+              ]
+            }
+          ],
+          hint: "Officials looking through your things, and officials taking them away.",
+          mistakes: [
+            {
+              match: "arrests",
+              coach: "Close idea, but the Amendment uses a word for taking people or property: seizures."
+            },
+            {
+              match: "soldiers",
+              coach: "Soldiers in the home is the Third Amendment. The Fourth is about looking through and taking things."
+            }
+          ],
+          seconds: 30
+        }
+      ],
       check: [
         {
           q: "Why did many Anti-Federalists object to the original Constitution?",
@@ -1650,6 +3062,48 @@ These inventions, and many others like them, made goods cheaper and work more pr
               { year: 1903, label: "1903: First powered flight", detail: "The Wright brothers fly at Kitty Hawk, North Carolina." },
             ],
           },
+          probe: {
+            type: "cloze",
+            text: "Gutenberg cast small metal letters, called {0} type, that could be arranged into a page, inked, printed, and then {1} for the next page.",
+            blanks: [
+              {
+                answers: [
+                  "movable",
+                  "moveable"
+                ]
+              },
+              {
+                answers: [
+                  "rearranged",
+                  "reused",
+                  "reset"
+                ]
+              }
+            ],
+            bank: [
+              "movable",
+              "rearranged",
+              "wooden",
+              "handwritten",
+              "thrown away"
+            ],
+            hint: "The big idea was letters that could move around and be used again.",
+            mistakes: [
+              {
+                match: "handwritten",
+                coach: "Handwriting was the old, slow way. Gutenberg replaced it with a machine."
+              },
+              {
+                match: "thrown away",
+                coach: "Throwing away the letters would waste his metalwork. The genius was reusing them."
+              },
+              {
+                match: "wooden",
+                coach: "Gutenberg was a goldsmith, and he cast his letters from metal, which lasted much longer."
+              }
+            ],
+            seconds: 30
+          },
           think: {
             q: "What was Gutenberg's key invention?",
             choices: [
@@ -1710,6 +3164,34 @@ These inventions, and many others like them, made goods cheaper and work more pr
               ],
             },
           },
+          probe: {
+            type: "build",
+            prompt: "Build the explanation of Watt's big improvement.",
+            tiles: [
+              "A separate condenser",
+              "cooled the steam",
+              "while the main cylinder",
+              "stayed hot,",
+              "so the engine",
+              "used much less fuel"
+            ],
+            distractors: [
+              "ran on electricity",
+              "stayed silent"
+            ],
+            hint: "Begin with Watt's invention, then explain what it kept hot and what that saved.",
+            mistakes: [
+              {
+                match: "Used ran on electricity",
+                coach: "Watt's engines ran on steam from burning coal. Practical electric power came about a century later."
+              },
+              {
+                match: "Used stayed silent",
+                coach: "Steam engines were loud. Watt's improvement was about wasted heat."
+              }
+            ],
+            seconds: 40
+          },
           think: {
             q: "Why was Watt's separate condenser such a big improvement?",
             choices: [
@@ -1759,6 +3241,46 @@ These inventions, and many others like them, made goods cheaper and work more pr
               { front: "Prototype", back: "An early model built to test an idea." },
               { front: "Industrial Revolution", back: "The era, beginning in Britain in the 1700s, when machines and factories changed how goods were made." },
             ],
+          },
+          probe: {
+            type: "cloze",
+            text: "Edison's team tested thousands of materials to find a {0}, the thin thread inside a bulb, that would glow for hours without burning out. In 1879, a {1} filament finally worked.",
+            blanks: [
+              {
+                answers: [
+                  "filament"
+                ]
+              },
+              {
+                answers: [
+                  "carbon",
+                  "carbonized"
+                ]
+              }
+            ],
+            bank: [
+              "filament",
+              "carbon",
+              "battery",
+              "gold",
+              "propeller"
+            ],
+            hint: "Think about which tiny part of a light bulb glows, and what material Edison's team turned their thread into.",
+            mistakes: [
+              {
+                match: "battery",
+                coach: "Edison's bulbs got power from a station, not batteries. The part that kept burning out glows inside the glass."
+              },
+              {
+                match: "propeller",
+                coach: "Propellers belong to the Wright brothers' story."
+              },
+              {
+                match: "gold",
+                coach: "Precious metals did not solve the problem. The winning thread was charred, or carbonized."
+              }
+            ],
+            seconds: 30
           },
           think: {
             q: "Why did Edison's team test thousands of materials?",
@@ -1810,6 +3332,39 @@ These inventions, and many others like them, made goods cheaper and work more pr
               "Build an engine and propellers for a powered airplane",
               "Make the first powered flight on December 17, 1903",
             ],
+          },
+          probe: {
+            type: "highlight",
+            prompt: "Tap every action that shows the Wright brothers testing and fixing problems.",
+            sentences: [
+              "They built a small wind tunnel and tested about 200 wing shapes.",
+              "They quit after their 1901 glider lifted less than expected.",
+              "They designed their own propellers when nothing suitable existed.",
+              "They copied a finished airplane built by another inventor.",
+              "They studied how birds twist their wings to keep balance.",
+              "They waited for the government to pay for their work."
+            ],
+            correct: [
+              0,
+              2,
+              4
+            ],
+            hint: "Look for actions where they studied, tested or built something to solve a problem.",
+            mistakes: [
+              {
+                match: "Picked quitting",
+                coach: "Wilbur was discouraged in 1901, but they did not quit. They built a wind tunnel instead."
+              },
+              {
+                match: "Picked copying",
+                coach: "No one had a working airplane to copy. They had to figure it out themselves."
+              },
+              {
+                match: "Picked government money",
+                coach: "They paid for their work with profits from their bicycle shop."
+              }
+            ],
+            seconds: 40
           },
           think: {
             q: "Which habit helped the Wright brothers succeed?",
@@ -1871,6 +3426,127 @@ These inventions, and many others like them, made goods cheaper and work more pr
           "Explains how the invention changed daily life, such as making things cheaper, faster or more available.",
         ],
       },
+      mastery: [
+        {
+          type: "place",
+          prompt: "Place these inventions on the timeline.",
+          min: 1400,
+          max: 1950,
+          step: 5,
+          tolerance: 15,
+          items: [
+            {
+              label: "Gutenberg Bible printed",
+              value: 1455
+            },
+            {
+              label: "Watt's separate condenser",
+              value: 1765
+            },
+            {
+              label: "Edison's practical light bulb",
+              value: 1879
+            },
+            {
+              label: "First powered flight",
+              value: 1903
+            }
+          ],
+          hint: "Printing came centuries before the others. Steam came in the 1700s, then electric light and flight within about 25 years of each other.",
+          mistakes: [
+            {
+              match: "Gutenberg in the 1700s",
+              coach: "Gutenberg's Bible was printed around 1455, about 300 years before Watt's steam engine work."
+            },
+            {
+              match: "Flight before the light bulb",
+              coach: "Edison's bulb came in 1879. The Wrights flew in 1903, about 24 years later."
+            }
+          ],
+          seconds: 50
+        },
+        {
+          type: "match",
+          prompt: "Match each inventor to the place where his big moment happened.",
+          pairs: [
+            {
+              left: "Johannes Gutenberg",
+              right: "Mainz, Germany"
+            },
+            {
+              left: "James Watt",
+              right: "University of Glasgow, Scotland"
+            },
+            {
+              left: "Thomas Edison",
+              right: "Menlo Park, New Jersey"
+            },
+            {
+              left: "Wright brothers",
+              right: "Kitty Hawk, North Carolina"
+            }
+          ],
+          hint: "Two of these places are in Europe and two are in America.",
+          mistakes: [
+            {
+              match: "Wrights to Menlo Park",
+              coach: "Menlo Park was Edison's laboratory. The Wrights flew on the windy beaches of North Carolina."
+            },
+            {
+              match: "Watt to Mainz",
+              coach: "Watt was a Scot. Mainz in Germany was Gutenberg's city."
+            }
+          ],
+          seconds: 40
+        },
+        {
+          type: "number",
+          prompt: "How many seconds did Orville Wright's first powered flight last on December 17, 1903?",
+          answer: 12,
+          tolerance: 0,
+          unit: "seconds",
+          hint: "It was shorter than a single minute by a lot. The longest flight that day came later.",
+          mistakes: [
+            {
+              match: "59",
+              coach: "59 seconds was the longest of the four flights that day. The very first one was much shorter."
+            },
+            {
+              match: "120",
+              coach: "About 120 is the distance in feet, not the time in seconds."
+            }
+          ],
+          seconds: 15
+        },
+        {
+          type: "cloze",
+          text: "Watt's efficient {0} engines helped launch the {1} Revolution, when work shifted from hand tools to machines in factories.",
+          blanks: [
+            {
+              answers: [
+                "steam"
+              ]
+            },
+            {
+              answers: [
+                "Industrial"
+              ]
+            }
+          ],
+          hint: "Think about what Watt's engines ran on and what kind of work changed.",
+          mistakes: [
+            {
+              match: "electric",
+              coach: "Electric power came about a century after Watt. His engines burned fuel to make steam."
+            },
+            {
+              match: "American",
+              coach: "The American Revolution was a war for independence. This revolution was about machines and factories."
+            }
+          ],
+          seconds: 25
+        }
+      ],
       check: [
         {
           q: "What made Gutenberg's printing press so important?",

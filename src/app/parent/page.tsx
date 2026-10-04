@@ -9,6 +9,7 @@ import {
   compliance,
   getFocus,
   kidFlags,
+  learnerProfiles,
   listKids,
   minutesOnDay,
   pendingBlocks,
@@ -166,6 +167,8 @@ export default async function ParentHome({ searchParams }: { searchParams: Promi
           const flags = kidFlags(kid.id);
           const c = compliance(kid.id, s.familyId);
           const placement = placementStatus(kid.id);
+          const warnings = learnerProfiles(kid.id).filter((p) => p.profile.status === "behind" || p.profile.status === "watch");
+          const ahead = learnerProfiles(kid.id).filter((p) => p.profile.status === "ahead");
           return (
             <div className="card" key={kid.id}>
               <h2>
@@ -191,6 +194,15 @@ export default async function ParentHome({ searchParams }: { searchParams: Promi
               <p className="small">
                 School year: {c.days}/{REQUIRED_DAYS} days · avg {c.avgHoursPerDay} h/day (goal {REQUIRED_AVG_HOURS})
               </p>
+              {warnings.map((w) => (
+                <div className="flag small" key={w.key}>
+                  {w.profile.status === "behind" ? "🔴" : "🟡"} {w.icon} {w.title}: {w.profile.status === "behind" ? "falling behind" : "early warning"}. {w.profile.reasons[0]} The coach is
+                  adapting.
+                </div>
+              ))}
+              {ahead.length > 0 && (
+                <p className="small">🚀 Ahead in: {ahead.map((a) => a.title).join(", ")}</p>
+              )}
               {flags.map((f, i) => (
                 <div className="flag small" key={i}>
                   ⚠️ {f.skillTitle ? `${f.skillTitle}: ` : ""}

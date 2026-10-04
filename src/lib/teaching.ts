@@ -29,12 +29,18 @@ export interface SegmentState {
   /** "passed" on their own (or with light help); "supported" after the answer was shown. */
   done: "" | "passed" | "supported";
   aiRescues: number;
+  /** Total time spent answering (ms). */
+  ms?: number;
 }
 
 export interface TeachState {
   segments: SegmentState[];
   activity: { tries: number; done: boolean };
   explain: { tries: number; done: boolean; understood: boolean; feedback: string };
+  masteryTries?: number;
+  /** The current round of the interactive mastery check. */
+  masteryItems?: { tries: number; credit: number; done: boolean; ms: number }[];
+  masteryRounds?: number;
 }
 
 export function emptySegment(): SegmentState {
@@ -53,6 +59,9 @@ export function parseState(raw: string | null | undefined, segments: number): Te
     segments: segs,
     activity: { tries: 0, done: false, ...(s.activity ?? {}) },
     explain: { tries: 0, done: false, understood: false, feedback: "", ...(s.explain ?? {}) },
+    masteryTries: s.masteryTries ?? 0,
+    masteryItems: s.masteryItems,
+    masteryRounds: s.masteryRounds ?? 0,
   };
 }
 

@@ -55,6 +55,12 @@ Colorado records.
   worked example and a smaller step, then an AI re-explanation built around
   their mistakes. Kids explain ideas back in their own words before the final
   check, and parents see where extra help was needed.
+- **Interactive assessment and early warning (Phase 3c).** Lessons check
+  understanding by having kids fill in, place, match, build and run simulations
+  instead of picking answers. Every answer's accuracy, speed and help-seeking
+  feeds a learner profile per subject that flags kids who are starting to slip
+  (before they fail) and adapts the teaching: worked examples first, warm-up
+  review, the help that works best for them, or a test-out when they're ahead.
 - **Real-world missions.** Off-screen tasks about money, business, leadership,
   character, science, history and civics. A parent approves each one, which
   awards XP and logs the minutes under the right subject for records.

@@ -22,7 +22,9 @@ import { allCourses, allQuests, blockById, courseById, drillSettings, focusPrese
 import { ideaFor, type Block } from "@/content/schedule";
 import { accuracyBand, factsPerMinute, forecast, GRADE_DONE, isStruggling, knowledgeGrade, wasteMeter } from "./engine/learningPlan";
 import type { Visual } from "./curriculum/answers";
-import { checkActivity, coachingFor, interactiveDone, LADDER, parseState, supportSummary, type TeachState } from "./teaching";
+import { checkActivity, coachingFor, interactiveDone, LADDER, parseState, supportSummary, type SegmentState, type TeachState } from "./teaching";
+import { expectedSeconds, gradeProbe, probeSolution } from "./probes";
+import { adapt, buildProfile, conceptMastery, whatHelps, type Adaptation, type LearningEvent, type Profile } from "./learner";
 
 export type Mode = "learn" | "review" | "placement";
 
@@ -1332,14 +1334,19 @@ export function answerThink(kidId: number, courseId: string, lessonId: string, s
   if (!seg) throw new PortalError("Unknown part of the lesson.");
   const st = ctx.state.segments[segIndex];
   if (choice === seg.think.answer) {
+    const first = !st.done;
     if (!st.done) st.done = "passed";
     saveTeachState(ctx.rowId, ctx.state);
+    if (first) logThinkResolved(kidId, courseId, lessonId, segIndex, st, true);
     addXp(kidId, st.misses === 0 ? 10 : 5);
     return { correct: true, why: seg.think.why, state: st, coaching: null, needsAi: false };
   }
   st.misses++;
   st.rung = Math.max(st.rung, Math.min(LADDER.reveal, st.misses));
-  if (st.rung >= LADDER.reveal && !st.done) st.done = "supported";
+  if (st.rung >= LADDER.reveal && !st.done) {
+    st.done = "supported";
+    logThinkResolved(kidId, courseId, lessonId, segIndex, st, false);
+  }
   saveTeachState(ctx.rowId, ctx.state);
   return {
     correct: false,
@@ -1461,4 +1468,308 @@ export function checkSegmentVisual(kidId: number, courseId: string, lessonId: st
   const w = ctx.lesson.teach?.[segIndex]?.visual;
   if (!w) throw new PortalError("Nothing to check here.");
   return checkActivity(w, answer);
+}
+
+// ---------------- Learning events, probes and the learner model (Phase 3c) ----------------
+
+const MAX_MS = 10 * 60_000;
+const clampMs = (ms: unknown) => Math.max(0, Math.min(MAX_MS, Math.round(Number(ms) || 0)));
+
+/** One row per answered item: what the learner model learns from. */
+export function logLearningEvent(
+  kidId: number,
+  e: { subject: string; concept: string; firstTry: boolean; score: number; ms: number; expectedMs: number; helped: boolean; source: string },
+): void {
+  getDb()
+    .prepare(
+      "INSERT INTO learning_events (kid_id, subject, concept, first_try, score, ms, expected_ms, helped, source, day, at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    )
+    .run(kidId, e.subject, e.concept, e.firstTry ? 1 : 0, e.score, clampMs(e.ms), Math.round(e.expectedMs), e.helped ? 1 : 0, e.source, today(), Date.now());
+}
+
+function courseEvents(kidId: number, subject: string): LearningEvent[] {
+  return (getDb()
+    .prepare("SELECT concept, first_try, score, ms, expected_ms, helped, at FROM learning_events WHERE kid_id = ? AND subject = ? ORDER BY at DESC LIMIT 400")
+    .all(kidId, subject) as { concept: string; first_try: number; score: number; ms: number; expected_ms: number; helped: number; at: number }[]).map(
+    (r) => ({ concept: r.concept, firstTry: !!r.first_try, score: r.score, ms: r.ms, expectedMs: r.expected_ms, helped: !!r.helped, at: r.at }),
+  );
+}
+
+/** Math practice already records every answer; it feeds the same model. */
+function mathEvents(kidId: number): LearningEvent[] {
+  return (getDb()
+    .prepare("SELECT skill_id, correct, used_hint, response_ms, created_at FROM attempts WHERE kid_id = ? AND mode != 'placement' ORDER BY id DESC LIMIT 400")
+    .all(kidId) as { skill_id: string; correct: number; used_hint: number; response_ms: number; created_at: string }[]).map((r) => ({
+    concept: r.skill_id,
+    firstTry: !!r.correct && !r.used_hint,
+    score: r.correct ? 1 : 0,
+    ms: r.response_ms,
+    expectedMs: 45_000,
+    helped: !!r.used_hint,
+    at: Date.parse(`${r.created_at.replace(" ", "T")}Z`) || 0,
+  }));
+}
+
+/** For each part a kid needed help on and then got, which rung of help was showing. */
+function rescuesFor(kidId: number, courseId: string) {
+  const rows = getDb().prepare("SELECT lesson_id, support FROM lesson_progress WHERE kid_id = ? AND course_id = ? AND support IS NOT NULL").all(kidId, courseId) as {
+    lesson_id: string;
+    support: string;
+  }[];
+  const out: { rungAtSuccess: number }[] = [];
+  for (const r of rows) {
+    const st = parseState(r.support, 12);
+    for (const s of st.segments) if (s.done === "passed" && s.misses > 0) out.push({ rungAtSuccess: s.rung });
+  }
+  return out;
+}
+
+function conceptTitle(concept: string, courseId: string): string {
+  if (courseId === "math") return getSkill(concept)?.title ?? concept;
+  const [lessonId, part] = concept.split("#");
+  const lesson = courseById(courseId)?.lessons.find((l) => l.id === lessonId);
+  if (!lesson) return concept;
+  if (part?.startsWith("m")) return `${lesson.title} (show what you know)`;
+  const seg = lesson.teach?.[Number(part)];
+  return seg ? `${lesson.title}: ${seg.title}` : lesson.title;
+}
+
+export interface SubjectProfile {
+  key: string;
+  title: string;
+  icon: string;
+  profile: Profile;
+  helps: ReturnType<typeof whatHelps>;
+  adaptation: Adaptation;
+  weakest: { concept: string; title: string; p: number }[];
+}
+
+export function subjectProfile(kidId: number, key: string): SubjectProfile {
+  const course = key === "math" ? null : courseById(key);
+  const events = key === "math" ? mathEvents(kidId) : courseEvents(kidId, key);
+  const profile = buildProfile(events);
+  const helps = whatHelps(key === "math" ? [] : rescuesFor(kidId, key));
+  return {
+    key,
+    title: course?.title ?? "Math",
+    icon: course?.icon ?? "⚔️",
+    profile,
+    helps,
+    adaptation: adapt(profile, helps),
+    weakest: profile.weakest.map((w) => ({ ...w, title: conceptTitle(w.concept, key) })),
+  };
+}
+
+/** Profiles for math and every course the kid has started. */
+export function learnerProfiles(kidId: number): SubjectProfile[] {
+  const started = (getDb().prepare("SELECT DISTINCT subject FROM learning_events WHERE kid_id = ?").all(kidId) as { subject: string }[]).map((r) => r.subject);
+  const keys = ["math", ...allCourses().map((c) => c.id).filter((id) => started.includes(id))];
+  return keys.map((k) => subjectProfile(kidId, k));
+}
+
+/** How the coach adapts a course for this kid right now. */
+export function adaptationFor(kidId: number, courseId: string): Adaptation {
+  return subjectProfile(kidId, courseId).adaptation;
+}
+
+function probeContext(kidId: number, courseId: string, lessonId: string, segIndex: number) {
+  const ctx = teachContext(kidId, courseId, lessonId);
+  const seg = ctx.lesson.teach?.[segIndex];
+  if (!seg?.probe) throw new PortalError("Unknown part of the lesson.");
+  return { ctx, seg, probe: seg.probe, st: ctx.state.segments[segIndex] };
+}
+
+/**
+ * An interactive answer for a lesson part. Same coaching ladder as the
+ * multiple-choice version, with coaching matched to the specific mistake.
+ */
+export function answerProbe(kidId: number, courseId: string, lessonId: string, segIndex: number, answer: unknown, ms: number) {
+  const { ctx, seg, probe, st } = probeContext(kidId, courseId, lessonId, segIndex);
+  if (st.done) return { correct: true, graded: null, state: st, coaching: null, needsAi: false, solution: null };
+  const graded = gradeProbe(probe, answer);
+  st.ms = (st.ms ?? 0) + clampMs(ms);
+  const resolve = (finalScore: number) =>
+    logLearningEvent(kidId, {
+      subject: courseId,
+      concept: `${lessonId}#${segIndex}`,
+      firstTry: st.misses === 0 && st.lost === 0 && graded.correct,
+      score: finalScore,
+      ms: st.ms ?? 0,
+      expectedMs: expectedSeconds(probe) * 1000,
+      helped: st.rung > 0 || st.lost > 0,
+      source: "probe",
+    });
+  if (graded.correct) {
+    st.done = "passed";
+    saveTeachState(ctx.rowId, ctx.state);
+    resolve(1);
+    addXp(kidId, st.misses === 0 ? 10 : 5);
+    return { correct: true, graded, state: st, coaching: null, needsAi: false, solution: null };
+  }
+  st.misses++;
+  // Support mode: lead with the help that has worked for this kid before.
+  const lead = adaptationFor(kidId, courseId).leadWith;
+  const floor = lead === "analogy" ? LADDER.analogy : lead === "example" ? LADDER.example : 0;
+  st.rung = Math.max(st.rung, Math.min(LADDER.reveal, st.misses), st.misses === 1 ? floor : 0);
+  let solution: unknown = null;
+  if (st.rung >= LADDER.reveal) {
+    st.done = "supported";
+    solution = probeSolution(probe);
+    resolve(graded.score);
+  }
+  saveTeachState(ctx.rowId, ctx.state);
+  const c = coachingFor(seg, st, -1);
+  return {
+    correct: false,
+    graded: { ...graded, coach: graded.coach ?? probe.hint ?? null },
+    state: st,
+    coaching: { ...c, hint: graded.coach ?? probe.hint ?? "Not quite. Look again at what you just learned.", reveal: null },
+    needsAi: st.rung === LADDER.example,
+    solution,
+    seg,
+    lesson: ctx.lesson,
+    course: ctx.course,
+  };
+}
+
+/**
+ * "Show what you know": the interactive mastery check, graded one question
+ * at a time so kids get instant feedback. Credit is full on the first try,
+ * 60% on a second try; after two tries the answer is shown. Pass = 80% of the
+ * possible credit across the set. A failed round can be retried after review.
+ * A test-out (offered when a kid is ahead) needs 90% and also counts the
+ * teaching as done.
+ */
+export function answerMasteryItem(
+  kidId: number,
+  courseId: string,
+  lessonId: string,
+  index: number,
+  answer: unknown,
+  ms: number,
+  testOut: boolean,
+) {
+  const ctx = teachContext(kidId, courseId, lessonId);
+  const probes = ctx.lesson.mastery ?? [];
+  const p = probes[index];
+  if (!p) throw new PortalError("Unknown question.");
+  if (testOut && !adaptationFor(kidId, courseId).offerTestOut) throw new PortalError("Test-out isn't available for this lesson right now.");
+  const st = ctx.state;
+  if (!st.masteryItems || st.masteryItems.length !== probes.length) st.masteryItems = probes.map(() => ({ tries: 0, credit: 0, done: false, ms: 0 }));
+  const item = st.masteryItems[index];
+  if (item.done) throw new PortalError("You already answered that one.");
+  item.tries++;
+  item.ms += clampMs(ms);
+  const g = gradeProbe(p, answer);
+  let solution: unknown = null;
+  if (g.correct || item.tries >= 2) {
+    item.done = true;
+    item.credit = g.score * (item.tries === 1 ? 1 : 0.6);
+    if (!g.correct) solution = probeSolution(p);
+    logLearningEvent(kidId, {
+      subject: courseId,
+      concept: `${lessonId}#m${index}`,
+      firstTry: g.correct && item.tries === 1,
+      score: g.score,
+      ms: item.ms,
+      expectedMs: expectedSeconds(p) * 1000,
+      helped: item.tries > 1 || (st.masteryRounds ?? 0) > 0,
+      source: testOut ? "test-out" : "mastery",
+    });
+  }
+  const allDone = st.masteryItems.every((i) => i.done);
+  const score = st.masteryItems.reduce((t, i) => t + i.credit, 0) / probes.length;
+  const passed = allDone && score >= (testOut ? 0.9 : CHECK_PASS);
+  let completed = false;
+  if (allDone) {
+    const row = ensureLessonRow(kidId, courseId, lessonId);
+    if (passed && testOut) {
+      st.segments.forEach((s) => (s.done ||= "passed"));
+      st.activity.done = true;
+      st.explain.done = true;
+      st.explain.understood = true;
+    }
+    saveTeachState(ctx.rowId, st);
+    getDb()
+      .prepare("UPDATE lesson_progress SET check_best = MAX(check_best, ?), check_total = ?, check_passed = MAX(check_passed, ?), updated_at = datetime('now') WHERE id = ?")
+      .run(Math.round(score * probes.length), probes.length, passed ? 1 : 0, row.id);
+    addXp(kidId, Math.round(score * 25));
+    if (passed) completed = maybeCompleteLesson(kidId, courseId, lessonId);
+  } else {
+    saveTeachState(ctx.rowId, st);
+  }
+  return {
+    correct: g.correct,
+    parts: g.parts,
+    coach: g.correct ? null : g.coach ?? p.hint ?? null,
+    detail: g.detail,
+    tries: item.tries,
+    itemDone: item.done,
+    solution,
+    summary: allDone ? { score: Math.round(score * 100), passed, completed } : null,
+  };
+}
+
+/** Starts a fresh round of the mastery check after a kid didn't pass. */
+export function retryMastery(kidId: number, courseId: string, lessonId: string) {
+  const ctx = teachContext(kidId, courseId, lessonId);
+  ctx.state.masteryRounds = (ctx.state.masteryRounds ?? 0) + 1;
+  ctx.state.masteryItems = undefined;
+  saveTeachState(ctx.rowId, ctx.state);
+  return { ok: true };
+}
+
+/**
+ * Warm-up review for kids who are behind or slipping: interactive questions
+ * from the weakest parts of this course they've already been taught.
+ */
+export function reviewItems(kidId: number, courseId: string, limit = 2) {
+  const course = courseById(courseId);
+  if (!course) return [];
+  const mastery = conceptMastery(courseEvents(kidId, courseId));
+  return [...mastery.entries()]
+    .filter(([c, p]) => p < 0.6 && !c.includes("#m"))
+    .sort((a, b) => a[1] - b[1])
+    .map(([concept]) => {
+      const [lessonId, part] = concept.split("#");
+      const lesson = course.lessons.find((l) => l.id === lessonId);
+      const seg = lesson?.teach?.[Number(part)];
+      return seg?.probe ? { lessonId, seg: Number(part), title: `${lesson!.title}: ${seg.title}`, probe: seg.probe } : null;
+    })
+    .filter((x): x is NonNullable<typeof x> => !!x)
+    .slice(0, limit);
+}
+
+/** A warm-up review answer. Practice only, but it updates the learner model. */
+export function answerReview(kidId: number, courseId: string, lessonId: string, segIndex: number, answer: unknown, ms: number, attempt: number) {
+  const seg = courseById(courseId)?.lessons.find((l) => l.id === lessonId)?.teach?.[segIndex];
+  if (!seg?.probe) throw new PortalError("Unknown review question.");
+  const graded = gradeProbe(seg.probe, answer);
+  if (graded.correct || attempt >= 2) {
+    logLearningEvent(kidId, {
+      subject: courseId,
+      concept: `${lessonId}#${segIndex}`,
+      firstTry: graded.correct && attempt <= 1,
+      score: graded.score,
+      ms,
+      expectedMs: expectedSeconds(seg.probe) * 1000,
+      helped: attempt > 1,
+      source: "review",
+    });
+  }
+  return { ...graded, coach: graded.correct ? null : graded.coach ?? seg.probe.hint ?? null, solution: !graded.correct && attempt >= 2 ? probeSolution(seg.probe) : null };
+}
+
+/** Lets the multiple-choice quick think feed the learner model too. */
+export function logThinkResolved(kidId: number, courseId: string, lessonId: string, segIndex: number, st: SegmentState, correct: boolean) {
+  logLearningEvent(kidId, {
+    subject: courseId,
+    concept: `${lessonId}#${segIndex}`,
+    firstTry: correct && st.misses === 0 && st.lost === 0,
+    score: correct ? 1 : 0,
+    ms: st.ms ?? 0,
+    expectedMs: 30_000,
+    helped: st.rung > 0 || st.lost > 0,
+    source: "think",
+  });
 }

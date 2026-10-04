@@ -59,6 +59,22 @@ Notice that the main idea is a full sentence, not just a topic. "Racing" is a to
               { front: "Margin note", back: "One or two words naming what you noticed, like 'pride'" },
             ],
           },
+          probe: {
+            type: "match",
+            prompt: "Match each thing you find while reading to the mark a close reader would make.",
+            pairs: [
+              { left: "A word you don't know, like 'plodded'", right: "Circle it" },
+              { left: "A striking line, like 'sure he had time to spare'", right: "Underline it" },
+              { left: "A spot that confuses you", right: "Put a question mark" },
+              { left: "Something you noticed, like the hare's pride", right: "Write a one-word margin note" },
+            ],
+            hint: "Think about what each mark is for: flagging a word, saving a line, marking confusion, or naming an idea.",
+            mistakes: [
+              { match: "Underlined the unknown word", coach: "Underlining saves an important line. A word you need to figure out gets circled so it stands out on its own." },
+              { match: "Margin note for the confusing spot", coach: "A margin note names something you understood. When you're confused, a question mark reminds you to come back." },
+            ],
+            seconds: 35,
+          },
           think: {
             q: "You hit a word you don't know, 'plodded.' What should a close reader do?",
             choices: [
@@ -105,6 +121,25 @@ Notice that the main idea is a full sentence, not just a topic. "Racing" is a to
             ],
             correct: [2],
           },
+          probe: {
+            type: "sort",
+            prompt: "Sort each question: does it unlock the story's meaning, or is it just a small fact?",
+            buckets: ["Unlocks meaning", "Just a small fact"],
+            items: [
+              { text: "Why would the hare nap in the middle of a race?", bucket: 0 },
+              { text: "What color was the tortoise?", bucket: 1 },
+              { text: "Why does the writer say the tortoise never stopped?", bucket: 0 },
+              { text: "How many pages is the story?", bucket: 1 },
+              { text: "What does the hare's laughing tell us about him?", bucket: 0 },
+              { text: "What day of the week was the race?", bucket: 1 },
+            ],
+            hint: "Questions that unlock meaning ask why a character chose something or why the writer said it a certain way.",
+            mistakes: [
+              { match: "Put the laughing question under small fact", coach: "Laughing at someone reveals character. Asking what it tells us about the hare points straight at his pride." },
+              { match: "Put the color question under unlocks meaning", coach: "The tortoise's color doesn't change what the story teaches. Ask about choices and causes instead." },
+            ],
+            seconds: 40,
+          },
           think: {
             q: "Which question would help you understand the fable most?",
             choices: [
@@ -142,6 +177,18 @@ Notice that the main idea is a full sentence, not just a topic. "Racing" is a to
             type: "compare",
             left: { title: "Topic", points: ["One word or phrase", "Racing", "Friendship", "Like a folder label"] },
             right: { title: "Main idea", points: ["A full sentence", "Steady effort beats lazy talent.", "Real friends tell you the truth.", "Makes a point you can prove"] },
+          },
+          probe: {
+            type: "build",
+            prompt: "The topic is 'patience.' Tap the tiles to build a full main-idea sentence about it.",
+            tiles: ["Patience", "usually", "wins", "over", "speed."],
+            distractors: ["racing", "animals"],
+            hint: "A main idea is a complete sentence that makes a point about the topic, not just a label.",
+            mistakes: [
+              { match: "Used the tile 'racing' or 'animals'", coach: "Those are more topics, like folder labels. Your sentence should say what patience does." },
+              { match: "Stopped after 'Patience'", coach: "One word is still a topic. Keep going until the sentence makes a point someone could prove." },
+            ],
+            seconds: 30,
           },
           think: {
             q: "Which is a main idea, not just a topic?",
@@ -188,6 +235,24 @@ Notice that the main idea is a full sentence, not just a topic. "Racing" is a to
               "The race took place in the countryside.",
             ],
             correct: [0, 1],
+          },
+          probe: {
+            type: "highlight",
+            prompt: "Claim: the hare was overconfident. Tap the sentences that are real evidence from the fable.",
+            sentences: [
+              "The hare was kind of lazy, I think.",
+              "The hare laughed at the tortoise for being slow.",
+              "Hares are usually fast animals.",
+              "The hare lay down for a nap, sure he had time to spare.",
+              "The story was pretty short.",
+            ],
+            correct: [1, 3],
+            hint: "Evidence is an exact detail from the story that you could put your finger on, not a feeling or a general fact.",
+            mistakes: [
+              { match: "Tapped 'The hare was kind of lazy, I think.'", coach: "That's your opinion, not something that happens on the page. Point to what the hare actually did." },
+              { match: "Tapped 'Hares are usually fast animals.'", coach: "That's true about hares in general, but it isn't from the fable and doesn't show overconfidence." },
+            ],
+            seconds: 35,
           },
           think: {
             q: "Which is the strongest evidence that the tortoise was persistent?",
@@ -244,6 +309,72 @@ Notice that the main idea is a full sentence, not just a topic. "Racing" is a to
           "Back it up with specific evidence you can point to in the text.",
         ],
       },
+      mastery: [
+        {
+          type: "cloze",
+          text: "'Racing' is just a {0}, but 'Steady effort beats careless talent' is a main {1}. To prove it, a close reader points to {2}, like the hare's nap.",
+          blanks: [{ answers: ["topic"] }, { answers: ["idea"] }, { answers: ["evidence", "proof"] }],
+          bank: ["topic", "idea", "evidence", "opinion", "title", "guess"],
+          hint: "Remember the three tools: a label for the subject, a full-sentence point, and the proof you can put your finger on.",
+          mistakes: [
+            { match: "opinion", coach: "An opinion is a feeling. A close reader proves the main idea with exact details from the text." },
+            { match: "title", coach: "A title names the whole work. A one-word label for what a passage is about is called something else." },
+            { match: "guess", coach: "A main idea starts as a guess, but what you point to on the page is the thing that proves it." },
+          ],
+          seconds: 35,
+        },
+        {
+          type: "sort",
+          prompt: "Sort each one: just a topic, or a full main idea?",
+          buckets: ["Topic", "Main idea"],
+          items: [
+            { text: "Courage", bucket: 0 },
+            { text: "Courage means acting even when you are afraid.", bucket: 1 },
+            { text: "Lies", bucket: 0 },
+            { text: "One small lie can grow into a big problem.", bucket: 1 },
+            { text: "Summer camp", bucket: 0 },
+            { text: "Trying new things at camp builds confidence.", bucket: 1 },
+          ],
+          hint: "If it could be a folder label, it's a topic. If it makes a point someone could prove, it's a main idea.",
+          mistakes: [
+            { match: "Put 'Summer camp' under main idea", coach: "'Summer camp' names a subject but says nothing about it. What point could you make about camp?" },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "highlight",
+          prompt: "Main idea: practice turns struggle into skill. Tap every sentence that is evidence for it.",
+          sentences: [
+            "Mia practiced the piano every afternoon, even when her friends went to the pool.",
+            "At first her fingers stumbled through the hard parts.",
+            "The recital hall had red velvet curtains.",
+            "By the recital, she played the whole piece without a single mistake.",
+            "Her brother prefers the drums.",
+          ],
+          correct: [0, 1, 3],
+          hint: "The main idea has three pieces: practice, struggle and skill. Find the detail that proves each one.",
+          mistakes: [
+            { match: "Tapped the red velvet curtains", coach: "That's a true detail, but it doesn't prove anything about practice or skill." },
+            { match: "Missed the stumbling fingers", coach: "Stumbling fingers are the struggle part of the main idea. That's evidence too." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "sequence",
+          prompt: "Put the steps of close reading in order.",
+          steps: [
+            "Read slowly and annotate as you go",
+            "Ask questions about key moments",
+            "State the main idea as a full sentence",
+            "Point to specific evidence that proves it",
+          ],
+          hint: "You can't name a main idea before you've noticed things, and you can't prove an idea you haven't stated yet.",
+          mistakes: [
+            { match: "Put evidence before the main idea", coach: "Evidence proves something, so you need to state the idea first." },
+          ],
+          seconds: 30,
+        },
+      ],
       check: [
         {
           q: "What does it mean to annotate a text?",
@@ -353,6 +484,19 @@ When you revise, read each sentence aloud and ask: Is the verb doing real work? 
               { front: "Decoration", back: "Extra words that add detail: ...above the quiet field." },
             ],
           },
+          probe: {
+            type: "cloze",
+            text: "In 'My little sister giggled at the puppy,' the subject is {0} and the verb is {1}.",
+            blanks: [{ answers: ["sister"] }, { answers: ["giggled"] }],
+            bank: ["sister", "giggled", "little", "puppy", "at"],
+            hint: "Ask 'What is happening?' to find the verb, then 'Who is doing it?' to find the subject.",
+            mistakes: [
+              { match: "little", coach: "'Little' describes someone. Which noun is it describing? That noun is the subject." },
+              { match: "puppy", coach: "The puppy is being giggled at, but it isn't doing the action. Who giggled?" },
+              { match: "at", coach: "'At' is a small connecting word. The verb is the action word." },
+            ],
+            seconds: 25,
+          },
           think: {
             q: "In 'My little sister giggled at the puppy,' what is the subject?",
             choices: ["giggled", "puppy", "sister", "little"],
@@ -395,6 +539,19 @@ When you revise, read each sentence aloud and ask: Is the verb doing real work? 
             ],
             correct: [1, 2, 4],
           },
+          probe: {
+            type: "cloze",
+            text: "Replace the weak verb and its helpers: 'The tired hiker walked slowly up the muddy trail' becomes 'The tired hiker {0} up the muddy trail.'",
+            blanks: [{ answers: ["trudged", "plodded", "slogged", "lumbered", "trudge"] }],
+            bank: ["trudged", "plodded", "went", "moved", "got"],
+            hint: "Look for one sharp verb that already means 'walked slowly and wearily' all by itself.",
+            mistakes: [
+              { match: "went", coach: "'Went' is even weaker than 'walked.' It doesn't show how the hiker moved at all." },
+              { match: "moved", coach: "'Moved' is vague. Could you picture tired, heavy steps from that word?" },
+              { match: "got", coach: "'Got' is one of the weakest verbs there is. Pick a verb that paints the slow, weary steps." },
+            ],
+            seconds: 20,
+          },
           think: {
             q: "What is the best replacement for 'walked slowly and tiredly'?",
             choices: ["trudged", "went", "walked very slowly", "moved"],
@@ -430,6 +587,22 @@ When you revise, read each sentence aloud and ask: Is the verb doing real work? 
             left: { title: "Vague", points: ["food", "some things", "an animal", "stuff outside"] },
             right: { title: "Concrete", points: ["a cold slice of pepperoni pizza", "a rusty key and a marble", "a muddy beagle", "a tipped-over red wheelbarrow"] },
           },
+          probe: {
+            type: "match",
+            prompt: "Match each vague noun to a concrete version you can actually picture.",
+            pairs: [
+              { left: "a drink", right: "a mug of steaming hot cocoa" },
+              { left: "a tool", right: "a red-handled hammer" },
+              { left: "a vehicle", right: "a rusty pickup truck" },
+              { left: "a plant", right: "a drooping sunflower" },
+            ],
+            hint: "For each vague word, ask 'What exactly?' and find the picture that answers it.",
+            mistakes: [
+              { match: "Matched 'a plant' with the hot cocoa", coach: "Cocoa is something you drink. Which picture shows a living, growing thing?" },
+              { match: "Matched 'a tool' with the pickup truck", coach: "A truck is something you drive. Which picture is something you'd hold in your hand to build with?" },
+            ],
+            seconds: 30,
+          },
           think: {
             q: "Which phrase is the most concrete?",
             choices: ["various items", "some stuff", "a cracked blue mug", "a thing"],
@@ -464,6 +637,18 @@ When you revise, read each sentence aloud and ask: Is the verb doing real work? 
             type: "compare",
             left: { title: "Wordy", points: ["due to the fact that", "in order to", "really very tired", "at this point in time"] },
             right: { title: "Trimmed", points: ["because", "to", "exhausted", "now"] },
+          },
+          probe: {
+            type: "build",
+            prompt: "Trim it: 'In order to win the game, we really needed to practice.' Build the shorter sentence that keeps the meaning.",
+            tiles: ["To win", "the game,", "we needed", "to practice."],
+            distractors: ["In order", "really"],
+            hint: "Keep every word that carries meaning and leave behind the ones that only add padding.",
+            mistakes: [
+              { match: "Used the 'In order' tile", coach: "'In order to' says the same thing as 'to.' Two extra words, no extra meaning." },
+              { match: "Used the 'really' tile", coach: "'Really' sounds strong but adds nothing. 'We needed to practice' already says it." },
+            ],
+            seconds: 30,
           },
           think: {
             q: "Which is the best revision of 'In order to win the game, we really needed to practice'?",
@@ -518,6 +703,74 @@ When you revise, read each sentence aloud and ask: Is the verb doing real work? 
           "Cut extra words and mix short and long sentences.",
         ],
       },
+      mastery: [
+        {
+          type: "cloze",
+          text: "Original: 'Due to the fact that it was raining, we went inside.' Revised: '{0} it was raining, we {1} inside.'",
+          blanks: [
+            { answers: ["Because", "Since", "As"] },
+            { answers: ["dashed", "hurried", "raced", "ran", "rushed", "scrambled", "darted", "sprinted"] },
+          ],
+          bank: ["Because", "dashed", "went", "Due to the fact that", "got", "hurried"],
+          hint: "Swap the five-word phrase for one word, then swap the weak verb for one that shows how you moved.",
+          mistakes: [
+            { match: "Due to the fact that", coach: "That's the wordy phrase you're trying to cut. One small word means the same thing." },
+            { match: "went", coach: "'Went' is the weak verb from the original. How did you move when the rain hit?" },
+            { match: "got", coach: "'Got' is even weaker than 'went.' Pick a verb that shows speed." },
+          ],
+          seconds: 35,
+        },
+        {
+          type: "highlight",
+          prompt: "Tap the sentences a careful writer would leave just as they are.",
+          sentences: [
+            "The beagle snatched the sandwich off the picnic blanket.",
+            "The dog got some food.",
+            "Thunder rattled the kitchen windows.",
+            "It was really very loud outside.",
+            "Grandma kneaded the bread dough with floury hands.",
+          ],
+          correct: [0, 2, 4],
+          hint: "A finished sentence has a strong verb, concrete nouns and no padding words.",
+          mistakes: [
+            { match: "Tapped 'The dog got some food.'", coach: "'Got' is a weak verb and 'some food' is vague. This one needs revising." },
+            { match: "Tapped 'It was really very loud outside.'", coach: "'Really very' is padding and 'was' does no work. What made the noise?" },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "build",
+          prompt: "Build a vivid sentence with a strong verb and concrete nouns.",
+          tiles: ["The muddy beagle", "burst", "through", "the screen door."],
+          distractors: ["went", "some stuff"],
+          hint: "Pick the verb that shows exactly how the dog moved, and skip any word a reader can't picture.",
+          mistakes: [
+            { match: "Used 'went'", coach: "'Went' tells us the dog moved but not how. There's a sharper verb in the tiles." },
+            { match: "Used 'some stuff'", coach: "'Some stuff' is vague fog. The screen door is something the reader can see." },
+          ],
+          seconds: 30,
+        },
+        {
+          type: "sort",
+          prompt: "Sort each verb: weak or strong?",
+          buckets: ["Weak verb", "Strong verb"],
+          items: [
+            { text: "went", bucket: 0 },
+            { text: "sprinted", bucket: 1 },
+            { text: "got", bucket: 0 },
+            { text: "snatched", bucket: 1 },
+            { text: "made", bucket: 0 },
+            { text: "scribbled", bucket: 1 },
+            { text: "was", bucket: 0 },
+            { text: "whispered", bucket: 1 },
+          ],
+          hint: "A strong verb lets you picture exactly how something happened. A weak one only says that it happened.",
+          mistakes: [
+            { match: "Put 'made' under strong", coach: "'Made' could mean built, baked, drew or anything. It doesn't paint a picture." },
+          ],
+          seconds: 35,
+        },
+      ],
       check: [
         {
           q: "In \"The hawk circled above the field,\" what is the verb?",
@@ -626,6 +879,25 @@ Here is a quick test. Cover everything but the topic sentence and ask what the p
             ],
             correct: [0],
           },
+          probe: {
+            type: "sort",
+            prompt: "Sort each topic sentence by its size.",
+            buckets: ["Too broad", "Just right", "Too narrow"],
+            items: [
+              { text: "The world is full of sports.", bucket: 0 },
+              { text: "Practicing free throws every day made me a better player.", bucket: 1 },
+              { text: "My basketball is orange.", bucket: 2 },
+              { text: "Animals are interesting.", bucket: 0 },
+              { text: "Owning a dog teaches responsibility.", bucket: 1 },
+              { text: "My dog weighs forty pounds.", bucket: 2 },
+            ],
+            hint: "Ask: would this need a whole book, a handful of sentences, or nothing more at all?",
+            mistakes: [
+              { match: "Put 'My dog weighs forty pounds.' under just right", coach: "That's a single fact. Once you say it, there's nothing left to prove, so it's too narrow." },
+              { match: "Put 'Animals are interesting.' under just right", coach: "Think how many animals there are. Covering all of them would take a whole book." },
+            ],
+            seconds: 45,
+          },
           think: {
             q: "Which topic sentence is the right size for one paragraph?",
             choices: [
@@ -672,6 +944,24 @@ Here is a quick test. Cover everything but the topic sentence and ask what the p
             ],
             correct: [2],
           },
+          probe: {
+            type: "highlight",
+            prompt: "Topic sentence: 'Gardening teaches patience.' Tap every sentence that wanders off topic and should be cut.",
+            sentences: [
+              "Seeds can take weeks to sprout, so you keep watering and wait.",
+              "My neighbor has a red mailbox.",
+              "Tomatoes stay green for weeks before they finally ripen.",
+              "Some people don't like vegetables.",
+              "Pulling weeds every Saturday means sticking with a slow job.",
+            ],
+            correct: [1, 3],
+            hint: "Read each sentence and ask, 'Does this help prove that gardening teaches patience?'",
+            mistakes: [
+              { match: "Tapped the tomato sentence", coach: "Waiting weeks for tomatoes to ripen is exactly what patience looks like. That one stays." },
+              { match: "Missed 'Some people don't like vegetables.'", coach: "Liking vegetables is a different topic. It has nothing to do with learning patience." },
+            ],
+            seconds: 35,
+          },
           think: {
             q: "Topic sentence: 'Gardening teaches patience.' Which detail supports it?",
             choices: [
@@ -717,6 +1007,22 @@ Here is a quick test. Cover everything but the topic sentence and ask what the p
               { front: "Because of this", back: "Show a result" },
             ],
           },
+          probe: {
+            type: "cloze",
+            text: "Our team practiced hard. {0}, we lost the first game. {1}, we watched the video and fixed our mistakes.",
+            blanks: [
+              { answers: ["However", "Still", "But", "Even so", "Yet"] },
+              { answers: ["After that", "Next", "Then", "Afterward", "Because of this", "So"] },
+            ],
+            bank: ["However", "After that", "For example", "First", "Similarly"],
+            hint: "Decide what each sentence does: does it push against the one before, or come next in time?",
+            mistakes: [
+              { match: "For example", coach: "'For example' brings in proof. Losing isn't an example of practicing hard." },
+              { match: "Similarly", coach: "'Similarly' links two ideas that are alike. Losing after hard practice is a surprise, not a match." },
+              { match: "First", coach: "'First' starts a list of steps. These sentences show a contrast and then what came after." },
+            ],
+            seconds: 30,
+          },
           think: {
             q: "'Our team practiced hard. ___, we lost the first game.' Which transition fits?",
             choices: ["For example", "However", "Also", "First"],
@@ -751,6 +1057,18 @@ Here is a quick test. Cover everything but the topic sentence and ask what the p
             type: "compare",
             left: { title: "Weak ending", points: ["Copies the topic sentence exactly", "Starts a new topic", "Lists every detail again"] },
             right: { title: "Strong ending", points: ["Says the point in fresh words", "Shows why it matters", "Feels finished"] },
+          },
+          probe: {
+            type: "build",
+            prompt: "Topic sentence: 'Learning to ride a bike takes patience.' Build a concluding sentence that says it in fresh words.",
+            tiles: ["Every fall", "was worth it", "the day", "I finally rode", "down the block alone."],
+            distractors: ["Scooters are also fun.", "takes patience."],
+            hint: "A good ending wraps up the same idea in new words and shows why it mattered.",
+            mistakes: [
+              { match: "Used 'Scooters are also fun.'", coach: "That starts a brand-new topic right when the paragraph should be closing." },
+              { match: "Used 'takes patience.'", coach: "That just echoes the topic sentence. Show the payoff of patience instead of repeating the word." },
+            ],
+            seconds: 35,
           },
           think: {
             q: "Topic sentence: 'Learning to ride a bike takes patience.' Which is the best concluding sentence?",
@@ -801,6 +1119,71 @@ Here is a quick test. Cover everything but the topic sentence and ask what the p
           "Transitions connect ideas, and a concluding sentence wraps up in fresh words.",
         ],
       },
+      mastery: [
+        {
+          type: "sequence",
+          prompt: "Unscramble this paragraph into the right order.",
+          steps: [
+            "Building a birdhouse taught me to measure carefully.",
+            "First, I cut the boards using my dad's tape measure.",
+            "However, my first roof piece was an inch too short and wouldn't fit.",
+            "Because of this, I learned to measure twice before every cut.",
+            "Now the birdhouse hangs straight on our fence, and so does my new habit.",
+          ],
+          hint: "Find the promise first, then follow the transition words: first, however, because of this, now.",
+          mistakes: [
+            { match: "Started with 'First, I cut the boards'", coach: "'First' starts the steps, but the reader needs the promise before the steps. Which sentence tells what the paragraph will show?" },
+            { match: "Put 'Because of this' before 'However'", coach: "'Because of this' points back to a problem. The problem has to happen first." },
+          ],
+          seconds: 50,
+        },
+        {
+          type: "match",
+          prompt: "Match each transition to the job it does.",
+          pairs: [
+            { left: "Finally", right: "Shows order" },
+            { left: "In addition", right: "Adds another point" },
+            { left: "For example", right: "Introduces proof" },
+            { left: "However", right: "Shows a contrast" },
+            { left: "As a result", right: "Shows a result" },
+          ],
+          hint: "Think of each transition as a turn signal: which way is the next idea about to go?",
+          mistakes: [
+            { match: "Matched 'However' with 'Adds another point'", coach: "'However' turns against what came before. Adding a similar point is a different job." },
+            { match: "Matched 'As a result' with 'Shows order'", coach: "'As a result' tells what something caused, not just what came next." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "highlight",
+          prompt: "Topic sentence: 'Saving money takes self-control.' Tap the sentence that should be cut.",
+          sentences: [
+            "Every week I put half my allowance in a jar.",
+            "When I see a new game, I remind myself what I'm saving for.",
+            "My jar used to hold pickles.",
+            "After four months, I had enough for a real telescope.",
+          ],
+          correct: [2],
+          hint: "Ask of each sentence: does this help prove that saving takes self-control?",
+          mistakes: [
+            { match: "Tapped the telescope sentence", coach: "Reaching the goal shows self-control paid off. That one helps keep the promise." },
+          ],
+          seconds: 30,
+        },
+        {
+          type: "cloze",
+          text: "A strong paragraph opens with a {0} sentence that makes a promise, uses {1} to connect ideas, and ends with a {2} sentence that says the point in fresh words.",
+          blanks: [{ answers: ["topic"] }, { answers: ["transitions", "transition words"] }, { answers: ["concluding", "conclusion"] }],
+          bank: ["topic", "transitions", "concluding", "title", "adverbs", "repeated"],
+          hint: "Name the promise, the mortar between the bricks, and the wrap-up.",
+          mistakes: [
+            { match: "repeated", coach: "A repeated sentence is an echo. The ending should say the idea in fresh words." },
+            { match: "adverbs", coach: "Adverbs describe verbs. The connecting words between ideas have their own name." },
+            { match: "title", coach: "A title sits above the writing. The sentence that makes the promise is inside the paragraph." },
+          ],
+          seconds: 30,
+        },
+      ],
       check: [
         {
           q: "What is the job of a topic sentence?",
@@ -909,6 +1292,24 @@ Abraham Lincoln, before he was President, was a frontier lawyer known for this k
               { text: "Some people eat breakfast.", bucket: 1 },
             ],
           },
+          probe: {
+            type: "highlight",
+            prompt: "Tap every sentence that is a real, arguable claim.",
+            sentences: [
+              "Dogs have four legs.",
+              "Kids should learn to swim before age ten.",
+              "The library has books.",
+              "Every family should have a weekly game night.",
+              "Water boils when it gets hot enough.",
+            ],
+            correct: [1, 3],
+            hint: "For each sentence, ask: could a reasonable person say 'I disagree'?",
+            mistakes: [
+              { match: "Tapped 'Water boils when it gets hot enough.'", coach: "Nobody argues with that. It's a fact, so there's nothing to persuade anyone about." },
+              { match: "Missed the game night sentence", coach: "A busy family might push back on that, which makes it arguable. That's a claim." },
+            ],
+            seconds: 30,
+          },
           think: {
             q: "Which is a real claim for a persuasive paragraph?",
             choices: [
@@ -953,6 +1354,24 @@ Abraham Lincoln, before he was President, was a frontier lawyer known for this k
             ],
             correct: [1, 2],
           },
+          probe: {
+            type: "sort",
+            prompt: "Claim: kids should get regular exercise. Sort each sentence: real evidence, or not evidence?",
+            buckets: ["Real evidence", "Not evidence"],
+            items: [
+              { text: "Running and playing make your heart and lungs stronger.", bucket: 0 },
+              { text: "Exercise is good because it is good.", bucket: 1 },
+              { text: "Climbing and jumping help build strong bones.", bucket: 0 },
+              { text: "Everyone says so.", bucket: 1 },
+              { text: "I just think it's right.", bucket: 1 },
+            ],
+            hint: "Real evidence is a specific fact or example a reader could check, not the claim said again or an opinion.",
+            mistakes: [
+              { match: "Put 'Exercise is good because it is good.' under evidence", coach: "That runs in a circle. It repeats the claim without adding any proof." },
+              { match: "Put 'Everyone says so.' under evidence", coach: "Lots of people saying something isn't proof. Point to a fact about the body." },
+            ],
+            seconds: 30,
+          },
           think: {
             q: "Claim: 'Kids should get regular exercise.' Which is the strongest evidence?",
             choices: [
@@ -992,6 +1411,22 @@ Abraham Lincoln, before he was President, was a frontier lawyer known for this k
             type: "compare",
             left: { title: "Fact dropped", points: ["Kids should cook.", "Recipes use fractions.", "(Reader: so what?)"] },
             right: { title: "Fact explained", points: ["Kids should cook.", "Recipes use fractions.", "This makes math practical, so kids see why it matters."] },
+          },
+          probe: {
+            type: "build",
+            prompt: "Build the argument in order: claim, then evidence, then the reasoning bridge.",
+            tiles: [
+              "Kids should learn to swim before age ten.",
+              "Swimming lessons teach kids what to do if they fall into water.",
+              "This means a child who can swim is much safer near lakes and pools.",
+            ],
+            distractors: ["Pools are usually blue."],
+            hint: "Start with the position, then the proof, then the sentence that explains why the proof matters.",
+            mistakes: [
+              { match: "Used 'Pools are usually blue.'", coach: "That's a random fact. Reasoning connects the evidence back to the claim." },
+              { match: "Put the reasoning before the evidence", coach: "Reasoning explains a piece of evidence, so the evidence has to come first." },
+            ],
+            seconds: 35,
           },
           think: {
             q: "Evidence: 'Swimming lessons teach kids what to do if they fall into water.' Which sentence is the reasoning?",
@@ -1037,6 +1472,19 @@ Abraham Lincoln, before he was President, was a frontier lawyer known for this k
               "Admit what is true about it",
               "Explain why your claim still holds",
             ],
+          },
+          probe: {
+            type: "cloze",
+            text: "Objection: 'Kitchens are dangerous.' Fair answer: 'Kitchens {0} have hot stoves and sharp knives, {1} that is exactly why kids should learn safe habits early, with an adult nearby.'",
+            blanks: [{ answers: ["do", "can", "really", "certainly"] }, { answers: ["but", "yet"] }],
+            bank: ["do", "but", "never", "so", "don't"],
+            hint: "A fair answer first admits what is true about the objection, then turns to show why your claim still holds.",
+            mistakes: [
+              { match: "never", coach: "Kitchens really do have hot stoves. Denying a true point makes readers trust you less." },
+              { match: "don't", coach: "Pretending the danger isn't real isn't fair. Admit it, then answer it." },
+              { match: "so", coach: "'So' makes it sound like the danger proves your point automatically. You need a word that turns against the objection." },
+            ],
+            seconds: 30,
           },
           think: {
             q: "Claim: 'Every family should have a game night.' Which is the best way to handle an objection?",
@@ -1091,6 +1539,74 @@ Abraham Lincoln, before he was President, was a frontier lawyer known for this k
           "Answer the other side fairly.",
         ],
       },
+      mastery: [
+        {
+          type: "match",
+          prompt: "Claim: kids should walk to school when it's close. Match each part of the argument to its sentence.",
+          pairs: [
+            { left: "Claim", right: "Kids should walk to school when it is close." },
+            { left: "Evidence", right: "Walking ten minutes each way adds up to over an hour and a half of exercise a week." },
+            { left: "Reasoning", right: "Because the exercise is built into the day, kids get it without needing extra time." },
+            { left: "Counterargument", right: "Some parents worry about bad weather." },
+            { left: "Response", right: "A raincoat handles most rainy days, and on stormy days a ride is fine." },
+          ],
+          hint: "Look for the job each sentence does: take a side, prove it, explain it, raise the other side, or answer it.",
+          mistakes: [
+            { match: "Swapped evidence and reasoning", coach: "Evidence is the checkable fact (the minutes of walking). Reasoning explains why that fact matters, often with 'because.'" },
+            { match: "Swapped counterargument and response", coach: "The counterargument is the worry from the other side. The response is your answer to it." },
+          ],
+          seconds: 55,
+        },
+        {
+          type: "build",
+          prompt: "Build a full argument in order: claim, evidence, reasoning, counterargument, response.",
+          tiles: [
+            "Families should have a weekly game night.",
+            "Board games make players take turns and lose without sulking.",
+            "This means kids practice patience while having fun.",
+            "Some families say they are too busy.",
+            "Even one hour a week can fit, and everyone looks forward to it.",
+          ],
+          distractors: ["People who don't like games are boring."],
+          hint: "A fair argument takes a side, proves it, explains it, then faces the other side calmly.",
+          mistakes: [
+            { match: "Used the 'boring' tile", coach: "Insulting people who disagree makes readers trust you less. Answer objections, don't mock them." },
+            { match: "Put the counterargument first", coach: "Readers need to know your claim before they hear the other side." },
+          ],
+          seconds: 50,
+        },
+        {
+          type: "highlight",
+          prompt: "Tap the sentence that is the reasoning bridge.",
+          sentences: [
+            "Kids should read every day.",
+            "Daily readers meet thousands of new words a year.",
+            "Because they know more words, they understand harder books and write more clearly.",
+            "Some say kids are too busy to read.",
+            "But even fifteen minutes before bed adds up.",
+          ],
+          correct: [2],
+          hint: "Reasoning explains why the evidence proves the claim. It often starts with 'because,' 'this means' or 'so.'",
+          mistakes: [
+            { match: "Tapped 'Daily readers meet thousands of new words a year.'", coach: "That's the evidence, the fact. Which sentence explains why knowing more words matters?" },
+            { match: "Tapped the fifteen minutes sentence", coach: "That answers the counterargument. Reasoning connects evidence to the claim." },
+          ],
+          seconds: 35,
+        },
+        {
+          type: "cloze",
+          text: "A {0} is a position reasonable people could disagree with. {1} supports it with facts or examples, and {2} explains why the evidence matters.",
+          blanks: [{ answers: ["claim"] }, { answers: ["evidence"] }, { answers: ["reasoning"] }],
+          bank: ["claim", "Evidence", "reasoning", "fact", "Shouting", "opinion"],
+          hint: "Think of the three parts: where you stand, what proves it, and the bridge between them.",
+          mistakes: [
+            { match: "fact", coach: "Nobody disagrees with a fact. The position you argue for has a different name." },
+            { match: "Shouting", coach: "Shouting rarely convinces anyone. What actually supports a claim?" },
+            { match: "opinion", coach: "An opinion alone isn't the bridge. The part that explains why evidence matters has its own name." },
+          ],
+          seconds: 30,
+        },
+      ],
       check: [
         {
           q: "Which of these is a real claim for a persuasive paragraph?",
@@ -1207,6 +1723,22 @@ True stories from your own life count. In fact, they are often the best ones, be
               "Resolution: Grandpa talked me down, and a week later I climbed up alone.",
             ],
           },
+          probe: {
+            type: "match",
+            prompt: "Match each part of the narrative arc to the moment from this story.",
+            pairs: [
+              { left: "Setup", right: "A girl moves to a new town in September." },
+              { left: "Conflict", right: "She sits alone at lunch every single day." },
+              { left: "Climax", right: "Heart pounding, she carries her tray to a crowded table." },
+              { left: "Resolution", right: "By spring, she is the one inviting new kids to sit down." },
+            ],
+            hint: "Picture the hill: calm start, the climb of trouble, the scary top, and the way back down.",
+            mistakes: [
+              { match: "Matched Conflict with the crowded table", coach: "Walking to the table is the tensest moment, where things must turn. That's the top of the hill: the climax." },
+              { match: "Matched Setup with sitting alone", coach: "Sitting alone is the problem. The setup only tells who, where and when." },
+            ],
+            seconds: 35,
+          },
           think: {
             q: "Which part of the arc is the moment of greatest tension?",
             choices: ["Setup", "Climax", "Resolution", "Conflict"],
@@ -1247,6 +1779,24 @@ True stories from your own life count. In fact, they are often the best ones, be
               { text: "I broke Mom's vase and heard her car pull in.", bucket: 0 },
               { text: "We ate dinner and watched the sunset.", bucket: 1 },
             ],
+          },
+          probe: {
+            type: "highlight",
+            prompt: "Tap every story opening that has a conflict.",
+            sentences: [
+              "We went to the store and bought milk.",
+              "The morning of the spelling bee, I woke up with no voice.",
+              "My room is painted blue.",
+              "I had one minute to find my lost ticket before the train pulled away.",
+              "It was a regular Tuesday.",
+            ],
+            correct: [1, 3],
+            hint: "Look for a want, a fear, a problem or a hard choice: something that could go wrong.",
+            mistakes: [
+              { match: "Tapped 'It was a regular Tuesday.'", coach: "That might start a story, but nothing is wrong yet. Nobody wants anything or is in trouble." },
+              { match: "Missed the train ticket opening", coach: "A lost ticket and a ticking clock is a real problem. That pulls the reader forward." },
+            ],
+            seconds: 30,
           },
           think: {
             q: "Which opening has a conflict that pulls the reader in?",
@@ -1295,6 +1845,25 @@ True stories from your own life count. In fact, they are often the best ones, be
             ],
             correct: [1, 3],
           },
+          probe: {
+            type: "sort",
+            prompt: "Sort each sentence: showing or telling?",
+            buckets: ["Showing", "Telling"],
+            items: [
+              { text: "She was really tired.", bucket: 1 },
+              { text: "Her eyelids drooped, and she yawned so wide her jaw clicked.", bucket: 0 },
+              { text: "He was angry.", bucket: 1 },
+              { text: "He slammed the door so hard the plates rattled.", bucket: 0 },
+              { text: "The kitchen smelled good.", bucket: 1 },
+              { text: "The kitchen smelled of warm bread and cinnamon.", bucket: 0 },
+            ],
+            hint: "Telling names the feeling. Showing gives details you could see, hear, smell or feel.",
+            mistakes: [
+              { match: "Put 'She was really tired.' under showing", coach: "'Really' makes it stronger, but it still just names the feeling. What would we see?" },
+              { match: "Put 'The kitchen smelled good.' under showing", coach: "It mentions smell, but 'good' isn't a smell you can imagine. Which sentence lets you actually smell it?" },
+            ],
+            seconds: 40,
+          },
           think: {
             q: "Which sentence best shows that a character is tired?",
             choices: [
@@ -1336,6 +1905,19 @@ True stories from your own life count. In fact, they are often the best ones, be
               { front: "New speaker", back: "Start a new paragraph each time a different person talks" },
               { front: "Punctuation", back: "Commas and periods go inside the closing quotation mark" },
             ],
+          },
+          probe: {
+            type: "cloze",
+            text: "Each time the speaker changes, start a new {0}. Put the spoken words inside {1} marks, and keep the comma {2} the closing mark.",
+            blanks: [{ answers: ["paragraph"] }, { answers: ["quotation", "quote"] }, { answers: ["inside"] }],
+            bank: ["paragraph", "quotation", "inside", "outside", "chapter", "question"],
+            hint: "Think about how a reader can always tell who's talking and which words were said out loud.",
+            mistakes: [
+              { match: "chapter", coach: "A whole new chapter for each speaker would be far too much. A smaller break does the job." },
+              { match: "outside", coach: "In American writing, commas and periods tuck inside the closing quotation mark." },
+              { match: "question", coach: "Question marks end questions. The marks that wrap spoken words have a different name." },
+            ],
+            seconds: 30,
           },
           think: {
             q: "Two characters are talking back and forth. What should you do each time the speaker changes?",
@@ -1391,6 +1973,70 @@ True stories from your own life count. In fact, they are often the best ones, be
           "Dialogue reveals characters, with quotation marks and a new paragraph for each speaker.",
         ],
       },
+      mastery: [
+        {
+          type: "sequence",
+          prompt: "Put this story in narrative-arc order.",
+          steps: [
+            "Leo's family adopts a shy rescue dog named Pepper.",
+            "At the park, Pepper slips her leash and vanishes into the woods.",
+            "At dusk, Leo hears a whimper under a fallen log and crawls in after her.",
+            "Now Pepper sleeps at the foot of Leo's bed and follows him everywhere.",
+          ],
+          hint: "Find the calm start, the moment trouble begins, the scariest moment, and how things settle.",
+          mistakes: [
+            { match: "Put the fallen log before the leash", coach: "Leo can't find Pepper until she's lost. The problem has to come before the climax." },
+          ],
+          seconds: 35,
+        },
+        {
+          type: "highlight",
+          prompt: "Tap every sentence that shows instead of tells.",
+          sentences: [
+            "I was nervous before my speech.",
+            "My note cards shook so hard the words blurred.",
+            "The audience was big.",
+            "Rows of faces stretched all the way to the back wall.",
+            "Then I started talking.",
+            "My voice cracked on the first word, and somebody coughed.",
+          ],
+          correct: [1, 3, 5],
+          hint: "Showing sentences give details you could see or hear. Telling sentences just name the feeling or fact.",
+          mistakes: [
+            { match: "Tapped 'I was nervous before my speech.'", coach: "That names the feeling. Which sentence lets you see the nerves?" },
+            { match: "Tapped 'The audience was big.'", coach: "'Big' is a label. Which sentence lets you picture how big?" },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "cloze",
+          text: "Turn telling into showing. 'It was cold' becomes: 'Frost {0} under my boots, and my {1} hung in the air like smoke.'",
+          blanks: [{ answers: ["crunched", "crackled", "snapped", "creaked"] }, { answers: ["breath"] }],
+          bank: ["crunched", "breath", "was", "coldness", "went", "feelings"],
+          hint: "Use your senses: what would frost sound like underfoot, and what can you see in the air on a freezing day?",
+          mistakes: [
+            { match: "was", coach: "'Was' doesn't make a sound. What noise does frost make when you step on it?" },
+            { match: "coldness", coach: "'Coldness' names the feeling again. What can you actually see hanging in freezing air?" },
+            { match: "went", coach: "'Went' is a weak verb. Pick a word you could hear." },
+          ],
+          seconds: 30,
+        },
+        {
+          type: "match",
+          prompt: "Match each storytelling tool to its example.",
+          pairs: [
+            { left: "Showing", right: "He slammed the door so hard the plates rattled." },
+            { left: "Telling", right: "He was angry." },
+            { left: "Dialogue", right: "'Don't look down,' Grandpa said." },
+            { left: "Conflict", right: "I wanted to make the team, but I'd never played before." },
+          ],
+          hint: "Look for a feeling named, a feeling shown, spoken words, and a want that's hard to get.",
+          mistakes: [
+            { match: "Swapped showing and telling", coach: "Telling names the feeling in a word. Showing gives the action that lets you feel it." },
+          ],
+          seconds: 35,
+        },
+      ],
       check: [
         {
           q: "What part of the narrative arc is the moment of greatest tension?",
@@ -1504,6 +2150,19 @@ The most important word in a review is "because." "I liked it" tells us little. 
               { text: "Instructions for an old phone model", bucket: 1 },
             ],
           },
+          probe: {
+            type: "cloze",
+            text: "Clothes and technology change, but people don't change much {0}. That's why a classic about {1} still grips readers 150 years later.",
+            blanks: [{ answers: ["inside"] }, { answers: ["courage", "friendship", "loyalty"] }],
+            bank: ["inside", "outside", "courage", "gadgets", "fads", "quickly"],
+            hint: "Classics last because of feelings and experiences every generation shares, not things that go out of style.",
+            mistakes: [
+              { match: "gadgets", coach: "Gadgets are exactly what goes out of date. What do readers 150 years apart still have in common?" },
+              { match: "fads", coach: "A fad fades with time. Pick a theme that never goes out of style." },
+              { match: "outside", coach: "On the outside, like clothes, people change a lot. It's the inside that stays the same." },
+            ],
+            seconds: 25,
+          },
           think: {
             q: "Why can a reader today still enjoy a book written 150 years ago?",
             choices: [
@@ -1550,6 +2209,23 @@ The most important word in a review is "because." "I liked it" tells us little. 
               { front: "The Adventures of Tom Sawyer", back: "Mark Twain: mischief, adventure and buried treasure" },
             ],
           },
+          probe: {
+            type: "match",
+            prompt: "Match each classic to what it's about.",
+            pairs: [
+              { left: "Treasure Island", right: "Jim Hawkins sails with pirates" },
+              { left: "Robinson Crusoe", right: "A shipwrecked man survives alone on an island" },
+              { left: "The Call of the Wild", right: "A stolen dog must survive the Yukon" },
+              { left: "Little Women", right: "Four sisters grow up in hard times" },
+              { left: "Around the World in Eighty Days", right: "A race against the clock" },
+            ],
+            hint: "Use clues in each title: an island treasure, a wild call, women growing up, a number of days.",
+            mistakes: [
+              { match: "Swapped Treasure Island and Robinson Crusoe", coach: "Both have islands, but only one has pirates and a treasure map. The other is about surviving alone." },
+              { match: "Matched The Call of the Wild with the shipwreck", coach: "The 'wild' in this title is the frozen Yukon, and the hero is a dog named Buck." },
+            ],
+            seconds: 40,
+          },
           think: {
             q: "If you love survival stories about being alone in the wild, which classic fits best?",
             choices: ["Little Women", "Tom Sawyer", "Around the World in Eighty Days", "Robinson Crusoe"],
@@ -1590,6 +2266,23 @@ The most important word in a review is "because." "I liked it" tells us little. 
               "Recommendation: anyone who loves animals and tough adventures should read it.",
             ],
           },
+          probe: {
+            type: "build",
+            prompt: "Build a Treasure Island review in the right order: summary, opinion, reason, recommendation. Leave out anything that spoils the ending.",
+            tiles: [
+              "Jim Hawkins finds a treasure map in an old pirate's sea chest.",
+              "This is one of my favorite books.",
+              "Long John Silver is friendly one minute and dangerous the next, so I never knew who to trust.",
+              "It's great for anyone who likes suspense.",
+            ],
+            distractors: ["At the very end, Jim sails home with his share of the treasure."],
+            hint: "A review starts with a spoiler-free beginning, then your opinion, then why, then who should read it.",
+            mistakes: [
+              { match: "Used the tile about the very end", coach: "That gives away the ending. A summary only covers the beginning so the next reader gets the surprise." },
+              { match: "Put the recommendation first", coach: "Readers need to know what the book is and what you thought before you tell them who should read it." },
+            ],
+            seconds: 45,
+          },
           think: {
             q: "What should the summary part of a review avoid?",
             choices: ["Naming the main character", "Giving away the ending", "Describing the setting"],
@@ -1623,6 +2316,19 @@ The most important word in a review is "because." "I liked it" tells us little. 
             type: "compare",
             left: { title: "Empty opinion", points: ["It was good.", "I liked it a lot.", "It was boring."] },
             right: { title: "Opinion with because", points: ["It was good because every chapter ended on a cliffhanger.", "I liked it because the sisters felt like real people.", "The middle dragged because the same scene repeated."] },
+          },
+          probe: {
+            type: "cloze",
+            text: "Turn an empty opinion into a real one: 'I liked it {0} Buck changes from a pampered pet into a {1}, and I couldn't stop reading.'",
+            blanks: [{ answers: ["because", "since"] }, { answers: ["survivor", "fighter"] }],
+            bank: ["because", "and", "survivor", "thing", "so", "stuff"],
+            hint: "One word turns an opinion into a reason, and the second blank should name a specific change in Buck.",
+            mistakes: [
+              { match: "and", coach: "'And' just adds another thought. You need the word that introduces a reason." },
+              { match: "thing", coach: "'A thing' is vague. Name exactly what Buck becomes in the harsh Yukon." },
+              { match: "stuff", coach: "'Stuff' tells the reader nothing. What does Buck turn into?" },
+            ],
+            seconds: 25,
           },
           think: {
             q: "Which review sentence is strongest?",
@@ -1679,6 +2385,72 @@ The most important word in a review is "because." "I liked it" tells us little. 
           "Opinions need specific reasons, often joined with 'because.'",
         ],
       },
+      mastery: [
+        {
+          type: "sort",
+          prompt: "Sort each review sentence: strong or weak?",
+          buckets: ["Strong", "Weak"],
+          items: [
+            { text: "It was good.", bucket: 1 },
+            { text: "The storm scene felt so real I could almost taste the salt spray.", bucket: 0 },
+            { text: "I liked it a lot, a lot.", bucket: 1 },
+            { text: "Readers who like animals and survival stories will enjoy it.", bucket: 0 },
+            { text: "Everyone should read it.", bucket: 1 },
+            { text: "Little Women made me laugh because Jo says exactly what she thinks.", bucket: 0 },
+          ],
+          hint: "Strong review sentences give a specific reason, example or audience. Weak ones are empty opinions.",
+          mistakes: [
+            { match: "Put 'Everyone should read it.' under strong", coach: "That's a recommendation with no reason and no specific reader. Who exactly, and why?" },
+            { match: "Put the storm scene under weak", coach: "A specific scene with a sensory detail is a strong reason. It shows what the book is like." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "match",
+          prompt: "Match each classic to its author.",
+          pairs: [
+            { left: "Treasure Island", right: "Robert Louis Stevenson" },
+            { left: "The Call of the Wild", right: "Jack London" },
+            { left: "Little Women", right: "Louisa May Alcott" },
+            { left: "Around the World in Eighty Days", right: "Jules Verne" },
+            { left: "The Adventures of Tom Sawyer", right: "Mark Twain" },
+          ],
+          hint: "Start with the pairs you're sure of, then use what's left over.",
+          mistakes: [
+            { match: "Swapped Stevenson and Verne", coach: "Stevenson wrote about pirates and a treasure map. Verne wrote about a race around the globe." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "highlight",
+          prompt: "This review summary of Robinson Crusoe has a problem. Tap the sentence that gives away the ending.",
+          sentences: [
+            "Robinson Crusoe ignores his family's advice and goes to sea.",
+            "A terrible storm wrecks his ship, and he washes up alone on an island.",
+            "He is finally rescued after twenty-eight years.",
+            "I loved watching him build a life from almost nothing.",
+          ],
+          correct: [2],
+          hint: "A summary should cover the beginning only. Which sentence tells how the whole story turns out?",
+          mistakes: [
+            { match: "Tapped the shipwreck sentence", coach: "The shipwreck happens early. It sets up the story without spoiling how it ends." },
+          ],
+          seconds: 25,
+        },
+        {
+          type: "cloze",
+          text: "Classics last because they explore {0} experiences and are well crafted. A good review gives a summary with no {1}, an opinion, reasons joined by '{2},' and a recommendation.",
+          blanks: [{ answers: ["timeless"] }, { answers: ["spoilers", "spoiler"] }, { answers: ["because"] }],
+          bank: ["timeless", "spoilers", "because", "modern", "characters", "and"],
+          hint: "Think about what never goes out of style, what ruins a book for the next reader, and the most important word in a review.",
+          mistakes: [
+            { match: "modern", coach: "Modern things go out of date. Classics last because their experiences never do." },
+            { match: "characters", coach: "A summary needs characters so readers know who the story is about. What should it leave out?" },
+            { match: "and", coach: "'And' adds a thought but doesn't give a reason. Which word turns an opinion into an explained one?" },
+          ],
+          seconds: 35,
+        },
+      ],
       check: [
         {
           q: "According to the lesson, why do classics last?",

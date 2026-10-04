@@ -28,7 +28,25 @@ and civics. Each phase can be switched on or off in `src/content/features.ts`.
 - Struggle detector (drops back to prerequisites) and math-fact speed drills
 - MAP test score tracking (percentile and growth, three times a year)
 
-## ✅ Phase 3b — Interactive teaching and coaching (built)
+## ✅ Phase 3c — Interactive assessment and the learner model (built)
+- Multiple choice replaced by interactive questions in every lesson part and
+  every final check: fill in the blank (typed or word bank), number entry,
+  drag markers onto number lines and timelines, matching, building
+  sentences/equations from tiles, sorting/ordering/highlighting, and
+  simulation goals (balance a lever, price for a profit, years to grow
+  savings, find the month for a season). Graded on the server with partial
+  credit and coaching for specific mistakes.
+- Every answer is measured: right first try, time vs expected, tries, and help
+  used. A learner model per subject estimates mastery per idea, tracks trends,
+  and raises early warnings (accuracy sliding, help climbing, slowing down)
+  before scores drop.
+- The coach adapts automatically: worked examples first and a warm-up on the
+  weakest ideas when a kid is slipping, leading with the kind of help that has
+  actually worked for that kid, and a test-out to skip ahead when they're ahead.
+- Parents see a learning profile per subject and early-warning flags on the
+  overview; the AI weekly summary includes them.
+
+## ✅ Phase 3b — Interactive teaching and coaching (live)
 Every lesson teaches like a tutor instead of read-then-test:
 1. Hook: a story or puzzle to spark curiosity
 2. Teach in small parts, each with an interactive visual (simulations for

@@ -202,6 +202,23 @@ CREATE TABLE IF NOT EXISTS lesson_progress (
 );
 CREATE INDEX IF NOT EXISTS lesson_progress_day ON lesson_progress (kid_id, completed_day);
 
+-- Every answered item, for the learner model (Phase 3c). subject = course id or "math".
+CREATE TABLE IF NOT EXISTS learning_events (
+  id INTEGER PRIMARY KEY,
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  subject TEXT NOT NULL,
+  concept TEXT NOT NULL,
+  first_try INTEGER NOT NULL,
+  score REAL NOT NULL,
+  ms INTEGER NOT NULL,
+  expected_ms INTEGER NOT NULL,
+  helped INTEGER NOT NULL,
+  source TEXT NOT NULL,
+  day TEXT NOT NULL,
+  at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS learning_events_kid ON learning_events (kid_id, subject, at);
+
 -- Finished focus sprints (Pomodoro-style work blocks).
 CREATE TABLE IF NOT EXISTS sprint_log (
   id INTEGER PRIMARY KEY,

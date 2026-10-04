@@ -13,6 +13,7 @@ import { KIND_LABEL } from "@/content/quests";
 import { activities, getKid, kidFlags, questLog, recentMastered, recentTutorMessages, skillTable, today, weekStats } from "@/lib/store";
 import { allTeachers, features } from "@/lib/content";
 import CourseProgress from "@/components/CourseProgress";
+import LearnerProfile from "@/components/LearnerProfile";
 
 export const dynamic = "force-dynamic";
 
@@ -84,6 +85,7 @@ export default async function KidDetail({
         )}
       </div>
 
+      <LearnerProfile kidId={kid.id} name={kid.name} />
       {FEATURES.twoHourDay && <LearningPlan kid={kid} />}
       {FEATURES.courses && <CourseProgress kidId={kid.id} name={kid.name} />}
 

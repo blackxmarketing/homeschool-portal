@@ -3,12 +3,25 @@
 import { useEffect, useState } from "react";
 import WidgetView, { type CheckFn } from "./Widgets";
 import type { PublicWidget } from "@/lib/teaching";
+import type { PublicProbe } from "@/lib/probes";
+import ProbeView, { type ProbeResult } from "./Probes";
+import { MasteryCheck, ReviewWarmup } from "./Assess";
 
 export interface PublicSegment {
   title: string;
   teach: string;
   visual?: PublicWidget;
   think: { q: string; choices: string[] };
+  /** Interactive check (replaces the multiple-choice think). */
+  probe?: PublicProbe;
+  /** Shown before the check when the coach is in support mode ("I do, we do, you do"). */
+  example?: string;
+}
+
+export interface AdaptView {
+  mode: "support" | "standard" | "challenge";
+  message: string;
+  offerTestOut: boolean;
 }
 
 export interface TeachInitial {
@@ -26,7 +39,10 @@ interface Props {
   activity?: PublicWidget;
   explain?: { prompt: string };
   initial: TeachInitial;
-  onFinished: () => void;
+  onFinished: (how: "taught" | "tested-out") => void;
+  adaptation?: AdaptView;
+  review?: { lessonId: string; seg: number; title: string; probe: PublicProbe }[];
+  mastery?: PublicProbe[];
 }
 
 type Coaching = {
@@ -82,7 +98,8 @@ function SegmentView({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nudge, setNudge] = useState(false);
-  const done = alreadyDone || !!correctWhy || !!coaching?.reveal;
+  const [revealed, setRevealed] = useState(false);
+  const done = alreadyDone || correctWhy !== null || !!coaching?.reveal || revealed;
 
   // Struggle signal: a long pause without answering brings a gentle offer of help.
   useEffect(() => {
@@ -147,6 +164,31 @@ function SegmentView({
 
   const checkVisual: CheckFn = (answer) => coach({ action: "visual", courseId, lessonId, seg: index, answer });
 
+  async function submitProbe(answer: unknown, ms: number): Promise<ProbeResult> {
+    setError(null);
+    setNudge(false);
+    try {
+      const d = await coach<{
+        correct: boolean;
+        graded: { parts: boolean[]; detail?: string } | null;
+        coaching: Coaching | null;
+        rescue: { explanation: string; tryThis: string } | null;
+        solution: unknown;
+      }>({ action: "probe", courseId, lessonId, seg: index, answer, ms });
+      if (d.correct) setCorrectWhy("");
+      else {
+        setWrongPicks((w) => [...w, -1]);
+        setCoaching(d.coaching);
+        if (d.rescue) setRescue(d.rescue);
+        if (d.solution !== null && d.solution !== undefined) setRevealed(true);
+      }
+      return { correct: d.correct, parts: d.graded?.parts ?? [], solution: d.solution ?? undefined, detail: d.graded?.detail };
+    } catch (e) {
+      setError((e as Error).message);
+      return { correct: false, parts: [] };
+    }
+  }
+
   return (
     <div className="kcard teach-seg pop">
       <div className="eyebrow">Part {index + 1}</div>
@@ -154,6 +196,19 @@ function SegmentView({
       <Coach teacher={teacher}>{seg.teach}</Coach>
       {seg.visual && <WidgetView w={seg.visual} onCheck={checkVisual} />}
 
+      {seg.example && (
+        <div className="approach">
+          <div className="eyebrow">Watch one first</div>
+          <p>{seg.example}</p>
+        </div>
+      )}
+
+      {seg.probe ? (
+        <div className="think">
+          <div className="eyebrow">Your turn</div>
+          <ProbeView p={seg.probe} submit={submitProbe} locked={alreadyDone} />
+        </div>
+      ) : (
       <div className="think">
         <div className="eyebrow">Quick think</div>
         <div className="check-text">{seg.think.q}</div>
@@ -170,6 +225,7 @@ function SegmentView({
           ))}
         </div>
       </div>
+      )}
 
       {correctWhy !== null && (
         <Coach teacher={teacher} tone="good">
@@ -177,7 +233,13 @@ function SegmentView({
         </Coach>
       )}
 
-      {coaching && correctWhy === null && (
+      {revealed && (
+        <Coach teacher={teacher} tone="good">
+          The answer is shown above. Look at how it works; we&apos;ll come back to this idea so it sticks.
+        </Coach>
+      )}
+
+      {coaching && correctWhy === null && !revealed && (
         <div className="ladder">
           {coaching.hint && <Coach teacher={teacher} tone="warn">🤔 {coaching.hint}</Coach>}
           {coaching.analogy && (
@@ -223,7 +285,7 @@ function SegmentView({
               this idea later so it sticks.
             </Coach>
           )}
-          {!coaching.reveal && <p className="kmuted small">Give it another try. Every miss teaches your brain something.</p>}
+          {!coaching.reveal && <p className="kmuted small">Give it another try{seg.probe ? ": change your answer above and check again" : ""}. Every miss teaches your brain something.</p>}
         </div>
       )}
 
@@ -247,13 +309,15 @@ function SegmentView({
   );
 }
 
-export default function TeachPlayer({ courseId, lessonId, teacher, hook, segments, activity, explain, initial, onFinished }: Props) {
-  // Steps: hook, each segment, activity, explain.
-  const steps: string[] = ["hook", ...segments.map((_, i) => `seg${i}`), ...(activity ? ["activity"] : []), ...(explain ? ["explain"] : [])];
+export default function TeachPlayer({ courseId, lessonId, teacher, hook, segments, activity, explain, initial, onFinished, adaptation, review, mastery }: Props) {
+  const [testOut, setTestOut] = useState(false);
+  // Steps: (warm-up), hook, each segment, activity, explain.
+  const steps: string[] = [...(review?.length ? ["review"] : []), "hook", ...segments.map((_, i) => `seg${i}`), ...(activity ? ["activity"] : []), ...(explain ? ["explain"] : [])];
   const firstOpen = (() => {
+    const offset = review?.length ? 1 : 0;
     const s = initial.segmentsDone.findIndex((d) => !d);
-    if (s >= 0) return s === 0 ? 0 : s + 1;
-    if (activity && !initial.activityDone) return 1 + segments.length;
+    if (s >= 0) return s === 0 ? 0 : s + 1 + offset;
+    if (activity && !initial.activityDone) return 1 + offset + segments.length;
     if (explain && !initial.explainDone) return steps.length - 1;
     return steps.length;
   })();
@@ -267,7 +331,7 @@ export default function TeachPlayer({ courseId, lessonId, teacher, hook, segment
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (step >= steps.length) onFinished();
+    if (step >= steps.length) onFinished("taught");
   }, [step, steps.length, onFinished]);
 
   const next = () => setStep((s) => s + 1);
@@ -297,13 +361,38 @@ export default function TeachPlayer({ courseId, lessonId, teacher, hook, segment
     return r;
   };
 
+  if (testOut && mastery?.length) {
+    return (
+      <MasteryCheck
+        courseId={courseId}
+        lessonId={lessonId}
+        probes={mastery}
+        testOut
+        onPassed={() => onFinished("tested-out")}
+        onCancel={() => setTestOut(false)}
+      />
+    );
+  }
+
   return (
     <div>
+      {adaptation?.message && (
+        <div className={`adapt-banner ${adaptation.mode}`}>
+          🧭 {adaptation.message}
+          {adaptation.offerTestOut && mastery?.length ? (
+            <button className="kbtn ghost" onClick={() => setTestOut(true)}>
+              Test out →
+            </button>
+          ) : null}
+        </div>
+      )}
       <div className="teach-progress" aria-label="Lesson progress">
         {steps.map((s, i) => (
           <span key={s} className={i < step ? "done" : i === step ? "on" : ""} title={s} />
         ))}
       </div>
+
+      {current === "review" && review?.length ? <ReviewWarmup courseId={courseId} items={review} onDone={next} /> : null}
 
       {current === "hook" && (
         <div className="kcard pop">
