@@ -3,6 +3,8 @@ import { requireParent } from "@/lib/auth";
 import { aiEnabled } from "@/lib/ai";
 import { SUBJECTS } from "@/lib/compliance";
 import { getContent, isCustomized, type ContentKey } from "@/lib/content";
+import Link from "next/link";
+import { addCourseAction } from "./courses/actions";
 import { STRANDS } from "@/lib/curriculum/skills";
 import { WORLDS } from "@/lib/game";
 import { KIND_LABEL, THEME_LABEL, type QuestKind, type QuestTheme } from "@/content/quests";
@@ -24,12 +26,14 @@ const FEATURE_INFO: Record<string, { label: string; text: string }> = {
   focusSprints: { label: "Focus sprints and brain breaks", text: "Pomodoro-style timed work blocks with movement breaks." },
   aiTeachers: { label: "AI teachers", text: "Teacher characters: mini-lessons, chat about a question, \"why was I wrong?\"" },
   twoHourDay: { label: "The 2-hour day", text: "Daily block rings, grade towers, goals, fact drills, struggle detector and the learning plan." },
+  courses: { label: "Courses (Academy)", text: "Science, history, writing, money, business and leadership lessons with checks and tasks." },
 };
 
 const SECTIONS = [
   { id: "features", label: "Features & limits" },
   { id: "schedule", label: "2-hour day" },
   { id: "teachers", label: "AI teachers" },
+  { id: "courses", label: "Courses" },
   { id: "quests", label: "Quests & missions" },
   { id: "focus", label: "Focus presets & breaks" },
 ];
@@ -78,6 +82,7 @@ export default async function ContentPage({ searchParams }: { searchParams: Prom
   const quests = getContent("quests");
   const presets = getContent("focusPresets");
   const breaks = getContent("breaks");
+  const courses = getContent("courses");
   const kinds: QuestKind[] = ["brain", "create", "mission"];
 
   return (
@@ -179,6 +184,8 @@ export default async function ContentPage({ searchParams }: { searchParams: Prom
                   <input name={`b.${i}.hue`} type="number" min={0} max={360} defaultValue={b?.hue ?? 200} />
                 </div>
               </div>
+              <label>Courses that count toward this block (course ids, separated by commas)</label>
+              <input name={`b.${i}.courses`} defaultValue={b?.courses?.join(", ") ?? ""} placeholder={courses.map((c) => c.id).join(", ")} />
               <label>Daily ideas (one per line, guided blocks only)</label>
               <textarea name={`b.${i}.ideas`} rows={4} defaultValue={b?.ideas.join("\n") ?? ""} />
               {b && (
@@ -239,6 +246,70 @@ export default async function ContentPage({ searchParams }: { searchParams: Prom
             );
           })}
           <button className="btn">Save teachers</button>
+        </form>
+      </section>
+
+      {/* ---------------- Courses ---------------- */}
+      <section className="card" id="courses">
+        <SectionHead
+          id="courses"
+          title="Courses"
+          keys={["courses"]}
+          note="Every lesson: a short reading, a check (80% to pass, graded automatically), then a task. Written tasks get AI feedback; projects, labs and speeches come to you to approve. Finished lessons log their minutes for records."
+        />
+        <table>
+          <thead>
+            <tr>
+              <th>Course</th>
+              <th>Id</th>
+              <th>Track</th>
+              <th>Lessons</th>
+              <th>Logged as</th>
+            </tr>
+          </thead>
+          <tbody>
+            {courses.map((c) => (
+              <tr key={c.id}>
+                <td>
+                  <Link href={`/parent/content/courses/${c.id}`}>
+                    {c.icon} {c.title}
+                  </Link>
+                </td>
+                <td className="small muted">{c.id}</td>
+                <td className="small">{c.track === "life" ? "Life skills" : "Academic"}</td>
+                <td>{c.lessons.length}</td>
+                <td className="small">{c.subject}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <form action={addCourseAction} className="row" style={{ alignItems: "end", marginTop: 12 }}>
+          <div>
+            <label>New course title</label>
+            <input name="title" maxLength={80} placeholder="e.g. Spanish, Art History, Coding" required />
+          </div>
+          <div>
+            <label>Icon</label>
+            <input name="icon" maxLength={8} placeholder="🗣️" />
+          </div>
+          <div>
+            <label>Track</label>
+            <select name="track" defaultValue="academic">
+              <option value="academic">Academic</option>
+              <option value="life">Life skills</option>
+            </select>
+          </div>
+          <div>
+            <label>Logged as</label>
+            <select name="subject" defaultValue="Other">
+              {SUBJECTS.map((x) => (
+                <option key={x}>{x}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <button className="btn">Add course</button>
+          </div>
         </form>
       </section>
 

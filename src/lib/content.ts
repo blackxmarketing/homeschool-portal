@@ -6,6 +6,8 @@ import { TEACHERS, TEACHING_METHOD, type Teacher } from "@/content/teachers";
 import { BREAKS, PRESETS, type AttentionAnswer, type FocusProfile } from "./focus";
 import { SUBJECTS, type Subject } from "./compliance";
 import { STRANDS, type Strand } from "./curriculum/skills";
+import { COURSES, type Course } from "@/content/courses";
+import { sanitizeCourses } from "./courseContent";
 
 /**
  * Editable content. The files in src/content/ (and the presets in lib/focus)
@@ -30,6 +32,7 @@ export interface ContentMap {
   quests: Quest[];
   focusPresets: Presets;
   breaks: BreakIdea[];
+  courses: Course[];
 }
 
 export type ContentKey = keyof ContentMap;
@@ -44,6 +47,7 @@ export const DEFAULTS: ContentMap = {
   quests: QUESTS,
   focusPresets: PRESETS,
   breaks: BREAKS,
+  courses: COURSES,
 };
 
 export const CONTENT_KEYS = Object.keys(DEFAULTS) as ContentKey[];
@@ -101,6 +105,7 @@ export function sanitize<K extends ContentKey>(key: K, raw: unknown): ContentMap
           subject: (SUBJECTS as readonly string[]).includes(str(b.subject)) ? (str(b.subject) as Subject) : "Other",
           hue: int(b.hue, 0, 360, 200),
           ideas: Array.isArray(b.ideas) ? b.ideas.map((i) => str(i, 500)).filter(Boolean).slice(0, 30) : [],
+          ...(Array.isArray(b.courses) ? { courses: b.courses.map((c) => str(c, 40)).filter(Boolean).slice(0, 10) } : {}),
         });
       }
       return (blocks.length ? blocks : d) as ContentMap[K];
@@ -183,6 +188,8 @@ export function sanitize<K extends ContentKey>(key: K, raw: unknown): ContentMap
         .filter((b) => b.title && b.text);
       return (list.length ? list : d) as ContentMap[K];
     }
+    case "courses":
+      return sanitizeCourses(raw, COURSES) as ContentMap[K];
   }
   return d;
 }
@@ -224,3 +231,5 @@ export const allQuests = () => getContent("quests");
 export const questById = (id: string) => allQuests().find((q) => q.id === id);
 export const focusPresets = () => getContent("focusPresets");
 export const breakIdeas = () => getContent("breaks");
+export const allCourses = () => getContent("courses");
+export const courseById = (id: string) => allCourses().find((c) => c.id === id);

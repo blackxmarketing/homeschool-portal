@@ -182,6 +182,26 @@ CREATE TABLE IF NOT EXISTS test_scores (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- Phase 3 courses: one row per kid per lesson.
+-- task_status: none | done (written work submitted) | pending (waiting for a parent) | approved | declined
+CREATE TABLE IF NOT EXISTS lesson_progress (
+  id INTEGER PRIMARY KEY,
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  course_id TEXT NOT NULL,
+  lesson_id TEXT NOT NULL,
+  check_best INTEGER NOT NULL DEFAULT 0,
+  check_total INTEGER NOT NULL DEFAULT 0,
+  check_passed INTEGER NOT NULL DEFAULT 0,
+  task_status TEXT NOT NULL DEFAULT 'none',
+  task_response TEXT NOT NULL DEFAULT '',
+  task_feedback TEXT NOT NULL DEFAULT '',
+  completed_day TEXT,
+  minutes INTEGER NOT NULL DEFAULT 0,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE (kid_id, course_id, lesson_id)
+);
+CREATE INDEX IF NOT EXISTS lesson_progress_day ON lesson_progress (kid_id, completed_day);
+
 -- Finished focus sprints (Pomodoro-style work blocks).
 CREATE TABLE IF NOT EXISTS sprint_log (
   id INTEGER PRIMARY KEY,

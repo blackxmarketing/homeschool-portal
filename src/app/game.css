@@ -297,3 +297,35 @@ details.edit-item > summary { cursor: pointer; }
 details.edit-item[open] > summary { margin-bottom: 8px; }
 .edit-item textarea { font-size: .95rem; }
 td input[type=number] { max-width: 90px; }
+
+/* ---------------- Courses (Phase 3) ---------------- */
+.course-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.course-card {
+  display: flex; gap: 12px; padding: 14px; border-radius: 18px; text-decoration: none; color: var(--k-ink) !important;
+  background: hsl(var(--t-hue) 70% 50% / .1); border: 1px solid hsl(var(--t-hue) 80% 60% / .4); transition: transform .15s;
+}
+.course-card:hover { transform: translateY(-2px); }
+.course-icon { font-size: 2.2rem; }
+.course-body { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.course-title { font-weight: 900; font-size: 1.05rem; }
+.lesson-steps { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.lesson-step { font: inherit; font-weight: 800; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--k-card-line); background: rgba(255, 255, 255, .05); color: var(--k-ink); cursor: pointer; }
+.lesson-step.active { background: hsl(var(--t-hue) 80% 55% / .35); border-color: hsl(var(--t-hue) 80% 65%); }
+.lesson-step:disabled { opacity: .45; cursor: default; }
+.lesson-read p { margin: 0 0 14px; }
+.key-ideas { margin: 16px 0; padding: 14px 16px; border-radius: 14px; background: rgba(251, 191, 36, .1); border: 1px solid rgba(251, 191, 36, .35); }
+.key-ideas ul { margin: 6px 0 0; padding-left: 20px; }
+.check-q { margin: 0 0 18px; }
+.check-text { font-weight: 800; margin-bottom: 8px; }
+.check-choices { display: flex; flex-direction: column; gap: 6px; }
+.check-choice { text-align: left; font: inherit; padding: 10px 14px; border-radius: 12px; border: 2px solid var(--k-card-line); background: rgba(255, 255, 255, .04); color: var(--k-ink); cursor: pointer; }
+.check-choice.picked { border-color: var(--k-accent2); background: rgba(34, 211, 238, .12); }
+.check-choice.right { border-color: var(--k-lime); background: rgba(163, 230, 53, .15); }
+.check-choice.wrong { border-color: #f87171; background: rgba(248, 113, 113, .12); }
+.check-choice:disabled { cursor: default; }
+.check-why { margin-top: 6px; font-size: .9rem; }
+.check-why.good { color: #d9f99d; }
+.check-why.bad { color: #fecaca; }
+.band-kid { padding: 10px 14px; border-radius: 12px; font-weight: 800; }
+.band-kid.good { background: rgba(163, 230, 53, .15); color: var(--k-lime); }
+.band-kid.bad { background: rgba(248, 113, 113, .14); color: #fecaca; }

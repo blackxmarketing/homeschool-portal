@@ -3,7 +3,7 @@ import ParentNav from "@/components/ParentNav";
 import { requireParent } from "@/lib/auth";
 import { REQUIRED_AVG_HOURS, REQUIRED_DAYS } from "@/lib/compliance";
 import { gradeProgress } from "@/lib/engine/planner";
-import { reviewBlockAction, reviewMissionAction } from "@/app/actions";
+import { reviewBlockAction, reviewCourseTaskAction, reviewMissionAction } from "@/app/actions";
 import { levelInfo } from "@/lib/game";
 import {
   compliance,
@@ -12,6 +12,7 @@ import {
   listKids,
   minutesOnDay,
   pendingBlocks,
+  pendingCourseTasks,
   pendingMissions,
   placementStatus,
   skillStates,
@@ -26,12 +27,52 @@ export default async function ParentHome({ searchParams }: { searchParams: Promi
   const kids = listKids(s.familyId);
   const pending = pendingMissions(s.familyId);
   const blocks = pendingBlocks(s.familyId);
+  const courseTasks = pendingCourseTasks(s.familyId);
   const { error } = await searchParams;
 
   return (
     <main className="wrap">
       <ParentNav title="Family overview" />
       {error && <div className="error">{error}</div>}
+      {courseTasks.length > 0 && (
+        <div className="card">
+          <h2>📚 Projects, labs and speeches to check ({courseTasks.length})</h2>
+          <p className="muted small">
+            Course tasks done off-screen. Approving finishes the lesson: +50 XP and its minutes logged for your records. &quot;Not yet&quot;
+            lets them try again.
+          </p>
+          <table>
+            <tbody>
+              {courseTasks.map((t) => (
+                <tr key={t.id}>
+                  <td>
+                    {t.avatar} {t.kidName}
+                  </td>
+                  <td>
+                    <strong>
+                      {t.course?.icon} {t.lesson?.title ?? t.lesson_id}
+                    </strong>{" "}
+                    <span className="muted small">{t.course?.title}</span>
+                    <div className="muted small">Task: {t.lesson?.task?.prompt}</div>
+                    <div className="quote">{t.task_response}</div>
+                  </td>
+                  <td style={{ whiteSpace: "nowrap" }}>
+                    <form action={reviewCourseTaskAction} style={{ display: "inline" }}>
+                      <input type="hidden" name="progressId" value={t.id} />
+                      <button className="btn" name="approve" value="1">
+                        Approve
+                      </button>{" "}
+                      <button className="btn secondary" name="approve" value="0">
+                        Not yet
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
       {blocks.length > 0 && (
         <div className="card">
           <h2>⏰ Learning blocks to check ({blocks.length})</h2>

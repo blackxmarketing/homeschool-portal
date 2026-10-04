@@ -9,6 +9,7 @@ import { THEME_LABEL } from "@/content/quests";
 import { drillSettings, features } from "@/lib/content";
 import {
   capStatus,
+  courseOverview,
   dayBlocks,
   drillStats,
   goalProgress,
@@ -51,6 +52,7 @@ export default async function KidHome({ searchParams }: { searchParams: Promise<
   const plan2 = learningPlan(kid);
   const goal = goalProgress(kid);
   const drills = drillStats(kid.id);
+  const courses = FEATURES.courses ? courseOverview(kid.id).filter((c) => c.course.lessons.length > 0) : [];
   const stuck = strugglingSkills(kid.id).map((id) => ({ skillId: id, title: getSkill(id)?.title ?? id, backTo: masteredPrereqs(kid.id, id) }));
 
   return (
@@ -70,6 +72,11 @@ export default async function KidHome({ searchParams }: { searchParams: Promise<
           <Link href="/kid/map" className="kbtn ghost">
             🗺️ Quest map
           </Link>
+          {FEATURES.courses && (
+            <Link href="/kid/learn" className="kbtn ghost">
+              📚 Academy
+            </Link>
+          )}
           <form action={logoutAction}>
             <button className="linkbtn">Log out</button>
           </form>
@@ -259,6 +266,35 @@ export default async function KidHome({ searchParams }: { searchParams: Promise<
           </div>
         </div>
       ) : null}
+
+      {courses.length > 0 && (
+        <div className="kcard">
+          <h2>📚 Academy</h2>
+          <p className="kmuted small">Your next lesson in each course. Academics fill your 2-hour rings; life skills are for the afternoon.</p>
+          <div className="quest-list">
+            {courses.map((c) => {
+              const next = c.lessons.find((l) => l.status !== "done" && l.status !== "locked");
+              return (
+                <div key={c.course.id} className="quest-item">
+                  <div className="quest-icon">{c.course.icon}</div>
+                  <div className="quest-body">
+                    <div className="quest-name">{c.course.title}</div>
+                    <div className="kmuted small">
+                      {c.done}/{c.lessons.length} lessons · {next ? next.lesson.title : "complete! 🏆"}
+                      {next?.status === "waiting" ? " · waiting for a parent" : ""}
+                    </div>
+                  </div>
+                  {next && (
+                    <Link href={`/kid/learn/${c.course.id}/${next.lesson.id}`} className="kbtn">
+                      {next.status === "open" ? "Start" : "Continue"}
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {FEATURES.missions && (
       <div className="kcard" id="missions">

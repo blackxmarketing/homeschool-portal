@@ -14,6 +14,7 @@ import {
   addTestScore,
   deleteTestScore,
   reviewBlock,
+  reviewCourseTask,
   setGoal,
   setFocus,
   createFamily,
@@ -236,4 +237,16 @@ export async function deleteTestScoreAction(form: FormData) {
   const kid = await ownKid(Number(form.get("kidId")));
   deleteTestScore(kid.id, Number(form.get("id")));
   redirect(`/parent/kids/${kid.id}#tests`);
+}
+
+export async function reviewCourseTaskAction(form: FormData) {
+  const s = await requireParent();
+  try {
+    reviewCourseTask(s.familyId, Number(form.get("progressId")), form.get("approve") === "1");
+  } catch (e) {
+    if (e instanceof PortalError) back("/parent", e.message);
+    throw e;
+  }
+  revalidatePath("/parent");
+  redirect("/parent");
 }

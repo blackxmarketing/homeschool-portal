@@ -5,7 +5,7 @@
 Log in as a parent and open **Content** in the top menu. Everything below can be
 edited there with no code: feature switches, AI limits, the fact-drill target,
 the 2-hour-day blocks and their daily ideas, the AI teachers and their teaching
-method, quests and missions (add your own), focus presets and brain breaks.
+method, courses and every lesson (reading, check questions, task and rubric), quests and missions (add your own), focus presets and brain breaks.
 Changes show up for the kids on their next page load. Each section has a
 "Reset to defaults" button.
 

@@ -23,6 +23,8 @@ export interface Block {
   hue: number;
   /** Ideas for guided blocks. One is suggested each day. */
   ideas: string[];
+  /** Course ids whose finished lessons count toward this block (Phase 3). */
+  courses?: string[];
 }
 
 export const BLOCKS: Block[] = [
@@ -59,6 +61,7 @@ export const BLOCKS: Block[] = [
     kind: "guided",
     subject: "Science",
     hue: 150,
+    courses: ["science", "history"],
     ideas: [
       "Do a kitchen experiment: write a prediction first, then test it and record what happened.",
       "Pick an invention (the printing press, the steam engine, the light bulb). Find out who made it, what problem it solved, and how it changed the world.",
@@ -74,6 +77,7 @@ export const BLOCKS: Block[] = [
     kind: "guided",
     subject: "Writing",
     hue: 200,
+    courses: ["writing"],
     ideas: [
       "Write a one-page persuasive letter: convince a parent to try your business idea. Give 3 reasons.",
       "Journal: describe a hard thing you did this week and what you learned from it.",

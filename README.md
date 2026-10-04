@@ -44,6 +44,11 @@ Colorado records.
   writing) have a timer and daily ideas; a parent approves them. Grade towers,
   kid-set goals, 60-second math-fact speed drills, and a struggle detector that
   sends a stuck kid back to the skills underneath.
+- **The Academy (Phase 3).** Courses beyond math: Reading & Writing, Science
+  Lab and History & Civics fill the 2-hour day; Money, Entrepreneurship (a real
+  mini-business per kid) and Leadership & Character are afternoon life skills.
+  Each lesson is a reading, a code-graded check and a task; writing gets AI
+  rubric feedback, and projects, labs and speeches are approved by a parent.
 - **Real-world missions.** Off-screen tasks about money, business, leadership,
   character, science, history and civics. A parent approves each one, which
   awards XP and logs the minutes under the right subject for records.

@@ -13,6 +13,8 @@ export const FEATURES = {
   aiTeachers: true,
   /** Phase 2b: the 2-hour day (block rings, grade towers, goals, fact drills, struggle detector). */
   twoHourDay: true,
+  /** Phase 3: courses beyond math (science, history, writing, money, business, leadership). */
+  courses: true,
 };
 
 /** Limits on AI use, to keep costs predictable. */

@@ -175,3 +175,46 @@ The student's answer was wrong. In 2-4 sentences: guess the specific mistake the
     2000,
   );
 }
+
+// ---------------- Writing feedback (Phase 3) ----------------
+
+/**
+ * Feedback on a kid's written work against the lesson's rubric: what's
+ * working, what to improve for each rubric point, and one next step. It never
+ * rewrites the work for them.
+ */
+export async function writingFeedback(input: {
+  teacher: { name: string; inspiredBy: string; voice: string };
+  courseTitle: string;
+  lessonTitle: string;
+  prompt: string;
+  rubric: string[];
+  work: string;
+}): Promise<string | null> {
+  const system = `You are ${input.teacher.name}, a teacher character in a homeschool learning app for kids aged 11-14${
+    input.teacher.inspiredBy ? `, loosely inspired by ${input.teacher.inspiredBy} (an original character, not that person)` : ""
+  }.
+Your style: ${input.teacher.voice}
+You give feedback on student writing the way a great writing coach does: specific, honest and encouraging. Quote short phrases from their work to show exactly what you mean.
+Never rewrite their work for them; show one small example at most. Never grade with letters or numbers.
+Plain text only, no markdown symbols. Use exactly these labeled parts on separate lines:
+Glow: one or two sentences on what is genuinely working.
+Then one line per rubric point, starting with a check mark if it is met or an arrow if it needs work, followed by one specific sentence.
+Next step: the single most useful revision to make.
+Keep it under 170 words.`;
+  return ask(
+    system,
+    `Course: ${input.courseTitle}
+Lesson: ${input.lessonTitle}
+Assignment: ${input.prompt}
+Rubric:
+${input.rubric.map((r, i) => `${i + 1}. ${r}`).join("\n")}
+
+Student's work:
+"""
+${input.work}
+"""`,
+    "low",
+    3000,
+  );
+}

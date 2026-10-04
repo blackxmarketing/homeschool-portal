@@ -18,7 +18,7 @@ import { schoolYearStart, summarize, type DayMinutes } from "./compliance";
 import { clampProfile, defaultProfile, parseProfile, type FocusProfile } from "./focus";
 import { badges, levelInfo, type BadgeStats } from "./game";
 import { pickQuest, type Quest, type QuestKind } from "@/content/quests";
-import { allQuests, blockById, drillSettings, focusPresets, questById, scheduleBlocks, teacherFor } from "./content";
+import { allCourses, allQuests, blockById, courseById, drillSettings, focusPresets, questById, scheduleBlocks, teacherFor } from "./content";
 import { ideaFor, type Block } from "@/content/schedule";
 import { accuracyBand, factsPerMinute, forecast, GRADE_DONE, isStruggling, knowledgeGrade, wasteMeter } from "./engine/learningPlan";
 import type { Visual } from "./curriculum/answers";
@@ -874,6 +874,12 @@ export function dayBlocks(kidId: number): BlockStatus[] {
         minutes = log.status === "declined" ? 0 : log.minutes;
         state = log.status;
       }
+      // Lessons finished today in this block's courses count too.
+      const fromCourses = courseMinutesToday(kidId, block.courses ?? []);
+      if (fromCourses) {
+        minutes = Math.min(block.minutes * 2, minutes + fromCourses);
+        if (state === "open" && minutes >= block.minutes) state = "done";
+      }
     }
     return { block, minutes, pct: Math.min(100, Math.round((minutes / block.minutes) * 100)), state, idea: ideaFor(block, day) };
   });
@@ -1101,4 +1107,192 @@ export function strugglingSkills(kidId: number): string[] {
       return isStruggling(learnAttempts(kidId, r.skill_id, r.counting_after), n);
     })
     .map((r) => r.skill_id);
+}
+
+// ---------------- Courses (Phase 3) ----------------
+
+/** Share of check questions needed to pass a lesson's check. */
+export const CHECK_PASS = 0.8;
+
+interface LessonRow {
+  id: number;
+  kid_id: number;
+  course_id: string;
+  lesson_id: string;
+  check_best: number;
+  check_total: number;
+  check_passed: number;
+  task_status: "none" | "done" | "pending" | "approved" | "declined";
+  task_response: string;
+  task_feedback: string;
+  completed_day: string | null;
+  minutes: number;
+}
+
+function lessonRow(kidId: number, courseId: string, lessonId: string): LessonRow | undefined {
+  return getDb()
+    .prepare("SELECT * FROM lesson_progress WHERE kid_id = ? AND course_id = ? AND lesson_id = ?")
+    .get(kidId, courseId, lessonId) as LessonRow | undefined;
+}
+
+function ensureLessonRow(kidId: number, courseId: string, lessonId: string): LessonRow {
+  getDb().prepare("INSERT INTO lesson_progress (kid_id, course_id, lesson_id) VALUES (?, ?, ?) ON CONFLICT DO NOTHING").run(kidId, courseId, lessonId);
+  return lessonRow(kidId, courseId, lessonId)!;
+}
+
+export type LessonStatus = "locked" | "open" | "started" | "waiting" | "done";
+
+function statusOf(row: LessonRow | undefined, unlocked: boolean): LessonStatus {
+  if (row?.completed_day) return "done";
+  if (!unlocked) return "locked";
+  if (row?.task_status === "pending") return "waiting";
+  if (row && (row.check_best > 0 || row.task_status !== "none")) return "started";
+  return "open";
+}
+
+/** Every course with each lesson's status. Lessons unlock in order. */
+export function courseOverview(kidId: number) {
+  const rows = getDb().prepare("SELECT * FROM lesson_progress WHERE kid_id = ?").all(kidId) as LessonRow[];
+  const byKey = new Map(rows.map((r) => [`${r.course_id}:${r.lesson_id}`, r]));
+  return allCourses().map((course) => {
+    let prevDone = true;
+    const lessons = course.lessons.map((lesson) => {
+      const row = byKey.get(`${course.id}:${lesson.id}`);
+      const status = statusOf(row, prevDone);
+      prevDone = status === "done";
+      return { lesson, status };
+    });
+    return { course, lessons, done: lessons.filter((l) => l.status === "done").length };
+  });
+}
+
+/** Everything the lesson page needs, or null if the course or lesson doesn't exist. */
+export function lessonView(kidId: number, courseId: string, lessonId: string) {
+  const overview = courseOverview(kidId).find((c) => c.course.id === courseId);
+  if (!overview) return null;
+  const i = overview.lessons.findIndex((l) => l.lesson.id === lessonId);
+  if (i < 0) return null;
+  const row = lessonRow(kidId, courseId, lessonId);
+  return {
+    course: overview.course,
+    lesson: overview.lessons[i].lesson,
+    status: overview.lessons[i].status,
+    index: i,
+    next: overview.lessons[i + 1]?.lesson ?? null,
+    checkPassed: !!row?.check_passed,
+    checkBest: row?.check_best ?? 0,
+    taskStatus: row?.task_status ?? "none",
+    taskResponse: row?.task_response ?? "",
+    taskFeedback: row?.task_feedback ?? "",
+  };
+}
+
+function openLesson(kidId: number, courseId: string, lessonId: string) {
+  const v = lessonView(kidId, courseId, lessonId);
+  if (!v) throw new PortalError("Lesson not found.");
+  if (v.status === "locked") throw new PortalError("Finish the lesson before this one first.");
+  return v;
+}
+
+/** Finishes a lesson once its check is passed and its task is done or approved. Logs minutes and XP. */
+function maybeCompleteLesson(kidId: number, courseId: string, lessonId: string): boolean {
+  const course = courseById(courseId);
+  const lesson = course?.lessons.find((l) => l.id === lessonId);
+  const row = lessonRow(kidId, courseId, lessonId);
+  if (!course || !lesson || !row || row.completed_day) return false;
+  const checkOk = lesson.check.length === 0 || !!row.check_passed;
+  const taskOk = !lesson.task || row.task_status === "done" || row.task_status === "approved";
+  if (!checkOk || !taskOk) return false;
+  const day = today();
+  const db = getDb();
+  db.transaction(() => {
+    db.prepare("UPDATE lesson_progress SET completed_day = ?, minutes = ?, updated_at = datetime('now') WHERE id = ?").run(day, lesson.minutes, row.id);
+    logActivity(kidId, { day, subject: lesson.subject ?? course.subject, minutes: lesson.minutes, note: `Lesson: ${course.title} · ${lesson.title}`.slice(0, 300) });
+    addXp(kidId, 50);
+  })();
+  return true;
+}
+
+/** Grades a lesson check. `answers` holds the chosen index for each question. */
+export function submitCheck(kidId: number, courseId: string, lessonId: string, answers: number[]) {
+  const { lesson } = openLesson(kidId, courseId, lessonId);
+  const results = lesson.check.map((q, i) => ({ correct: answers[i] === q.answer, answer: q.answer, why: q.why }));
+  const score = results.filter((r) => r.correct).length;
+  const total = lesson.check.length;
+  const passed = total === 0 || score / total >= CHECK_PASS;
+  const row = ensureLessonRow(kidId, courseId, lessonId);
+  getDb()
+    .prepare("UPDATE lesson_progress SET check_best = MAX(check_best, ?), check_total = ?, check_passed = MAX(check_passed, ?), updated_at = datetime('now') WHERE id = ?")
+    .run(score, total, passed ? 1 : 0, row.id);
+  addXp(kidId, score * 5);
+  const completed = maybeCompleteLesson(kidId, courseId, lessonId);
+  return { score, total, passed, results, completed, xpGained: score * 5 + (completed ? 50 : 0) };
+}
+
+/**
+ * Turns in a lesson task. Written work counts right away (and gets feedback);
+ * projects, labs and speeches wait for a parent.
+ */
+export function submitTask(kidId: number, courseId: string, lessonId: string, response: string) {
+  const { lesson } = openLesson(kidId, courseId, lessonId);
+  if (!lesson.task) throw new PortalError("This lesson has no task.");
+  const text = response.trim().slice(0, 6000);
+  if (text.length < 20) throw new PortalError("Write a bit more so your work can be checked.");
+  const row = ensureLessonRow(kidId, courseId, lessonId);
+  if (row.task_status === "pending") throw new PortalError("This is already waiting for a parent to check.");
+  const status = lesson.task.kind === "write" ? "done" : "pending";
+  getDb()
+    .prepare("UPDATE lesson_progress SET task_status = ?, task_response = ?, task_feedback = '', updated_at = datetime('now') WHERE id = ?")
+    .run(status, text, row.id);
+  const completed = maybeCompleteLesson(kidId, courseId, lessonId);
+  return { status, completed, lesson };
+}
+
+export function saveTaskFeedback(kidId: number, courseId: string, lessonId: string, feedback: string): void {
+  getDb()
+    .prepare("UPDATE lesson_progress SET task_feedback = ? WHERE kid_id = ? AND course_id = ? AND lesson_id = ?")
+    .run(feedback.slice(0, 6000), kidId, courseId, lessonId);
+}
+
+/** Projects, labs and speeches waiting for a parent. */
+export function pendingCourseTasks(familyId: number) {
+  return (getDb()
+    .prepare(
+      `SELECT p.id, p.kid_id, p.course_id, p.lesson_id, p.task_response, k.name AS kidName, k.avatar
+       FROM lesson_progress p JOIN kids k ON k.id = p.kid_id
+       WHERE k.family_id = ? AND p.task_status = 'pending' ORDER BY p.updated_at`,
+    )
+    .all(familyId) as { id: number; kid_id: number; course_id: string; lesson_id: string; task_response: string; kidName: string; avatar: string }[]).map((r) => {
+    const course = courseById(r.course_id);
+    const lesson = course?.lessons.find((l) => l.id === r.lesson_id);
+    return { ...r, course, lesson };
+  });
+}
+
+export function reviewCourseTask(familyId: number, progressId: number, approve: boolean): void {
+  const row = getDb()
+    .prepare("SELECT p.* FROM lesson_progress p JOIN kids k ON k.id = p.kid_id WHERE p.id = ? AND k.family_id = ?")
+    .get(progressId, familyId) as LessonRow | undefined;
+  if (!row || row.task_status !== "pending") throw new PortalError("That task isn't waiting for review.");
+  getDb().prepare("UPDATE lesson_progress SET task_status = ?, updated_at = datetime('now') WHERE id = ?").run(approve ? "approved" : "declined", row.id);
+  if (approve) maybeCompleteLesson(row.kid_id, row.course_id, row.lesson_id);
+}
+
+/** Minutes of lessons finished today in the given courses (fills 2-hour-day rings). */
+export function courseMinutesToday(kidId: number, courseIds: string[]): number {
+  if (!courseIds.length) return 0;
+  const rows = getDb()
+    .prepare("SELECT course_id, minutes FROM lesson_progress WHERE kid_id = ? AND completed_day = ?")
+    .all(kidId, today()) as { course_id: string; minutes: number }[];
+  return rows.filter((r) => courseIds.includes(r.course_id)).reduce((t, r) => t + r.minutes, 0);
+}
+
+/** Recent course work for the parent: written answers, feedback and status. */
+export function recentCourseWork(kidId: number, limit = 30) {
+  return (getDb()
+    .prepare("SELECT * FROM lesson_progress WHERE kid_id = ? AND task_status != 'none' ORDER BY updated_at DESC LIMIT ?")
+    .all(kidId, limit) as LessonRow[]).map((r) => {
+    const course = courseById(r.course_id);
+    return { ...r, course, lesson: course?.lessons.find((l) => l.id === r.lesson_id) };
+  });
 }

@@ -57,6 +57,7 @@ export async function saveScheduleAction(form: FormData) {
       subject: s(form, `${p}subject`),
       hue: s(form, `${p}hue`),
       ideas: lines(form, `${p}ideas`),
+      courses: s(form, `${p}courses`).split(/[\s,]+/).filter(Boolean),
     });
   }
   blocks.sort((a, b) => a.order - b.order);
@@ -150,6 +151,7 @@ export async function resetContentAction(form: FormData) {
     teachers: ["teachers", "teachingMethod"],
     quests: ["quests"],
     focus: ["focusPresets", "breaks"],
+    courses: ["courses"],
   };
   for (const k of keys[section] ?? []) if (CONTENT_KEYS.includes(k)) resetContent(k);
   revalidatePath("/", "layout");
