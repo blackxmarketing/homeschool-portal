@@ -218,6 +218,8 @@ const ADDED_COLUMNS: { table: string; column: string; ddl: string }[] = [
   // For the waste meter: when each question was answered and whether it was right.
   { table: "issued_questions", column: "answered_at", ddl: "ALTER TABLE issued_questions ADD COLUMN answered_at INTEGER" },
   { table: "issued_questions", column: "correct", ddl: "ALTER TABLE issued_questions ADD COLUMN correct INTEGER" },
+  // Teaching-model progress and struggle tracking (JSON TeachState, see lib/teaching.ts).
+  { table: "lesson_progress", column: "support", ddl: "ALTER TABLE lesson_progress ADD COLUMN support TEXT" },
 ];
 
 function migrate(conn: Database.Database): void {

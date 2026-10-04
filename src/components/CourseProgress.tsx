@@ -1,4 +1,4 @@
-import { courseOverview, recentCourseWork } from "@/lib/store";
+import { courseOverview, recentCourseWork, supportReport } from "@/lib/store";
 
 const STATUS = { done: "complete", open: "ready", started: "in progress", waiting: "waiting for you", locked: "locked" } as const;
 const TASK_STATUS: Record<string, string> = { done: "turned in", pending: "waiting for you", approved: "approved", declined: "asked to redo" };
@@ -7,6 +7,7 @@ const TASK_STATUS: Record<string, string> = { done: "turned in", pending: "waiti
 export default function CourseProgress({ kidId, name }: { kidId: number; name: string }) {
   const courses = courseOverview(kidId).filter((c) => c.course.lessons.length > 0);
   const work = recentCourseWork(kidId);
+  const support = supportReport(kidId);
 
   return (
     <div className="card">
@@ -38,6 +39,52 @@ export default function CourseProgress({ kidId, name }: { kidId: number; name: s
           })}
         </tbody>
       </table>
+
+      <h3 style={{ margin: "16px 0 6px" }}>Where {name} needed extra help</h3>
+      {support.length === 0 ? (
+        <p className="muted small">Nothing yet. When {name} misses a quick think twice, says they&apos;re lost, or needs the coach to step in, it shows here.</p>
+      ) : (
+        <table>
+          <thead>
+            <tr>
+              <th>Lesson</th>
+              <th>Part</th>
+              <th>What happened</th>
+            </tr>
+          </thead>
+          <tbody>
+            {support.flatMap((r) => [
+              ...r.segments.map((s, i) => (
+                <tr key={`${r.lesson.id}:${i}`}>
+                  <td className="small">
+                    {r.course.icon} {r.lesson.title}
+                  </td>
+                  <td className="small">{s.title}</td>
+                  <td className="small">
+                    {s.misses} miss{s.misses === 1 ? "" : "es"}
+                    {s.lost ? ` · said "I'm lost" ${s.lost}×` : ""}
+                    {s.aiRescues ? ` · coach re-explained ${s.aiRescues}×` : ""}
+                    {s.done === "supported" ? " · answer shown, worth revisiting together" : s.done === "passed" ? " · got it in the end ✓" : " · still working on it"}
+                  </td>
+                </tr>
+              )),
+              ...(r.explain.tries > 1 || (r.explain.done && !r.explain.understood)
+                ? [
+                    <tr key={`${r.lesson.id}:explain`}>
+                      <td className="small">
+                        {r.course.icon} {r.lesson.title}
+                      </td>
+                      <td className="small">Explain it back</td>
+                      <td className="small">
+                        {r.explain.tries} tries · {r.explain.understood ? "explained it well in the end ✓" : "didn't fully explain it yet: ask them to teach it to you"}
+                      </td>
+                    </tr>,
+                  ]
+                : []),
+            ])}
+          </tbody>
+        </table>
+      )}
 
       <h3 style={{ margin: "16px 0 6px" }}>Recent work</h3>
       {work.length === 0 ? (

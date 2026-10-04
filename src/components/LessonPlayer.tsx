@@ -15,6 +15,8 @@ interface Props {
   lesson: { id: string; title: string; minutes: number; stage: "grammar" | "logic" | "rhetoric"; read: string; keyIdeas: string[]; check: { q: string; choices: string[] }[]; task?: Task };
   initial: { checkPassed: boolean; checkBest: number; taskStatus: string; taskResponse: string; taskFeedback: string; done: boolean };
   next: { id: string; title: string } | null;
+  /** Where to open: lessons with the teaching model start at the check. */
+  startAt?: "read" | "check";
 }
 
 async function post<T>(body: unknown): Promise<T> {
@@ -24,8 +26,8 @@ async function post<T>(body: unknown): Promise<T> {
   return data as T;
 }
 
-export default function LessonPlayer({ courseId, courseTitle, hue, teacher, lesson, initial, next }: Props) {
-  const [step, setStep] = useState<"read" | "check" | "task">(initial.checkPassed ? (lesson.task ? "task" : "check") : "read");
+export default function LessonPlayer({ courseId, courseTitle, hue, teacher, lesson, initial, next, startAt = "read" }: Props) {
+  const [step, setStep] = useState<"read" | "check" | "task">(initial.checkPassed ? (lesson.task ? "task" : "check") : startAt);
   const [answers, setAnswers] = useState<(number | null)[]>(lesson.check.map(() => null));
   const [checked, setChecked] = useState<{ score: number; total: number; passed: boolean; results: { correct: boolean; answer: number; why: string }[] } | null>(null);
   const [checkPassed, setCheckPassed] = useState(initial.checkPassed);

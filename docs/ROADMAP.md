@@ -28,7 +28,24 @@ and civics. Each phase can be switched on or off in `src/content/features.ts`.
 - Struggle detector (drops back to prerequisites) and math-fact speed drills
 - MAP test score tracking (percentile and growth, three times a year)
 
-## ✅ Phase 3 — New subjects (built)
+## ✅ Phase 3b — Interactive teaching and coaching (built)
+Every lesson teaches like a tutor instead of read-then-test:
+1. Hook: a story or puzzle to spark curiosity
+2. Teach in small parts, each with an interactive visual (simulations for
+   compound interest, budgets, profit, levers, seasons, ramps and bounces;
+   timelines, diagrams, flip cards, comparisons, sorting and sequencing)
+   and a quick think
+3. Struggle detection and rescue: misses, "I'm lost" and long pauses climb a
+   coaching ladder: coaching on the exact wrong answer -> a different way in
+   (analogy) -> a worked example, a smaller first step, and the AI coach
+   re-explaining around the kid's mistakes -> the answer with the full reason,
+   flagged for the parent
+4. Hands-on activity (sort, sequence or highlight), checked on the server
+5. Explain it back: the coach checks real understanding in the kid's words
+6. Show what you know, then the task
+Parents see where each kid needed extra help.
+
+## ✅ Phase 3 — New subjects (live)
 The Academy: every lesson is a short reading, a check graded by code (80% to
 pass), then a task. Written tasks get AI feedback against a rubric; projects,
 labs and speeches are approved by a parent. Lessons follow the classical stages

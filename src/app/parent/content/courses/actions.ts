@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireParent } from "@/lib/auth";
 import { allCourses, setContent } from "@/lib/content";
-import { parseQuestions } from "@/lib/courseContent";
+import { parseQuestions, sanitizeTeaching } from "@/lib/courseContent";
 import type { Course, Lesson } from "@/content/courses/types";
 
 function s(form: FormData, key: string): string {
@@ -123,6 +123,18 @@ export async function saveLessonAction(form: FormData) {
       ? { task: { kind: taskKind as NonNullable<Lesson["task"]>["kind"], prompt: s(form, "taskPrompt"), rubric: lines(form, "taskRubric") } }
       : {}),
   };
-  course.lessons[i] = lesson;
+  // Interactive teaching (hook, segments, activity, explain): kept as is unless edited in the advanced box.
+  const teachingText = s(form, "teaching");
+  let teaching = sanitizeTeaching(course.lessons[i] as unknown as Record<string, unknown>);
+  if (teachingText) {
+    try {
+      teaching = sanitizeTeaching(JSON.parse(teachingText));
+    } catch {
+      redirect(`/parent/content/courses/${course.id}/${encodeURIComponent(lessonId)}?error=json`);
+    }
+  } else if (form.get("teachingCleared") === "1") {
+    teaching = {};
+  }
+  course.lessons[i] = { ...lesson, ...teaching };
   save(courses, `/parent/content/courses/${course.id}/${encodeURIComponent(lessonId)}?saved=1`);
 }

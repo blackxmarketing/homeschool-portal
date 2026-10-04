@@ -14,14 +14,15 @@ export default async function EditLesson({
   searchParams,
 }: {
   params: Promise<{ id: string; lesson: string }>;
-  searchParams: Promise<{ saved?: string }>;
+  searchParams: Promise<{ saved?: string; error?: string }>;
 }) {
   await requireParent();
   const { id, lesson: lessonParam } = await params;
   const course = courseById(id);
   const lesson = course?.lessons.find((l) => l.id === decodeURIComponent(lessonParam));
   if (!course || !lesson) notFound();
-  const { saved } = await searchParams;
+  const { saved, error } = await searchParams;
+  const teaching = { hook: lesson.hook, teach: lesson.teach, activity: lesson.activity, explain: lesson.explain };
 
   return (
     <main className="wrap">
@@ -32,6 +33,7 @@ export default async function EditLesson({
         </Link>
       </p>
       {saved && <div className="notice">Saved. Kids see the change on their next page load.</div>}
+      {error === "json" && <div className="error">The interactive teaching box has a typo (it must be valid JSON). Nothing was saved.</div>}
       <form action={saveLessonAction} className="card" key={JSON.stringify(lesson)}>
         <input type="hidden" name="courseId" value={course.id} />
         <input type="hidden" name="lessonId" value={lesson.id} />
@@ -99,6 +101,22 @@ export default async function EditLesson({
         <textarea name="taskPrompt" rows={4} defaultValue={lesson.task?.prompt ?? ""} />
         <label>What great work looks like (rubric, one per line)</label>
         <textarea name="taskRubric" rows={4} defaultValue={lesson.task?.rubric.join("\n") ?? ""} />
+        <h3>Interactive teaching (advanced)</h3>
+        <p className="muted small">
+          {lesson.teach?.length
+            ? `This lesson teaches in ${lesson.teach.length} interactive parts, each with a visual, a quick think, and backup approaches (analogy, worked example, simpler step) for when a kid is stuck.`
+            : "This lesson has no interactive teaching yet, so kids read it and take the check."}{" "}
+          Edit it here as JSON if you&apos;re comfortable; leave it as is otherwise. Invalid parts are dropped, never the whole lesson.
+        </p>
+        <details>
+          <summary>Show the interactive teaching JSON</summary>
+          <textarea
+            name="teaching"
+            rows={24}
+            defaultValue={lesson.teach?.length ? JSON.stringify(teaching, null, 2) : ""}
+            style={{ fontFamily: "ui-monospace, monospace", fontSize: ".85rem" }}
+          />
+        </details>
         <p />
         <button className="btn">Save lesson</button>
       </form>

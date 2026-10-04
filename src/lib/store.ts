@@ -22,6 +22,7 @@ import { allCourses, allQuests, blockById, courseById, drillSettings, focusPrese
 import { ideaFor, type Block } from "@/content/schedule";
 import { accuracyBand, factsPerMinute, forecast, GRADE_DONE, isStruggling, knowledgeGrade, wasteMeter } from "./engine/learningPlan";
 import type { Visual } from "./curriculum/answers";
+import { checkActivity, coachingFor, interactiveDone, LADDER, parseState, supportSummary, type TeachState } from "./teaching";
 
 export type Mode = "learn" | "review" | "placement";
 
@@ -1201,6 +1202,10 @@ function maybeCompleteLesson(kidId: number, courseId: string, lessonId: string):
   const row = lessonRow(kidId, courseId, lessonId);
   if (!course || !lesson || !row || row.completed_day) return false;
   const checkOk = lesson.check.length === 0 || !!row.check_passed;
+  if (lesson.teach?.length) {
+    const support = (getDb().prepare("SELECT support FROM lesson_progress WHERE id = ?").get(row.id) as { support: string | null }).support;
+    if (!interactiveDone(lesson, parseState(support, lesson.teach.length))) return false;
+  }
   const taskOk = !lesson.task || row.task_status === "done" || row.task_status === "approved";
   if (!checkOk || !taskOk) return false;
   const day = today();
@@ -1295,4 +1300,165 @@ export function recentCourseWork(kidId: number, limit = 30) {
     const course = courseById(r.course_id);
     return { ...r, course, lesson: course?.lessons.find((l) => l.id === r.lesson_id) };
   });
+}
+
+// ---------------- Teaching model: coaching and struggle tracking ----------------
+
+function teachContext(kidId: number, courseId: string, lessonId: string) {
+  const v = lessonView(kidId, courseId, lessonId);
+  if (!v) throw new PortalError("Lesson not found.");
+  if (v.status === "locked") throw new PortalError("Finish the lesson before this one first.");
+  const row = ensureLessonRow(kidId, courseId, lessonId);
+  const raw = (getDb().prepare("SELECT support FROM lesson_progress WHERE id = ?").get(row.id) as { support: string | null }).support;
+  return { ...v, rowId: row.id, state: parseState(raw, v.lesson.teach?.length ?? 0) };
+}
+
+function saveTeachState(rowId: number, state: TeachState): void {
+  getDb().prepare("UPDATE lesson_progress SET support = ?, updated_at = datetime('now') WHERE id = ?").run(JSON.stringify(state), rowId);
+}
+
+/** Where a kid is in a lesson's teaching (for resuming). */
+export function teachProgress(kidId: number, courseId: string, lessonId: string): TeachState {
+  return teachContext(kidId, courseId, lessonId).state;
+}
+
+/**
+ * A quick-think answer. Right: the segment is done. Wrong: climb the coaching
+ * ladder (see lib/teaching.ts) and return the next kind of help.
+ */
+export function answerThink(kidId: number, courseId: string, lessonId: string, segIndex: number, choice: number) {
+  const ctx = teachContext(kidId, courseId, lessonId);
+  const seg = ctx.lesson.teach?.[segIndex];
+  if (!seg) throw new PortalError("Unknown part of the lesson.");
+  const st = ctx.state.segments[segIndex];
+  if (choice === seg.think.answer) {
+    if (!st.done) st.done = "passed";
+    saveTeachState(ctx.rowId, ctx.state);
+    addXp(kidId, st.misses === 0 ? 10 : 5);
+    return { correct: true, why: seg.think.why, state: st, coaching: null, needsAi: false };
+  }
+  st.misses++;
+  st.rung = Math.max(st.rung, Math.min(LADDER.reveal, st.misses));
+  if (st.rung >= LADDER.reveal && !st.done) st.done = "supported";
+  saveTeachState(ctx.rowId, ctx.state);
+  return {
+    correct: false,
+    why: null,
+    state: st,
+    coaching: coachingFor(seg, st, choice),
+    // The AI coach steps in at the example rung with an explanation built around this kid's mistakes.
+    needsAi: st.rung === LADDER.example,
+    seg,
+    lesson: ctx.lesson,
+    course: ctx.course,
+  };
+}
+
+/** The smaller first-step question shown when a kid is stuck. */
+export function answerSimpler(kidId: number, courseId: string, lessonId: string, segIndex: number, choice: number) {
+  const ctx = teachContext(kidId, courseId, lessonId);
+  const seg = ctx.lesson.teach?.[segIndex];
+  if (!seg) throw new PortalError("Unknown part of the lesson.");
+  const q = seg.approaches.simpler;
+  const correct = choice === q.answer;
+  if (correct) {
+    ctx.state.segments[segIndex].simplerDone = true;
+    saveTeachState(ctx.rowId, ctx.state);
+  }
+  return { correct, feedback: correct ? q.why : q.hints[choice] || "Not quite. Try another one." };
+}
+
+/** "I'm lost": climb one rung of help without counting a miss. */
+export function imLost(kidId: number, courseId: string, lessonId: string, segIndex: number) {
+  const ctx = teachContext(kidId, courseId, lessonId);
+  const seg = ctx.lesson.teach?.[segIndex];
+  if (!seg) throw new PortalError("Unknown part of the lesson.");
+  const st = ctx.state.segments[segIndex];
+  st.lost++;
+  st.rung = Math.min(LADDER.example, Math.max(st.rung + 1, LADDER.analogy));
+  saveTeachState(ctx.rowId, ctx.state);
+  const c = coachingFor(seg, st, seg.think.answer);
+  return { state: st, coaching: { ...c, hint: "" }, needsAi: st.rung === LADDER.example, seg, lesson: ctx.lesson, course: ctx.course };
+}
+
+export function noteAiRescue(kidId: number, courseId: string, lessonId: string, segIndex: number): void {
+  const ctx = teachContext(kidId, courseId, lessonId);
+  if (!ctx.state.segments[segIndex]) return;
+  ctx.state.segments[segIndex].aiRescues++;
+  saveTeachState(ctx.rowId, ctx.state);
+}
+
+/** Checks the hands-on activity. */
+export function answerActivity(kidId: number, courseId: string, lessonId: string, answer: number[]) {
+  const ctx = teachContext(kidId, courseId, lessonId);
+  if (!ctx.lesson.activity) throw new PortalError("This lesson has no activity.");
+  const result = checkActivity(ctx.lesson.activity, answer);
+  ctx.state.activity.tries++;
+  // After 3 tries, show the solution and let them continue: practice, not a wall.
+  const showSolution = !result.correct && ctx.state.activity.tries >= 3;
+  if (result.correct || showSolution) ctx.state.activity.done = true;
+  saveTeachState(ctx.rowId, ctx.state);
+  if (result.correct) addXp(kidId, 15);
+  const w = ctx.lesson.activity;
+  const solution = !showSolution
+    ? null
+    : w.type === "sort"
+      ? w.items.map((it) => it.bucket)
+      : w.type === "sequence"
+        ? w.steps.map((_, i) => i)
+        : w.type === "highlight"
+          ? w.correct
+          : null;
+  return { ...result, tries: ctx.state.activity.tries, done: ctx.state.activity.done, solution };
+}
+
+/** Records an "explain it back" attempt. Done when understood, or after three honest tries. */
+export function recordExplain(kidId: number, courseId: string, lessonId: string, understood: boolean, feedback: string) {
+  const ctx = teachContext(kidId, courseId, lessonId);
+  const e = ctx.state.explain;
+  e.tries++;
+  e.understood = e.understood || understood;
+  e.feedback = feedback.slice(0, 2000);
+  if (understood || e.tries >= 3) e.done = true;
+  saveTeachState(ctx.rowId, ctx.state);
+  if (understood) addXp(kidId, 20);
+  maybeCompleteLesson(kidId, courseId, lessonId);
+  return { ...e };
+}
+
+export function explainContext(kidId: number, courseId: string, lessonId: string) {
+  const ctx = teachContext(kidId, courseId, lessonId);
+  if (!ctx.lesson.explain) throw new PortalError("This lesson has no explain-it-back step.");
+  return ctx;
+}
+
+/** Lessons where a kid needed extra help, for the parent's page. */
+export function supportReport(kidId: number) {
+  const rows = getDb()
+    .prepare("SELECT course_id, lesson_id, support, completed_day FROM lesson_progress WHERE kid_id = ? AND support IS NOT NULL ORDER BY updated_at DESC")
+    .all(kidId) as { course_id: string; lesson_id: string; support: string; completed_day: string | null }[];
+  return rows
+    .map((r) => {
+      const course = courseById(r.course_id);
+      const lesson = course?.lessons.find((l) => l.id === r.lesson_id);
+      if (!course || !lesson) return null;
+      const state = parseState(r.support, lesson.teach?.length ?? 0);
+      return {
+        course,
+        lesson,
+        completed: r.completed_day,
+        segments: supportSummary(lesson, state),
+        explain: state.explain,
+        activityTries: state.activity.tries,
+      };
+    })
+    .filter((x): x is NonNullable<typeof x> => !!x && (x.segments.length > 0 || x.explain.tries > 1 || !x.explain.understood && x.explain.done));
+}
+
+/** Checks an activity used as a teaching visual (practice only; it doesn't affect progress). */
+export function checkSegmentVisual(kidId: number, courseId: string, lessonId: string, segIndex: number, answer: number[]) {
+  const ctx = teachContext(kidId, courseId, lessonId);
+  const w = ctx.lesson.teach?.[segIndex]?.visual;
+  if (!w) throw new PortalError("Nothing to check here.");
+  return checkActivity(w, answer);
 }

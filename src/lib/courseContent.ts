@@ -1,4 +1,4 @@
-import type { CheckQuestion, Course, Lesson, Stage, TaskKind } from "@/content/courses/types";
+import type { CheckQuestion, Course, Lesson, Segment, Stage, TaskKind, ThinkQuestion, Widget } from "@/content/courses/types";
 import { SUBJECTS, type Subject } from "./compliance";
 
 /**
@@ -50,6 +50,7 @@ function sanitizeLesson(raw: unknown, courseSubject: Subject, seen: Set<string>)
     ...(t && prompt
       ? { task: { kind: TASK_KINDS.includes(t.kind as TaskKind) ? (t.kind as TaskKind) : "write", prompt, rubric: strList(t.rubric, 8) } }
       : {}),
+    ...sanitizeTeaching(raw),
   };
 }
 
@@ -111,6 +112,115 @@ export function parseQuestions(text: string): CheckQuestion[] {
     if (!q || choiceLines.length < 2) continue;
     const answer = Math.max(0, choiceLines.findIndex((l) => l.startsWith("*")));
     out.push({ q, choices: choiceLines.map((l) => l.replace(/^[-*]\s+/, "")), answer, why });
+  }
+  return out;
+}
+
+// ---------------- Teaching model validation ----------------
+
+function sanitizeThink(raw: unknown): ThinkQuestion | null {
+  const q = sanitizeQuestion(raw);
+  if (!q || !isObj(raw)) return null;
+  const hints = Array.isArray(raw.hints) ? raw.hints.map((h) => str(h, 600)) : [];
+  return { ...q, hints: q.choices.map((_, i) => hints[i] ?? "") };
+}
+
+const nums = (v: unknown, n: number, lo: number, hi: number) => int(v, lo, hi, n);
+
+export function sanitizeWidget(raw: unknown): Widget | null {
+  if (!isObj(raw)) return null;
+  switch (raw.type) {
+    case "sort": {
+      const buckets = strList(raw.buckets, 6, 80);
+      const items = (Array.isArray(raw.items) ? raw.items : [])
+        .filter(isObj)
+        .map((it) => ({ text: str(it.text, 200), bucket: int(it.bucket, 0, Math.max(0, buckets.length - 1), 0) }))
+        .filter((it) => it.text)
+        .slice(0, 16);
+      return buckets.length >= 2 && items.length >= 2 ? { type: "sort", prompt: str(raw.prompt, 300), buckets, items } : null;
+    }
+    case "sequence": {
+      const steps = strList(raw.steps, 12, 300);
+      return steps.length >= 2 ? { type: "sequence", prompt: str(raw.prompt, 300), steps } : null;
+    }
+    case "highlight": {
+      const sentences = strList(raw.sentences, 12, 400);
+      const correct = (Array.isArray(raw.correct) ? raw.correct : []).map(Number).filter((i) => Number.isInteger(i) && i >= 0 && i < sentences.length);
+      return sentences.length >= 2 && correct.length ? { type: "highlight", prompt: str(raw.prompt, 300), sentences, correct: [...new Set(correct)] } : null;
+    }
+    case "flip": {
+      const cards = (Array.isArray(raw.cards) ? raw.cards : []).filter(isObj).map((c) => ({ front: str(c.front, 200), back: str(c.back, 400) })).filter((c) => c.front && c.back).slice(0, 12);
+      return cards.length ? { type: "flip", cards } : null;
+    }
+    case "timeline": {
+      const events = (Array.isArray(raw.events) ? raw.events : [])
+        .filter(isObj)
+        .map((e) => ({ year: int(e.year, -5000, 3000, 0), label: str(e.label, 120), detail: str(e.detail, 500) }))
+        .filter((e) => e.label)
+        .slice(0, 16);
+      return events.length ? { type: "timeline", events } : null;
+    }
+    case "hotspots": {
+      const spots = (Array.isArray(raw.spots) ? raw.spots : []).filter(isObj).map((s) => ({ label: str(s.label, 60), icon: str(s.icon, 8) || "•", detail: str(s.detail, 500) })).filter((s) => s.label).slice(0, 8);
+      return spots.length ? { type: "hotspots", title: str(raw.title, 120), center: str(raw.center, 60), spots } : null;
+    }
+    case "compare": {
+      const side = (v: unknown) => (isObj(v) ? { title: str(v.title, 80), points: strList(v.points, 8) } : { title: "", points: [] });
+      return { type: "compare", left: side(raw.left), right: side(raw.right) };
+    }
+    case "compound":
+      return { type: "compound", principal: nums(raw.principal, 1000, 1, 1_000_000), rate: nums(raw.rate, 5, 1, 30), years: nums(raw.years, 10, 1, 60) };
+    case "budget": {
+      const categories = (Array.isArray(raw.categories) ? raw.categories : []).filter(isObj).map((c) => ({ label: str(c.label, 40), pct: int(c.pct, 0, 100, 0) })).filter((c) => c.label).slice(0, 5);
+      return categories.length ? { type: "budget", income: nums(raw.income, 100, 1, 1_000_000), categories } : null;
+    }
+    case "profit": {
+      const n = (v: unknown, d: number) => (Number.isFinite(Number(v)) ? Math.max(0, Math.min(100_000, Number(v))) : d);
+      return { type: "profit", price: n(raw.price, 5), cost: n(raw.cost, 2), fixed: n(raw.fixed, 20), units: Math.round(n(raw.units, 20)) };
+    }
+    case "lever":
+    case "seasons":
+    case "ramp":
+      return { type: raw.type };
+    case "bounce": {
+      const e = Number(raw.efficiency);
+      return { type: "bounce", efficiency: Number.isFinite(e) ? Math.min(0.95, Math.max(0.3, e)) : 0.7 };
+    }
+  }
+  return null;
+}
+
+function sanitizeSegment(raw: unknown): Segment | null {
+  if (!isObj(raw)) return null;
+  const title = str(raw.title, 120);
+  const teach = str(raw.teach, 3000);
+  const think = sanitizeThink(raw.think);
+  const ap = isObj(raw.approaches) ? raw.approaches : {};
+  const simpler = sanitizeThink(ap.simpler);
+  if (!title || !teach || !think || !simpler) return null;
+  const visual = raw.visual ? sanitizeWidget(raw.visual) : null;
+  return {
+    title,
+    teach,
+    ...(visual ? { visual } : {}),
+    think,
+    approaches: { analogy: str(ap.analogy, 2000) || teach, example: str(ap.example, 2000) || teach, simpler },
+  };
+}
+
+/** The interactive parts of a lesson; anything invalid is dropped rather than breaking the lesson. */
+export function sanitizeTeaching(raw: Record<string, unknown>): Pick<Lesson, "hook" | "teach" | "activity" | "explain"> {
+  const out: Pick<Lesson, "hook" | "teach" | "activity" | "explain"> = {};
+  if (isObj(raw.hook) && str(raw.hook.text)) {
+    const visual = raw.hook.visual ? sanitizeWidget(raw.hook.visual) : null;
+    out.hook = { text: str(raw.hook.text, 1000), ...(visual ? { visual } : {}) };
+  }
+  const teach = (Array.isArray(raw.teach) ? raw.teach : []).map(sanitizeSegment).filter((s): s is Segment => !!s).slice(0, 8);
+  if (teach.length) out.teach = teach;
+  const activity = raw.activity ? sanitizeWidget(raw.activity) : null;
+  if (activity && (activity.type === "sort" || activity.type === "sequence" || activity.type === "highlight")) out.activity = activity;
+  if (isObj(raw.explain) && str(raw.explain.prompt)) {
+    out.explain = { prompt: str(raw.explain.prompt, 600), keyPoints: strList(raw.explain.keyPoints, 6) };
   }
   return out;
 }

@@ -49,6 +49,12 @@ Colorado records.
   mini-business per kid) and Leadership & Character are afternoon life skills.
   Each lesson is a reading, a code-graded check and a task; writing gets AI
   rubric feedback, and projects, labs and speeches are approved by a parent.
+- **Interactive teaching (Phase 3b).** Lessons teach in small parts with
+  simulations and activities. When a kid struggles (wrong answers, "I'm lost",
+  long pauses) the coach changes approach: targeted coaching, an analogy, a
+  worked example and a smaller step, then an AI re-explanation built around
+  their mistakes. Kids explain ideas back in their own words before the final
+  check, and parents see where extra help was needed.
 - **Real-world missions.** Off-screen tasks about money, business, leadership,
   character, science, history and civics. A parent approves each one, which
   awards XP and logs the minutes under the right subject for records.

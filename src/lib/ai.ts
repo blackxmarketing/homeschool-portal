@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { jsonSchemaOutputFormat } from "@anthropic-ai/sdk/helpers/json-schema";
 import type { Question } from "./curriculum/answers";
 import type { Teacher } from "@/content/teachers";
 import { teachingMethod } from "./content";
@@ -216,5 +217,123 @@ ${input.work}
 """`,
     "low",
     3000,
+  );
+}
+
+// ---------------- Coaching in the teaching model ----------------
+
+const RESCUE_SCHEMA = {
+  type: "object",
+  properties: {
+    approach: { type: "string", enum: ["story", "picture-in-words", "step-by-step", "analogy", "real-life"] },
+    explanation: { type: "string" },
+    tryThis: { type: "string" },
+  },
+  required: ["approach", "explanation", "tryThis"],
+  additionalProperties: false,
+} as const;
+
+const EXPLAIN_SCHEMA = {
+  type: "object",
+  properties: {
+    understood: { type: "boolean" },
+    covered: { type: "array", items: { type: "string" } },
+    missing: { type: "array", items: { type: "string" } },
+    feedback: { type: "string" },
+    followUp: { type: "string" },
+  },
+  required: ["understood", "covered", "missing", "feedback", "followUp"],
+  additionalProperties: false,
+} as const;
+
+async function askStructured<T>(system: string, user: string, schema: Record<string, unknown> & { type: "object" }): Promise<T | null> {
+  const c = getClient();
+  if (!c) return null;
+  try {
+    const res = await c.beta.messages.parse({
+      model: MODEL,
+      max_tokens: 4000,
+      betas: ["server-side-fallback-2026-07-01"],
+      fallbacks: "default",
+      output_config: { effort: "low", format: jsonSchemaOutputFormat(schema as never) },
+      system,
+      messages: [{ role: "user", content: user }],
+    });
+    if (res.stop_reason === "refusal") return null;
+    return (res.parsed_output as T | null) ?? null;
+  } catch (err) {
+    if (err instanceof Anthropic.APIError) console.warn(`Claude API error ${err.status}; using built-in coaching`);
+    else console.warn("Claude coaching failed; using built-in coaching", err);
+    return null;
+  }
+}
+
+function coachSystem(teacher: { name: string; inspiredBy: string; voice: string }): string {
+  return `You are ${teacher.name}, a coach in a homeschool learning app for kids aged 11-14${
+    teacher.inspiredBy ? `, loosely inspired by ${teacher.inspiredBy} (an original character, not that person)` : ""
+  }. Your style: ${teacher.voice}
+${teachingMethod()}
+Plain text only: no markdown, no lists, no emojis.`;
+}
+
+/**
+ * A kid has missed the same quick think several times. Explain the idea a
+ * new way, built around their specific wrong answers, without giving the
+ * answer away.
+ */
+export async function coachRescue(input: {
+  teacher: { name: string; inspiredBy: string; voice: string };
+  lessonTitle: string;
+  segmentTitle: string;
+  teachText: string;
+  question: string;
+  choices: string[];
+  answer: number;
+  wrongPicks: string[];
+  alreadyTried: string[];
+}): Promise<{ approach: string; explanation: string; tryThis: string } | null> {
+  const result = await askStructured<{ approach: string; explanation: string; tryThis: string }>(
+    coachSystem(input.teacher),
+    `The student is stuck on part of a lesson and has answered wrong several times.
+Lesson: ${input.lessonTitle}
+Part: ${input.segmentTitle}
+What was taught: ${input.teachText}
+Question: ${input.question}
+Choices: ${input.choices.map((c, i) => `${i + 1}. ${c}`).join(" | ")}
+Correct choice (SECRET, never say it or quote it): ${input.choices[input.answer]}
+The student picked: ${input.wrongPicks.join(" | ")}
+Explanations already shown (do NOT repeat these approaches): ${input.alreadyTried.join(" || ")}
+
+Diagnose the misunderstanding behind their picks and explain the idea in a completely different way (choose the approach most likely to click). explanation: 3-5 short sentences. tryThis: one guiding question that leads them to reason it out themselves. Never reveal the correct choice.`,
+    RESCUE_SCHEMA,
+  );
+  if (!result) return null;
+  const secret = input.choices[input.answer];
+  if (secret.length >= 4 && (result.explanation + result.tryThis).toLowerCase().includes(secret.toLowerCase())) return null;
+  return result;
+}
+
+/** Checks a kid's "explain it back" answer for real understanding. */
+export async function coachExplain(input: {
+  teacher: { name: string; inspiredBy: string; voice: string };
+  lessonTitle: string;
+  prompt: string;
+  keyPoints: string[];
+  text: string;
+}): Promise<{ understood: boolean; covered: string[]; missing: string[]; feedback: string; followUp: string } | null> {
+  return askStructured(
+    coachSystem(input.teacher),
+    `Lesson: ${input.lessonTitle}
+The student was asked to explain in their own words: ${input.prompt}
+A good explanation includes these key points:
+${input.keyPoints.map((k, i) => `${i + 1}. ${k}`).join("\n")}
+
+Student's explanation:
+"""
+${input.text}
+"""
+
+Judge understanding, not spelling or wording: their own words and examples count. understood = true when they show the main idea and most key points. covered/missing: copy the key points exactly as written above. feedback: 2-3 sentences, specific and encouraging, quoting their words. followUp: if not understood, one question that helps them figure out the missing piece; if understood, one question that stretches their thinking.`,
+    EXPLAIN_SCHEMA,
   );
 }
