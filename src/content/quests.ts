@@ -381,8 +381,13 @@ export const QUEST_BY_ID = new Map(QUESTS.map((q) => [q.id, q]));
  * offered when the kid can actually go do them (not mid-question streaks
  * where they'd lose focus), so callers pass which kinds are allowed.
  */
-export function pickQuest(recentIds: Set<string>, kinds: QuestKind[], rand: () => number = Math.random): Quest {
-  const pool = QUESTS.filter((q) => kinds.includes(q.kind));
+export function pickQuest(
+  recentIds: Set<string>,
+  kinds: QuestKind[],
+  rand: () => number = Math.random,
+  list: Quest[] = QUESTS,
+): Quest {
+  const pool = list.filter((q) => kinds.includes(q.kind));
   const fresh = pool.filter((q) => !recentIds.has(q.id));
   const from = fresh.length ? fresh : pool;
   return from[Math.floor(rand() * from.length)];

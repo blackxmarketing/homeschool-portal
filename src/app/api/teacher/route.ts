@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { kidFromRequest } from "@/lib/auth";
 import { aiEnabled, teacherLesson, teacherReply, teacherWhyWrong } from "@/lib/ai";
-import { AI_LIMITS, FEATURES } from "@/content/features";
-import { teacherFor } from "@/content/teachers";
+import { aiLimits, features, teacherFor } from "@/lib/content";
 import { getSkill } from "@/lib/curriculum/skills";
 import {
   logTutor,
@@ -24,7 +23,8 @@ import {
 export async function POST(req: Request) {
   const kid = await kidFromRequest();
   if (!kid) return NextResponse.json({ error: "Please log in again." }, { status: 401 });
-  if (!FEATURES.aiTeachers) return NextResponse.json({ error: "Teachers are turned off." }, { status: 400 });
+  const AI_LIMITS = aiLimits();
+  if (!features().aiTeachers) return NextResponse.json({ error: "Teachers are turned off." }, { status: 400 });
   const body = (await req.json().catch(() => ({}))) as {
     action?: string;
     questionId?: string;

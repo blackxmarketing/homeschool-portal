@@ -1,5 +1,5 @@
 import { addTestScoreAction, deleteTestScoreAction } from "@/app/actions";
-import { DRILL } from "@/content/schedule";
+import { drillSettings } from "@/lib/content";
 import type { AccuracyBand } from "@/lib/engine/learningPlan";
 import { drillStats, goalProgress, learningPlan, testScores, today, type Kid } from "@/lib/store";
 
@@ -38,6 +38,7 @@ export default function LearningPlan({ kid }: { kid: Kid }) {
   const plan = learningPlan(kid);
   const goal = goalProgress(kid);
   const drills = drillStats(kid.id);
+  const DRILL = drillSettings();
   const scores = testScores(kid.id);
   const band = BAND[plan.accuracy.band];
   const subjects = [...new Set(scores.map((s) => s.subject))];

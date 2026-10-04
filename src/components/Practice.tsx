@@ -7,7 +7,7 @@ import { BreakScreen, countQuestion, SideQuest, SprintRing, useSprint } from "./
 import type { Visual as V } from "@/lib/curriculum/answers";
 import type { FocusProfile } from "@/lib/focus";
 import { CHEERS, ENCOURAGE } from "@/lib/game";
-import { FEATURES } from "@/content/features";
+import type { BreakIdea, Features } from "@/lib/content";
 import { MiniLesson, TeacherChat, WhyWrong, type TeacherInfo } from "./TeacherChat";
 
 type Mode = "learn" | "review" | "placement";
@@ -84,7 +84,19 @@ function Confetti() {
   );
 }
 
-export default function Practice({ mode, skillId, focus }: { mode: Mode; skillId?: string; focus: FocusProfile }) {
+export default function Practice({
+  mode,
+  skillId,
+  focus,
+  features: FEATURES,
+  breaks,
+}: {
+  mode: Mode;
+  skillId?: string;
+  focus: FocusProfile;
+  features: Features;
+  breaks: BreakIdea[];
+}) {
   const [q, setQ] = useState<Q | null>(null);
   const [answer, setAnswer] = useState("");
   const [result, setResult] = useState<Result | null>(null);
@@ -276,6 +288,7 @@ export default function Practice({ mode, skillId, focus }: { mode: Mode; skillId
   if (interlude === "break") {
     return (
       <BreakScreen
+        breaks={breaks}
         minutes={focus.breakMinutes}
         onDone={() => {
           sprint.restart();

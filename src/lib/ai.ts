@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Question } from "./curriculum/answers";
-import { TEACHING_METHOD, type Teacher } from "@/content/teachers";
+import type { Teacher } from "@/content/teachers";
+import { teachingMethod } from "./content";
 
 /**
  * Optional Claude features. The portal works without an API key: hints fall
@@ -113,7 +114,7 @@ function teacherSystem(t: Teacher): string {
 Your style: ${t.voice}
 Stories and hooks you like: ${t.hooks.join("; ")}.
 
-${TEACHING_METHOD}
+${teachingMethod()}
 
 Rules:
 - Stay on the current lesson. If the student brings up something unrelated, say one friendly sentence and steer back to the math.

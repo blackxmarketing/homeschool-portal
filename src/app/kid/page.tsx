@@ -2,12 +2,11 @@ import Link from "next/link";
 import { logoutAction } from "../actions";
 import MissionButton from "@/components/MissionButton";
 import { DayRings, GradeTower } from "@/components/DayRings";
-import { DRILL } from "@/content/schedule";
 import { getSkill } from "@/lib/curriculum/skills";
 import { requireKid } from "@/lib/auth";
 import { levelInfo } from "@/lib/game";
 import { THEME_LABEL } from "@/content/quests";
-import { FEATURES } from "@/content/features";
+import { drillSettings, features } from "@/lib/content";
 import {
   capStatus,
   dayBlocks,
@@ -34,6 +33,8 @@ export default async function KidHome({ searchParams }: { searchParams: Promise<
   const { kid } = await requireKid();
   if ((await searchParams).more) extendPlan(kid.id);
 
+  const FEATURES = features();
+  const DRILL = drillSettings();
   const focus = getFocus(kid.id);
   const cap = capStatus(kid.id);
   const goalPct = Math.min(100, Math.round((cap.minutes / kid.daily_goal_minutes) * 100));

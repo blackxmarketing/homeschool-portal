@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Practice from "@/components/Practice";
 import { requireKid } from "@/lib/auth";
 import { getFocus } from "@/lib/store";
+import { breakIdeas, features } from "@/lib/content";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,7 @@ export default async function PlacementPage() {
           ← Take a break
         </Link>
       </div>
-      <Practice mode="placement" focus={getFocus(kid.id)} />
+      <Practice mode="placement" focus={getFocus(kid.id)} features={features()} breaks={breakIdeas()} />
     </main>
   );
 }

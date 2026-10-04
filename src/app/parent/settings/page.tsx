@@ -1,7 +1,8 @@
 import ParentNav from "@/components/ParentNav";
 import { addKidAction, focusAction, resetPlacementAction, schoolYearAction, updateKidAction } from "@/app/actions";
 import { requireParent } from "@/lib/auth";
-import { LIMITS, PRESETS } from "@/lib/focus";
+import { LIMITS } from "@/lib/focus";
+import { focusPresets } from "@/lib/content";
 import { AVATARS, getFamily, getFocus, listKids } from "@/lib/store";
 
 const ATTENTION_OPTIONS = [
@@ -11,7 +12,7 @@ const ATTENTION_OPTIONS = [
 ];
 
 function presetText(key: "yes" | "no" | "unsure") {
-  const p = PRESETS[key];
+  const p = focusPresets()[key];
   return `${p.sprintMinutes}-min sprints, ${p.breakMinutes}-min breaks, a side quest every ${p.sideQuestEvery} questions, ${p.dailyCapMinutes} min/day screen cap`;
 }
 

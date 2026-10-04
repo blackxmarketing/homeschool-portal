@@ -17,9 +17,9 @@ import { buildPlan, gradeProgress, isAvailable, DAILY_QUESTION_CAP, type PlanIte
 import { schoolYearStart, summarize, type DayMinutes } from "./compliance";
 import { clampProfile, defaultProfile, parseProfile, type FocusProfile } from "./focus";
 import { badges, levelInfo, type BadgeStats } from "./game";
-import { pickQuest, QUEST_BY_ID, type Quest, type QuestKind } from "@/content/quests";
-import { teacherFor } from "@/content/teachers";
-import { BLOCKS, BLOCK_BY_ID, DRILL, ideaFor, type Block } from "@/content/schedule";
+import { pickQuest, type Quest, type QuestKind } from "@/content/quests";
+import { allQuests, blockById, drillSettings, focusPresets, questById, scheduleBlocks, teacherFor } from "./content";
+import { ideaFor, type Block } from "@/content/schedule";
 import { accuracyBand, factsPerMinute, forecast, GRADE_DONE, isStruggling, knowledgeGrade, wasteMeter } from "./engine/learningPlan";
 import type { Visual } from "./curriculum/answers";
 
@@ -98,14 +98,14 @@ export function addKid(
       input.grade,
       bcrypt.hashSync(input.pin, 10),
       input.dailyGoal,
-      JSON.stringify(clampProfile(input.focus ?? defaultProfile())),
+      JSON.stringify(clampProfile(input.focus ?? defaultProfile("unsure", focusPresets()))),
     );
   return Number(res.lastInsertRowid);
 }
 
 export function getFocus(kidId: number): FocusProfile {
   const row = getDb().prepare("SELECT focus FROM kids WHERE id = ?").get(kidId) as { focus: string | null } | undefined;
-  return parseProfile(row?.focus);
+  return parseProfile(row?.focus, focusPresets());
 }
 
 export function setFocus(kidId: number, profile: FocusProfile): void {
@@ -631,7 +631,7 @@ function recentQuestIds(kidId: number, includeToday = true): Set<string> {
 }
 
 export function nextSideQuest(kidId: number, kinds: QuestKind[]): Quest {
-  return pickQuest(recentQuestIds(kidId), kinds);
+  return pickQuest(recentQuestIds(kidId), kinds, Math.random, allQuests());
 }
 
 /** Missions offered on the kid's home page. Same three all day, new ones tomorrow. */
@@ -645,7 +645,7 @@ export function missionBoard(kidId: number, count = 3): Quest[] {
   const exclude = recentQuestIds(kidId, false);
   const picked: Quest[] = [];
   for (let i = 0; i < count; i++) {
-    const q = pickQuest(exclude, ["mission"], rand);
+    const q = pickQuest(exclude, ["mission"], rand, allQuests());
     if (picked.some((p) => p.id === q.id)) break;
     picked.push(q);
     exclude.add(q.id);
@@ -654,7 +654,7 @@ export function missionBoard(kidId: number, count = 3): Quest[] {
 }
 
 export function completeQuest(kidId: number, questId: string, response = ""): { status: string; xpGained: number } {
-  const quest = QUEST_BY_ID.get(questId);
+  const quest = questById(questId);
   if (!quest) throw new PortalError("Unknown quest.");
   const db = getDb();
   const day = today();
@@ -692,7 +692,7 @@ type QuestLogBase = {
 export type QuestLogRow = QuestLogBase & { title: string; xp: number; minutes: number; subject: string };
 
 function withQuest<T extends QuestLogBase>(r: T): T & QuestLogRow {
-  const q = QUEST_BY_ID.get(r.quest_id);
+  const q = questById(r.quest_id);
   return { ...r, title: q?.title ?? r.quest_id, xp: q?.xp ?? 0, minutes: q?.minutes ?? 0, subject: q?.subject ?? "Other" };
 }
 
@@ -721,7 +721,7 @@ export function reviewMission(familyId: number, logId: number, approve: boolean)
     )
     .get(logId, familyId) as { kid_id: number; quest_id: string; day: string; status: string } | undefined;
   if (!row || row.status !== "pending") throw new PortalError("That mission isn't waiting for review.");
-  const quest = QUEST_BY_ID.get(row.quest_id);
+  const quest = questById(row.quest_id);
   db.transaction(() => {
     db.prepare("UPDATE quest_log SET status = ?, reviewed_at = datetime('now') WHERE id = ?").run(
       approve ? "approved" : "declined",
@@ -861,7 +861,7 @@ export function dayBlocks(kidId: number): BlockStatus[] {
       status: BlockStatus["state"];
     }[]).map((r) => [r.block_id, r]),
   );
-  return BLOCKS.map((block) => {
+  return scheduleBlocks().map((block) => {
     let minutes = 0;
     let state: BlockStatus["state"] = "open";
     if (block.kind === "portal") {
@@ -881,7 +881,7 @@ export function dayBlocks(kidId: number): BlockStatus[] {
 
 /** The kid finished a guided block. It waits for a parent to approve. */
 export function finishBlock(kidId: number, blockId: string, minutes: number, note: string): void {
-  const block = BLOCK_BY_ID.get(blockId);
+  const block = blockById(blockId);
   if (!block || block.kind !== "guided") throw new PortalError("Unknown block.");
   const m = Math.max(1, Math.min(block.minutes * 2, Math.round(minutes)));
   const res = getDb()
@@ -897,7 +897,7 @@ export function pendingBlocks(familyId: number) {
        FROM block_log b JOIN kids k ON k.id = b.kid_id WHERE k.family_id = ? AND b.status = 'pending' ORDER BY b.id`,
     )
     .all(familyId) as { id: number; kid_id: number; block_id: string; day: string; minutes: number; note: string; kidName: string; avatar: string }[]).map(
-    (r) => ({ ...r, block: BLOCK_BY_ID.get(r.block_id) }),
+    (r) => ({ ...r, block: blockById(r.block_id) }),
   );
 }
 
@@ -908,7 +908,7 @@ export function reviewBlock(familyId: number, logId: number, approve: boolean): 
     .prepare("SELECT b.kid_id, b.block_id, b.day, b.minutes, b.note, b.status FROM block_log b JOIN kids k ON k.id = b.kid_id WHERE b.id = ? AND k.family_id = ?")
     .get(logId, familyId) as { kid_id: number; block_id: string; day: string; minutes: number; note: string; status: string } | undefined;
   if (!row || row.status !== "pending") throw new PortalError("That block isn't waiting for review.");
-  const block = BLOCK_BY_ID.get(row.block_id);
+  const block = blockById(row.block_id);
   db.transaction(() => {
     db.prepare("UPDATE block_log SET status = ? WHERE id = ?").run(approve ? "approved" : "declined", logId);
     if (approve && block) {
@@ -968,7 +968,7 @@ export function drillStats(kidId: number) {
       best,
       runs: mine.length,
       last: mine[0] ? factsPerMinute(mine[0].correct, mine[0].seconds) : null,
-      fluent: best >= DRILL.fluentPerMinute,
+      fluent: best >= drillSettings().fluentPerMinute,
     };
   });
 }

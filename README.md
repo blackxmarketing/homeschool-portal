@@ -49,6 +49,8 @@ Colorado records.
   awards XP and logs the minutes under the right subject for records.
 
 **For parents**
+- **Content page.** Edit features, the 2-hour day, AI teachers, quests and
+  missions, focus presets and brain breaks from the parent portal, no code needed.
 - **Focus settings per kid.** One question ("ADHD or trouble keeping focus?")
   sets the starting values: shorter sprints, more breaks, more side quests and
   a tighter screen cap for kids who need them. Every value can be changed.

@@ -11,10 +11,7 @@ import { STRANDS } from "@/lib/curriculum/skills";
 import { addDays } from "@/lib/engine/mastery";
 import { KIND_LABEL } from "@/content/quests";
 import { activities, getKid, kidFlags, questLog, recentMastered, recentTutorMessages, skillTable, today, weekStats } from "@/lib/store";
-import { TEACHERS } from "@/content/teachers";
-import { FEATURES } from "@/content/features";
-
-const TEACHER_NAME: Record<string, string> = Object.fromEntries(Object.values(TEACHERS).map((t) => [t.id, t.name]));
+import { allTeachers, features } from "@/lib/content";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +26,8 @@ export default async function KidDetail({
   const kid = getKid(Number((await params).id));
   if (!kid || kid.family_id !== s.familyId) notFound();
   const { error, logged } = await searchParams;
+  const FEATURES = features();
+  const TEACHER_NAME: Record<string, string> = Object.fromEntries(Object.values(allTeachers()).map((t) => [t.id, t.name]));
 
   const skills = skillTable(kid.id);
   const week = weekStats(kid.id);

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireKid } from "@/lib/auth";
 import { STRANDS } from "@/lib/curriculum/skills";
 import { WORLDS } from "@/lib/game";
-import { TEACHERS } from "@/content/teachers";
+import { allTeachers } from "@/lib/content";
 import { skillTable } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +38,7 @@ function Ring({ pct, hue }: { pct: number; hue: number }) {
 export default async function QuestMap() {
   const { kid } = await requireKid();
   const skills = skillTable(kid.id);
+  const TEACHERS = allTeachers();
 
   return (
     <main className="wrap">

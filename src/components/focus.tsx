@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BREAKS, type FocusProfile } from "@/lib/focus";
+import type { FocusProfile } from "@/lib/focus";
+import type { BreakIdea } from "@/lib/content";
 import { KIND_LABEL, THEME_LABEL, type Quest } from "@/content/quests";
 
 /**
@@ -101,8 +102,8 @@ export function SprintRing({ left, total }: { left: number; total: number }) {
   );
 }
 
-export function BreakScreen({ minutes, onDone }: { minutes: number; onDone: () => void }) {
-  const [b] = useState(() => BREAKS[Math.floor(Math.random() * BREAKS.length)]);
+export function BreakScreen({ minutes, breaks, onDone }: { minutes: number; breaks: BreakIdea[]; onDone: () => void }) {
+  const [b] = useState(() => breaks[Math.floor(Math.random() * breaks.length)]);
   const [left, setLeft] = useState(minutes * 60);
   useEffect(() => {
     const t = setInterval(() => setLeft((l) => Math.max(0, l - 1)), 1000);

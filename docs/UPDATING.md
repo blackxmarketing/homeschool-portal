@@ -1,5 +1,17 @@
 # Updating and tweaking the portal
 
+## The easy way: the Content page
+
+Log in as a parent and open **Content** in the top menu. Everything below can be
+edited there with no code: feature switches, AI limits, the fact-drill target,
+the 2-hour-day blocks and their daily ideas, the AI teachers and their teaching
+method, quests and missions (add your own), focus presets and brain breaks.
+Changes show up for the kids on their next page load. Each section has a
+"Reset to defaults" button.
+
+The files below are the *defaults*. Edits made on the Content page win over
+them, so only change the files if you want new defaults for everyone.
+
 The portal is built so most changes are edits to plain content files. Push the
 change to GitHub and the server updates itself within about 5–10 minutes (once
 auto-update is turned on, see below). Every update backs up the database first,

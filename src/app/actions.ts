@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { endSession, requireKid, requireParent, startSession } from "@/lib/auth";
 import { SUBJECTS } from "@/lib/compliance";
-import { clampProfile, defaultProfile, PRESETS, type AttentionAnswer } from "@/lib/focus";
+import { clampProfile, defaultProfile, type AttentionAnswer } from "@/lib/focus";
+import { focusPresets } from "@/lib/content";
 import {
   AVATARS,
   addKid,
@@ -90,7 +91,7 @@ export async function addKidAction(form: FormData) {
   const fields = parseKidFields(form, "/parent/settings");
   if (!name) back("/parent/settings", "Every kid needs a name.");
   if (!fields.pin) back("/parent/settings", "Set a 4-digit PIN for the kid to log in with.");
-  addKid(s.familyId, { name, avatar, ...fields, focus: defaultProfile(attentionAnswer(form)) });
+  addKid(s.familyId, { name, avatar, ...fields, focus: defaultProfile(attentionAnswer(form), focusPresets()) });
   revalidatePath("/parent/settings");
   redirect("/parent/settings?saved=1");
 }
@@ -120,7 +121,7 @@ export async function focusAction(form: FormData) {
   const attention = attentionAnswer(form);
   // "Use recommended" resets the numbers to the preset for the attention answer.
   const numbers = form.get("preset")
-    ? PRESETS[attention]
+    ? focusPresets()[attention]
     : {
         sprintMinutes: Number(form.get("sprintMinutes")),
         breakMinutes: Number(form.get("breakMinutes")),

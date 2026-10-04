@@ -36,15 +36,15 @@ export const LIMITS = {
   dailyCapMinutes: [15, 240],
 } as const;
 
-export function defaultProfile(attention: AttentionAnswer = "unsure"): FocusProfile {
-  return { attention, ...PRESETS[attention] };
+export function defaultProfile(attention: AttentionAnswer = "unsure", presets = PRESETS): FocusProfile {
+  return { attention, ...presets[attention] };
 }
 
-export function parseProfile(raw: string | null | undefined): FocusProfile {
-  if (!raw) return defaultProfile();
+export function parseProfile(raw: string | null | undefined, presets = PRESETS): FocusProfile {
+  if (!raw) return defaultProfile("unsure", presets);
   try {
     const p = JSON.parse(raw) as Partial<FocusProfile>;
-    const base = defaultProfile(p.attention ?? "unsure");
+    const base = defaultProfile(p.attention ?? "unsure", presets);
     return clampProfile({ ...base, ...p });
   } catch {
     return defaultProfile();
