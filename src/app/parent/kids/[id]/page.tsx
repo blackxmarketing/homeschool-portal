@@ -8,8 +8,11 @@ import { requireParent } from "@/lib/auth";
 import { SUBJECTS } from "@/lib/compliance";
 import { STRANDS } from "@/lib/curriculum/skills";
 import { addDays } from "@/lib/engine/mastery";
-import { KIND_LABEL } from "@/lib/quests";
-import { activities, getKid, kidFlags, questLog, recentMastered, skillTable, today, weekStats } from "@/lib/store";
+import { KIND_LABEL } from "@/content/quests";
+import { activities, getKid, kidFlags, questLog, recentMastered, recentTutorMessages, skillTable, today, weekStats } from "@/lib/store";
+import { TEACHERS } from "@/content/teachers";
+
+const TEACHER_NAME: Record<string, string> = Object.fromEntries(Object.values(TEACHERS).map((t) => [t.id, t.name]));
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +34,7 @@ export default async function KidDetail({
   const mastered = recentMastered(kid.id, addDays(today(), -30));
   const log = activities(kid.id, addDays(today(), -14));
   const quests = questLog(kid.id, addDays(today(), -30));
+  const chats = recentTutorMessages(kid.id, addDays(today(), -6)).reverse();
   const strandLabel = Object.fromEntries(STRANDS.map((x) => [x.id, x.label]));
 
   return (
@@ -110,6 +114,29 @@ export default async function KidDetail({
               ))}
             </tbody>
           </table>
+        )}
+      </div>
+
+      <div className="card">
+        <h2>Teacher conversations (last 7 days)</h2>
+        <p className="muted small">
+          Everything {kid.name} said to the AI teachers and what they said back.{" "}
+          {aiEnabled() ? "" : "AI is off (no ANTHROPIC_API_KEY), so teachers reply with the built-in hints and solutions."}
+        </p>
+        {chats.length === 0 ? (
+          <p className="muted">No conversations yet.</p>
+        ) : (
+          <div className="chatlog">
+            {chats.map((m) => (
+              <div key={m.id} className={`chatline ${m.role}`}>
+                <span className="muted small">
+                  {m.day} · {m.skillTitle} · {m.kind === "why" ? "why wrong" : m.kind} ·{" "}
+                  {m.role === "kid" ? kid.name : TEACHER_NAME[m.teacher_id] ?? "Teacher"}
+                </span>
+                <div>{m.content}</div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 

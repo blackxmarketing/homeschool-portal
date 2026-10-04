@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { badges, levelInfo, rankFor, WORLDS, xpForLevel } from "@/lib/game";
 import { clampProfile, defaultProfile, parseProfile, PRESETS } from "@/lib/focus";
-import { pickQuest, QUESTS } from "@/lib/quests";
+import { pickQuest, QUESTS } from "@/content/quests";
 import { SUBJECTS } from "@/lib/compliance";
 import { SKILLS, STRANDS } from "@/lib/curriculum/skills";
 import { seededRng } from "@/lib/curriculum/math";
@@ -113,4 +113,19 @@ describe("question visuals", () => {
       }
     });
   }
+});
+
+describe("AI teachers", () => {
+  it("has a complete teacher for every world", async () => {
+    const { TEACHERS } = await import("@/content/teachers");
+    const ids = new Set<string>();
+    for (const s of STRANDS) {
+      const t = TEACHERS[s.id];
+      expect(t, s.id).toBeDefined();
+      for (const field of [t.name, t.avatar, t.voice, t.greeting, t.inspiredBy]) expect(field.length, s.id).toBeGreaterThan(0);
+      expect(t.hooks.length, s.id).toBeGreaterThan(0);
+      ids.add(t.id);
+    }
+    expect(ids.size).toBe(STRANDS.length);
+  });
 });

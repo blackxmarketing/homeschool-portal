@@ -35,6 +35,10 @@ Colorado records.
   countdown and "2 minutes left" cues, movement breaks, side quests every few
   questions (brain benders and creative challenges), and a daily screen-time
   cap. After the cap, kids are pointed to real-world missions.
+- **AI teachers (Phase 2).** A teacher character for each math world teaches
+  Socratically: mini-lessons, chat about the current question (never giving the
+  answer away), and "why was my answer wrong?" Parents can read every message.
+  See [docs/UPDATING.md](docs/UPDATING.md) to tweak teachers, quests and features.
 - **Real-world missions.** Off-screen tasks about money, business, leadership,
   character, science, history and civics. A parent approves each one, which
   awards XP and logs the minutes under the right subject for records.

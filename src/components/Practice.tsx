@@ -7,6 +7,8 @@ import { BreakScreen, countQuestion, SideQuest, SprintRing, useSprint } from "./
 import type { Visual as V } from "@/lib/curriculum/answers";
 import type { FocusProfile } from "@/lib/focus";
 import { CHEERS, ENCOURAGE } from "@/lib/game";
+import { FEATURES } from "@/content/features";
+import { MiniLesson, TeacherChat, WhyWrong, type TeacherInfo } from "./TeacherChat";
 
 type Mode = "learn" | "review" | "placement";
 
@@ -20,6 +22,7 @@ interface Q {
   choices?: string[];
   visual?: V;
   formatHelp: string;
+  teacher: TeacherInfo;
 }
 
 interface Result {
@@ -101,6 +104,10 @@ export default function Practice({ mode, skillId, focus }: { mode: Mode; skillId
   const [mastery, setMastery] = useState<{ correct: number; count: number } | null>(null);
   const [example, setExample] = useState<Example | null>(null);
   const [answeredAny, setAnsweredAny] = useState(false);
+  const [lessonOpen, setLessonOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [helped, setHelped] = useState(false);
+  const [lastAnswer, setLastAnswer] = useState("");
   const [interlude, setInterlude] = useState<Interlude>(null);
   const [questDue, setQuestDue] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -110,7 +117,7 @@ export default function Practice({ mode, skillId, focus }: { mode: Mode; skillId
   const sprint = useSprint(focus);
 
   useEffect(() => {
-    if (sprint.over && !sprintLogged.current) {
+    if (FEATURES.focusSprints && sprint.over && !sprintLogged.current) {
       sprintLogged.current = true;
       fetch("/api/sprint", { method: "POST" }).catch(() => {});
     }
@@ -125,6 +132,8 @@ export default function Practice({ mode, skillId, focus }: { mode: Mode; skillId
     setAnswer("");
     setCheer("");
     setExample(null);
+    setChatOpen(false);
+    setHelped(false);
     try {
       const data = await post<{ question: Q; progress: { done?: number; total?: number; correct?: number; count?: number } }>(
         "/api/question",
@@ -168,13 +177,14 @@ export default function Practice({ mode, skillId, focus }: { mode: Mode; skillId
         return;
       }
       setResult(data);
+      setLastAnswer(value);
       setAnsweredAny(true);
       gainXp(data.xpGained);
       setCombo((c) => (data.correct ? c + 1 : 0));
       setCheer(data.correct ? pickOne(CHEERS) : pickOne(ENCOURAGE));
-      if (countQuestion(focus.sideQuestEvery)) setQuestDue(true);
+      if (FEATURES.sideQuests && countQuestion(focus.sideQuestEvery)) setQuestDue(true);
       if (data.mastery) setMastery({ correct: data.mastery.correct, count: data.mastery.count });
-      setHistory((h) => [...h, data.correct ? (hint ? ("h" as const) : ("y" as const)) : ("n" as const)].slice(-10));
+      setHistory((h) => [...h, data.correct ? (hint || helped ? ("h" as const) : ("y" as const)) : ("n" as const)].slice(-10));
       if (data.mastery?.justMastered) {
         setFinished(`SKILL MASTERED: ${q.skillTitle}`);
         setCelebrate(true);
@@ -222,7 +232,7 @@ export default function Practice({ mode, skillId, focus }: { mode: Mode; skillId
 
   /** "Next" goes to a break if the sprint is over, then a side quest if one is due, then the next question. */
   function next() {
-    if (sprint.over) {
+    if (FEATURES.focusSprints && sprint.over) {
       setInterlude("break");
       return;
     }
@@ -309,14 +319,14 @@ export default function Practice({ mode, skillId, focus }: { mode: Mode; skillId
           <div className="xpchip">
             +{xp} XP{xpPop && <span className="xppop">+{xpPop}</span>}
           </div>
-          <SprintRing left={sprint.left} total={sprint.total} />
+          {FEATURES.focusSprints && <SprintRing left={sprint.left} total={sprint.total} />}
         </div>
       </div>
 
-      {sprint.left > 0 && sprint.left <= 120 && (
+      {FEATURES.focusSprints && sprint.left > 0 && sprint.left <= 120 && (
         <div className="cue">⏳ {Math.ceil(sprint.left / 60)} min left in this sprint. Finish strong!</div>
       )}
-      {sprint.over && !result && <div className="cue">⏱️ Sprint's up! Finish this question, then take your break.</div>}
+      {FEATURES.focusSprints && sprint.over && !result && <div className="cue">⏱️ Sprint's up! Finish this question, then take your break.</div>}
 
       <div className="kcard question-card">
         {mode === "learn" && (
@@ -396,13 +406,20 @@ export default function Practice({ mode, skillId, focus }: { mode: Mode; skillId
                 💡 I'm stuck. Give me a hint.
               </button>
             )}
-            {mode === "learn" && !answeredAny && !example && (
-              <button className="linkbtn" onClick={showExample}>
-                🎬 Show me one first
+            {mode === "learn" && !answeredAny && !example && !lessonOpen && (
+              <button className="linkbtn" onClick={FEATURES.aiTeachers ? () => setLessonOpen(true) : showExample}>
+                {FEATURES.aiTeachers ? `🎓 Teach me first, ${q.teacher.name}` : "🎬 Show me one first"}
+              </button>
+            )}
+            {FEATURES.aiTeachers && !chatOpen && (
+              <button className="linkbtn" onClick={() => setChatOpen(true)}>
+                {q.teacher.avatar} Ask {q.teacher.name}
               </button>
             )}
           </div>
         )}
+
+        {lessonOpen && !answeredAny && <MiniLesson t={q.teacher} skillId={q.skillId} />}
 
         {example && !result && (
           <div className="example">
@@ -433,7 +450,21 @@ export default function Practice({ mode, skillId, focus }: { mode: Mode; skillId
               </div>
             )}
             <div>{result.explanation}</div>
+            {FEATURES.aiTeachers && !result.correct && (
+              <div style={{ marginTop: 10 }}>
+                <WhyWrong key={q.id} t={q.teacher} questionId={q.id} kidAnswer={lastAnswer} />
+              </div>
+            )}
           </div>
+        )}
+
+        {FEATURES.aiTeachers && chatOpen && (
+          <TeacherChat key={q.id} t={q.teacher} questionId={q.id} answered={!!result} onHelped={() => setHelped(true)} />
+        )}
+        {FEATURES.aiTeachers && result && !chatOpen && (
+          <button className="linkbtn" style={{ marginTop: 10 }} onClick={() => setChatOpen(true)}>
+            {q.teacher.avatar} Talk it over with {q.teacher.name}
+          </button>
         )}
 
         {finished && <div className="mastered-banner pop">{finished}</div>}
@@ -446,7 +477,7 @@ export default function Practice({ mode, skillId, focus }: { mode: Mode; skillId
               </Link>
             ) : (
               <button ref={nextRef} className="kbtn big" onClick={next} disabled={busy}>
-                {sprint.over ? "Take my break →" : questDue ? "Side quest! →" : "Next →"}
+                {FEATURES.focusSprints && sprint.over ? "Take my break →" : questDue ? "Side quest! →" : "Next →"}
               </button>
             )}
             {!finished && (

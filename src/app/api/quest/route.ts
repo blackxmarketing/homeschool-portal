@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { kidFromRequest } from "@/lib/auth";
 import { completeQuest, nextSideQuest, PortalError } from "@/lib/store";
-import type { QuestKind } from "@/lib/quests";
+import type { QuestKind } from "@/content/quests";
 
 const KINDS: QuestKind[] = ["brain", "create", "mission"];
 

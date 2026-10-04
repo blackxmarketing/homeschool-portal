@@ -3,7 +3,8 @@ import { logoutAction } from "../actions";
 import MissionButton from "@/components/MissionButton";
 import { requireKid } from "@/lib/auth";
 import { levelInfo } from "@/lib/game";
-import { THEME_LABEL } from "@/lib/quests";
+import { THEME_LABEL } from "@/content/quests";
+import { FEATURES } from "@/content/features";
 import {
   capStatus,
   extendPlan,
@@ -152,6 +153,7 @@ export default async function KidHome({ searchParams }: { searchParams: Promise<
         </div>
       )}
 
+      {FEATURES.missions && (
       <div className="kcard" id="missions">
         <h2>🌍 Real-world missions</h2>
         <p className="kmuted">
@@ -173,6 +175,7 @@ export default async function KidHome({ searchParams }: { searchParams: Promise<
           ))}
         </div>
       </div>
+      )}
 
       <div className="kcard">
         <h2>🏅 Badges</h2>

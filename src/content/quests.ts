@@ -1,4 +1,4 @@
-import type { Subject } from "./compliance";
+import type { Subject } from "@/lib/compliance";
 
 /**
  * Side quests break up practice with something different:

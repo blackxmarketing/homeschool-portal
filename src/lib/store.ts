@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import { getDb } from "./db";
 import { checkAnswer, formatHelp, type AnswerKind, type Question } from "./curriculum/answers";
-import { SKILLS, getSkill } from "./curriculum/skills";
+import { SKILLS, getSkill, type Strand } from "./curriculum/skills";
 import { addDays, detectFlags, masteryProgress, reviewOutcome, REVIEW_INTERVALS, REVIEW_QUESTIONS } from "./engine/mastery";
 import {
   nextPlacementSkill,
@@ -17,7 +17,8 @@ import { buildPlan, isAvailable, DAILY_QUESTION_CAP, type PlanItem, type SkillSt
 import { schoolYearStart, summarize, type DayMinutes } from "./compliance";
 import { clampProfile, defaultProfile, parseProfile, type FocusProfile } from "./focus";
 import { badges, levelInfo, type BadgeStats } from "./game";
-import { pickQuest, QUEST_BY_ID, type Quest, type QuestKind } from "./quests";
+import { pickQuest, QUEST_BY_ID, type Quest, type QuestKind } from "@/content/quests";
+import { teacherFor } from "@/content/teachers";
 import type { Visual } from "./curriculum/answers";
 
 export type Mode = "learn" | "review" | "placement";
@@ -258,6 +259,7 @@ export interface PublicQuestion {
   kind: AnswerKind;
   choices?: string[];
   visual?: Visual;
+  teacher: { name: string; avatar: string; hue: number; greeting: string; inspiredBy: string };
   formatHelp: string;
 }
 
@@ -319,6 +321,7 @@ export function issueQuestion(kidId: number, mode: Mode, skillId?: string): Publ
     kind: q.kind,
     choices: q.choices,
     visual: q.visual,
+    teacher: (({ name, avatar, hue, greeting, inspiredBy }) => ({ name, avatar, hue, greeting, inspiredBy }))(teacherFor(skill.strand)),
     formatHelp: formatHelp(q.kind),
   };
 }
@@ -760,4 +763,77 @@ export function gameStats(kid: Kid): BadgeStats {
 
 export function kidBadges(kid: Kid) {
   return badges(gameStats(kid));
+}
+
+// ---------------- AI teachers ----------------
+
+export interface TutorContext {
+  question: Question;
+  skillId: string;
+  skillTitle: string;
+  strand: Strand;
+  grade: number;
+  answered: boolean;
+}
+
+/** Everything a teacher needs to talk about one issued question. */
+export function tutorContext(kidId: number, questionId: string): TutorContext {
+  const row = issued(kidId, questionId);
+  const skill = getSkill(row.skill_id)!;
+  return {
+    question: row.question,
+    skillId: skill.id,
+    skillTitle: skill.title,
+    strand: skill.strand,
+    grade: getKid(kidId)!.grade,
+    answered: !!row.answered,
+  };
+}
+
+/** Getting help before answering means the question won't count toward mastery (same as a hint). */
+export function markHelped(kidId: number, questionId: string): void {
+  getDb().prepare("UPDATE issued_questions SET hint_used = 1 WHERE id = ? AND kid_id = ? AND answered = 0").run(questionId, kidId);
+}
+
+export function tutorMessagesToday(kidId: number): number {
+  return (getDb()
+    .prepare("SELECT COUNT(*) AS n FROM tutor_messages WHERE kid_id = ? AND day = ? AND role = 'kid'")
+    .get(kidId, today()) as { n: number }).n;
+}
+
+export function logTutor(
+  kidId: number,
+  m: { questionId: string | null; skillId: string; teacherId: string; kind: "chat" | "lesson" | "why"; role: "kid" | "teacher"; content: string },
+): void {
+  getDb()
+    .prepare(
+      "INSERT INTO tutor_messages (kid_id, question_id, skill_id, teacher_id, kind, role, content, day) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    )
+    .run(kidId, m.questionId, m.skillId, m.teacherId, m.kind, m.role, m.content, today());
+}
+
+/** The chat about one question so far, oldest first. */
+export function tutorChat(kidId: number, questionId: string): { role: "kid" | "teacher"; content: string }[] {
+  return getDb()
+    .prepare("SELECT role, content FROM tutor_messages WHERE kid_id = ? AND question_id = ? AND kind = 'chat' ORDER BY id")
+    .all(kidId, questionId) as { role: "kid" | "teacher"; content: string }[];
+}
+
+/** Recent teacher conversations for the parent, newest first. */
+export function recentTutorMessages(kidId: number, sinceDay: string, limit = 200) {
+  return (getDb()
+    .prepare(
+      "SELECT id, question_id, skill_id, teacher_id, kind, role, content, day, created_at FROM tutor_messages WHERE kid_id = ? AND day >= ? ORDER BY id DESC LIMIT ?",
+    )
+    .all(kidId, sinceDay, limit) as {
+    id: number;
+    question_id: string | null;
+    skill_id: string;
+    teacher_id: string;
+    kind: string;
+    role: "kid" | "teacher";
+    content: string;
+    day: string;
+    created_at: string;
+  }[]).map((r) => ({ ...r, skillTitle: getSkill(r.skill_id)?.title ?? r.skill_id }));
 }

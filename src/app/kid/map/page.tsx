@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireKid } from "@/lib/auth";
 import { STRANDS } from "@/lib/curriculum/skills";
 import { WORLDS } from "@/lib/game";
+import { TEACHERS } from "@/content/teachers";
 import { skillTable } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -67,6 +68,9 @@ export default async function QuestMap() {
                   <div className="world-icon">{w.icon}</div>
                   <h2>{w.name}</h2>
                   <div className="kmuted small">{w.blurb}</div>
+                  <div className="world-teacher" title={`Inspired by ${TEACHERS[strand.id].inspiredBy}`}>
+                    {TEACHERS[strand.id].avatar} Teacher: {TEACHERS[strand.id].name}
+                  </div>
                   <div className="kmuted small">
                     {done} of {list.length} skills mastered
                   </div>

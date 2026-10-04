@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { BREAKS, type FocusProfile } from "@/lib/focus";
-import { KIND_LABEL, THEME_LABEL, type Quest } from "@/lib/quests";
+import { KIND_LABEL, THEME_LABEL, type Quest } from "@/content/quests";
 
 /**
  * Focus sprint state lives in sessionStorage so it carries across skills and

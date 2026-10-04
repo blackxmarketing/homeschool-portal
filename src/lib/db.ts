@@ -120,6 +120,22 @@ CREATE TABLE IF NOT EXISTS quest_log (
 );
 CREATE INDEX IF NOT EXISTS quest_log_kid ON quest_log (kid_id, day);
 
+-- Conversations with AI teachers. Parents can read every message.
+CREATE TABLE IF NOT EXISTS tutor_messages (
+  id INTEGER PRIMARY KEY,
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  question_id TEXT,
+  skill_id TEXT NOT NULL,
+  teacher_id TEXT NOT NULL,
+  kind TEXT NOT NULL CHECK (kind IN ('chat', 'lesson', 'why')),
+  role TEXT NOT NULL CHECK (role IN ('kid', 'teacher')),
+  content TEXT NOT NULL,
+  day TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS tutor_messages_kid ON tutor_messages (kid_id, day);
+CREATE INDEX IF NOT EXISTS tutor_messages_question ON tutor_messages (question_id, id);
+
 -- Finished focus sprints (Pomodoro-style work blocks).
 CREATE TABLE IF NOT EXISTS sprint_log (
   id INTEGER PRIMARY KEY,

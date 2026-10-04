@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Question } from "./curriculum/answers";
+import { TEACHING_METHOD, type Teacher } from "@/content/teachers";
 
 /**
  * Optional Claude features. The portal works without an API key: hints fall
@@ -25,6 +26,15 @@ export function aiEnabled(): boolean {
 }
 
 async function ask(system: string, user: string, effort: "low" | "medium", maxTokens: number): Promise<string | null> {
+  return askMessages(system, [{ role: "user", content: user }], effort, maxTokens);
+}
+
+async function askMessages(
+  system: string,
+  messages: Anthropic.Beta.BetaMessageParam[],
+  effort: "low" | "medium",
+  maxTokens: number,
+): Promise<string | null> {
   const c = getClient();
   if (!c) return null;
   try {
@@ -36,7 +46,7 @@ async function ask(system: string, user: string, effort: "low" | "medium", maxTo
       fallbacks: "default",
       output_config: { effort },
       system,
-      messages: [{ role: "user", content: user }],
+      messages,
     });
     if (res.stop_reason === "refusal") return null;
     const text = res.content
@@ -84,4 +94,83 @@ Keep it under 180 words. Plain text, short paragraphs, no markdown headings.`;
 
 export async function weeklySummary(data: unknown): Promise<string | null> {
   return ask(SUMMARY_SYSTEM, JSON.stringify(data, null, 2), "medium", 4000);
+}
+
+// ---------------- AI teachers (Phase 2) ----------------
+
+export interface LessonContext {
+  teacher: Teacher;
+  skillTitle: string;
+  grade: number;
+  question: Question;
+  /** True once the kid has answered, so the teacher may discuss the answer. */
+  answered: boolean;
+  kidAnswer?: string;
+}
+
+function teacherSystem(t: Teacher): string {
+  return `You are ${t.name}, an AI teacher character in a homeschool learning app for kids aged 11-14. Your character is loosely inspired by ${t.inspiredBy}; you are an original character, not that person.
+Your style: ${t.voice}
+Stories and hooks you like: ${t.hooks.join("; ")}.
+
+${TEACHING_METHOD}
+
+Rules:
+- Stay on the current lesson. If the student brings up something unrelated, say one friendly sentence and steer back to the math.
+- Never ask for personal information. If the student mentions being upset, hurt or unsafe, kindly tell them to talk to their parent right away.
+- Plain text only: no markdown, no emojis, no lists.`;
+}
+
+function lessonFacts(ctx: LessonContext): string {
+  const q = ctx.question;
+  return `Current skill: ${ctx.skillTitle} (grade ${ctx.grade} level)
+Current question: ${q.prompt}
+Correct answer${ctx.answered ? "" : " (SECRET: never say it, never do the final step for them)"}: ${q.answer}
+Worked solution${ctx.answered ? "" : " (SECRET)"}: ${q.explanation}
+${ctx.answered ? `The student already answered${ctx.kidAnswer ? ` "${ctx.kidAnswer}"` : ""}, so you may discuss the answer openly.` : "The student has not answered yet. Guide them; do not give the answer."}`;
+}
+
+/**
+ * One chat turn with a teacher about the current question. `history` is the
+ * conversation so far (oldest first), ending with the kid's new message.
+ * Returns null when AI is off or the request failed.
+ */
+export async function teacherReply(ctx: LessonContext, history: { role: "user" | "assistant"; content: string }[]): Promise<string | null> {
+  const messages: Anthropic.Beta.BetaMessageParam[] = history.map((m, i) =>
+    i === 0 && m.role === "user" ? { role: "user", content: `${lessonFacts(ctx)}\n\nStudent: ${m.content}` } : m,
+  );
+  if (messages[0]?.role !== "user") messages.unshift({ role: "user", content: lessonFacts(ctx) });
+  const text = await askMessages(teacherSystem(ctx.teacher), messages, "low", 2000);
+  if (!text) return null;
+  if (!ctx.answered && leaksAnswer(text, ctx.question.answer)) {
+    // Never let the answer slip out before the kid tries.
+    return "I almost gave it away there! Let's back up. What's the very first step you'd take here?";
+  }
+  return text;
+}
+
+/** A short mini-lesson that introduces a skill with a hook, the key idea and a worked example. */
+export async function teacherLesson(teacher: Teacher, skillTitle: string, grade: number, example: Question): Promise<string | null> {
+  return ask(
+    teacherSystem(teacher),
+    `Teach a 60-second mini-lesson on "${skillTitle}" (grade ${grade} level) before the student practices.
+Structure, as 3 short paragraphs:
+1. A one- or two-sentence real-world hook from your character's world.
+2. The key idea in plain words.
+3. Walk through this example step by step: ${example.prompt} (answer ${example.answer}; solution: ${example.explanation}). End by asking the student to try one on their own.
+Under 130 words total.`,
+    "low",
+    3000,
+  );
+}
+
+/** After a wrong answer: explain the likely mistake, kindly and specifically. */
+export async function teacherWhyWrong(ctx: LessonContext): Promise<string | null> {
+  return ask(
+    teacherSystem(ctx.teacher),
+    `${lessonFacts({ ...ctx, answered: true })}
+The student's answer was wrong. In 2-4 sentences: guess the specific mistake they most likely made (be concrete about their answer), show the step that fixes it, and end with one quick tip to remember next time. Be encouraging.`,
+    "low",
+    2000,
+  );
 }

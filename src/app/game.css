@@ -214,3 +214,30 @@
   .kidworld .question { font-size: 1.35rem; }
   .hud-right { width: 100%; justify-content: space-between; }
 }
+
+/* ---------------- AI teachers (Phase 2) ---------------- */
+.teacher-badge { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.teacher-avatar {
+  width: 44px; height: 44px; flex: 0 0 auto; display: grid; place-items: center; font-size: 1.6rem; border-radius: 14px;
+  background: hsl(var(--t-hue, 260) 80% 55% / .25); border: 2px solid hsl(var(--t-hue, 260) 80% 60% / .7);
+}
+.teacher-name { font-weight: 900; color: hsl(var(--t-hue, 260) 90% 75%); }
+.teacher-line { font-size: .9rem; color: var(--k-muted); }
+.chat, .teacher-note {
+  margin-top: 16px; padding: 16px; border-radius: 18px;
+  background: hsl(var(--t-hue, 260) 70% 50% / .1); border: 1px solid hsl(var(--t-hue, 260) 80% 60% / .4);
+}
+.teacher-note p, .lesson-text { margin: 4px 0 0; white-space: pre-wrap; line-height: 1.55; }
+.chat-log { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; max-height: 320px; overflow-y: auto; }
+.bubble { max-width: 85%; padding: 10px 14px; border-radius: 16px; line-height: 1.45; white-space: pre-wrap; }
+.bubble.kid { align-self: flex-end; background: var(--k-accent); color: #fff; border-bottom-right-radius: 4px; }
+.bubble.teacher { align-self: flex-start; background: rgba(255, 255, 255, .1); border-bottom-left-radius: 4px; }
+.bubble.typing { opacity: .7; font-style: italic; }
+.chat-form { display: flex; gap: 10px; }
+.chat-form .kinput { flex: 1; }
+.world-teacher { margin-top: 6px; font-size: .85rem; font-weight: 700; color: hsl(var(--hue) 85% 75%); }
+/* Parent view of teacher chats */
+.chatlog { display: flex; flex-direction: column; gap: 8px; max-height: 480px; overflow-y: auto; }
+.chatline { padding: 8px 12px; border-radius: 10px; background: var(--bg); white-space: pre-wrap; }
+.chatline.kid { border-left: 3px solid var(--brand); }
+.chatline.teacher { border-left: 3px solid var(--good); }
