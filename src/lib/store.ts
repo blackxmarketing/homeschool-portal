@@ -13,12 +13,14 @@ import {
   startPlacement,
   type PlacementState,
 } from "./engine/placement";
-import { buildPlan, isAvailable, DAILY_QUESTION_CAP, type PlanItem, type SkillState } from "./engine/planner";
+import { buildPlan, gradeProgress, isAvailable, DAILY_QUESTION_CAP, type PlanItem, type SkillState } from "./engine/planner";
 import { schoolYearStart, summarize, type DayMinutes } from "./compliance";
 import { clampProfile, defaultProfile, parseProfile, type FocusProfile } from "./focus";
 import { badges, levelInfo, type BadgeStats } from "./game";
 import { pickQuest, QUEST_BY_ID, type Quest, type QuestKind } from "@/content/quests";
 import { teacherFor } from "@/content/teachers";
+import { BLOCKS, BLOCK_BY_ID, DRILL, ideaFor, type Block } from "@/content/schedule";
+import { accuracyBand, factsPerMinute, forecast, GRADE_DONE, isStruggling, knowledgeGrade, wasteMeter } from "./engine/learningPlan";
 import type { Visual } from "./curriculum/answers";
 
 export type Mode = "learn" | "review" | "placement";
@@ -391,7 +393,7 @@ export function submitAnswer(kidId: number, questionId: string, input: string): 
   const responseMs = Math.min(Date.now() - row.issued_at, MAX_COUNTED_MS);
 
   return db.transaction((): AnswerResult => {
-    db.prepare("UPDATE issued_questions SET answered = 1 WHERE id = ?").run(questionId);
+    db.prepare("UPDATE issued_questions SET answered = 1, answered_at = ?, correct = ? WHERE id = ?").run(Date.now(), check.correct ? 1 : 0, questionId);
     const attempt = db
       .prepare(
         "INSERT INTO attempts (kid_id, skill_id, mode, correct, used_hint, response_ms, answer, day) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -836,4 +838,267 @@ export function recentTutorMessages(kidId: number, sinceDay: string, limit = 200
     day: string;
     created_at: string;
   }[]).map((r) => ({ ...r, skillTitle: getSkill(r.skill_id)?.title ?? r.skill_id }));
+}
+
+// ---------------- The 2-hour day (Phase 2b) ----------------
+
+export interface BlockStatus {
+  block: Block;
+  minutes: number;
+  pct: number;
+  state: "open" | "pending" | "approved" | "declined" | "done";
+  idea: string;
+}
+
+/** Today's blocks with progress. Portal math minutes fill the math block, then the booster. */
+export function dayBlocks(kidId: number): BlockStatus[] {
+  const day = today();
+  let math = minutesOnDay(kidId, day) + drillMinutesOnDay(kidId, day);
+  const logs = new Map(
+    (getDb().prepare("SELECT block_id, minutes, status FROM block_log WHERE kid_id = ? AND day = ?").all(kidId, day) as {
+      block_id: string;
+      minutes: number;
+      status: BlockStatus["state"];
+    }[]).map((r) => [r.block_id, r]),
+  );
+  return BLOCKS.map((block) => {
+    let minutes = 0;
+    let state: BlockStatus["state"] = "open";
+    if (block.kind === "portal") {
+      minutes = Math.min(block.minutes, math);
+      math -= minutes;
+      if (minutes >= block.minutes) state = "done";
+    } else {
+      const log = logs.get(block.id);
+      if (log) {
+        minutes = log.status === "declined" ? 0 : log.minutes;
+        state = log.status;
+      }
+    }
+    return { block, minutes, pct: Math.min(100, Math.round((minutes / block.minutes) * 100)), state, idea: ideaFor(block, day) };
+  });
+}
+
+/** The kid finished a guided block. It waits for a parent to approve. */
+export function finishBlock(kidId: number, blockId: string, minutes: number, note: string): void {
+  const block = BLOCK_BY_ID.get(blockId);
+  if (!block || block.kind !== "guided") throw new PortalError("Unknown block.");
+  const m = Math.max(1, Math.min(block.minutes * 2, Math.round(minutes)));
+  const res = getDb()
+    .prepare("INSERT INTO block_log (kid_id, block_id, day, minutes, note, status) VALUES (?, ?, ?, ?, ?, 'pending') ON CONFLICT DO NOTHING")
+    .run(kidId, block.id, today(), m, note.trim().slice(0, 500));
+  if (!res.changes) throw new PortalError("You already turned in that block today.");
+}
+
+export function pendingBlocks(familyId: number) {
+  return (getDb()
+    .prepare(
+      `SELECT b.id, b.kid_id, b.block_id, b.day, b.minutes, b.note, k.name AS kidName, k.avatar
+       FROM block_log b JOIN kids k ON k.id = b.kid_id WHERE k.family_id = ? AND b.status = 'pending' ORDER BY b.id`,
+    )
+    .all(familyId) as { id: number; kid_id: number; block_id: string; day: string; minutes: number; note: string; kidName: string; avatar: string }[]).map(
+    (r) => ({ ...r, block: BLOCK_BY_ID.get(r.block_id) }),
+  );
+}
+
+/** Approving a block logs its minutes under the block's subject for records. */
+export function reviewBlock(familyId: number, logId: number, approve: boolean): void {
+  const db = getDb();
+  const row = db
+    .prepare("SELECT b.kid_id, b.block_id, b.day, b.minutes, b.note, b.status FROM block_log b JOIN kids k ON k.id = b.kid_id WHERE b.id = ? AND k.family_id = ?")
+    .get(logId, familyId) as { kid_id: number; block_id: string; day: string; minutes: number; note: string; status: string } | undefined;
+  if (!row || row.status !== "pending") throw new PortalError("That block isn't waiting for review.");
+  const block = BLOCK_BY_ID.get(row.block_id);
+  db.transaction(() => {
+    db.prepare("UPDATE block_log SET status = ? WHERE id = ?").run(approve ? "approved" : "declined", logId);
+    if (approve && block) {
+      logActivity(row.kid_id, {
+        day: row.day,
+        subject: block.subject,
+        minutes: row.minutes,
+        note: `${block.label} block${row.note ? `: ${row.note}` : ""}`.slice(0, 300),
+      });
+      addXp(row.kid_id, 25);
+    }
+  })();
+}
+
+// ---------------- Goals ----------------
+
+export function getGoal(kidId: number): { grade: number; target_day: string } | undefined {
+  return getDb().prepare("SELECT grade, target_day FROM goals WHERE kid_id = ?").get(kidId) as never;
+}
+
+export function setGoal(kidId: number, grade: number, targetDay: string): void {
+  getDb()
+    .prepare(
+      "INSERT INTO goals (kid_id, grade, target_day) VALUES (?, ?, ?) ON CONFLICT (kid_id) DO UPDATE SET grade = excluded.grade, target_day = excluded.target_day",
+    )
+    .run(kidId, grade, targetDay);
+}
+
+// ---------------- Fact drills ----------------
+
+export const DRILL_OPS = ["+", "−", "×", "÷"] as const;
+
+export function saveDrill(kidId: number, op: string, correct: number, wrong: number, seconds: number): void {
+  if (!(DRILL_OPS as readonly string[]).includes(op)) throw new PortalError("Unknown drill.");
+  getDb()
+    .prepare("INSERT INTO drill_results (kid_id, day, op, correct, wrong, seconds) VALUES (?, ?, ?, ?, ?, ?)")
+    .run(kidId, today(), op, Math.max(0, Math.min(200, correct)), Math.max(0, Math.min(200, wrong)), Math.max(1, Math.min(300, seconds)));
+}
+
+function drillMinutesOnDay(kidId: number, day: string): number {
+  const row = getDb().prepare("SELECT COALESCE(SUM(seconds), 0) AS s FROM drill_results WHERE kid_id = ? AND day = ?").get(kidId, day) as {
+    s: number;
+  };
+  return Math.round(row.s / 60);
+}
+
+/** Best recent speed (facts per minute) for each operation. */
+export function drillStats(kidId: number) {
+  const rows = getDb()
+    .prepare("SELECT op, correct, seconds, day FROM drill_results WHERE kid_id = ? AND day >= ? ORDER BY id DESC")
+    .all(kidId, addDays(today(), -30)) as { op: string; correct: number; seconds: number; day: string }[];
+  return DRILL_OPS.map((op) => {
+    const mine = rows.filter((r) => r.op === op);
+    const best = Math.max(0, ...mine.map((r) => factsPerMinute(r.correct, r.seconds)));
+    return {
+      op,
+      best,
+      runs: mine.length,
+      last: mine[0] ? factsPerMinute(mine[0].correct, mine[0].seconds) : null,
+      fluent: best >= DRILL.fluentPerMinute,
+    };
+  });
+}
+
+// ---------------- Test scores ----------------
+
+export function addTestScore(
+  kidId: number,
+  s: { testDay: string; test: string; subject: string; score: number; achievementPct: number | null; growthPct: number | null },
+): void {
+  getDb()
+    .prepare("INSERT INTO test_scores (kid_id, test_day, test, subject, score, achievement_pct, growth_pct) VALUES (?, ?, ?, ?, ?, ?, ?)")
+    .run(kidId, s.testDay, s.test, s.subject, s.score, s.achievementPct, s.growthPct);
+}
+
+export function deleteTestScore(kidId: number, id: number): void {
+  getDb().prepare("DELETE FROM test_scores WHERE id = ? AND kid_id = ?").run(id, kidId);
+}
+
+export function testScores(kidId: number) {
+  return getDb()
+    .prepare("SELECT id, test_day, test, subject, score, achievement_pct, growth_pct FROM test_scores WHERE kid_id = ? ORDER BY test_day, id")
+    .all(kidId) as {
+    id: number;
+    test_day: string;
+    test: string;
+    subject: string;
+    score: number;
+    achievement_pct: number | null;
+    growth_pct: number | null;
+  }[];
+}
+
+// ---------------- Learning plan ----------------
+
+const PACE_WEEKS = 4;
+
+function daysBetween(a: string, b: string): number {
+  return Math.round((Date.parse(`${b}T12:00:00Z`) - Date.parse(`${a}T12:00:00Z`)) / 864e5);
+}
+
+/** Everything on the parent's learning plan, computed from practice data. */
+export function learningPlan(kid: Kid) {
+  const db = getDb();
+  const rows = gradeProgress(skillStates(kid.id));
+  const since = addDays(today(), -PACE_WEEKS * 7);
+  const masteredRecently = (db
+    .prepare("SELECT COUNT(*) AS n FROM kid_skills WHERE kid_id = ? AND status = 'mastered' AND source = 'practice' AND mastered_at >= ?")
+    .get(kid.id, since) as { n: number }).n;
+  const minutesRecently = Math.round(
+    (db.prepare("SELECT COALESCE(SUM(response_ms), 0) AS ms FROM attempts WHERE kid_id = ? AND day >= ?").get(kid.id, since) as { ms: number }).ms /
+      60000,
+  );
+  // Observe at least a week, so a first busy day doesn't look like a huge pace.
+  const firstDay = (db.prepare("SELECT MIN(day) AS d FROM attempts WHERE kid_id = ?").get(kid.id) as { d: string | null }).d;
+  const daysActive = firstDay ? Math.max(7, Math.min(PACE_WEEKS * 7, daysBetween(firstDay, today()) + 1)) : PACE_WEEKS * 7;
+  const weeksObserved = daysActive / 7;
+
+  const grades = rows.map((r) => ({
+    ...r,
+    pct: Math.round((r.mastered / r.total) * 100),
+    forecast: forecast(r, masteredRecently, minutesRecently, weeksObserved),
+  }));
+
+  const week = weekStats(kid.id);
+  const recent = db
+    .prepare("SELECT issued_at, answered_at, correct FROM issued_questions WHERE kid_id = ? AND mode != 'placement' AND issued_at >= ? ORDER BY issued_at")
+    .all(kid.id, Date.now() - 7 * 864e5) as { issued_at: number; answered_at: number | null; correct: number | null }[];
+  const waste = wasteMeter(
+    recent
+      .map((q, i) => ({ q, next: recent[i + 1] }))
+      .filter(({ q }) => q.answered_at !== null)
+      .map(({ q, next }) => {
+        const gap = next ? next.issued_at - q.answered_at! : null;
+        return { correct: !!q.correct, responseMs: q.answered_at! - q.issued_at, reviewMs: gap !== null && gap < 10 * 60_000 ? gap : null };
+      }),
+  );
+
+  return {
+    ageGrade: kid.grade,
+    knowledgeGrade: Math.min(knowledgeGrade(rows), 9),
+    grades,
+    masteredRecently,
+    minutesRecently,
+    weeksObserved: Math.round(weeksObserved * 10) / 10,
+    accuracy: { correct: week.correct, total: week.questions, band: accuracyBand(week.correct, week.questions) },
+    waste,
+  };
+}
+
+/** Progress toward the kid's goal: skills left and the pace needed to hit the date. */
+export function goalProgress(kid: Kid) {
+  const goal = getGoal(kid.id);
+  if (!goal) return null;
+  const row = gradeProgress(skillStates(kid.id)).find((r) => r.grade === goal.grade);
+  if (!row) return null;
+  const remaining = Math.max(0, Math.ceil(row.total * GRADE_DONE) - row.mastered);
+  const days = Math.max(0, daysBetween(today(), goal.target_day));
+  const schoolDays = Math.max(1, Math.round((days * 5) / 7));
+  return {
+    ...goal,
+    mastered: row.mastered,
+    total: row.total,
+    remaining,
+    days,
+    perSchoolDay: Math.round((remaining / schoolDays) * 10) / 10,
+    perWeek: Math.round((remaining / Math.max(1, days / 7)) * 10) / 10,
+    done: remaining === 0,
+  };
+}
+
+// ---------------- Struggle detector ----------------
+
+/** Mastered prerequisites of a skill: where to go "back to basics" when stuck. */
+export function masteredPrereqs(kidId: number, skillId: string): { id: string; title: string }[] {
+  const states = skillStates(kidId);
+  return (getSkill(skillId)?.prereqs ?? [])
+    .filter((p) => states.get(p)?.status === "mastered")
+    .map((p) => ({ id: p, title: getSkill(p)!.title }));
+}
+
+/** Skills the kid is stuck on right now (see isStruggling). */
+export function strugglingSkills(kidId: number): string[] {
+  return kidSkillRows(kidId)
+    .filter((r) => r.status === "learning")
+    .filter((r) => {
+      const n = (getDb()
+        .prepare("SELECT COUNT(*) AS n FROM attempts WHERE kid_id = ? AND skill_id = ? AND mode = 'learn' AND id > ?")
+        .get(kidId, r.skill_id, r.counting_after) as { n: number }).n;
+      return isStruggling(learnAttempts(kidId, r.skill_id, r.counting_after), n);
+    })
+    .map((r) => r.skill_id);
 }

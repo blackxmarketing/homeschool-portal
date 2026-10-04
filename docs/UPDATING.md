@@ -13,6 +13,7 @@ All of these live in `src/content/`:
 |---|---|
 | `features.ts` | Turn whole phases on or off (`true` / `false`): side quests, missions, focus sprints, AI teachers. Also the daily limit on AI teacher messages. |
 | `teachers.ts` | The AI teacher characters (names, personalities, stories they tell) and `TEACHING_METHOD`, the teaching style every teacher follows. |
+| `schedule.ts` | The 2-hour day: the blocks, their minutes, subjects and daily activity ideas, plus the fact-drill fluency target. |
 | `quests.ts` | Side quests (brain benders, creative challenges) and real-world missions. Add one by copying an existing entry and giving it a new `id`. |
 
 Other settings you might tweak:

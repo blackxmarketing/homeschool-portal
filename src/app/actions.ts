@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { endSession, requireParent, startSession } from "@/lib/auth";
+import { endSession, requireKid, requireParent, startSession } from "@/lib/auth";
 import { SUBJECTS } from "@/lib/compliance";
 import { clampProfile, defaultProfile, PRESETS, type AttentionAnswer } from "@/lib/focus";
 import {
@@ -10,6 +10,10 @@ import {
   addKid,
   PortalError,
   reviewMission,
+  addTestScore,
+  deleteTestScore,
+  reviewBlock,
+  setGoal,
   setFocus,
   createFamily,
   deleteActivity,
@@ -176,4 +180,59 @@ export async function deleteActivityAction(form: FormData) {
   const kid = await ownKid(Number(form.get("kidId")));
   deleteActivity(kid.id, Number(form.get("id")));
   redirect(`/parent/kids/${kid.id}`);
+}
+
+// ---------------- Phase 2b: goals, blocks, test scores ----------------
+
+export async function setGoalAction(form: FormData) {
+  const { kid } = await requireKid();
+  const grade = Number(form.get("grade"));
+  const target = str(form, "target");
+  if (!Number.isInteger(grade) || grade < 3 || grade > 8) back("/kid/goal", "Pick a grade from 3 to 8.");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(target) || target <= today()) back("/kid/goal", "Pick a date in the future.");
+  setGoal(kid.id, grade, target);
+  redirect("/kid?goal=1");
+}
+
+export async function reviewBlockAction(form: FormData) {
+  const s = await requireParent();
+  try {
+    reviewBlock(s.familyId, Number(form.get("logId")), form.get("approve") === "1");
+  } catch (e) {
+    if (e instanceof PortalError) back("/parent", e.message);
+    throw e;
+  }
+  revalidatePath("/parent");
+  redirect("/parent");
+}
+
+function optPct(form: FormData, key: string): number | null {
+  const v = str(form, key);
+  if (!v) return null;
+  const n = Number(v);
+  return Number.isInteger(n) && n >= 1 && n <= 99 ? n : NaN;
+}
+
+export async function addTestScoreAction(form: FormData) {
+  const kid = await ownKid(Number(form.get("kidId")));
+  const path = `/parent/kids/${kid.id}#tests`;
+  const testDay = str(form, "testDay");
+  const test = str(form, "test").slice(0, 40) || "MAP Growth";
+  const subject = str(form, "subject").slice(0, 40);
+  const score = Number(form.get("score"));
+  const achievementPct = optPct(form, "achievementPct");
+  const growthPct = optPct(form, "growthPct");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(testDay)) back(path, "Pick the test date.");
+  if (!subject) back(path, "Pick a subject.");
+  if (!Number.isInteger(score) || score < 1 || score > 2000) back(path, "Enter the score as a whole number (MAP RIT scores are usually 150-300).");
+  if (Number.isNaN(achievementPct) || Number.isNaN(growthPct)) back(path, "Percentiles are whole numbers from 1 to 99.");
+  addTestScore(kid.id, { testDay, test, subject, score, achievementPct, growthPct });
+  revalidatePath(`/parent/kids/${kid.id}`);
+  redirect(`/parent/kids/${kid.id}#tests`);
+}
+
+export async function deleteTestScoreAction(form: FormData) {
+  const kid = await ownKid(Number(form.get("kidId")));
+  deleteTestScore(kid.id, Number(form.get("id")));
+  redirect(`/parent/kids/${kid.id}#tests`);
 }

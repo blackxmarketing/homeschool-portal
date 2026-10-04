@@ -1,12 +1,21 @@
 import Link from "next/link";
 import { logoutAction } from "../actions";
 import MissionButton from "@/components/MissionButton";
+import { DayRings, GradeTower } from "@/components/DayRings";
+import { DRILL } from "@/content/schedule";
+import { getSkill } from "@/lib/curriculum/skills";
 import { requireKid } from "@/lib/auth";
 import { levelInfo } from "@/lib/game";
 import { THEME_LABEL } from "@/content/quests";
 import { FEATURES } from "@/content/features";
 import {
   capStatus,
+  dayBlocks,
+  drillStats,
+  goalProgress,
+  learningPlan,
+  masteredPrereqs,
+  strugglingSkills,
   extendPlan,
   getFocus,
   kidBadges,
@@ -36,6 +45,12 @@ export default async function KidHome({ searchParams }: { searchParams: Promise<
   const todaysQuests = new Map(questLog(kid.id, today()).map((r) => [r.quest_id, r.status]));
   const earned = kidBadges(kid);
   const days = streak(kid.id);
+  const blocks = dayBlocks(kid.id);
+  const dayTotal = { done: blocks.reduce((t, b) => t + b.minutes, 0), minutes: blocks.reduce((t, b) => t + b.block.minutes, 0) };
+  const plan2 = learningPlan(kid);
+  const goal = goalProgress(kid);
+  const drills = drillStats(kid.id);
+  const stuck = strugglingSkills(kid.id).map((id) => ({ skillId: id, title: getSkill(id)?.title ?? id, backTo: masteredPrereqs(kid.id, id) }));
 
   return (
     <main className="wrap">
@@ -93,6 +108,40 @@ export default async function KidHome({ searchParams }: { searchParams: Promise<
         </div>
       </div>
 
+      {FEATURES.twoHourDay && (
+        <div className="kcard">
+          <h2>⏰ Today&apos;s 2 hours</h2>
+          <p className="kmuted small">
+            Fill every ring: {dayTotal.done} of {dayTotal.minutes} minutes so far. Then the rest of the day is yours: missions,
+            building, reading, playing outside.
+          </p>
+          <DayRings blocks={blocks} />
+        </div>
+      )}
+
+      {stuck.length > 0 && (
+        <div className="kcard basics">
+          <div className="eyebrow">Struggle detector</div>
+          <h2>🧱 Strengthen your foundation</h2>
+          <p className="kmuted small">
+            These skills aren&apos;t clicking yet. A quick warm-up on the skills underneath them makes them much easier.
+          </p>
+          {stuck.map((s) => (
+            <div key={s.skillId} className="quest-item">
+              <div className="quest-body">
+                <div className="quest-name">{s.title}</div>
+                <div className="kmuted small">Warm up first: {s.backTo.map((b) => b.title).join(", ") || "ask your teacher for a hand"}</div>
+              </div>
+              {s.backTo[0] && !cap.reached && (
+                <Link href={`/kid/practice?skill=${s.backTo[0].id}&mode=review`} className="kbtn">
+                  Warm up
+                </Link>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
       {cap.reached && (
         <div className="kcard callout">
           <h2>🌅 Screen time&apos;s done for today!</h2>
@@ -119,7 +168,7 @@ export default async function KidHome({ searchParams }: { searchParams: Promise<
           )}
         </div>
       ) : (
-        <div className="kcard">
+        <div className="kcard" id="training">
           <h2>⚔️ Today&apos;s training</h2>
           {plan.length === 0 ? (
             <p>You&apos;ve mastered everything available right now. Legendary! Ask a parent what&apos;s next.</p>
@@ -152,6 +201,63 @@ export default async function KidHome({ searchParams }: { searchParams: Promise<
           )}
         </div>
       )}
+
+      {FEATURES.twoHourDay && kid.placement_done ? (
+        <div className="grid2">
+          <div className="kcard">
+            <h2>🏗️ My path</h2>
+            <p className="kmuted small">
+              You&apos;re working in <strong>grade {plan2.knowledgeGrade > 8 ? "8+" : plan2.knowledgeGrade}</strong> math. Every solid block is a
+              skill you&apos;ve mastered.
+            </p>
+            <GradeTower grades={plan2.grades} focus={plan2.knowledgeGrade} />
+            {goal ? (
+              <div className="goal">
+                <div className="eyebrow">My goal</div>
+                {goal.done ? (
+                  <strong>🏆 Goal reached: grade {goal.grade} math is done!</strong>
+                ) : (
+                  <>
+                    <strong>
+                      Finish grade {goal.grade} by {goal.target_day}
+                    </strong>
+                    <div className="kmuted small">
+                      {goal.remaining} skills to go in {goal.days} days. That&apos;s about {goal.perSchoolDay >= 1 ? `${goal.perSchoolDay} skills per school day` : `${goal.perWeek} skills a week`}.
+                    </div>
+                  </>
+                )}
+                <Link href="/kid/goal" className="linkbtn small">
+                  Change goal
+                </Link>
+              </div>
+            ) : (
+              <Link href="/kid/goal" className="kbtn ghost" style={{ marginTop: 10 }}>
+                🎯 Set a goal
+              </Link>
+            )}
+          </div>
+          <div className="kcard">
+            <h2>⚡ Fact speed</h2>
+            <p className="kmuted small">
+              Fast facts free up your brain for the hard stuff. Fluent = {DRILL.fluentPerMinute}+ correct a minute.
+            </p>
+            <div className="fluency">
+              {drills.map((d) => (
+                <div key={d.op} className={`fluency-op ${d.fluent ? "fluent" : ""}`}>
+                  <div className="fluency-sign">{d.op}</div>
+                  <div className="fluency-num">{d.best || "–"}</div>
+                  <div className="kmuted small">{d.fluent ? "fluent ✅" : "best / min"}</div>
+                </div>
+              ))}
+            </div>
+            {!cap.reached && (
+              <Link href="/kid/drill" className="kbtn" style={{ marginTop: 12 }}>
+                Start a 60-second drill
+              </Link>
+            )}
+          </div>
+        </div>
+      ) : null}
 
       {FEATURES.missions && (
       <div className="kcard" id="missions">

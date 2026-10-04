@@ -136,6 +136,52 @@ CREATE TABLE IF NOT EXISTS tutor_messages (
 CREATE INDEX IF NOT EXISTS tutor_messages_kid ON tutor_messages (kid_id, day);
 CREATE INDEX IF NOT EXISTS tutor_messages_question ON tutor_messages (question_id, id);
 
+-- Guided (off-screen) blocks of the 2-hour day. A parent approves them, which logs the minutes.
+CREATE TABLE IF NOT EXISTS block_log (
+  id INTEGER PRIMARY KEY,
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  block_id TEXT NOT NULL,
+  day TEXT NOT NULL,
+  minutes INTEGER NOT NULL,
+  note TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL CHECK (status IN ('pending', 'approved', 'declined')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE (kid_id, block_id, day)
+);
+
+-- A kid's long-term goal: finish a grade of math by a date.
+CREATE TABLE IF NOT EXISTS goals (
+  kid_id INTEGER PRIMARY KEY REFERENCES kids(id),
+  grade INTEGER NOT NULL,
+  target_day TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Math-fact speed drills.
+CREATE TABLE IF NOT EXISTS drill_results (
+  id INTEGER PRIMARY KEY,
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  day TEXT NOT NULL,
+  op TEXT NOT NULL,
+  correct INTEGER NOT NULL,
+  wrong INTEGER NOT NULL,
+  seconds INTEGER NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Outside standardized test results (e.g. NWEA MAP), entered by a parent.
+CREATE TABLE IF NOT EXISTS test_scores (
+  id INTEGER PRIMARY KEY,
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  test_day TEXT NOT NULL,
+  test TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  score INTEGER NOT NULL,
+  achievement_pct INTEGER,
+  growth_pct INTEGER,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- Finished focus sprints (Pomodoro-style work blocks).
 CREATE TABLE IF NOT EXISTS sprint_log (
   id INTEGER PRIMARY KEY,
@@ -149,6 +195,9 @@ CREATE TABLE IF NOT EXISTS sprint_log (
 const ADDED_COLUMNS: { table: string; column: string; ddl: string }[] = [
   // JSON FocusProfile (see lib/focus.ts). NULL means defaults.
   { table: "kids", column: "focus", ddl: "ALTER TABLE kids ADD COLUMN focus TEXT" },
+  // For the waste meter: when each question was answered and whether it was right.
+  { table: "issued_questions", column: "answered_at", ddl: "ALTER TABLE issued_questions ADD COLUMN answered_at INTEGER" },
+  { table: "issued_questions", column: "correct", ddl: "ALTER TABLE issued_questions ADD COLUMN correct INTEGER" },
 ];
 
 function migrate(conn: Database.Database): void {

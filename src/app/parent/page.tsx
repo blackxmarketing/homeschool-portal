@@ -3,7 +3,7 @@ import ParentNav from "@/components/ParentNav";
 import { requireParent } from "@/lib/auth";
 import { REQUIRED_AVG_HOURS, REQUIRED_DAYS } from "@/lib/compliance";
 import { gradeProgress } from "@/lib/engine/planner";
-import { reviewMissionAction } from "@/app/actions";
+import { reviewBlockAction, reviewMissionAction } from "@/app/actions";
 import { levelInfo } from "@/lib/game";
 import {
   compliance,
@@ -11,6 +11,7 @@ import {
   kidFlags,
   listKids,
   minutesOnDay,
+  pendingBlocks,
   pendingMissions,
   placementStatus,
   skillStates,
@@ -24,12 +25,52 @@ export default async function ParentHome({ searchParams }: { searchParams: Promi
   const s = await requireParent();
   const kids = listKids(s.familyId);
   const pending = pendingMissions(s.familyId);
+  const blocks = pendingBlocks(s.familyId);
   const { error } = await searchParams;
 
   return (
     <main className="wrap">
       <ParentNav title="Family overview" />
       {error && <div className="error">{error}</div>}
+      {blocks.length > 0 && (
+        <div className="card">
+          <h2>⏰ Learning blocks to check ({blocks.length})</h2>
+          <p className="muted small">
+            Off-screen blocks of the 2-hour day. Approving logs the minutes under the subject in your Colorado records (+25 XP).
+          </p>
+          <table>
+            <tbody>
+              {blocks.map((b) => (
+                <tr key={b.id}>
+                  <td>
+                    {b.avatar} {b.kidName}
+                  </td>
+                  <td>
+                    <strong>
+                      {b.block?.icon} {b.block?.label ?? b.block_id}
+                    </strong>{" "}
+                    <span className="muted small">
+                      {b.day} · {b.minutes} min of {b.block?.subject}
+                    </span>
+                    {b.note && <div className="quote">{b.note}</div>}
+                  </td>
+                  <td style={{ whiteSpace: "nowrap" }}>
+                    <form action={reviewBlockAction} style={{ display: "inline" }}>
+                      <input type="hidden" name="logId" value={b.id} />
+                      <button className="btn" name="approve" value="1">
+                        Approve
+                      </button>{" "}
+                      <button className="btn secondary" name="approve" value="0">
+                        Not yet
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
       {pending.length > 0 && (
         <div className="card">
           <h2>🌍 Missions to check ({pending.length})</h2>

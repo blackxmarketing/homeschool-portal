@@ -12,7 +12,7 @@ and civics. Each phase can be switched on or off in `src/content/features.ts`.
 - Parent attention/ADHD question that sets each kid's starting focus settings
 - Real-world missions approved by a parent (logged for Colorado records)
 
-## ✅ Phase 2 — AI teachers (built)
+## ✅ Phase 2 — AI teachers (live)
 - A teacher character for each math world, inspired by great thinkers
   (Ben Franklin, Ada Lovelace, Archimedes, Hypatia, Florence Nightingale…)
 - Socratic chat about the current question; never gives the answer away
@@ -20,7 +20,7 @@ and civics. Each phase can be switched on or off in `src/content/features.ts`.
 - Grading stays in code; parents can read every conversation
 - Needs `ANTHROPIC_API_KEY` for full AI replies (falls back to built-in hints)
 
-## ⏭️ Phase 2b — The 2-hour day
+## ✅ Phase 2b — The 2-hour day (built)
 - Daily schedule of 4 × 25-minute subject blocks with daily rings
 - Kid dashboard: lessons left per grade, long-term goals turned into daily goals
 - Parent learning plan: age grade vs knowledge grade, weeks to finish a grade

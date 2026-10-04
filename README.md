@@ -39,6 +39,11 @@ Colorado records.
   Socratically: mini-lessons, chat about the current question (never giving the
   answer away), and "why was my answer wrong?" Parents can read every message.
   See [docs/UPDATING.md](docs/UPDATING.md) to tweak teachers, quests and features.
+- **The 2-hour day (Phase 2b).** Four 25-minute blocks plus a 20-minute math
+  booster, shown as daily rings. Off-screen blocks (reading, science and history,
+  writing) have a timer and daily ideas; a parent approves them. Grade towers,
+  kid-set goals, 60-second math-fact speed drills, and a struggle detector that
+  sends a stuck kid back to the skills underneath.
 - **Real-world missions.** Off-screen tasks about money, business, leadership,
   character, science, history and civics. A parent approves each one, which
   awards XP and logs the minutes under the right subject for records.
@@ -47,6 +52,9 @@ Colorado records.
 - **Focus settings per kid.** One question ("ADHD or trouble keeping focus?")
   sets the starting values: shorter sprints, more breaks, more side quests and
   a tighter screen cap for kids who need them. Every value can be changed.
+- **Learning plan.** Age grade vs knowledge grade, weeks to finish each grade (and
+  with an extra hour a day), the accuracy band (too easy / learning zone / too
+  hard), a waste meter, fact fluency, and outside test scores (like MAP) over time.
 - **Missions to check.** Approve or decline the missions kids say they finished,
   and read their creative-challenge answers on each kid's page.
 - **Overview.** The level each kid is working at, minutes, accuracy, and flags

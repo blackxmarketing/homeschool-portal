@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ParentNav from "@/components/ParentNav";
+import LearningPlan from "@/components/LearningPlan";
 import SummaryButton from "@/components/SummaryButton";
 import { deleteActivityAction, logActivityAction } from "@/app/actions";
 import { aiEnabled } from "@/lib/ai";
@@ -11,6 +12,7 @@ import { addDays } from "@/lib/engine/mastery";
 import { KIND_LABEL } from "@/content/quests";
 import { activities, getKid, kidFlags, questLog, recentMastered, recentTutorMessages, skillTable, today, weekStats } from "@/lib/store";
 import { TEACHERS } from "@/content/teachers";
+import { FEATURES } from "@/content/features";
 
 const TEACHER_NAME: Record<string, string> = Object.fromEntries(Object.values(TEACHERS).map((t) => [t.id, t.name]));
 
@@ -81,6 +83,8 @@ export default async function KidDetail({
           <p className="muted small">Add an ANTHROPIC_API_KEY on the server to get AI-written weekly summaries and tutor hints.</p>
         )}
       </div>
+
+      {FEATURES.twoHourDay && <LearningPlan kid={kid} />}
 
       <div className="card">
         <h2>Side quests and missions (last 30 days)</h2>

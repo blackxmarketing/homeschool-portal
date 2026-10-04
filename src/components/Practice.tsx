@@ -97,6 +97,8 @@ export default function Practice({ mode, skillId, focus }: { mode: Mode; skillId
   const [xp, setXp] = useState(0);
   const [xpPop, setXpPop] = useState<number | null>(null);
   const [combo, setCombo] = useState(0);
+  const [missStreak, setMissStreak] = useState(0);
+  const [backTo, setBackTo] = useState<{ id: string; title: string }[]>([]);
   const [cheer, setCheer] = useState("");
   const [finished, setFinished] = useState<string | null>(null);
   const [celebrate, setCelebrate] = useState(false);
@@ -135,12 +137,13 @@ export default function Practice({ mode, skillId, focus }: { mode: Mode; skillId
     setChatOpen(false);
     setHelped(false);
     try {
-      const data = await post<{ question: Q; progress: { done?: number; total?: number; correct?: number; count?: number } }>(
+      const data = await post<{ question: Q; progress: { done?: number; total?: number; correct?: number; count?: number; backTo?: { id: string; title: string }[] } }>(
         "/api/question",
         { mode, skillId },
       );
       setQ(data.question);
       if (mode === "learn") setMastery({ correct: data.progress.correct ?? 0, count: data.progress.count ?? 0 });
+      if (data.progress.backTo) setBackTo(data.progress.backTo);
       if (mode === "placement" && data.progress.total) setPlacementInfo({ done: data.progress.done!, total: data.progress.total });
     } catch (e) {
       if (e instanceof ApiError && e.capReached) setCapReached(true);
@@ -181,6 +184,7 @@ export default function Practice({ mode, skillId, focus }: { mode: Mode; skillId
       setAnsweredAny(true);
       gainXp(data.xpGained);
       setCombo((c) => (data.correct ? c + 1 : 0));
+      setMissStreak((m) => (data.correct ? 0 : m + 1));
       setCheer(data.correct ? pickOne(CHEERS) : pickOne(ENCOURAGE));
       if (FEATURES.sideQuests && countQuestion(focus.sideQuestEvery)) setQuestDue(true);
       if (data.mastery) setMastery({ correct: data.mastery.correct, count: data.mastery.count });
@@ -468,6 +472,21 @@ export default function Practice({ mode, skillId, focus }: { mode: Mode; skillId
         )}
 
         {finished && <div className="mastered-banner pop">{finished}</div>}
+
+        {mode === "learn" && missStreak >= 3 && backTo.length > 0 && !finished && (
+          <div className="basics pop">
+            <div className="eyebrow">Struggle detector</div>
+            <strong>Three misses in a row. Let&apos;s go back to basics.</strong>
+            <p className="kmuted small">Strong foundations make this skill much easier. Warm up on one of these, then come back.</p>
+            <div className="btnrow" style={{ marginTop: 8 }}>
+              {backTo.map((p) => (
+                <Link key={p.id} href={`/kid/practice?skill=${p.id}&mode=review`} className="kbtn ghost">
+                  🔁 {p.title}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {result && (
           <div className="btnrow">

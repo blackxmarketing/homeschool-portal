@@ -11,6 +11,8 @@ export const FEATURES = {
   focusSprints: true,
   /** Phase 2: AI teacher characters (chat, mini-lessons, "why was I wrong?"). Needs ANTHROPIC_API_KEY for the AI parts. */
   aiTeachers: true,
+  /** Phase 2b: the 2-hour day (block rings, grade towers, goals, fact drills, struggle detector). */
+  twoHourDay: true,
 };
 
 /** Limits on AI use, to keep costs predictable. */
