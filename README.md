@@ -67,27 +67,27 @@ npm run build
 
 ## Deploy (family-only)
 
-The app is one Node server plus one SQLite file, so any host with a persistent
-disk works. Two simple options:
+**DigitalOcean (recommended):** follow
+[deploy/DIGITALOCEAN.md](deploy/DIGITALOCEAN.md). You create a $6/month
+Droplet and paste two commands. It comes with free HTTPS, a firewall, automatic
+restarts and nightly database backups.
 
-- **Fly.io or Railway:** deploy the included `Dockerfile` and attach a volume at
-  `/data`.
-- **A small VPS or home server:** run `docker build -t learning-portal . && docker run -p 3000:3000 -v portal-data:/data learning-portal`
-  and put it behind HTTPS (for example with Caddy).
+Any other server with Docker and a persistent disk works too:
+`docker compose up -d --build`. It uses the `docker-compose.yml` and
+`deploy/Caddyfile` in this repo, with a `.env` file like the one
+`deploy/setup.sh` creates.
 
-Set these environment variables:
+Settings (in `.env`):
 
 | Variable | Needed | Purpose |
 |---|---|---|
-| `SESSION_SECRET` | yes (production) | Signs login cookies. `openssl rand -hex 32` |
+| `SITE_ADDRESS` | yes | Web address Caddy gets an HTTPS certificate for |
+| `SESSION_SECRET` | yes | Signs login cookies (`openssl rand -hex 32`) |
 | `ANTHROPIC_API_KEY` | optional | AI tutor hints and weekly summaries |
-| `DATA_DIR` | set in Docker | Where `learning.db` lives |
 | `APP_TIMEZONE` | optional | Defaults to `America/Denver` |
 
-**Back up** `learning.db` regularly. It holds all the progress history.
-
-Vercel-style serverless hosting doesn't keep a local SQLite file. If you want to
-host there, move storage to Postgres first (see the roadmap).
+Avoid hosts without a persistent disk, such as Vercel, Render's free tier or
+DigitalOcean App Platform. The SQLite database would be wiped on restart.
 
 ## Project layout
 
