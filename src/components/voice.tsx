@@ -25,6 +25,17 @@ export function VoiceProvider({ speakOn, micOn, children }: VoiceSettings & { ch
 
 export const useVoiceSettings = () => useContext(VoiceCtx);
 
+/** Male or female teachers each get a matching voice. */
+export type VoiceKind = "male" | "female";
+const TeacherVoiceCtx = createContext<VoiceKind>("female");
+
+/** Everything inside reads aloud in this teacher's kind of voice. */
+export function TeacherVoice({ kind, children }: { kind: VoiceKind; children: React.ReactNode }) {
+  return <TeacherVoiceCtx.Provider value={kind}>{children}</TeacherVoiceCtx.Provider>;
+}
+
+export const useTeacherVoice = () => useContext(TeacherVoiceCtx);
+
 /** Each kid's own choices, kept on this device. */
 export interface VoicePrefs {
   autoRead: boolean;
@@ -104,21 +115,33 @@ export function speechSupported(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined";
 }
 
-/** Natural-sounding English voices first. */
-function pickVoice(): SpeechSynthesisVoice | null {
-  const voices = window.speechSynthesis.getVoices().filter((v) => v.lang.toLowerCase().startsWith("en"));
-  if (!voices.length) return null;
+/** Voice names browsers use, by kind (Edge's "Natural" voices sound the most human). */
+const MALE = /\b(male|guy|andrew|brian|christopher|eric|roger|steffan|davis|tony|jason|ryan|thomas|william|liam|connor|david|mark|james|george|daniel|alex|fred|tom|aaron|arthur|oliver|reed|rocko|evan|nathan|ralph|gordon)\b/;
+const FEMALE = /\b(female|aria|jenny|ava|emma|michelle|ana|sara|nancy|jane|libby|sonia|maisie|natasha|clara|zira|hazel|susan|samantha|karen|moira|tessa|fiona|victoria|allison|ava|serena|kate|catherine|google us english|aria|joanna|salli|kimberly|ivy)\b/;
+
+export function voiceKindOf(name: string): VoiceKind | null {
+  const n = name.toLowerCase();
+  if (/\bfemale\b/.test(n)) return "female";
+  if (MALE.test(n)) return "male";
+  if (FEMALE.test(n)) return "female";
+  return null;
+}
+
+/** The most natural-sounding English voice of the right kind. */
+export function pickVoice(voices: SpeechSynthesisVoice[], kind: VoiceKind): { voice: SpeechSynthesisVoice | null; matched: boolean } {
+  const en = voices.filter((v) => v.lang.toLowerCase().startsWith("en"));
+  if (!en.length) return { voice: null, matched: false };
   const score = (v: SpeechSynthesisVoice) => {
     const n = v.name.toLowerCase();
     let s = 0;
+    if (voiceKindOf(v.name) === kind) s += 20;
     if (v.lang.toLowerCase() === "en-us") s += 3;
-    if (/natural|neural|online/.test(n)) s += 6;
-    if (/aria|jenny|ava|samantha|google us english|michelle|emma|guy|andrew/.test(n)) s += 4;
-    if (v.localService) s += 1;
-    if (/novelty|whisper|bad news|bells|boing|bubbles|cellos|zarvox|trinoids|albert|jester|organ|superstar|wobble/.test(n)) s -= 20;
+    if (/natural|neural|online|premium|enhanced/.test(n)) s += 8;
+    if (/novelty|whisper|bad news|bells|boing|bubbles|cellos|zarvox|trinoids|albert|jester|organ|superstar|wobble|grandpa|grandma|eddy|flo|shelley|sandy|rocko/.test(n)) s -= 40;
     return s;
   };
-  return [...voices].sort((a, b) => score(b) - score(a))[0];
+  const voice = [...en].sort((a, b) => score(b) - score(a))[0];
+  return { voice, matched: voiceKindOf(voice.name) === kind };
 }
 
 /** Splits text into sentences with their character ranges. */
@@ -137,13 +160,17 @@ export function sentences(text: string): [number, number][] {
 }
 
 /** Reads text aloud, sentence by sentence (long single utterances get cut off in some browsers). */
-export function speak(id: string, text: string, rate = loadPrefs().rate) {
+export function speak(id: string, text: string, opts: { rate?: number; kind?: VoiceKind } = {}) {
   if (!speechSupported() || !text.trim()) return;
+  const rate = opts.rate ?? loadPrefs().rate;
+  const kind = opts.kind ?? "female";
   const synth = window.speechSynthesis;
   synth.cancel();
   const token = ++runToken;
   const parts = sentences(text);
-  const voice = pickVoice();
+  const { voice, matched } = pickVoice(synth.getVoices(), kind);
+  // No voice of the right kind on this computer: shift the pitch so it still sounds right.
+  const pitch = matched ? 1 : kind === "male" ? 0.75 : 1.2;
   setSpeech({ id, charIndex: -1, sentence: parts[0], words: false, paused: false });
 
   const say = (i: number) => {
@@ -157,7 +184,7 @@ export function speak(id: string, text: string, rate = loadPrefs().rate) {
     if (voice) u.voice = voice;
     u.lang = voice?.lang ?? "en-US";
     u.rate = rate;
-    u.pitch = 1;
+    u.pitch = pitch;
     u.onstart = () => token === runToken && setSpeech({ sentence: [start, end] });
     u.onboundary = (e) => {
       if (token === runToken && e.name !== "sentence") setSpeech({ charIndex: start + e.charIndex, words: true });
@@ -228,6 +255,7 @@ function canAutoPlay(): boolean {
 export function useAutoRead(id: string, text: string | null | undefined, enabled = true) {
   const { speakOn } = useVoiceSettings();
   const [p] = useVoicePrefs();
+  const kind = useTeacherVoice();
   const spoken = useRef<string | null>(null);
   useVoicesReady();
   useEffect(() => {
@@ -237,10 +265,10 @@ export function useAutoRead(id: string, text: string | null | undefined, enabled
     // A short pause lets the screen settle before the teacher starts.
     const t = setTimeout(() => {
       spoken.current = key;
-      speak(id, text);
+      speak(id, text, { kind });
     }, 350);
     return () => clearTimeout(t);
-  }, [id, text, enabled, speakOn, p.autoRead]);
+  }, [id, text, enabled, speakOn, p.autoRead, kind]);
 }
 
 // ---------------- Listening (speech to text) ----------------
@@ -393,6 +421,7 @@ export function MicButton({
 /** A small "read this to me" button for any piece of teacher text. */
 export function SayButton({ id, text, label }: { id: string; text: string; label?: string }) {
   const { speakOn } = useVoiceSettings();
+  const kind = useTeacherVoice();
   const s = useSpeech();
   const [supported, setSupported] = useState(false);
   useEffect(() => setSupported(speechSupported()), []);
@@ -402,7 +431,7 @@ export function SayButton({ id, text, label }: { id: string; text: string; label
     <button
       type="button"
       className={`say-btn ${on ? "on" : ""}`}
-      onClick={() => (on ? stopSpeaking() : speak(id, text))}
+      onClick={() => (on ? stopSpeaking() : speak(id, text, { kind }))}
       aria-label={on ? "Stop reading" : "Read this to me"}
       title={on ? "Stop" : "Read this to me"}
     >

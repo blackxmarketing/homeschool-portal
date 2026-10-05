@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { logoutAction } from "../actions";
 import MissionButton from "@/components/MissionButton";
+import HomeTabs from "@/components/HomeTabs";
 import { DayRings, GradeTower } from "@/components/DayRings";
 import { getSkill } from "@/lib/curriculum/skills";
 import { requireKid } from "@/lib/auth";
@@ -17,12 +18,10 @@ import {
   masteredPrereqs,
   strugglingSkills,
   extendPlan,
-  getFocus,
   kidBadges,
   missionBoard,
   placementStatus,
   questLog,
-  sprintsToday,
   streak,
   today,
   todaysPlan,
@@ -36,9 +35,7 @@ export default async function KidHome({ searchParams }: { searchParams: Promise<
 
   const FEATURES = features();
   const DRILL = drillSettings();
-  const focus = getFocus(kid.id);
   const cap = capStatus(kid.id);
-  const goalPct = Math.min(100, Math.round((cap.minutes / kid.daily_goal_minutes) * 100));
   const lvl = levelInfo(kid.xp);
   const placement = placementStatus(kid.id);
   const plan = kid.placement_done ? todaysPlan(kid.id) : [];
@@ -55,273 +52,164 @@ export default async function KidHome({ searchParams }: { searchParams: Promise<
   const courses = FEATURES.courses ? courseOverview(kid.id).filter((c) => c.course.lessons.length > 0) : [];
   const stuck = strugglingSkills(kid.id).map((id) => ({ skillId: id, title: getSkill(id)?.title ?? id, backTo: masteredPrereqs(kid.id, id) }));
 
-  return (
-    <main className="wrap">
-      <div className="topbar">
-        <div className="hero">
-          <div className="hero-avatar">{kid.avatar}</div>
-          <div>
-            <div className="eyebrow">Welcome back</div>
-            <h1>{kid.name}</h1>
-            <div className="rank">
-              {lvl.rank.icon} Level {lvl.level} · {lvl.rank.title}
-            </div>
-          </div>
-        </div>
-        <nav>
-          <Link href="/kid/map" className="kbtn ghost">
-            🗺️ Quest map
-          </Link>
-          {FEATURES.courses && (
-            <Link href="/kid/learn" className="kbtn ghost">
-              📚 Academy
-            </Link>
-          )}
-          <form action={logoutAction}>
-            <button className="linkbtn">Log out</button>
-          </form>
-        </nav>
-      </div>
+  // "Start here": every next step as a big colored button.
+  type Tile = { key: string; href: string | null; icon: string; eyebrow: string; title: string; sub: string; hue: number; done?: boolean; cta: string; pct?: number };
+  const tiles: Tile[] = [];
+  if (!kid.placement_done) {
+    tiles.push({
+      key: "placement",
+      href: cap.reached ? null : "/kid/placement",
+      icon: "🗺️",
+      eyebrow: "Start here",
+      title: "Placement quest",
+      sub: placement.done > 0 ? `${placement.done} of ${placement.total} parts done` : "Show what you already know",
+      hue: 228,
+      cta: placement.done > 0 ? "Keep going" : "Start",
+      pct: placement.total ? Math.round((placement.done / placement.total) * 100) : 0,
+    });
+  } else {
+    for (const p of plan) {
+      tiles.push({
+        key: `${p.type}:${p.skillId}`,
+        href: p.done || cap.reached ? null : `/kid/practice?skill=${p.skillId}&mode=${p.type}`,
+        icon: p.done ? "✅" : p.type === "review" ? "🔁" : "⭐",
+        eyebrow: p.type === "review" ? "Math review" : "New math skill",
+        title: p.title,
+        sub: `Grade ${p.grade} level`,
+        hue: p.type === "review" ? 265 : 32,
+        done: p.done,
+        cta: p.done ? "Done" : p.answeredToday > 0 ? "Continue" : "Start",
+      });
+    }
+  }
+  for (const c of courses) {
+    const next = c.lessons.find((l) => l.status !== "done" && l.status !== "locked");
+    tiles.push({
+      key: `course:${c.course.id}`,
+      href: next && !cap.reached ? `/kid/learn/${c.course.id}/${next.lesson.id}` : `/kid/learn/${c.course.id}`,
+      icon: c.course.icon,
+      eyebrow: c.course.title,
+      title: next ? next.lesson.title : "Course complete! 🏆",
+      sub: next?.status === "waiting" ? "Waiting for a parent" : `${c.done} of ${c.lessons.length} lessons`,
+      hue: c.course.hue,
+      done: !next,
+      cta: !next ? "Review" : next.status === "open" ? "Start" : "Continue",
+      pct: Math.round((c.done / Math.max(1, c.lessons.length)) * 100),
+    });
+  }
+  if (FEATURES.twoHourDay && kid.placement_done) {
+    tiles.push({
+      key: "drill",
+      href: cap.reached ? null : "/kid/drill",
+      icon: "⚡",
+      eyebrow: "Fact speed",
+      title: "60-second drill",
+      sub: `Fluent = ${DRILL.fluentPerMinute}+ a minute`,
+      hue: 330,
+      cta: "Go",
+    });
+  }
+  // Every button gets its own bright color, so neighbors never match.
+  const PALETTE = [24, 212, 150, 282, 346, 190, 262, 128, 322, 8, 228, 172];
+  tiles.forEach((t, i) => (t.hue = PALETTE[i % PALETTE.length]));
+  const openMissions = missions.filter((m) => (todaysQuests.get(m.id) ?? "open") === "open").length;
 
-      <div className="xpbar-wrap">
-        <div className="xpbar">
-          <span style={{ width: `${lvl.pct}%` }} />
-        </div>
-        <div className="kmuted small">
-          {kid.xp.toLocaleString()} XP · {lvl.needed - lvl.into} XP to level {lvl.level + 1}
-        </div>
-      </div>
-
-      <div className="kstats">
-        <div className="kstat">
-          <div className="v">{days} 🔥</div>
-          <div className="k">day streak</div>
-        </div>
-        <div className="kstat">
-          <div className="v">
-            {cap.minutes}/{kid.daily_goal_minutes}
-          </div>
-          <div className="k">minutes toward today&apos;s goal</div>
-          <div className="mini-bar">
-            <span style={{ width: `${goalPct}%` }} />
-          </div>
-        </div>
-        <div className="kstat">
-          <div className="v">{sprintsToday(kid.id)} ⏱️</div>
-          <div className="k">focus sprints today ({focus.sprintMinutes} min each)</div>
-        </div>
-        <div className="kstat">
-          <div className="v">{Math.max(0, cap.cap - cap.minutes)}</div>
-          <div className="k">screen minutes left today</div>
-        </div>
-      </div>
-
-      {FEATURES.twoHourDay && (
-        <div className="kcard">
-          <h2>⏰ Today&apos;s 2 hours</h2>
-          <p className="kmuted small">
-            Fill every ring: {dayTotal.done} of {dayTotal.minutes} minutes so far. Then the rest of the day is yours: missions,
-            building, reading, playing outside.
-          </p>
-          <DayRings blocks={blocks} />
-        </div>
-      )}
-
-      {stuck.length > 0 && (
-        <div className="kcard basics">
-          <div className="eyebrow">Struggle detector</div>
-          <h2>🧱 Strengthen your foundation</h2>
-          <p className="kmuted small">
-            These skills aren&apos;t clicking yet. A quick warm-up on the skills underneath them makes them much easier.
-          </p>
-          {stuck.map((s) => (
-            <div key={s.skillId} className="quest-item">
-              <div className="quest-body">
-                <div className="quest-name">{s.title}</div>
-                <div className="kmuted small">Warm up first: {s.backTo.map((b) => b.title).join(", ") || "ask your teacher for a hand"}</div>
-              </div>
-              {s.backTo[0] && !cap.reached && (
-                <Link href={`/kid/practice?skill=${s.backTo[0].id}&mode=review`} className="kbtn">
-                  Warm up
-                </Link>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {cap.reached && (
-        <div className="kcard callout">
-          <h2>🌅 Screen time&apos;s done for today!</h2>
-          <p>Great work. Now go make something happen in the real world. Pick a mission below.</p>
-        </div>
-      )}
-
-      {!kid.placement_done ? (
-        <div className="kcard">
-          <h2>🗺️ Placement quest</h2>
-          <p>
-            Before we build your map, let&apos;s find out what you already know. Some questions will be easy and some will be
-            tricky. Do your best. You can stop and come back any time.
-          </p>
-          {placement.done > 0 && (
-            <p className="kmuted">
-              Progress: {placement.done} of {placement.total} parts done.
-            </p>
-          )}
-          {!cap.reached && (
-            <Link href="/kid/placement" className="kbtn big">
-              {placement.done > 0 ? "Keep going →" : "Start the quest →"}
-            </Link>
-          )}
-        </div>
-      ) : (
-        <div className="kcard" id="training">
-          <h2>⚔️ Today&apos;s training</h2>
-          {plan.length === 0 ? (
-            <p>You&apos;ve mastered everything available right now. Legendary! Ask a parent what&apos;s next.</p>
-          ) : (
-            <div className="quest-list">
-              {plan.map((p) => (
-                <div key={`${p.type}:${p.skillId}`} className={`quest-item ${p.done ? "done" : ""}`}>
-                  <div className="quest-icon">{p.done ? "✅" : p.type === "review" ? "🔁" : "⭐"}</div>
-                  <div className="quest-body">
-                    <div className="quest-name">{p.title}</div>
-                    <div className="kmuted small">
-                      {p.type === "review" ? "Power review" : "New skill"} · grade {p.grade} level
+  const tabs = [
+    ...(FEATURES.missions
+      ? [
+          {
+            id: "missions",
+            label: "🌍 Missions",
+            count: openMissions,
+            content: (
+              <>
+                <p className="kmuted small">
+                  Get off the screen and make it real. Tap &quot;I did it!&quot; when you&apos;re done. A parent checks it, then you get the XP.
+                </p>
+                <div className="mission-grid">
+                  {missions.map((m) => (
+                    <div key={m.id} className="mission">
+                      <div className="eyebrow">{THEME_LABEL[m.theme]}</div>
+                      <h3>{m.title}</h3>
+                      <p>{m.text}</p>
+                      <div className="mission-foot">
+                        <span className="tag">+{m.xp} XP</span>
+                        <span className="tag">~{m.minutes} min</span>
+                      </div>
+                      <MissionButton questId={m.id} initial={todaysQuests.get(m.id) ?? "open"} />
                     </div>
-                  </div>
-                  {p.done ? (
-                    <span className="tag ok">Done</span>
-                  ) : cap.reached ? null : (
-                    <Link href={`/kid/practice?skill=${p.skillId}&mode=${p.type}`} className="kbtn">
-                      {p.answeredToday > 0 ? "Continue" : "Start"}
-                    </Link>
-                  )}
+                  ))}
                 </div>
-              ))}
-            </div>
-          )}
-          {allDone && !cap.reached && (
-            <div className="callout small-callout">
-              Training complete for today! 🎉 <Link href="/kid?more=1">Want more?</Link>
-            </div>
-          )}
-        </div>
-      )}
-
-      {FEATURES.twoHourDay && kid.placement_done ? (
-        <div className="grid2">
-          <div className="kcard">
-            <h2>🏗️ My path</h2>
-            <p className="kmuted small">
-              You&apos;re working in <strong>grade {plan2.knowledgeGrade > 8 ? "8+" : plan2.knowledgeGrade}</strong> math. Every solid block is a
-              skill you&apos;ve mastered.
-            </p>
-            <GradeTower grades={plan2.grades} focus={plan2.knowledgeGrade} />
-            {goal ? (
-              <div className="goal">
-                <div className="eyebrow">My goal</div>
-                {goal.done ? (
-                  <strong>🏆 Goal reached: grade {goal.grade} math is done!</strong>
+              </>
+            ),
+          },
+        ]
+      : []),
+    ...(FEATURES.twoHourDay && kid.placement_done
+      ? [
+          {
+            id: "path",
+            label: "🏗️ My path",
+            content: (
+              <>
+                <p className="kmuted small">
+                  You&apos;re working in <strong>grade {plan2.knowledgeGrade > 8 ? "8+" : plan2.knowledgeGrade}</strong> math. Every solid block is a
+                  skill you&apos;ve mastered.
+                </p>
+                <GradeTower grades={plan2.grades} focus={plan2.knowledgeGrade} />
+                {goal ? (
+                  <div className="goal">
+                    <div className="eyebrow">My goal</div>
+                    {goal.done ? (
+                      <strong>🏆 Goal reached: grade {goal.grade} math is done!</strong>
+                    ) : (
+                      <>
+                        <strong>
+                          Finish grade {goal.grade} by {goal.target_day}
+                        </strong>
+                        <div className="kmuted small">
+                          {goal.remaining} skills to go in {goal.days} days. That&apos;s about{" "}
+                          {goal.perSchoolDay >= 1 ? `${goal.perSchoolDay} skills per school day` : `${goal.perWeek} skills a week`}.
+                        </div>
+                      </>
+                    )}
+                    <Link href="/kid/goal" className="linkbtn small">
+                      Change goal
+                    </Link>
+                  </div>
                 ) : (
-                  <>
-                    <strong>
-                      Finish grade {goal.grade} by {goal.target_day}
-                    </strong>
-                    <div className="kmuted small">
-                      {goal.remaining} skills to go in {goal.days} days. That&apos;s about {goal.perSchoolDay >= 1 ? `${goal.perSchoolDay} skills per school day` : `${goal.perWeek} skills a week`}.
-                    </div>
-                  </>
+                  <Link href="/kid/goal" className="kbtn ghost" style={{ marginTop: 10 }}>
+                    🎯 Set a goal
+                  </Link>
                 )}
-                <Link href="/kid/goal" className="linkbtn small">
-                  Change goal
-                </Link>
-              </div>
-            ) : (
-              <Link href="/kid/goal" className="kbtn ghost" style={{ marginTop: 10 }}>
-                🎯 Set a goal
-              </Link>
-            )}
-          </div>
-          <div className="kcard">
-            <h2>⚡ Fact speed</h2>
-            <p className="kmuted small">
-              Fast facts free up your brain for the hard stuff. Fluent = {DRILL.fluentPerMinute}+ correct a minute.
-            </p>
-            <div className="fluency">
-              {drills.map((d) => (
-                <div key={d.op} className={`fluency-op ${d.fluent ? "fluent" : ""}`}>
-                  <div className="fluency-sign">{d.op}</div>
-                  <div className="fluency-num">{d.best || "–"}</div>
-                  <div className="kmuted small">{d.fluent ? "fluent ✅" : "best / min"}</div>
-                </div>
-              ))}
-            </div>
-            {!cap.reached && (
-              <Link href="/kid/drill" className="kbtn" style={{ marginTop: 12 }}>
-                Start a 60-second drill
-              </Link>
-            )}
-          </div>
-        </div>
-      ) : null}
-
-      {courses.length > 0 && (
-        <div className="kcard">
-          <h2>📚 Academy</h2>
-          <p className="kmuted small">Your next lesson in each course. Academics fill your 2-hour rings; life skills are for the afternoon.</p>
-          <div className="quest-list">
-            {courses.map((c) => {
-              const next = c.lessons.find((l) => l.status !== "done" && l.status !== "locked");
-              return (
-                <div key={c.course.id} className="quest-item">
-                  <div className="quest-icon">{c.course.icon}</div>
-                  <div className="quest-body">
-                    <div className="quest-name">{c.course.title}</div>
-                    <div className="kmuted small">
-                      {c.done}/{c.lessons.length} lessons · {next ? next.lesson.title : "complete! 🏆"}
-                      {next?.status === "waiting" ? " · waiting for a parent" : ""}
+              </>
+            ),
+          },
+          {
+            id: "facts",
+            label: "⚡ Fact speed",
+            content: (
+              <>
+                <p className="kmuted small">Fast facts free up your brain for the hard stuff. Fluent = {DRILL.fluentPerMinute}+ correct a minute.</p>
+                <div className="fluency">
+                  {drills.map((d) => (
+                    <div key={d.op} className={`fluency-op ${d.fluent ? "fluent" : ""}`}>
+                      <div className="fluency-sign">{d.op}</div>
+                      <div className="fluency-num">{d.best || "–"}</div>
+                      <div className="kmuted small">{d.fluent ? "fluent ✅" : "best / min"}</div>
                     </div>
-                  </div>
-                  {next && (
-                    <Link href={`/kid/learn/${c.course.id}/${next.lesson.id}`} className="kbtn">
-                      {next.status === "open" ? "Start" : "Continue"}
-                    </Link>
-                  )}
+                  ))}
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {FEATURES.missions && (
-      <div className="kcard" id="missions">
-        <h2>🌍 Real-world missions</h2>
-        <p className="kmuted">
-          Get off the screen and make it real. Tap &quot;I did it!&quot; when you&apos;re done. A parent checks it, then you get
-          the XP.
-        </p>
-        <div className="mission-grid">
-          {missions.map((m) => (
-            <div key={m.id} className="mission">
-              <div className="eyebrow">{THEME_LABEL[m.theme]}</div>
-              <h3>{m.title}</h3>
-              <p>{m.text}</p>
-              <div className="mission-foot">
-                <span className="tag">+{m.xp} XP</span>
-                <span className="tag">~{m.minutes} min</span>
-              </div>
-              <MissionButton questId={m.id} initial={todaysQuests.get(m.id) ?? "open"} />
-            </div>
-          ))}
-        </div>
-      </div>
-      )}
-
-      <div className="kcard">
-        <h2>🏅 Badges</h2>
+              </>
+            ),
+          },
+        ]
+      : []),
+    {
+      id: "badges",
+      label: "🏅 Badges",
+      count: earned.filter((b) => b.earned).length,
+      content: (
         <div className="badge-grid">
           {earned.map((b) => (
             <div key={b.id} className={`badge ${b.earned ? "earned" : ""}`} title={b.how}>
@@ -331,7 +219,152 @@ export default async function KidHome({ searchParams }: { searchParams: Promise<
             </div>
           ))}
         </div>
-      </div>
+      ),
+    },
+    ...(stuck.length > 1
+      ? [
+          {
+            id: "basics",
+            label: "🧱 Warm-ups",
+            count: stuck.length,
+            content: (
+              <div className="quest-list">
+                {stuck.map((s) => (
+                  <div key={s.skillId} className="quest-item">
+                    <div className="quest-body">
+                      <div className="quest-name">{s.title}</div>
+                      <div className="kmuted small">Warm up first: {s.backTo.map((b) => b.title).join(", ") || "ask your teacher for a hand"}</div>
+                    </div>
+                    {s.backTo[0] && !cap.reached && (
+                      <Link href={`/kid/practice?skill=${s.backTo[0].id}&mode=review`} className="kbtn">
+                        Warm up
+                      </Link>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ),
+          },
+        ]
+      : []),
+  ];
+
+  return (
+    <main className="wrap home">
+      <header className="home-head">
+        <div className="hero-avatar">{kid.avatar}</div>
+        <div className="home-who">
+          <h1>Hi, {kid.name}!</h1>
+          <div className="rank">
+            {lvl.rank.icon} Level {lvl.level} · {lvl.rank.title} · <span className="kmuted">{lvl.needed - lvl.into} XP to level {lvl.level + 1}</span>
+          </div>
+          <div className="xpbar" aria-label={`${kid.xp} XP`}>
+            <span style={{ width: `${lvl.pct}%` }} />
+          </div>
+        </div>
+        <div className="home-chips">
+          <span className="chip" title="Day streak">
+            🔥 {days} day{days === 1 ? "" : "s"}
+          </span>
+          <span className="chip" title="Minutes toward today's goal">
+            ⏱️ {cap.minutes}/{kid.daily_goal_minutes} min
+          </span>
+          <span className="chip" title="Screen minutes left today">
+            🖥️ {Math.max(0, cap.cap - cap.minutes)} left
+          </span>
+        </div>
+        <nav className="home-nav">
+          <Link href="/kid/map" className="kbtn ghost small-btn">
+            🗺️ Map
+          </Link>
+          {FEATURES.courses && (
+            <Link href="/kid/learn" className="kbtn ghost small-btn">
+              📚 Academy
+            </Link>
+          )}
+          <form action={logoutAction}>
+            <button className="linkbtn">Log out</button>
+          </form>
+        </nav>
+      </header>
+
+      {cap.reached && <div className="home-banner good">🌅 Screen time&apos;s done for today! Go make something happen: open Missions below.</div>}
+      {stuck.length > 0 && !cap.reached && (
+        <div className="home-banner warn">
+          <span>
+            🧱 <strong>{stuck[0].title}</strong> isn&apos;t clicking yet. A quick warm-up makes it easier.
+          </span>
+          {stuck[0].backTo[0] && (
+            <Link href={`/kid/practice?skill=${stuck[0].backTo[0].id}&mode=review`} className="kbtn small-btn">
+              Warm up
+            </Link>
+          )}
+        </div>
+      )}
+
+      {FEATURES.twoHourDay && (
+        <section className="home-rings" aria-label="Today's 2 hours">
+          <div className="home-rings-label">
+            <strong>Today&apos;s 2 hours</strong>
+            <span className="kmuted small">
+              {dayTotal.done}/{dayTotal.minutes} min
+            </span>
+          </div>
+          <DayRings blocks={blocks} />
+        </section>
+      )}
+
+      <section aria-label="Start here">
+        <div className="home-section-title">
+          <h2>Start here</h2>
+          {allDone && !cap.reached && (
+            <Link href="/kid?more=1" className="linkbtn small">
+              Training done! 🎉 Want more?
+            </Link>
+          )}
+        </div>
+        {tiles.length === 0 ? (
+          <p className="kmuted">You&apos;ve mastered everything available right now. Legendary! Ask a parent what&apos;s next.</p>
+        ) : (
+          <div className="tile-grid">
+            {tiles.map((t) => {
+              const body = (
+                <>
+                  <span className="tile-top">
+                    <span className="tile-icon" aria-hidden>
+                      {t.icon}
+                    </span>
+                    <span className="tile-eyebrow">{t.eyebrow}</span>
+                  </span>
+                  <span className="tile-title">{t.title}</span>
+                  <span className="tile-sub">{t.sub}</span>
+                  {t.pct !== undefined && (
+                    <span className="tile-bar" aria-hidden>
+                      <span style={{ width: `${t.pct}%` }} />
+                    </span>
+                  )}
+                  <span className="tile-cta">
+                    {t.cta}
+                    {t.href && !t.done ? " ▶" : ""}
+                  </span>
+                </>
+              );
+              const style = { ["--t-hue" as string]: t.hue };
+              return t.href ? (
+                <Link key={t.key} href={t.href} className={`tile ${t.done ? "done" : ""}`} style={style}>
+                  {body}
+                </Link>
+              ) : (
+                <div key={t.key} className={`tile ${t.done ? "done" : "off"}`} style={style}>
+                  {body}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      <HomeTabs tabs={tabs} />
     </main>
   );
 }

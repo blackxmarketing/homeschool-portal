@@ -137,7 +137,7 @@
 /* ---------------- The teacher stage ---------------- */
 .stage {
   display: grid;
-  grid-template-columns: 170px 1fr;
+  grid-template-columns: 210px 1fr;
   gap: 18px;
   align-items: start;
   padding: 18px;
@@ -151,7 +151,7 @@
   gap: 6px;
   color: var(--k-ink);
 }
-.stage-avatar { width: 150px; height: 150px; border-radius: 50%; background: #fff; box-shadow: 0 10px 30px rgba(12, 26, 75, .25); overflow: hidden; }
+.stage-avatar { width: 190px; height: 190px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 5px #fff, 0 12px 32px rgba(12, 26, 75, .28); overflow: hidden; }
 .stage-avatar svg { width: 100%; height: 100%; display: block; }
 .stage-name { font-family: var(--font-display), Georgia, serif; font-weight: 700; font-size: 1.05rem; }
 .stage-title-tag { font-size: .7rem; text-transform: uppercase; letter-spacing: .12em; color: var(--k-muted); text-align: center; }
@@ -298,4 +298,108 @@ button.video-card:hover { border-color: var(--k-accent); }
   .sb-caption { font-size: .82rem; padding: 18px 12px 8px; }
   .sb-arrow { top: 38%; width: 30px; height: 30px; font-size: 1.2rem; }
   .sb-credit { font-size: .56rem; max-width: 60%; }
+}
+
+/* ---------------- Kid home: one screen, big colored buttons ---------------- */
+.home { display: flex; flex-direction: column; gap: 14px; padding-top: 16px; max-width: 1200px; }
+.home-head { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 14px 18px; }
+.home-head .hero-avatar { width: 64px; height: 64px; font-size: 2.1rem; }
+.home-who h1 { font-size: 1.7rem; margin: 0; line-height: 1.1; }
+.home-who .rank { font-size: .85rem; margin: 2px 0 6px; }
+.home-who .xpbar { height: 8px; max-width: 320px; }
+.home-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 999px; background: #fff; border: 1px solid var(--k-card-line); font-weight: 800; font-size: .85rem; white-space: nowrap; box-shadow: 0 3px 10px rgba(18, 36, 110, .05); }
+.home-nav { display: flex; align-items: center; gap: 8px; }
+.kbtn.small-btn { padding: 8px 14px; font-size: .85rem; }
+
+.home-banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-radius: 16px; font-weight: 600; }
+.home-banner.warn { background: #fff6e6; border: 1px solid #f7d49a; color: var(--k-warn-ink); }
+.home-banner.good { background: #ecf9f0; border: 1px solid #a8e2bb; color: var(--k-good-ink); }
+
+.home-rings { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 14px; padding: 10px 14px; border-radius: 20px; background: #fff; border: 1px solid var(--k-card-line); }
+.home-rings-label { display: flex; flex-direction: column; gap: 2px; font-family: var(--font-display), Georgia, serif; }
+.home-rings .rings { grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; }
+.home-rings .ring { padding: 6px 4px; }
+.home-rings .ring svg { width: 52px; height: 52px; }
+.home-rings .ring-label { font-size: .78rem; }
+.home-rings .ring-sub { font-size: .68rem; }
+
+.home-section-title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.home-section-title h2 { margin: 0; font-size: 1.3rem; }
+
+.tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(178px, 1fr)); gap: 12px; }
+.tile {
+  --t-bg1: hsl(var(--t-hue) 88% 56%);
+  --t-bg2: hsl(calc(var(--t-hue) + 28) 90% 48%);
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; gap: 4px;
+  min-height: 140px; padding: 14px 14px 12px;
+  border-radius: 22px; text-decoration: none; color: #fff !important;
+  background: linear-gradient(145deg, var(--t-bg1), var(--t-bg2));
+  box-shadow: 0 8px 0 hsl(var(--t-hue) 70% 36%), 0 14px 24px hsl(var(--t-hue) 80% 40% / .28);
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s;
+  isolation: isolate;
+}
+.tile::after { content: ""; position: absolute; right: -30px; top: -30px; width: 110px; height: 110px; border-radius: 50%; background: rgba(255, 255, 255, .16); z-index: -1; }
+a.tile:hover { transform: translateY(-3px) rotate(-.4deg); filter: saturate(1.1) brightness(1.05); }
+a.tile:active { transform: translateY(6px); box-shadow: 0 2px 0 hsl(var(--t-hue) 70% 36%), 0 6px 12px hsl(var(--t-hue) 80% 40% / .25); }
+a.tile:focus-visible { outline: 4px solid #ffe58f; outline-offset: 3px; }
+.tile-top { display: flex; align-items: center; gap: 8px; }
+.tile-icon { font-size: 1.7rem; line-height: 1; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .2)); }
+.tile-eyebrow { font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; opacity: .9; }
+.tile-title { font-family: var(--font-display), Georgia, serif; font-weight: 700; font-size: 1.08rem; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tile-sub { font-size: .78rem; opacity: .92; }
+.tile-bar { height: 6px; border-radius: 999px; background: rgba(255, 255, 255, .3); overflow: hidden; margin-top: 2px; }
+.tile-bar span { display: block; height: 100%; background: #fff; border-radius: 999px; }
+.tile-cta { margin-top: auto; align-self: flex-start; padding: 5px 12px; border-radius: 999px; background: rgba(255, 255, 255, .95); color: hsl(var(--t-hue) 70% 32%); font-weight: 900; font-size: .82rem; }
+.tile.done { filter: saturate(.55); opacity: .82; }
+.tile.off { opacity: .7; cursor: default; }
+
+.home-tab-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.home-tab { font: inherit; font-weight: 800; font-size: .9rem; display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 999px; border: 2px solid var(--k-card-line); background: #fff; color: var(--k-ink); cursor: pointer; transition: transform .1s; }
+.home-tab:hover { border-color: var(--k-accent); color: var(--k-accent); }
+.home-tab:active { transform: scale(.96); }
+.home-tab.on { background: var(--k-accent); border-color: var(--k-accent); color: #fff; }
+.home-tab-count { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: #ef4444; color: #fff; font-size: .72rem; display: inline-grid; place-items: center; }
+.home-tab.on .home-tab-count { background: #fff; color: var(--k-accent); }
+.home-tab-panel { margin-top: 10px; }
+
+@media (max-width: 900px) {
+  .home-head { grid-template-columns: auto 1fr auto; }
+  .home-chips { grid-column: 1 / -1; order: 3; }
+}
+@media (max-width: 640px) {
+  .home-head { grid-template-columns: auto 1fr; }
+  .home-nav { grid-column: 1 / -1; order: 4; }
+  .home-rings { grid-template-columns: 1fr; }
+  .tile-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .tile { min-height: 132px; padding: 12px; }
+  .tile-title { font-size: .98rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  a.tile:hover, a.tile:active { transform: none; }
+}
+
+/* Photo-real teachers */
+.teacher-face { position: relative; border-radius: 50%; overflow: hidden; background: #dfe6ff; }
+.teacher-face img, .teacher-face video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
+.teacher-face .tf-talk { opacity: 0; transition: opacity .25s; }
+.teacher-face.talking .tf-talk { opacity: 1; }
+.teacher-face.talking:not(:has(video)) img { animation: tfspeak 1.6s ease-in-out infinite; }
+@keyframes tfspeak { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03) translateY(-1px); } }
+.coach-face .teacher-face { box-shadow: none; }
+.coach-face .teacher-face.talking { box-shadow: 0 0 0 3px var(--k-accent); }
+@media (prefers-reduced-motion: reduce) { .teacher-face.talking img { animation: none; } }
+.stage-avatar .teacher-face { width: 100% !important; height: 100% !important; }
+@media (max-width: 640px) {
+  .home { gap: 10px; padding-top: 10px; }
+  .home-head .hero-avatar { width: 52px; height: 52px; font-size: 1.7rem; }
+  .home-who h1 { font-size: 1.4rem; }
+  .home-chips { gap: 6px; }
+  .chip { padding: 4px 9px; font-size: .78rem; }
+  .home-rings { padding: 8px 10px; gap: 6px; }
+  .home-rings-label { flex-direction: row; justify-content: space-between; }
+  .home-rings .rings { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 2px; }
+  .home-rings .ring { flex: 0 0 82px; scroll-snap-align: start; }
+  .home-rings .ring svg { width: 44px; height: 44px; }
 }

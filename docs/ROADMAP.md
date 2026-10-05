@@ -28,6 +28,20 @@ and civics. Each phase can be switched on or off in `src/content/features.ts`.
 - Struggle detector (drops back to prerequisites) and math-fact speed drills
 - MAP test score tracking (percentile and growth, three times a year)
 
+## ✅ Phase 3f — Lifelike teachers and a one-screen home (built)
+- Every teacher is a photo-real (AI-generated, original) person in
+  `public/teachers/<id>.jpg`, with short looping clips (<id>-talk.mp4 while
+  reading aloud, <id>-idle.mp4 while listening). Set `photo`/`clips` in
+  `src/content/avatars.ts`; teachers without a photo use the drawn character.
+- Male teachers read in a male voice and female teachers in a female voice
+  (`voice` in avatars.ts). The browser's most natural voice of that kind is
+  used (Microsoft Edge has the most human-sounding ones); if a computer has
+  only one kind, the pitch is shifted.
+- The kid home page fits on one screen: a compact header, the 2-hour rings,
+  and "Start here" as big, differently colored buttons (math skills, each
+  course's next lesson, fact drill). Missions, path, fact speed and badges
+  open as tabs.
+
 ## ✅ Phase 3e — Picture slides and videos (built)
 - The teacher's board has a screen. As the teacher reads, slides change at
   the words they go with: real photos and paintings (from Wikimedia Commons,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import TeacherAvatar from "./TeacherAvatar";
+import TeacherFace from "./TeacherFace";
 import { StoryBoard, VideoCard } from "./StoryBoard";
 import type { PublicShow } from "@/lib/storyboard";
 import { avatarFor, type AvatarLook } from "@/content/avatars";
@@ -17,6 +17,7 @@ import {
   useAutoRead,
   useSpeech,
   useStopOnUnmount,
+  useTeacherVoice,
   useVoicePrefs,
   useVoiceSettings,
 } from "./voice";
@@ -64,12 +65,13 @@ function Captions({ id, text }: { id: string; text: string }) {
 /** Listen / pause / replay, speed and auto-read. */
 function StageControls({ id, text }: { id: string; text: string }) {
   const s = useSpeech();
+  const kind = useTeacherVoice();
   const [p, setP] = useVoicePrefs();
   const active = s.id === id;
   return (
     <div className="stage-controls">
       {!active ? (
-        <button type="button" className="stage-btn on" onClick={() => speak(id, text)}>
+        <button type="button" className="stage-btn on" onClick={() => speak(id, text, { kind })}>
           ▶ Listen
         </button>
       ) : s.paused ? (
@@ -82,7 +84,7 @@ function StageControls({ id, text }: { id: string; text: string }) {
         </button>
       )}
       {active && (
-        <button type="button" className="stage-btn" onClick={() => speak(id, text)}>
+        <button type="button" className="stage-btn" onClick={() => speak(id, text, { kind })}>
           ↺ Start over
         </button>
       )}
@@ -98,7 +100,7 @@ function StageControls({ id, text }: { id: string; text: string }) {
         onChange={(e) => {
           const rate = Number(e.target.value);
           setP({ rate });
-          if (active) speak(id, text, rate);
+          if (active) speak(id, text, { rate, kind });
         }}
       >
         <option value={0.8}>🐢 Slower</option>
@@ -147,7 +149,7 @@ export function TeacherStage({
     <section className="stage" aria-label={`${teacher.name} is teaching`}>
       <div className="stage-teacher">
         <div className={`stage-avatar ${talking ? "talking" : ""}`}>
-          <TeacherAvatar look={lookOf(teacher)} talking={talking} />
+          <TeacherFace look={lookOf(teacher)} talking={talking} size={190} />
         </div>
         <div className="stage-name">{teacher.name}</div>
         {teacher.title && <div className="stage-title-tag">{teacher.title}</div>}
@@ -191,7 +193,7 @@ export function CoachLine({
   return (
     <div className={`coach-bubble ${tone}`}>
       <div className="coach-face">
-        <TeacherAvatar look={lookOf(teacher)} talking={talking} size={52} />
+        <TeacherFace look={lookOf(teacher)} talking={talking} size={52} still />
       </div>
       <div style={{ flex: 1 }}>
         <div className="coach-name">

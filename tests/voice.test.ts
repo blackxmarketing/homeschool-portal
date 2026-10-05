@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { appendSpoken, sentences } from "@/components/voice";
+import { appendSpoken, pickVoice, sentences, voiceKindOf } from "@/components/voice";
 import { probeSpeech } from "@/components/Probes";
 import { AVATARS, avatarFor } from "@/content/avatars";
 import { COURSES } from "@/content/courses";
@@ -51,5 +51,37 @@ describe("voice switches", () => {
     expect(f.kidMic).toBe(false);
     expect(sanitize("features", {}).readAloud).toBe(true);
     expect(sanitize("features", { kidMic: "yes" }).kidMic).toBe(true);
+  });
+});
+
+describe("male and female teacher voices", () => {
+  const v = (name: string, lang = "en-US") => ({ name, lang, localService: true, default: false, voiceURI: name }) as SpeechSynthesisVoice;
+  const edge = [v("Microsoft Ava Online (Natural) - English (United States)"), v("Microsoft Andrew Online (Natural) - English (United States)"), v("Microsoft Zira - English (United States)"), v("Microsoft David - English (United States)")];
+  const chrome = [v("Microsoft David - English (United States)"), v("Microsoft Zira - English (United States)"), v("Google US English"), v("Google UK English Male", "en-GB"), v("Google UK English Female", "en-GB")];
+
+  it("knows which voices are male and female", () => {
+    expect(voiceKindOf("Microsoft Andrew Online (Natural) - English (United States)")).toBe("male");
+    expect(voiceKindOf("Google UK English Female")).toBe("female");
+    expect(voiceKindOf("Google UK English Male")).toBe("male");
+    expect(voiceKindOf("Microsoft Zira - English (United States)")).toBe("female");
+    expect(voiceKindOf("Samantha")).toBe("female");
+    expect(voiceKindOf("Mystery voice")).toBeNull();
+  });
+
+  it("picks the most natural voice of the right kind", () => {
+    expect(pickVoice(edge, "male").voice?.name).toContain("Andrew");
+    expect(pickVoice(edge, "female").voice?.name).toContain("Ava");
+    expect(pickVoice(chrome, "male")).toMatchObject({ matched: true });
+    expect(voiceKindOf(pickVoice(chrome, "male").voice!.name)).toBe("male");
+    expect(voiceKindOf(pickVoice(chrome, "female").voice!.name)).toBe("female");
+  });
+
+  it("says when no voice of that kind exists (so the pitch can be shifted)", () => {
+    expect(pickVoice([v("Microsoft Zira - English (United States)")], "male")).toMatchObject({ matched: false });
+    expect(pickVoice([], "male").voice).toBeNull();
+  });
+
+  it("every teacher has a voice", () => {
+    for (const [id, look] of Object.entries(AVATARS)) expect(["male", "female"], id).toContain(look.voice);
   });
 });

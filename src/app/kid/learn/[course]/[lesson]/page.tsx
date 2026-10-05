@@ -8,6 +8,7 @@ import { interactiveDone, publicThink, publicWidget } from "@/lib/teaching";
 import { adaptationFor, lessonView, reviewItems, teachProgress } from "@/lib/store";
 import { publicProbe } from "@/lib/probes";
 import { avatarFor } from "@/content/avatars";
+import { TeacherVoice } from "@/components/voice";
 import { photosFor } from "@/lib/media";
 import { publicShow } from "@/lib/storyboard";
 import type { Beat, Video } from "@/content/courses/types";
@@ -69,6 +70,7 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
         </span>
       </div>
       <h1 style={{ marginBottom: 12 }}>{L.title}</h1>
+      <TeacherVoice kind={player.teacher.look.voice}>
       {L.teach?.length && state ? (
         <LessonFlow
           player={player}
@@ -101,6 +103,7 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
       ) : (
         <LessonPlayer {...player} />
       )}
+      </TeacherVoice>
     </main>
   );
 }

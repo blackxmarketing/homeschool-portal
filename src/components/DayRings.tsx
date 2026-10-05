@@ -9,7 +9,7 @@ export function DayRings({ blocks }: { blocks: BlockStatus[] }) {
     <div className="rings">
       {blocks.map(({ block, minutes, pct, state }) => {
         const done = state === "done" || state === "approved";
-        const href = block.kind === "portal" ? "/kid#training" : `/kid/block/${block.id}`;
+        const href = block.kind === "portal" ? "/kid" : `/kid/block/${block.id}`;
         return (
           <Link key={block.id} href={href} className={`ring ${done ? "done" : ""}`} style={{ ["--b-hue" as string]: block.hue }}>
             <svg width={76} height={76} viewBox="0 0 76 76" aria-hidden>

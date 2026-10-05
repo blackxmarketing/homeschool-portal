@@ -326,7 +326,7 @@ export function issueQuestion(kidId: number, mode: Mode, skillId?: string): Publ
     kind: q.kind,
     choices: q.choices,
     visual: q.visual,
-    teacher: (({ name, avatar, hue, greeting, inspiredBy }) => ({ name, avatar, hue, greeting, inspiredBy }))(teacherFor(skill.strand)),
+    teacher: (({ id, name, avatar, hue, greeting, inspiredBy }) => ({ id, name, avatar, hue, greeting, inspiredBy }))(teacherFor(skill.strand)),
     formatHelp: formatHelp(q.kind),
   };
 }

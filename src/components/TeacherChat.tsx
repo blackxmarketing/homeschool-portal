@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { appendSpoken, MicButton, SayButton } from "./voice";
+import { appendSpoken, MicButton, SayButton, TeacherVoice } from "./voice";
+import { avatarFor } from "@/content/avatars";
 
 export interface TeacherInfo {
+  /** The teacher id (e.g. "forge"), for their look and voice. */
+  id?: string;
   name: string;
   avatar: string;
   hue: number;
@@ -64,6 +67,7 @@ export function TeacherChat({ t, questionId, answered, onHelped }: { t: TeacherI
   }
 
   return (
+    <TeacherVoice kind={avatarFor(t.id ?? t.name).voice}>
     <div className="chat" style={{ ["--t-hue" as string]: t.hue }}>
       <TeacherBadge t={t} line={msgs.length ? undefined : answered ? "Want to dig into that one? Ask me anything about it." : t.greeting} />
       {!answered && (
@@ -95,6 +99,7 @@ export function TeacherChat({ t, questionId, answered, onHelped }: { t: TeacherI
         </button>
       </form>
     </div>
+    </TeacherVoice>
   );
 }
 
