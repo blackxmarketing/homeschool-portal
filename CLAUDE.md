@@ -67,6 +67,10 @@ Write scripts to a file with the Write tool and run them with node instead.
   (teacher + captions + controls), `TeacherFace.tsx` (photo teacher with
   looping clips), `voice.tsx` (read-aloud and mic), `StoryBoard.tsx` (slides),
   `Probes.tsx` (interactive questions).
+- The kid side is a pixel-art game, Lumina: design in `docs/GAME.md`; art and
+  maps in `src/lib/pixel/` (drawn in code), game data in `src/lib/gameState.ts`,
+  screens in `src/components/pixel/`, pages `/kid` (world), `/kid/land/[id]`,
+  `/kid/hero`.
 - `src/app/kid/` — kid pages (home is `page.tsx`), `src/app/parent/` — parent
   pages, `src/app/api/` — routes (`coach` runs lesson coaching).
 - Styles: `src/app/kid-theme.css` (current kid look; tokens on `.kidworld`),

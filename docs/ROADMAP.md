@@ -28,6 +28,19 @@ and civics. Each phase can be switched on or off in `src/content/features.ts`.
 - Struggle detector (drops back to prerequisites) and math-fact speed drills
 - MAP test score tracking (percentile and growth, three times a year)
 
+## ✅ Phase 5a — Lumina, the game world (built)
+See docs/GAME.md for the whole design.
+- The kid home is a pixel-art world: a HUD (hero, level, XP, coins, streak,
+  minutes), the world map, and the quest log (today's training and each
+  land's next quest, plus the daily rings). Side quests stay in the tabs.
+- Seven lands around the home village; each land turns from grey to color
+  as its lessons are mastered. Each land has its own map: a road with a
+  beacon per quest (lit when mastered) and a quest card with objectives.
+- Heroes: kids design a pixel Lightkeeper (skin, hair, outfit, hat, pet) on
+  first visit; it walks the map. Coins come with XP (1 per 5 XP).
+- Grade bands: 4-5 brighter and bigger, 6-8 classic, 9-12 darker and cleaner.
+- All art is drawn in code (`src/lib/pixel/`).
+
 ## ✅ Phase 4a — The tutor (Synthesis-style lessons) (built)
 - Lessons run as a one-on-one conversation on one screen: the teacher's
   voice with live captions in a bar on top, a big hands-on workspace below.

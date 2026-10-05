@@ -476,8 +476,9 @@ export function submitAnswer(kidId: number, questionId: string, input: string): 
   })();
 }
 
+/** XP for learning; coins come with it (1 coin per 5 XP, at least 1) for the game's shop. */
 function addXp(kidId: number, xp: number): void {
-  if (xp) getDb().prepare("UPDATE kids SET xp = xp + ? WHERE id = ?").run(xp, kidId);
+  if (xp) getDb().prepare("UPDATE kids SET xp = xp + ?, coins = coins + ? WHERE id = ?").run(xp, xp > 0 ? Math.max(1, Math.round(xp / 5)) : 0, kidId);
 }
 
 /** Marks placed skills as known. Reviews are spread out so they don't all land on one day. */

@@ -10,6 +10,7 @@ import { publicProbe } from "@/lib/probes";
 import { avatarFor } from "@/content/avatars";
 import { TeacherVoice } from "@/components/voice";
 import { photosFor } from "@/lib/media";
+import { LANDS } from "@/lib/pixel/world";
 import { publicShow } from "@/lib/storyboard";
 import type { Beat, Video } from "@/content/courses/types";
 
@@ -44,6 +45,8 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
   const seed = `${kid.id}:${L.id}`;
   // Slides: real photos are looked up (and cached) on the server.
   const f = features();
+  // Lessons are quests in a land of the game world; "back" goes to that land.
+  const landFor = LANDS.find((l) => l.courses.includes(v.course.id));
   const photos = f.lessonSlides
     ? await photosFor([...(L.hook?.show ?? []), ...(L.teach ?? []).flatMap((s) => s.show ?? [])].map((b) => b.photo ?? "").filter(Boolean))
     : {};
@@ -62,8 +65,8 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
   return (
     <main className={`wrap ${f.tutorMode && L.teach?.length ? "lesson-tutor" : ""}`} style={{ maxWidth: f.tutorMode && L.teach?.length ? 1240 : 860 }}>
       <div className="topbar">
-        <Link href={`/kid/learn/${course}`} className="backlink">
-          ← {v.course.icon} {v.course.title}
+        <Link href={landFor ? `/kid/land/${landFor.id}` : `/kid/learn/${course}`} className="backlink">
+          ← {landFor ? landFor.name : `${v.course.icon} ${v.course.title}`}
         </Link>
         <span className="kmuted small">
           Lesson {v.index + 1} of {v.course.lessons.length}

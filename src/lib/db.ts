@@ -244,6 +244,9 @@ const ADDED_COLUMNS: { table: string; column: string; ddl: string }[] = [
   { table: "issued_questions", column: "correct", ddl: "ALTER TABLE issued_questions ADD COLUMN correct INTEGER" },
   // Teaching-model progress and struggle tracking (JSON TeachState, see lib/teaching.ts).
   { table: "lesson_progress", column: "support", ddl: "ALTER TABLE lesson_progress ADD COLUMN support TEXT" },
+  // The game (docs/GAME.md): each kid's pixel hero (JSON) and coins.
+  { table: "kids", column: "hero", ddl: "ALTER TABLE kids ADD COLUMN hero TEXT" },
+  { table: "kids", column: "coins", ddl: "ALTER TABLE kids ADD COLUMN coins INTEGER NOT NULL DEFAULT 0" },
 ];
 
 function migrate(conn: Database.Database): void {

@@ -2,6 +2,11 @@ import Link from "next/link";
 import { logoutAction } from "../actions";
 import MissionButton from "@/components/MissionButton";
 import HomeTabs from "@/components/HomeTabs";
+import { redirect } from "next/navigation";
+import WorldScreen from "@/components/pixel/WorldScreen";
+import { HeroSprite } from "@/components/pixel/PixelArt";
+import { coinsOf, heroOf, worldProgress } from "@/lib/gameState";
+import { bandFor } from "@/lib/pixel/world";
 import { DayRings, GradeTower } from "@/components/DayRings";
 import { getSkill } from "@/lib/curriculum/skills";
 import { requireKid } from "@/lib/auth";
@@ -31,6 +36,11 @@ export const dynamic = "force-dynamic";
 
 export default async function KidHome({ searchParams }: { searchParams: Promise<{ more?: string }> }) {
   const { kid } = await requireKid();
+  const hero = heroOf(kid.id);
+  if (!hero) redirect("/kid/hero?first=1");
+  const band = bandFor(kid.grade);
+  const coins = coinsOf(kid.id);
+  const progress = worldProgress(kid.id);
   if ((await searchParams).more) extendPlan(kid.id);
 
   const FEATURES = features();
@@ -250,38 +260,29 @@ export default async function KidHome({ searchParams }: { searchParams: Promise<
   ];
 
   return (
-    <main className="wrap home">
-      <header className="home-head">
-        <div className="hero-avatar">{kid.avatar}</div>
-        <div className="home-who">
-          <h1>Hi, {kid.name}!</h1>
-          <div className="rank">
-            {lvl.rank.icon} Level {lvl.level} · {lvl.rank.title} · <span className="kmuted">{lvl.needed - lvl.into} XP to level {lvl.level + 1}</span>
+    <main className={`wrap home game-page band-${band}`}>
+      <header className="hud">
+        <Link href="/kid/hero" className="hud-hero" title="Change your hero">
+          <HeroSprite hero={hero} scale={3} bounce={false} />
+        </Link>
+        <div className="hud-who">
+          <h1 className="pixel-title">{kid.name}</h1>
+          <div className="hud-level">
+            Lv {lvl.level} · {lvl.rank.title}
           </div>
-          <div className="xpbar" aria-label={`${kid.xp} XP`}>
+          <div className="xpbar" aria-label={`${kid.xp} XP, ${lvl.needed - lvl.into} to level ${lvl.level + 1}`}>
             <span style={{ width: `${lvl.pct}%` }} />
           </div>
         </div>
-        <div className="home-chips">
-          <span className="chip" title="Day streak">
-            🔥 {days} day{days === 1 ? "" : "s"}
-          </span>
+        <div className="hud-chips">
+          <span className="chip coin" title="Coins">🪙 {coins}</span>
+          <span className="chip" title="Day streak">🔥 {days}</span>
           <span className="chip" title="Minutes toward today's goal">
-            ⏱️ {cap.minutes}/{kid.daily_goal_minutes} min
+            ⏱️ {cap.minutes}/{kid.daily_goal_minutes}
           </span>
-          <span className="chip" title="Screen minutes left today">
-            🖥️ {Math.max(0, cap.cap - cap.minutes)} left
-          </span>
+          <span className="chip" title="Screen minutes left today">🖥️ {Math.max(0, cap.cap - cap.minutes)} left</span>
         </div>
         <nav className="home-nav">
-          <Link href="/kid/map" className="kbtn ghost small-btn">
-            🗺️ Map
-          </Link>
-          {FEATURES.courses && (
-            <Link href="/kid/learn" className="kbtn ghost small-btn">
-              📚 Academy
-            </Link>
-          )}
           <form action={logoutAction}>
             <button className="linkbtn">Log out</button>
           </form>
@@ -302,67 +303,65 @@ export default async function KidHome({ searchParams }: { searchParams: Promise<
         </div>
       )}
 
-      {FEATURES.twoHourDay && (
-        <section className="home-rings" aria-label="Today's 2 hours">
-          <div className="home-rings-label">
-            <strong>Today&apos;s 2 hours</strong>
-            <span className="kmuted small">
-              {dayTotal.done}/{dayTotal.minutes} min
-            </span>
-          </div>
-          <DayRings blocks={blocks} />
+      <div className="world-layout">
+        <section className="world-main" aria-label="World map">
+          <WorldScreen band={band} progress={progress} hero={hero} />
         </section>
-      )}
 
-      <section aria-label="Start here">
-        <div className="home-section-title">
-          <h2>Start here</h2>
-          {allDone && !cap.reached && (
-            <Link href="/kid?more=1" className="linkbtn small">
-              Training done! 🎉 Want more?
-            </Link>
+        <aside className="quest-log" aria-label="Quest log">
+          <div className="quest-log-head">
+            <h2 className="pixel-title small">Quest log</h2>
+            {allDone && !cap.reached && (
+              <Link href="/kid?more=1" className="linkbtn small">
+                More training?
+              </Link>
+            )}
+          </div>
+          {FEATURES.twoHourDay && (
+            <div className="daily">
+              <div className="daily-label">
+                Daily quests <span className="kmuted small">{dayTotal.done}/{dayTotal.minutes} min</span>
+              </div>
+              <DayRings blocks={blocks} />
+            </div>
           )}
-        </div>
-        {tiles.length === 0 ? (
-          <p className="kmuted">You&apos;ve mastered everything available right now. Legendary! Ask a parent what&apos;s next.</p>
-        ) : (
-          <div className="tile-grid">
-            {tiles.map((t) => {
-              const body = (
-                <>
-                  <span className="tile-top">
-                    <span className="tile-icon" aria-hidden>
+          {tiles.length === 0 ? (
+            <p className="kmuted">Every quest is done for now. Legendary! Ask a parent what&apos;s next.</p>
+          ) : (
+            <div className="quest-list-game">
+              {tiles.map((t) => {
+                const body = (
+                  <>
+                    <span className="ql-icon" aria-hidden>
                       {t.icon}
                     </span>
-                    <span className="tile-eyebrow">{t.eyebrow}</span>
-                  </span>
-                  <span className="tile-title">{t.title}</span>
-                  <span className="tile-sub">{t.sub}</span>
-                  {t.pct !== undefined && (
-                    <span className="tile-bar" aria-hidden>
-                      <span style={{ width: `${t.pct}%` }} />
+                    <span className="ql-text">
+                      <span className="ql-eyebrow">{t.eyebrow}</span>
+                      <span className="ql-title">{t.title}</span>
+                      {t.pct !== undefined && (
+                        <span className="tile-bar" aria-hidden>
+                          <span style={{ width: `${t.pct}%` }} />
+                        </span>
+                      )}
                     </span>
-                  )}
-                  <span className="tile-cta">
-                    {t.cta}
-                    {t.href && !t.done ? " ▶" : ""}
-                  </span>
-                </>
-              );
-              const style = { ["--t-hue" as string]: t.hue };
-              return t.href ? (
-                <Link key={t.key} href={t.href} className={`tile ${t.done ? "done" : ""}`} style={style}>
-                  {body}
-                </Link>
-              ) : (
-                <div key={t.key} className={`tile ${t.done ? "done" : "off"}`} style={style}>
-                  {body}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
+                    <span className="ql-cta">{t.done ? "✓" : "▶"}</span>
+                  </>
+                );
+                const style = { ["--t-hue" as string]: t.hue };
+                return t.href ? (
+                  <Link key={t.key} href={t.href} className={`ql-item ${t.done ? "done" : ""}`} style={style}>
+                    {body}
+                  </Link>
+                ) : (
+                  <div key={t.key} className={`ql-item ${t.done ? "done" : "off"}`} style={style}>
+                    {body}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </aside>
+      </div>
 
       <HomeTabs tabs={tabs} />
     </main>
