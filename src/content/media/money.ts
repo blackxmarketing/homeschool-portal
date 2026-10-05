@@ -245,4 +245,196 @@ export const moneyMedia: CourseMedia = {
       },
     ],
   },
+  "money.budgeting": {
+    hook: {
+      show: [
+        { emoji: "👩‍💼👨‍💼💵", caption: "Two friends, two first jobs, the same $2,800 paycheck." },
+        { at: "$4,800 saved", big: "$4,800 saved", caption: "Friend one: a full year of steady saving." },
+        { at: "no idea where the money went", emoji: "💸❓💳", caption: "Friend two: money gone, plus a card bill." },
+        { at: "Same paycheck", emoji: "🤔📋", caption: "Same pay. One had a plan. Let's build one!" },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { big: "Money in − Money out", caption: "Every budget starts with two lists." },
+          { at: "take-home pay", emoji: "🧾💵", caption: "Take-home pay is what's left on a paycheck after taxes." },
+          { at: "babysitting or mowing money", emoji: "🧸👶🌱", caption: "Your income might be allowance or money from jobs." },
+          { at: "every dollar should have a job", emoji: "💵👷", caption: "Give every dollar a job before the month starts." },
+          { at: "zero-based budget", big: "Income − Plan = $0", caption: "Zero-based: no dollar is left without a plan." },
+        ],
+      },
+      {
+        show: [
+          { big: "Fixed vs Flexible", caption: "Two kinds of expenses that behave very differently." },
+          { at: "Rent, a phone plan", emoji: "🏢🔑", caption: "Rent is the classic fixed expense: same bill every month." },
+          { at: "Flexible expenses, sometimes called", emoji: "🛒⛽🍔", caption: "Groceries, gas and eating out change month to month." },
+          { at: "cut your rent in half", emoji: "🏠✂️❌", caption: "You can't shrink your rent by Friday..." },
+          { at: "cook at home", emoji: "🍳🏡✅", caption: "...but you can cook at home this week." },
+        ],
+      },
+      {
+        show: [
+          { big: "5 steps", caption: "Income, fixed bills, subtract, save, then flexible." },
+          { at: "Grace takes home $2,800", emoji: "🧮📝", caption: "Grab a pencil and follow Grace's numbers." },
+          { at: "2,800 - 1,330 = $1,470", big: "$2,800 − $1,330 = $1,470", caption: "Income minus fixed bills shows what's left." },
+          { at: "She saves $400 first", emoji: "🐷➡️💵", caption: "Savings come first, before any fun money." },
+          { at: "Try the sliders", emoji: "🎚️📊", caption: "Move the sliders and watch every slice change." },
+        ],
+      },
+      {
+        show: [
+          { emoji: "📋🆚🧾", caption: "Plan vs. actual: the end-of-month check-up." },
+          { at: "spent $340", big: "$340 − $250 = $90 over", caption: "Grace's fun line ran $90 over the plan." },
+          { at: "spent only $120", big: "$40 under", caption: "But gas came in $40 under. Good news!" },
+          { at: "small leak will sink", photo: "USS Constitution", caption: "A small leak can sink a great ship, Franklin warned." },
+        ],
+      },
+    ],
+  },
+
+  "money.smart-shopping": {
+    hook: {
+      show: [
+        { photo: "Breakfast cereal", caption: "A breakfast favorite, and a great math problem." },
+        { at: "costs more", big: "$3.60 vs $5.00", caption: "The big box costs more. But is it the worse deal?" },
+        { at: "eye level", emoji: "👀🥣🎁", caption: "Why is the prize cereal right at kid height? Hmm..." },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { big: "Price ÷ Units", caption: "Unit price: the cost of one ounce, one roll or one egg." },
+          { at: "3.60 / 12 = $0.30", big: "$0.30 an ounce", caption: "Small box: 30 cents for every ounce." },
+          { at: "5.00 / 20 = $0.25", big: "$0.25 an ounce", caption: "Big box: 25 cents an ounce. Cheaper per bite!" },
+          { at: "goes stale", emoji: "🥣🗑️", caption: "But stale cereal in the trash is no bargain." },
+          { at: "shelf tags", emoji: "🏷️🔍", caption: "Shelf tags often print the unit price in small type." },
+        ],
+      },
+      {
+        show: [
+          { photo: "Supermarket", caption: "SALE signs everywhere! Time for some quick math." },
+          { at: "0.25 x 40 = $10", big: "25% of $40 = $10", caption: "Turn the percent into a decimal and multiply." },
+          { at: "you pay 75 percent", big: "75% × $40 = $30", caption: "Shortcut: multiply by the part you DO pay." },
+          { at: "stacked discounts", big: "20% + 10% ≠ 30%", caption: "The second discount comes off the lower price." },
+          { at: "would you buy it at all", emoji: "🤔🛍️", caption: "Biggest question: would you buy it without the sale?" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "🧠🛒", caption: "Stores study how shoppers decide." },
+          { at: "Anchoring", big: "Was $80 → Now $50", caption: "Anchoring: a high 'was' price makes $50 feel cheap." },
+          { at: "Charm prices", photo: "Price tag", caption: "This tag says 49.99. Charm price! It is really 50." },
+          { at: "Urgency", emoji: "⏰🔥", caption: "'Today only!' rushes you before you can think." },
+          { at: "Placement", photo: "Shopping cart", caption: "Treats wait at checkout. Prize cereal sits at kid height." },
+        ],
+      },
+      {
+        show: [
+          { big: "Opportunity cost", caption: "The next-best thing you give up when you choose." },
+          { at: "$60 on a video game", emoji: "🎮🆚⛑️", caption: "A $60 game means no $60 bike helmet." },
+          { at: "practicing piano", photo: "Piano", caption: "Time has an opportunity cost too." },
+          { at: "What else could this money do?", emoji: "💭💵", caption: "Ask: what else could this money do?" },
+          { at: "24-hour rule", big: "Wait 24 hours", caption: "Still want it tomorrow? Then decide with a clear head." },
+        ],
+      },
+    ],
+  },
+
+  "money.giving": {
+    hook: {
+      show: [
+        { photo: "Benjamin Franklin", caption: "Ben Franklin: printer, inventor, saver, and giver." },
+        { at: "Boston and Philadelphia", emoji: "🏙️🏙️💷", caption: "1,000 pounds for each city, loaned to young tradesmen." },
+        { at: "200 years", big: "200 years", caption: "A gift built to keep growing long after he was gone." },
+        { at: "Why would", emoji: "🤔🎁", caption: "Why would a careful saver give like that?" },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { emoji: "🧰🏠", caption: "Money is a tool. Tools can build." },
+          { at: "Aristotle", photo: "Aristotle", caption: "Aristotle counted generosity among the virtues." },
+          { at: "the right amount, to the right people", big: "Right amount · Right people · Right time", caption: "Generosity is a balance you practice." },
+          { at: "not giving away everything carelessly", emoji: "🧂⚖️", caption: "Not too little, not too much: just right." },
+          { at: "what every dollar is for", emoji: "💵🎯", caption: "Givers see their money more clearly." },
+        ],
+      },
+      {
+        show: [
+          { big: "Tithe = 1/10", caption: "An old word for a tenth." },
+          { at: "Abraham gives a tenth", emoji: "📜✋", caption: "In Genesis, Abraham gives a tenth to Melchizedek." },
+          { at: "a tenth of each harvest", photo: "Wheat", caption: "Ancient Israel set aside a tenth of each harvest." },
+          { at: "0.10 x 50 = $5", big: "10% of $50 = $5", caption: "Income times the percent. That's it!" },
+          { at: "right off the top", emoji: "🫙🎁🐷", caption: "Fill the give jar first, just like savings." },
+        ],
+      },
+      {
+        show: [
+          { emoji: "❤️🧠", caption: "Wanting to help is good. Helping wisely is better." },
+          { at: "what do they actually do?", photo: "Food bank", caption: "A food pantry hands out food. You can see the work." },
+          { at: "how much of the money reaches the work?", emoji: "💵➡️🍞", caption: "Ask where the donations actually go." },
+          { at: "does it work?", emoji: "📊✅", caption: "Look for real results you can count." },
+          { at: "pressure you to give right now", emoji: "📞⚠️", caption: "Pressure to give right now? Stop and check first." },
+        ],
+      },
+      {
+        show: [
+          { big: "Time · Talent · Treasure", caption: "Three kinds of gifts. Everyone has some." },
+          { at: "volunteering at a food bank", emoji: "🙋🥫", caption: "Time: showing up to help." },
+          { at: "tutoring a younger kid", emoji: "📚🧒", caption: "Talent: using a skill you have for others." },
+          { at: "your give jar", emoji: "🫙🧥", caption: "Treasure: money or things, like outgrown coats." },
+          { at: "start a library", photo: "Pennsylvania Hospital", caption: "Franklin helped found Pennsylvania Hospital in Philadelphia." },
+        ],
+      },
+    ],
+  },
+
+  "money.taxes": {
+    hook: {
+      show: [
+        { emoji: "👕🏷️💵", caption: "A $20 shirt, and exactly $20 saved." },
+        { at: "$21.40", big: "$21.40", caption: "The register says more than the tag!" },
+        { at: "where is it going", emoji: "🤔🏛️", caption: "Where does the extra money go? Let's find out." },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { big: "Tax", caption: "Money people must pay to the government, by law." },
+          { at: "roads and bridges", photo: "Highway", caption: "Streets and highways are built and repaired with tax money." },
+          { at: "fire departments", emoji: "🚒🏫⚖️", caption: "Fire trucks, public schools, courts and more." },
+          { at: "lay and collect taxes", big: "Article I, Section 8", caption: "The Constitution gives Congress the power to tax." },
+          { at: "In 1773", photo: "Boston Tea Party", caption: "1773: colonists dumped tea in Boston Harbor in protest." },
+        ],
+      },
+      {
+        show: [
+          { emoji: "🧾🛍️", caption: "Sales tax shows up on your receipt." },
+          { at: "set by states", emoji: "🗺️📍", caption: "The rate depends on your state and city." },
+          { at: "0.07 x 20 = $1.40", big: "7% × $20 = $1.40", caption: "Turn the rate into a decimal and multiply." },
+          { at: "20 + 1.40 = $21.40", big: "$20 + $1.40 = $21.40", caption: "Add the tax to the price for the total." },
+          { at: "multiply by 1.07", big: "$20 × 1.07 = $21.40", caption: "Shortcut: find the total in one step." },
+        ],
+      },
+      {
+        show: [
+          { big: "1913", caption: "The Sixteenth Amendment allowed a federal income tax." },
+          { at: "employer withholds", emoji: "💵✋", caption: "Your employer holds back tax from each paycheck." },
+          { at: "6.2 percent for Social Security", big: "6.2% + 1.45%", caption: "Social Security and Medicare payroll taxes." },
+          { at: "your gross pay", big: "Gross − Taxes = Net", caption: "Net pay is what actually lands in your account." },
+          { at: "April 15", photo: "Form 1040", caption: "Each spring, people file a tax return for the year." },
+        ],
+      },
+      {
+        show: [
+          { big: "Brackets", caption: "Slices of income taxed at different rates." },
+          { at: "made-up, simple example", emoji: "🧪📊", caption: "A pretend example to see how brackets work." },
+          { at: "first $10,000 is taxed at 10 percent", big: "First $10,000 → 10%", caption: "Every dollar above $10,000 → 20%." },
+          { at: "Total tax: $2,000", big: "$1,000 + $1,000 = $2,000", caption: "Each slice is taxed at its own rate." },
+          { at: "Only the dollars above the line", emoji: "🪣💧🪣", caption: "Only the spill-over gets the higher rate." },
+        ],
+      },
+    ],
+  },
 };

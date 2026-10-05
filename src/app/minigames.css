@@ -1,0 +1,59 @@
+/* Story mini-games (docs/GAME.md): side quests on each land. */
+
+.side-quests { margin-top: 16px; }
+.side-quests .pixel-title { margin-bottom: 8px; }
+.sq-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.sq-card { display: grid; grid-template-columns: 48px 1fr auto; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: #fff; border: 3px solid #1b1530; box-shadow: 0 4px 0 #1b1530; color: var(--k-ink) !important; text-decoration: none; transition: transform .1s; }
+.sq-card:hover { transform: translateY(-2px); }
+.sq-card:active { transform: translateY(3px); box-shadow: 0 1px 0 #1b1530; }
+.sq-icon { font-size: 2rem; text-align: center; }
+.sq-text { display: flex; flex-direction: column; gap: 2px; }
+.sq-stars { font-family: var(--font-pixel), monospace; font-size: .6rem; color: #b45309; }
+
+.level-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.level-card { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; padding: 16px; border-radius: 12px; background: #fff; border: 3px solid #1b1530; box-shadow: 0 4px 0 #1b1530; font: inherit; color: var(--k-ink); cursor: pointer; text-align: left; }
+.level-card:hover:not(:disabled) { transform: translateY(-2px); }
+.level-card.locked { opacity: .55; cursor: not-allowed; }
+.level-num { font-family: var(--font-pixel), monospace; font-size: .55rem; color: #6b3fd4; }
+.level-title { font-weight: 800; font-size: 1.05rem; }
+.level-stars { font-size: 1.3rem; }
+.level-stars .star, .mg-stars .star { color: #dee2e6; }
+.level-stars .star.lit, .mg-stars .star.lit { color: #f59e0b; }
+
+.game-host { display: flex; flex-direction: column; gap: 10px; }
+.mg { display: flex; flex-direction: column; gap: 12px; padding: 14px; border-radius: 14px; background: #fff; border: 3px solid #1b1530; box-shadow: 0 5px 0 #1b1530; }
+.mg-hud { display: flex; gap: 6px; flex-wrap: wrap; }
+.mg-goalbar { height: 10px; border: 2px solid #1b1530; border-radius: 4px; background: #e9ecf5; overflow: hidden; }
+.mg-goalbar span { display: block; height: 100%; background: linear-gradient(90deg, #f59e0b, #22c55e); transition: width .5s; }
+.forecast { display: flex; gap: 6px; flex-wrap: wrap; }
+.fc { display: flex; flex-direction: column; align-items: center; padding: 4px 8px; border-radius: 8px; border: 2px solid #d0d6e6; background: #f4f6fe; }
+.fc.now { border-color: #1b1530; background: #fff3bf; transform: translateY(-2px); }
+.fc.past { opacity: .45; }
+.fc-day { font-family: var(--font-pixel), monospace; font-size: .45rem; }
+.fc-icon { font-size: 1.3rem; }
+
+.mg-scene { position: relative; height: 150px; border-radius: 12px; border: 3px solid #1b1530; overflow: hidden; background: linear-gradient(180deg, #8fd0ff 0 62%, #f2cf7a 62%); }
+.stand { position: absolute; left: 6%; bottom: 10px; }
+.stand-sign { position: absolute; top: -26px; left: 50%; transform: translateX(-50%); padding: 3px 8px; border-radius: 6px; background: #fff; border: 2px solid #1b1530; font-weight: 900; font-size: .75rem; white-space: nowrap; }
+.customers { position: absolute; left: 26%; right: 12%; bottom: 10px; display: flex; flex-wrap: wrap-reverse; gap: 2px; align-items: flex-end; }
+.customer { animation: walkin .6s ease-out both; }
+@keyframes walkin { from { transform: translateX(160px); opacity: 0; } to { transform: none; opacity: 1; } }
+.customers .more { font-weight: 900; font-size: .85rem; align-self: center; }
+.weather-now { position: absolute; right: 12px; top: 8px; font-size: 2.2rem; }
+
+.day-report { padding: 10px 12px; border-radius: 10px; border: 2px solid; }
+.day-report.good { background: #ecf9f0; border-color: #a8e2bb; }
+.day-report.bad { background: #fff6e6; border-color: #f7d49a; }
+.math-line { font-family: ui-monospace, Consolas, monospace; font-size: .85rem; margin: 6px 0; }
+.mg-controls { display: flex; flex-direction: column; gap: 10px; }
+.mg-controls label { display: flex; flex-direction: column; gap: 4px; font-weight: 700; }
+.mg-controls input[type="range"] { width: 100%; accent-color: #2340ff; }
+.mg-result { text-align: center; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+.mg-stars { font-size: 2.4rem; }
+.day-log { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; font-size: .8rem; font-weight: 700; }
+.day-log span { padding: 2px 8px; border-radius: 6px; background: #f4f6fe; }
+
+.band-strategist .mg, .band-strategist .level-card, .band-strategist .sq-card { background: #151a2e; color: #e6e9f5 !important; border-color: #0b0e1a; box-shadow: 0 5px 0 #0b0e1a; }
+.band-strategist .fc { background: #232a45; border-color: #0b0e1a; }
+.band-strategist .day-log span { background: #232a45; }
+@media (prefers-reduced-motion: reduce) { .customer { animation: none; } }

@@ -5,6 +5,7 @@ import "./game.css";
 import "./teach.css";
 import "./kid-theme.css";
 import "./game-theme.css";
+import "./minigames.css";
 
 // Lexend was designed to reduce visual stress and improve reading speed.
 const kidFont = Lexend({ subsets: ["latin"], variable: "--font-kid", display: "swap" });

@@ -54,11 +54,11 @@ export interface LandDef {
 export const LANDS: LandDef[] = [
   { id: "village", name: "Home Village", courses: [], terrain: "grass", cx: 32, cy: 20, r: 6, landmark: "village", props: ["tree", "flowers", "bush"], hue: 140, blurb: "Your home base. Quests start here." },
   { id: "math", name: "Math Mountains", courses: ["math"], terrain: "snow", cx: 31, cy: 6, r: 8, landmark: "forge", props: ["mountain", "peak", "pine", "rock", "crystal"], hue: 210, blurb: "Seven worlds of numbers, from the Number Forge to the Data Lab." },
-  { id: "science", name: "Science Isles", courses: ["science"], terrain: "sand", cx: 54, cy: 13, r: 7, landmark: "lab", props: ["palm", "crystal", "rock", "bush"], hue: 190, blurb: "Experiments, forces, energy, cells and space." },
-  { id: "history", name: "History Kingdom", courses: ["history"], terrain: "meadow", cx: 10, cy: 12, r: 8, landmark: "castle", props: ["column", "tree", "flowers", "house"], hue: 265, blurb: "Ancient Greece and Rome, the founding of America, and the inventors who built the modern world." },
-  { id: "writing", name: "Wordsmith Woods", courses: ["writing"], terrain: "forest", cx: 12, cy: 30, r: 7, landmark: "booktower", props: ["pine", "tree", "bush", "flowers"], hue: 25, blurb: "Read closely, write great sentences, persuade, and tell stories." },
-  { id: "harbor", name: "Merchant Harbor", courses: ["money", "business"], terrain: "sand", cx: 52, cy: 31, r: 7, landmark: "harbor", props: ["stall", "tent", "palm", "house"], hue: 45, blurb: "Earn, save and invest. Spot problems, build a business, make a profit." },
-  { id: "summit", name: "Leaders' Summit", courses: ["leadership"], terrain: "stone", cx: 33, cy: 34, r: 5, landmark: "summit", props: ["peak", "rock", "pine"], hue: 0, blurb: "Courage, integrity, teamwork and speaking up." },
+  { id: "science", name: "Science Isles", courses: ["science", "science-45", "science-hs"], terrain: "sand", cx: 54, cy: 13, r: 7, landmark: "lab", props: ["palm", "crystal", "rock", "bush"], hue: 190, blurb: "Experiments, forces, energy, cells and space." },
+  { id: "history", name: "History Kingdom", courses: ["history", "history-45", "history-hs"], terrain: "meadow", cx: 10, cy: 12, r: 8, landmark: "castle", props: ["column", "tree", "flowers", "house"], hue: 265, blurb: "Ancient Greece and Rome, the founding of America, and the inventors who built the modern world." },
+  { id: "writing", name: "Wordsmith Woods", courses: ["writing", "writing-45", "writing-hs"], terrain: "forest", cx: 12, cy: 30, r: 7, landmark: "booktower", props: ["pine", "tree", "bush", "flowers"], hue: 25, blurb: "Read closely, write great sentences, persuade, and tell stories." },
+  { id: "harbor", name: "Merchant Harbor", courses: ["money", "business", "money-45", "business-45", "money-hs", "business-hs"], terrain: "sand", cx: 52, cy: 31, r: 7, landmark: "harbor", props: ["stall", "tent", "palm", "house"], hue: 45, blurb: "Earn, save and invest. Spot problems, build a business, make a profit." },
+  { id: "summit", name: "Leaders' Summit", courses: ["leadership", "leadership-45", "leadership-hs"], terrain: "stone", cx: 33, cy: 34, r: 5, landmark: "summit", props: ["peak", "rock", "pine"], hue: 0, blurb: "Courage, integrity, teamwork and speaking up." },
 ];
 
 export const landById = (id: string) => LANDS.find((l) => l.id === id);

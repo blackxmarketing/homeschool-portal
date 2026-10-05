@@ -6,6 +6,18 @@ import { writingMedia } from "./writing";
 import { moneyMedia } from "./money";
 import { entrepreneurshipMedia } from "./entrepreneurship";
 import { leadershipMedia } from "./leadership";
+import { science45Media } from "./science-45";
+import { scienceHsMedia } from "./science-hs";
+import { history45Media } from "./history-45";
+import { historyHsMedia } from "./history-hs";
+import { writing45Media } from "./writing-45";
+import { writingHsMedia } from "./writing-hs";
+import { money45Media } from "./money-45";
+import { moneyHsMedia } from "./money-hs";
+import { business45Media } from "./business-45";
+import { businessHsMedia } from "./business-hs";
+import { leadership45Media } from "./leadership-45";
+import { leadershipHsMedia } from "./leadership-hs";
 
 export const MEDIA: Record<string, CourseMedia> = {
   science: scienceMedia,
@@ -14,6 +26,18 @@ export const MEDIA: Record<string, CourseMedia> = {
   money: moneyMedia,
   business: entrepreneurshipMedia,
   leadership: leadershipMedia,
+  "science-45": science45Media,
+  "science-hs": scienceHsMedia,
+  "history-45": history45Media,
+  "history-hs": historyHsMedia,
+  "writing-45": writing45Media,
+  "writing-hs": writingHsMedia,
+  "money-45": money45Media,
+  "money-hs": moneyHsMedia,
+  "business-45": business45Media,
+  "business-hs": businessHsMedia,
+  "leadership-45": leadership45Media,
+  "leadership-hs": leadershipHsMedia,
 };
 
 /** Adds the slides and videos to a course's lessons. */

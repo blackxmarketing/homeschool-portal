@@ -2404,5 +2404,1690 @@ export const science: Course = {
         ],
       },
     },
+
+    // 7. Matter and chemical change
+    {
+      id: "science.matter",
+      title: "Matter and Change: Atoms, Molecules and Reactions",
+      minutes: 35,
+      stage: "grammar",
+      read: [
+        "Everything around you, from the air you breathe to the chair you sit on, is matter. Matter is anything that has mass and takes up space. All matter is made of atoms, particles so tiny that a single drop of water holds more than a billion billion of them. A substance made of only one kind of atom is called an element. Gold, oxygen, carbon and iron are elements. Scientists have discovered 118 elements and arranged them in a chart called the periodic table.",
+        "Atoms can join, or bond, to form molecules. A water molecule is two hydrogen atoms bonded to one oxygen atom, which is why chemists write it as H2O. When two or more different elements are bonded together, the result is a compound. A compound can be completely different from the elements that make it. Sodium is a soft metal that fizzes violently in water, and chlorine is a poisonous yellow-green gas, yet together they make ordinary table salt.",
+        "Matter can change in two main ways. In a physical change, a substance changes its size, shape or state, but it is still the same substance. Melting ice, chopping wood and dissolving sugar in tea are physical changes. In a chemical change, also called a chemical reaction, atoms rearrange to form new substances with new properties. Burning wood, rusting iron and baking a cake are chemical changes. Clues that a reaction has happened include bubbles of gas, a new color, a new smell, light or heat, or a solid forming in a liquid.",
+        "In the 1770s and 1780s, the French chemist Antoine Lavoisier weighed substances carefully before and after reactions in sealed containers. He found that the total mass stayed the same. This is the law of conservation of mass: in a chemical reaction, atoms are not created or destroyed, only rearranged. When a log burns down to a small pile of ash, the missing mass has not vanished. It has floated away as invisible gases, mostly carbon dioxide and water vapor.",
+      ].join("\n\n"),
+      keyIdeas: [
+        "All matter is made of atoms; an element has only one kind of atom.",
+        "Atoms bond into molecules, and different elements bonded together form compounds.",
+        "A physical change keeps the same substance; a chemical change makes new substances.",
+        "In a chemical reaction, atoms are rearranged, never created or destroyed, so mass is conserved.",
+      ],
+      hook: {
+        text: "A big log goes into a campfire, and a few hours later all that is left is a small pile of gray ash. Where did the rest of the log go? Did it simply disappear? About 250 years ago, a French chemist named Antoine Lavoisier set out to answer questions like this with a very careful balance, and what he found became one of the great laws of science.",
+      },
+      teach: [
+        {
+          title: "Atoms and Elements",
+          teach:
+            "Matter is anything that has mass and takes up space: rocks, water, air, even you. All matter is built from atoms, which are far too small to see even with an ordinary microscope. A single drop of water holds more than a billion billion of them. An element is a pure substance made of only one kind of atom. Gold is made only of gold atoms; oxygen is made only of oxygen atoms. Scientists have found 118 elements so far and arranged them in the periodic table, a chart that groups elements with similar properties. Each element has a one- or two-letter symbol. Some come from English names, like O for oxygen. Others come from Latin, like Fe for iron (ferrum) and Au for gold (aurum).",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Matter", back: "Anything that has mass and takes up space." },
+              { front: "Atom", back: "The tiny building block of all matter." },
+              { front: "Element", back: "A pure substance made of only one kind of atom, like gold or oxygen." },
+              { front: "Periodic table", back: "The chart of all 118 known elements, grouped by similar properties." },
+            ],
+          },
+          probe: {
+            type: "match",
+            prompt: "Match each element to its chemical symbol.",
+            pairs: [
+              { left: "Oxygen", right: "O" },
+              { left: "Carbon", right: "C" },
+              { left: "Hydrogen", right: "H" },
+              { left: "Iron", right: "Fe" },
+              { left: "Gold", right: "Au" },
+              { left: "Sodium", right: "Na" },
+            ],
+            hint: "Some symbols are the first letter of the English name. Others come from Latin names: ferrum (iron), aurum (gold) and natrium (sodium).",
+            mistakes: [
+              { match: "Gold matched to Fe", coach: "Fe comes from ferrum, the Latin word for iron. Gold's Latin name is aurum, so its symbol is Au." },
+              { match: "Sodium matched to Au", coach: "Au is gold. Sodium's symbol, Na, comes from its Latin name, natrium." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "Which of these is an element?",
+            choices: ["Water", "Table salt", "Gold", "Air"],
+            answer: 2,
+            why: "Gold is made of only one kind of atom: gold atoms.",
+            hints: [
+              "Water is made of hydrogen and oxygen atoms bonded together, so it contains two elements.",
+              "Table salt is sodium and chlorine bonded together, so it contains two elements.",
+              "",
+              "Air is a mixture of several gases, such as nitrogen, oxygen and carbon dioxide.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Elements are like the letters of the alphabet. There are only 26 letters, but they combine into every word in the dictionary. In the same way, about 118 elements combine to make all the millions of substances in the world.",
+            example:
+              "A pure gold ring contains only gold atoms, so gold is an element. A glass of water contains hydrogen and oxygen atoms joined together, so water is not an element; it is made from two elements.",
+            simpler: {
+              q: "An element is made of...",
+              choices: ["Only one kind of atom", "Two kinds of atoms", "Any mixture of things"],
+              answer: 0,
+              why: "An element is a pure substance with just one kind of atom.",
+              hints: [
+                "",
+                "Two kinds of atoms bonded together make a compound, not an element.",
+                "A mixture combines different substances. An element is pure: one kind of atom.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Molecules and Compounds",
+          teach:
+            "Atoms rarely stay alone. They bond, or hold together, to form molecules. A water molecule is two hydrogen atoms bonded to one oxygen atom, so its formula is H2O. The small number after a letter tells how many atoms of that element are in one molecule. Carbon dioxide, CO2, is one carbon atom and two oxygen atoms. When different elements bond, they form a compound, and a compound can behave nothing like its ingredients. Sodium is a soft metal that fizzes violently in water. Chlorine is a poisonous yellow-green gas. Bonded together, they make sodium chloride: the table salt you sprinkle on food. Some molecules have just one element, like the oxygen we breathe, O2. That makes it a molecule, but not a compound.",
+          visual: {
+            type: "sort",
+            prompt: "Sort each substance by what it is made of.",
+            buckets: ["Element (one kind of atom)", "Compound (two or more elements bonded)"],
+            items: [
+              { text: "Oxygen gas, O2", bucket: 0 },
+              { text: "Water, H2O", bucket: 1 },
+              { text: "Carbon dioxide, CO2", bucket: 1 },
+              { text: "Pure copper, Cu", bucket: 0 },
+              { text: "Table salt, NaCl", bucket: 1 },
+              { text: "Helium, He", bucket: 0 },
+            ],
+          },
+          probe: {
+            type: "number",
+            prompt: "Table sugar has the formula C12H22O11. How many atoms are in one molecule of sugar?",
+            answer: 45,
+            tolerance: 0,
+            unit: "atoms",
+            hint: "Add the small numbers: the carbon atoms, plus the hydrogen atoms, plus the oxygen atoms.",
+            mistakes: [
+              { match: "3", coach: "3 is the number of different elements (C, H and O). Count the atoms instead: add 12 + 22 + 11." },
+              { match: "34", coach: "That is 12 + 22. Don't forget the 11 oxygen atoms." },
+              { match: "12", coach: "12 is just the carbon atoms. Add the hydrogen and oxygen atoms too." },
+            ],
+            seconds: 30,
+          },
+          think: {
+            q: "How many atoms are in one molecule of carbon dioxide, CO2?",
+            choices: ["2", "1", "3", "4"],
+            answer: 2,
+            why: "C is one carbon atom and O2 is two oxygen atoms: 1 + 2 = 3.",
+            hints: [
+              "2 is the number of oxygen atoms. Don't forget the carbon atom.",
+              "1 is just the carbon atom. The small 2 means there are two oxygen atoms as well.",
+              "",
+              "Count again: C means one carbon and O2 means two oxygens. That is 1 + 2.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Bonding atoms is like snapping building bricks together. The same few brick shapes can make a car, a house or a spaceship, and the finished model can look nothing like a loose pile of bricks.",
+            example:
+              "Ammonia, NH3, is one nitrogen atom bonded to three hydrogen atoms, so each molecule has 1 + 3 = 4 atoms. Because it contains two different elements, ammonia is a compound.",
+            simpler: {
+              q: "In H2O, how many hydrogen atoms are there?",
+              choices: ["1", "2", "3"],
+              answer: 1,
+              why: "The small 2 after the H means two hydrogen atoms.",
+              hints: [
+                "1 is the number of oxygen atoms. Look at the small number right after the H.",
+                "",
+                "3 is the total number of atoms. The question asks only about hydrogen.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Physical and Chemical Changes",
+          teach:
+            "A physical change alters how matter looks, its size, shape or state, but not what it is. When ice melts, it is still water. When you tear paper, every piece is still paper. Dissolving sugar in tea is physical too: the sugar molecules spread out, but they are still sugar. A chemical change makes one or more new substances with new properties. When iron rusts, iron and oxygen form iron oxide, a crumbly reddish-brown material. When you bake a cake, the batter turns into something spongy that can never become batter again. Watch for clues of a chemical change: gas bubbles, a color change, a new smell, light or heat given off, or a solid appearing in a liquid. Clues are not proof, though. Boiling water makes bubbles, and that is only a physical change.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "Physical change",
+              points: [
+                "Same substance before and after",
+                "Changes size, shape or state",
+                "Examples: melting ice, chopping wood, dissolving sugar",
+                "Often easy to reverse",
+              ],
+            },
+            right: {
+              title: "Chemical change",
+              points: [
+                "New substance with new properties",
+                "Atoms rearrange into new molecules",
+                "Examples: rusting, burning, baking",
+                "Usually hard to reverse",
+              ],
+            },
+          },
+          probe: {
+            type: "sort",
+            prompt: "Sort each change.",
+            buckets: ["Physical change", "Chemical change"],
+            items: [
+              { text: "Ice cubes melting in a glass", bucket: 0 },
+              { text: "A nail rusting in the rain", bucket: 1 },
+              { text: "Chopping a log into kindling", bucket: 0 },
+              { text: "Wood burning in a campfire", bucket: 1 },
+              { text: "A cake baking in the oven", bucket: 1 },
+              { text: "Salt dissolving in water", bucket: 0 },
+              { text: "Milk going sour", bucket: 1 },
+              { text: "Water boiling into steam", bucket: 0 },
+            ],
+            hint: "Ask: is it still the same substance afterward? If something new formed, with new properties, it is a chemical change.",
+            mistakes: [
+              { match: "Water boiling sorted as chemical", coach: "Boiling makes bubbles, but the bubbles are just water vapor, still H2O. No new substance forms." },
+              { match: "Salt dissolving sorted as chemical", coach: "The salt seems to vanish, but it is still there. Let the water evaporate and the salt is left behind, so it is physical." },
+              { match: "Milk going sour sorted as physical", coach: "Sour milk smells and tastes different because bacteria make new substances, like lactic acid. That is chemical." },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "Which of these is a chemical change?",
+            choices: ["Ice melting", "Paper being torn", "Bread toasting until it turns brown", "Sugar dissolving in tea"],
+            answer: 2,
+            why: "Toasting makes new substances with a new color, smell and taste. You cannot turn toast back into bread.",
+            hints: [
+              "Melted ice is still water, just in a different state. That is physical.",
+              "Torn paper is still paper, just in smaller pieces. That is physical.",
+              "",
+              "Dissolved sugar is still sugar; it is just spread out in the tea. That is physical.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A physical change is like rearranging the furniture in your room: everything is still there, just moved around. A chemical change is like taking the furniture apart and building something completely new from the pieces.",
+            example:
+              "Melting a chocolate bar is physical: it is still chocolate, and it hardens again in the fridge. Burning toast is chemical: the bread turns black, smells different and gives off smoke, and nothing you do can turn it back into fresh bread.",
+            simpler: {
+              q: "When ice melts into water, what is it made of?",
+              choices: ["Still H2O, the same substance", "Oxygen gas", "Salt"],
+              answer: 0,
+              why: "Ice and liquid water are both H2O. Only the state changed.",
+              hints: [
+                "",
+                "No new substance forms when ice melts. The molecules are still H2O.",
+                "Nothing new is made. Melting only changes solid water into liquid water.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Reactions and Conservation of Mass",
+          teach:
+            "In a chemical reaction, the starting substances are called reactants and the new substances are called products. Chemists write it with an arrow: reactants make products. The atoms in the reactants do not disappear; they break their old bonds and form new ones. Antoine Lavoisier showed this in the 1770s and 1780s by weighing everything, including the gases, in sealed containers. The total mass before a reaction always equaled the total mass after. This is the law of conservation of mass. So why does a burning log seem to lose mass? Most of its atoms join oxygen from the air and float away as carbon dioxide and water vapor. If you could trap every bit of gas, the products would weigh exactly as much as the log plus the oxygen it used.",
+          visual: {
+            type: "hotspots",
+            title: "Reading a chemical equation",
+            center: "2H₂ + O₂ → 2H₂O",
+            spots: [
+              { label: "Reactants", icon: "🧪", detail: "Hydrogen gas and oxygen gas: the substances you start with, written on the left." },
+              { label: "Arrow", icon: "➡️", detail: "Means 'react to make.' It points from the reactants to the products." },
+              { label: "Products", icon: "💧", detail: "Water: the new substance formed, written on the right." },
+              { label: "Big numbers", icon: "🔢", detail: "The 2 in front means two molecules. Count the atoms: 4 hydrogen and 2 oxygen on each side, so nothing is lost." },
+            ],
+          },
+          probe: {
+            type: "number",
+            prompt: "In a sealed tube, 56 grams of iron react completely with 32 grams of sulfur to make iron sulfide. What is the mass of the iron sulfide?",
+            answer: 88,
+            tolerance: 0,
+            unit: "grams",
+            hint: "Atoms are not created or destroyed, so the mass of the products equals the total mass of the reactants.",
+            mistakes: [
+              { match: "24", coach: "You subtracted. Mass is conserved, so add the masses of the reactants together." },
+              { match: "56", coach: "That is just the iron. The sulfur atoms end up in the product too." },
+              { match: "32", coach: "That is just the sulfur. The iron atoms end up in the product too." },
+            ],
+            seconds: 30,
+          },
+          think: {
+            q: "Baking soda and vinegar react in an open cup, and the cup weighs less afterward. Why?",
+            choices: [
+              "Some atoms were destroyed",
+              "Carbon dioxide gas escaped into the air",
+              "The vinegar turned into nothing",
+              "Reactions always lose mass",
+            ],
+            answer: 1,
+            why: "The reaction makes carbon dioxide gas, which floats out of the open cup, carrying its mass with it.",
+            hints: [
+              "Atoms are never destroyed in a chemical reaction. Think about where they could have gone.",
+              "",
+              "Matter cannot turn into nothing. The bubbles are a clue: some product left as a gas.",
+              "In a sealed container the mass stays exactly the same. The open cup let something escape.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A reaction is like friends trading cards. Cards change hands and end up in new piles, but if no one leaves the room, the total number of cards stays exactly the same.",
+            example:
+              "In a sealed plastic bottle, 10 grams of baking soda and 100 grams of vinegar fizz and react. The contents still have a mass of 110 grams afterward. Open the cap and let the carbon dioxide out, and the scale drops by the mass of the escaped gas.",
+            simpler: {
+              q: "In a chemical reaction, atoms are...",
+              choices: ["Created from nothing", "Destroyed", "Rearranged into new substances"],
+              answer: 2,
+              why: "Atoms break old bonds and form new ones, but the same atoms are all still there.",
+              hints: [
+                "Reactions cannot make atoms out of nothing. Every atom in the products was in the reactants.",
+                "Atoms are not destroyed. Lavoisier's careful weighing showed the total mass stays the same.",
+                "",
+              ],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "highlight",
+        prompt: "Tap every sentence that describes a chemical change.",
+        sentences: [
+          "A copper roof slowly turns green after years in the rain.",
+          "Butter melts in a hot pan.",
+          "An egg cooks until the clear part turns white and firm.",
+          "A glass falls and shatters into pieces.",
+          "Fireworks explode with flashes of light and smoke.",
+          "Water freezes into ice in the freezer.",
+        ],
+        correct: [0, 2, 4],
+      },
+      explain: {
+        prompt: "Explain the difference between a physical change and a chemical change, and why a burning log seems to lose mass.",
+        keyPoints: [
+          "A physical change keeps the same substance; only size, shape or state changes",
+          "A chemical change makes new substances with new properties",
+          "Clues include gas bubbles, a color change, a new smell, light or heat",
+          "Atoms are rearranged, not destroyed, so mass is conserved; the log's mass leaves as gases",
+        ],
+      },
+      mastery: [
+        {
+          type: "cloze",
+          text: "Water, {0}, is a {1} because it is made of two different elements bonded together. Oxygen gas, O2, is an {2} because it has only one kind of atom.",
+          blanks: [{ answers: ["H2O", "H₂O"] }, { answers: ["compound"] }, { answers: ["element"] }],
+          bank: ["H2O", "compound", "element", "mixture", "CO2"],
+          hint: "Count the kinds of atoms. Two or more different elements bonded together make a compound; one kind of atom is an element.",
+          mistakes: [
+            { match: "mixture", coach: "In a mixture the parts are not bonded. In water, hydrogen and oxygen are chemically bonded, so it is a compound." },
+            { match: "CO2", coach: "CO2 is carbon dioxide. Water is two hydrogen atoms and one oxygen atom." },
+            { match: "compound", coach: "O2 has only one kind of atom, oxygen. One kind of atom means an element, even when two atoms are bonded." },
+          ],
+          seconds: 35,
+        },
+        {
+          type: "number",
+          prompt: "Lavoisier heated mercury in a sealed jar of air. Suppose 200 grams of mercury combine with 16 grams of oxygen to make red mercury oxide. What mass of mercury oxide forms?",
+          answer: 216,
+          tolerance: 0,
+          unit: "grams",
+          hint: "Mass is conserved: the product weighs the same as all the reactants put together.",
+          mistakes: [
+            { match: "184", coach: "You subtracted. The oxygen atoms join the mercury, so add the two masses." },
+            { match: "200", coach: "That is just the mercury. The oxygen that joined it adds mass too." },
+          ],
+          seconds: 30,
+        },
+        {
+          type: "build",
+          prompt: "Build the law of conservation of mass.",
+          tiles: ["In a chemical reaction,", "atoms are rearranged,", "not created or destroyed,", "so the total mass stays the same."],
+          distractors: ["so the products always weigh less.", "atoms disappear into the air,"],
+          hint: "Start with when the law applies, then say what happens to the atoms, then what that means for the mass.",
+          mistakes: [
+            { match: "Used 'so the products always weigh less.'", coach: "In a sealed container the products weigh exactly the same. Products only seem lighter when a gas escapes." },
+            { match: "Used 'atoms disappear into the air,'", coach: "Atoms never disappear. Some may leave as a gas, but they still exist and still have mass." },
+          ],
+          seconds: 35,
+        },
+        {
+          type: "match",
+          prompt: "Match each observation to the clue of chemical change it shows.",
+          pairs: [
+            { left: "Fizzing when baking soda meets vinegar", right: "A gas is produced" },
+            { left: "A silver spoon slowly turning black", right: "A color change" },
+            { left: "A campfire glowing at night", right: "Light and heat are given off" },
+            { left: "Spoiled eggs smelling awful", right: "A new smell" },
+            { left: "Two clear liquids mixing and turning cloudy with tiny bits of solid", right: "A solid forms in a liquid" },
+          ],
+          hint: "Think about which of your senses notices each clue: seeing bubbles, seeing color, feeling warmth, smelling, or seeing a new solid.",
+          mistakes: [
+            { match: "Campfire matched to A color change", coach: "A campfire's biggest clue is the light and warmth it gives off." },
+          ],
+          seconds: 45,
+        },
+      ],
+      check: [
+        {
+          q: "What is an element?",
+          choices: [
+            "A substance made of only one kind of atom",
+            "Any mixture of two liquids",
+            "A substance made in a laboratory",
+            "A molecule with exactly two atoms",
+          ],
+          answer: 0,
+          why: "An element is a pure substance with only one kind of atom, like gold or oxygen.",
+        },
+        {
+          q: "Which of these is a physical change?",
+          choices: ["Iron rusting", "Wood burning", "Glass breaking", "Milk souring"],
+          answer: 2,
+          why: "Broken glass is still glass. No new substance forms.",
+        },
+        {
+          q: "What does the small 2 in H2O tell you?",
+          choices: [
+            "There are two water molecules",
+            "There are two oxygen atoms",
+            "Water boils at 2 degrees",
+            "There are two hydrogen atoms in each molecule",
+          ],
+          answer: 3,
+          why: "A small number after a symbol tells how many atoms of that element are in one molecule.",
+        },
+        {
+          q: "Sodium and chlorine bond together to form...",
+          choices: ["Water", "Sugar", "Table salt", "Rust"],
+          answer: 2,
+          why: "Sodium chloride is table salt, a compound very different from either element.",
+        },
+        {
+          q: "What did Lavoisier discover by weighing reactions in sealed containers?",
+          choices: ["Fire destroys matter", "Mass is conserved in a chemical reaction", "Air has no mass", "Gases cannot react"],
+          answer: 1,
+          why: "The total mass before and after a reaction stayed the same, because atoms are only rearranged.",
+        },
+      ],
+      task: {
+        kind: "lab",
+        prompt:
+          "Test the law of conservation of mass with baking soda and vinegar. Ask an adult to supervise, wear safety glasses, and work over a tray. Materials: a clean plastic bottle, a balloon, a funnel, about 2 teaspoons of baking soda, about 100 mL of vinegar, and a kitchen scale. Steps: 1) Write a prediction: will the mass change when the reaction happens in a closed system? 2) Use the funnel to put the baking soda inside the balloon, and pour the vinegar into the bottle. 3) Stretch the balloon over the bottle's mouth without letting the baking soda fall in. 4) Weigh everything together and record the mass. 5) Lift the balloon so the baking soda drops in, and watch the reaction. 6) Weigh again when the fizzing stops. (If the balloon puffs up large, the scale may read a gram or so less, because the balloon pushes aside air and floats a tiny bit, like a small hot-air balloon.) 7) Carefully remove the balloon, let the gas escape, and weigh the bottle and balloon once more. Record all three masses in a table and explain what you observed.",
+        rubric: [
+          "Prediction written before starting",
+          "All three masses recorded in a table",
+          "Explains why the mass stayed (nearly) the same when the system was closed",
+          "Explains that the mass dropped when the carbon dioxide gas escaped",
+        ],
+      },
+    },
+
+    // 8. Ecosystems and food webs
+    {
+      id: "science.ecosystems",
+      title: "Ecosystems: Food Webs and the Flow of Energy",
+      minutes: 35,
+      stage: "logic",
+      read: [
+        "An ecosystem is a community of living things together with the nonliving parts of their surroundings, such as sunlight, water, soil and air. A pond, a forest, a desert and a coral reef are all ecosystems. Every living thing in an ecosystem needs energy, and nearly all of that energy starts as sunlight.",
+        "Plants, algae and some bacteria are producers. They capture sunlight and use it to make their own food, a sugar, through photosynthesis. Animals cannot do this, so they are consumers: they get energy by eating other living things. Herbivores, like deer and grasshoppers, eat plants. Carnivores, like hawks and wolves, eat other animals. Omnivores, like bears and raccoons, eat both. Decomposers, such as fungi, bacteria and earthworms, break down dead plants and animals and return their nutrients to the soil, where producers can use them again.",
+        "A food chain shows one path of energy: grass is eaten by a grasshopper, which is eaten by a frog, which is eaten by a snake, which is eaten by a hawk. The arrows in a food chain point from the food to the eater, showing which way the energy flows. Real ecosystems are tangled, because most animals eat more than one thing and are eaten by more than one predator. All the connected food chains in an ecosystem make a food web.",
+        "Energy is lost at every step. A grasshopper uses most of the energy from the grass it eats just to move, grow and stay alive, and much of it escapes as heat. Only about 10 percent passes on to the frog that eats it. That is why there are far more plants than plant eaters, and far more plant eaters than top predators.",
+        "Because everything is connected, a change to one species can ripple through the whole web. When wolves were returned to Yellowstone National Park in 1995, after about 70 years away, they began hunting elk, and scientists have been studying the effects on plants, rivers and other animals ever since.",
+      ].join("\n\n"),
+      keyIdeas: [
+        "Producers make food from sunlight; consumers eat other living things; decomposers recycle nutrients.",
+        "Food-chain arrows point from the food to the eater, the direction energy flows.",
+        "Only about 10 percent of the energy passes from one level to the next.",
+        "Changing one species can ripple through the whole food web.",
+      ],
+      hook: {
+        text: "For about 70 years, there were no wolf packs in Yellowstone National Park. Without them, elk herds grew large and nibbled young willow and aspen trees along the rivers. Then, in 1995, wolves were brought back. What would happen to the elk, the trees, the beavers and even the rivers when one hunter returned to the web of life?",
+      },
+      teach: [
+        {
+          title: "Producers, Consumers and Decomposers",
+          teach:
+            "Every living thing needs energy to grow, move and repair itself. Producers make their own food. Plants, algae and some bacteria capture sunlight and use it, with water and carbon dioxide, to make sugar. This is photosynthesis. Consumers cannot make food, so they eat. Herbivores eat only plants, like a rabbit munching clover. Carnivores eat other animals, like an owl catching a mouse. Omnivores eat both, like a black bear that eats berries one day and fish the next. Then comes the cleanup crew, the decomposers. Fungi, bacteria and earthworms break down dead leaves, fallen logs and dead animals into simple nutrients. Those nutrients go back into the soil, and producers use them again. Without decomposers, the forest floor would be buried in dead material.",
+          visual: {
+            type: "hotspots",
+            title: "A pond ecosystem",
+            center: "Pond",
+            spots: [
+              { label: "Sunlight", icon: "☀️", detail: "The energy source for almost every ecosystem on Earth." },
+              { label: "Algae and water plants", icon: "🌿", detail: "Producers: they make sugar from sunlight by photosynthesis." },
+              { label: "Tadpoles", icon: "🐸", detail: "Most young tadpoles are herbivores that graze on algae." },
+              { label: "Heron", icon: "🐦", detail: "A carnivore that spears fish and frogs with its sharp beak." },
+              { label: "Raccoon", icon: "🦝", detail: "An omnivore that eats crayfish, frogs, berries and seeds." },
+              { label: "Bacteria and fungi", icon: "🍄", detail: "Decomposers that break down dead plants and animals in the mud." },
+              { label: "Water, mud and air", icon: "💧", detail: "Nonliving parts of the ecosystem that shape what can live there." },
+            ],
+          },
+          probe: {
+            type: "sort",
+            prompt: "Sort each living thing by how it gets its energy.",
+            buckets: ["Producer", "Consumer", "Decomposer"],
+            items: [
+              { text: "Oak tree", bucket: 0 },
+              { text: "Algae", bucket: 0 },
+              { text: "Grass", bucket: 0 },
+              { text: "Deer", bucket: 1 },
+              { text: "Hawk", bucket: 1 },
+              { text: "Black bear", bucket: 1 },
+              { text: "Mushroom", bucket: 2 },
+              { text: "Bacteria breaking down a dead leaf", bucket: 2 },
+            ],
+            hint: "Ask: does it make its own food from sunlight, eat other living things, or break down dead things?",
+            mistakes: [
+              { match: "Mushroom sorted as producer", coach: "Mushrooms are fungi, not plants. They cannot make food from sunlight; they break down dead material, so they are decomposers." },
+              { match: "Algae sorted as consumer", coach: "Algae are green because they hold chlorophyll and make their own food by photosynthesis, so they are producers." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "A mushroom grows on a fallen log. What role does it play?",
+            choices: ["Producer", "Herbivore", "Carnivore", "Decomposer"],
+            answer: 3,
+            why: "Mushrooms are fungi that break down the dead wood and return nutrients to the soil.",
+            hints: [
+              "Mushrooms are not plants and cannot make food from sunlight. Look at what it is growing on.",
+              "Herbivores eat living plants. The mushroom is feeding on a dead log.",
+              "Carnivores eat other animals. The mushroom is feeding on dead wood.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "An ecosystem works like a town. Producers are the farms that grow the food, consumers are the families who eat it, and decomposers are the recycling crew that turns old things into raw materials the farms can use again.",
+            example:
+              "In a meadow, clover is a producer. A rabbit that eats the clover is a herbivore, a consumer. A fox that eats the rabbit is a carnivore. When the fox dies, bacteria and fungi break its body down, and the nutrients help new clover grow.",
+            simpler: {
+              q: "Which living thing makes its own food from sunlight?",
+              choices: ["A sunflower", "A rabbit", "A hawk"],
+              answer: 0,
+              why: "Plants like sunflowers are producers: they make sugar by photosynthesis.",
+              hints: [
+                "",
+                "A rabbit has to eat plants to get energy, so it is a consumer.",
+                "A hawk has to hunt other animals to get energy, so it is a consumer.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Food Chains and Food Webs",
+          teach:
+            "A food chain shows one path that energy takes through an ecosystem. In a meadow: grass, then grasshopper, then frog, then snake, then hawk. Every food chain begins with a producer, because producers are the ones that capture energy from the Sun. Notice which way the arrows point in a food chain diagram. An arrow does not mean 'eats.' It points from the food to the eater, showing where the energy goes. So the arrow goes from the grass to the grasshopper. But nature is rarely that simple. A frog also eats flies and beetles. A hawk also eats mice and rabbits. When you draw all the connected food chains in one ecosystem, you get a food web. A web shows how many different paths energy can follow, and it reveals who depends on whom.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "Food chain",
+              points: ["One single path of energy", "Starts with a producer", "Easy to read", "Leaves out most connections"],
+            },
+            right: {
+              title: "Food web",
+              points: ["Many connected food chains", "Shows animals that eat several foods", "More like real nature", "Shows who depends on whom"],
+            },
+          },
+          probe: {
+            type: "build",
+            prompt: "Build a meadow food chain in order, starting where the energy enters.",
+            tiles: ["Sunlight", "Grass", "Grasshopper", "Frog", "Snake", "Hawk"],
+            distractors: ["Mushroom"],
+            hint: "Start with the energy source, then the producer, then each eater in turn, ending with the top predator.",
+            mistakes: [
+              { match: "Used 'Mushroom'", coach: "A mushroom is a decomposer. It breaks things down after they die rather than being a link in this chain." },
+              { match: "Hawk first", coach: "The chain starts where energy enters: the Sun and then the producer. The top predator goes last." },
+            ],
+            seconds: 35,
+          },
+          think: {
+            q: "In the food chain grass → rabbit → fox, what does the arrow from rabbit to fox show?",
+            choices: [
+              "The rabbit eats the fox",
+              "Energy flows from the rabbit to the fox",
+              "The fox gives energy to the rabbit",
+              "The rabbit and fox are the same size",
+            ],
+            answer: 1,
+            why: "Food-chain arrows point from the food to the eater, the direction the energy travels.",
+            hints: [
+              "Rabbits eat plants, not foxes. Arrows point toward the eater, not away from it.",
+              "",
+              "Backwards: the fox gets energy by eating the rabbit, so energy flows from rabbit to fox.",
+              "Arrows in a food chain are about energy, not size.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Food-chain arrows are like arrows on a map showing which way a river flows. Energy flows like water, from the plant into the animal that eats it, and on down the line.",
+            example:
+              "In the ocean: tiny algae → krill → small fish → seal → orca. The algae are the producers, and the arrows show energy moving into each eater. If the seal also eats squid, that adds a new strand, turning the chain into part of a web.",
+            simpler: {
+              q: "Every food chain begins with a...",
+              choices: ["Producer", "Carnivore", "Decomposer"],
+              answer: 0,
+              why: "Producers capture the Sun's energy, so every chain starts with one.",
+              hints: [
+                "",
+                "A carnivore needs to eat other animals first, so it cannot be the start.",
+                "Decomposers break down things that already died. Chains start where energy enters.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Energy Flow and the 10 Percent Rule",
+          teach:
+            "When a grasshopper eats grass, does it get all the energy the grass captured? Not even close. The grass used much of its energy just to live and grow, and the grasshopper uses most of what it eats to hop, breathe, digest and keep its body working. Much of that energy escapes as heat. On average, only about 10 percent of the energy at one level passes on to the next level. Scientists draw this as an energy pyramid. Producers form the wide base. Herbivores, the next level, have about one tenth as much energy. Carnivores above them have about one tenth of that. This explains why a field has huge numbers of grass plants, fewer insects, and only a few hawks. There is simply not enough energy at the top to feed many top predators.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Energy pyramid", back: "A diagram showing energy shrinking at each feeding level, with producers at the wide base." },
+              { front: "10 percent rule", back: "About one tenth of the energy at one level passes to the next level." },
+              { front: "Where does the other 90 percent go?", back: "It is used for moving, growing and breathing, and much is lost as heat." },
+              { front: "Why so few top predators?", back: "Little energy is left at the top of the pyramid, so it can feed only a few animals." },
+            ],
+          },
+          probe: {
+            type: "number",
+            prompt: "Grass in a meadow stores 20,000 units of energy. Grasshoppers eat the grass, and frogs eat the grasshoppers. Using the 10 percent rule, how many units of energy reach the frogs?",
+            answer: 200,
+            tolerance: 0,
+            unit: "units",
+            hint: "Take 10 percent once to get from grass to grasshoppers, then 10 percent again to get from grasshoppers to frogs.",
+            mistakes: [
+              { match: "2000", coach: "2,000 is what the grasshoppers get. The frogs are one more step up, so take 10 percent again." },
+              { match: "18000", coach: "You subtracted 10 percent. Only 10 percent passes on; the other 90 percent is used or lost." },
+              { match: "20", coach: "That is one step too far: about 20 units would reach a snake that eats the frogs." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "Why are there fewer hawks than mice in a field?",
+            choices: [
+              "Hawks are bigger, so they need less food",
+              "Mice eat hawks",
+              "Only about 10 percent of energy passes up each level, so little is left for hawks",
+              "Hawks make their own food",
+            ],
+            answer: 2,
+            why: "Energy shrinks at each level of the pyramid, so the top can support only a few predators.",
+            hints: [
+              "Bigger animals usually need more food, not less. Think about how much energy reaches the top.",
+              "Mice do not eat hawks. Hawks eat mice, so energy flows from mice to hawks.",
+              "",
+              "Hawks are consumers. They cannot make food from sunlight; they must hunt.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Passing energy up a food chain is like a bucket brigade with leaky buckets. Each person spills most of the water before handing it on, so by the end of the line only a small splash is left.",
+            example:
+              "Plants in a pond capture 10,000 units of energy. Tiny animals that eat the plants get about 1,000 units. Small fish that eat those animals get about 100. A heron that eats the small fish gets only about 10 units.",
+            simpler: {
+              q: "About how much energy passes from one level of a food chain to the next?",
+              choices: ["10 percent", "50 percent", "100 percent"],
+              answer: 0,
+              why: "Most energy is used or lost as heat, so only about a tenth moves up.",
+              hints: [
+                "",
+                "Half is far too much. Animals use most of their energy just staying alive.",
+                "If all the energy passed on, nothing would be used for moving, growing and breathing.",
+              ],
+            },
+          },
+        },
+        {
+          title: "When the Web Changes",
+          teach:
+            "Because the strands of a food web are connected, pulling on one can shake the whole web. Along the Pacific coast, sea otters eat sea urchins, and sea urchins graze on giant kelp. Where otters were hunted almost to extinction for their fur, urchins multiplied and chewed kelp forests down to bare rock. Where otters returned, urchin numbers fell and kelp forests grew back, giving shelter to many fish. An animal with an outsized effect like this is called a keystone species. Nonliving factors matter too. A drought can shrink the grass, which leaves less food for grasshoppers, then frogs, then snakes. When wolves returned to Yellowstone in 1995, scientists began tracking how elk, trees and other animals responded, and they still study it today.",
+          visual: {
+            type: "sequence",
+            prompt: "Put the sea otter chain reaction in order.",
+            steps: [
+              "Hunters take most of the sea otters",
+              "Sea urchins have far fewer predators",
+              "Sea urchin numbers explode",
+              "Urchins chew through the kelp",
+              "Fish lose the kelp forests where they shelter",
+            ],
+          },
+          probe: {
+            type: "cloze",
+            text: "Sea otters eat {0}, and sea urchins eat {1}. If the otters disappear, the urchins will {2} and the kelp will {3}.",
+            blanks: [
+              { answers: ["sea urchins", "urchins"] },
+              { answers: ["kelp"] },
+              { answers: ["increase", "multiply", "grow"] },
+              { answers: ["decrease", "shrink", "disappear"] },
+            ],
+            bank: ["sea urchins", "kelp", "increase", "decrease", "sunlight", "orcas"],
+            hint: "Follow the chain: otter eats urchin, urchin eats kelp. Remove the top, and the middle grows while the bottom gets eaten.",
+            mistakes: [
+              { match: "sunlight", coach: "Sunlight is the kelp's energy source, but urchins don't eat it. Urchins graze on the kelp itself." },
+              { match: "orcas", coach: "Orcas are top predators that sometimes eat otters. Sea otters mostly eat urchins, crabs and shellfish." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "Sea otters disappear from a kelp forest. What happens next?",
+            choices: [
+              "The kelp grows faster",
+              "Sea urchins increase and the kelp shrinks",
+              "Nothing changes",
+              "Sea urchins disappear too",
+            ],
+            answer: 1,
+            why: "Without otters eating them, urchins multiply and eat much more kelp.",
+            hints: [
+              "Think about who eats the kelp. With fewer otters, there are more of those kelp eaters.",
+              "",
+              "In a food web, removing one animal almost always changes the others.",
+              "Otters eat urchins. With fewer otters, the urchins have fewer predators, so they increase.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A food web is like a spider web. Pluck one strand and the whole web trembles, even the strands far from where you touched it.",
+            example:
+              "In a pond, a disease kills most of the frogs. Insects the frogs used to eat, like mosquitoes, increase. Herons that ate frogs have less food, so they may leave or switch to eating more fish. One change spreads in both directions along the web.",
+            simpler: {
+              q: "If a predator disappears, what usually happens to the animals it ate?",
+              choices: ["Their numbers go up", "Their numbers go down", "They turn into producers"],
+              answer: 0,
+              why: "With fewer animals hunting them, more of them survive.",
+              hints: [
+                "",
+                "The predator was eating them. Without it, would more or fewer survive?",
+                "Animals cannot become producers. Think about how many survive without the predator.",
+              ],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sequence",
+        prompt: "Put the path of energy in order, from the Sun to the soil.",
+        steps: [
+          "Sunlight shines on an oak tree",
+          "The oak makes sugar by photosynthesis",
+          "A caterpillar eats oak leaves",
+          "A songbird eats the caterpillar",
+          "A hawk catches the songbird",
+          "When the hawk dies, fungi and bacteria break it down",
+        ],
+      },
+      explain: {
+        prompt: "Explain how energy moves through an ecosystem, from the Sun to a top predator, and why there are so few top predators.",
+        keyPoints: [
+          "Producers capture energy from sunlight by photosynthesis",
+          "Consumers get energy by eating other living things",
+          "Food-chain arrows show energy flowing from the food to the eater",
+          "Only about 10 percent of energy passes to the next level, so few top predators can be fed",
+          "Decomposers recycle nutrients from dead things back to the soil",
+        ],
+      },
+      mastery: [
+        {
+          type: "match",
+          prompt: "Match each living thing to its role in the ecosystem.",
+          pairs: [
+            { left: "Sunflower", right: "Producer: makes its own food from sunlight" },
+            { left: "Grasshopper", right: "Herbivore: eats only plants" },
+            { left: "Owl", right: "Carnivore: eats other animals" },
+            { left: "Raccoon", right: "Omnivore: eats plants and animals" },
+            { left: "Mushroom", right: "Decomposer: breaks down dead things" },
+          ],
+          hint: "Think about what each one eats, or whether it eats at all.",
+          mistakes: [
+            { match: "Mushroom matched to Producer", coach: "Mushrooms are fungi. They cannot make food from sunlight; they feed on dead material." },
+            { match: "Raccoon matched to Carnivore", coach: "Raccoons eat frogs and crayfish, but also berries, nuts and seeds. Eating both makes them omnivores." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "number",
+          prompt: "Producers in a forest store 50,000 units of energy. Herbivores eat the producers, and carnivores eat the herbivores. About how many units reach the carnivores?",
+          answer: 500,
+          tolerance: 0,
+          unit: "units",
+          hint: "Take 10 percent for each step up: producers to herbivores, then herbivores to carnivores.",
+          mistakes: [
+            { match: "5000", coach: "5,000 is what the herbivores get. Carnivores are one more step up: take 10 percent again." },
+            { match: "45000", coach: "You took away 10 percent. Only 10 percent passes on, not 90 percent." },
+            { match: "50", coach: "That is one step too many. Count the steps: producers to herbivores, herbivores to carnivores." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "highlight",
+          prompt: "Tap every sentence that shows a decomposer at work.",
+          sentences: [
+            "Fungi grow over a fallen log and soften the wood.",
+            "A deer eats acorns under an oak.",
+            "Bacteria break down a dead fish on the riverbank.",
+            "A hawk swoops down on a mouse.",
+            "Earthworms turn fallen leaves into rich soil.",
+            "A sunflower makes sugar in its leaves using sunlight.",
+          ],
+          correct: [0, 2, 4],
+          hint: "Decomposers feed on things that are already dead, like fallen logs, dead leaves and dead animals.",
+          mistakes: [
+            { match: "Tapped the sunflower", coach: "The sunflower is a producer: it makes its own food from sunlight." },
+            { match: "Tapped the hawk or the deer", coach: "The hawk and deer are consumers eating living things. Decomposers feed on dead material." },
+          ],
+          seconds: 35,
+        },
+        {
+          type: "cloze",
+          text: "In the food chain grass → mouse → owl, the {0} is the producer, and the arrow points from the mouse to the owl because {1} flows from the food to the eater.",
+          blanks: [{ answers: ["grass"] }, { answers: ["energy"] }],
+          bank: ["grass", "owl", "energy", "water", "mouse"],
+          hint: "The producer makes its own food. The arrows follow something that every living thing needs.",
+          mistakes: [
+            { match: "owl", coach: "The owl is the top predator. The producer is the one that makes food from sunlight." },
+            { match: "mouse", coach: "The mouse is a consumer that eats plants. The producer is at the start of the chain." },
+            { match: "water", coach: "Food-chain arrows show the flow of energy, not water." },
+          ],
+          seconds: 30,
+        },
+      ],
+      check: [
+        {
+          q: "Which of these is a producer?",
+          choices: ["Rabbit", "Mushroom", "Maple tree", "Wolf"],
+          answer: 2,
+          why: "A maple tree makes its own food from sunlight by photosynthesis.",
+        },
+        {
+          q: "In a food chain, the arrows point...",
+          choices: ["From the eater to the food", "From the food to the eater", "From the largest animal to the smallest"],
+          answer: 1,
+          why: "Arrows show energy flowing from the food into the animal that eats it.",
+        },
+        {
+          q: "About what percent of energy passes from one level of a food chain to the next?",
+          choices: ["10 percent", "50 percent", "90 percent", "100 percent"],
+          answer: 0,
+          why: "Most energy is used for living or lost as heat, so only about 10 percent passes on.",
+        },
+        {
+          q: "What do decomposers do?",
+          choices: [
+            "Make food from sunlight",
+            "Hunt other animals",
+            "Eat only living plants",
+            "Break down dead things and return nutrients to the soil",
+          ],
+          answer: 3,
+          why: "Fungi, bacteria and earthworms recycle dead material so producers can use the nutrients again.",
+        },
+        {
+          q: "When sea otters were hunted out of parts of the Pacific coast, what happened to the kelp forests?",
+          choices: [
+            "They grew bigger",
+            "Sea urchins multiplied and ate much of the kelp",
+            "Nothing happened",
+            "The kelp turned into coral",
+          ],
+          answer: 1,
+          why: "Without otters to eat them, urchins multiplied and grazed the kelp down.",
+        },
+      ],
+      task: {
+        kind: "project",
+        prompt:
+          "Map a real food web near your home. With an adult, spend 20 minutes observing a backyard, park or garden. Do not touch or disturb animals, and keep away from stinging insects. List at least 8 living things you see or find signs of, such as plants, insects, birds, squirrels, mushrooms and earthworms. Then draw a food web on a large sheet of paper: put producers at the bottom, add consumers above them, and draw arrows from each food to its eater. Label each living thing as a producer, herbivore, carnivore, omnivore or decomposer. Finally, write two or three sentences predicting what would happen to your web if one living thing disappeared.",
+        rubric: [
+          "At least 8 real living things from the observation, including producers and a decomposer",
+          "Arrows point from the food to the eater",
+          "Each living thing labeled with its correct role",
+          "A sensible prediction of what would happen if one living thing disappeared",
+        ],
+      },
+    },
+
+    // 9. Earth's layers and plate tectonics
+    {
+      id: "science.earth",
+      title: "Inside the Earth: Layers, Plates, Earthquakes and Volcanoes",
+      minutes: 35,
+      stage: "logic",
+      read: [
+        "If you could dig straight down to the center of the Earth, you would travel about 6,370 kilometers. No one has ever come close; the deepest hole ever drilled, in Russia, reached only about 12 kilometers. Instead, scientists study the inside of the Earth by measuring how earthquake waves travel through it, bending and changing speed as they pass through different materials.",
+        "Earth has four main layers. The crust is the thin, rocky outer skin, from about 5 kilometers thick under the oceans to about 70 kilometers under tall mountains. Below it is the mantle, nearly 2,900 kilometers of hot rock that can flow very slowly, like extremely thick putty. Then comes the outer core, liquid iron and nickel, and finally the inner core, a solid ball of iron and nickel about as hot as the surface of the Sun. The inner core stays solid because the pressure there is enormous.",
+        "The crust and the top of the mantle are broken into giant slabs called tectonic plates. The plates move only a few centimeters a year, about as fast as your fingernails grow. In 1912, a German scientist named Alfred Wegener argued that the continents had once been joined in a single supercontinent, later called Pangaea. He pointed out that South America and Africa fit together like puzzle pieces and that the same fossils appear on both. Many scientists doubted him, but in the 1950s and 1960s maps of the ocean floor revealed long ridges where new crust forms, and the theory of plate tectonics was born.",
+        "Most of the action happens where plates meet. At divergent boundaries, plates pull apart. At convergent boundaries, they push together, building mountains or forcing one plate down into the mantle. At transform boundaries, they grind past each other. When rocks along a boundary lock together and then suddenly slip, the shaking is an earthquake. Where melted rock, called magma, rises to the surface, volcanoes form. Many of the world's volcanoes and earthquakes are found around the Pacific Ocean, in a belt called the Ring of Fire.",
+      ].join("\n\n"),
+      keyIdeas: [
+        "Earth has four main layers: crust, mantle, outer core and inner core.",
+        "The crust and upper mantle are broken into tectonic plates that move a few centimeters a year.",
+        "Plates pull apart, push together or slide past each other at their boundaries.",
+        "Earthquakes and volcanoes happen mostly along plate boundaries.",
+      ],
+      hook: {
+        text: "Look at a world map and you may notice something odd: the east coast of South America and the west coast of Africa look like two pieces of a jigsaw puzzle. In 1912 a German scientist named Alfred Wegener said that was no accident. He claimed the continents had once been joined and had slowly drifted apart. Most experts scoffed. It took about fifty years, and maps of the deep ocean floor, to show he was onto something.",
+      },
+      teach: [
+        {
+          title: "Earth's Layers",
+          teach:
+            "Earth is built in layers, a bit like a peach. The crust is the thin skin we live on. Under the oceans it is only about 5 to 10 kilometers thick; under the continents it is usually 30 to 50, and up to about 70 under great mountain ranges. Next comes the mantle, almost 2,900 kilometers thick. Its rock is hot enough to flow very slowly over millions of years. Below that is the outer core, made of liquid iron and nickel. Swirling metal in the outer core creates Earth's magnetic field, the reason a compass works. At the very center is the inner core, solid iron and nickel about as hot as the surface of the Sun. It stays solid because of the crushing pressure above it.",
+          visual: {
+            type: "hotspots",
+            title: "Inside the Earth",
+            center: "About 6,370 km to the center",
+            spots: [
+              { label: "Crust", icon: "🪨", detail: "5 to 70 km thick. Rocky and cool compared to the layers below. We live on it." },
+              { label: "Mantle", icon: "🔥", detail: "About 2,900 km thick. Hot rock that flows very slowly, like extremely thick putty." },
+              { label: "Outer core", icon: "🌀", detail: "Liquid iron and nickel. Its swirling creates Earth's magnetic field." },
+              { label: "Inner core", icon: "⚪", detail: "Solid iron and nickel, about as hot as the Sun's surface, squeezed solid by enormous pressure." },
+            ],
+          },
+          probe: {
+            type: "place",
+            prompt: "Drag each marker to its depth below the surface, in kilometers.",
+            min: 0,
+            max: 6400,
+            step: 10,
+            tolerance: 300,
+            items: [
+              { label: "Bottom of the crust under a continent", value: 40 },
+              { label: "Bottom of the mantle", value: 2900 },
+              { label: "Bottom of the outer core", value: 5150 },
+              { label: "Center of the Earth", value: 6370 },
+            ],
+            hint: "The crust is very thin. The mantle is the thickest layer, ending almost 2,900 km down. The center is about 6,370 km down.",
+            mistakes: [
+              { match: "Mantle bottom placed near the center", coach: "The mantle ends about 2,900 km down, a bit less than halfway to the center. The core fills the rest." },
+              { match: "Crust bottom placed far down", coach: "The crust is the thinnest layer, only tens of kilometers, so its bottom is very close to the surface." },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "Which layer of the Earth is liquid?",
+            choices: ["Crust", "Mantle", "Outer core", "Inner core"],
+            answer: 2,
+            why: "The outer core is liquid iron and nickel. Its swirling makes Earth's magnetic field.",
+            hints: [
+              "The crust is solid rock, the ground we stand on.",
+              "The mantle flows very slowly, but it is mostly solid rock, not a liquid.",
+              "",
+              "The inner core is even hotter, but the huge pressure squeezes it solid.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Earth is like a peach. The thin fuzzy skin is the crust, the thick juicy fruit is the mantle, and the pit in the middle is the core.",
+            example:
+              "If Earth were shrunk to the size of an apple, the crust would be about as thin as the apple's skin. The mantle and core would make up almost everything inside.",
+            simpler: {
+              q: "Which layer do we live on?",
+              choices: ["The crust", "The mantle", "The core"],
+              answer: 0,
+              why: "The crust is Earth's thin rocky outer layer.",
+              hints: [
+                "",
+                "The mantle is the hot layer under the crust, far below our feet.",
+                "The core is at the very center, thousands of kilometers down.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Moving Plates",
+          teach:
+            "Earth's crust and the top of the mantle form a rigid shell that is cracked into seven major tectonic plates and many smaller ones. The plates rest on hotter, softer mantle rock, and heat from deep inside the Earth keeps that rock slowly churning. As it moves, the plates move too, usually a few centimeters a year, about the speed your fingernails grow. That sounds tiny, but over millions of years it adds up to thousands of kilometers. Alfred Wegener collected clues that the continents had once fit together: matching coastlines, fossils of the same small reptile, Mesosaurus, in both South America and Africa, and matching rock layers. But he could not explain how continents moved. In the 1950s and 1960s, maps of the ocean floor finally showed how.",
+          visual: {
+            type: "timeline",
+            events: [
+              { year: 1912, label: "Wegener proposes continental drift", detail: "Alfred Wegener argues the continents were once joined and have drifted apart." },
+              { year: 1930, label: "Wegener dies in Greenland", detail: "He dies on a scientific expedition, with his idea still widely doubted." },
+              { year: 1957, label: "The ocean floor is mapped", detail: "Marie Tharp and Bruce Heezen publish a map of the North Atlantic floor showing a long ridge with a rift valley down its middle." },
+              { year: 1962, label: "Seafloor spreading", detail: "Harry Hess explains that new crust forms at ocean ridges and spreads outward." },
+              { year: 1968, label: "Plate tectonics accepted", detail: "By the late 1960s, most geologists agree that Earth's surface is made of moving plates." },
+            ],
+          },
+          probe: {
+            type: "number",
+            prompt: "The Atlantic Ocean widens by about 2.5 centimeters a year. How many kilometers wider will it be in 1,000,000 years?",
+            answer: 25,
+            tolerance: 0,
+            unit: "km",
+            hint: "First find the total in centimeters, then convert: 100,000 centimeters make 1 kilometer.",
+            mistakes: [
+              { match: "2500000", coach: "That is the answer in centimeters. Divide by 100,000 to change centimeters into kilometers." },
+              { match: "25000", coach: "That is the answer in meters. Divide by 1,000 to get kilometers." },
+              { match: "250", coach: "Check your conversion: 2,500,000 cm divided by 100,000 is 25 km." },
+            ],
+            seconds: 60,
+          },
+          think: {
+            q: "Which clue did Wegener use to argue that the continents had moved?",
+            choices: [
+              "Earthquakes happen every day",
+              "The same fossils are found in South America and Africa",
+              "The ocean is salty",
+              "Mountains are cold at the top",
+            ],
+            answer: 1,
+            why: "The same land reptile could not have swum an ocean, so the continents were probably once joined.",
+            hints: [
+              "Earthquakes show the ground moves, but Wegener's clues were about continents once fitting together.",
+              "",
+              "Salty oceans don't tell us anything about where the continents used to be.",
+              "Mountain temperatures don't show that continents were once joined.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Tectonic plates are like the pieces of a cracked shell on a hard-boiled egg, except the egg inside is hot and slowly churning, so the pieces drift, bump and scrape against one another.",
+            example:
+              "A plate moving 5 centimeters a year travels 50 centimeters in 10 years, 50 meters in 1,000 years, and 50 kilometers in a million years. Over 100 million years that is 5,000 kilometers, farther than the distance across the Atlantic from Brazil to West Africa.",
+            simpler: {
+              q: "About how fast do tectonic plates move?",
+              choices: ["A few kilometers a day", "A few centimeters a year", "They never move"],
+              answer: 1,
+              why: "Plates creep along at a few centimeters a year, about as fast as fingernails grow.",
+              hints: [
+                "That would be fast enough to see! Plate motion is far too slow to notice in a lifetime.",
+                "",
+                "They do move. Wegener's clues and ocean-floor maps showed it.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Where Plates Meet",
+          teach:
+            "Plate edges are called boundaries, and there are three main kinds. At a divergent boundary, plates pull apart. Magma rises into the gap and cools into new crust. The Mid-Atlantic Ridge runs down the middle of the Atlantic Ocean this way, and Iceland sits right on top of it. At a convergent boundary, plates push together. If two continents collide, the crust crumples upward into mountains: the Himalayas, home of Mount Everest, are still rising as India pushes into Asia. If an ocean plate meets another plate, the heavier ocean plate sinks down into the mantle, a process called subduction, and a chain of volcanoes forms, like those in the Andes. At a transform boundary, plates grind sideways past each other. California's San Andreas Fault is a famous example.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Divergent boundary", back: "Plates pull apart and new crust forms. Example: the Mid-Atlantic Ridge and Iceland." },
+              { front: "Convergent boundary", back: "Plates push together; mountains rise or one plate sinks. Examples: the Himalayas, the Andes." },
+              { front: "Transform boundary", back: "Plates slide sideways past each other. Example: the San Andreas Fault." },
+              { front: "Subduction", back: "A heavier ocean plate sinks beneath another plate into the mantle." },
+            ],
+          },
+          probe: {
+            type: "match",
+            prompt: "Match each place to the kind of plate boundary that formed it.",
+            pairs: [
+              { left: "Mid-Atlantic Ridge", right: "Divergent: plates pull apart" },
+              { left: "Himalaya Mountains", right: "Convergent: two continents collide" },
+              { left: "San Andreas Fault", right: "Transform: plates slide past each other" },
+              { left: "Volcanoes of the Andes", right: "Convergent: an ocean plate sinks under a continent" },
+            ],
+            hint: "Ridges form where plates separate, mountains where they crash together, and long faults where they slide sideways.",
+            mistakes: [
+              { match: "San Andreas Fault matched to Divergent", coach: "Along the San Andreas Fault, the plates slide sideways past each other. That is a transform boundary." },
+              { match: "Himalaya Mountains matched to Divergent", coach: "Mountains like the Himalayas rise where plates push together and crumple, not where they pull apart." },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "India pushing into Asia formed the Himalayas. What kind of boundary is that?",
+            choices: ["Divergent", "Convergent", "Transform"],
+            answer: 1,
+            why: "The plates are pushing together, so it is a convergent boundary, and the crust crumples up into mountains.",
+            hints: [
+              "Divergent means pulling apart. India and Asia are pushing together.",
+              "",
+              "Transform means sliding sideways. Here the plates are crashing head-on.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Push two rugs toward each other on a smooth floor and they wrinkle up into ridges, like mountains at a convergent boundary. Pull them apart and a gap opens, like a divergent boundary. Slide them past each other and their edges rub, like a transform boundary.",
+            example:
+              "Iceland sits on the Mid-Atlantic Ridge, where the North American and Eurasian plates pull apart. At a place called Thingvellir, you can walk along a rift valley between the two plates.",
+            simpler: {
+              q: "At a divergent boundary, plates...",
+              choices: ["Pull apart", "Push together", "Slide sideways past each other"],
+              answer: 0,
+              why: "Divergent means moving apart, like diverging paths.",
+              hints: [
+                "",
+                "Pushing together happens at convergent boundaries.",
+                "Sliding sideways happens at transform boundaries.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Earthquakes and Volcanoes",
+          teach:
+            "Plates do not slide smoothly. Along a boundary, rough rocks can lock together while the plates keep pushing. Stress builds for years, even centuries, until the rocks suddenly slip. That burst of energy travels out as seismic waves, and the ground shakes: an earthquake. The spot on the surface right above where the slip starts is the epicenter. Instruments called seismometers record the waves. Scientists rate earthquakes on the magnitude scale, where each step up of 1 means about 10 times more ground shaking and about 32 times more energy. Volcanoes form where magma rises to the surface, mostly at plate boundaries and above hot spots like the one under Hawaii. Once magma erupts, it is called lava. Around the Pacific Ocean, a belt called the Ring of Fire holds most of the world's active volcanoes.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "Earthquake",
+              points: ["Rocks lock, stress builds, then they suddenly slip", "Energy travels out as seismic waves", "Recorded by seismometers", "Rated by magnitude"],
+            },
+            right: {
+              title: "Volcano",
+              points: ["Magma rises from deep below", "Called lava once it reaches the surface", "Forms at plate boundaries and hot spots", "Builds mountains from layers of lava and ash"],
+            },
+          },
+          probe: {
+            type: "number",
+            prompt: "On the magnitude scale, each step up of 1 means about 10 times more ground shaking. How many times more shaking does a magnitude 6 earthquake make than a magnitude 4?",
+            answer: 100,
+            tolerance: 0,
+            unit: "times",
+            hint: "Magnitude 6 is two steps above 4, and each step multiplies the shaking by 10.",
+            mistakes: [
+              { match: "2", coach: "The difference is 2 steps, but each step multiplies the shaking by 10. Multiply: 10 × 10." },
+              { match: "20", coach: "Don't add 10 + 10. Each step multiplies by 10, so two steps is 10 × 10." },
+              { match: "1000", coach: "That would be three steps. From 4 to 6 is only two steps: 10 × 10." },
+            ],
+            seconds: 35,
+          },
+          think: {
+            q: "What causes most earthquakes?",
+            choices: [
+              "Rocks along a plate boundary suddenly slipping",
+              "The Moon pulling on the oceans",
+              "Thunderstorms",
+              "Heavy buildings",
+            ],
+            answer: 0,
+            why: "Stress builds where plates lock together, and the sudden slip releases energy as seismic waves.",
+            hints: [
+              "",
+              "The Moon causes tides, not earthquakes.",
+              "Storms happen in the air. Earthquakes start deep in the rock below.",
+              "Buildings are far too light to make the Earth's crust slip.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Bend a stick slowly in your hands. For a while nothing happens as the strain builds, then it suddenly snaps and you feel the jolt. Rocks along a fault store up strain the same way until they slip.",
+            example:
+              "Mount Fuji in Japan is a volcano formed where ocean plates sink beneath Japan. It last erupted in 1707. Japan also has many earthquakes, because it sits where several plates meet on the Ring of Fire.",
+            simpler: {
+              q: "Melted rock that has reached the surface is called...",
+              choices: ["Magma", "Lava", "Crust"],
+              answer: 1,
+              why: "Melted rock is magma underground and lava once it erupts.",
+              hints: [
+                "Magma is melted rock while it is still underground.",
+                "",
+                "The crust is the solid outer layer, not melted rock.",
+              ],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sequence",
+        prompt: "Put the steps in order: how a volcano forms where an ocean plate meets a continent.",
+        steps: [
+          "An ocean plate and a continental plate push toward each other",
+          "The heavier ocean plate sinks under the continent into the mantle",
+          "Heat and water from the sinking plate help melt rock above it into magma",
+          "The magma rises because it is lighter than the solid rock around it",
+          "Magma erupts at the surface as lava and ash",
+          "Layers of lava and ash build up a volcanic mountain",
+        ],
+      },
+      explain: {
+        prompt: "Explain how moving tectonic plates cause both earthquakes and volcanoes.",
+        keyPoints: [
+          "Earth's crust and upper mantle are broken into plates that move slowly",
+          "Plates pull apart, push together or slide past each other at boundaries",
+          "Earthquakes happen when locked rocks suddenly slip and release energy",
+          "Volcanoes form where magma rises to the surface, often at plate boundaries",
+        ],
+      },
+      mastery: [
+        {
+          type: "sort",
+          prompt: "Sort each feature by the kind of plate boundary that makes it.",
+          buckets: ["Divergent (pull apart)", "Convergent (push together)", "Transform (slide past)"],
+          items: [
+            { text: "New ocean crust forming at a ridge", bucket: 0 },
+            { text: "Iceland's rift valley", bucket: 0 },
+            { text: "The Himalaya Mountains", bucket: 1 },
+            { text: "Volcanoes of the Andes", bucket: 1 },
+            { text: "An ocean plate sinking into the mantle", bucket: 1 },
+            { text: "The San Andreas Fault", bucket: 2 },
+          ],
+          hint: "New crust means pulling apart. Mountains and sinking plates mean pushing together. A long sideways fault means sliding past.",
+          mistakes: [
+            { match: "Ocean plate sinking sorted as divergent", coach: "A plate sinks into the mantle when plates push together. That is subduction at a convergent boundary." },
+            { match: "San Andreas Fault sorted as convergent", coach: "The two sides of the San Andreas Fault slide sideways past each other: a transform boundary." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "cloze",
+          text: "Earth's layers, from the outside in, are the {0}, the {1}, the liquid {2}, and the solid {3}.",
+          blanks: [{ answers: ["crust"] }, { answers: ["mantle"] }, { answers: ["outer core"] }, { answers: ["inner core"] }],
+          bank: ["crust", "mantle", "outer core", "inner core", "magma", "plate"],
+          hint: "Start with the thin layer we live on and work toward the center.",
+          mistakes: [
+            { match: "inner core", coach: "The inner core is solid because of the enormous pressure. The liquid layer is the outer core." },
+            { match: "magma", coach: "Magma is melted rock that rises toward volcanoes. It is not one of Earth's four main layers." },
+            { match: "plate", coach: "Plates are pieces of the crust and upper mantle, not a separate layer." },
+          ],
+          seconds: 35,
+        },
+        {
+          type: "number",
+          prompt: "A plate moves 4 centimeters a year. How many meters does it move in 1,000 years?",
+          answer: 40,
+          tolerance: 0,
+          unit: "meters",
+          hint: "Find the total in centimeters first, then divide by 100 to change centimeters into meters.",
+          mistakes: [
+            { match: "4000", coach: "That is the answer in centimeters. There are 100 centimeters in a meter, so divide by 100." },
+            { match: "4", coach: "Check your multiplying: 4 cm × 1,000 years is 4,000 cm. Then divide by 100." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "match",
+          prompt: "Match each word to its meaning.",
+          pairs: [
+            { left: "Magma", right: "Melted rock underground" },
+            { left: "Lava", right: "Melted rock that reaches the surface" },
+            { left: "Epicenter", right: "The spot on the surface above where an earthquake starts" },
+            { left: "Seismometer", right: "An instrument that records earthquake waves" },
+            { left: "Pangaea", right: "The supercontinent that broke apart long ago" },
+          ],
+          hint: "Magma and lava are both melted rock; the difference is where they are.",
+          mistakes: [
+            { match: "Magma matched to Melted rock that reaches the surface", coach: "Melted rock is called magma underground and lava once it erupts." },
+          ],
+          seconds: 45,
+        },
+      ],
+      check: [
+        {
+          q: "Which layer of the Earth is the thickest?",
+          choices: ["Crust", "Mantle", "Inner core", "Outer core"],
+          answer: 1,
+          why: "The mantle is almost 2,900 kilometers thick.",
+        },
+        {
+          q: "California's San Andreas Fault is an example of...",
+          choices: ["A divergent boundary", "A hot spot", "A mid-ocean ridge", "A transform boundary"],
+          answer: 3,
+          why: "There, two plates slide sideways past each other.",
+        },
+        {
+          q: "Which clue supported Wegener's idea that continents had drifted?",
+          choices: [
+            "The same fossils on continents far apart",
+            "Earth is round",
+            "The Moon has craters",
+            "Oceans have tides",
+          ],
+          answer: 0,
+          why: "Fossils of the same land reptile in South America and Africa suggested the continents were once joined.",
+        },
+        {
+          q: "Why are so many volcanoes found around the Pacific Ocean?",
+          choices: [
+            "The water there is warmer",
+            "The Moon pulls hardest on the Pacific",
+            "It is ringed by plate boundaries where plates sink into the mantle",
+            "Islands attract volcanoes",
+          ],
+          answer: 2,
+          why: "The Ring of Fire follows plate boundaries where subduction melts rock into magma.",
+        },
+        {
+          q: "How do scientists know what is deep inside the Earth?",
+          choices: [
+            "They drilled all the way to the center",
+            "By studying how earthquake waves travel through it",
+            "Astronauts saw it from space",
+            "By exploring deep caves",
+          ],
+          answer: 1,
+          why: "Seismic waves bend and change speed in different materials, revealing the layers.",
+        },
+      ],
+      task: {
+        kind: "lab",
+        prompt:
+          "Model the three kinds of plate boundaries with graham crackers and frosting. Ask an adult before using the food. Materials: 2 graham crackers broken in half, a few spoonfuls of thick frosting (or pudding), a paper plate, a cup of water, and a paper towel. The frosting is the soft mantle, and the cracker pieces are plates. Steps: 1) Write a prediction for what each boundary will look like. 2) Divergent: spread the frosting on the plate, lay two cracker halves side by side on it, and slowly pull them apart. What appears in the gap? 3) Transform: press two halves edge to edge and slide them past each other in opposite directions. What happens to the edges? 4) Convergent, two continents: dip one edge of two halves in water for a few seconds, lay them on the frosting, and push the wet edges gently together. Watch them crumple up like mountains. 5) Convergent, subduction: push one dry half under another. Sketch each result, label the boundary type, and name a real place on Earth where it happens.",
+        rubric: [
+          "Prediction written before building the model",
+          "All three boundary types modeled and sketched",
+          "Each sketch correctly labeled with its boundary type",
+          "A real place on Earth named for each kind of boundary",
+        ],
+      },
+    },
+
+    // 10. Electricity and magnetism
+    {
+      id: "science.electricity",
+      title: "Electricity and Magnetism: Circuits, Conductors and Electromagnets",
+      minutes: 35,
+      stage: "logic",
+      read: [
+        "In 1820, the Danish scientist Hans Christian Ørsted was teaching when he noticed something strange. Whenever an electric current flowed through a wire, a compass needle lying nearby swung to point a different way. Electricity and magnetism, which most people had thought were separate, turned out to be closely linked. That discovery led to electric motors, generators and the power that runs our homes today.",
+        "Electric current is a flow of tiny charged particles called electrons. A battery gives them a push, measured in volts. But current can flow only through a complete, unbroken loop called a circuit. A simple circuit has an energy source such as a battery, wires, a load such as a light bulb that uses the energy, and often a switch. When the switch is closed, the loop is complete and the bulb lights. When the switch is open, the loop is broken and the current stops.",
+        "In a series circuit, all the parts are on one single path, so if one bulb burns out, they all go dark. In a parallel circuit, each part has its own branch, so the others keep working. That is why homes are wired in parallel.",
+        "Materials that let current flow easily are called conductors. Most metals, such as copper and aluminum, are good conductors. Materials that block current are insulators, like rubber, plastic, glass and dry wood. Electrical cords use both: copper wire inside, plastic coating outside. Water with dissolved minerals conducts too, which is why electricity and water are a dangerous mix.",
+        "Magnets have a north pole and a south pole. Like poles repel and opposite poles attract. A wire carrying current makes its own magnetic field, just as Ørsted saw. Wrap that wire into a coil around an iron nail and you have an electromagnet, a magnet you can switch on and off. More coils or more current make it stronger. Electromagnets lift scrap metal, ring doorbells and spin the motors in fans and cars.",
+      ].join("\n\n"),
+      keyIdeas: [
+        "Current flows only through a complete, closed circuit.",
+        "Series circuits have one path; parallel circuits give each part its own branch.",
+        "Conductors let current flow easily; insulators block it.",
+        "An electric current makes a magnetic field, so a coil of wire around iron becomes an electromagnet.",
+      ],
+      hook: {
+        text: "In 1820, a Danish professor named Hans Christian Ørsted was showing his students an electric current flowing through a wire. A compass happened to be lying nearby. When the current flowed, the compass needle swung away from north. Why would electricity in a wire push on a compass needle? That small surprise revealed a hidden link between electricity and magnetism, and it changed the world.",
+      },
+      teach: [
+        {
+          title: "Current and Circuits",
+          teach:
+            "Everything is made of atoms, and atoms contain tiny particles called electrons that carry an electric charge. In a metal wire, some electrons can move freely. When they all drift in one direction, that flow is an electric current. A battery is like a pump that pushes electrons along. Its push is measured in volts; a flashlight battery gives 1.5 volts. But current can only flow around a closed, unbroken loop called a circuit. A simple circuit needs an energy source, like a battery; wires to carry the current; and a load, like a bulb or motor, that uses the energy. A switch opens and closes a gap in the loop. A closed circuit is complete, and the bulb lights. An open circuit has a break somewhere, and nothing flows.",
+          visual: {
+            type: "hotspots",
+            title: "A simple circuit",
+            center: "Battery, wires, bulb, switch",
+            spots: [
+              { label: "Battery", icon: "🔋", detail: "The energy source. It pushes electrons around the loop; one AA battery gives 1.5 volts." },
+              { label: "Wires", icon: "〰️", detail: "Copper paths that carry the current from the battery to the bulb and back again." },
+              { label: "Bulb", icon: "💡", detail: "The load: it turns electrical energy into light and heat." },
+              { label: "Switch", icon: "🔘", detail: "Opens or closes a gap. Closed means the loop is complete and current flows." },
+            ],
+          },
+          probe: {
+            type: "highlight",
+            prompt: "Tap every circuit in which the bulb will light.",
+            sentences: [
+              "A battery, a bulb and two wires make a full loop with the switch closed.",
+              "The same loop, but the switch is open.",
+              "One wire touches the battery, but the other wire is cut in the middle.",
+              "Wires connect each end of the battery to the bulb in a complete loop.",
+              "Both wires from the bulb are attached to the same end of the battery.",
+              "A loop runs from the battery, through a bulb and a closed switch, and back to the battery.",
+            ],
+            correct: [0, 3, 5],
+            hint: "Trace the path with your finger. Current must leave one end of the battery, pass through the bulb, and get back to the other end.",
+            mistakes: [
+              { match: "Tapped the open switch", coach: "An open switch leaves a gap in the loop, so current cannot flow." },
+              { match: "Tapped both wires on the same end", coach: "Current must travel from one end of the battery to the other. Two wires on the same end make no complete path." },
+              { match: "Tapped the cut wire", coach: "A cut wire is a break in the loop, just like an open switch." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "A bulb is wired to a battery, but it won't light. The switch is open. Why?",
+            choices: [
+              "The battery is too strong",
+              "The circuit is open, so there is a gap and no current flows",
+              "Bulbs need water to work",
+              "The wires are too short",
+            ],
+            answer: 1,
+            why: "An open switch breaks the loop. Current can only flow through a closed circuit.",
+            hints: [
+              "A strong battery would make the bulb brighter, not dark. Look at the switch.",
+              "",
+              "Bulbs do not need water. In fact, water and electricity are a dangerous mix.",
+              "Short wires work fine if the loop is complete. Look at the switch.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A circuit is like a toy train on a circular track. The train can go round and round only if every piece of track is connected. Lift out one piece, like opening a switch, and the train stops.",
+            example:
+              "In a flashlight, batteries, metal strips, a bulb and a switch form a loop. Press the switch and a metal contact closes the gap, completing the circuit, so the bulb shines. Press it again and the gap opens, so the light goes out.",
+            simpler: {
+              q: "For a bulb to light, the circuit must be...",
+              choices: ["Open, with a gap", "Closed, a complete loop", "Made of plastic"],
+              answer: 1,
+              why: "Current needs a complete path to flow.",
+              hints: [
+                "A gap stops the current, like a missing piece of train track.",
+                "",
+                "Plastic blocks current. Wires need metal inside.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Series and Parallel Circuits",
+          teach:
+            "There are two main ways to connect more than one bulb. In a series circuit, everything is on one single path, like beads on a string. The current must pass through every bulb in turn. If one bulb burns out, it breaks the loop, and all the bulbs go dark. Adding more bulbs in series also makes each one dimmer, because they share the battery's push. In a parallel circuit, each bulb gets its own branch, a separate path back to the battery. If one bulb burns out, the others stay bright, because their branches are still complete. That is why the lights and outlets in a house are wired in parallel. You can switch off the kitchen light without plunging the whole house into darkness. Batteries can be connected in series too: their volts add up.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "Series circuit",
+              points: ["One single path for the current", "One bulb out means all go dark", "More bulbs make each one dimmer", "Batteries in series add their volts"],
+            },
+            right: {
+              title: "Parallel circuit",
+              points: ["Each bulb has its own branch", "One bulb out, the rest stay lit", "Each bulb gets the battery's full push", "Used to wire homes"],
+            },
+          },
+          probe: {
+            type: "cloze",
+            text: "In a {0} circuit there is only one path, so when one bulb burns out, all the others go {1}. Homes are wired in {2}, so each light has its own branch.",
+            blanks: [{ answers: ["series"] }, { answers: ["dark", "out", "off"] }, { answers: ["parallel"] }],
+            bank: ["series", "parallel", "dark", "brighter", "insulators"],
+            hint: "One path is series; separate branches are parallel. Think about what a single break does to a single path.",
+            mistakes: [
+              { match: "parallel", coach: "A parallel circuit has several branches. A circuit with only one path is a series circuit." },
+              { match: "series", coach: "If homes were wired in series, one burned-out bulb would black out the whole house. Homes use parallel branches." },
+              { match: "brighter", coach: "A burned-out bulb breaks the only path in a series circuit, so current stops everywhere." },
+              { match: "insulators", coach: "Insulators block current. This blank is about how the circuit is arranged." },
+            ],
+            seconds: 35,
+          },
+          think: {
+            q: "On an old string of holiday lights, all the bulbs go out when one bulb breaks. How are they wired?",
+            choices: ["In parallel", "In series", "With insulators only", "They are not in a circuit"],
+            answer: 1,
+            why: "One broken bulb breaks the only path, so the current stops through all of them.",
+            hints: [
+              "In parallel, each bulb has its own branch, so the others would stay lit.",
+              "",
+              "Insulators would block the current completely. The lights worked before one broke.",
+              "They lit up before, so they must be in a circuit. Think about how many paths there are.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A series circuit is like a one-lane road with no side streets: if one bridge closes, every car is stuck. A parallel circuit is like several separate roads to the same town: close one, and traffic keeps moving on the others.",
+            example:
+              "Two 1.5-volt batteries placed end to end, in series, give 3 volts. Four in series give 6 volts. That is why a toy that needs 6 volts often holds four AA batteries lined up end to end.",
+            simpler: {
+              q: "In a series circuit, how many paths can the current take?",
+              choices: ["One", "Two", "One for every bulb"],
+              answer: 0,
+              why: "Series means everything is on one single path.",
+              hints: [
+                "",
+                "Two or more paths would make it a parallel circuit.",
+                "Separate paths for each bulb describe a parallel circuit.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Conductors and Insulators",
+          teach:
+            "Why are wires made of copper wrapped in plastic? Because some materials let current flow easily and others block it. Conductors let electrons move freely. Most metals are good conductors: copper, aluminum, silver, iron and gold. Insulators hold their electrons tightly, so current cannot flow through them. Rubber, plastic, glass, dry wood, cloth and air are insulators. An electrical cord uses both: the copper inside carries the current, and the plastic outside keeps it from reaching your hand. Water is tricky. Very pure water is a poor conductor, but tap water, rainwater and the water in your body contain dissolved minerals that let current flow. That is why you should never touch a switch or plug with wet hands, and why electrical devices must stay away from bathtubs and pools.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Conductor", back: "A material that lets electric current flow easily, like copper or aluminum." },
+              { front: "Insulator", back: "A material that blocks electric current, like rubber, plastic or glass." },
+              { front: "Why copper?", back: "It conducts very well and costs far less than silver, the best conductor of all." },
+              { front: "Water and electricity", back: "Water with dissolved minerals conducts, so keep electrical things away from wet hands." },
+            ],
+          },
+          probe: {
+            type: "sort",
+            prompt: "Sort each material.",
+            buckets: ["Conductor", "Insulator"],
+            items: [
+              { text: "Copper wire", bucket: 0 },
+              { text: "Aluminum foil", bucket: 0 },
+              { text: "A steel paper clip", bucket: 0 },
+              { text: "A gold ring", bucket: 0 },
+              { text: "A rubber band", bucket: 1 },
+              { text: "A plastic spoon", bucket: 1 },
+              { text: "A glass marble", bucket: 1 },
+              { text: "A dry wooden craft stick", bucket: 1 },
+            ],
+            hint: "Is it a metal? Most metals conduct. Rubber, plastic, glass and dry wood insulate.",
+            mistakes: [
+              { match: "Paper clip sorted as insulator", coach: "Paper clips are made of steel, a metal, and metals conduct." },
+              { match: "Wooden craft stick sorted as conductor", coach: "Dry wood holds its electrons tightly and blocks current, so it is an insulator." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "Why are electrical cords covered in plastic?",
+            choices: [
+              "Plastic is a conductor that speeds up the current",
+              "Plastic makes the cord heavier",
+              "Plastic stores extra electricity",
+              "Plastic is an insulator that keeps the current away from your hand",
+            ],
+            answer: 3,
+            why: "The copper inside carries the current; the plastic insulator keeps it safely inside.",
+            hints: [
+              "Plastic is not a conductor. It blocks current instead.",
+              "Weight is not the reason. Think about safety.",
+              "Plastic does not store electricity. It blocks it from flowing.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A conductor is like an open hallway where people can walk through easily. An insulator is like a solid wall: the people stay where they are, so no one gets through.",
+            example:
+              "Test materials with a simple circuit: a battery, a bulb and two loose wire ends. Touch both ends to a metal spoon and the bulb lights, so the spoon conducts. Touch them to a plastic spoon and the bulb stays dark, so plastic insulates.",
+            simpler: {
+              q: "Most metals are...",
+              choices: ["Conductors", "Insulators", "Batteries"],
+              answer: 0,
+              why: "Metals let electrons move freely, so current flows easily.",
+              hints: [
+                "",
+                "Insulators block current, like rubber and plastic. Metals let it flow.",
+                "A battery is an energy source, not a kind of material.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Magnets and Electromagnets",
+          teach:
+            "Every magnet has two ends called poles, north and south. Opposite poles attract, and like poles repel. The space around a magnet where its force acts is its magnetic field. Earth itself acts like a giant magnet, which is why a compass needle points north. Ørsted's discovery showed that an electric current also makes a magnetic field. Wind a wire into a coil and the field gets stronger. Put an iron nail inside the coil and it becomes an electromagnet, a magnet you can switch on and off. You can make it stronger by adding more coils or more current. Cranes lift scrap cars with electromagnets, and electric motors use them to spin. In 1831, Michael Faraday showed the reverse: moving a magnet near a coil of wire makes a current. That is how power plants generate electricity.",
+          visual: {
+            type: "hotspots",
+            title: "Parts of an electromagnet",
+            center: "Electromagnet",
+            spots: [
+              { label: "Battery", icon: "🔋", detail: "Supplies the current. More current makes a stronger magnet." },
+              { label: "Coil of wire", icon: "🌀", detail: "Insulated copper wire wrapped around and around. More turns make a stronger magnet." },
+              { label: "Iron nail", icon: "🔩", detail: "The core. Iron gathers the magnetic field and makes it much stronger." },
+              { label: "Switch", icon: "🔘", detail: "Turn the current off and the electromagnet lets go." },
+            ],
+          },
+          probe: {
+            type: "sequence",
+            prompt: "Put the steps for building and testing an electromagnet in order.",
+            steps: [
+              "Gather an iron nail, insulated copper wire and a battery",
+              "Wrap the wire tightly around the nail many times, leaving both ends free",
+              "Connect the two wire ends to the two ends of the battery",
+              "Hold the nail near some paper clips and watch them jump to it",
+              "Disconnect the wire and watch the paper clips drop",
+            ],
+            hint: "You need the parts first, then the coil, then the current. Only then can the nail act as a magnet.",
+            mistakes: [
+              { match: "Connected the battery before wrapping", coach: "Wrap the coil first. Without the coil around the nail, there is no electromagnet to switch on." },
+            ],
+            seconds: 35,
+          },
+          think: {
+            q: "Which change would make an electromagnet stronger?",
+            choices: [
+              "Using fewer coils of wire",
+              "Wrapping more coils of wire around the nail",
+              "Replacing the iron nail with a plastic straw",
+              "Disconnecting the battery",
+            ],
+            answer: 1,
+            why: "More coils concentrate more of the magnetic field into the iron core.",
+            hints: [
+              "Fewer coils make a weaker magnet, not a stronger one.",
+              "",
+              "Iron makes the field much stronger. A plastic straw would weaken it.",
+              "Without current, there is no magnetic field at all.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "An electromagnet is like a flashlight for magnetism. Switch it on and the magnetic force appears; switch it off and it disappears. More coils or more current make it stronger, like a brighter beam.",
+            example:
+              "A scrapyard crane has a huge electromagnet. The operator switches on the current, lowers the magnet onto an old car, and lifts it. Over the pile of scrap, the operator switches off the current, the magnetism vanishes, and the car drops exactly where it should.",
+            simpler: {
+              q: "Two magnets have their north poles facing each other. What happens?",
+              choices: ["They attract", "They repel", "Nothing happens"],
+              answer: 1,
+              why: "Like poles repel; opposite poles attract.",
+              hints: [
+                "Opposite poles attract. These are the same pole, north and north.",
+                "",
+                "Magnets always push or pull on each other when they are close.",
+              ],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "highlight",
+        prompt: "Tap every change that would make an electromagnet STRONGER.",
+        sentences: [
+          "Wrap more coils of wire around the nail.",
+          "Paint the nail red.",
+          "Use two batteries in series instead of one.",
+          "Swap the iron nail for a plastic straw.",
+          "Use an iron core instead of an empty coil of wire.",
+          "Disconnect one end of the wire.",
+        ],
+        correct: [0, 2, 4],
+      },
+      explain: {
+        prompt: "Explain how an electromagnet works and how to make it stronger, using what you know about circuits.",
+        keyPoints: [
+          "Current flows only through a complete, closed circuit",
+          "An electric current makes a magnetic field",
+          "Coiling the wire around an iron core makes an electromagnet",
+          "More coils or more current make it stronger, and switching off the current turns it off",
+        ],
+      },
+      mastery: [
+        {
+          type: "sort",
+          prompt: "Sort each statement: does it describe a series or a parallel circuit?",
+          buckets: ["Series circuit", "Parallel circuit"],
+          items: [
+            { text: "Only one path for the current", bucket: 0 },
+            { text: "Each bulb has its own branch", bucket: 1 },
+            { text: "One bulb burns out and all go dark", bucket: 0 },
+            { text: "How the outlets in a house are wired", bucket: 1 },
+            { text: "Adding bulbs makes each one dimmer", bucket: 0 },
+            { text: "Turning off one light leaves the others on", bucket: 1 },
+          ],
+          hint: "Series means one path, so one break stops everything. Parallel means separate branches.",
+          mistakes: [
+            { match: "House outlets sorted as series", coach: "If a house were wired in series, unplugging one lamp would cut power everywhere. Homes use parallel branches." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "number",
+          prompt: "Each AA battery gives 1.5 volts. How many volts do 4 AA batteries give when they are connected in series?",
+          answer: 6,
+          tolerance: 0,
+          unit: "volts",
+          hint: "In series, the volts of each battery add up.",
+          mistakes: [
+            { match: "1.5", coach: "That is just one battery. In series, add the volts of all four." },
+            { match: "4", coach: "4 is the number of batteries. Multiply by 1.5 volts each." },
+            { match: "5.5", coach: "You added 4 + 1.5. Instead, add 1.5 four times, or multiply 4 × 1.5." },
+          ],
+          seconds: 30,
+        },
+        {
+          type: "match",
+          prompt: "Match each part to its job.",
+          pairs: [
+            { left: "Battery", right: "Pushes current around the circuit" },
+            { left: "Switch", right: "Opens or closes a gap in the loop" },
+            { left: "Copper wire", right: "Conducts current from part to part" },
+            { left: "Plastic coating", right: "Insulates the wire so current stays inside" },
+            { left: "Iron nail in a coil", right: "Becomes a magnet when current flows" },
+          ],
+          hint: "Think about what would happen if each part were missing.",
+          mistakes: [
+            { match: "Plastic coating matched to Conducts current", coach: "Plastic is an insulator. The copper conducts; the plastic keeps the current inside." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "cloze",
+          text: "Opposite magnetic poles {0}, and like poles {1}. An electromagnet is made by wrapping wire around an {2} core and running a current through it.",
+          blanks: [{ answers: ["attract"] }, { answers: ["repel"] }, { answers: ["iron"] }],
+          bank: ["attract", "repel", "iron", "plastic", "glow"],
+          hint: "North and south pull together; north and north push apart. The best core is a magnetic metal.",
+          mistakes: [
+            { match: "plastic", coach: "Plastic is not magnetic. An iron core gathers the magnetic field and makes it much stronger." },
+            { match: "repel", coach: "Opposite poles pull together. It is like poles that push apart." },
+            { match: "attract", coach: "Like poles, such as north and north, push apart. Opposites attract." },
+          ],
+          seconds: 30,
+        },
+      ],
+      check: [
+        {
+          q: "What is needed for current to flow?",
+          choices: ["A closed, complete circuit", "An open switch", "A plastic wire", "A magnet"],
+          answer: 0,
+          why: "Current can flow only around a complete, unbroken loop.",
+        },
+        {
+          q: "Which of these is the best insulator?",
+          choices: ["Copper", "Aluminum", "Rubber", "Iron"],
+          answer: 2,
+          why: "Rubber blocks current. The other three are metals, which conduct.",
+        },
+        {
+          q: "In a parallel circuit, if one bulb burns out...",
+          choices: ["All the others go out", "The others stay lit", "The battery stops working"],
+          answer: 1,
+          why: "Each bulb has its own branch, so the other branches are still complete.",
+        },
+        {
+          q: "What did Ørsted discover in 1820?",
+          choices: [
+            "Lightning is electricity",
+            "Copper is a metal",
+            "Batteries store water",
+            "An electric current can move a compass needle",
+          ],
+          answer: 3,
+          why: "A current makes a magnetic field, which pushed the compass needle. This linked electricity and magnetism.",
+        },
+        {
+          q: "How can you make an electromagnet stronger?",
+          choices: ["Use a plastic core", "Add more coils of wire", "Use fewer batteries", "Open the switch"],
+          answer: 1,
+          why: "More coils, or more current, make a stronger magnetic field.",
+        },
+      ],
+      task: {
+        kind: "lab",
+        prompt:
+          "Build an electromagnet and test what makes it stronger. An adult must supervise. Use only a battery, never a wall outlet. Materials: a large iron or steel nail (about 8 cm long), about 1 meter of thin insulated copper wire, a fresh D battery, tape, and a pile of small steel paper clips. Steps: 1) Write a hypothesis: how will the number of coils change how many paper clips the nail picks up? 2) Wrap 10 coils of wire around the nail, leaving both ends free. Have an adult strip about 2 cm of plastic off each end. 3) Hold or tape the wire ends to the two ends of the battery, touch the nail tip to the paper clips, lift, and count. Disconnect right away; the wire and battery get warm if left connected. 4) Repeat with 20 and then 30 coils, doing 3 trials each. 5) Record the results in a table, find each average, and write a conclusion: was your hypothesis supported?",
+        rubric: [
+          "Hypothesis written before testing",
+          "Only the number of coils changed; the same nail, battery and paper clips were used",
+          "Results recorded in a table with 3 trials and an average for each number of coils",
+          "Conclusion explains how coils affect strength and why the clips drop when the current stops",
+        ],
+      },
+    },
   ],
 };

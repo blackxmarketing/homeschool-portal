@@ -2265,5 +2265,1763 @@ export const leadership: Course = {
         ],
       },
     },
+    {
+      id: "leadership.goals",
+      title: "Goals, Habits and Discipline",
+      minutes: 30,
+      stage: "logic",
+      subject: "Other",
+      read: [
+        "As a young printer in Philadelphia, Benjamin Franklin made a bold plan. He would try to become a better person on purpose. He wrote down thirteen virtues he wanted to build, such as order, industry, frugality and sincerity. Then he made a little book with a page for each virtue and a column for each day of the week. Every night he marked a small dot for each slip he had made that day.",
+        "Franklin did not try to fix everything at once. He worked hard on one virtue each week, so he went through the whole list in thirteen weeks, four times a year. He admitted later that he never became perfect, but he said he was a better and happier man for trying.",
+        "Franklin's plan shows the difference between a wish and a goal. A wish sounds like \"I want to get better at piano.\" A goal is specific, it can be measured, and it has a deadline: \"I will learn to play this whole song by March 1.\" You can tell whether you reached a goal. You cannot really tell with a wish.",
+        "Big goals are reached through small daily steps. If you read 20 pages every day, you will read 7,300 pages in a year. That is a whole shelf of books, and no single day felt huge.",
+        "Daily steps last longest when they become habits. A habit has three parts: a cue that reminds you, a routine you do, and a reward that makes you glad you did it. Putting your practice book on your pillow is a cue. Practicing is the routine. Checking off the day on your chart is the reward.",
+        "Discipline is doing what you planned even when you do not feel like it. Feelings come and go like weather. A person with discipline keeps their promise to themselves anyway, and over time that is what turns a goal into reality.",
+      ].join("\n\n"),
+      keyIdeas: [
+        "A real goal is specific, measurable and has a deadline. A wish has none of these.",
+        "Big goals are reached through small daily steps that add up over time.",
+        "A habit has a cue, a routine and a reward.",
+        "Discipline means keeping your plan even when you do not feel like it.",
+      ],
+      hook: {
+        text: "Imagine a young printer who decides to fix his own bad habits, one at a time, and keeps score with dots in a tiny notebook. Benjamin Franklin did exactly that. He never reached perfection, yet he called it one of the best things he ever did. Why would a plan that never fully worked be worth so much?",
+      },
+      teach: [
+        {
+          title: "Franklin's Little Book",
+          teach:
+            "Benjamin Franklin wanted to improve his character, so he treated it like a project. He picked thirteen virtues, including order, which means keeping things in their place, industry, which means working hard and not wasting time, and frugality, which means not wasting money. He made a little book with a chart for each virtue and a column for each day. Each night he put a small dot on the chart for every slip. He focused on one virtue a week, so he cycled through all thirteen four times a year. Franklin later wrote that he never became perfect, but he was better and happier for trying. A clear plan and a daily record made him grow.",
+          visual: {
+            type: "hotspots",
+            title: "Franklin's Virtue Chart",
+            center: "One virtue a week",
+            spots: [
+              { label: "Order", icon: "🗂️", detail: "Keep things in their place, and give each part of your work its own time." },
+              { label: "Industry", icon: "⚒️", detail: "Do not waste time. Always be doing something useful." },
+              { label: "Frugality", icon: "🪙", detail: "Do not waste money. Spend only on what does good." },
+              { label: "The dots", icon: "⚫", detail: "Each night Franklin marked a dot for every slip, so he could see if he was getting better." },
+              { label: "The weekly focus", icon: "📅", detail: "He gave one virtue his special attention each week, then moved to the next." },
+            ],
+          },
+          probe: {
+            type: "number",
+            prompt: "Franklin had 13 virtues and gave each one a full week of focus. A year has 52 weeks. How many times could he go through his whole list in one year?",
+            answer: 4,
+            hint: "Each trip through the list takes 13 weeks. How many groups of 13 fit into 52?",
+            mistakes: [
+              { match: "13", coach: "13 is how many virtues he had. Now ask how many 13-week rounds fit into a 52-week year." },
+              { match: "52", coach: "52 is the number of weeks. Each full trip through the list uses 13 of them." },
+              { match: "65", coach: "You added 13 and 52. Instead, divide the weeks in a year by the weeks in one round." },
+            ],
+            seconds: 30,
+          },
+          think: {
+            q: "Why did Franklin put a dot in his book for every slip?",
+            choices: [
+              "To punish himself",
+              "To show his friends how good he was",
+              "To see clearly whether he was improving over time",
+              "Because his teacher made him",
+            ],
+            answer: 2,
+            why: "Keeping a record let Franklin see his progress and notice which virtues still needed work.",
+            hints: [
+              "The dots were not a punishment. Think about what a scorecard helps you see.",
+              "The book was private. He was not trying to impress anyone.",
+              "",
+              "Franklin was a grown man running his own business. Nobody made him do it.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Franklin's dot chart is like a fitness tracker for character. A step counter does not walk for you, but seeing the number every day makes you want to beat it.",
+            example:
+              "In a week focused on order, Franklin might mark a dot on Monday for leaving papers scattered, and two dots on Tuesday. By Saturday, with fewer dots, he could see that his focus was working.",
+            simpler: {
+              q: "How many virtues did Franklin work on at one time, with special focus?",
+              choices: ["All thirteen at once", "One each week", "None, he just hoped"],
+              answer: 1,
+              why: "Franklin focused on one virtue a week so he would not be overwhelmed.",
+              hints: [
+                "Trying to fix everything at once usually fails. Franklin was smarter than that.",
+                "",
+                "Franklin made a real plan with a chart, not just a hope.",
+              ],
+            },
+          },
+        },
+        {
+          title: "A Wish or a Goal?",
+          teach:
+            "A wish and a goal can sound alike, but they are very different. A wish is a hope with no plan, like \"I want to be better at soccer.\" A goal has three parts. First, it is specific: it says exactly what you will do. Second, it is measurable: you can count or check it. Third, it has a deadline: a date when it should be done. So a goal sounds like \"I will make 20 free kicks in a row by the end of May.\" At the end of May, you will know for sure whether you made it. With a wish, you never really know, so it is easy to quit without noticing.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "A Wish",
+              points: [
+                "Vague: \"get better at math\"",
+                "No way to measure it",
+                "No deadline",
+                "Easy to forget about",
+              ],
+            },
+            right: {
+              title: "A Goal",
+              points: [
+                "Specific: \"master my times tables to 12\"",
+                "Measurable: \"all 144 facts with no mistakes\"",
+                "Deadline: \"by October 31\"",
+                "You know exactly when you have done it",
+              ],
+            },
+          },
+          probe: {
+            type: "sort",
+            prompt: "Is each one just a wish, or a real goal that is specific, measurable and has a deadline?",
+            buckets: ["Just a wish", "A real goal"],
+            items: [
+              { text: "I want to be healthier someday", bucket: 0 },
+              { text: "I will run one mile without stopping by June 1", bucket: 1 },
+              { text: "I hope to read more books", bucket: 0 },
+              { text: "I will finish three chapter books before winter break", bucket: 1 },
+              { text: "I'd like to be good at drawing", bucket: 0 },
+              { text: "I will save $60 for a new bike helmet by my birthday", bucket: 1 },
+            ],
+            hint: "For each one, ask: could you check on a certain date whether it is done? If not, it is a wish.",
+            mistakes: [
+              { match: "Read more books sorted as a goal", coach: "How many books, and by when? Without a number and a date, it is still a wish." },
+              { match: "Save $60 sorted as a wish", coach: "This one has an amount, $60, and a deadline, your birthday. That makes it a real goal." },
+              { match: "Healthier someday sorted as a goal", coach: "Someday is not a deadline, and healthier is not something you can count." },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "Which of these is a real goal?",
+            choices: [
+              "I want to get better at piano",
+              "I will play my recital song with no mistakes by March 1",
+              "I wish I could play like a professional",
+            ],
+            answer: 1,
+            why: "It is specific (one song), measurable (no mistakes) and has a deadline (March 1).",
+            hints: [
+              "Better how, and by when? This one has no number and no date.",
+              "",
+              "Wishing is a start, but there is nothing to measure and no deadline here.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A wish is like saying \"I want to go somewhere nice.\" A goal is like a map with a pin on the city and an arrival date. Only the map can actually get you there.",
+            example:
+              "Jada wished she could do more push-ups. She turned it into a goal: \"I will do 25 push-ups in a row by the last day of school.\" Now she could test herself every Saturday and see her number climb from 8 to 25.",
+            simpler: {
+              q: "Which part does a goal have that a wish usually lacks?",
+              choices: ["A deadline", "A good feeling", "A big dream"],
+              answer: 0,
+              why: "A goal says by when it will be done. Wishes usually have no date.",
+              hints: [
+                "",
+                "Wishes feel good too. Look for a part you could check on a calendar.",
+                "Dreams are great, but a dream alone has no date or number.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Small Steps Add Up",
+          teach:
+            "Big goals can feel too big to start. The secret is to break them into small daily steps. Suppose your goal is to read a whole shelf of books this year. That sounds huge. But if you read 20 pages every day, you read 140 pages a week and 7,300 pages in a year. No single day feels hard, yet the total is enormous. This works for almost anything: ten minutes of piano a day, five new vocabulary words a day, one dollar saved a day. The steps are small enough to do even on a busy day. And because you do them every day, they add up to something big.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "20 pages a day", back: "That is 140 pages a week and 7,300 pages in a year: a whole shelf of books." },
+              { front: "10 minutes of practice a day", back: "That is 70 minutes a week and over 60 hours in a year." },
+              { front: "5 new words a day", back: "That is 35 words a week and 1,825 words in a year." },
+              { front: "$1 saved a day", back: "That is $7 a week and $365 in a year." },
+            ],
+          },
+          probe: {
+            type: "number",
+            prompt: "Owen's goal is to learn new vocabulary words. He learns 5 new words every day for 30 days. How many new words has he learned by the end?",
+            answer: 150,
+            unit: "words",
+            hint: "Multiply the words per day by the number of days.",
+            mistakes: [
+              { match: "35", coach: "35 is one week of words. Owen kept going for 30 days, so multiply 5 by 30." },
+              { match: "15", coach: "Check the place value: 5 times 30 is a bigger number than 15." },
+            ],
+            seconds: 30,
+          },
+          think: {
+            q: "Lucas wants to read 7,300 pages this year. What is the best plan?",
+            choices: [
+              "Read nothing until summer, then read all day",
+              "Wait until he feels very motivated",
+              "Read only on rainy days",
+              "Read 20 pages every single day",
+            ],
+            answer: 3,
+            why: "Twenty pages a day for 365 days is 7,300 pages, and each day's step is small enough to keep.",
+            hints: [
+              "Saving it all for later makes the job so huge that most people give up.",
+              "Motivation comes and goes. A goal that waits for good feelings rarely gets done.",
+              "Rainy days are not regular enough to add up to a big number.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Small daily steps are like a dripping faucet filling a bucket. One drop seems like nothing, but leave it all night and the bucket is full.",
+            example:
+              "Grace wanted to save $365 for a telescope. Saving it all at once was impossible, but she put $1 into a jar every day. After 365 days she had exactly $365 and bought the telescope.",
+            simpler: {
+              q: "If you practice piano 10 minutes a day for 7 days, how many minutes is that?",
+              choices: ["17 minutes", "70 minutes", "700 minutes"],
+              answer: 1,
+              why: "10 minutes times 7 days is 70 minutes.",
+              hints: [
+                "That adds 10 and 7. Practice happens 7 times, so multiply.",
+                "",
+                "Too many! 10 times 7 is much smaller than 700.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Habits and Discipline",
+          teach:
+            "Daily steps are easiest when they become habits. A habit has three parts. The cue is a reminder that starts it, like seeing your practice book on your pillow. The routine is the action itself, like practicing for ten minutes. The reward is the good feeling after, like checking the day off on a chart. Do the same routine after the same cue for a few weeks and it starts to feel automatic. But some days you will not feel like it at all. That is where discipline comes in. Discipline means doing what you planned even when you do not feel like it. Feelings change like the weather, but a promise to yourself does not have to.",
+          visual: {
+            type: "sequence",
+            prompt: "The habit loop",
+            steps: [
+              "Cue: something reminds you, like your book on your pillow",
+              "Routine: you do the action, like reading 20 pages",
+              "Reward: you feel good, like checking off the day",
+              "Repeat: after weeks of this, the habit becomes automatic",
+            ],
+          },
+          probe: {
+            type: "match",
+            prompt: "Noah is building a habit of practicing guitar every afternoon. Match each part of his plan to the part of the habit loop.",
+            pairs: [
+              { left: "He leaves his guitar on its stand next to his desk", right: "Cue" },
+              { left: "He practices for fifteen minutes", right: "Routine" },
+              { left: "He colors in a box on his practice chart", right: "Reward" },
+              { left: "He practices even on a day he feels tired and grumpy", right: "Discipline" },
+            ],
+            hint: "The cue comes first and reminds you. The routine is the action. The reward comes after. Discipline is keeping going when you do not feel like it.",
+            mistakes: [
+              { match: "Swapped cue and reward", coach: "The cue happens before the action and reminds you. The reward comes after and feels good." },
+              { match: "Matched practicing while grumpy to routine", coach: "Practicing is the routine, but doing it when he does not feel like it shows something more. Which word means keeping your plan anyway?" },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "Ava planned to practice violin every day, but today she does not feel like it. What does discipline look like?",
+            choices: [
+              "She practices anyway, because she made a promise to herself",
+              "She skips it and waits until she feels excited again",
+              "She quits violin because it is too hard",
+              "She practices only if a friend is watching",
+            ],
+            answer: 0,
+            why: "Discipline means doing what you planned even when your feelings say no.",
+            hints: [
+              "",
+              "Waiting for the right feeling is the opposite of discipline. Feelings come and go.",
+              "One hard day is not a reason to give up a goal. Discipline carries you through it.",
+              "Discipline does not need an audience. It is a promise you keep to yourself.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A habit is like a path through a grassy field. The first time you walk it, it is hard to see. After walking the same way every day, the path is worn smooth and your feet find it on their own.",
+            example:
+              "Ethan wanted to stop forgetting his homework. His cue: he set his backpack by the front door before dinner. His routine: he packed his finished work into it. His reward: a gold star on the fridge chart. After a month he did it without thinking.",
+            simpler: {
+              q: "What starts a habit by reminding you to do it?",
+              choices: ["The reward", "The cue", "The deadline"],
+              answer: 1,
+              why: "The cue is the reminder that comes first and starts the routine.",
+              hints: [
+                "The reward comes at the end, after you have done the action.",
+                "",
+                "A deadline belongs to a goal. In a habit, the reminder has a different name.",
+              ],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sequence",
+        prompt: "Put the steps in order to turn a big dream into a daily habit.",
+        steps: [
+          "Pick something you want, like getting better at chess",
+          "Turn it into a goal that is specific, measurable and has a deadline",
+          "Break the goal into a small daily step",
+          "Choose a cue that reminds you to do the step each day",
+          "Track each day with a chart, like Franklin's little book",
+          "Keep going with discipline, even on days you do not feel like it",
+        ],
+      },
+      explain: {
+        prompt: "In your own words, explain how Benjamin Franklin worked on his character, and how you would turn a wish of your own into a goal and a daily habit.",
+        keyPoints: [
+          "Describes Franklin's plan: one virtue at a time and a daily record",
+          "Explains that a goal is specific, measurable and has a deadline",
+          "Explains that big goals are reached through small daily steps",
+          "Names the parts of a habit: cue, routine and reward",
+          "Explains that discipline means sticking to the plan when you do not feel like it",
+        ],
+      },
+      mastery: [
+        {
+          type: "cloze",
+          text: "A real goal is {0}, measurable and has a {1}. A habit starts with a {2} that reminds you, and {3} is doing what you planned even when you do not feel like it.",
+          blanks: [
+            { answers: ["specific"] },
+            { answers: ["deadline"] },
+            { answers: ["cue"] },
+            { answers: ["discipline"] },
+          ],
+          bank: ["specific", "deadline", "cue", "discipline", "vague", "reward", "wish"],
+          hint: "Think about the three parts of a goal, the first part of the habit loop, and the word for keeping your promise to yourself.",
+          mistakes: [
+            { match: "vague", coach: "Vague is the opposite of what a goal needs. A goal says exactly what you will do." },
+            { match: "reward", coach: "The reward comes at the end of the habit loop. What comes first and reminds you?" },
+            { match: "wish", coach: "A wish is a hope with no plan. The word you want means sticking to your plan." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "number",
+          prompt: "Sofia saves $2 every day toward a goal. How many days will it take her to save $90?",
+          answer: 45,
+          unit: "days",
+          hint: "Each day adds $2. How many groups of 2 make 90?",
+          mistakes: [
+            { match: "180", coach: "You multiplied. She already knows the total, $90. Divide it by $2 a day instead." },
+            { match: "90", coach: "That would be true at $1 a day. She saves $2 a day, so it takes fewer days." },
+          ],
+          seconds: 35,
+        },
+        {
+          type: "sort",
+          prompt: "Sort each piece of Isaac's plan to build a reading habit.",
+          buckets: ["Cue", "Routine", "Reward"],
+          items: [
+            { text: "His book waits on his pillow every night", bucket: 0 },
+            { text: "An alarm rings at 8:00 p.m.", bucket: 0 },
+            { text: "He reads 20 pages", bucket: 1 },
+            { text: "He writes one sentence about what he read", bucket: 1 },
+            { text: "He colors in that day on his chart", bucket: 2 },
+            { text: "After 30 days, he gets to pick a new book at the store", bucket: 2 },
+          ],
+          hint: "Cues come before and remind him. The routine is what he does. Rewards come after and feel good.",
+          mistakes: [
+            { match: "Alarm sorted as routine", coach: "The alarm does not do the reading. It reminds Isaac to start, so it is a cue." },
+            { match: "Coloring the chart sorted as routine", coach: "Coloring the chart comes after the reading and feels good. That makes it a reward." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "build",
+          prompt: "Build a real goal for learning to cook.",
+          tiles: ["I will", "cook dinner for my family", "by myself", "four times", "before the end of the month"],
+          distractors: ["someday", "if I feel like it"],
+          hint: "A goal says exactly what, how many, and by when.",
+          mistakes: [
+            { match: "Used someday", coach: "Someday is not a deadline. Pick a real date or time limit." },
+            { match: "Used if I feel like it", coach: "A goal that depends on your feelings needs discipline instead. Leave that tile out." },
+          ],
+          seconds: 40,
+        },
+      ],
+      check: [
+        {
+          q: "How did Benjamin Franklin work on his thirteen virtues?",
+          choices: [
+            "He tried to master all thirteen in one day",
+            "He focused on one virtue each week and kept a daily record",
+            "He asked a teacher to grade him each month",
+            "He wrote about them but never practiced",
+          ],
+          answer: 1,
+          why: "Franklin gave one virtue special focus each week and marked his slips in a little book every night.",
+        },
+        {
+          q: "Which of these is a real goal?",
+          choices: [
+            "I want to be a better swimmer",
+            "I hope I get faster someday",
+            "I wish I liked swimming more",
+            "I will swim four laps without stopping by July 1",
+          ],
+          answer: 3,
+          why: "It is specific, can be measured (four laps) and has a deadline (July 1).",
+        },
+        {
+          q: "What are the three parts of a habit?",
+          choices: ["Cue, routine and reward", "Wish, hope and dream", "Start, middle and end"],
+          answer: 0,
+          why: "A cue reminds you, the routine is the action, and the reward makes you glad you did it.",
+        },
+        {
+          q: "What does discipline mean?",
+          choices: [
+            "Doing only what you enjoy",
+            "Getting in trouble for breaking a rule",
+            "Doing what you planned even when you do not feel like it",
+            "Waiting for motivation before you start",
+          ],
+          answer: 2,
+          why: "Discipline keeps your promise to yourself when feelings say no.",
+        },
+        {
+          q: "If you read 20 pages a day for a year, about how many pages will you read?",
+          choices: ["About 365 pages", "About 7,300 pages", "About 2,000 pages"],
+          answer: 1,
+          why: "20 pages times 365 days is 7,300 pages: small steps add up to something big.",
+        },
+      ],
+      task: {
+        kind: "project",
+        prompt:
+          "Make your own Franklin-style chart. Pick one real goal (specific, measurable, with a deadline) and one small daily step toward it. Choose a cue and a reward. Draw a chart with a box for each day for two weeks, and mark it every day. At the end, show a parent your chart and tell them what you learned about discipline.",
+        rubric: [
+          "Writes a goal that is specific, measurable and has a deadline",
+          "Names a small daily step, a cue and a reward",
+          "Marks the chart honestly every day for two weeks",
+          "Explains what helped on hard days and what they would change next time",
+        ],
+      },
+    },
+    {
+      id: "leadership.ownership",
+      title: "Owning Your Results",
+      minutes: 30,
+      stage: "logic",
+      subject: "Other",
+      read: [
+        "On June 5, 1944, General Dwight D. Eisenhower was about to send more than 150,000 soldiers across the English Channel to land on the beaches of Normandy, France. It was the largest sea invasion in history, and he could not know whether it would work. That day he wrote a short note to be read if the landings failed. It said the decision to attack had been his, and that if there was any blame, it was his alone.",
+        "The landings on June 6, known as D-Day, succeeded, so the note was never needed. An aide saved it, and today it is kept at the Eisenhower Presidential Library. It shows something every leader needs: ownership.",
+        "Ownership means taking responsibility for your choices and their results, good or bad. The opposite is passing the buck, which means pushing the blame onto someone else. The phrase comes from old card games, where a marker called a buck showed whose turn it was to deal. President Harry Truman kept a sign on his desk that said \"The Buck Stops Here,\" meaning he would not pass responsibility to anyone else.",
+        "Owning your results does not mean blaming yourself for everything. Some things are outside your control, like the weather or another person's choices. Other things are inside your control: your effort, your preparation, your attitude and how you respond. Strong people spend their energy on what they can control.",
+        "When something goes wrong, ownership has three steps. Own it: say clearly what you did, without excuses. Fix it: do what you can to make it right. Learn from it: change something so it does not happen again.",
+        "People trust someone who owns their mistakes. Excuses might protect your pride for a moment, but ownership builds your character and earns respect that lasts.",
+      ].join("\n\n"),
+      keyIdeas: [
+        "Ownership means taking responsibility for your choices and their results, without excuses.",
+        "Passing the buck means pushing blame onto others. Truman's sign said the buck stops here.",
+        "Focus your energy on what you can control: effort, preparation, attitude and response.",
+        "When you make a mistake: own it, fix it, learn from it.",
+      ],
+      hook: {
+        text: "The day before the biggest sea invasion in history, General Eisenhower sat down and wrote a note that he hoped no one would ever read. It said that if the attack failed, the blame was his alone. Why would a commander write down his own blame before the battle even started?",
+      },
+      teach: [
+        {
+          title: "The Note in Eisenhower's Pocket",
+          teach:
+            "In June 1944, General Dwight D. Eisenhower commanded the Allied armies preparing to free France. He had to decide when to send more than 150,000 soldiers across the English Channel to the beaches of Normandy. The weather was bad, and many lives depended on his choice. On June 5 he gave the order. Then he wrote a short note in case the landings failed. It did not blame the weather, the soldiers or the other generals. It said the decision was his, and any blame was his alone. The D-Day landings succeeded the next day, and the note was never used. Eisenhower had already decided that the result would be his to own.",
+          visual: {
+            type: "timeline",
+            events: [
+              { year: 1944, label: "June 5: Eisenhower gives the order", detail: "After waiting a day for the weather, he decides the invasion will go ahead." },
+              { year: 1944, label: "June 5: The note", detail: "He writes a short note taking all the blame if the landings fail. In his tiredness he dates it July 5 by mistake." },
+              { year: 1944, label: "June 6: D-Day", detail: "Allied soldiers land on the beaches of Normandy, France. The landings succeed." },
+              { year: 1945, label: "The war in Europe ends", detail: "Less than a year later, in May 1945, the war in Europe is over." },
+            ],
+          },
+          probe: {
+            type: "highlight",
+            prompt: "Eisenhower took full ownership. Tap every sentence that sounds like him: owning the result instead of making excuses.",
+            sentences: [
+              "The decision to attack was mine.",
+              "If it failed, it was only because of the bad weather.",
+              "The soldiers and sailors did all that bravery could do.",
+              "Any blame or fault belongs to me alone.",
+              "The other generals gave me poor advice.",
+            ],
+            correct: [0, 2, 3],
+            hint: "Look for sentences where the speaker points to himself, or gives others credit, instead of pointing blame at others.",
+            mistakes: [
+              { match: "Tapped the bad weather sentence", coach: "Blaming the weather is an excuse. Eisenhower chose to own the decision, weather and all." },
+              { match: "Tapped the poor advice sentence", coach: "That pushes the blame onto the other generals. That is passing the buck, not ownership." },
+              { match: "Skipped the soldiers sentence", coach: "Giving the soldiers credit is part of ownership too: the leader takes the blame and shares the praise." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "Why is Eisenhower's note a powerful example of ownership?",
+            choices: [
+              "He blamed the weather ahead of time",
+              "He took responsibility before he even knew the result",
+              "He wanted to become famous for his writing",
+            ],
+            answer: 1,
+            why: "He accepted the blame in advance, so there would be no excuses no matter what happened.",
+            hints: [
+              "The note did the opposite. It did not blame the weather or anyone else.",
+              "",
+              "The note was private and meant only for a failure. It was not written for fame.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Eisenhower's note is like a team captain telling the coach before a big game, \"If we lose, it's on me.\" Saying it before the result shows it is not just words.",
+            example:
+              "Imagine leading a group project. Before you present, you tell your teacher, \"I chose our topic, so if it does not work out, that is on me.\" Your teammates now know you will not throw them under the bus, and they work harder for you.",
+            simpler: {
+              q: "In Eisenhower's note, who did he say would get the blame if the attack failed?",
+              choices: ["The weather", "His soldiers", "Himself"],
+              answer: 2,
+              why: "Eisenhower wrote that the blame would be his alone.",
+              hints: [
+                "The weather was bad, but he did not blame it.",
+                "He praised his soldiers instead of blaming them.",
+                "",
+              ],
+            },
+          },
+        },
+        {
+          title: "The Buck Stops Here",
+          teach:
+            "To pass the buck means to push the blame or a hard job onto someone else. The phrase comes from old card games, where a marker called a buck was passed around the table to show who would deal next. President Harry Truman kept a sign on his desk that read \"The Buck Stops Here.\" He meant that he could not pass his hardest decisions to anyone else. Notice the difference between an excuse and ownership. An excuse says, \"It's not my fault because...\" Ownership says, \"Here is what I did, and here is what I will do now.\" Excuses point outward at other people and things. Ownership points back at yourself.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "Passing the Buck",
+              points: [
+                "\"The ref was unfair.\"",
+                "\"My brother distracted me.\"",
+                "\"Nobody told me it was due.\"",
+                "Points outward at others",
+              ],
+            },
+            right: {
+              title: "The Buck Stops Here",
+              points: [
+                "\"I didn't practice my free throws enough.\"",
+                "\"I let myself get distracted.\"",
+                "\"I didn't check the due date.\"",
+                "Points back at what you can do",
+              ],
+            },
+          },
+          probe: {
+            type: "sort",
+            prompt: "Is each statement passing the buck, or taking ownership?",
+            buckets: ["Passing the buck", "Taking ownership"],
+            items: [
+              { text: "The dog knocked my science project off the table", bucket: 0 },
+              { text: "I left my project on the edge of the table where the dog could reach it", bucket: 1 },
+              { text: "My teacher never reminded us about the test", bucket: 0 },
+              { text: "I didn't write the test date in my planner", bucket: 1 },
+              { text: "We lost because the other team got lucky", bucket: 0 },
+              { text: "I missed three easy passes, so I will practice passing this week", bucket: 1 },
+            ],
+            hint: "Ask: is the speaker pointing at someone or something else, or at what they did themselves?",
+            mistakes: [
+              { match: "Dog knocked the project sorted as ownership", coach: "That sentence puts the blame on the dog. What could the speaker have done differently?" },
+              { match: "Missed passes sorted as passing the buck", coach: "This speaker names their own mistake and makes a plan. That is ownership." },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "What did Truman mean by \"The Buck Stops Here\"?",
+            choices: [
+              "He would not push responsibility onto anyone else",
+              "He liked to play card games at his desk",
+              "He would stop spending the government's money",
+              "Other people should make the hard choices",
+            ],
+            answer: 0,
+            why: "Truman meant that final responsibility for decisions stopped with him.",
+            hints: [
+              "",
+              "The phrase comes from card games, but the sign was about responsibility, not playing cards.",
+              "A buck can mean a dollar, but here it is the marker from old card games that means responsibility.",
+              "That is passing the buck, the exact opposite of what the sign says.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Passing the buck is like a game of hot potato with blame: everyone tosses it away as fast as they can. Ownership is catching the potato and holding it.",
+            example:
+              "Kai's team lost a robotics match because the robot's battery died. Kai could say, \"The battery was bad.\" Instead he says, \"I was in charge of charging it, and I forgot. I'll make a checklist for next time.\" That is the buck stopping with Kai.",
+            simpler: {
+              q: "Which statement is an excuse?",
+              choices: [
+                "I forgot, and I'm sorry",
+                "It's not my fault, the alarm didn't go off",
+                "I'll set two alarms next time",
+              ],
+              answer: 1,
+              why: "Blaming the alarm points outward instead of owning the result.",
+              hints: [
+                "Saying \"I forgot\" points back at yourself. That is ownership.",
+                "",
+                "Making a new plan is part of owning a mistake, not making an excuse.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Your Circle of Control",
+          teach:
+            "Owning your results does not mean blaming yourself for everything. Picture a circle. Inside the circle are the things you control: your effort, your preparation, your attitude, your words and how you respond. Outside the circle are things you cannot control: the weather, the referee's call, how other people act, and luck. People who make excuses spend their energy outside the circle, complaining about things they cannot change. People who take ownership spend their energy inside it. If it rains on your race day, you cannot stop the rain, but you can bring the right shoes and run your best. That is where real power is.",
+          visual: {
+            type: "hotspots",
+            title: "The Circle of Control",
+            center: "Me",
+            spots: [
+              { label: "My effort", icon: "💪", detail: "How hard I work is always up to me." },
+              { label: "My preparation", icon: "📝", detail: "I decide how ready I am: practice, study, packing what I need." },
+              { label: "My attitude", icon: "🙂", detail: "I choose how I think about a hard situation." },
+              { label: "My response", icon: "↩️", detail: "I cannot control what happens to me, but I control what I do next." },
+              { label: "Outside: weather and luck", icon: "🌧️", detail: "Rain, bad bounces and luck are outside my circle. I plan for them but do not blame them." },
+              { label: "Outside: other people", icon: "👥", detail: "I cannot control others' choices, only how I treat them and respond." },
+            ],
+          },
+          probe: {
+            type: "sort",
+            prompt: "It is the day of your piano recital. Sort each thing into what you can control and what you cannot.",
+            buckets: ["I can control it", "I cannot control it"],
+            items: [
+              { text: "How many times I practiced this week", bucket: 0 },
+              { text: "How many people come to watch", bucket: 1 },
+              { text: "Whether I get enough sleep the night before", bucket: 0 },
+              { text: "How well the performer before me plays", bucket: 1 },
+              { text: "Taking a deep breath before I start", bucket: 0 },
+              { text: "A thunderstorm outside during the recital", bucket: 1 },
+            ],
+            hint: "Ask: could I change this by my own choices? If yes, it is inside my circle.",
+            mistakes: [
+              { match: "Sleep sorted as cannot control", coach: "You choose when to go to bed. That is inside your circle." },
+              { match: "Audience size sorted as can control", coach: "You can invite people, but you cannot decide for them whether they come. That is outside your circle." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "Mila's soccer game is moved to a muddy field. What shows ownership?",
+            choices: [
+              "Complaining that the game is unfair",
+              "Refusing to play until the field is dry",
+              "Blaming the coach for not picking a better field",
+              "Wearing longer cleats and adjusting how she dribbles",
+            ],
+            answer: 3,
+            why: "She cannot control the mud, but she can control her preparation and how she plays.",
+            hints: [
+              "Complaining spends energy on something she cannot change.",
+              "Refusing to play gives up control of the one thing she could change: her own effort.",
+              "Blaming the coach is passing the buck. Focus on what Mila can do.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A sailor cannot control the wind, but he can adjust his sails. The wind is outside his circle. The sails are inside it.",
+            example:
+              "Ben got a harder teacher than his friends this year. He cannot change that. But he can do every assignment carefully, ask questions after class, and study ten extra minutes a night. By the end of the year, he has learned more than he expected.",
+            simpler: {
+              q: "Which of these is inside your circle of control?",
+              choices: ["The weather tomorrow", "How hard you study", "What your friend decides"],
+              answer: 1,
+              why: "Your effort, like how hard you study, is always up to you.",
+              hints: [
+                "Nobody can control the weather. Plan for it instead.",
+                "",
+                "Your friend makes their own choices. You control only your own.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Own It, Fix It, Learn From It",
+          teach:
+            "Everyone makes mistakes. What matters is what you do next. Ownership has three steps. First, own it: say plainly what you did, without adding \"but\" and an excuse. \"I forgot to feed the dog\" is ownership. \"I forgot, but my brother distracted me\" is not. Second, fix it: do what you can to make things right, like feeding the dog right away or paying for what you broke. Third, learn from it: change something so it does not happen again, like setting a reminder. People trust someone who does all three. Excuses protect your pride for a moment, but ownership builds respect that lasts.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "1. Own it", back: "Say plainly what you did, with no \"but.\" Example: \"I broke the lamp.\"" },
+              { front: "2. Fix it", back: "Make it as right as you can. Example: \"I'll pay for a new one from my savings.\"" },
+              { front: "3. Learn from it", back: "Change something for next time. Example: \"I won't throw the ball in the house anymore.\"" },
+              { front: "The \"but\" trap", back: "\"I'm sorry, but...\" usually turns ownership into an excuse. Leave off the \"but.\"" },
+            ],
+          },
+          probe: {
+            type: "build",
+            prompt: "Leah borrowed her neighbor's rake and left it out in the rain, and now it is rusty. Build her ownership statement in the right order.",
+            tiles: [
+              "I left your rake out in the rain, and it rusted.",
+              "That was my fault.",
+              "I'll clean off the rust, or buy you a new one with my savings.",
+              "From now on, I'll return anything I borrow the same day.",
+            ],
+            distractors: ["But nobody told me it was going to rain.", "It was already kind of old anyway."],
+            hint: "Own it first, then fix it, then learn from it. Leave out anything that sounds like an excuse.",
+            mistakes: [
+              { match: "Used the nobody told me tile", coach: "That is the \"but\" trap. It blames someone else for the weather. Leave it out." },
+              { match: "Used the already old tile", coach: "Saying it was old anyway makes the mistake seem smaller. That is an excuse, not ownership." },
+              { match: "Put the fix before owning it", coach: "First say plainly what happened. The fix comes after you own it." },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "Which apology shows full ownership?",
+            choices: [
+              "I'm sorry I broke your headphones, but you left them on the floor",
+              "Sorry, I guess",
+              "I broke your headphones. I'll replace them, and I'll be more careful with your things",
+            ],
+            answer: 2,
+            why: "It owns the mistake, fixes it and learns from it, with no excuses.",
+            hints: [
+              "The word \"but\" turns this into an excuse that blames the other person.",
+              "This says sorry without owning what happened or fixing anything.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Owning a mistake is like a doctor treating a cut. First you look at the wound honestly, then you clean and bandage it, then you figure out how not to get cut again.",
+            example:
+              "Zara missed her shift walking the neighbor's dog. She knocked on the door: \"I forgot to walk Max today. I'm sorry. I'll walk him now and do an extra walk Saturday for free. I've put a reminder on our family calendar.\" The neighbor hired her again.",
+            simpler: {
+              q: "What is the first step of owning a mistake?",
+              choices: ["Explain whose fault it really was", "Say plainly what you did", "Wait to see if anyone notices"],
+              answer: 1,
+              why: "Ownership starts by honestly saying what you did, with no excuses.",
+              hints: [
+                "Pointing to someone else's fault is passing the buck.",
+                "",
+                "Hiding a mistake is the opposite of owning it.",
+              ],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "highlight",
+        prompt: "Read Leo's story. Tap every sentence where Leo takes ownership.",
+        sentences: [
+          "Leo was supposed to water Mrs. Patel's tomato plants while she was away, but he forgot for three days.",
+          "When she came home, he said, \"I forgot to water your plants, and some of them wilted.\"",
+          "He almost added, \"It was really hot, so it's not all my fault,\" but he stopped himself.",
+          "He offered to buy two new tomato plants with his own money.",
+          "He wrote \"Water plants\" on a sticky note and stuck it on his bedroom door for the next time.",
+          "Leo's friend said he should have just blamed the heat wave.",
+        ],
+        correct: [1, 3, 4],
+      },
+      explain: {
+        prompt: "In your own words, explain what ownership means, and what you should do when you make a mistake.",
+        keyPoints: [
+          "Ownership means taking responsibility for your choices and results without excuses",
+          "Passing the buck means blaming others instead",
+          "Focus on what you can control: effort, preparation, attitude and response",
+          "The three steps: own it, fix it, learn from it",
+        ],
+      },
+      mastery: [
+        {
+          type: "cloze",
+          text: "Pushing blame onto someone else is called passing the {0}. President {1} kept a desk sign saying it stops with him. Before D-Day, General {2} wrote a note saying any blame was his alone.",
+          blanks: [{ answers: ["buck"] }, { answers: ["Truman", "Harry Truman"] }, { answers: ["Eisenhower", "Dwight Eisenhower"] }],
+          bank: ["buck", "Truman", "Eisenhower", "ball", "Lincoln", "Washington"],
+          hint: "Think of the old card game marker, the president with the desk sign, and the general who planned D-Day.",
+          mistakes: [
+            { match: "ball", coach: "Close! People say \"drop the ball\" for a mistake, but the phrase about blame uses the card-game marker." },
+            { match: "Lincoln", coach: "Lincoln was a great leader, but the desk sign belonged to a twentieth-century president." },
+            { match: "Washington", coach: "Washington led long before D-Day. Think of the general of World War II." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "match",
+          prompt: "Match each situation with the part of ownership it shows.",
+          pairs: [
+            { left: "\"I spilled juice on your rug.\"", right: "Own it" },
+            { left: "Scrubbing the stain out right away", right: "Fix it" },
+            { left: "Keeping drinks in the kitchen from now on", right: "Learn from it" },
+            { left: "\"The cup was too slippery.\"", right: "Passing the buck" },
+          ],
+          hint: "Owning names what you did. Fixing makes it right now. Learning changes the future. Blaming the cup is an excuse.",
+          mistakes: [
+            { match: "Swapped fix it and learn from it", coach: "Fixing happens right now to repair the damage. Learning is a change for next time." },
+            { match: "Matched the slippery cup to own it", coach: "Blaming the cup points away from yourself. That is passing the buck." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "sort",
+          prompt: "Before a big spelling bee, sort what is inside and outside your circle of control.",
+          buckets: ["Inside my circle", "Outside my circle"],
+          items: [
+            { text: "Studying the word list every night", bucket: 0 },
+            { text: "Which words the judge picks", bucket: 1 },
+            { text: "Asking for a word's definition before spelling it", bucket: 0 },
+            { text: "How well the other spellers have studied", bucket: 1 },
+            { text: "Staying calm if I miss a word", bucket: 0 },
+          ],
+          hint: "Ask: can I change this with my own choices?",
+          mistakes: [
+            { match: "Judge's words sorted as inside", coach: "The judge chooses the words. You can only control how ready you are for them." },
+            { match: "Staying calm sorted as outside", coach: "Your attitude and response are always inside your circle, even when it is hard." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "build",
+          prompt: "Build an ownership statement for a soccer player whose missed shot lost the game.",
+          tiles: ["I missed", "an open shot,", "and I'll practice", "shooting", "every day this week"],
+          distractors: ["but the goalie got lucky", "because the ball was flat"],
+          hint: "Own the mistake and make a plan, with no excuses.",
+          mistakes: [
+            { match: "Used the lucky goalie tile", coach: "Blaming the goalie's luck points outward. Ownership points back at what you can do." },
+            { match: "Used the flat ball tile", coach: "Blaming the ball is an excuse. Leave it out." },
+          ],
+          seconds: 35,
+        },
+      ],
+      check: [
+        {
+          q: "What does it mean to pass the buck?",
+          choices: [
+            "To lend someone a dollar",
+            "To push blame or responsibility onto someone else",
+            "To win a card game",
+          ],
+          answer: 1,
+          why: "Passing the buck means shifting the blame or a hard job to another person.",
+        },
+        {
+          q: "What did General Eisenhower's note before D-Day say?",
+          choices: [
+            "That any blame for a failed attack was his alone",
+            "That the weather would be to blame if it failed",
+            "That the soldiers had not trained hard enough",
+            "That the attack should be cancelled",
+          ],
+          answer: 0,
+          why: "Eisenhower wrote that the decision was his and any blame was his alone.",
+        },
+        {
+          q: "Which of these is inside your circle of control?",
+          choices: ["The referee's calls", "The weather on game day", "How the other team plays", "How much you practiced"],
+          answer: 3,
+          why: "Your effort and preparation are always within your control.",
+        },
+        {
+          q: "What are the three steps of owning a mistake?",
+          choices: [
+            "Hide it, wait, hope",
+            "Explain, blame, move on",
+            "Own it, fix it, learn from it",
+          ],
+          answer: 2,
+          why: "Say what you did, make it right, and change something so it does not happen again.",
+        },
+        {
+          q: "Why do people trust someone who owns their mistakes?",
+          choices: [
+            "Because they never make any mistakes",
+            "Because they are honest and fix what goes wrong",
+            "Because they always have a good excuse ready",
+          ],
+          answer: 1,
+          why: "Ownership shows honesty and responsibility, which earns lasting respect.",
+        },
+      ],
+      task: {
+        kind: "write",
+        prompt:
+          "Think of a real time you made a mistake, big or small. Write one or two paragraphs: describe what happened, then write what you could have said using the three steps (own it, fix it, learn from it). Finally, describe one thing in your life right now that is inside your circle of control that you want to work on.",
+        rubric: [
+          "Describes a specific, real mistake honestly",
+          "Writes an ownership statement with all three steps and no excuses",
+          "Names something inside their circle of control and a plan for it",
+          "Writing is clear and in complete sentences",
+        ],
+      },
+    },
+    {
+      id: "leadership.resilience",
+      title: "Bouncing Back from Failure",
+      minutes: 30,
+      stage: "logic",
+      subject: "Other",
+      read: [
+        "In 1901, two brothers who ran a bicycle shop in Dayton, Ohio, packed up their glider at Kitty Hawk, North Carolina, and headed home disappointed. Wilbur and Orville Wright's glider did not lift nearly as well as they had expected. Instead of quitting, they asked why. They found that the tables of numbers everyone used for wing design were wrong. So they built a small wind tunnel in their shop and tested hundreds of small model wings, more than 200 shapes. On December 17, 1903, Orville made the first powered, controlled airplane flight. It lasted 12 seconds and went 120 feet.",
+        "The ability to bounce back from failure is called resilience. Many great people failed often before they succeeded.",
+        "Thomas Edison and his team tested thousands of materials before they found a filament that let a light bulb glow for a long time. Each failure told them one more thing that did not work. Years later, in 1914, a huge fire destroyed much of Edison's factory in West Orange, New Jersey. He was 67 years old. He began rebuilding right away.",
+        "Abraham Lincoln faced many setbacks. He lost his first election in 1832. A store he ran with a partner failed and left him in debt that took years to pay. He lost two races for the United States Senate, in 1855 and 1858. In 1860, he was elected president.",
+        "Resilient people think about failure in a special way. Instead of saying \"I'm just not good at this,\" they say \"I'm not good at this yet.\" They treat a failure as information, like the Wrights' wrong wing tables. Bouncing back has four steps: feel the disappointment, find the lesson, change your plan and try again.",
+        "Failure is not the opposite of success. Very often it is the path to it.",
+      ].join("\n\n"),
+      keyIdeas: [
+        "Resilience is the ability to bounce back from failure.",
+        "Edison, Lincoln and the Wright brothers all failed many times before they succeeded.",
+        "A failure is information: it shows you what to change.",
+        "To bounce back: feel it, find the lesson, change your plan, try again.",
+      ],
+      hook: {
+        text: "In 1901, two brothers packed up their glider and went home disappointed. It did not fly the way they had planned, and they were not sure flying was possible at all. Two years later, those same brothers made history. What did they do in between that changed everything?",
+      },
+      teach: [
+        {
+          title: "Edison's Thousands of Tries",
+          teach:
+            "Thomas Edison is famous for his inventions, but he was just as good at failing. To make a light bulb that glowed for a long time, he needed a filament, the thin thread inside the bulb that glows. Most materials burned up in moments. Edison and his team tested thousands of materials, from plant fibers to metals. Each failed test taught them something: this material does not work, so try something else. Finally they found that a thread of carbonized bamboo could glow for more than a thousand hours. Years later, in 1914, a huge fire destroyed much of Edison's factory. He was 67 years old. Instead of giving up, he began rebuilding right away.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Filament", back: "The thin thread inside a light bulb that glows when electricity passes through it." },
+              { front: "The problem", back: "Most materials burned out in moments. Edison needed one that would last for hours." },
+              { front: "Thousands of tests", back: "Edison's team tried thousands of materials. Each failure crossed one more off the list." },
+              { front: "Carbonized bamboo", back: "A bamboo thread, baked into carbon, could glow for more than a thousand hours." },
+              { front: "The 1914 fire", back: "A fire destroyed much of his factory when he was 67. He started rebuilding right away." },
+            ],
+          },
+          probe: {
+            type: "cloze",
+            text: "Edison needed a {0} that would glow for a long time. His team tested {1} of materials, and each failed test showed them what did not {2}. After a fire destroyed his factory in 1914, he began {3} right away.",
+            blanks: [
+              { answers: ["filament"] },
+              { answers: ["thousands"] },
+              { answers: ["work"] },
+              { answers: ["rebuilding"] },
+            ],
+            bank: ["filament", "thousands", "work", "rebuilding", "battery", "two", "retiring"],
+            hint: "Think of the thin glowing thread, how many materials they tried, and what Edison did after the fire.",
+            mistakes: [
+              { match: "battery", coach: "A battery stores power. The part that glows inside a bulb is a thin thread with a different name." },
+              { match: "two", coach: "Edison's team tried far more than two. It was a huge number." },
+              { match: "retiring", coach: "Edison was 67, but he did not quit. He started over." },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "How did Edison think about each failed filament test?",
+            choices: [
+              "As proof that he was a bad inventor",
+              "As useful information about what did not work",
+              "As a sign that he should give up",
+            ],
+            answer: 1,
+            why: "Each failure crossed one more material off the list and brought him closer to the answer.",
+            hints: [
+              "If he thought that, he would have stopped after the first few tries.",
+              "",
+              "He kept going through thousands of tests. Failure did not make him quit.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Searching for the right filament was like trying keys on a giant key ring. Every key that does not fit is not wasted. It is one fewer key left to try.",
+            example:
+              "Lily is trying to bake bread, but the first loaf comes out flat. She learns her yeast was too old. The second is too dense, so she kneads longer. The third loaf is perfect. Each flop told her exactly what to change.",
+            simpler: {
+              q: "What is a filament?",
+              choices: ["The glass part of a light bulb", "The thin thread inside a bulb that glows", "The switch on the wall"],
+              answer: 1,
+              why: "The filament is the thin thread that glows when electricity passes through it.",
+              hints: [
+                "The glass protects the inside, but it is not what glows.",
+                "",
+                "The switch turns the power on. The glowing part is inside the bulb.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Lincoln's Long Road",
+          teach:
+            "Abraham Lincoln grew up poor on the frontier, with very little school. As a young man, he ran for the Illinois legislature in 1832 and lost. He and a partner opened a store, but it failed, leaving Lincoln in debt that took him years to pay back. He did pay it all. He kept studying, became a lawyer, and later won a seat in Congress. Then came more setbacks. He tried for the United States Senate in 1855 and lost. He tried again in 1858 and lost again. Many people would have quit. But in 1860, Abraham Lincoln was elected president, and he led the nation through the Civil War.",
+          visual: {
+            type: "timeline",
+            events: [
+              { year: 1832, label: "Loses his first election", detail: "Lincoln runs for the Illinois legislature and loses." },
+              { year: 1833, label: "His store fails", detail: "The store he ran with a partner fails, leaving him in debt that he takes years to repay." },
+              { year: 1834, label: "Wins on his second try", detail: "Lincoln is elected to the Illinois legislature." },
+              { year: 1846, label: "Elected to Congress", detail: "He wins a seat in the U.S. House of Representatives." },
+              { year: 1855, label: "Loses a Senate race", detail: "Lincoln tries for the U.S. Senate and loses." },
+              { year: 1858, label: "Loses another Senate race", detail: "After famous debates with Stephen Douglas, he loses again." },
+              { year: 1860, label: "Elected president", detail: "Two years after his last loss, Lincoln is elected the 16th president." },
+            ],
+          },
+          probe: {
+            type: "place",
+            prompt: "Place each moment from Lincoln's long road on the timeline.",
+            min: 1825,
+            max: 1865,
+            step: 1,
+            tolerance: 1,
+            items: [
+              { label: "Loses his first election", value: 1832 },
+              { label: "Loses his second Senate race", value: 1858 },
+              { label: "Elected president", value: 1860 },
+            ],
+            hint: "His first loss was in the early 1830s. His last Senate loss came just two years before he became president in 1860.",
+            mistakes: [
+              { match: "Placed the presidency before the Senate loss", coach: "Lincoln lost the Senate race first, then bounced back to become president two years later." },
+              { match: "Placed the first election in the 1840s", coach: "His very first try came when he was a young man, in 1832." },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "What does Lincoln's story teach about failure?",
+            choices: [
+              "If you lose once, you are not meant for it",
+              "Only lucky people succeed",
+              "Setbacks can be part of the road to success",
+              "You should never try anything big",
+            ],
+            answer: 2,
+            why: "Lincoln lost several times, kept going, and became president.",
+            hints: [
+              "Lincoln lost his first election and many after it, yet he became president.",
+              "Lincoln worked hard for decades. His success was not just luck.",
+              "",
+              "Lincoln tried big things again and again, even after losing.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Lincoln's career was like climbing a mountain with switchbacks. Sometimes the trail seemed to go sideways or even down, but every step kept him on the mountain.",
+            example:
+              "In 1858, Lincoln lost a Senate race to Stephen Douglas. But their debates were printed in newspapers, and people across the country learned who Lincoln was. The loss helped him become known, and two years later he won the presidency.",
+            simpler: {
+              q: "In what year was Lincoln elected president?",
+              choices: ["1832", "1858", "1860"],
+              answer: 2,
+              why: "Lincoln was elected president in 1860, two years after losing a Senate race.",
+              hints: [
+                "1832 was the year of his very first election, which he lost.",
+                "1858 was a Senate race he lost.",
+                "",
+              ],
+            },
+          },
+        },
+        {
+          title: "The Wright Brothers' Wind Tunnel",
+          teach:
+            "Wilbur and Orville Wright ran a bicycle shop in Dayton, Ohio. In 1900 and 1901 they tested gliders at Kitty Hawk, North Carolina, but the gliders lifted much less than the numbers predicted. They went home discouraged. Then they asked why. They suspected the tables of numbers everyone used for wing design were wrong. To find out, they built a small wind tunnel in their shop and tested more than 200 tiny model wing shapes. Their own careful data was better. Their 1902 glider flew beautifully. On December 17, 1903, at Kitty Hawk, Orville flew their engine-powered Flyer for 12 seconds and 120 feet. It was the first powered, controlled airplane flight.",
+          visual: {
+            type: "sequence",
+            prompt: "How the Wright brothers turned failure into flight",
+            steps: [
+              "1900-1901: Their gliders lift much less than expected",
+              "They ask why, and suspect the wing tables are wrong",
+              "They build a wind tunnel and test over 200 wing shapes",
+              "1902: Their new glider, built with their own data, flies well",
+              "December 17, 1903: the first powered, controlled airplane flight",
+            ],
+          },
+          probe: {
+            type: "number",
+            prompt: "On December 17, 1903, Orville Wright's first flight went 120 feet in 12 seconds. On average, how many feet did the Flyer travel each second?",
+            answer: 10,
+            unit: "feet per second",
+            hint: "Divide the distance by the time.",
+            mistakes: [
+              { match: "1440", coach: "You multiplied. Speed is distance divided by time." },
+              { match: "132", coach: "You added the numbers. Divide 120 feet by 12 seconds instead." },
+              { match: "108", coach: "You subtracted. Speed is distance divided by time." },
+            ],
+            seconds: 30,
+          },
+          think: {
+            q: "What did the Wright brothers do after their 1901 glider disappointed them?",
+            choices: [
+              "They found out why by testing wing shapes in a wind tunnel",
+              "They gave up and went back to bicycles for good",
+              "They blamed the wind at Kitty Hawk",
+            ],
+            answer: 0,
+            why: "They treated the failure as a clue, tested over 200 wing shapes, and fixed the problem.",
+            hints: [
+              "",
+              "They were discouraged, but they did not quit. They went looking for the reason.",
+              "Blaming the wind would be an excuse. They looked for something they could fix.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "The Wrights were like detectives. The failed glider was the clue, the wind tunnel was the magnifying glass, and the bad wing tables were the culprit.",
+            example:
+              "Mateo's model rocket kept tipping over at launch. Instead of quitting, he tested three different fin sizes on the same rocket. The biggest fins made it fly straight. Like the Wrights, he tested to find the real problem.",
+            simpler: {
+              q: "How long did the first powered airplane flight last?",
+              choices: ["12 seconds", "12 minutes", "12 hours"],
+              answer: 0,
+              why: "Orville's first flight lasted just 12 seconds, but it changed history.",
+              hints: [
+                "",
+                "Much shorter than that! The first flight was very brief.",
+                "No early plane could stay up that long. The first flight was very short.",
+              ],
+            },
+          },
+        },
+        {
+          title: "How to Bounce Back",
+          teach:
+            "Resilience means bouncing back after a failure. It starts with how you think. Someone who says \"I'm just bad at this\" sees failure as a final verdict. Someone resilient adds one powerful word: \"I'm not good at this yet.\" They see failure as information, the way the Wrights saw their glider. Bouncing back has four steps. First, feel it: it is normal to be disappointed, so let yourself feel it for a while. Second, find the lesson: ask what went wrong and why. Third, change your plan: do something differently. Fourth, try again. Failure is not the opposite of success. Very often it is the path to it.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "Giving Up Thinking",
+              points: [
+                "\"I'm just bad at this.\"",
+                "\"I failed, so I'm a failure.\"",
+                "\"Why bother trying again?\"",
+                "Sees failure as the end",
+              ],
+            },
+            right: {
+              title: "Bouncing Back Thinking",
+              points: [
+                "\"I'm not good at this yet.\"",
+                "\"I failed this time. What can I learn?\"",
+                "\"What should I change for next time?\"",
+                "Sees failure as information",
+              ],
+            },
+          },
+          probe: {
+            type: "highlight",
+            prompt: "Grace failed her first piano exam. Tap every thought that shows resilience.",
+            sentences: [
+              "I'm just not a music person.",
+              "I'm disappointed, and that's okay for today.",
+              "I rushed the fast part, so I'll practice it slowly with a metronome.",
+              "Everyone else is naturally better than me.",
+              "I can't play the fast part yet, but I can learn it.",
+              "I'll never try another exam.",
+            ],
+            correct: [1, 2, 4],
+            hint: "Look for thoughts that feel the disappointment, find a lesson, make a new plan, or use the word yet.",
+            mistakes: [
+              { match: "Tapped not a music person", coach: "That treats one failure as a final verdict about who she is. Resilience says \"not yet.\"" },
+              { match: "Skipped the disappointed thought", coach: "Feeling disappointed is the first step of bouncing back. It is normal and healthy." },
+              { match: "Tapped never try again", coach: "Quitting is the opposite of bouncing back." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "Jack failed his first try at the swim test. Which thought shows resilience?",
+            choices: [
+              "I'm just a bad swimmer",
+              "The test is unfair",
+              "Swimming is pointless anyway",
+              "I can't do it yet, so I'll practice my breathing and try next week",
+            ],
+            answer: 3,
+            why: "It uses the word yet, finds a lesson and makes a new plan.",
+            hints: [
+              "That turns one failure into a final verdict. Resilient people say \"not yet.\"",
+              "Blaming the test is an excuse, not a lesson.",
+              "Pretending it does not matter is a way of giving up.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Resilience is like a rubber ball. Drop a lump of clay and it goes splat. Drop a rubber ball and it bounces back up. The fall is the same; what happens next is different.",
+            example:
+              "Ruth tried out for the basketball team and was cut. She felt sad for a weekend. Then she asked the coach what to work on: dribbling with her left hand. She practiced every day all year, tried out again, and made the team.",
+            simpler: {
+              q: "What small word turns \"I can't do it\" into a resilient thought?",
+              choices: ["Never", "Yet", "Maybe"],
+              answer: 1,
+              why: "\"I can't do it yet\" means you are still learning and can improve.",
+              hints: [
+                "Never makes it sound permanent. That is the opposite of resilience.",
+                "",
+                "Maybe is unsure. The resilient word says you will get there with practice.",
+              ],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sequence",
+        prompt: "Put the four steps of bouncing back in order, using the Wright brothers as an example.",
+        steps: [
+          "Feel it: they went home from Kitty Hawk disappointed",
+          "Find the lesson: the wing tables everyone used were wrong",
+          "Change the plan: build a wind tunnel and test over 200 wing shapes",
+          "Try again: the 1902 glider flew, and in 1903 they made the first powered flight",
+        ],
+      },
+      explain: {
+        prompt: "In your own words, what is resilience? Use one example from Edison, Lincoln or the Wright brothers, and explain the steps for bouncing back from a failure.",
+        keyPoints: [
+          "Resilience is bouncing back after failure",
+          "Gives a correct example from Edison, Lincoln or the Wright brothers",
+          "Explains that failure can be information or a lesson",
+          "Names the steps: feel it, find the lesson, change your plan, try again",
+        ],
+      },
+      mastery: [
+        {
+          type: "match",
+          prompt: "Match each person to the setback they bounced back from.",
+          pairs: [
+            { left: "Thomas Edison", right: "Thousands of failed light bulb filaments" },
+            { left: "Abraham Lincoln", right: "Losing two races for the U.S. Senate" },
+            { left: "The Wright brothers", right: "Gliders that would not lift as expected" },
+          ],
+          hint: "Think about who was an inventor, who was a politician, and who ran a bicycle shop.",
+          mistakes: [
+            { match: "Matched Lincoln to the filaments", coach: "Lincoln was a lawyer and leader. The filaments belong to the inventor." },
+            { match: "Matched Edison to the gliders", coach: "Edison worked on light bulbs. The gliders belong to the brothers from Dayton." },
+          ],
+          seconds: 35,
+        },
+        {
+          type: "place",
+          prompt: "Place each comeback moment on the timeline.",
+          min: 1825,
+          max: 1920,
+          step: 1,
+          tolerance: 1,
+          items: [
+            { label: "Lincoln is elected president", value: 1860 },
+            { label: "The Wright brothers' first powered flight", value: 1903 },
+            { label: "Fire destroys much of Edison's factory", value: 1914 },
+          ],
+          hint: "Lincoln came first, before the Civil War. The first flight was at the start of the 1900s, and Edison's fire came about eleven years later.",
+          mistakes: [
+            { match: "Placed the first flight after the fire", coach: "The Wrights flew in 1903. Edison's factory fire came later, in 1914." },
+            { match: "Placed Lincoln after 1900", coach: "Lincoln lived in the 1800s and was elected just before the Civil War." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "number",
+          prompt: "The Wright brothers ran their first glider tests at Kitty Hawk in 1900. How many years later was their first powered flight in 1903?",
+          answer: 3,
+          unit: "years",
+          hint: "Subtract 1900 from 1903.",
+          mistakes: [
+            { match: "2", coach: "1901 was their disappointing year, but count from the first tests in 1900." },
+            { match: "1903", coach: "That is the year of the flight. Subtract to find how many years passed." },
+          ],
+          seconds: 25,
+        },
+        {
+          type: "build",
+          prompt: "Build a resilient thought for someone who failed a math test.",
+          tiles: ["I don't understand fractions", "yet,", "so I'll ask for help", "and practice", "before the next test"],
+          distractors: ["because I'm bad at math", "so I'll stop trying"],
+          hint: "Use the word yet, then make a plan. Leave out anything that sounds like giving up.",
+          mistakes: [
+            { match: "Used bad at math", coach: "That turns one failure into a final verdict. Resilience says \"not yet.\"" },
+            { match: "Used stop trying", coach: "Stopping is the opposite of bouncing back." },
+          ],
+          seconds: 35,
+        },
+      ],
+      check: [
+        {
+          q: "What is resilience?",
+          choices: [
+            "Never failing at anything",
+            "Being naturally talented",
+            "Avoiding hard things so you cannot fail",
+            "The ability to bounce back from failure",
+          ],
+          answer: 3,
+          why: "Resilience is about how you respond after failure, not avoiding it.",
+        },
+        {
+          q: "What did the Wright brothers build to discover why their gliders did not lift well?",
+          choices: ["A bigger engine", "A wind tunnel", "A taller hill"],
+          answer: 1,
+          why: "They built a small wind tunnel and tested more than 200 wing shapes.",
+        },
+        {
+          q: "Which setback did Abraham Lincoln face before becoming president?",
+          choices: [
+            "He lost two races for the U.S. Senate",
+            "He was never allowed to vote",
+            "He failed his pilot's test",
+          ],
+          answer: 0,
+          why: "Lincoln lost Senate races in 1855 and 1858, then was elected president in 1860.",
+        },
+        {
+          q: "What did Edison do after a fire destroyed much of his factory in 1914?",
+          choices: [
+            "He retired",
+            "He sold his company",
+            "He began rebuilding right away",
+            "He moved to another country",
+          ],
+          answer: 2,
+          why: "At 67, Edison started rebuilding right away instead of giving up.",
+        },
+      ],
+      task: {
+        kind: "speak",
+        prompt:
+          "Tell your family the story of a comeback, in about two minutes. It can be Edison, Lincoln, the Wright brothers, or a real time you failed and tried again. Explain the setback, the lesson learned, what changed, and how it turned out. End with one sentence about what you will try again yourself.",
+        rubric: [
+          "Tells the story clearly with accurate facts",
+          "Explains the lesson that came from the failure",
+          "Shows how the plan changed before trying again",
+          "Ends with a personal sentence about something they will keep trying",
+        ],
+      },
+    },
+    {
+      id: "leadership.service",
+      title: "Leading by Serving",
+      minutes: 30,
+      stage: "rhetoric",
+      subject: "Speaking",
+      read: [
+        "In December 1783, the American Revolution was over. General George Washington was the most famous and admired man in the country. He commanded an army that had just won its war. In many times and places, a victorious general with a loyal army has used it to take power for himself. Washington did the opposite. On December 23, 1783, he walked into the meeting of Congress at Annapolis, Maryland, handed back his commission as commander, and went home to his farm at Mount Vernon.",
+        "Americans compared him to Cincinnatus, a farmer of ancient Rome. According to the Roman historian Livy, Cincinnatus was called from his plow to lead Rome in an emergency. He won, gave up his power after about sixteen days, and went back to farming. The city of Cincinnati, Ohio, is named after a society of officers who honored that example.",
+        "Washington's choice shows a great truth about leadership: the best leaders serve. A serving leader asks, \"What does my team need?\" instead of \"What can my team do for me?\" Years later, after two terms as president, Washington again stepped down on his own, in 1797.",
+        "Serving leaders are also stewards. A steward takes care of something that belongs to someone else, or that was trusted to them, and tries to leave it better than they found it. You can be a steward of a borrowed book, your family's home, money you are given, or a park you visit.",
+        "Serving starts close to home. As a young man in Philadelphia, Benjamin Franklin helped start a lending library in 1731 and a volunteer fire company in 1736. He saw needs in his community and organized people to meet them. You can do the same: notice a need, ask the people you want to help, make a plan, and get to work.",
+        "Real leaders measure their success by how much better off the people around them are.",
+      ].join("\n\n"),
+      keyIdeas: [
+        "Serving leaders put the needs of their team and community ahead of their own power.",
+        "Washington gave up power twice, in 1783 and 1797, following the example of Cincinnatus.",
+        "A steward takes care of what was trusted to them and leaves it better than they found it.",
+        "Service starts by noticing a need, asking, planning and acting.",
+      ],
+      hook: {
+        text: "Imagine winning a war, commanding a loyal army, and being the most admired person in the country. You could ask for almost anything. In 1783, George Washington had all of that, and he chose to give his power back and go home to his farm. Why would a leader walk away from that much power?",
+      },
+      teach: [
+        {
+          title: "Washington and Cincinnatus",
+          teach:
+            "George Washington took command of the American army in 1775. For eight hard years he led it through cold winters, defeats and finally victory. By 1783 he was the most admired man in America. Throughout history, many winning generals have used their armies to seize power. Washington did the opposite. On December 23, 1783, he went before Congress at Annapolis, Maryland, and handed back his commission. Then he went home to his farm. People compared him to Cincinnatus, a farmer of ancient Rome who, according to the historian Livy, was called from his plow to save the city, then gave up his power after about sixteen days and went back to his fields.",
+          visual: {
+            type: "timeline",
+            events: [
+              { year: 1775, label: "Washington takes command", detail: "Congress makes Washington commander of the Continental Army." },
+              { year: 1783, label: "Washington resigns his commission", detail: "On December 23, at Annapolis, he hands his power back to Congress and goes home to Mount Vernon." },
+              { year: 1789, label: "First president", detail: "Washington is called back to serve as the first president of the United States." },
+              { year: 1797, label: "Steps down again", detail: "After two terms, he chooses to step down and return home, setting an example for later presidents." },
+            ],
+          },
+          probe: {
+            type: "number",
+            prompt: "Washington took command of the army in 1775 and handed back his commission in 1783. How many years did he serve as commander?",
+            answer: 8,
+            unit: "years",
+            hint: "Subtract the earlier year from the later year.",
+            mistakes: [
+              { match: "3558", coach: "You added the years. Subtract 1775 from 1783 instead." },
+              { match: "7", coach: "Check your subtraction: 1775 plus 8 is 1783." },
+              { match: "18", coach: "Check your subtraction again. From 1775 to 1783 is less than ten years." },
+            ],
+            seconds: 25,
+          },
+          think: {
+            q: "Why do people compare Washington to Cincinnatus?",
+            choices: [
+              "Both were farmers who gave up power and went home after serving",
+              "Both were kings who ruled for life",
+              "Both lived in ancient Rome",
+            ],
+            answer: 0,
+            why: "Each was called to lead in a crisis, then gave up power instead of keeping it.",
+            hints: [
+              "",
+              "Neither was a king. The point is that they gave power back.",
+              "Only Cincinnatus lived in Rome. Washington lived in America about 2,200 years later.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A serving leader is like a lifeguard. The lifeguard has authority at the pool, but it is all for the swimmers' safety. When the shift is over, the lifeguard hands the chair to the next person and goes home.",
+            example:
+              "When Washington resigned in 1783, he could have kept command of a victorious army. Instead he gave his power back to the people's representatives. That choice helped show the world that the new country would be ruled by laws, not by a general.",
+            simpler: {
+              q: "What did Washington do in December 1783?",
+              choices: ["Crowned himself king", "Handed back his command and went home", "Started a new war"],
+              answer: 1,
+              why: "Washington gave his commission back to Congress and returned to his farm.",
+              hints: [
+                "Washington refused to become a king. He did the opposite.",
+                "",
+                "The war had just ended. Washington wanted peace and to go home.",
+              ],
+            },
+          },
+        },
+        {
+          title: "The Leader Serves the Team",
+          teach:
+            "A serving leader asks, \"What does my team need?\" instead of \"What can my team do for me?\" Washington showed this in March 1783, when some of his officers were angry because Congress had not paid them. There was talk of rebellion. Washington met with them and asked them to stay loyal. As he began to read a letter, he paused to put on his glasses and said he had grown gray and almost blind in the service of his country. Many officers were moved to tears, and the danger passed. They trusted him because he had suffered alongside them. Serving leaders eat last, work hardest and give the credit away.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "Boss for Myself",
+              points: [
+                "Asks: what can my team do for me?",
+                "Takes the credit",
+                "Gives orders, avoids hard work",
+                "Uses people to look good",
+              ],
+            },
+            right: {
+              title: "Serving Leader",
+              points: [
+                "Asks: what does my team need?",
+                "Gives the credit away",
+                "Works alongside the team",
+                "Helps each person grow",
+              ],
+            },
+          },
+          probe: {
+            type: "sort",
+            prompt: "Maya is captain of her robotics team. Sort each choice: is she serving the team, or using the team for herself?",
+            buckets: ["Serving the team", "Using the team for herself"],
+            items: [
+              { text: "She stays late to help a new member learn to code", bucket: 0 },
+              { text: "She tells the judges the robot was mostly her idea", bucket: 1 },
+              { text: "She asks each teammate what they need to finish their part", bucket: 0 },
+              { text: "She picks the fun jobs for herself and gives others the boring ones", bucket: 1 },
+              { text: "She thanks the whole team by name after they win", bucket: 0 },
+              { text: "She only helps teammates who are her close friends", bucket: 1 },
+            ],
+            hint: "Ask: is this choice about what the team needs, or about what Maya gets?",
+            mistakes: [
+              { match: "Telling the judges sorted as serving", coach: "Taking the credit puts Maya first. A serving leader gives the credit away." },
+              { match: "Thanking the team sorted as using", coach: "Thanking everyone by name gives the credit to the team. That is serving." },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "Why did Washington's officers listen to him at Newburgh in 1783?",
+            choices: [
+              "He threatened to punish them",
+              "He promised to make them rich",
+              "He had suffered and served alongside them for years",
+              "He was the tallest person in the room",
+            ],
+            answer: 2,
+            why: "His years of service and sacrifice earned their trust, so his words moved them.",
+            hints: [
+              "Washington appealed to their loyalty, not their fear.",
+              "He could not promise riches. Congress had not even paid them.",
+              "",
+              "Height has nothing to do with it. Think about what he had done for them.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A serving leader is like the roots of a tree. Nobody sees the roots, but they feed and hold up everything else. The leader's job is to make the whole tree strong.",
+            example:
+              "On a family camping trip, Noah is the oldest. Instead of grabbing the best spot, he helps his little sisters set up their tent first, carries the heavy cooler and makes sure everyone has eaten before he does. That is leading by serving.",
+            simpler: {
+              q: "What question does a serving leader ask?",
+              choices: ["What can my team do for me?", "How can I get the credit?", "What does my team need?"],
+              answer: 2,
+              why: "Serving leaders focus on what their team needs.",
+              hints: [
+                "That question puts the leader first. Flip it around.",
+                "Serving leaders give credit away instead of chasing it.",
+                "",
+              ],
+            },
+          },
+        },
+        {
+          title: "Being a Good Steward",
+          teach:
+            "A steward is someone who takes care of something that belongs to someone else, or that has been trusted to them. In old times, a steward managed a large house or farm for its owner. Today, everyone is a steward of something. You are a steward of a library book, your family's home, money your parents give you, your own health and talents, and the parks and trails you visit. A good steward has a simple rule: leave it better than you found it. Return the borrowed bike clean. Pick up trash at the campsite, even if it is not yours. Washington spent years improving the land at Mount Vernon, trying new crops and better farming methods. Stewardship is service in small, everyday actions.",
+          visual: {
+            type: "hotspots",
+            title: "Things You Are a Steward Of",
+            center: "Leave it better",
+            spots: [
+              { label: "Borrowed things", icon: "📚", detail: "Return books, tools and bikes on time and in good shape, or better." },
+              { label: "Your home", icon: "🏡", detail: "Do your part to keep your family's home clean, safe and in good repair." },
+              { label: "Money", icon: "💵", detail: "Money you are given is a trust. Spend, save and give it wisely." },
+              { label: "Your talents", icon: "🎻", detail: "Your gifts grow when you use and practice them, and they can help others." },
+              { label: "Nature", icon: "🌲", detail: "Parks, trails and campsites: pack out your trash, and pick up a little extra." },
+            ],
+          },
+          probe: {
+            type: "highlight",
+            prompt: "Tap every action that shows good stewardship: leaving something better than you found it.",
+            sentences: [
+              "Owen returns his neighbor's lawn mower cleaned and with a full gas can.",
+              "Bella leaves her library book in the rain on the porch.",
+              "Sam picks up the trash at the picnic table, even though it was not his.",
+              "Tara spends all of her birthday money the first day without a plan.",
+              "Leo fixes the loose hinge on the family's gate after asking his dad how.",
+            ],
+            correct: [0, 2, 4],
+            hint: "Look for people taking care of something they were trusted with, or improving it.",
+            mistakes: [
+              { match: "Tapped the library book in the rain", coach: "A library book belongs to the whole town. Leaving it in the rain is the opposite of stewardship." },
+              { match: "Tapped spending all the birthday money", coach: "Money is something you are a steward of. Spending it all with no plan is not taking care of it." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "What is the simple rule of a good steward?",
+            choices: [
+              "Keep everything for yourself",
+              "Use it up before someone else does",
+              "Only take care of things you own",
+              "Leave it better than you found it",
+            ],
+            answer: 3,
+            why: "A good steward takes care of what was trusted to them and improves it.",
+            hints: [
+              "A steward cares for things, often things that belong to others. Keeping it all is not the point.",
+              "Using things up is the opposite of taking care of them.",
+              "Stewards especially care for things that belong to others, like borrowed books.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Being a steward is like being trusted to babysit a neighbor's puppy. It is not your dog, so you take extra good care of it, and you hand it back happy, fed and walked.",
+            example:
+              "Hannah borrowed her grandfather's fishing rod for the summer. When she returned it, she had cleaned the reel, replaced the old line, and added two new lures. Her grandfather said she could borrow anything of his, anytime.",
+            simpler: {
+              q: "A steward takes care of things that...",
+              choices: ["Have been trusted to them", "Are broken beyond repair", "Nobody wants"],
+              answer: 0,
+              why: "A steward takes care of what belongs to someone else or has been trusted to them.",
+              hints: [
+                "",
+                "A steward might fix things, but the key idea is being trusted with them.",
+                "Stewards care for things that matter to others.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Serving Your Community",
+          teach:
+            "Service starts close to home. As a young man in Philadelphia, Benjamin Franklin noticed that books were expensive and hard to get. In 1731 he helped start a library where members shared books. He also saw how dangerous fires were in a city of wooden buildings, so in 1736 he helped organize a volunteer fire company. Franklin did not wait for someone else to fix things. You can serve your community the same way, in four steps. First, notice a need. Second, ask the people you want to help what would really help them. Third, make a plan with a goal and a date. Fourth, do it, and invite others to join you.",
+          visual: {
+            type: "timeline",
+            events: [
+              { year: 1731, label: "A library for everyone", detail: "Franklin and friends start the Library Company of Philadelphia so members can share books." },
+              { year: 1736, label: "A volunteer fire company", detail: "Franklin helps organize the Union Fire Company, where neighbors fight fires together." },
+              { year: 1751, label: "A hospital", detail: "Franklin helps raise money to start the Pennsylvania Hospital, one of the first in America." },
+            ],
+          },
+          probe: {
+            type: "match",
+            prompt: "Match each community need with a service project a 12-year-old could lead.",
+            pairs: [
+              { left: "An elderly neighbor can't shovel her walk", right: "Shovel it every time it snows this winter" },
+              { left: "The park is littered after weekends", right: "Organize a Saturday cleanup with friends" },
+              { left: "The local food pantry is low on canned food", right: "Run a canned food drive at church or club" },
+              { left: "Younger kids at the library struggle to read", right: "Volunteer to read with them once a week" },
+            ],
+            hint: "For each need, find the project that solves that exact problem.",
+            mistakes: [
+              { match: "Matched the park to the food drive", coach: "A food drive helps the pantry. The littered park needs a cleanup." },
+              { match: "Matched the neighbor to reading", coach: "Reading helps young readers. The neighbor's problem is her snowy walk." },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "What is the best first step for starting a service project?",
+            choices: [
+              "Buy matching T-shirts for your team",
+              "Notice a real need in your community",
+              "Post about it before you do anything",
+            ],
+            answer: 1,
+            why: "Like Franklin, good service starts by noticing a real need.",
+            hints: [
+              "T-shirts are fun, but they do not help anyone yet. Start with the need.",
+              "",
+              "Serving is about helping others, not about attention. Start with the need.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Serving your community is like being a good teammate on a bigger team. You look around, see where the team needs help, and step in.",
+            example:
+              "Eli noticed that the families at the end of his street had no one to rake their leaves. He asked them, made a list, recruited three friends, and set a date. In one Saturday they raked six yards, and the neighbors brought hot cider.",
+            simpler: {
+              q: "What did Franklin help start in Philadelphia in 1736?",
+              choices: ["A volunteer fire company", "A toy store", "A sports team"],
+              answer: 0,
+              why: "Franklin helped organize a volunteer fire company to protect the city.",
+              hints: [
+                "",
+                "Franklin was serving a need, not selling toys. Think about the danger in a city of wooden buildings.",
+                "Franklin's projects met serious community needs, like protecting homes from fire.",
+              ],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sort",
+        prompt: "Sort each example into the kind of service it shows.",
+        buckets: ["Serving leader", "Good steward", "Community service"],
+        items: [
+          { text: "A team captain helps the newest player learn the drills", bucket: 0 },
+          { text: "A general gives power back and goes home to his farm", bucket: 0 },
+          { text: "Returning a borrowed bike cleaned and with air in the tires", bucket: 1 },
+          { text: "Picking up extra trash at the campsite before you leave", bucket: 1 },
+          { text: "Starting a lending library so neighbors can share books", bucket: 2 },
+          { text: "Running a canned food drive for the local pantry", bucket: 2 },
+        ],
+      },
+      explain: {
+        prompt: "In your own words, explain what it means to lead by serving. Use Washington's example and describe what a good steward does.",
+        keyPoints: [
+          "A serving leader puts the team's or community's needs first",
+          "Washington gave up power and went home instead of keeping it",
+          "A steward takes care of what was trusted to them and leaves it better",
+          "Service starts by noticing a need and making a plan to help",
+        ],
+      },
+      mastery: [
+        {
+          type: "place",
+          prompt: "Place each moment of Washington's service on the timeline.",
+          min: 1770,
+          max: 1800,
+          step: 1,
+          tolerance: 0,
+          items: [
+            { label: "Takes command of the army", value: 1775 },
+            { label: "Hands back his commission and goes home", value: 1783 },
+            { label: "Steps down after two terms as president", value: 1797 },
+          ],
+          hint: "The war began in 1775. He resigned when it ended, and he stepped down as president in the late 1790s.",
+          mistakes: [
+            { match: "Placed resigning in 1776", coach: "1776 was the Declaration of Independence. The war went on for years after that." },
+            { match: "Placed stepping down in 1789", coach: "1789 was when he became president. He stepped down eight years later." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "cloze",
+          text: "Washington was compared to {0}, a Roman farmer who gave up power. A good {1} leaves things better than they found them, and a serving leader asks what the {2} needs.",
+          blanks: [{ answers: ["Cincinnatus"] }, { answers: ["steward"] }, { answers: ["team", "group"] }],
+          bank: ["Cincinnatus", "steward", "team", "Caesar", "boss", "leader"],
+          hint: "Think of the farmer who went back to his plow, the word for someone trusted to take care of things, and who a serving leader thinks about first.",
+          mistakes: [
+            { match: "Caesar", coach: "Julius Caesar seized power. Washington was compared to the Roman who gave it back." },
+            { match: "boss", coach: "A boss for himself uses things. The word you want means someone trusted to take care of them." },
+            { match: "leader", coach: "A serving leader thinks about the people they lead first." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "sequence",
+          prompt: "Put the steps of starting a service project in order.",
+          steps: [
+            "Notice a need in your community",
+            "Ask the people you want to help what would really help",
+            "Make a plan with a goal and a date",
+            "Do it, and invite others to join you",
+          ],
+          hint: "You have to see a need before you can ask about it, and plan before you act.",
+          mistakes: [
+            { match: "Put the plan before asking", coach: "Ask first, so your plan solves the problem people actually have." },
+            { match: "Put doing it first", coach: "Jumping in without noticing and planning can miss the real need." },
+          ],
+          seconds: 35,
+        },
+        {
+          type: "build",
+          prompt: "Build the big idea of this lesson.",
+          tiles: ["The best leaders", "serve", "the people", "they lead"],
+          distractors: ["rule over", "use"],
+          hint: "Think about Washington giving power back and the captain helping the new player.",
+          mistakes: [
+            { match: "Used rule over", coach: "Ruling over people is what Washington refused to do. Serving leaders put others first." },
+            { match: "Used use", coach: "Using people for yourself is the opposite of serving them." },
+          ],
+          seconds: 25,
+        },
+      ],
+      check: [
+        {
+          q: "What did George Washington do on December 23, 1783?",
+          choices: [
+            "He was elected president",
+            "He crossed the Delaware River",
+            "He handed back his commission and went home to his farm",
+            "He wrote the Constitution by himself",
+          ],
+          answer: 2,
+          why: "Washington gave his power back to Congress at Annapolis instead of keeping it.",
+        },
+        {
+          q: "Who was Cincinnatus?",
+          choices: [
+            "A Roman farmer who led in a crisis and then gave up his power",
+            "A Greek king who ruled for life",
+            "An American general in the Revolution",
+          ],
+          answer: 0,
+          why: "According to Livy, Cincinnatus left his plow to lead Rome, then returned to farming.",
+        },
+        {
+          q: "What does a good steward do?",
+          choices: [
+            "Uses things up quickly",
+            "Only cares about what they own",
+            "Lets others take care of things",
+            "Leaves what was trusted to them better than they found it",
+          ],
+          answer: 3,
+          why: "Stewardship means caring for what was trusted to you and improving it.",
+        },
+        {
+          q: "Which question does a serving leader ask?",
+          choices: ["What can my team do for me?", "What does my team need?", "How can I get the most credit?"],
+          answer: 1,
+          why: "Serving leaders focus on what their team needs.",
+        },
+        {
+          q: "What did Benjamin Franklin help start in Philadelphia?",
+          choices: [
+            "A lending library and a volunteer fire company",
+            "A movie theater and a train station",
+            "A football league",
+          ],
+          answer: 0,
+          why: "Franklin helped start a library in 1731 and a volunteer fire company in 1736.",
+        },
+      ],
+      task: {
+        kind: "project",
+        prompt:
+          "Plan and lead a small service project with your family or friends. Notice a real need nearby, ask the people you want to help what would help most, make a plan with a goal and a date, and do it. Afterward, give a short talk to your family: what was the need, what you did, and what you learned about leading by serving.",
+        rubric: [
+          "Identifies a real need and asks the people affected what would help",
+          "Makes a plan with a clear goal and a date",
+          "Carries out the project and invites others to help",
+          "Explains in a short talk what they learned about serving others",
+        ],
+      },
+    },
   ],
 };

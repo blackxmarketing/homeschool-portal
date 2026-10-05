@@ -1,0 +1,74 @@
+/* Voyage of Discovery: sea chart, compass rose and navigator's notebook. */
+
+.voyage { min-width: 0; }
+
+.history { border: 2px solid #e0d3b0; background: #fff8e6; border-radius: 10px; padding: 8px 12px; font-size: .92rem; }
+.history summary { cursor: pointer; font-weight: 800; }
+.history p { margin: 6px 0 0; line-height: 1.45; }
+
+.chartWrap { display: flex; flex-direction: column; gap: 6px; }
+.chart { position: relative; width: 100%; border: 3px solid #1b1530; border-radius: 10px; overflow: hidden; background: #2f6fd6; }
+.chartImg, .chart > svg.chartImg { position: absolute; inset: 0; width: 100% !important; height: 100% !important; display: block; }
+.overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
+.gridline { stroke: rgba(255, 255, 255, .22); stroke-width: .03; }
+.track { stroke: #fff3bf; stroke-width: .12; stroke-linecap: round; }
+.drift { stroke: #ffd43b; stroke-width: .08; stroke-dasharray: .15 .12; }
+.plan { stroke: #ffffff; stroke-width: .09; stroke-dasharray: .25 .18; stroke-linecap: round; opacity: .9; }
+.hitMark { fill: #e03131; stroke: #fff; stroke-width: .06; }
+.tick { font-size: .34px; fill: rgba(255, 255, 255, .85); font-family: ui-monospace, Consolas, monospace; }
+
+.ship { position: absolute; transform: translate(-50%, -62%); transition: left .7s ease-in-out, top .7s ease-in-out; pointer-events: none; }
+.ship svg { width: 100% !important; height: auto !important; display: block; filter: drop-shadow(0 1px 0 rgba(0, 0, 0, .35)); }
+.bump { animation: bump .5s; }
+@keyframes bump { 20% { transform: translateX(-4px); } 40% { transform: translateX(4px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(2px); } }
+
+.north { position: absolute; right: 6px; top: 4px; color: #fff; font-family: var(--font-pixel), monospace; font-size: .55rem; line-height: 1.1; text-align: center; text-shadow: 0 1px 0 #1b1530; pointer-events: none; }
+.current { position: absolute; left: 6px; top: 4px; padding: 2px 6px; border-radius: 6px; background: rgba(27, 21, 48, .65); color: #ffd43b; font-size: .72rem; font-weight: 800; pointer-events: none; }
+.current span { font-size: 1rem; line-height: 1; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .78rem; font-weight: 700; }
+.reefKey { display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #80766a; border: 2px solid #fff; box-shadow: 0 0 0 1px #6c6258; vertical-align: -1px; }
+.planKey { opacity: .7; }
+
+.controls { align-items: stretch; }
+
+.rose4, .rose8 { display: grid; grid-template-columns: repeat(3, minmax(56px, 76px)); grid-template-rows: repeat(3, minmax(52px, 64px)); gap: 6px; justify-content: center; }
+.pt { display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 10px; border: 3px solid #1b1530; background: #eef2ff; color: #1b1530; font-weight: 900; font-size: 1.1rem; cursor: pointer; box-shadow: 0 3px 0 #1b1530; touch-action: manipulation; font-family: inherit; }
+.pt small { font-size: .6rem; font-weight: 700; opacity: .75; }
+.pt:active { transform: translateY(2px); box-shadow: 0 1px 0 #1b1530; }
+.pt.on { background: #2340ff; color: #fff; }
+.roseMid { grid-column: 2; grid-row: 2; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
+.pN { grid-column: 2; grid-row: 1; }
+.pNE { grid-column: 3; grid-row: 1; }
+.pE { grid-column: 3; grid-row: 2; }
+.pSE { grid-column: 3; grid-row: 3; }
+.pS { grid-column: 2; grid-row: 3; }
+.pSW { grid-column: 1; grid-row: 3; }
+.pW { grid-column: 1; grid-row: 2; }
+.pNW { grid-column: 1; grid-row: 1; }
+
+.stepper { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; font-weight: 700; }
+.stepper button { min-width: 48px; min-height: 44px; font-size: 1.3rem; font-weight: 900; }
+.distNum { font-size: 1.8rem; min-width: 2ch; text-align: center; }
+
+.numRow { display: flex; gap: 8px; align-items: center; }
+.numRow input[type="range"] { flex: 1; min-width: 0; }
+.numRow input[type="number"] { width: 5.5em; padding: 6px 8px; font: inherit; font-weight: 800; border-radius: 8px; border: 2px solid #1b1530; }
+
+.notebook { padding: 8px 10px; border-radius: 10px; border: 2px dashed #b9c2e0; background: #f7f8ff; font-size: .85rem; overflow-wrap: anywhere; }
+.notebook :global(.math-line) { margin: 4px 0 0; font-size: .8rem; }
+
+/* Grades 9–12: the darker look. */
+.strategist .history { background: #232a45; border-color: #0b0e1a; }
+.strategist .notebook { background: #1d2340; border-color: #3a4470; }
+.strategist .numRow input[type="number"] { background: #0f1426; color: #e6e9f5; border-color: #3a4470; }
+.strategist .pt { background: #232a45; color: #e6e9f5; }
+
+/* Grades 4–5: chunkier buttons. */
+.sprout .pt { font-size: 1.4rem; }
+
+@media (max-width: 420px) {
+  .rose4, .rose8 { grid-template-columns: repeat(3, 60px); grid-template-rows: repeat(3, 54px); }
+  .legend { font-size: .72rem; }
+}
+@media (prefers-reduced-motion: reduce) { .ship { transition: none; } .bump { animation: none; } }

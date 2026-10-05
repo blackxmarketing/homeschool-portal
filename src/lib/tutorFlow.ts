@@ -107,8 +107,12 @@ export function buildSteps(input: TutorInput): TutorStep[] {
     if (input.initial.segmentsDone[i]) return;
     const part = i + 1;
     const lines = sayLines(`s${i}`, part, seg.teach, seg.show, mode, seg.title);
-    // The hands-on model goes halfway through the explanation, so the kid is doing something every few lines.
-    const mid = seg.visual ? (lines.length >= 3 ? Math.ceil(lines.length / 2) : lines.length) : -1;
+    // The hands-on model goes halfway through the explanation, so the kid is doing something every few lines
+    // (sooner after a long hook, so there are never more than 6 lines in a row).
+    let carry = 0;
+    while (carry < steps.length && steps[steps.length - 1 - carry].kind === "say") carry++;
+    const half = lines.length >= 3 ? Math.ceil(lines.length / 2) : lines.length;
+    const mid = seg.visual ? Math.max(1, Math.min(half, 6 - carry)) : -1;
     lines.forEach((l, li) => {
       steps.push(l);
       if (li === mid - 1 && seg.visual)

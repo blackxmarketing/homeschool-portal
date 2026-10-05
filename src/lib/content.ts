@@ -193,7 +193,12 @@ export function sanitize<K extends ContentKey>(key: K, raw: unknown): ContentMap
       return (list.length ? list : d) as ContentMap[K];
     }
     case "courses":
-      return withDefaultMedia(sanitizeCourses(raw, COURSES), COURSES) as ContentMap[K];
+    {
+      // New default courses (e.g. a new grade band) show up even after a parent has edited the courses.
+      const saved = withDefaultMedia(sanitizeCourses(raw, COURSES), COURSES);
+      const have = new Set(saved.map((c) => c.id));
+      return [...saved, ...COURSES.filter((c) => !have.has(c.id))] as ContentMap[K];
+    }
     case "hiddenVideos":
       return (Array.isArray(raw) ? [...new Set(raw.filter((v): v is string => typeof v === "string" && isYoutubeId(v)))].slice(0, 500) : []) as ContentMap[K];
   }

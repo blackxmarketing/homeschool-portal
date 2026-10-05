@@ -28,6 +28,18 @@ and civics. Each phase can be switched on or off in `src/content/features.ts`.
 - Struggle detector (drops back to prerequisites) and math-fact speed drills
 - MAP test score tracking (percentile and growth, three times a year)
 
+## ✅ Phase 5d — Lessons for every grade, and story mini-games (built)
+- Grades 4–5 and 9–12 versions of all six Academy courses (5 lessons each),
+  picked automatically from the kid's grade; 26 high school math skills.
+- Four more lessons in each grades 6–8 course (budgeting, smart shopping,
+  giving, taxes; marketing, sales, teams, bookkeeping; goals, ownership,
+  resilience, service; first civilizations, Middle Ages, exploration,
+  Lincoln; matter, ecosystems, Earth, electricity; grammar, research,
+  poetry, letters and speeches).
+- Six story mini-games as side quests, one per land, with levels per grade
+  band and a report after every move that teaches why it worked. Scores are
+  checked on the server by replaying the moves. See `docs/GAME.md`.
+
 ## ✅ Phase 5c — Lessons as game scenes (built)
 - Every challenge in a lesson is a scene in its land's scenery: the hero
   faces an obstacle that solving the problem overcomes (fill in -> rune gate,

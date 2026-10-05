@@ -246,4 +246,200 @@ export const leadershipMedia: CourseMedia = {
       },
     ],
   },
+
+  "leadership.goals": {
+    hook: {
+      show: [
+        { emoji: "🖨️📓", caption: "A young printer with a plan to improve himself" },
+        { at: "keeps score with dots", emoji: "⚫⚫⚪", caption: "He kept score with little dots in a tiny notebook" },
+        { at: "Benjamin Franklin did", photo: "Benjamin Franklin", caption: "Benjamin Franklin: printer, inventor and founding father" },
+        { at: "never fully worked", emoji: "🤔", caption: "Can a plan that falls short still be worth it?" },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { emoji: "📓✍️", caption: "Franklin treated his own character like a project" },
+          { at: "He picked thirteen virtues", big: "13 virtues", caption: "Order, industry, frugality and ten more" },
+          { at: "a little book with a chart", photo: "The Autobiography of Benjamin Franklin", caption: "An early printing of Franklin's life story, where he described his chart" },
+          { at: "one virtue a week", big: "13 weeks × 4", caption: "One virtue a week: four trips through the list each year" },
+          { at: "better and happier", emoji: "😊📈", caption: "Never perfect, but better and happier for trying" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "🌠➡️🎯", caption: "A wish is a hope. A goal is a target." },
+          { at: "it is specific", big: "Specific", caption: "Say exactly what you will do" },
+          { at: "it is measurable", emoji: "📏✅", caption: "You can count it or check it" },
+          { at: "it has a deadline", emoji: "📅", caption: "Pick a date when it should be done" },
+          { at: "20 free kicks in a row", emoji: "⚽🥅", caption: "20 free kicks in a row by the end of May" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "🏔️", caption: "Big goals can feel too big to start" },
+          { at: "20 pages every day", big: "20 pages a day", caption: "One small step you can do even on a busy day" },
+          { at: "7,300 pages in a year", big: "7,300 pages", caption: "20 pages × 365 days" },
+          { at: "ten minutes of piano", emoji: "🎹⏱️", caption: "Ten minutes a day adds up to over 60 hours a year" },
+          { at: "add up to something big", photo: "Bookcase", caption: "Small daily steps can fill a whole bookcase" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "🔁", caption: "Daily steps work best as habits" },
+          { at: "The cue is a reminder", emoji: "🔔", caption: "Cue: the reminder that starts it" },
+          { at: "The routine is the action", emoji: "🎻", caption: "Routine: the action itself" },
+          { at: "The reward is the good feeling", emoji: "✅⭐", caption: "Reward: checking it off feels good" },
+          { at: "That is where discipline comes in", big: "Discipline", caption: "Keeping your promise to yourself, even when you don't feel like it" },
+        ],
+      },
+    ],
+  },
+
+  "leadership.ownership": {
+    hook: {
+      show: [
+        { big: "June 5, 1944", caption: "The day before D-Day" },
+        { at: "wrote a note", emoji: "📝", caption: "A short note he hoped no one would ever read" },
+        { at: "the blame was his alone", big: "Mine alone", caption: "If the attack failed, the blame was his" },
+        { at: "Why would a commander", emoji: "🤔", caption: "Why take the blame before the battle?" },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { big: "June 1944", caption: "The Allies get ready to free France" },
+          { at: "General Dwight D. Eisenhower", photo: "Dwight D. Eisenhower", caption: "Dwight D. Eisenhower, who commanded the Allied armies in Europe" },
+          { at: "more than 150,000 soldiers", big: "150,000+", caption: "Soldiers crossing the English Channel to Normandy" },
+          { at: "he wrote a short note", emoji: "📝✋", caption: "No excuses: the decision was his" },
+          { at: "The D-Day landings succeeded", emoji: "✅🏖️", caption: "The landings worked, and the note was never used" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "🥔➡️", caption: "Passing the buck: tossing blame like a hot potato" },
+          { at: "old card games", emoji: "🃏", caption: "In old card games, a marker called a buck showed who dealt next" },
+          { at: "President Harry Truman", photo: "Harry S. Truman", caption: "Harry Truman, 33rd president of the United States" },
+          { at: "The Buck Stops Here", big: "The Buck Stops Here", caption: "The sign on Truman's desk" },
+          { at: "Ownership points back at yourself", emoji: "👈🙋", caption: "Ownership points back at what you can do" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "⭕", caption: "Picture a circle around you" },
+          { at: "Inside the circle", emoji: "💪📝🙂", caption: "Inside: effort, preparation, attitude, response" },
+          { at: "Outside the circle", emoji: "🌧️🍀👥", caption: "Outside: weather, luck and other people's choices" },
+          { at: "If it rains on your race day", emoji: "🌧️👟", caption: "You can't stop the rain, but you can bring the right shoes" },
+          { at: "That is where real power is", big: "Control what you can", caption: "Spend your energy inside the circle" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "🤷", caption: "Everyone makes mistakes. What matters is what's next." },
+          { at: "First, own it", big: "1. Own it", caption: "Say plainly what you did, with no \"but\"" },
+          { at: "Second, fix it", big: "2. Fix it", caption: "Make it as right as you can" },
+          { at: "Third, learn from it", big: "3. Learn from it", caption: "Change something so it won't happen again" },
+          { at: "People trust someone", emoji: "🤝", caption: "Ownership earns respect that lasts" },
+        ],
+      },
+    ],
+  },
+
+  "leadership.resilience": {
+    hook: {
+      show: [
+        { big: "1901", caption: "A disappointing year at Kitty Hawk" },
+        { at: "two brothers packed up", photo: "Wright brothers", caption: "Orville Wright, who with his brother Wilbur ran a bike shop in Ohio" },
+        { at: "Two years later", emoji: "✈️🏆", caption: "Two years later, they made history" },
+        { at: "What did they do", emoji: "🤔", caption: "What changed in between?" },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { photo: "Thomas Edison", caption: "Thomas Edison, one of history's great inventors" },
+          { at: "he needed a filament", emoji: "💡🧵", caption: "The filament: the thin thread that glows" },
+          { at: "tested thousands of materials", big: "1,000s of tries", caption: "Each failed test crossed one more material off the list" },
+          { at: "carbonized bamboo", emoji: "🎋💡", caption: "Baked bamboo glowed for over a thousand hours" },
+          { at: "a huge fire destroyed", emoji: "🔥➡️🔨", caption: "At 67, he lost much of his factory and started rebuilding" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "🌲🏠", caption: "Lincoln grew up poor on the frontier" },
+          { at: "in 1832 and lost", big: "1832: lost", caption: "He lost his very first election" },
+          { at: "but it failed", emoji: "🏪💸", caption: "His store failed and left him in debt for years" },
+          { at: "United States Senate in 1855", big: "1855 and 1858: lost", caption: "Two losses in races for the U.S. Senate" },
+          { at: "in 1860, Abraham Lincoln", photo: "Abraham Lincoln", caption: "In 1860, Lincoln was elected the 16th president" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "🚲🔧", caption: "The Wrights ran a bicycle shop in Dayton, Ohio" },
+          { at: "went home discouraged", emoji: "🪁😞", caption: "Their gliders lifted much less than predicted" },
+          { at: "built a small wind tunnel", emoji: "🌬️📦", caption: "A homemade wind tunnel to test wing shapes" },
+          { at: "more than 200 tiny model wing shapes", big: "200+ wing shapes", caption: "Careful testing gave them better numbers" },
+          { at: "On December 17, 1903", photo: "Wright Flyer", caption: "The Wright Flyer: the first powered, controlled airplane flight" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "🏀↩️", caption: "Resilience: bouncing back" },
+          { at: "I'm just bad at this", emoji: "😞🚫", caption: "Giving-up thinking sees failure as the end" },
+          { at: "I'm not good at this yet", big: "Yet", caption: "One small word that changes everything" },
+          { at: "Bouncing back has four steps", emoji: "😔🔍🔄🔁", caption: "Feel it, find the lesson, change the plan, try again" },
+          { at: "Very often it is the path", emoji: "🛤️🏆", caption: "Failure is often the path to success" },
+        ],
+      },
+    ],
+  },
+
+  "leadership.service": {
+    hook: {
+      show: [
+        { emoji: "🏆🎖️", caption: "Victory, a loyal army and the nation's admiration" },
+        { at: "In 1783, George Washington", photo: "George Washington", caption: "George Washington, commander of the American army" },
+        { at: "go home to his farm", photo: "Mount Vernon", caption: "Mount Vernon, Washington's home in Virginia" },
+        { at: "Why would a leader", emoji: "🤔", caption: "Why walk away from so much power?" },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { big: "1775-1783", caption: "Eight hard years leading the army" },
+          { at: "handed back his commission", photo: "General George Washington Resigning His Commission", caption: "John Trumbull's painting of Washington resigning his command" },
+          { at: "a farmer of ancient Rome", photo: "File:Cincinnatus.jpg", caption: "Cincinnatus, the Roman farmer who gave his power back, in an old engraving" },
+          { at: "about sixteen days", big: "About 16 days", caption: "How long Cincinnatus kept his power, according to Livy" },
+          { at: "back to his fields", emoji: "🌾🐂", caption: "Then back to the plow" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "🤝", caption: "A serving leader asks: what does my team need?" },
+          { at: "in March 1783", big: "March 1783", caption: "Angry, unpaid officers at Newburgh, New York" },
+          { at: "put on his glasses", emoji: "👓", caption: "Grown gray and almost blind in his country's service" },
+          { at: "Many officers were moved", emoji: "😢🤝", caption: "They trusted him, and the danger passed" },
+          { at: "Serving leaders eat last", emoji: "🍽️🙋", caption: "Eat last, work hardest, give the credit away" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "🔑🏡", caption: "A steward takes care of what is trusted to them" },
+          { at: "In old times, a steward", emoji: "🏰📜", caption: "Stewards once managed great houses and farms for their owners" },
+          { at: "leave it better than you found it", big: "Leave it better", caption: "The good steward's rule" },
+          { at: "Pick up trash at the campsite", emoji: "🏕️🗑️", caption: "Even if it isn't yours" },
+          { at: "improving the land at Mount Vernon", emoji: "🌾🌱", caption: "Washington tried new crops and better farming methods" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "📚🏛️", caption: "Franklin's library in Philadelphia still exists today" },
+          { at: "In 1731 he helped", big: "1731", caption: "Members shared books they could not afford alone" },
+          { at: "in 1736 he helped organize", emoji: "🔥🪣", caption: "1736: neighbors fight fires together" },
+          { at: "First, notice a need", emoji: "👀", caption: "Notice, ask, plan, do" },
+          { at: "invite others to join you", emoji: "🙋🙋🤝", caption: "Service grows when others join in" },
+        ],
+      },
+    ],
+  },
 };

@@ -3610,5 +3610,2307 @@ These inventions, and many others like them, made goods cheaper and work more pr
         ],
       },
     },
+    {
+      id: "history.first-civilizations",
+      title: "The First Civilizations: Mesopotamia and Egypt",
+      minutes: 35,
+      stage: "logic",
+      subject: "History",
+      read: `About 5,500 years ago, in the land between the Tigris and Euphrates Rivers, people built something new: cities. The Greeks later called this region Mesopotamia, which means "the land between the rivers." Today most of it lies in Iraq.
+
+It all started with farming. Mesopotamian farmers dug canals to carry river water to their fields of barley and wheat. This is called irrigation. Good harvests produced a surplus, more food than the farmers needed. With extra food, not everyone had to farm. Some people became potters, weavers, metalworkers, merchants, priests and soldiers. Villages grew into cities such as Uruk and Ur, with temples, markets and walls.
+
+Cities created a new problem: how do you keep track of so much grain, so many sheep and so many trades? Around 3200 BC, the Sumerians of southern Mesopotamia developed one of the world's first writing systems, called cuneiform. Scribes pressed wedge-shaped marks into wet clay with a cut reed. Writing began as record keeping, but soon people used it for letters, laws and stories.
+
+Around 1754 BC, King Hammurabi of Babylon had about 282 laws carved onto a tall stone pillar. His code set rules for trade, farming, wages and families, and punishments for crimes. Some punishments were harsh, such as "an eye for an eye," and they were not the same for every class of person. Still, writing the laws down meant the rules were fixed and could be known in advance.
+
+Meanwhile, in Egypt, people farmed along the Nile River. Almost every year the Nile flooded and left behind rich black soil. Egyptians developed hieroglyphs, a writing system of picture signs, and wrote on papyrus made from river reeds. Their kings, the pharaohs, built enormous pyramids as tombs.
+
+Farming, cities, writing and written laws: these first civilizations laid the foundation for everything that came after.`,
+      keyIdeas: [
+        "Irrigation and river floods let farmers grow a surplus, so people could take other jobs and cities grew.",
+        "Cities needed records, so Mesopotamians invented cuneiform and Egyptians developed hieroglyphs.",
+        "Hammurabi's Code made laws public and fixed, so people could know the rules in advance.",
+      ],
+      hook: {
+        text: "Imagine you are a farmer in ancient Sumer, more than 5,000 years ago. You say you paid the temple 30 baskets of barley. The temple official says you paid only 20. Who is right, when there is no paper, no alphabet and no receipt? Problems like this helped lead to one of the greatest inventions in history: writing. How would you keep track of things if writing did not exist?",
+      },
+      teach: [
+        {
+          title: "Farming Builds the First Cities",
+          teach:
+            "Mesopotamia is a Greek word meaning \"the land between the rivers.\" It lies between the Tigris and Euphrates Rivers, mostly in today's Iraq, and is part of a curve of good farmland often called the Fertile Crescent. Rain there was scarce, so farmers dug canals to carry river water to their fields. This is called irrigation. With irrigation, farmers grew barley and wheat and raised more food than their families could eat. That extra food, called a surplus, changed everything. Not everyone had to farm anymore, so some people became potters, weavers, metalworkers, traders and builders. People who do one special job are called specialists. Between about 3500 and 3000 BC, villages grew into some of the first cities in the world, such as Uruk and Ur.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Civilization", back: "A large, organized society with cities, government, specialized jobs and usually writing." },
+              { front: "Irrigation", back: "Bringing water to crops through canals or ditches." },
+              { front: "Surplus", back: "More of something, such as food, than people need right away." },
+              { front: "Specialist", back: "A person who does one kind of work, such as making pots or trading." },
+              { front: "Fertile Crescent", back: "A curved region of rich farmland in the Middle East, including Mesopotamia." },
+              { front: "City-state", back: "A city and the farmland around it with its own ruler, such as Ur or Uruk." },
+            ],
+          },
+          probe: {
+            type: "build",
+            prompt: "Build the chain of cause and effect that led to the first cities.",
+            tiles: [
+              "Irrigation helped farmers",
+              "grow a food surplus,",
+              "so some people could",
+              "do other jobs,",
+              "and villages grew",
+              "into cities"
+            ],
+            distractors: [
+              "because it rained every day",
+              "so everyone stopped working"
+            ],
+            hint: "Start with how farmers got water, then what the extra food allowed people to do.",
+            mistakes: [
+              {
+                match: "Used because it rained every day",
+                coach: "Mesopotamia was dry. Farmers dug canals because there was not enough rain."
+              },
+              {
+                match: "Used so everyone stopped working",
+                coach: "People kept working. A surplus let them switch to new jobs like making pots or trading."
+              }
+            ],
+            seconds: 40
+          },
+          think: {
+            q: "Why did a food surplus help cities grow?",
+            choices: [
+              "It made the rivers flood less often",
+              "It meant people no longer needed water",
+              "It let everyone stop working",
+              "Not everyone had to farm, so people could take other jobs",
+            ],
+            answer: 3,
+            why: "With extra food, some people could become potters, traders and builders, and villages grew into cities.",
+            hints: [
+              "A surplus is extra food. It does not change the river.",
+              "Farmers still needed river water for their crops every year.",
+              "People kept working, but not all of them had to farm.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Think of a camping trip where one person cooks for the whole group. Because that cook feeds everyone, the others are free to set up tents, gather wood or fish. A food surplus did the same thing for a whole village.",
+            example:
+              "If one farming family can grow enough barley for three families, two families can do something else. One might make clay pots and the other build boats. They trade pots and boats for barley, everyone eats, and the village gains new skills.",
+            simpler: {
+              q: "Irrigation means:",
+              choices: ["Bringing water to crops through canals or ditches", "Hunting animals for food", "Building walls around a city"],
+              answer: 0,
+              why: "Mesopotamian farmers dug canals to carry river water to their fields.",
+              hints: [
+                "",
+                "Hunting is a way to get food, but irrigation is about water for crops.",
+                "Cities did build walls, but irrigation is about watering fields.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Cuneiform: Writing on Clay",
+          teach:
+            "As cities grew, temples and palaces stored huge amounts of grain and owned many animals. Leaders needed to track who paid what, and memory was not enough. Around 3200 BC, the Sumerians of southern Mesopotamia developed one of the world's first writing systems. At first they drew simple pictures, such as a sheep or a stalk of grain, beside marks for numbers. Over time, scribes began pressing a cut reed into wet clay, making wedge-shaped marks. We call this writing cuneiform, from the Latin word for wedge. Learning hundreds of signs took years, so students trained in scribe schools. Writing began with record keeping, then grew to letters, laws and stories such as the Epic of Gilgamesh. Clay tablets dried or baked hard have lasted thousands of years.",
+          visual: {
+            type: "hotspots",
+            title: "A Scribe's Tools",
+            center: "📜 Scribe",
+            spots: [
+              { label: "Clay tablet", icon: "🟫", detail: "A flat piece of wet clay, often small enough to hold in one hand. When it dried or was baked, the writing became permanent." },
+              { label: "Reed stylus", icon: "🌾", detail: "A reed from the riverbank, cut to a sharp edge. Pressing it into clay made wedge-shaped marks." },
+              { label: "Wedge marks", icon: "🔺", detail: "Cuneiform signs were built from wedges. Some signs stood for words, others for sounds or numbers." },
+              { label: "Scribe school", icon: "🏫", detail: "Students spent years copying signs and texts to learn hundreds of symbols." },
+              { label: "Records", icon: "🐑", detail: "The first texts were lists of grain, animals, workers and trades." },
+            ],
+          },
+          probe: {
+            type: "cloze",
+            text: "Sumerian scribes pressed a cut {0} into wet {1}, making wedge-shaped marks called {2}.",
+            blanks: [
+              {
+                answers: [
+                  "reed"
+                ]
+              },
+              {
+                answers: [
+                  "clay"
+                ]
+              },
+              {
+                answers: [
+                  "cuneiform"
+                ]
+              }
+            ],
+            bank: [
+              "reed",
+              "clay",
+              "cuneiform",
+              "papyrus",
+              "hieroglyphs",
+              "feather"
+            ],
+            hint: "Think about what grew by the river, what the tablets were made of, and the word that comes from the Latin for wedge.",
+            mistakes: [
+              {
+                match: "papyrus",
+                coach: "Papyrus was the Egyptians' writing material. Mesopotamians wrote on clay."
+              },
+              {
+                match: "hieroglyphs",
+                coach: "Hieroglyphs were Egyptian picture writing. Mesopotamia's wedge writing has a different name."
+              },
+              {
+                match: "feather",
+                coach: "Feather quills came much later. Sumerian scribes used a cut reed."
+              }
+            ],
+            seconds: 35
+          },
+          think: {
+            q: "What was the first main use of writing in Mesopotamia?",
+            choices: [
+              "Writing poems for fun",
+              "Keeping records of grain, animals and trade",
+              "Carving names on pyramids",
+              "Printing books",
+            ],
+            answer: 1,
+            why: "Temples and palaces needed to track grain, animals and payments, so the first texts were records.",
+            hints: [
+              "Stories and poems came later. The first texts were much more practical.",
+              "",
+              "Pyramids were built in Egypt, and their writing was hieroglyphs, not cuneiform.",
+              "Printing presses came thousands of years later.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Cuneiform tablets were like the receipts and account books of the ancient world. A store prints a receipt so no one argues later about what was paid, and a scribe's tablet recorded who delivered how much barley.",
+            example:
+              "A temple scribe might make a tablet showing that a farmer delivered 20 measures of barley. He pressed the sign for barley and marks for the number into the clay. If anyone argued later, the tablet settled it.",
+            simpler: {
+              q: "Cuneiform marks were shaped like:",
+              choices: ["Circles", "Wedges", "Letters of the English alphabet"],
+              answer: 1,
+              why: "Cuneiform comes from the Latin word for wedge, the shape a cut reed makes in clay.",
+              hints: [
+                "A reed pressed into clay leaves a pointed, triangular mark, not a circle.",
+                "",
+                "The English alphabet came thousands of years later.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Hammurabi's Code: Laws Set in Stone",
+          teach:
+            "Hammurabi was king of Babylon, a powerful city in Mesopotamia, from about 1792 to 1750 BC. Near the end of his reign, he had about 282 laws carved in cuneiform onto a tall black stone pillar called a stele. In his introduction, Hammurabi said the laws were meant to keep the strong from harming the weak. The laws covered trade, farming, wages, property, families and crimes. Some were harsh. One law said that if a man destroyed another man's eye, his own eye would be put out, an idea often summed up as \"an eye for an eye.\" Punishments also differed for nobles, commoners and slaves. Even so, the code made a big idea famous: laws should be written down and known in advance.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "Unwritten Rules",
+              points: [
+                "Rules live only in the ruler's memory",
+                "A judge can change the rules on a whim",
+                "People cannot check what the law says",
+                "Hard to know if you are being treated fairly",
+              ],
+            },
+            right: {
+              title: "A Written Code",
+              points: [
+                "Rules are carved where they can be read",
+                "The same rule applies to the next similar case",
+                "People can learn the rules in advance",
+                "Judges and rulers can be held to the words",
+              ],
+            },
+          },
+          probe: {
+            type: "highlight",
+            prompt: "Tap each sentence that describes Hammurabi's Code accurately.",
+            sentences: [
+              "It was carved in cuneiform on a tall stone pillar.",
+              "It treated every person exactly the same.",
+              "It included laws about trade, farming and wages.",
+              "It was written on paper and kept secret by the king.",
+              "Some of its punishments were very harsh.",
+              "It was the first set of laws in the United States."
+            ],
+            correct: [
+              0,
+              2,
+              4
+            ],
+            hint: "Look for what it was made of, what it covered and how strict it was.",
+            mistakes: [
+              {
+                match: "Picked treated everyone the same",
+                coach: "Punishments differed for nobles, commoners and slaves, so it did not treat everyone the same."
+              },
+              {
+                match: "Picked paper and secret",
+                coach: "The laws were carved on stone, and the point was that they could be known."
+              },
+              {
+                match: "Picked United States",
+                coach: "Hammurabi lived in Babylon almost 3,500 years before the United States existed."
+              }
+            ],
+            seconds: 40
+          },
+          think: {
+            q: "Why was it important that Hammurabi's laws were written down?",
+            choices: [
+              "So the king could change them every day",
+              "So only priests could read them",
+              "So people could know the rules ahead of time",
+              "So no one would ever be punished",
+            ],
+            answer: 2,
+            why: "Written laws were fixed and public, so people could know the rules and expect them to be applied.",
+            hints: [
+              "Carving laws in stone made them harder to change, not easier.",
+              "The point was to make the laws known, not to hide them.",
+              "",
+              "The code included many punishments. Writing them down made them known, not gone.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Imagine a board game where only one player knows the rules and can change them whenever he likes. Printing the rules on the box lid lets everyone see them before the game starts. Hammurabi's stele was the rules on the box lid.",
+            example:
+              "One of Hammurabi's laws said that if a man neglected his dam and the water flooded his neighbors' fields, he had to replace the grain that was ruined. A farmer who lost his crop could point to that written law instead of hoping the judge was in a good mood.",
+            simpler: {
+              q: "Hammurabi was the king of:",
+              choices: ["Egypt", "Rome", "Babylon"],
+              answer: 2,
+              why: "Hammurabi ruled Babylon, a powerful city in Mesopotamia.",
+              hints: [
+                "Egypt was ruled by pharaohs along the Nile.",
+                "Rome was founded more than a thousand years after Hammurabi.",
+                "",
+              ],
+            },
+          },
+        },
+        {
+          title: "Egypt: Gift of the Nile",
+          teach:
+            "Egypt grew up along the Nile, the longest river in Africa. Almost every year, the Nile flooded, and when the water went down it left behind rich black mud called silt. Egyptians called their land Kemet, \"the black land.\" Farmers planted wheat and barley in the fresh soil, and boats used the Nile like a highway. Around 3100 BC, Upper and Lower Egypt were united under one king. These kings, later called pharaohs, ruled for thousands of years. Egyptians wrote with hieroglyphs, picture signs carved on stone or written on papyrus, a paper-like sheet made from river reeds. Around 2560 BC, workers finished the Great Pyramid of Giza as a tomb for the pharaoh Khufu. It stood as the tallest human-made structure on Earth for more than 3,800 years.",
+          visual: {
+            type: "timeline",
+            events: [
+              { year: -3500, label: "About 3500 BC: Cities in Sumer", detail: "Farming villages in southern Mesopotamia grow into cities such as Uruk." },
+              { year: -3200, label: "About 3200 BC: Writing begins", detail: "Sumerians develop cuneiform. Egyptians develop hieroglyphs around the same time." },
+              { year: -3100, label: "About 3100 BC: Egypt united", detail: "Upper and Lower Egypt are joined under one king." },
+              { year: -2560, label: "About 2560 BC: The Great Pyramid", detail: "Workers finish the Great Pyramid of Giza for the pharaoh Khufu." },
+              { year: -1754, label: "About 1754 BC: Hammurabi's Code", detail: "King Hammurabi of Babylon has about 282 laws carved on a stone stele." },
+              { year: 1799, label: "1799: The Rosetta Stone found", detail: "A stone with the same message in hieroglyphs and Greek is found in Egypt." },
+              { year: 1822, label: "1822: Hieroglyphs decoded", detail: "Jean-Francois Champollion uses the Rosetta Stone to read hieroglyphs again." },
+            ],
+          },
+          probe: {
+            type: "match",
+            prompt: "Match each part of Egyptian life to what it was.",
+            pairs: [
+              {
+                left: "The Nile flood",
+                right: "Left rich black silt for farming"
+              },
+              {
+                left: "Papyrus",
+                right: "Paper-like sheets made from river reeds"
+              },
+              {
+                left: "Hieroglyphs",
+                right: "Writing made of picture signs"
+              },
+              {
+                left: "Pharaoh",
+                right: "The king of Egypt"
+              },
+              {
+                left: "Great Pyramid of Giza",
+                right: "A giant tomb for the pharaoh Khufu"
+              }
+            ],
+            hint: "Two of these are about writing, one is a ruler, one is a building and one is the river.",
+            mistakes: [
+              {
+                match: "Papyrus to picture signs",
+                coach: "Papyrus was what Egyptians wrote on. The picture signs themselves were hieroglyphs."
+              },
+              {
+                match: "Pyramid to king",
+                coach: "The pyramid was built for the king, as his tomb. The king himself was the pharaoh."
+              }
+            ],
+            seconds: 40
+          },
+          think: {
+            q: "Why did Egypt's farmers depend on the Nile's yearly flood?",
+            choices: [
+              "The flood brought gold from the mountains",
+              "The flood washed away the pyramids",
+              "The flood kept all enemies away forever",
+              "The flood left water and rich soil for crops",
+            ],
+            answer: 3,
+            why: "When the flood went down, it left damp, rich silt where farmers planted wheat and barley.",
+            hints: [
+              "The flood brought mud, not gold. Think about what crops need.",
+              "The pyramids were built on high ground, away from the flood, and still stand today.",
+              "Egypt still had to defend itself. The flood mattered for farming.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "The Nile flood worked like a giant gardener who came once a year to water every field and spread fresh fertilizer, then went back to the riverbed so the farmers could plant.",
+            example:
+              "After the flood went down in the fall, a farmer near the Nile sowed wheat in the damp black silt. By spring the crop was ready to harvest. Part of it went to the pharaoh's storehouses as tax, which helped feed workers and officials.",
+            simpler: {
+              q: "Egyptian writing made of picture signs is called:",
+              choices: ["Cuneiform", "The alphabet", "Hieroglyphs"],
+              answer: 2,
+              why: "Hieroglyphs were Egyptian picture signs carved on stone or written on papyrus.",
+              hints: [
+                "Cuneiform was the wedge writing of Mesopotamia.",
+                "Alphabets with letters for sounds came later.",
+                "",
+              ],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sort",
+        prompt: "Sort each clue: Mesopotamia, Egypt, or both?",
+        buckets: ["Mesopotamia", "Egypt", "Both"],
+        items: [
+          { text: "Tigris and Euphrates Rivers", bucket: 0 },
+          { text: "Cuneiform on clay tablets", bucket: 0 },
+          { text: "Hammurabi's Code", bucket: 0 },
+          { text: "The cities of Uruk and Ur", bucket: 0 },
+          { text: "The Nile's yearly flood", bucket: 1 },
+          { text: "Hieroglyphs on papyrus", bucket: 1 },
+          { text: "Pyramids built as tombs", bucket: 1 },
+          { text: "Rulers called pharaohs", bucket: 1 },
+          { text: "Farming with river water", bucket: 2 },
+          { text: "One of the world's first writing systems", bucket: 2 },
+        ],
+      },
+      explain: {
+        prompt:
+          "Explain in your own words how farming led to cities, writing and written laws in the first civilizations.",
+        keyPoints: [
+          "Irrigation and river floods let farmers grow a surplus of food.",
+          "A surplus let people take other jobs, and villages grew into cities.",
+          "Cities needed records, so people invented writing such as cuneiform and hieroglyphs.",
+          "Written laws like Hammurabi's Code let people know the rules in advance.",
+        ],
+      },
+      mastery: [
+        {
+          type: "place",
+          prompt: "Place these events on the timeline. Remember: BC years count down, so 3500 BC comes before 3100 BC.",
+          min: -3600,
+          max: -1600,
+          step: 10,
+          tolerance: 100,
+          items: [
+            {
+              label: "Cities grow in Sumer",
+              value: -3500
+            },
+            {
+              label: "Egypt united under one king",
+              value: -3100
+            },
+            {
+              label: "Great Pyramid finished",
+              value: -2560
+            },
+            {
+              label: "Hammurabi's Code carved",
+              value: -1754
+            }
+          ],
+          hint: "Cities came first, then writing and a united Egypt, then the pyramid, and Hammurabi's Code came last, about 800 years after the pyramid.",
+          mistakes: [
+            {
+              match: "Hammurabi first",
+              coach: "Hammurabi ruled around 1750 BC, long after the first cities and the Great Pyramid."
+            },
+            {
+              match: "Pyramid before Egypt united",
+              coach: "Egypt was united around 3100 BC. The Great Pyramid came about 500 years later."
+            }
+          ],
+          seconds: 50
+        },
+        {
+          type: "sequence",
+          prompt: "Put the chain of events in order, from first cause to final result.",
+          steps: [
+            "Farmers dig canals to water their fields",
+            "Harvests produce a food surplus",
+            "Some people become potters, traders and builders",
+            "Villages grow into cities",
+            "Leaders need records, so writing is invented",
+            "Laws are written down for all to know"
+          ],
+          hint: "Start with water for the crops and end with laws carved in stone.",
+          mistakes: [
+            {
+              match: "Writing before cities",
+              coach: "Writing grew out of the needs of busy cities, so cities came first."
+            }
+          ],
+          seconds: 45
+        },
+        {
+          type: "number",
+          prompt: "Scholars count how many laws on Hammurabi's stone stele?",
+          answer: 282,
+          tolerance: 0,
+          unit: "laws",
+          hint: "It is a little less than 300.",
+          mistakes: [
+            {
+              match: "300",
+              coach: "Close, but the usual count is a bit less than 300."
+            },
+            {
+              match: "1754",
+              coach: "1754 BC is roughly when the code was carved, not the number of laws."
+            }
+          ],
+          seconds: 20
+        },
+        {
+          type: "cloze",
+          text: "The Nile's yearly {0} left rich black {1}, so Egyptians called their land Kemet, \"the black land.\"",
+          blanks: [
+            {
+              answers: [
+                "flood",
+                "flooding",
+                "floods"
+              ]
+            },
+            {
+              answers: [
+                "silt",
+                "soil",
+                "mud"
+              ]
+            }
+          ],
+          hint: "Think about what the river did each year and what it left behind on the fields.",
+          mistakes: [
+            {
+              match: "sand",
+              coach: "Sand is what the desert had. The river left something much better for farming."
+            }
+          ],
+          seconds: 30
+        }
+      ],
+      check: [
+        {
+          q: "What does the name Mesopotamia mean?",
+          choices: ["Land of the pharaohs", "The black land", "The land between the rivers", "City of kings"],
+          answer: 2,
+          why: "Mesopotamia is Greek for \"the land between the rivers\": the Tigris and Euphrates.",
+        },
+        {
+          q: "Why was a food surplus so important?",
+          choices: [
+            "It let some people do jobs other than farming",
+            "It ended all trade",
+            "It stopped the rivers from flooding",
+            "It made writing unnecessary",
+          ],
+          answer: 0,
+          why: "Extra food freed people to become specialists, and villages grew into cities.",
+        },
+        {
+          q: "What was cuneiform?",
+          choices: [
+            "Egyptian picture writing on papyrus",
+            "A kind of pyramid",
+            "Babylon's army",
+            "Wedge-shaped writing pressed into clay",
+          ],
+          answer: 3,
+          why: "Sumerian scribes pressed a reed into wet clay to make wedge-shaped signs.",
+        },
+        {
+          q: "What big idea did Hammurabi's Code make famous?",
+          choices: [
+            "Laws should be kept secret",
+            "Laws should be written down and known in advance",
+            "Kings should never make laws",
+            "Crimes should go unpunished",
+          ],
+          answer: 1,
+          why: "Carving the laws on a stele made them fixed and public.",
+        },
+        {
+          q: "What made Egypt's farmland so rich?",
+          choices: ["Heavy rain every day", "Soil carried in from Mesopotamia", "Silt left by the Nile's yearly flood"],
+          answer: 2,
+          why: "When the Nile flood went down, it left fertile black silt on the fields.",
+        },
+      ],
+      task: {
+        kind: "project",
+        prompt:
+          "Make your own clay or play-dough tablet. Use a craft stick or pencil tip to press wedge-shaped marks, inventing simple signs for a sheep, a basket of grain and the numbers 1 to 10. Record a short receipt for a trade, make a key, and then explain your signs to a parent.",
+        rubric: [
+          "Invents clear signs for at least three things and for numbers.",
+          "Records a trade that someone else can read using the key.",
+          "Explains why early cities needed writing to keep records.",
+          "Compares the tablet to cuneiform or hieroglyphs in at least one way.",
+        ],
+      },
+    },
+    {
+      id: "history.middle-ages",
+      title: "The Middle Ages: Castles, Knights and Magna Carta",
+      minutes: 35,
+      stage: "grammar",
+      subject: "History",
+      read: `After the Western Roman Empire fell in AD 476, Europe broke into many small kingdoms. Roads and towns decayed, and raiders attacked from land and sea. The next thousand years, from about 500 to 1500, are called the Middle Ages, because they come between ancient times and the modern world.
+
+To stay safe, people relied on a system called feudalism. A king granted land to powerful nobles, called lords. In return, the lords promised loyalty and sent knights to fight for him. Peasants farmed the lord's land and gave him part of their harvest and labor, and the lord protected them.
+
+Lords guarded their land with castles. The earliest were motte-and-bailey castles: a wooden tower on a hill of earth, with a fenced yard below. Later castles were built of stone, with thick walls, towers, a strong gatehouse and often a water-filled moat.
+
+Knights were trained warriors on horseback. A boy from a noble family might begin as a page at about age seven, become a squire at about fourteen, and be knighted around twenty-one. Knights were expected to follow a code of chivalry: to be brave, loyal and honest, and to protect the weak.
+
+Monasteries were communities where monks lived lives of prayer, study and work. Many followed the Rule of Saint Benedict. Monks copied books by hand, keeping alive the writings of the ancient world. They ran schools, cared for the sick and welcomed travelers.
+
+In 1215, English barons angry with King John forced him to agree to a document called Magna Carta, Latin for "Great Charter." It promised that no free man would be imprisoned or punished except by the lawful judgment of his equals or by the law of the land. Its great idea, that even the king must obey the law, lasted for centuries and later inspired the American Founders.`,
+      keyIdeas: [
+        "Feudalism traded land and protection for loyalty, military service and work.",
+        "Castles and knights defended the land, and knights were expected to follow the code of chivalry.",
+        "Monks preserved learning by copying books, and Magna Carta put the king under the law.",
+      ],
+      hook: {
+        text: "In June 1215, in a meadow called Runnymede beside the River Thames, a group of angry English barons faced their king. King John had demanded heavy taxes again and again and punished nobles without fair trials. Now the barons had captured London, and they demanded that he put his seal on a document limiting his power. Can a king be made to obey the law?",
+      },
+      teach: [
+        {
+          title: "Feudalism and Castles",
+          teach:
+            "After Rome fell, Europe had no strong central government to keep order. Raiders such as the Vikings attacked towns and monasteries. People needed protection, and they found it through feudalism, a system of promises built on land. A king granted land, called a fief, to a noble, called a lord. The lord promised loyalty and supplied knights for the king's army. Peasants farmed the lord's land and owed him part of their crops and labor, and in return he protected them. Lords built castles to guard their land. The first were motte-and-bailey castles, a wooden tower on a mound of earth above a fenced yard. Later castles were made of stone, with thick curtain walls, towers, a strong keep, a gatehouse with a heavy gate called a portcullis, and often a moat.",
+          visual: {
+            type: "hotspots",
+            title: "Parts of a Stone Castle",
+            center: "🏰 Castle",
+            spots: [
+              { label: "Keep", icon: "🗼", detail: "The biggest, strongest tower. The lord's family could retreat here if the outer walls fell." },
+              { label: "Curtain wall", icon: "🧱", detail: "The thick outer wall that linked the towers and surrounded the castle." },
+              { label: "Moat", icon: "🌊", detail: "A deep ditch, often filled with water, that made it hard to reach the walls." },
+              { label: "Drawbridge", icon: "🌉", detail: "A bridge over the moat that could be raised to block the entrance." },
+              { label: "Portcullis", icon: "🚪", detail: "A heavy iron or wooden grille that dropped down to seal the gateway." },
+              { label: "Arrow slits", icon: "🏹", detail: "Narrow openings that let archers shoot out while staying protected." },
+            ],
+          },
+          probe: {
+            type: "match",
+            prompt: "Match each person in the feudal system to what he gave.",
+            pairs: [
+              {
+                left: "King",
+                right: "Granted land, called fiefs, to lords"
+              },
+              {
+                left: "Lord",
+                right: "Promised loyalty and supplied knights"
+              },
+              {
+                left: "Knight",
+                right: "Fought on horseback for his lord"
+              },
+              {
+                left: "Peasant",
+                right: "Farmed the land and gave part of the harvest"
+              }
+            ],
+            hint: "Follow the land downward and the service upward: the king gives land, and each person below gives something back.",
+            mistakes: [
+              {
+                match: "Peasant to knights",
+                coach: "Peasants did not supply knights. They farmed the lord's land and gave part of their crops."
+              },
+              {
+                match: "King to harvest",
+                coach: "The king did not farm. He was at the top, granting land to lords."
+              }
+            ],
+            seconds: 35
+          },
+          think: {
+            q: "What was the basic trade at the heart of feudalism?",
+            choices: [
+              "Money in exchange for votes",
+              "Gold in exchange for spices",
+              "Books in exchange for food",
+              "Land and protection in exchange for loyalty, service and work",
+            ],
+            answer: 3,
+            why: "Kings and lords gave land and protection; those below them gave loyalty, military service and labor.",
+            hints: [
+              "Medieval kingdoms were not run by elections. Think about what kings had plenty of: land.",
+              "Spice trade mattered later, in the Age of Exploration. Feudalism was built on land.",
+              "Books were rare and copied by monks. Feudalism was about land and protection.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Feudalism worked like a chain of promises. Picture a landowner who lets a manager run his farms if the manager will defend them, and the manager lets families work the fields if they share the harvest. Each person owes something to the one above and receives something in return.",
+            example:
+              "After William of Normandy conquered England in 1066, he kept a large share of the land and granted much of the rest to loyal nobles. In return, they owed him knights for his army. William himself began the stone White Tower in London to show his power and guard the city.",
+            simpler: {
+              q: "In feudalism, a fief was:",
+              choices: ["A type of sword", "A piece of land granted by a king or lord", "A monk's book"],
+              answer: 1,
+              why: "A fief was land granted in exchange for loyalty and service.",
+              hints: [
+                "Knights carried swords, but a fief was something a king could grant to a lord.",
+                "",
+                "Monks copied books, but a fief was about land.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Knights and the Code of Chivalry",
+          teach:
+            "Knights were warriors who fought on horseback, wearing armor and carrying lances, swords and shields. Their horses and equipment were costly, so knights were usually supported by land. Training took years. A boy from a noble family might become a page at about age seven, serving in a lord's household and learning manners, riding and the basics of fighting. At about fourteen he became a squire, caring for a knight's horse and armor and following him into battle. Around age twenty-one, if he proved worthy, he was made a knight in a ceremony called dubbing. Knights were expected to follow chivalry, a code of honor: be brave, loyal and honest, keep your word, and protect the weak. Not every knight lived up to it, but the ideal shaped ideas of good conduct for centuries.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Page", back: "A boy of about seven who served in a lord's household and began learning to ride and fight." },
+              { front: "Squire", back: "A teenager who cared for a knight's horse and armor and trained beside him." },
+              { front: "Dubbing", back: "The ceremony that made a squire a knight." },
+              { front: "Chivalry", back: "The knight's code of honor: bravery, loyalty, honesty and protecting the weak." },
+              { front: "Lance", back: "A long spear carried by a knight on horseback." },
+              { front: "Tournament", back: "A contest where knights practiced fighting skills, including jousting." },
+            ],
+          },
+          probe: {
+            type: "build",
+            prompt: "Build the path a boy followed to become a knight.",
+            tiles: [
+              "He served as a page",
+              "at about seven,",
+              "became a squire",
+              "at about fourteen,",
+              "and was dubbed a knight",
+              "around twenty-one"
+            ],
+            distractors: [
+              "became a monk at five",
+              "skipped all training"
+            ],
+            hint: "Put the three stages in order and attach the right age to each one.",
+            mistakes: [
+              {
+                match: "Used became a monk at five",
+                coach: "Monks lived in monasteries. A future knight started as a page in a lord's household."
+              },
+              {
+                match: "Used skipped all training",
+                coach: "Becoming a knight took about fourteen years of training."
+              }
+            ],
+            seconds: 40
+          },
+          think: {
+            q: "Which action best fits the code of chivalry?",
+            choices: [
+              "Breaking a promise when it is convenient",
+              "Protecting a traveler who is being robbed",
+              "Running away at the start of every battle",
+              "Taking food from peasants without paying",
+            ],
+            answer: 1,
+            why: "Chivalry called on knights to be brave and to protect the weak.",
+            hints: [
+              "Chivalry asked knights to keep their word, even when it was hard.",
+              "",
+              "Chivalry valued courage. Running from every fight is the opposite.",
+              "Chivalry asked knights to protect ordinary people, not take from them.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Becoming a knight was like an apprenticeship in a trade. An apprentice carpenter starts by sweeping the shop, then helps a master carpenter, and finally builds on his own. Pages and squires learned step by step in the same way.",
+            example:
+              "William Marshal, an English knight who lived from about 1147 to 1219, began as a squire in a lord's household, became famous in tournaments, and served several kings loyally. In his old age, as regent for the boy king Henry III, he helped reissue Magna Carta. People admired him as a model knight.",
+            simpler: {
+              q: "A squire was:",
+              choices: ["A young man training as a knight's helper", "A castle's moat", "The king's crown"],
+              answer: 0,
+              why: "A squire cared for a knight's horse and armor while training to become a knight.",
+              hints: [
+                "",
+                "The moat was a ditch around a castle. A squire was a person.",
+                "A crown is something a king wears. A squire was a person in training.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Monasteries: Keepers of Learning",
+          teach:
+            "Monasteries were communities where monks lived together, devoting their lives to prayer, study and work. Around 530, an Italian monk named Benedict wrote a rule, or set of guidelines, for monastery life. It set times each day for prayer, reading and work, and many monasteries across Europe followed it. Monks farmed, kept bees, and made bread and cloth so the community could support itself. In a room called a scriptorium, monks copied books by hand onto parchment made from animal skin. Some decorated pages with gold and bright colors, creating illuminated manuscripts such as the Book of Kells. By copying both religious books and ancient Latin works, monks preserved learning that might otherwise have been lost. Monasteries also ran schools, cared for the sick, and gave food and shelter to travelers and the poor.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "Life in a Castle",
+              points: [
+                "Home of a lord, his family and soldiers",
+                "Built to defend land in war",
+                "Knights trained for battle",
+                "Peasants nearby farmed the lord's fields",
+              ],
+            },
+            right: {
+              title: "Life in a Monastery",
+              points: [
+                "Home of monks who made lifelong vows",
+                "Built for prayer, study and work",
+                "Monks copied and decorated books",
+                "Ran schools, cared for the sick, sheltered travelers",
+              ],
+            },
+          },
+          probe: {
+            type: "highlight",
+            prompt: "Tap each job that monks in a medieval monastery did.",
+            sentences: [
+              "Copied books by hand in a scriptorium",
+              "Printed newspapers on a printing press",
+              "Ran schools and taught reading",
+              "Cared for the sick and gave travelers shelter",
+              "Led armies of knights into battle",
+              "Grew food on the monastery's farms"
+            ],
+            correct: [
+              0,
+              2,
+              3,
+              5
+            ],
+            hint: "Think about prayer, study and work: books, teaching, caring for people and farming.",
+            mistakes: [
+              {
+                match: "Picked printing press",
+                coach: "The printing press reached Europe around 1450, near the end of the Middle Ages, and newspapers came later. Monks copied by hand."
+              },
+              {
+                match: "Picked led armies",
+                coach: "Knights fought battles. Monks lived lives of prayer, study and work."
+              }
+            ],
+            seconds: 40
+          },
+          think: {
+            q: "Why are medieval monks important to the history of learning?",
+            choices: [
+              "They invented the printing press",
+              "They built the pyramids",
+              "They copied and preserved ancient and religious books",
+              "They wrote Magna Carta",
+            ],
+            answer: 2,
+            why: "By copying books by hand, monks kept ancient and religious writings from being lost.",
+            hints: [
+              "Gutenberg's printing press came around 1450. Before that, monks copied by hand.",
+              "The pyramids were built in Egypt thousands of years earlier.",
+              "",
+              "Magna Carta was written by the king's officials and the barons.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Monks in a scriptorium were like people who back up important computer files. If the only copy of a book wore out or burned, its knowledge was gone, so making careful new copies kept ideas safe for the future.",
+            example:
+              "Many works by ancient Roman writers such as Cicero and Virgil survive largely because monks copied them in monasteries. A single book could take months to copy, line by line, with a quill pen and ink on parchment.",
+            simpler: {
+              q: "The room where monks copied books was called the:",
+              choices: ["Keep", "Moat", "Scriptorium"],
+              answer: 2,
+              why: "Scriptorium comes from the Latin word for writing.",
+              hints: [
+                "The keep was the strongest tower of a castle.",
+                "The moat was a ditch around a castle.",
+                "",
+              ],
+            },
+          },
+        },
+        {
+          title: "Magna Carta: The King Under the Law",
+          teach:
+            "King John of England ruled from 1199 to 1216. He lost costly wars in France, demanded heavy taxes and punished nobles without fair trials. In 1215, a group of barons rebelled and captured London. On June 15, 1215, at a meadow called Runnymede, John agreed to a charter of rights. It became known as Magna Carta, Latin for \"Great Charter.\" One famous clause says: \"No free man shall be seized or imprisoned... except by the lawful judgment of his equals or by the law of the land.\" Another promises that the king will not sell, deny or delay justice to anyone. John broke his promise within months, but later kings reissued Magna Carta. Its big idea lasted: even the king must obey the law. Centuries later, it inspired the American Founders and the Bill of Rights.",
+          visual: {
+            type: "timeline",
+            events: [
+              { year: 476, label: "476: Rome falls in the West", detail: "The last emperor in the West is removed. The Middle Ages begin soon after." },
+              { year: 530, label: "About 530: Benedict's Rule", detail: "Benedict writes his rule for monastery life, later followed across Europe." },
+              { year: 800, label: "About 800: The Book of Kells", detail: "Monks create one of the most beautiful illuminated manuscripts." },
+              { year: 1066, label: "1066: The Norman Conquest", detail: "William of Normandy conquers England and grants land to his loyal nobles." },
+              { year: 1215, label: "1215: Magna Carta", detail: "King John agrees to Magna Carta at Runnymede." },
+              { year: 1225, label: "1225: Magna Carta reissued", detail: "King Henry III reissues Magna Carta, and it becomes part of English law." },
+              { year: 1791, label: "1791: The U.S. Bill of Rights", detail: "Americans add protections, such as due process of law, that echo Magna Carta." },
+            ],
+          },
+          probe: {
+            type: "cloze",
+            text: "King John agreed to Magna Carta at {0} in {1}. It said no free man could be imprisoned except by the lawful judgment of his equals or by the law of the {2}.",
+            blanks: [
+              {
+                answers: [
+                  "Runnymede"
+                ]
+              },
+              {
+                answers: [
+                  "1215"
+                ]
+              },
+              {
+                answers: [
+                  "land"
+                ]
+              }
+            ],
+            bank: [
+              "Runnymede",
+              "1215",
+              "land",
+              "London",
+              "1066",
+              "king"
+            ],
+            hint: "Think of the meadow by the Thames, the year in the 1200s, and the phrase \"the law of the ___.\"",
+            mistakes: [
+              {
+                match: "1066",
+                coach: "1066 was the Norman Conquest. Magna Carta came about 150 years later."
+              },
+              {
+                match: "king",
+                coach: "The whole point was that the king could not imprison people just because he wanted to. It was the law of the land."
+              },
+              {
+                match: "London",
+                coach: "The barons had captured London, but John met them at a meadow by the River Thames."
+              }
+            ],
+            seconds: 35
+          },
+          think: {
+            q: "What was Magna Carta's most lasting idea?",
+            choices: [
+              "Even the king must obey the law",
+              "The king can do whatever he wants",
+              "Barons should rule instead of kings",
+              "Taxes should be doubled",
+            ],
+            answer: 0,
+            why: "Magna Carta set out rules the king himself had to follow, an idea that grew into the rule of law.",
+            hints: [
+              "",
+              "Magna Carta did the opposite: it limited what the king could do.",
+              "England kept its kings. Magna Carta set limits on them.",
+              "The barons were angry about heavy taxes. They wanted limits, not more taxes.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Magna Carta was like a team captain agreeing in writing that the rules of the game apply to him too. Once it is written down, the other players can point to it if he tries to break them.",
+            example:
+              "Under clause 39, a king could not simply throw a free man in prison because he was angry. There had to be a lawful judgment by his equals or a reason under the law of the land. The American Fifth Amendment carries the same idea: no person shall be deprived of life, liberty, or property without due process of law.",
+            simpler: {
+              q: "Which English king agreed to Magna Carta in 1215?",
+              choices: ["King Arthur", "King John", "William the Conqueror"],
+              answer: 1,
+              why: "King John agreed to Magna Carta at Runnymede in 1215.",
+              hints: [
+                "King Arthur is a figure of legend, not a king we can date in history.",
+                "",
+                "William the Conqueror lived about 150 years earlier, in 1066.",
+              ],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sort",
+        prompt: "Sort each clue into the part of medieval life it belongs to.",
+        buckets: ["Castles", "Knights", "Monasteries", "Magna Carta"],
+        items: [
+          { text: "Moat and drawbridge", bucket: 0 },
+          { text: "Keep and curtain wall", bucket: 0 },
+          { text: "Training as a page and squire", bucket: 1 },
+          { text: "The code of chivalry", bucket: 1 },
+          { text: "Scriptorium and illuminated manuscripts", bucket: 2 },
+          { text: "The Rule of Saint Benedict", bucket: 2 },
+          { text: "Runnymede, 1215", bucket: 3 },
+          { text: "No imprisonment without lawful judgment", bucket: 3 },
+        ],
+      },
+      explain: {
+        prompt:
+          "Explain how people in the Middle Ages stayed safe, kept learning alive, and began to limit a king's power.",
+        keyPoints: [
+          "Feudalism traded land and protection for loyalty, service and work.",
+          "Castles and knights defended the land.",
+          "Monks copied books and preserved learning.",
+          "Magna Carta established that even the king must obey the law.",
+        ],
+      },
+      mastery: [
+        {
+          type: "place",
+          prompt: "Place these events of the Middle Ages on the timeline.",
+          min: 400,
+          max: 1300,
+          step: 5,
+          tolerance: 25,
+          items: [
+            {
+              label: "Rome falls in the West",
+              value: 476
+            },
+            {
+              label: "Benedict writes his Rule",
+              value: 530
+            },
+            {
+              label: "Norman Conquest of England",
+              value: 1066
+            },
+            {
+              label: "Magna Carta",
+              value: 1215
+            }
+          ],
+          hint: "Rome's fall and Benedict's Rule came close together near the start. The Norman Conquest and Magna Carta came about 150 years apart near the end.",
+          mistakes: [
+            {
+              match: "Magna Carta before 1066",
+              coach: "Magna Carta came in 1215, about 150 years after William conquered England."
+            }
+          ],
+          seconds: 45
+        },
+        {
+          type: "match",
+          prompt: "Match each castle part to its job.",
+          pairs: [
+            {
+              left: "Moat",
+              right: "A deep ditch, often filled with water"
+            },
+            {
+              left: "Keep",
+              right: "The strongest tower, a last place of safety"
+            },
+            {
+              left: "Portcullis",
+              right: "A heavy grille that dropped to seal the gate"
+            },
+            {
+              left: "Curtain wall",
+              right: "The thick outer wall linking the towers"
+            },
+            {
+              left: "Arrow slit",
+              right: "A narrow opening for archers"
+            }
+          ],
+          hint: "Think from the outside in: the ditch, the outer wall, the gate, the narrow openings, and the strong tower at the center.",
+          mistakes: [
+            {
+              match: "Keep to outer wall",
+              coach: "The keep was the strongest tower inside. The outer wall was the curtain wall."
+            }
+          ],
+          seconds: 40
+        },
+        {
+          type: "sequence",
+          prompt: "Put the story of Magna Carta in order.",
+          steps: [
+            "King John loses wars in France and demands heavy taxes",
+            "The barons rebel and capture London",
+            "John agrees to Magna Carta at Runnymede",
+            "John breaks his promise within months",
+            "Later kings reissue Magna Carta",
+            "Its ideas inspire the U.S. Bill of Rights"
+          ],
+          hint: "Start with the reasons the barons were angry and end centuries later in America.",
+          mistakes: [
+            {
+              match: "Bill of Rights early",
+              coach: "The Bill of Rights came in 1791, more than 500 years after Magna Carta."
+            }
+          ],
+          seconds: 45
+        },
+        {
+          type: "cloze",
+          text: "A future knight began as a {0}, then became a {1}, and was finally dubbed a knight. He was expected to follow the code of {2}.",
+          blanks: [
+            {
+              answers: [
+                "page"
+              ]
+            },
+            {
+              answers: [
+                "squire"
+              ]
+            },
+            {
+              answers: [
+                "chivalry"
+              ]
+            }
+          ],
+          bank: [
+            "page",
+            "squire",
+            "chivalry",
+            "monk",
+            "baron",
+            "feudalism"
+          ],
+          hint: "Two training stages, then the name of the knight's code of honor.",
+          mistakes: [
+            {
+              match: "monk",
+              coach: "Monks lived in monasteries. A future knight started in a lord's household."
+            },
+            {
+              match: "feudalism",
+              coach: "Feudalism was the land-for-loyalty system. The knight's code of honor had a different name."
+            }
+          ],
+          seconds: 30
+        }
+      ],
+      check: [
+        {
+          q: "Why is the period from about 500 to 1500 called the Middle Ages?",
+          choices: [
+            "Everyone who lived then was middle-aged",
+            "It happened in the middle of Africa",
+            "It comes between ancient times and the modern world",
+          ],
+          answer: 2,
+          why: "The Middle Ages fall between the ancient world of Greece and Rome and the modern era.",
+        },
+        {
+          q: "In feudalism, what did peasants give their lord?",
+          choices: ["Castles and knights", "Part of their harvest and labor", "Fiefs of land", "A royal charter"],
+          answer: 1,
+          why: "Peasants farmed the lord's land and owed him crops and work in exchange for protection.",
+        },
+        {
+          q: "What did monks do in a scriptorium?",
+          choices: ["Trained horses", "Stored weapons", "Held tournaments", "Copied books by hand"],
+          answer: 3,
+          why: "The scriptorium was the monastery's writing room, where monks copied manuscripts.",
+        },
+        {
+          q: "What did Magna Carta establish?",
+          choices: [
+            "Even the king must obey the law",
+            "The king could ignore the law",
+            "Knights no longer needed training",
+            "Monasteries must close",
+          ],
+          answer: 0,
+          why: "Magna Carta set limits on the king, the beginning of the idea of the rule of law.",
+        },
+        {
+          q: "Which castle feature was a ditch often filled with water?",
+          choices: ["Keep", "Moat", "Gatehouse", "Arrow slit"],
+          answer: 1,
+          why: "A moat surrounded the walls and made them hard to reach.",
+        },
+      ],
+      task: {
+        kind: "speak",
+        prompt:
+          "Give a two-minute speech as a baron at Runnymede in 1215. Explain to King John why he must accept Magna Carta, using at least two of its real promises, and why a ruler who obeys the law is good for everyone.",
+        rubric: [
+          "States at least two real promises from Magna Carta.",
+          "Explains why even the king must obey the law.",
+          "Speaks clearly with a strong opening and closing.",
+          "Stays accurate to what happened in 1215.",
+        ],
+      },
+    },
+    {
+      id: "history.exploration",
+      title: "The Age of Exploration: Mapping the World",
+      minutes: 35,
+      stage: "logic",
+      subject: "History",
+      read: `In the 1400s, Europeans wanted spices such as pepper, cinnamon and cloves, along with silk and other goods from Asia. These goods traveled thousands of miles over land and sea, passing through many traders who each raised the price. European rulers and merchants dreamed of an all-sea route that would let them buy directly.
+
+Portugal led the way. Prince Henry, later called Henry the Navigator, paid for voyages down the west coast of Africa. Portuguese sailors used the caravel, a small, quick ship whose triangular sails could sail closer into the wind. In 1488, Bartolomeu Dias rounded the southern tip of Africa, and in 1498 Vasco da Gama reached India by sea.
+
+Spain took a different bet. In 1492, Christopher Columbus sailed west, hoping to reach Asia. Instead he reached islands in the Bahamas and the Caribbean, part of continents unknown to Europeans that became known as the Americas.
+
+Sailors depended on new and improved tools. The magnetic compass, first developed in China, showed direction. The astrolabe and quadrant measured the height of the sun or the North Star to find latitude, how far north or south a ship was. Navigators also used dead reckoning, estimating their position from speed, direction and time.
+
+In 1519, Ferdinand Magellan, a Portuguese captain sailing for Spain, set out with five ships and about 270 men to reach Asia by sailing west. He found a passage near the tip of South America, now called the Strait of Magellan, and crossed the vast Pacific Ocean. Magellan was killed in the Philippines in 1521, but one ship, the Victoria, returned to Spain in 1522 under Juan Sebastian Elcano. Its 18 survivors had completed the first voyage around the world.
+
+Mapmakers used the explorers' reports to draw new maps. The Age of Exploration connected the continents, bringing new trade, new foods and new knowledge, and also deadly diseases and conflict.`,
+      keyIdeas: [
+        "Europeans explored the oceans to find a direct sea route to the spices and goods of Asia.",
+        "The compass, astrolabe and dead reckoning helped sailors find their way across open ocean.",
+        "Magellan's expedition made the first voyage around the world, and new maps and the Columbian Exchange connected the continents.",
+      ],
+      hook: {
+        text: "In September 1522, a battered ship sailed into a harbor in Spain. Three years earlier, five ships and about 270 men had set out. Now only this one ship, the Victoria, and 18 men had made it back. They had done something no one had ever done: sailed all the way around the world. How did sailors find their way across oceans with no GPS, no radio and no maps of where they were going?",
+      },
+      teach: [
+        {
+          title: "Why Europe Looked to the Sea",
+          teach:
+            "In the 1400s, Europeans prized spices such as pepper, cinnamon, nutmeg and cloves, which flavored food and were used in medicines. Spices, silk and other Asian goods passed through many traders on long routes over land and sea, and each trader raised the price. If a country could sail directly to Asia, it could buy at lower prices and grow rich. Portugal led the way. Prince Henry, later called Henry the Navigator, paid for expeditions down Africa's west coast. Portuguese shipbuilders used the caravel, a small, quick ship whose triangular sails could sail closer into the wind than square sails could. In 1488, Bartolomeu Dias rounded the southern tip of Africa. In 1498, Vasco da Gama reached India by sea and returned with a valuable cargo of spices.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "The Old Way",
+              points: [
+                "Goods passed through many traders",
+                "Long journeys by camel caravan and ship",
+                "Every trader added to the price",
+                "Spices cost a fortune by the time they reached Europe",
+              ],
+            },
+            right: {
+              title: "An All-Sea Route",
+              points: [
+                "Ships sail straight to Asian ports",
+                "Merchants buy directly from the source",
+                "Far fewer people to pay along the way",
+                "Huge profits for the country that gets there first",
+              ],
+            },
+          },
+          probe: {
+            type: "build",
+            prompt: "Build the reason Europeans wanted a sea route to Asia.",
+            tiles: [
+              "Spices passed through",
+              "many traders,",
+              "each raising the price,",
+              "so a direct sea route",
+              "meant cheaper goods",
+              "and great profits"
+            ],
+            distractors: [
+              "because Asia had no spices",
+              "so ships could avoid water"
+            ],
+            hint: "Start with the problem of the many traders, then explain what a direct route would change.",
+            mistakes: [
+              {
+                match: "Used because Asia had no spices",
+                coach: "Asia was where the spices grew. Europeans wanted to reach it more cheaply."
+              },
+              {
+                match: "Used so ships could avoid water",
+                coach: "A sea route means sailing on water the whole way."
+              }
+            ],
+            seconds: 40
+          },
+          think: {
+            q: "Why did European countries want an all-sea route to Asia?",
+            choices: [
+              "To buy spices and silk directly at lower prices",
+              "To find a place to build castles",
+              "To escape cold winters",
+              "To deliver letters faster",
+            ],
+            answer: 0,
+            why: "Cutting out the many middlemen meant cheaper goods and big profits.",
+            hints: [
+              "",
+              "Explorers were looking for trade, not land for castles. Think about what Asia had to sell.",
+              "Explorers often came home again. The goal was trade goods from Asia.",
+              "Letters were not the reason. Think about pepper, cinnamon and silk.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Imagine a toy that passes from a factory to a shipper to a warehouse to three different stores before it reaches you, and each one adds to the price. If you could buy straight from the factory, you would pay far less.",
+            example:
+              "Vasco da Gama's voyage proved the idea. In 1498 he sailed from Portugal around Africa to Calicut in India and came home with pepper and other spices worth far more than the voyage cost. Portugal soon sent fleets to India regularly.",
+            simpler: {
+              q: "Which country led the first big voyages down the coast of Africa?",
+              choices: ["England", "Portugal", "Russia"],
+              answer: 1,
+              why: "Portugal, encouraged by Prince Henry the Navigator, explored Africa's coast step by step.",
+              hints: [
+                "England's big voyages came later. Think of Prince Henry the Navigator.",
+                "",
+                "Russia expanded mostly over land, not down the coast of Africa.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Tools for Finding the Way",
+          teach:
+            "Out on the open ocean there were no landmarks, so sailors relied on tools and math. The magnetic compass, first developed in China, pointed north, letting a navigator hold a steady course. To find latitude, how far north or south of the equator a ship was, sailors used an astrolabe or quadrant to measure how high the sun or the North Star stood above the horizon. The higher the North Star, the farther north you were. Navigators also used dead reckoning: from the ship's speed, its direction and the time traveled, they estimated their position and marked it on a chart. Longitude, how far east or west a ship was, was much harder. Sailors could not measure it accurately until clockmaker John Harrison built reliable sea clocks in the 1700s.",
+          visual: {
+            type: "hotspots",
+            title: "A Navigator's Toolkit",
+            center: "⛵ Ship",
+            spots: [
+              { label: "Compass", icon: "🧭", detail: "A magnetized needle that points north, so the ship can hold a steady direction." },
+              { label: "Astrolabe", icon: "☀️", detail: "Measures the height of the sun or a star above the horizon to find latitude." },
+              { label: "North Star", icon: "⭐", detail: "In the Northern Hemisphere, its height above the horizon roughly equals your latitude." },
+              { label: "Sandglass", icon: "⏳", detail: "Sailors turned a sandglass to keep track of time during each watch." },
+              { label: "Knotted log line", icon: "🪢", detail: "A rope with knots, let out behind the ship to measure speed. That is why ship speed is measured in knots." },
+              { label: "Chart", icon: "🗺️", detail: "A sailor's map of coasts and seas, where the navigator marked the ship's position." },
+            ],
+          },
+          probe: {
+            type: "match",
+            prompt: "Match each navigation tool or method to its job.",
+            pairs: [
+              {
+                left: "Compass",
+                right: "Shows which way is north"
+              },
+              {
+                left: "Astrolabe",
+                right: "Measures the sun or a star to find latitude"
+              },
+              {
+                left: "Sandglass",
+                right: "Keeps track of time at sea"
+              },
+              {
+                left: "Dead reckoning",
+                right: "Estimates position from speed, direction and time"
+              },
+              {
+                left: "Chart",
+                right: "A map of coasts and seas for sailors"
+              }
+            ],
+            hint: "One tool shows direction, one measures the sky, one measures time, one is a map, and one is a method of figuring.",
+            mistakes: [
+              {
+                match: "Compass to latitude",
+                coach: "A compass shows direction. Latitude came from measuring the sun or stars with an astrolabe."
+              },
+              {
+                match: "Dead reckoning to map",
+                coach: "Dead reckoning is a way of figuring out position with math. The chart is the map where you mark it."
+              }
+            ],
+            seconds: 40
+          },
+          think: {
+            q: "A navigator sees the North Star higher in the sky than it was last week. What does that tell him?",
+            choices: [
+              "The ship has moved farther south",
+              "The ship has moved farther north",
+              "The ship has moved farther east",
+              "Nothing useful at all",
+            ],
+            answer: 1,
+            why: "The higher the North Star appears, the farther north you are.",
+            hints: [
+              "Sailing south makes the North Star sink lower, until it disappears below the horizon.",
+              "",
+              "Moving east or west does not change the North Star's height. That is why longitude was so hard.",
+              "The North Star's height was one of a sailor's most useful clues to latitude.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Dead reckoning is like figuring out where you are on a bike ride with no map: if you rode east at 10 miles per hour for 2 hours, you are about 20 miles east of home.",
+            example:
+              "Suppose a ship sails due west at about 5 miles per hour for 24 hours. The navigator multiplies 5 by 24 and marks the ship about 120 miles west of yesterday's position. Wind and currents can push a ship off course, so he also checks latitude with the sun at noon.",
+            simpler: {
+              q: "Which tool shows direction by pointing north?",
+              choices: ["A sandglass", "An anchor", "A compass"],
+              answer: 2,
+              why: "A compass needle is magnetized and points north.",
+              hints: [
+                "A sandglass measures time, not direction.",
+                "An anchor holds a ship in place. It does not show direction.",
+                "",
+              ],
+            },
+          },
+        },
+        {
+          title: "Magellan's Voyage Around the World",
+          teach:
+            "Ferdinand Magellan was a Portuguese sea captain who convinced the king of Spain to pay for a voyage west to the Spice Islands in Asia. In September 1519, he set out with five ships and about 270 men. They sailed down the coast of South America, searching for a way through. In 1520, Magellan found a narrow, stormy passage near the tip of the continent, now called the Strait of Magellan. Beyond it lay an ocean so calm that he named it the Pacific, meaning peaceful. The crossing took months, and many sailors suffered from hunger and scurvy, a disease caused by a lack of vitamin C. In 1521, Magellan was killed in a battle in the Philippines. Juan Sebastian Elcano led the last ship, the Victoria, home to Spain in 1522 with 18 survivors.",
+          visual: {
+            type: "timeline",
+            events: [
+              { year: 1488, label: "1488: Dias rounds Africa", detail: "Bartolomeu Dias sails around the southern tip of Africa." },
+              { year: 1492, label: "1492: Columbus sails west", detail: "Columbus reaches islands in the Bahamas and the Caribbean." },
+              { year: 1498, label: "1498: Da Gama reaches India", detail: "Vasco da Gama completes an all-sea route from Portugal to India." },
+              { year: 1519, label: "1519: Magellan sets out", detail: "Five ships and about 270 men leave Spain, heading west for Asia." },
+              { year: 1520, label: "1520: The Strait of Magellan", detail: "The fleet finds a passage near the tip of South America and enters the Pacific." },
+              { year: 1521, label: "1521: Magellan is killed", detail: "Magellan dies in a battle in the Philippines. The voyage continues." },
+              { year: 1522, label: "1522: The Victoria returns", detail: "Elcano and 18 men complete the first voyage around the world." },
+            ],
+          },
+          probe: {
+            type: "sequence",
+            prompt: "Put the events of Magellan's voyage in order.",
+            steps: [
+              "Magellan leaves Spain with five ships",
+              "The fleet sails down the coast of South America",
+              "Magellan finds the strait near the tip of South America",
+              "The ships cross the Pacific Ocean",
+              "Magellan is killed in the Philippines",
+              "Elcano brings the Victoria home to Spain"
+            ],
+            hint: "Follow the route on a globe: down South America, through the strait, across the Pacific, then home.",
+            mistakes: [
+              {
+                match: "Pacific before strait",
+                coach: "The fleet had to get through the strait at the tip of South America before it could reach the Pacific."
+              },
+              {
+                match: "Magellan home",
+                coach: "Magellan did not make it home. Elcano led the last ship back."
+              }
+            ],
+            seconds: 45
+          },
+          think: {
+            q: "Why is Magellan's expedition famous?",
+            choices: [
+              "It discovered the Atlantic Ocean",
+              "It found a land route to India",
+              "It made the first voyage around the whole world",
+              "It was the first trip to Africa",
+            ],
+            answer: 2,
+            why: "The Victoria sailed west from Spain and returned from the east, circling the globe.",
+            hints: [
+              "Europeans had sailed the Atlantic for a long time. This voyage went much farther.",
+              "The expedition traveled by sea, heading west to reach Asia.",
+              "",
+              "Portuguese sailors had explored Africa's coast decades earlier.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Magellan's voyage was like a relay race. Magellan ran the hardest early legs and found the way, but Elcano carried the baton across the finish line.",
+            example:
+              "The Victoria left Spain in September 1519 and returned in September 1522, about three years later. Of about 270 men who set out, only 18 arrived home on that ship. Their journey proved that the oceans are connected and that the Earth is far larger than many had thought.",
+            simpler: {
+              q: "Who led the Victoria home after Magellan died?",
+              choices: ["Juan Sebastian Elcano", "Vasco da Gama", "Christopher Columbus"],
+              answer: 0,
+              why: "Elcano took command and brought the Victoria back to Spain in 1522.",
+              hints: [
+                "",
+                "Vasco da Gama sailed to India for Portugal in 1498.",
+                "Columbus died in 1506, before Magellan's voyage began.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Mapping a Bigger World",
+          teach:
+            "Each voyage brought home new information about coasts, islands, winds and currents, and mapmakers, called cartographers, used it to draw better maps. In 1507, a German mapmaker named Martin Waldseemuller published a world map that was the first to use the name America, after the Italian explorer Amerigo Vespucci. In 1569, Gerardus Mercator, a Flemish mapmaker, created a new kind of map. On it, a steady compass course appears as a straight line, which made it very useful for sailors. Many maps still use his design, though it makes lands near the poles look bigger than they really are. Voyages also carried living things. Corn, potatoes and tomatoes spread from the Americas to the world, while horses, cattle and wheat came to the Americas. This is called the Columbian Exchange. Diseases spread too, and illnesses such as smallpox killed huge numbers of Native Americans.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Cartographer", back: "A person who makes maps." },
+              { front: "Latitude", back: "How far north or south of the equator a place is." },
+              { front: "Longitude", back: "How far east or west a place is." },
+              { front: "Mercator map", back: "A 1569 map design where a steady compass course is a straight line. It stretches lands near the poles." },
+              { front: "Circumnavigation", back: "Sailing all the way around the world." },
+              { front: "Columbian Exchange", back: "The movement of plants, animals and diseases between the Americas and the rest of the world after 1492." },
+            ],
+          },
+          probe: {
+            type: "sort",
+            prompt: "Which way did each one travel in the Columbian Exchange?",
+            buckets: ["From the Americas to the world", "To the Americas from Europe, Africa and Asia"],
+            items: [
+              { text: "Corn", bucket: 0 },
+              { text: "Potatoes", bucket: 0 },
+              { text: "Tomatoes", bucket: 0 },
+              { text: "Cacao, used for chocolate", bucket: 0 },
+              { text: "Horses", bucket: 1 },
+              { text: "Cattle", bucket: 1 },
+              { text: "Wheat", bucket: 1 },
+              { text: "Smallpox", bucket: 1 }
+            ],
+            hint: "Crops first grown by Native Americans went out to the world. Farm animals, wheat and some diseases came in.",
+            mistakes: [
+              {
+                match: "Horses from the Americas",
+                coach: "The Spanish brought horses to the Americas. Many Native peoples later became expert riders."
+              },
+              {
+                match: "Potatoes to the Americas",
+                coach: "Potatoes were first grown in the Andes Mountains of South America, then spread to Europe."
+              }
+            ],
+            seconds: 45
+          },
+          think: {
+            q: "Why was Mercator's map so useful to sailors?",
+            choices: [
+              "It showed every city in the world",
+              "It made every country its true size",
+              "It was the first map ever made",
+              "A steady compass course appears as a straight line",
+            ],
+            answer: 3,
+            why: "A sailor could draw a straight line between ports, read its compass direction and steer that course.",
+            hints: [
+              "Many places were still unknown in 1569. Its value was for steering.",
+              "Mercator's map actually stretches lands near the poles, so sizes are not true.",
+              "People had made maps for thousands of years before Mercator.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Try peeling an orange and pressing the peel flat. It always stretches or tears. Every flat map of the round Earth has the same problem, so mapmakers choose what to keep accurate. Mercator kept compass directions true and let sizes near the poles stretch.",
+            example:
+              "On a Mercator map, Greenland looks about as big as Africa, but Africa is actually about 14 times larger. Even so, a sailor could draw a straight line from port to port, read its compass direction and steer that course the whole way.",
+            simpler: {
+              q: "A person who makes maps is called a:",
+              choices: ["Navigator", "Cartographer", "Squire"],
+              answer: 1,
+              why: "Cartographers gather information and draw maps.",
+              hints: [
+                "A navigator uses maps to steer a ship. The mapmaker has a different name.",
+                "",
+                "A squire was a knight in training in the Middle Ages.",
+              ],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sequence",
+        prompt: "Put these milestones of the Age of Exploration in order.",
+        steps: [
+          "Bartolomeu Dias rounds the southern tip of Africa",
+          "Columbus sails west and reaches the Caribbean",
+          "Vasco da Gama reaches India by sea",
+          "A world map first uses the name America",
+          "Magellan's fleet sets out from Spain",
+          "The Victoria completes the first voyage around the world",
+          "Mercator publishes his famous world map",
+        ],
+      },
+      explain: {
+        prompt:
+          "Explain why Europeans explored the oceans, how sailors found their way, and what Magellan's voyage proved.",
+        keyPoints: [
+          "Europeans wanted a direct sea route to the spices and goods of Asia.",
+          "The compass, the astrolabe and dead reckoning helped sailors navigate.",
+          "Magellan's expedition was the first to sail around the world, proving the oceans are connected.",
+          "New maps and the Columbian Exchange connected the continents.",
+        ],
+      },
+      mastery: [
+        {
+          type: "place",
+          prompt: "Place these voyages and maps on the timeline.",
+          min: 1480,
+          max: 1580,
+          step: 1,
+          tolerance: 2,
+          items: [
+            {
+              label: "Dias rounds Africa",
+              value: 1488
+            },
+            {
+              label: "Columbus reaches the Americas",
+              value: 1492
+            },
+            {
+              label: "Da Gama reaches India",
+              value: 1498
+            },
+            {
+              label: "Magellan sets out",
+              value: 1519
+            },
+            {
+              label: "The Victoria returns",
+              value: 1522
+            },
+            {
+              label: "Mercator's map",
+              value: 1569
+            }
+          ],
+          hint: "Three voyages came close together in the 1480s and 1490s, Magellan's voyage took about three years in the 1510s and 1520s, and Mercator's map came almost 50 years later.",
+          mistakes: [
+            {
+              match: "Columbus before Dias",
+              coach: "Dias rounded Africa in 1488, four years before Columbus sailed in 1492."
+            },
+            {
+              match: "Mercator early",
+              coach: "Mercator used reports from many voyages. His map came in 1569, long after Magellan."
+            }
+          ],
+          seconds: 55
+        },
+        {
+          type: "number",
+          prompt: "Using dead reckoning: a ship sails in a straight line at 6 miles per hour for 12 hours. How many miles has it traveled?",
+          answer: 72,
+          tolerance: 0,
+          unit: "miles",
+          hint: "Distance equals speed times time.",
+          mistakes: [
+            {
+              match: "18",
+              coach: "That adds 6 and 12. Multiply speed by time instead."
+            },
+            {
+              match: "2",
+              coach: "That divides 12 by 6. Distance is speed times time."
+            }
+          ],
+          seconds: 30
+        },
+        {
+          type: "cloze",
+          text: "Sailors used a {0} to find direction, and an {1} to measure the height of the sun or North Star to find their {2}.",
+          blanks: [
+            {
+              answers: [
+                "compass"
+              ]
+            },
+            {
+              answers: [
+                "astrolabe"
+              ]
+            },
+            {
+              answers: [
+                "latitude"
+              ]
+            }
+          ],
+          hint: "One tool points north. The tool that starts with a vowel measures the sky. The measurement tells how far north or south you are.",
+          mistakes: [
+            {
+              match: "longitude",
+              coach: "Longitude, east or west, could not be found this way. The sun and North Star told sailors their latitude."
+            }
+          ],
+          seconds: 35
+        },
+        {
+          type: "match",
+          prompt: "Match each person to what he did.",
+          pairs: [
+            {
+              left: "Bartolomeu Dias",
+              right: "Rounded the southern tip of Africa"
+            },
+            {
+              left: "Christopher Columbus",
+              right: "Sailed west in 1492 and reached the Americas"
+            },
+            {
+              left: "Vasco da Gama",
+              right: "Reached India by sea"
+            },
+            {
+              left: "Ferdinand Magellan",
+              right: "Found a strait near the tip of South America and named the Pacific"
+            },
+            {
+              left: "Juan Sebastian Elcano",
+              right: "Brought the Victoria home to finish the first voyage around the world"
+            },
+            {
+              left: "Gerardus Mercator",
+              right: "Made a map where compass courses are straight lines"
+            }
+          ],
+          hint: "Two sailed for Portugal around Africa, three sailed west for Spain, and one stayed home and made maps.",
+          mistakes: [
+            {
+              match: "Magellan to Victoria home",
+              coach: "Magellan was killed in the Philippines in 1521. Elcano brought the Victoria home."
+            },
+            {
+              match: "Columbus to India",
+              coach: "Columbus hoped to reach Asia but reached the Americas. Da Gama reached India."
+            }
+          ],
+          seconds: 50
+        }
+      ],
+      check: [
+        {
+          q: "What did European traders most want from Asia?",
+          choices: ["Coal and iron", "Spices and silk", "Horses and cattle", "Snow and ice"],
+          answer: 1,
+          why: "Pepper, cinnamon, cloves and silk were very valuable in Europe.",
+        },
+        {
+          q: "What does latitude tell you?",
+          choices: [
+            "How far east or west you are",
+            "How fast the ship is moving",
+            "How far north or south of the equator you are",
+            "What time it is at home",
+          ],
+          answer: 2,
+          why: "Sailors found latitude by measuring the height of the sun or the North Star.",
+        },
+        {
+          q: "Who finished the first voyage around the world after Magellan's death?",
+          choices: [
+            "Christopher Columbus",
+            "Vasco da Gama",
+            "Prince Henry the Navigator",
+            "Juan Sebastian Elcano and the crew of the Victoria",
+          ],
+          answer: 3,
+          why: "Elcano led the Victoria home to Spain in 1522 with 18 survivors.",
+        },
+        {
+          q: "What was the Columbian Exchange?",
+          choices: [
+            "The movement of crops, animals and diseases between the Americas and the rest of the world",
+            "A bank in Spain",
+            "A treaty that ended exploration",
+            "A trade of ships between Spain and Portugal",
+          ],
+          answer: 0,
+          why: "After 1492, plants, animals and diseases crossed the Atlantic in both directions.",
+        },
+        {
+          q: "What made the caravel useful for exploration?",
+          choices: [
+            "It had a steam engine",
+            "It was the largest warship in the world",
+            "Its triangular sails let it sail closer into the wind",
+          ],
+          answer: 2,
+          why: "The caravel was small and quick, and its triangular sails handled changing winds well.",
+        },
+      ],
+      task: {
+        kind: "lab",
+        prompt:
+          "With a parent, build a simple quadrant from cardboard, a protractor, string and a small weight. On a clear night, sight the North Star along the top edge and read the angle where the string hangs. Compare your measurement to your town's real latitude on a map, and explain how sailors used the same idea.",
+        rubric: [
+          "Builds a working quadrant with a hanging string and weight.",
+          "Measures the North Star's angle and records it.",
+          "Compares the measurement to the real latitude and explains any difference.",
+          "Explains how sailors used this method to find their way.",
+        ],
+      },
+    },
+    {
+      id: "history.lincoln",
+      title: "Lincoln and the Civil War: The Union Preserved",
+      minutes: 40,
+      stage: "rhetoric",
+      subject: "History",
+      read: `Abraham Lincoln was born in a log cabin in Kentucky in 1809. He had less than a year of formal schooling, but he borrowed every book he could find and taught himself. He became a lawyer in Springfield, Illinois, known as "Honest Abe."
+
+In the 1850s, Americans argued bitterly over slavery, especially whether it should spread into the new western territories. In 1858 Lincoln warned, "A house divided against itself cannot stand." He was elected president in 1860. Seven Southern states left the Union before he took office, and four more followed after the war began. They formed the Confederate States of America. Lincoln believed no state had the right to break up the nation.
+
+The Civil War began on April 12, 1861, when Confederate forces fired on Fort Sumter in South Carolina. The North had more people, factories and railroads. The South had skilled generals, such as Robert E. Lee, and fought mostly on its own land.
+
+On January 1, 1863, Lincoln's Emancipation Proclamation declared that enslaved people in the states in rebellion "are, and henceforward shall be free." It also opened the Union army to Black soldiers, and about 180,000 served. In July 1863, the Union won the Battle of Gettysburg in Pennsylvania, a turning point of the war. That November, Lincoln gave a two-minute speech there, the Gettysburg Address, calling for "a new birth of freedom" and a "government of the people, by the people, for the people."
+
+On April 9, 1865, Lee surrendered to Union general Ulysses S. Grant at Appomattox Court House, Virginia. Grant gave generous terms and let Confederate soldiers go home. The Union was preserved, though more than 600,000 soldiers had died. Days later, Lincoln was shot at Ford's Theatre and died the next morning. That December, the Thirteenth Amendment ended slavery throughout the United States.`,
+      keyIdeas: [
+        "The Civil War began after Southern states seceded over slavery following Lincoln's election in 1860.",
+        "Lincoln's goal was to preserve the Union, and the Emancipation Proclamation made freedom part of that goal.",
+        "The Union won in 1865, the nation stayed united, and the Thirteenth Amendment ended slavery.",
+      ],
+      hook: {
+        text: "On November 19, 1863, President Abraham Lincoln stood before a crowd at Gettysburg, Pennsylvania, where a huge battle had been fought that summer. The main speaker before him had talked for two hours. Lincoln spoke for about two minutes, using only about 270 words. Yet many Americans can still recite its opening: \"Four score and seven years ago.\" How can so few words matter so much?",
+      },
+      teach: [
+        {
+          title: "Honest Abe and a House Divided",
+          teach:
+            "Abraham Lincoln was born in a one-room log cabin in Kentucky on February 12, 1809, and grew up on frontier farms in Indiana. Altogether, he had less than a year of formal schooling. Still, he borrowed books, read by firelight and taught himself grammar, math and law. He became a lawyer in Springfield, Illinois, and earned the nickname \"Honest Abe.\" By the 1850s, Americans were arguing bitterly over slavery, especially whether it should be allowed to spread into new western territories. In 1858, running for the Senate, Lincoln said: \"A house divided against itself cannot stand. I believe this government cannot endure, permanently half slave and half free.\" He lost that race, but his debates with Stephen Douglas made him famous. In 1860, he was elected president.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Union", back: "The United States as one nation. During the war, the Northern side." },
+              { front: "Secede", back: "To formally leave a nation or group." },
+              { front: "Confederacy", back: "The Confederate States of America, formed by the Southern states that seceded." },
+              { front: "Emancipation", back: "Setting people free from slavery." },
+              { front: "Abolish", back: "To end something completely, such as a law or a practice." },
+              { front: "Primary source", back: "A document from the time itself, such as a speech, letter or proclamation." },
+            ],
+          },
+          probe: {
+            type: "cloze",
+            text: "In 1858 Lincoln warned, \"A house {0} against itself cannot {1}.\"",
+            blanks: [
+              {
+                answers: [
+                  "divided"
+                ]
+              },
+              {
+                answers: [
+                  "stand"
+                ]
+              }
+            ],
+            bank: [
+              "divided",
+              "stand",
+              "united",
+              "fall",
+              "built"
+            ],
+            hint: "Lincoln was describing a nation split in two that could not stay that way.",
+            mistakes: [
+              {
+                match: "united",
+                coach: "A united house is strong. Lincoln was warning about a house split apart."
+              },
+              {
+                match: "fall",
+                coach: "Lincoln said a divided house \"cannot\" do something. Cannot fall would mean it is safe, the opposite of his warning."
+              }
+            ],
+            seconds: 25
+          },
+          think: {
+            q: "What did Lincoln mean by \"A house divided against itself cannot stand\"?",
+            choices: [
+              "Houses should be built with stronger walls",
+              "A nation split over slavery could not last that way forever",
+              "Families should live in separate houses",
+              "The government should build more houses",
+            ],
+            answer: 1,
+            why: "The \"house\" was the nation. Lincoln believed it could not stay half slave and half free forever.",
+            hints: [
+              "Lincoln was using a picture, a metaphor. The house stands for something bigger.",
+              "",
+              "The house stands for the whole nation, not a family.",
+              "Lincoln was talking about the nation's future, not about building.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Imagine a rowing team where half the rowers paddle forward and half paddle backward. The boat goes nowhere and may tip over. Lincoln believed a nation pulling in two opposite directions could not last.",
+            example:
+              "In his 1858 Senate race in Illinois, Lincoln debated Stephen Douglas seven times in towns across the state. Thousands of people stood for hours to listen, and newspapers printed the debates. Lincoln lost the election, but the debates made him known across the country and helped him win the presidency in 1860.",
+            simpler: {
+              q: "How did Lincoln get most of his education?",
+              choices: ["By reading borrowed books and teaching himself", "At a famous university", "From private tutors in a mansion"],
+              answer: 0,
+              why: "Lincoln had less than a year of school but read every book he could borrow.",
+              hints: [
+                "",
+                "Lincoln never went to college. He learned law by studying on his own.",
+                "Lincoln grew up poor on frontier farms, far from any mansion.",
+              ],
+            },
+          },
+        },
+        {
+          title: "The Union Splits",
+          teach:
+            "After Lincoln won the election of 1860, many Southern leaders believed his victory threatened slavery. South Carolina seceded, or left the Union, in December 1860. Six more states soon followed, and together they formed the Confederate States of America, with Jefferson Davis as president. Lincoln took office in March 1861 and declared that the Union could not lawfully be broken up. On April 12, 1861, Confederate cannons fired on Fort Sumter, a U.S. fort in Charleston Harbor, South Carolina. The Civil War had begun, and four more states joined the Confederacy. The North had more people, far more factories and most of the railroads. The South had skilled generals such as Robert E. Lee and fought mostly on its own land, so it could win simply by not losing. Many expected a short war. It lasted four years.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "The Union (North)",
+              points: [
+                "President Abraham Lincoln",
+                "About 22 million people",
+                "Most of the factories and railroads",
+                "A strong navy to blockade Southern ports",
+              ],
+            },
+            right: {
+              title: "The Confederacy (South)",
+              points: [
+                "President Jefferson Davis",
+                "About 9 million people, including about 3.5 million enslaved people",
+                "Skilled generals such as Robert E. Lee",
+                "Fought mostly on its own land",
+              ],
+            },
+          },
+          probe: {
+            type: "sort",
+            prompt: "Sort each clue: Union or Confederacy?",
+            buckets: ["Union (North)", "Confederacy (South)"],
+            items: [
+              { text: "Abraham Lincoln", bucket: 0 },
+              { text: "Jefferson Davis", bucket: 1 },
+              { text: "Ulysses S. Grant", bucket: 0 },
+              { text: "Robert E. Lee", bucket: 1 },
+              { text: "Most of the factories and railroads", bucket: 0 },
+              { text: "Fired on Fort Sumter", bucket: 1 },
+              { text: "Capital at Washington, D.C.", bucket: 0 },
+              { text: "Capital at Richmond, Virginia", bucket: 1 }
+            ],
+            hint: "The Union kept the old capital and had the president elected in 1860. The Confederacy chose its own president and capital.",
+            mistakes: [
+              {
+                match: "Grant to Confederacy",
+                coach: "Grant was the Union general who accepted Lee's surrender."
+              },
+              {
+                match: "Factories to Confederacy",
+                coach: "The North had far more factories, which made weapons and supplies."
+              }
+            ],
+            seconds: 40
+          },
+          think: {
+            q: "What event started the Civil War?",
+            choices: [
+              "Lee's surrender at Appomattox",
+              "The Gettysburg Address",
+              "Confederate forces firing on Fort Sumter",
+              "The Emancipation Proclamation",
+            ],
+            answer: 2,
+            why: "The war began on April 12, 1861, when Confederate cannons fired on Fort Sumter.",
+            hints: [
+              "Appomattox is where the war ended in 1865.",
+              "Lincoln gave the Gettysburg Address in 1863, in the middle of the war.",
+              "",
+              "The Emancipation Proclamation took effect in 1863, almost two years into the war.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "The North was like a team with a much bigger bench and better equipment. The South was like a home team with star players and its crowd behind it. The South did not have to conquer the North; it only had to hold out until the North gave up.",
+            example:
+              "In 1860, the states that stayed in the Union had about 22 million people, while the states that joined the Confederacy had about 9 million, including about 3.5 million enslaved people. The North also had most of the nation's factories, which could make rifles, uniforms and railroad engines.",
+            simpler: {
+              q: "To secede means to:",
+              choices: ["Win a battle", "Formally leave a nation or group", "Write a speech"],
+              answer: 1,
+              why: "Southern states seceded, or left, the Union in 1860 and 1861.",
+              hints: [
+                "Winning a battle is a victory. Secede is about leaving.",
+                "",
+                "Speeches were part of the story, but secede means to leave.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Emancipation and Gettysburg",
+          teach:
+            "At first, Lincoln's main goal was saving the Union. In 1862 he wrote to a newspaper editor, \"My paramount object in this struggle is to save the Union.\" As the war went on, he decided that freeing enslaved people would weaken the Confederacy and give the war a higher purpose. His Emancipation Proclamation took effect on January 1, 1863. It declared that enslaved people in the states in rebellion \"are, and henceforward shall be free.\" It also opened the Union army to Black soldiers, and about 180,000 served. In July 1863, Union forces defeated Lee at Gettysburg, Pennsylvania, after three days of fighting, a turning point of the war. That November, Lincoln dedicated a cemetery there. In about two minutes, he honored the fallen and called for \"a new birth of freedom.\"",
+          visual: {
+            type: "hotspots",
+            title: "Inside the Gettysburg Address",
+            center: "📜 Address",
+            spots: [
+              { label: "\"Four score and seven years ago\"", icon: "🗓️", detail: "A score is 20, so this is 87 years before 1863: 1776, the year of the Declaration of Independence." },
+              { label: "\"Conceived in Liberty\"", icon: "🗽", detail: "Lincoln reminds listeners that the nation was founded on freedom and the idea that all men are created equal." },
+              { label: "\"We can not hallow\"", icon: "🎖️", detail: "The soldiers' sacrifice made the ground sacred, more than any words could." },
+              { label: "\"A new birth of freedom\"", icon: "🌅", detail: "Lincoln hoped the war would bring the nation a renewed and wider freedom." },
+              { label: "\"Of the people, by the people, for the people\"", icon: "🇺🇸", detail: "Lincoln's resolve that self-government must not perish from the earth." },
+            ],
+          },
+          probe: {
+            type: "number",
+            prompt: "Lincoln began, \"Four score and seven years ago.\" A score is 20. Counting back from 1863, what year was he pointing to?",
+            answer: 1776,
+            tolerance: 0,
+            hint: "First find four times 20, add 7, then subtract that from 1863.",
+            mistakes: [
+              {
+                match: "87",
+                coach: "87 is how many years ago. Now subtract 87 from 1863 to find the year."
+              },
+              {
+                match: "1783",
+                coach: "That counts back only 80 years. Don't forget the extra seven."
+              },
+              {
+                match: "1856",
+                coach: "That subtracts only the seven. Four score is 80 more years."
+              }
+            ],
+            seconds: 45
+          },
+          think: {
+            q: "Why did Lincoln issue the Emancipation Proclamation?",
+            choices: [
+              "To free enslaved people in rebel states, weakening the Confederacy and giving the war a higher purpose",
+              "To end the war that same day",
+              "To raise taxes for the army",
+              "To move the nation's capital",
+            ],
+            answer: 0,
+            why: "Freeing enslaved people in the rebelling states weakened the Confederacy and joined the cause of freedom to the cause of Union.",
+            hints: [
+              "",
+              "The war went on for more than two more years after the proclamation.",
+              "The proclamation was about freedom, not taxes.",
+              "The capital stayed in Washington, D.C.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Lincoln's goals grew like a building with a strong foundation and a new floor. Saving the Union was the foundation, and as the war went on, freedom was built on top of it. In the end, the two goals stood together.",
+            example:
+              "The 54th Massachusetts Infantry was one of the first regiments of Black soldiers raised in the North. In July 1863, its men led a brave attack on Fort Wagner in South Carolina. Their courage helped convince many Northerners that Black soldiers should serve, and thousands more enlisted.",
+            simpler: {
+              q: "Where was the turning-point battle of July 1863 fought?",
+              choices: ["Fort Sumter, South Carolina", "Gettysburg, Pennsylvania", "Appomattox, Virginia"],
+              answer: 1,
+              why: "The Union won the three-day Battle of Gettysburg in July 1863.",
+              hints: [
+                "Fort Sumter is where the war began in 1861.",
+                "",
+                "Appomattox is where the war ended in 1865.",
+              ],
+            },
+          },
+        },
+        {
+          title: "The Union Preserved",
+          teach:
+            "In 1864, Lincoln put General Ulysses S. Grant in command of all Union armies. Grant pressed Lee's army in Virginia while General William T. Sherman marched through Georgia. On April 9, 1865, Lee surrendered to Grant at Appomattox Court House, Virginia. Grant offered generous terms: Confederate soldiers could go home, and men who owned horses or mules could keep them for spring planting. Grant also sent food to Lee's hungry men. More than 600,000 soldiers had died, but the Union was preserved. In his second inaugural address, Lincoln had urged the nation to heal \"with malice toward none, with charity for all.\" On April 14, Lincoln was shot at Ford's Theatre in Washington and died the next morning. In December 1865, the Thirteenth Amendment abolished slavery throughout the United States.",
+          visual: {
+            type: "timeline",
+            events: [
+              { year: 1809, label: "1809: Lincoln is born", detail: "Abraham Lincoln is born in a log cabin in Kentucky." },
+              { year: 1858, label: "1858: A house divided", detail: "Lincoln warns that the nation cannot stay half slave and half free." },
+              { year: 1860, label: "1860: Lincoln elected", detail: "Lincoln wins the presidency, and South Carolina secedes in December." },
+              { year: 1861, label: "1861: Fort Sumter", detail: "Confederate forces fire on Fort Sumter, and the Civil War begins." },
+              { year: 1863, label: "1863: Emancipation and Gettysburg", detail: "The Emancipation Proclamation takes effect, the Union wins at Gettysburg, and Lincoln gives the Gettysburg Address." },
+              { year: 1865, label: "1865: The Union preserved", detail: "Lee surrenders at Appomattox, Lincoln is killed, and the Thirteenth Amendment abolishes slavery." },
+            ],
+          },
+          probe: {
+            type: "highlight",
+            prompt: "Tap each sentence that shows a generous, healing spirit at the end of the war.",
+            sentences: [
+              "Grant let Confederate soldiers go home.",
+              "Grant let men keep their horses and mules for spring planting.",
+              "Grant sent food to Lee's hungry soldiers.",
+              "Grant demanded that every Confederate soldier be put in prison.",
+              "Lincoln urged the nation to act \"with malice toward none.\"",
+              "Lincoln called for revenge against the South."
+            ],
+            correct: [
+              0,
+              1,
+              2,
+              4
+            ],
+            hint: "Look for actions that helped former enemies go home and rebuild.",
+            mistakes: [
+              {
+                match: "Picked prison",
+                coach: "Grant did the opposite: he let Confederate soldiers go home."
+              },
+              {
+                match: "Picked revenge",
+                coach: "Lincoln asked for \"malice toward none,\" which means no ill will or revenge."
+              }
+            ],
+            seconds: 40
+          },
+          think: {
+            q: "What did \"the Union preserved\" mean at the end of the war?",
+            choices: [
+              "The Confederacy became a separate country",
+              "Slavery spread to new territories",
+              "The capital moved to Richmond",
+              "The states remained one nation",
+            ],
+            answer: 3,
+            why: "The Union's victory kept the United States together as one country.",
+            hints: [
+              "The Confederacy lost. It did not become a separate country.",
+              "The Thirteenth Amendment ended slavery in 1865.",
+              "Richmond was the Confederate capital. Washington, D.C. remained the nation's capital.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Grant's terms were like a coach after a hard-fought game telling his players to shake hands with the other team. The goal was not to humiliate the opponent but to become one country again.",
+            example:
+              "At Appomattox, Lee told Grant his men were hungry, and Grant arranged rations for about 25,000 Confederate soldiers. When Union troops began firing salutes to celebrate, Grant ordered them to stop. The Confederates, he said, were now their countrymen again.",
+            simpler: {
+              q: "Where did Lee surrender to Grant?",
+              choices: ["Fort Sumter", "Gettysburg", "Appomattox Court House"],
+              answer: 2,
+              why: "Lee surrendered to Grant at Appomattox Court House, Virginia, on April 9, 1865.",
+              hints: [
+                "Fort Sumter is where the war began.",
+                "Gettysburg was a turning-point battle in 1863, two years before the end.",
+                "",
+              ],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sequence",
+        prompt: "Put these events of Lincoln's life and the Civil War in order.",
+        steps: [
+          "Lincoln warns that a house divided cannot stand",
+          "Lincoln is elected president",
+          "Southern states secede and form the Confederacy",
+          "Confederates fire on Fort Sumter",
+          "The Emancipation Proclamation takes effect",
+          "The Union wins at Gettysburg",
+          "Lee surrenders to Grant at Appomattox",
+          "The Thirteenth Amendment abolishes slavery",
+        ],
+      },
+      explain: {
+        prompt:
+          "Explain why the Civil War began, how Lincoln led the nation through it, and what the Union's victory achieved.",
+        keyPoints: [
+          "Southern states seceded over slavery after Lincoln's election, and the war began at Fort Sumter.",
+          "Lincoln's goal was to preserve the Union, and the Emancipation Proclamation made freedom part of that goal.",
+          "The Union won at Gettysburg and Lee surrendered at Appomattox in 1865.",
+          "The nation stayed united and the Thirteenth Amendment ended slavery.",
+        ],
+      },
+      mastery: [
+        {
+          type: "place",
+          prompt: "Place these events on the timeline.",
+          min: 1855,
+          max: 1870,
+          step: 1,
+          tolerance: 0,
+          items: [
+            {
+              label: "\"A house divided\" speech",
+              value: 1858
+            },
+            {
+              label: "Lincoln elected president",
+              value: 1860
+            },
+            {
+              label: "Fort Sumter: the war begins",
+              value: 1861
+            },
+            {
+              label: "Emancipation Proclamation takes effect",
+              value: 1863
+            },
+            {
+              label: "Lee surrenders at Appomattox",
+              value: 1865
+            }
+          ],
+          hint: "The speech came two years before the election, the war began the next year, and it lasted four years.",
+          mistakes: [
+            {
+              match: "Emancipation in 1861",
+              coach: "The Emancipation Proclamation took effect on January 1, 1863, almost two years into the war."
+            },
+            {
+              match: "Surrender in 1864",
+              coach: "Lee surrendered in April 1865, four years after Fort Sumter."
+            }
+          ],
+          seconds: 50
+        },
+        {
+          type: "match",
+          prompt: "Match each primary-source quote to where it comes from.",
+          pairs: [
+            {
+              left: "\"A house divided against itself cannot stand.\"",
+              right: "Lincoln's 1858 Senate campaign speech"
+            },
+            {
+              left: "\"...are, and henceforward shall be free.\"",
+              right: "The Emancipation Proclamation"
+            },
+            {
+              left: "\"Four score and seven years ago...\"",
+              right: "The Gettysburg Address"
+            },
+            {
+              left: "\"With malice toward none, with charity for all...\"",
+              right: "Lincoln's second inaugural address"
+            },
+            {
+              left: "\"My paramount object in this struggle is to save the Union.\"",
+              right: "Lincoln's 1862 letter to a newspaper editor"
+            }
+          ],
+          hint: "Think about when each was said: before the war, during it, or near its end.",
+          mistakes: [
+            {
+              match: "Malice to Gettysburg",
+              coach: "\"With malice toward none\" came from Lincoln's second inaugural address in March 1865, as the war was ending."
+            },
+            {
+              match: "Free to Gettysburg",
+              coach: "\"Henceforward shall be free\" is from the Emancipation Proclamation, the order that declared freedom."
+            }
+          ],
+          seconds: 50
+        },
+        {
+          type: "number",
+          prompt: "The war began in April 1861 and Lee surrendered in April 1865. How many years did the war last?",
+          answer: 4,
+          tolerance: 0,
+          unit: "years",
+          hint: "Subtract 1861 from 1865.",
+          mistakes: [
+            {
+              match: "5",
+              coach: "Count the gaps, not the calendar years: April 1861 to April 1865 is 4 years."
+            }
+          ],
+          seconds: 20
+        },
+        {
+          type: "cloze",
+          text: "The {0} Amendment, ratified in December 1865, abolished {1} throughout the United States.",
+          blanks: [
+            {
+              answers: [
+                "Thirteenth",
+                "13th",
+                "13"
+              ]
+            },
+            {
+              answers: [
+                "slavery"
+              ]
+            }
+          ],
+          hint: "It was the amendment right after the twelfth, and it ended what the war had been fought over.",
+          mistakes: [
+            {
+              match: "Fourteenth",
+              coach: "The Fourteenth Amendment came in 1868. The one that ended slavery came first."
+            },
+            {
+              match: "First",
+              coach: "The First Amendment protects freedom of speech and religion. This one came in 1865."
+            }
+          ],
+          seconds: 25
+        }
+      ],
+      check: [
+        {
+          q: "Why did Southern states secede after the 1860 election?",
+          choices: [
+            "They wanted to join Canada",
+            "Many Southern leaders believed Lincoln's victory threatened slavery",
+            "Lincoln had declared war on them",
+            "They wanted a new capital city",
+          ],
+          answer: 1,
+          why: "Southern leaders feared that Lincoln, who opposed the spread of slavery, threatened it.",
+        },
+        {
+          q: "Where did the Civil War begin?",
+          choices: ["Gettysburg", "Appomattox Court House", "Ford's Theatre", "Fort Sumter"],
+          answer: 3,
+          why: "Confederate forces fired on Fort Sumter on April 12, 1861.",
+        },
+        {
+          q: "What did the Emancipation Proclamation declare?",
+          choices: [
+            "Enslaved people in the states in rebellion were free",
+            "The war was over",
+            "The South could leave the Union",
+            "Lincoln would serve a third term",
+          ],
+          answer: 0,
+          why: "It declared that enslaved people in the rebelling states \"are, and henceforward shall be free.\"",
+        },
+        {
+          q: "What happened at Appomattox Court House in April 1865?",
+          choices: ["Lincoln gave the Gettysburg Address", "The war began", "Lee surrendered to Grant", "The Confederacy was formed"],
+          answer: 2,
+          why: "Lee surrendered his army to Grant on April 9, 1865.",
+        },
+        {
+          q: "What was Lincoln's main goal throughout the war?",
+          choices: [
+            "To make the South a separate nation",
+            "To preserve the Union",
+            "To move the capital to Illinois",
+          ],
+          answer: 1,
+          why: "Lincoln's paramount object was to save the Union, and emancipation became part of that cause.",
+        },
+      ],
+      task: {
+        kind: "speak",
+        prompt:
+          "Memorize and recite the Gettysburg Address, or at least its first and last sentences, for your family. Then explain in your own words what \"four score and seven years ago,\" \"a new birth of freedom\" and \"government of the people, by the people, for the people\" mean.",
+        rubric: [
+          "Recites the chosen part accurately and clearly.",
+          "Explains that four score and seven years points back to 1776 and the Declaration.",
+          "Explains the meaning of the key phrases in own words.",
+          "Speaks with good pace, eye contact and expression.",
+        ],
+      },
+    },
   ],
 };

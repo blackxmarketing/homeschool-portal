@@ -226,6 +226,18 @@ CREATE TABLE IF NOT EXISTS media_cache (
   fetched_at INTEGER NOT NULL
 );
 
+-- Story mini-games (docs/GAME.md): each kid's best stars per game level.
+CREATE TABLE IF NOT EXISTS minigame_progress (
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  game TEXT NOT NULL,
+  level TEXT NOT NULL,
+  stars INTEGER NOT NULL DEFAULT 0,
+  best REAL,
+  plays INTEGER NOT NULL DEFAULT 0,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (kid_id, game, level)
+);
+
 -- Finished focus sprints (Pomodoro-style work blocks).
 CREATE TABLE IF NOT EXISTS sprint_log (
   id INTEGER PRIMARY KEY,

@@ -44,6 +44,9 @@ export const AVATARS: Record<string, AvatarLook> = {
 /** A look for any key, falling back to a pleasant default picked from the name. */
 export function avatarFor(key: string): AvatarLook {
   if (AVATARS[key]) return AVATARS[key];
+  // Grade-band versions of a course ("science-45", "science-hs") keep the same teacher.
+  const base = key.replace(/-(45|hs)$/, "");
+  if (AVATARS[base]) return AVATARS[base];
   const looks = Object.values(AVATARS);
   const h = [...key].reduce((a, c) => a + c.charCodeAt(0), 0);
   return looks[h % looks.length];

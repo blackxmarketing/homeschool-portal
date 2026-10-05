@@ -274,4 +274,200 @@ export const writingMedia: CourseMedia = {
       },
     ],
   },
+
+  "writing.grammar": {
+    hook: {
+      show: [
+        { caption: "Lewis Carroll filled a famous poem with made-up words.", photo: "Lewis Carroll" },
+        { at: "Nobody knows what a tove", caption: "What is a tove? Nobody knows!", emoji: "🤔❓" },
+        { at: "slithy describes it", caption: "Yet you can tell: tove is a thing, slithy describes, gyre is an action.", big: "thing · describer · action" },
+        { at: "the parts of speech", caption: "Your brain already knows the parts of speech.", emoji: "🧠✨" },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { caption: "Every word in a sentence has a job.", emoji: "👷📝" },
+          { at: "English has eight", caption: "Eight parts of speech, but five do most of the work.", big: "8 → 5" },
+          { at: "A noun names", caption: "Nouns name things: sailor, harbor, rope, even courage.", emoji: "⚓⛵🪢" },
+          { at: "A verb shows an action", caption: "Verbs show action or tell what something is.", big: "climbed · is" },
+          { at: "backbone of the sentence", caption: "Noun + verb = the backbone of every sentence.", emoji: "🦴" },
+        ],
+      },
+      {
+        show: [
+          { caption: "Describers add detail to the frame.", emoji: "🎨🖌️" },
+          { at: "An adjective describes a noun", caption: "Adjectives describe nouns: which one, what kind, how many?", big: "the OLD sailor" },
+          { at: "An adverb usually describes a verb", caption: "Adverbs answer how, when, where or how much.", big: "climbed QUICKLY" },
+          { at: "Many adverbs end in -ly", caption: "Many end in -ly, but soon, never and very are adverbs too.", big: "-ly? Often. Always? No." },
+          { at: "Here is a quick test", caption: "Point to the word being described. A noun means adjective.", emoji: "👉🔍" },
+        ],
+      },
+      {
+        show: [
+          { caption: "Conjunctions are the connectors.", emoji: "🔗" },
+          { at: "you get FANBOYS", caption: "FANBOYS: for, and, nor, but, or, yet, so.", big: "F·A·N·B·O·Y·S" },
+          { at: "salt and pepper", caption: "'And' adds one thing to another.", photo: "Salt and pepper shakers" },
+          { at: "Or offers a choice", caption: "'Or' offers a choice. 'So' shows a result.", emoji: "☕❓🍫" },
+          { at: "put a comma before it", caption: "Joining two full sentences? Put a comma before the conjunction.", big: "The wind died, so the ship drifted." },
+        ],
+      },
+      {
+        show: [
+          { caption: "The most important rule of all.", big: "The job decides" },
+          { at: "We went for a run", caption: "'Went for a run': here run names a thing, so it's a noun.", photo: "Running" },
+          { at: "We run every morning", caption: "'We run': here run is the action, so it's a verb.", emoji: "🏃🌅" },
+          { at: "Fast works the same way", caption: "'Fast boat' is an adjective. 'Swam fast' is an adverb.", big: "fast boat · swam fast" },
+          { at: "what the word is doing right now", caption: "Always ask: what is this word doing right now?", emoji: "🔍❓" },
+        ],
+      },
+    ],
+  },
+
+  "writing.research-report": {
+    hook: {
+      show: [
+        { caption: "In 1899 Wilbur Wright wrote to the Smithsonian for papers on flight.", photo: "Smithsonian Institution Building" },
+        { at: "ran a bicycle shop", caption: "Two brothers who built and fixed bicycles in Dayton, Ohio.", emoji: "🚲🔧" },
+        { at: "Four years later", caption: "Four years later, they flew.", emoji: "✈️🎉" },
+        { at: "That is research", caption: "Questions, reading, testing and notes: that's research.", big: "Research" },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { caption: "Every report begins with a question.", emoji: "❓📄" },
+          { at: "'Airplanes' is only a topic", caption: "'Airplanes' is a topic, not a question.", emoji: "✈️🏷️" },
+          { at: "one fact answers it", caption: "One fact answers it, so there's nothing left to research.", big: "1903. Done." },
+          { at: "How did the Wright brothers teach themselves", caption: "Orville Wright. How did he and Wilbur teach themselves to fly?", photo: "Wright brothers" },
+          { at: "how or why", caption: "Strong questions often start with how or why.", big: "How? Why?" },
+        ],
+      },
+      {
+        show: [
+          { caption: "Sources are the raw material of research.", emoji: "📚🔎" },
+          { at: "A primary source comes from the time", caption: "A primary source: this photo was taken as the Flyer lifted off in 1903.", photo: "Wright Flyer" },
+          { at: "A secondary source is written later", caption: "Secondary sources are written later: biographies, encyclopedias.", emoji: "📖🗂️" },
+          { at: "Who wrote it?", caption: "Question every source.", big: "Who? What do they know? When?" },
+          { at: "at least two sources", caption: "Check important facts in at least two sources.", big: "✓ ✓" },
+        ],
+      },
+      {
+        show: [
+          { caption: "Good notes: short, accurate, in your own words.", emoji: "🗒️✏️" },
+          { at: "Dec 17, 1903", caption: "A whole sentence shrinks to a few key facts.", big: "Dec 17, 1903 · Orville · 12 sec" },
+          { at: "write the source next to it", caption: "Write the source beside every note.", emoji: "📌📚" },
+          { at: "Plagiarism is a kind of stealing", caption: "Passing off someone's words as yours is stealing.", big: "Plagiarism = stealing" },
+          { at: "inside quotation marks", caption: "Want the exact words? Use quotation marks and give credit.", big: "“ … ”" },
+        ],
+      },
+      {
+        show: [
+          { caption: "Turn a pile of notes into a report.", emoji: "🗂️➡️📄" },
+          { at: "sort your notes into groups", caption: "Each group of notes becomes one body paragraph.", emoji: "🧺🧺🧺" },
+          { at: "called your thesis", caption: "Your thesis answers the question in one sentence.", big: "Thesis" },
+          { at: "The body paragraphs prove", caption: "Body paragraphs prove it with facts. This memorial marks the first flight.", photo: "Wright Brothers National Memorial" },
+          { at: "list your sources at the end", caption: "List your sources so readers can check your work.", emoji: "📚✅" },
+        ],
+      },
+    ],
+  },
+
+  "writing.poetry": {
+    hook: {
+      show: [
+        { caption: "A midnight ride, told in a poem people still memorize.", emoji: "🐎🌙🏮" },
+        { at: "Henry Wadsworth Longfellow", caption: "Henry Wadsworth Longfellow, one of America's best-loved poets.", photo: "Henry Wadsworth Longfellow" },
+        { at: "Why do poems stick", caption: "Why do poems stick in our memory?", emoji: "🧠📌" },
+        { at: "The secret is music", caption: "Beat, rhyme and pictures working together.", big: "Beat + Rhyme + Pictures" },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { caption: "Words have syllables, and some get a stronger push.", big: "GAR-den" },
+          { at: "Rhythm is the pattern", caption: "Rhythm is the pattern of strong and weak syllables.", emoji: "🥁" },
+          { at: "Robert Frost wrote", caption: "Robert Frost, poet of New England woods and farms.", photo: "Robert Frost" },
+          { at: "whose WOODS these ARE", caption: "Eight syllables, four strong beats.", big: "da-DUM da-DUM da-DUM da-DUM" },
+          { at: "galloping rhythm", caption: "Longfellow's rhythm gallops like Revere's horse.", emoji: "🐎💨" },
+        ],
+      },
+      {
+        show: [
+          { caption: "Rhyme: matching ending sounds.", big: "know · snow" },
+          { at: "called a rhyme scheme", caption: "Each new ending sound gets the next letter.", big: "A, B, C…" },
+          { at: "Robert Louis Stevenson's poem", caption: "Robert Louis Stevenson wrote A Child's Garden of Verses.", photo: "Robert Louis Stevenson" },
+          { at: "The scheme is AABB", caption: "me, see, head, bed", big: "AABB" },
+          { at: "it's AABA", caption: "know, though, here, snow", big: "AABA" },
+        ],
+      },
+      {
+        show: [
+          { caption: "Imagery paints with all five senses.", emoji: "👀👂✋👃👅" },
+          { at: "Weak poetry tells", caption: "Telling says 'It was quiet.' Showing lets you hear the quiet.", big: "Tell ❌  Show ✅" },
+          { at: "easy wind and downy flake", caption: "You can almost hear the snow falling.", emoji: "🌬️❄️" },
+          { at: "The Village Blacksmith", caption: "Longfellow's blacksmith: a mighty man with large and sinewy hands.", photo: "Blacksmith" },
+          { at: "which sense each line reaches", caption: "Ask: which sense does this line reach?", emoji: "🤔👂" },
+        ],
+      },
+      {
+        show: [
+          { caption: "Figurative language: surprising comparisons.", emoji: "🔀" },
+          { at: "A simile makes the comparison", caption: "Similes compare with like or as.", big: "like · as" },
+          { at: "has a face like the clock", caption: "'The moon has a face like the clock in the hall.'", photo: "Moon" },
+          { at: "A metaphor is bolder", caption: "A metaphor says one thing IS another.", big: "Her early leaf's a flower." },
+          { at: "I like apples", caption: "'I like apples' compares nothing, so it's not a simile!", emoji: "🍎🚫" },
+        ],
+      },
+    ],
+  },
+
+  "writing.letters-speeches": {
+    hook: {
+      show: [
+        { caption: "Grace Bedell, shown here grown up, wrote to Lincoln when she was eleven.", photo: "Grace Bedell" },
+        { at: "grow a beard", caption: "Her advice: grow a beard!", emoji: "🧔✉️" },
+        { at: "wearing a full beard", caption: "A few months later, Lincoln wore a full beard.", photo: "Abraham Lincoln" },
+        { at: "One short, polite letter", caption: "One clear, polite letter made history.", big: "Purpose + Polite" },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { caption: "Two questions come before any letter or speech.", emoji: "❓❓" },
+          { at: "what is my purpose", caption: "Purpose: the job your words must do.", big: "Purpose" },
+          { at: "who is my audience", caption: "Audience: who will read or hear your words.", big: "Audience" },
+          { at: "A thank-you note to your grandmother", caption: "Warm and chatty for Grandma.", emoji: "👵💌" },
+          { at: "tour the fossil lab", caption: "Polite, clear and brief for a museum director.", photo: "Fossil" },
+        ],
+      },
+      {
+        show: [
+          { caption: "Letters follow a pattern readers expect.", emoji: "✉️" },
+          { at: "The heading comes first", caption: "Heading: the date at the top.", big: "March 12" },
+          { at: "Next is the greeting", caption: "Greeting: a comma for friends, a colon for formal letters.", big: "Dear Aunt Ruth,\nDear Mr. Hayes:" },
+          { at: "Then comes the body", caption: "Body: get to your purpose in the first sentence or two.", photo: "Letter (message)" },
+          { at: "Last is your signature", caption: "Closing, then signature: goodbye and your name.", big: "Love,\nSam" },
+        ],
+      },
+      {
+        show: [
+          { caption: "Tone is the attitude your words carry.", emoji: "🎭" },
+          { at: "A friendly letter to a cousin", caption: "Friendly: jokes, contractions, exclamation points!", emoji: "🎣😄" },
+          { at: "A formal letter to a business", caption: "Formal: complete, polite sentences and no slang.", photo: "Fountain pen" },
+          { at: "Formal doesn't mean stiff", caption: "Formal means respectful and clear, not stiff.", big: "Respectful + Clear" },
+          { at: "Grace Bedell's letter", caption: "Bold but polite: Grace's letter got an answer.", emoji: "✉️✅" },
+        ],
+      },
+      {
+        show: [
+          { caption: "A speech is a letter delivered with your voice.", emoji: "🎤" },
+          { at: "Open with a hook", caption: "Hook, purpose, two or three points, strong ending.", big: "Hook → Points → Ending" },
+          { at: "Edward Everett spoke", caption: "Edward Everett, the main speaker, talked for about two hours.", photo: "Edward Everett" },
+          { at: "about two minutes", caption: "Lincoln spoke for about two minutes.", big: "2 hours vs. 2 minutes" },
+          { at: "the rule of three", caption: "The crowd at Gettysburg, 1863. Lincoln ended with a rule of three.", photo: "Gettysburg Address" },
+        ],
+      },
+    ],
+  },
 };

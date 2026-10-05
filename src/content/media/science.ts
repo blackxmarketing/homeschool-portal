@@ -275,4 +275,198 @@ export const scienceMedia: CourseMedia = {
       },
     ],
   },
+
+  "science.matter": {
+    hook: {
+      show: [
+        { photo: "Campfire", caption: "A campfire: wood goes in, and flames and smoke come out" },
+        { at: "small pile of gray ash", emoji: "🪵🔥➡️💨", caption: "Hours later, only a little ash is left. Where did the rest go?" },
+        { at: "Antoine Lavoisier", photo: "Antoine Lavoisier", caption: "Antoine Lavoisier, the French chemist who weighed everything" },
+        { at: "very careful balance", emoji: "⚖️", caption: "His secret weapon: a very careful balance" },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { emoji: "🪨💧🌬️", caption: "Rocks, water, air, even you: all of it is matter" },
+          { at: "built from atoms", emoji: "⚛️", caption: "Atoms: the tiny building blocks of everything" },
+          { at: "more than a billion billion", big: "A billion billion", caption: "At least that many atoms in a single drop of water" },
+          { at: "periodic table", photo: "Periodic table", caption: "The periodic table: all 118 known elements in one chart" },
+          { at: "Others come from Latin", big: "Fe · Au", caption: "Fe from ferrum (iron), Au from aurum (gold)" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "⚛️🔗⚛️", caption: "Atoms bond together to form molecules" },
+          { at: "its formula is H2O", big: "H₂O", caption: "Two hydrogen atoms + one oxygen atom = one water molecule" },
+          { at: "Carbon dioxide, CO2", big: "CO₂", caption: "One carbon atom and two oxygen atoms" },
+          { at: "Bonded together, they make sodium chloride", photo: "Sodium chloride", caption: "A salt crystal: a soft metal and a poisonous gas, bonded together" },
+          { at: "the oxygen we breathe, O2", big: "O₂", caption: "A molecule, but not a compound: only one kind of atom" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "🧊➡️💧", caption: "Melting ice is still water, just in a new state" },
+          { at: "A chemical change makes", emoji: "✨🆕", caption: "A chemical change makes brand-new substances" },
+          { at: "When iron rusts", photo: "Rust", caption: "Rust: iron and oxygen have formed iron oxide" },
+          { at: "When you bake a cake", emoji: "🎂", caption: "Baked cake can never turn back into batter" },
+          { at: "Watch for clues", emoji: "🫧🎨👃🔥", caption: "Clues: bubbles, new color, new smell, light or heat, a new solid" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "🧪➡️✨", caption: "Reactants go in, products come out" },
+          { at: "Antoine Lavoisier showed", photo: "Antoine Lavoisier", caption: "Lavoisier weighed everything, even the gases" },
+          { at: "in sealed containers", emoji: "⚖️🫙", caption: "Sealed containers trapped every bit of gas for weighing" },
+          { at: "law of conservation of mass", big: "Mass in = Mass out", caption: "The law of conservation of mass" },
+          { at: "why does a burning log", emoji: "🪵🔥💨", caption: "The log's atoms float away as carbon dioxide and water vapor" },
+        ],
+      },
+    ],
+  },
+
+  "science.ecosystems": {
+    hook: {
+      show: [
+        { photo: "Yellowstone National Park", caption: "Yellowstone National Park, in the Rocky Mountains" },
+        { at: "elk herds grew large", photo: "Elk", caption: "With no wolves around, elk herds grew large" },
+        { at: "in 1995", big: "1995", caption: "Gray wolves are brought back to Yellowstone" },
+        { at: "web of life", emoji: "🐺🦌🌳🦫", caption: "One hunter returns. What happens to everyone else?" },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { emoji: "☀️🌱", caption: "Producers make their own food from sunlight" },
+          { at: "This is photosynthesis", big: "Photosynthesis", caption: "Sunlight + water + carbon dioxide → sugar" },
+          { at: "Herbivores eat only plants", emoji: "🐇🍀", caption: "Herbivores eat plants; carnivores eat animals" },
+          { at: "Omnivores eat both", photo: "American black bear", caption: "A black bear: an omnivore that eats berries and fish" },
+          { at: "the decomposers", emoji: "🍄🪱🦠", caption: "Decomposers: fungi, earthworms and bacteria recycle the dead" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "🌾➡️🦗➡️🐸➡️🐍➡️🦅", caption: "A meadow food chain: one path of energy" },
+          { at: "begins with a producer", emoji: "☀️🌱", caption: "Every chain starts with a producer catching sunlight" },
+          { at: "It points from the food to the eater", big: "food → eater", caption: "The arrow shows where the energy goes" },
+          { at: "food web", photo: "Food web", caption: "A food web: many food chains tangled together" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "🦗💨", caption: "A grasshopper uses most of its energy just to stay alive" },
+          { at: "only about 10 percent", big: "10%", caption: "Only about one tenth of the energy moves up each level" },
+          { at: "energy pyramid", photo: "Ecological pyramid", caption: "An energy pyramid: a wide base of producers, a tiny top" },
+          { at: "only a few hawks", photo: "Red-tailed hawk", caption: "Top predators, like this red-tailed hawk, are few" },
+        ],
+      },
+      {
+        show: [
+          { photo: "Sea otter", caption: "A sea otter, a hungry hunter of sea urchins" },
+          { at: "sea urchins graze on giant kelp", photo: "Kelp forest", caption: "A giant kelp forest, shelter for many fish" },
+          { at: "keystone species", big: "Keystone species", caption: "One animal with an outsized effect on its ecosystem" },
+          { at: "A drought can shrink", emoji: "🏜️🌾⬇️", caption: "A drought shrinks the grass, and the whole chain feels it" },
+          { at: "When wolves returned to Yellowstone", photo: "Gray wolf", caption: "A gray wolf. Wolves returned to Yellowstone in 1995" },
+        ],
+      },
+    ],
+  },
+
+  "science.earth": {
+    hook: {
+      show: [
+        { emoji: "🗺️", caption: "Look closely at the Atlantic coasts on a world map" },
+        { at: "jigsaw puzzle", emoji: "🧩🌎🌍", caption: "South America and Africa fit like puzzle pieces" },
+        { at: "Alfred Wegener", photo: "Alfred Wegener", caption: "Alfred Wegener, German scientist and polar explorer" },
+        { at: "maps of the deep ocean floor", emoji: "🌊🗺️", caption: "Maps of the ocean floor finally backed him up" },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { emoji: "🍑", caption: "Earth is built in layers, a bit like a peach" },
+          { at: "The crust is the thin skin", photo: "Structure of Earth", caption: "Earth's layers: crust, mantle, outer core and inner core" },
+          { at: "almost 2,900 kilometers thick", big: "2,900 km", caption: "The mantle: the thickest layer, hot rock that flows slowly" },
+          { at: "the outer core", emoji: "🌀🧭", caption: "Swirling liquid metal in the outer core makes Earth's magnetic field" },
+          { at: "the inner core", emoji: "⚪🔥", caption: "The inner core: solid metal, about as hot as the Sun's surface" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "🥚🧩", caption: "Earth's rigid outer shell is cracked into plates" },
+          { at: "seven major tectonic plates", photo: "Plate tectonics", caption: "Earth's major tectonic plates" },
+          { at: "a few centimeters a year", emoji: "💅🐌", caption: "Plates move about as fast as your fingernails grow" },
+          { at: "Mesosaurus", photo: "Mesosaurus", caption: "Mesosaurus fossils turn up in both South America and Africa" },
+          { at: "maps of the ocean floor", emoji: "🌊🗺️", caption: "Ocean-floor maps revealed ridges where new crust forms" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "↔️", caption: "Three kinds of boundaries: apart, together, sideways" },
+          { at: "Iceland sits right on top", photo: "Þingvellir", caption: "Thingvellir, Iceland, where two plates pull apart" },
+          { at: "the Himalayas", photo: "Mount Everest", caption: "Mount Everest, in the Himalayas, which are still rising" },
+          { at: "a process called subduction", big: "Subduction", caption: "A heavy ocean plate sinks down into the mantle" },
+          { at: "San Andreas Fault", photo: "San Andreas Fault", caption: "The San Andreas Fault, where plates grind sideways" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "🪨🔒", caption: "Rough rocks lock together while the plates keep pushing" },
+          { at: "the ground shakes", emoji: "〰️📈", caption: "Seismic waves race outward and the ground shakes" },
+          { at: "seismometers", photo: "Seismometer", caption: "A seismograph draws the wiggly lines of earthquake waves" },
+          { at: "10 times more ground shaking", big: "×10", caption: "Each step up in magnitude: about 10 times more shaking" },
+          { at: "Ring of Fire", photo: "Mount Fuji", caption: "Mount Fuji in Japan, a volcano on the Pacific Ring of Fire" },
+        ],
+      },
+    ],
+  },
+
+  "science.electricity": {
+    hook: {
+      show: [
+        { big: "1820", caption: "Copenhagen, 1820: a professor shows students an electric current" },
+        { at: "Hans Christian Ørsted", photo: "Hans Christian Ørsted", caption: "Hans Christian Ørsted, Danish physicist and chemist" },
+        { at: "A compass happened", photo: "Compass", caption: "A compass needle normally points north" },
+        { at: "hidden link", emoji: "⚡🔗🧲", caption: "Electricity and magnetism are linked" },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { emoji: "⚛️⚡", caption: "Electrons are tiny particles that carry electric charge" },
+          { at: "that flow is an electric current", emoji: "➡️➡️➡️", caption: "Electrons drifting one way: an electric current" },
+          { at: "1.5 volts", big: "1.5 V", caption: "The push of one flashlight battery" },
+          { at: "called a circuit", photo: "Incandescent light bulb", caption: "A bulb lights only when the circuit is a complete loop" },
+          { at: "An open circuit", emoji: "✂️💡", caption: "A break anywhere in the loop, and nothing flows" },
+        ],
+      },
+      {
+        show: [
+          { emoji: "📿", caption: "Series: everything on one path, like beads on a string" },
+          { at: "all the bulbs go dark", emoji: "💡💡⚫", caption: "One bulb out in series, and they all go dark" },
+          { at: "In a parallel circuit", emoji: "🔀💡", caption: "Parallel: each bulb gets its own branch" },
+          { at: "a house are wired in parallel", emoji: "🏠💡", caption: "Homes are wired in parallel, so lights work on their own" },
+          { at: "their volts add up", big: "1.5 + 1.5 = 3 V", caption: "Batteries in series add their volts" },
+        ],
+      },
+      {
+        show: [
+          { photo: "File:Stranded lamp wire.jpg", caption: "Copper wire inside, plastic insulation outside" },
+          { at: "Conductors let electrons move freely", emoji: "🥄⚡✅", caption: "Conductors: most metals let current flow" },
+          { at: "Insulators hold their electrons tightly", emoji: "🧤⚡❌", caption: "Insulators: rubber, plastic, glass and dry wood block current" },
+          { at: "Water is tricky", emoji: "💧⚠️", caption: "Tap water conducts, so keep electricity away from water" },
+          { at: "bathtubs and pools", big: "Dry hands only", caption: "Never touch switches or plugs with wet hands" },
+        ],
+      },
+      {
+        show: [
+          { photo: "Horseshoe magnet", caption: "Every magnet has a north pole and a south pole" },
+          { at: "Opposite poles attract", big: "N→←S   ←N N→", caption: "Opposites attract; like poles repel" },
+          { at: "a compass needle points north", emoji: "🌍🧭", caption: "Earth itself acts like a giant magnet" },
+          { at: "it becomes an electromagnet", photo: "File:Electromagnet.jpg", caption: "An old electromagnet: coils of copper wire around an iron core" },
+          { at: "Michael Faraday", photo: "Michael Faraday", caption: "Michael Faraday showed that a moving magnet makes a current" },
+        ],
+      },
+    ],
+  },
 };

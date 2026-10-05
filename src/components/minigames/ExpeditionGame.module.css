@@ -1,0 +1,66 @@
+/* Expedition Leader: game-specific styles (shared ones live in minigames.css). */
+
+.meters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; }
+.meter { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.meterHead { display: flex; justify-content: space-between; align-items: baseline; font-weight: 800; font-size: .85rem; gap: 6px; }
+.meterHead span:last-child { font-family: var(--font-pixel), monospace; font-size: .6rem; }
+.bar { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; height: 16px; padding: 2px; border: 2px solid #1b1530; border-radius: 4px; background: #1b1530; }
+.seg { background: #3a3550; border-radius: 1px; transition: background .4s; }
+.low .meterHead { color: #dc2626; }
+.low .bar { animation: pulse 1s ease-in-out infinite alternate; }
+@keyframes pulse { to { box-shadow: 0 0 0 3px rgba(220, 38, 38, .35); } }
+
+.trail { display: flex; gap: 4px; flex-wrap: wrap; }
+.trailDay { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 6px; border: 2px solid #d0d6e6; background: rgba(35, 64, 255, .06); font-size: 1rem; }
+.trailDay.now { border-color: #1b1530; background: #fff3bf; transform: translateY(-2px); }
+.trailDay.done { opacity: .55; }
+.trailDay.lost { border-color: #dc2626; }
+
+.scene { position: relative; height: 150px; border-radius: 12px; border: 3px solid #1b1530; overflow: hidden; background: linear-gradient(180deg, #7fb6e8 0 45%, #cfe6f7 45% 58%, #f4f9ff 58%); }
+.dark .scene { background: linear-gradient(180deg, #1c2a4a 0 45%, #6f8db3 45% 58%, #dfe9f5 58%); }
+.mountains { position: absolute; left: 0; right: 0; top: 34%; height: 18%; background: linear-gradient(135deg, transparent 33%, #b8d2ea 33% 50%, transparent 50%), linear-gradient(225deg, transparent 33%, #a7c4e0 33% 50%, transparent 50%); background-size: 60px 100%; opacity: .9; }
+.team { position: absolute; left: 4%; right: 4%; bottom: 8px; display: flex; align-items: flex-end; gap: 4px; }
+.walker { animation: bob 1.2s ease-in-out infinite; }
+.walker:nth-child(2) { animation-delay: .2s; }
+.walker:nth-child(3) { animation-delay: .4s; }
+.walker:nth-child(4) { animation-delay: .6s; }
+@keyframes bob { 50% { transform: translateY(-2px); } }
+.tent { position: absolute; right: 6%; bottom: 10px; }
+.eventIcon { position: absolute; right: 10px; top: 8px; font-size: 2.2rem; }
+.snow { position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(#fff 1px, transparent 1.6px), radial-gradient(#fff 1px, transparent 1.6px); background-size: 28px 28px, 41px 41px; background-position: 0 0, 13px 17px; animation: snow 6s linear infinite; opacity: .8; }
+@keyframes snow { to { background-position: -40px 280px, -27px 300px; } }
+
+.card { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 12px; border: 3px solid #1b1530; background: rgba(35, 64, 255, .05); }
+.cardTitle { display: flex; gap: 8px; align-items: center; font-weight: 900; font-size: 1.1rem; }
+.choices { display: flex; flex-direction: column; gap: 8px; }
+.choice { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; width: 100%; padding: 12px 14px; border-radius: 12px; border: 3px solid #1b1530; background: #fff; color: #1b1530; box-shadow: 0 4px 0 #1b1530; font: inherit; font-weight: 800; text-align: left; cursor: pointer; touch-action: manipulation; transition: transform .08s; }
+.choice:hover { transform: translateY(-2px); background: #eef1ff; }
+.choice:active { transform: translateY(3px); box-shadow: 0 1px 0 #1b1530; }
+.choice:focus-visible { outline: 3px solid #f59e0b; outline-offset: 2px; }
+.fxRow { display: flex; flex-wrap: wrap; gap: 4px; }
+.fx { display: inline-flex; align-items: center; gap: 2px; padding: 1px 7px; border-radius: 999px; font-size: .78rem; font-weight: 800; background: #eef1f8; color: #1b1530; white-space: nowrap; }
+.fx.up { background: #dcfce7; color: #166534; }
+.fx.down { background: #fee2e2; color: #991b1b; }
+.fx.unsure { background: #fef3c7; color: #92400e; }
+
+.lines { display: flex; flex-direction: column; gap: 5px; margin: 6px 0; }
+.line { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: .9rem; }
+.line.later { font-style: italic; }
+.lesson { padding: 8px 10px; border-radius: 8px; background: rgba(35, 64, 255, .08); border-left: 4px solid #2340ff; font-size: .92rem; }
+.story { padding: 8px 10px; border-radius: 8px; background: rgba(245, 158, 11, .12); border-left: 4px solid #f59e0b; font-size: .92rem; }
+
+.journal { display: flex; flex-direction: column; gap: 4px; width: 100%; text-align: left; font-size: .85rem; }
+.journal li { padding: 4px 8px; border-radius: 6px; background: rgba(35, 64, 255, .06); list-style: none; }
+.journal ul { padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.weigh { text-align: left; width: 100%; }
+.weigh ul { margin: 4px 0 0; padding-left: 20px; }
+
+@media (max-width: 420px) {
+  .meters { gap: 6px 8px; }
+  .scene { height: 120px; }
+  .tent, .walker:nth-child(4) { display: none; }
+  .choice { padding: 10px 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .walker, .snow, .low .bar { animation: none; }
+}

@@ -106,6 +106,7 @@ export function sanitizeCourses(raw: unknown, defaults: Course[]): Course[] {
       track: c.track === "life" ? "life" : "academic",
       subject,
       blurb: str(c.blurb, 300),
+      ...(c.band === "sprout" || c.band === "strategist" ? { band: c.band } : {}),
       teacher: {
         name: str(teacher.name, 60) || "Your teacher",
         avatar: str(teacher.avatar, 8) || "🎓",

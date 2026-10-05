@@ -88,8 +88,8 @@ describe("question visuals", () => {
   const withVisuals = SKILLS.filter((s) => s.generate(seededRng(1)).visual || s.generate(seededRng(2)).visual);
 
   it("cover the grade 6-8 skills", () => {
-    const upper = SKILLS.filter((s) => s.grade >= 6);
-    expect(withVisuals.filter((s) => s.grade >= 6).length).toBeGreaterThanOrEqual(Math.floor(upper.length * 0.7));
+    const upper = SKILLS.filter((s) => s.grade >= 6 && s.grade <= 8);
+    expect(withVisuals.filter((s) => s.grade >= 6 && s.grade <= 8).length).toBeGreaterThanOrEqual(Math.floor(upper.length * 0.7));
   });
 
   for (const skill of withVisuals) {
@@ -101,8 +101,9 @@ describe("question visuals", () => {
         const json = JSON.stringify(q.visual);
         expect(json, `${skill.id}: ${json}`).not.toMatch(/NaN|undefined|Infinity|null/);
         // Shape and triangle pictures label the given sides; the unknown is always "?".
+        // (A trig-ratio question shows all three sides and asks for a ratio instead.)
         if (q.visual.type === "right-triangle") {
-          expect([q.visual.a, q.visual.b, q.visual.c]).toContain("?");
+          if (/^d+(.d+)?$/.test(q.answer)) expect([q.visual.a, q.visual.b, q.visual.c]).toContain("?");
           expect([q.visual.a, q.visual.b, q.visual.c]).not.toContain(q.answer);
         }
         // A balance only redraws the equation that's already in the question.

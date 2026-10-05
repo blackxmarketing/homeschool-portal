@@ -2939,5 +2939,1684 @@ So ask yourself three questions. What worked? What did not? What will I change n
         ],
       },
     },
+    {
+      id: "business.marketing",
+      title: "Marketing: Telling the Right Customers",
+      minutes: 35,
+      stage: "logic",
+      read: `You can make the best cookies in town, but if nobody knows about them, nobody buys them. Marketing is how you tell the right customers about your product, in a way that is clear and honest.
+
+Marketing starts with your customer, not with you. Who has the problem you solve, and where can you find them? A dog-walking business is for busy dog owners in your neighborhood, not for everyone in the world. When you can picture one real customer, it gets much easier to decide what to say and where to say it.
+
+What you say is called your message. A strong message is short and answers three questions: What is it? Why should I care? How do I get it? A sign that says "Fresh-baked cookies, $1 each, Saturday 10 to 2 at the Oak Street corner" beats a sign that says "Best cookies ever!!!" because it tells a hungry person exactly what to do.
+
+Where you say it is called the channel. Channels are the ways your message travels: a sign, a flyer on a community board, a friendly note to neighbors, a parent's post in a neighborhood group, or word of mouth, which is happy customers telling their friends. Pick the channels where your customers already are. A sign at a busy park reaches families walking by. A flyer taped inside your closet reaches nobody.
+
+Good marketing is also honest. Advertising means putting up or paying for messages that ask people to buy. Honest advertising tells the truth about the product, the price, and what is included. Calling store-bought cookies "homemade" or hiding an extra fee might win one sale, but customers feel tricked and never come back. In the United States, the Federal Trade Commission enforces laws that require ads to be truthful.
+
+Finally, measure what works. Ask each new customer, "How did you hear about us?" and keep a tally. If the sign brought 12 customers and the flyer brought 2, you know where to spend your time next week.`,
+      keyIdeas: [
+        "Marketing starts with a target customer: the person who has the problem you solve.",
+        "A clear message says what it is, why to care, and how to get it.",
+        "Use channels where your customers already are, and measure which ones work.",
+        "Every claim in an ad must be true.",
+      ],
+      hook: {
+        text: "Milton Hershey's chocolate became so well known through word of mouth that his company did not run national advertising until 1970. Most new businesses are not that lucky. If nobody knows your product exists, nobody can buy it. So how do you get the word out to the right people, and do it honestly?",
+      },
+      teach: [
+        {
+          title: "Know your customer first",
+          teach:
+            "Marketing is how you tell the right customers about your product, clearly and honestly. It starts with your customer, not with you. Ask two questions: who has the problem I solve, and where can I find them? A dog-walking business is for busy dog owners in your neighborhood, not for everyone in the world. Trying to talk to everybody usually means nobody really listens. So picture one real customer: a neighbor who works late and owns a beagle that needs a walk at 4 o'clock. Once you can picture that person, it gets much easier to decide what to say and where to say it.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "Talking to everyone",
+              points: ["The message is vague", "Signs go up anywhere", "Few people feel it is for them"],
+            },
+            right: {
+              title: "Talking to your target customer",
+              points: ["The message fits their problem", "Signs go where they already are", "People think: that's for me!"],
+            },
+          },
+          probe: {
+            type: "sort",
+            prompt: "You run an after-school dog-walking business. Sort each person.",
+            buckets: ["Likely customer", "Not a likely customer"],
+            items: [
+              { text: "A neighbor who works late and owns a beagle", bucket: 0 },
+              { text: "A family on your street with a new puppy and a busy schedule", bucket: 0 },
+              { text: "A person who owns a cat and no dog", bucket: 1 },
+              { text: "A dog owner who lives 20 miles away", bucket: 1 },
+              { text: "An older neighbor whose dog needs exercise but whose knees hurt", bucket: 0 },
+              { text: "A neighbor who loves walking her own dog every afternoon", bucket: 1 },
+            ],
+            hint: "A likely customer has the problem you solve AND lives close enough for you to help.",
+            mistakes: [
+              {
+                match: "Put the cat owner in likely customers",
+                coach: "A cat owner doesn't need a dog walker. No dog, no problem to solve.",
+              },
+              {
+                match: "Put the dog owner 20 miles away in likely customers",
+                coach: "They have a dog, but they live too far away for an after-school walk.",
+              },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "You run a snow-shoveling business. Who is your best target customer?",
+            choices: [
+              "Everyone in the whole country",
+              "Neighbors on your street with long driveways",
+              "People who live where it never snows",
+              "Kids at your school",
+            ],
+            answer: 1,
+            why: "Neighbors with long driveways have the problem you solve and live close enough for you to help.",
+            hints: [
+              "Talking to everyone usually means nobody listens. Narrow it down.",
+              "",
+              "No snow means no problem to solve.",
+              "Kids rarely pay for shoveling. Who owns the driveways?",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Marketing to everyone is like shouting across a crowded stadium. Talking to your target customer is like walking over and speaking to the one person who needs your help.",
+            example:
+              "Lawn-mowing business. Not 'everyone.' Target customer: older neighbors and busy families on your street and the next two streets, who have grass and not much time. Now you know to leave notes at those 12 doors, with a parent along, instead of hanging a sign across town.",
+            simpler: {
+              q: "A target customer is...",
+              choices: [
+                "anyone who is alive",
+                "the person most likely to have the problem you solve",
+                "your best friend",
+              ],
+              answer: 1,
+              why: "Your target customer is the person who has the problem and would pay to solve it.",
+              hints: [
+                "Too broad! Pick the people who actually need what you sell.",
+                "",
+                "Friends are great, but they may not have the problem you solve.",
+              ],
+            },
+          },
+        },
+        {
+          title: "A clear message",
+          teach:
+            "What you say is called your message. A strong message is short and answers three questions. What is it? Why should I care? How do I get it? Compare two signs. Sign one says 'Best cookies ever!!!' Sign two says 'Fresh-baked cookies, $1 each. Saturday 10 to 2 at the Oak Street corner.' The second sign wins, because a hungry person knows exactly what they'll get and where to go. Use plain words, big letters, and only the facts that matter. If someone walking by can't understand your sign in five seconds, make it simpler.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Message", back: "What you say to customers about your product." },
+              { front: "What is it?", back: "Name the product or service plainly: 'Fresh-baked cookies.'" },
+              { front: "Why should I care?", back: "The benefit to the customer: tasty, fresh, cheap, saves time." },
+              { front: "How do I get it?", back: "The price, when, and where: '$1 each, Saturday 10 to 2, Oak Street corner.'" },
+              { front: "Five-second test", back: "If a person walking by can't understand your sign in five seconds, simplify it." },
+            ],
+          },
+          probe: {
+            type: "build",
+            prompt: "Build a clear sign, in this order: what it is, the price, when, and where.",
+            tiles: ["Fresh-baked cookies", "$1 each", "Saturday 10 to 2", "at the Oak Street corner"],
+            distractors: ["BEST EVER!!!", "Maybe sometime soon"],
+            hint: "A clear message says what it is, what it costs, and when and where to get it. Skip the shouting.",
+            mistakes: [
+              { match: "Used 'BEST EVER!!!'", coach: "Shouting doesn't tell customers anything. Stick to useful facts." },
+              { match: "Used 'Maybe sometime soon'", coach: "Vague timing loses customers. Give a real day and time." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "Which sign has the clearest message?",
+            choices: [
+              "AMAZING!!! YOU WON'T BELIEVE IT!",
+              "Stuff for sale",
+              "Dog walks after school, $5 for 30 minutes. Ask Sam's mom for details.",
+              "Cookies",
+            ],
+            answer: 2,
+            why: "It says what it is, the price, when, and how to get it.",
+            hints: [
+              "Exciting, but what IS it? Customers can't tell what you sell.",
+              "Too vague. What stuff, how much, and where?",
+              "",
+              "One word says what it is, but not the price, when, or where.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A clear message is like good directions. 'Turn left at the red barn' gets you there. 'It's somewhere around here' gets you lost.",
+            example:
+              "Sam's car wash sign. First draft: 'CAR WASH!!! GREAT!!!' Better: 'Car wash, $8. Saturday 9 to 12. Driveway at 14 Maple Street.' Now it answers what (a car wash), why care (a clean car for $8), and how to get it (when and where).",
+            simpler: {
+              q: "Which part of a sign answers 'How do I get it?'",
+              choices: ["Saturday 10 to 2 at the Oak Street corner", "Fresh-baked cookies", "Yummy!"],
+              answer: 0,
+              why: "The day, time and place tell customers how to get it.",
+              hints: ["", "That tells WHAT it is, not how to get it.", "That's a feeling, not directions."],
+            },
+          },
+        },
+        {
+          title: "Pick the right channel",
+          teach:
+            "Where you say your message is called the channel. A channel is any way your message travels: a sign, a flyer on a community board, a friendly note to neighbors, a parent's post in a neighborhood group, or word of mouth, which is happy customers telling their friends. The rule is simple: go where your customers already are. A sign at a busy park reaches families walking by. A flyer taped inside your closet reaches nobody. Then measure. Ask each new customer, 'How did you hear about us?' and keep a tally. If the sign brought 12 customers and the flyer brought 2, you know where to spend your time next week.",
+          visual: {
+            type: "hotspots",
+            title: "Marketing channels",
+            center: "Your message",
+            spots: [
+              { label: "Sign", icon: "🪧", detail: "Big and simple. Best where customers walk by, like a park entrance, with permission." },
+              { label: "Flyer", icon: "📄", detail: "A small sheet with details, posted on a community board at a library or store that allows it." },
+              { label: "Note to neighbors", icon: "🚪", detail: "A friendly note at each door on your street, delivered with a parent." },
+              { label: "Word of mouth", icon: "🗣️", detail: "Happy customers tell their friends. It's free, and people trust it most." },
+              { label: "Parent's post", icon: "💻", detail: "A parent can share your business in a neighborhood group or email list." },
+            ],
+          },
+          probe: {
+            type: "match",
+            prompt: "Match each group of customers to the channel that reaches them best.",
+            pairs: [
+              { left: "Families walking through the park on Saturday", right: "A big sign at the park entrance" },
+              { left: "Neighbors on your own street", right: "A friendly note at each door, with a parent" },
+              { left: "Friends of your happy customers", right: "Word of mouth" },
+              { left: "People who check the library's community board", right: "A flyer on the community board" },
+            ],
+            hint: "Go where each group already is. Where do they spend time, and what do they look at?",
+            mistakes: [
+              {
+                match: "Matched the park families to notes at each door",
+                coach: "Families at the park aren't at home. A sign where they walk by reaches them.",
+              },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "You sell lemonade at the park on Saturdays. Which channel reaches the most likely customers?",
+            choices: [
+              "A flyer taped inside your closet",
+              "A letter to a town 500 miles away",
+              "A note in your own lunchbox",
+              "A big sign at the park, where you have permission",
+            ],
+            answer: 3,
+            why: "Your customers are at the park, so a sign at the park reaches them.",
+            hints: [
+              "Nobody sees the inside of your closet. Go where customers are.",
+              "Those people can't come to your stand. Stay close to home.",
+              "Only you will read that note! Who needs to see it?",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Choosing a channel is like fishing. You catch fish by putting your line where the fish swim, not in a puddle in your driveway.",
+            example:
+              "You asked 15 new customers, 'How did you hear about us?' Sign: 9. Flyer: 1. Word of mouth: 5. Next week, make a second sign and thank your happy customers, and stop printing so many flyers.",
+            simpler: {
+              q: "A marketing channel is...",
+              choices: ["the way your message travels to customers", "a TV remote", "your price"],
+              answer: 0,
+              why: "A channel is how the message gets from you to customers: a sign, a flyer, word of mouth.",
+              hints: ["", "Not that kind of channel! In marketing it's how your message travels.", "Price is what customers pay, not how they hear about you."],
+            },
+          },
+        },
+        {
+          title: "Honest advertising",
+          teach:
+            "Advertising means putting up or paying for messages that ask people to buy. Good advertising is honest. It tells the truth about what the product is, what it costs, and what is included. Calling store-bought cookies 'homemade,' showing a photo of a much bigger cookie, or hiding an extra fee might win one sale, but customers feel tricked and never come back. They also tell their friends. In the United States, the Federal Trade Commission enforces laws that require ads to be truthful. Honest doesn't mean boring, though. You can be cheerful and excited, as long as every fact is true.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "Misleading ad",
+              points: ["Claims you can't prove", "Pictures bigger than the real thing", "Hidden fees", "One sale, then lost trust"],
+            },
+            right: {
+              title: "Honest ad",
+              points: ["Every fact is true", "Real pictures and real prices", "Everything included is clear", "Customers trust you and return"],
+            },
+          },
+          probe: {
+            type: "highlight",
+            prompt: "Sam's cookies are really homemade, palm-sized, and $1 each, and nobody has ever voted on them. Tap every line of Sam's ad that is NOT honest.",
+            sentences: [
+              "Homemade chocolate chip cookies, baked this morning.",
+              "Only $1 each!",
+              "Voted the best cookies in the whole world!",
+              "Each cookie is as big as a dinner plate.",
+              "Ask us about nuts: one batch has walnuts.",
+              "Plus a secret $2 table fee at checkout.",
+            ],
+            correct: [2, 3, 5],
+            hint: "Check each line against the facts: homemade, palm-sized, $1 each, never voted on.",
+            mistakes: [
+              {
+                match: "Tapped the homemade line",
+                coach: "Sam really baked them at home that morning, so that line is true.",
+              },
+              {
+                match: "Missed the secret table fee",
+                coach: "A hidden fee means the real price isn't $1. Hiding costs is dishonest.",
+              },
+            ],
+            seconds: 50,
+          },
+          think: {
+            q: "Your cookies are good but not famous. Which ad line is honest?",
+            choices: [
+              "World-famous cookies!",
+              "Doctors say these cookies are healthy",
+              "Fresh-baked this morning, $1 each",
+              "Only 1 left! (when you have 40)",
+            ],
+            answer: 2,
+            why: "Every fact in it is true and easy to check.",
+            hints: [
+              "They aren't famous yet, so that claim isn't true.",
+              "No doctor said that. Never invent proof.",
+              "",
+              "Pretending to run out to rush people is a trick, not the truth.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "An ad is a promise. If the product doesn't match the promise, it's like a friend who says 'I'll be there at 3' and never shows up. Next time, you won't believe them.",
+            example:
+              "Sam's first sign said 'Giant cookies!' but the cookies were palm-sized. Sam changed it to 'Fresh cookies, $1, baked this morning.' Fewer exclamation points, but every customer got exactly what the sign promised, and many came back the next Saturday.",
+            simpler: {
+              q: "Honest advertising means...",
+              choices: ["every claim in the ad is true", "using as many exclamation points as possible", "leaving out the price"],
+              answer: 0,
+              why: "An honest ad only says things that are true.",
+              hints: ["", "Exclamation points don't make an ad honest or dishonest. Check the facts.", "Hiding the price isn't honest. Customers should know what they'll pay."],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sequence",
+        prompt: "Put the steps of a simple marketing plan in order.",
+        steps: [
+          "Picture your target customer",
+          "Write a clear message: what, why care, how to get it",
+          "Choose channels where your customers already are",
+          "Check that every claim is true",
+          "Put up your sign or share your message",
+          "Ask new customers 'How did you hear about us?' and keep a tally",
+        ],
+      },
+      explain: {
+        prompt: "Explain how you would tell the right customers about a small business of your own.",
+        keyPoints: [
+          "Start with a target customer who has the problem",
+          "A clear message says what it is, why care, and how to get it",
+          "Choose channels where customers already are",
+          "Every claim must be honest",
+          "Ask how customers heard about you and measure what works",
+        ],
+      },
+      mastery: [
+        {
+          type: "number",
+          prompt: "You printed 40 flyers at $0.25 each, and they brought 2 customers. A $5 poster at the park brought 10 customers. How much did each FLYER customer cost you to find?",
+          answer: 5,
+          tolerance: 0.01,
+          unit: "$",
+          hint: "First find what all the flyers cost (40 x $0.25). Then divide by the 2 customers they brought.",
+          mistakes: [
+            { match: "10", coach: "$10 is what all the flyers cost. Divide it by the 2 customers they brought." },
+            { match: "0.5", coach: "That's the cost for each POSTER customer. The question asks about the flyers." },
+            { match: "0.25", coach: "That's the cost of one flyer. How much did it cost to find each customer?" },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "cloze",
+          text: "Marketing starts with your target {0}. Your {1} says what it is, why to care, and how to get it. The {2} is the way the message travels, like a sign or word of mouth. Every claim in an ad must be {3}.",
+          blanks: [
+            { answers: ["customer", "customers"] },
+            { answers: ["message"] },
+            { answers: ["channel"] },
+            { answers: ["true", "honest", "truthful"] },
+          ],
+          bank: ["customer", "message", "channel", "true", "price", "everyone", "loud"],
+          hint: "Who, what you say, where it travels, and the rule every ad must follow.",
+          mistakes: [
+            { match: "everyone", coach: "Talking to everyone means nobody listens. Marketing starts with a target customer." },
+            { match: "loud", coach: "Loud isn't the rule. Every claim must be true." },
+          ],
+          seconds: 50,
+        },
+        {
+          type: "sort",
+          prompt: "Lily's lemonade is made from real lemons, costs $1 a cup, and has never won a prize. Sort each line for her sign.",
+          buckets: ["Honest", "Misleading"],
+          items: [
+            { text: "Made with real lemons", bucket: 0 },
+            { text: "$1 a cup, ice included", bucket: 0 },
+            { text: "Award-winning lemonade!", bucket: 1 },
+            { text: "Open Saturday 10 to 2", bucket: 0 },
+            { text: "Free refills! (but each refill costs 50 cents)", bucket: 1 },
+            { text: "The only lemonade doctors recommend", bucket: 1 },
+          ],
+          hint: "Check each line against the facts: real lemons, $1 a cup, no prizes.",
+          mistakes: [
+            { match: "Put award-winning in honest", coach: "Lily's lemonade has never won a prize, so that claim isn't true." },
+            { match: "Put free refills in honest", coach: "If refills cost 50 cents, they aren't free. That's misleading." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "match",
+          prompt: "Match each marketing word to its meaning.",
+          pairs: [
+            { left: "Target customer", right: "The person most likely to have the problem you solve" },
+            { left: "Message", right: "What you say: what it is, why care, how to get it" },
+            { left: "Channel", right: "The way your message travels to customers" },
+            { left: "Word of mouth", right: "Happy customers telling their friends" },
+            { left: "Advertising", right: "Putting up or paying for messages that ask people to buy" },
+          ],
+          hint: "Think who, what, where: the customer, the message, and how it travels.",
+          mistakes: [
+            { match: "Swapped message and channel", coach: "The message is WHAT you say. The channel is HOW it travels." },
+          ],
+          seconds: 50,
+        },
+      ],
+      check: [
+        {
+          q: "What is a target customer?",
+          choices: [
+            "Everyone who could ever buy anything",
+            "The person most likely to have the problem you solve",
+            "A customer who is angry",
+          ],
+          answer: 1,
+          why: "Marketing starts by picturing the person who has the problem and would pay to solve it.",
+        },
+        {
+          q: "Which three questions should a clear message answer?",
+          choices: [
+            "Who are you, how old are you, and where do you live?",
+            "How loud, how big, and how many exclamation points?",
+            "What is it, why should I care, and how do I get it?",
+            "What is the weather, what time is it, and who won?",
+          ],
+          answer: 2,
+          why: "A clear message tells customers what it is, why it matters to them, and how to get it.",
+        },
+        {
+          q: "You sell snacks at a Saturday soccer game. Which channel fits best?",
+          choices: [
+            "A sign near the field where families walk by, with permission",
+            "A flyer in a town far away",
+            "A note hidden in your desk",
+          ],
+          answer: 0,
+          why: "Go where your customers already are: the families at the field.",
+        },
+        {
+          q: "Why should you ask new customers 'How did you hear about us?'",
+          choices: [
+            "To make them feel nervous",
+            "To make the line longer",
+            "To learn their home address",
+            "To learn which channels bring customers, so you can spend time wisely",
+          ],
+          answer: 3,
+          why: "A tally shows which channels work, so you know where to focus next time.",
+        },
+        {
+          q: "Which ad line breaks the honesty rule?",
+          choices: [
+            "Fresh-baked this morning",
+            "$1 each",
+            "Voted best in the world (when nobody voted)",
+            "Ask us about nuts",
+          ],
+          answer: 2,
+          why: "Claiming a vote that never happened is not true, so it's misleading.",
+        },
+      ],
+      task: {
+        kind: "project",
+        prompt:
+          "With a parent's okay, make a marketing plan for your business. Describe your target customer in 2 sentences. Write a clear message that says what it is, why to care, and how to get it. Choose 2 channels and explain why your customers will see them. Make one real sign or flyer and check that every claim on it is true. On your next sales day, ask each new customer 'How did you hear about us?' and keep a tally.",
+        rubric: [
+          "Describes a specific target customer",
+          "Message clearly says what it is, why care, and how to get it",
+          "Chooses 2 channels that fit where customers already are",
+          "Every claim on the sign or flyer is true",
+          "Keeps a 'How did you hear about us?' tally",
+        ],
+      },
+    },
+    {
+      id: "business.sales-service",
+      title: "Selling Well and Keeping Customers Happy",
+      minutes: 35,
+      stage: "logic",
+      read: `Getting a customer to buy once is good. Getting them to come back again and again is how a small business grows. That takes two skills: selling well and serving well.
+
+Selling well starts with listening, not talking. Ask friendly questions like "What are you looking for?" or "Who is it for?" Then recommend what truly fits, even if it is the cheaper choice. A pushy seller tries to get as much money as possible today. A helpful seller wants the customer to be glad tomorrow. Customers can feel the difference, and they come back to the helpful one.
+
+Sometimes things go wrong. A cookie is broken, a dog walk starts late, or a car still has a muddy spot. Good businesses fix problems with four steps: listen to the whole complaint without interrupting, apologize for the trouble, fix it with a redo, a replacement or a refund, and thank the customer for telling you. A problem handled well can make a customer more loyal than before.
+
+In 1912, a Maine outdoorsman named Leon Leonwood Bean sold 100 pairs of his new hunting boots by mail. Then 90 pairs came back, because the rubber bottoms pulled away from the leather tops. Bean gave the money back, fixed the design, and promised to keep his customers satisfied. His company is still in business more than a century later.
+
+Loyal customers add up. If a neighbor pays $6 a week for dog walks and stays for 12 weeks, that one customer brings in $72. Losing them over one bad day would cost far more than a free walk to make things right.
+
+Finally, reviews. A review is a customer's honest opinion of your business. Ask happy customers if they would tell a friend or write a few kind words. Treat complaints as free advice about what to fix. And never write fake reviews or pay people for praise. That is lying to customers, and it breaks trust.`,
+      keyIdeas: [
+        "Helpful selling means listening first and recommending what truly fits.",
+        "Fix problems in four steps: listen, apologize, fix, thank.",
+        "Loyal customers add up, so keeping them is worth a lot.",
+        "Earn honest reviews and never fake them.",
+      ],
+      hook: {
+        text: "In 1912, a Maine outdoorsman named Leon Leonwood Bean sold 100 pairs of his new waterproof hunting boots by mail. Then disaster: 90 pairs came back broken. He could have blamed his customers or kept their money. What do you think he did? And what would you have done?",
+      },
+      teach: [
+        {
+          title: "Selling starts with listening",
+          teach:
+            "Selling well starts with listening, not talking. Ask friendly, open questions like 'What are you looking for?' or 'Who is it for?' Then recommend what truly fits, even if it is the cheaper choice. Imagine a customer at your bracelet table who wants a small gift for her little sister. A pushy seller pushes the biggest, most expensive bracelet. A helpful seller asks about her sister's favorite color and suggests the small blue one. The pushy seller might earn a dollar more today. The helpful seller earns a customer who trusts them and comes back. Customers can feel the difference.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "Pushy seller",
+              points: ["Talks the whole time", "Pushes the most expensive item", "Won't take no for an answer", "One sale, then the customer avoids them"],
+            },
+            right: {
+              title: "Helpful seller",
+              points: ["Asks questions and listens", "Recommends what truly fits", "Says 'no problem' to a no", "Customers trust them and come back"],
+            },
+          },
+          probe: {
+            type: "sort",
+            prompt: "Sort each move a seller might make.",
+            buckets: ["Helpful selling", "Pushy selling"],
+            items: [
+              { text: "Asking who the gift is for", bucket: 0 },
+              { text: "Suggesting a cheaper bracelet because it fits better", bucket: 0 },
+              { text: "Saying 'Buy now or you'll be sorry!'", bucket: 1 },
+              { text: "Following a customer around after they said no thanks", bucket: 1 },
+              { text: "Answering honestly: 'I don't know, but I'll find out'", bucket: 0 },
+              { text: "Talking nonstop without asking a single question", bucket: 1 },
+            ],
+            hint: "Helpful selling puts the customer's needs first. Pushy selling puts the seller's money first.",
+            mistakes: [
+              {
+                match: "Put the cheaper bracelet in pushy selling",
+                coach: "Recommending what fits, even if it costs less, is helpful. It earns trust.",
+              },
+              {
+                match: "Put 'I don't know, but I'll find out' in pushy selling",
+                coach: "Honesty about what you don't know is helpful. Making something up would not be.",
+              },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "A customer says, 'I need a birthday gift for my grandpa.' What's the best first move?",
+            choices: [
+              "Point to your most expensive item",
+              "Ask what your grandpa likes to do",
+              "Say 'Everything here is perfect!'",
+              "Wait silently until they leave",
+            ],
+            answer: 1,
+            why: "Asking a question first helps you recommend something that truly fits.",
+            hints: [
+              "The most expensive item may not fit at all. Learn what they need first.",
+              "",
+              "That doesn't help them choose. Ask a question instead.",
+              "Silence doesn't help. A friendly question does.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A good seller is like a good doctor. A doctor asks where it hurts before giving any medicine. A seller asks what you need before recommending anything.",
+            example:
+              "At Maya's bookmark table, a boy wants a gift for his dad. Maya asks, 'What does your dad like?' 'Fishing.' She shows him the $2 bookmark with a fish on it instead of the $4 glitter one. He buys it, and next month he brings a friend who buys two more.",
+            simpler: {
+              q: "Before recommending something, a good seller should...",
+              choices: ["ask questions and listen", "talk as fast as possible", "hide the prices"],
+              answer: 0,
+              why: "Listening first shows you what the customer really needs.",
+              hints: ["", "Fast talking doesn't tell you what the customer needs.", "Hiding prices isn't honest. Customers should know the cost."],
+            },
+          },
+        },
+        {
+          title: "Fixing problems the right way",
+          teach:
+            "Sometimes things go wrong. A cookie arrives broken, a dog walk starts late, or a car still has a muddy spot after the wash. Good businesses fix problems with four steps. First, listen to the whole complaint without interrupting or making excuses. Second, apologize: 'I'm sorry that happened.' Third, fix it, with a redo, a replacement, or a refund. Fourth, thank the customer for telling you, because now you can do better. Leon Leonwood Bean did this when 90 of his first 100 boots came back. He gave the money back and fixed the design. A problem handled well can make a customer more loyal than before.",
+          visual: {
+            type: "hotspots",
+            title: "Four steps to fix a problem",
+            center: "Unhappy customer",
+            spots: [
+              { label: "Listen", icon: "👂", detail: "Let the customer explain everything without interrupting or making excuses." },
+              { label: "Apologize", icon: "🙏", detail: "Say 'I'm sorry that happened.' Mean it." },
+              { label: "Fix", icon: "🔧", detail: "Make it right with a redo, a replacement, or a refund." },
+              { label: "Thank", icon: "😊", detail: "Thank them for telling you. Now you know what to improve." },
+            ],
+          },
+          probe: {
+            type: "sequence",
+            prompt: "A customer says the car you washed still has mud on the back bumper. Put your response in order.",
+            steps: [
+              "Listen to the whole complaint without interrupting",
+              "Say you're sorry it happened",
+              "Wash the bumper again right away",
+              "Thank them for telling you",
+            ],
+            hint: "Listen, apologize, fix, thank.",
+            mistakes: [
+              { match: "Fixed it before listening", coach: "Listen first, so you know exactly what to fix." },
+              { match: "Thanked them first", coach: "Thanks comes at the end, after the problem is fixed." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "A customer says your cookie was burnt on the bottom. What should you do FIRST?",
+            choices: [
+              "Argue that it tasted fine",
+              "Blame the oven",
+              "Listen to the whole complaint",
+              "Hand them a refund without a word",
+            ],
+            answer: 2,
+            why: "Listening first shows respect and tells you exactly what went wrong.",
+            hints: [
+              "Arguing turns a small problem into a lost customer.",
+              "Excuses don't help the customer. Listen first.",
+              "",
+              "A refund may come later, but first listen so they feel heard.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Fixing a customer's problem is like patching a bike tire. Ignore the leak and the tire goes flat. Find the hole, patch it, and the bike rides again.",
+            example:
+              "Liam's dog-walking customer says he was 15 minutes late. Liam listens, then says, 'I'm sorry. You were counting on me.' He offers a free walk next week and sets an alarm so it won't happen again. He thanks her for telling him. She books him for the whole month.",
+            simpler: {
+              q: "Which is one of the four steps for fixing a problem?",
+              choices: ["Apologize for the trouble", "Hide from the customer", "Raise your price"],
+              answer: 0,
+              why: "Listen, apologize, fix, thank: saying sorry is step two.",
+              hints: ["", "Hiding makes the problem worse. Face it kindly.", "Raising prices doesn't fix anything for this customer."],
+            },
+          },
+        },
+        {
+          title: "Loyal customers add up",
+          teach:
+            "Loyal customers are the ones who come back again and again, and they add up fast. If a neighbor pays $6 a week for dog walks and stays for 12 weeks, that one customer brings in 6 times 12, or $72. Keeping a happy customer is usually much easier than finding a brand-new one, because you don't need new signs or flyers. That's why a smart business owner gladly gives a free $6 walk to fix a mistake. Losing that customer over one bad day could cost $72 or more. Treat every customer like someone you hope to see for years.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "One-time customer",
+              points: ["Buys once: $6", "You must find someone new", "Tells nobody about you"],
+            },
+            right: {
+              title: "Loyal customer (12 weeks)",
+              points: ["Buys every week: $72", "No new marketing needed", "Tells friends about you"],
+            },
+          },
+          probe: {
+            type: "number",
+            prompt: "A family pays you $8 every week to wash their car. If they stay loyal for 10 weeks, how much will they pay you in all?",
+            answer: 80,
+            tolerance: 0.01,
+            unit: "$",
+            hint: "Multiply what they pay each week by the number of weeks.",
+            mistakes: [
+              { match: "18", coach: "That added 8 and 10. Each week they pay $8 again, so multiply." },
+              { match: "8", coach: "That's just one week. They stay for 10 weeks." },
+              { match: "0.8", coach: "That divided. Multiply $8 by 10 weeks." },
+            ],
+            seconds: 25,
+          },
+          think: {
+            q: "Mrs. Lee pays $6 a week for dog walks. How much does she pay over 12 weeks?",
+            choices: ["$18", "$6", "$60", "$72"],
+            answer: 3,
+            why: "$6 x 12 weeks = $72.",
+            hints: [
+              "That added 6 and 12. Multiply instead.",
+              "That's just one week. Count all 12.",
+              "That's only 10 weeks. Count all 12.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A loyal customer is like a fruit tree. One apple is nice, but a tree you take care of gives you apples every season.",
+            example:
+              "Grace sells muffins every Saturday. Her neighbor buys 2 muffins at $2 each, $4 in all, every week for 36 weeks of the school year: 36 x $4 = $144. One free $2 muffin to replace a squashed one protected $144 of sales.",
+            simpler: {
+              q: "A customer pays $5 a week for 3 weeks. How much in all?",
+              choices: ["$8", "$15", "$5"],
+              answer: 1,
+              why: "$5 x 3 = $15.",
+              hints: ["That added 5 and 3. Multiply instead.", "", "That's only one week."],
+            },
+          },
+        },
+        {
+          title: "Reviews and word of mouth",
+          teach:
+            "A review is a customer's honest opinion of your business, often given as stars from 1 to 5. Good reviews and word of mouth bring new customers, because people trust their friends more than any sign. To earn them, do great work, then ask happy customers, 'Would you tell a friend about us?' Treat complaints as free advice: they show you what to fix. To find your average rating, add up all the stars and divide by the number of reviews. One rule never bends: never write fake reviews or pay people for praise. That is lying to customers.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Review", back: "A customer's honest opinion of your business." },
+              { front: "Average rating", back: "Add all the stars, then divide by the number of reviews." },
+              { front: "Word of mouth", back: "Happy customers telling friends. People trust it more than ads." },
+              { front: "Complaint", back: "Free advice about what to fix. Thank the person who gave it." },
+              { front: "Fake review", back: "Praise you wrote yourself or paid for. It's lying, so never do it." },
+            ],
+          },
+          probe: {
+            type: "number",
+            prompt: "Your dog-walking business got these ratings: 5, 4, 5, 5, 1. What is the average rating?",
+            answer: 4,
+            tolerance: 0.01,
+            unit: "stars",
+            hint: "Add all the stars, then divide by how many reviews there are.",
+            mistakes: [
+              { match: "5", coach: "5 is the most common rating, but the average uses every rating. Add them all up first." },
+              { match: "20", coach: "20 is the total of all the stars. Now divide by the 5 reviews." },
+              { match: "1", coach: "That's the lowest rating. Add all five ratings and divide by 5." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "Which is an honest way to get more good reviews?",
+            choices: [
+              "Do great work and ask happy customers to share their opinion",
+              "Write five-star reviews yourself under made-up names",
+              "Pay strangers $1 for each five-star review",
+              "Throw away every review that isn't perfect",
+            ],
+            answer: 0,
+            why: "Honest reviews come from real customers who were happy with real work.",
+            hints: [
+              "",
+              "That's a fake review. It lies to customers.",
+              "Paying for praise isn't an honest opinion.",
+              "Hiding complaints means you miss free advice about what to fix.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A review is like a report card written by your customers. You can't write your own grades, but you can work hard to earn good ones.",
+            example:
+              "Ratings: 5, 5, 4, 3, 3. Add them: 5 + 5 + 4 + 3 + 3 = 20. Divide by 5 reviews: 20 / 5 = 4 stars. Both 3-star reviews said 'started late,' so the owner learns to be on time.",
+            simpler: {
+              q: "To find an average rating, first you...",
+              choices: ["count only the 5-star reviews", "add up all the stars", "pick the highest one"],
+              answer: 1,
+              why: "Add all the stars first, then divide by the number of reviews.",
+              hints: ["Every review counts, not just the best ones.", "", "The highest rating isn't the average. Use them all."],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sort",
+        prompt: "Sort each action: does it bring customers back or drive them away?",
+        buckets: ["Brings customers back", "Drives customers away"],
+        items: [
+          { text: "Remembering a regular customer's favorite cookie", bucket: 0 },
+          { text: "Arguing with a customer who has a complaint", bucket: 1 },
+          { text: "Showing up exactly on time", bucket: 0 },
+          { text: "Writing fake five-star reviews", bucket: 1 },
+          { text: "Replacing a broken item with a smile", bucket: 0 },
+          { text: "Pushing the most expensive item every time", bucket: 1 },
+          { text: "Thanking a customer for telling you about a problem", bucket: 0 },
+          { text: "Ignoring a customer while you play on a phone", bucket: 1 },
+        ],
+      },
+      explain: {
+        prompt: "Explain how a small business can sell well and keep its customers happy.",
+        keyPoints: [
+          "Listen and ask questions before recommending",
+          "Recommend what truly fits, not just what costs most",
+          "Fix problems by listening, apologizing, fixing and thanking",
+          "Loyal customers add up over time",
+          "Earn honest reviews and never fake them",
+        ],
+      },
+      mastery: [
+        {
+          type: "sequence",
+          prompt: "A customer's bracelet broke the day after she bought it. Put your response in order.",
+          steps: [
+            "Let her explain what happened without interrupting",
+            "Tell her you're sorry it broke",
+            "Offer a new bracelet or her money back",
+            "Thank her for telling you, then check the clasps on the rest",
+          ],
+          hint: "Listen, apologize, fix, thank.",
+          mistakes: [
+            { match: "Offered the fix before listening", coach: "Listen first so you understand what went wrong." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "number",
+          prompt: "A neighbor buys 3 cookies at $1 each every Saturday for 15 Saturdays. How much does this loyal customer spend in all?",
+          answer: 45,
+          tolerance: 0.01,
+          unit: "$",
+          hint: "Find what she spends each Saturday, then multiply by the number of Saturdays.",
+          mistakes: [
+            { match: "3", coach: "That's one Saturday. She comes back for 15 Saturdays." },
+            { match: "15", coach: "That counts the Saturdays, but she buys 3 cookies each time." },
+            { match: "18", coach: "That added 3 and 15. Multiply: $3 x 15." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "match",
+          prompt: "Match each word to what it means.",
+          pairs: [
+            { left: "Listen", right: "Let the customer explain without interrupting" },
+            { left: "Apologize", right: "Say you're sorry for the trouble" },
+            { left: "Fix", right: "Redo, replace or refund" },
+            { left: "Loyal customer", right: "Someone who comes back again and again" },
+            { left: "Review", right: "A customer's honest opinion of your business" },
+          ],
+          hint: "The first four steps fix a problem. The last two are about customers who return and share opinions.",
+          mistakes: [
+            { match: "Swapped listen and apologize", coach: "Listening means hearing them out. Apologizing means saying sorry." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "cloze",
+          text: "A helpful seller asks {0} and listens before recommending. Customers who come back again and again are {1} customers. Never write {2} reviews.",
+          blanks: [{ answers: ["questions"] }, { answers: ["loyal", "repeat"] }, { answers: ["fake"] }],
+          bank: ["questions", "loyal", "fake", "expensive", "pushy", "angry"],
+          hint: "Think listening first, customers who return, and the rule about reviews.",
+          mistakes: [
+            { match: "pushy", coach: "Pushy sellers drive customers away. Loyal customers are the ones who return." },
+            { match: "expensive", coach: "A helpful seller asks questions first, not pushes expensive things." },
+          ],
+          seconds: 40,
+        },
+      ],
+      check: [
+        {
+          q: "What does a helpful seller do first?",
+          choices: [
+            "Points to the most expensive item",
+            "Talks without stopping",
+            "Asks questions and listens",
+          ],
+          answer: 2,
+          why: "Listening first shows what the customer really needs.",
+        },
+        {
+          q: "What are the four steps for fixing a customer's problem?",
+          choices: [
+            "Listen, apologize, fix, thank",
+            "Argue, blame, hide, forget",
+            "Ignore, wait, guess, repeat",
+            "Laugh, shrug, leave, sell",
+          ],
+          answer: 0,
+          why: "Listen, apologize, fix, thank turns a problem into trust.",
+        },
+        {
+          q: "A neighbor pays $5 a week for 20 weeks. How much does that loyal customer bring in?",
+          choices: ["$25", "$100", "$4", "$15"],
+          answer: 1,
+          why: "$5 x 20 weeks = $100.",
+        },
+        {
+          q: "Ratings are 4, 4, 5, 3. What is the average?",
+          choices: ["16 stars", "5 stars", "3 stars", "4 stars"],
+          answer: 3,
+          why: "4 + 4 + 5 + 3 = 16, and 16 / 4 reviews = 4 stars.",
+        },
+        {
+          q: "What did Leon Leonwood Bean do when 90 of his first 100 boots came back?",
+          choices: [
+            "Kept the money and quit",
+            "Blamed his customers",
+            "Gave the money back and fixed the design",
+            "Raised his prices",
+          ],
+          answer: 2,
+          why: "He made it right with his customers and improved the boot, and his company still runs today.",
+        },
+      ],
+      task: {
+        kind: "speak",
+        prompt:
+          "With a parent or sibling playing the customer, act out three short scenes for your business: helping a customer choose by asking questions, fixing a complaint with listen, apologize, fix, thank, and politely asking a happy customer to tell a friend. Then, on your next sales day, ask 3 real customers 'How did we do?' and write down exactly what they said and one thing you will improve.",
+        rubric: [
+          "Asks questions and listens before recommending",
+          "Handles the complaint with all four steps, calmly and kindly",
+          "Asks for word of mouth politely, with no pressure and no fake praise",
+          "Records 3 real customers' answers and one improvement",
+        ],
+      },
+    },
+    {
+      id: "business.teams",
+      title: "Building a Team",
+      minutes: 35,
+      stage: "logic",
+      read: `Some jobs are too big for one person. When your business grows, you may need help: a friend to run the cash box, a sibling to dry cars, a neighbor kid to share the dog walks. A team is a group of people working toward the same goal, each doing a part.
+
+Thomas Edison is often pictured as a lone genius, but at his laboratory in Menlo Park, New Jersey, he worked with machinists, a glassblower, a mathematician and other helpers, who called themselves the muckers. His chief assistant, Charles Batchelor, ran experiments beside him for years. Machinist John Kruesi built many machines from Edison's sketches, including the first phonograph in 1877. Edison's ideas became real because a team built them.
+
+A strong team needs clear roles. A role is a job that one person owns. At a car wash, one person greets drivers, two scrub, one dries, and one handles the money. When everyone knows their role, work moves fast and nothing is forgotten.
+
+As the leader, you will need to delegate, which means handing a task to someone else. Good delegating has steps: choose the right person, explain the task and what "done well" looks like, give them what they need, check in partway through, and say thank you. You can hand off the task, but you are still responsible for the result. If something goes wrong, the leader owns it and helps fix it.
+
+Finally, pay people fairly. Agree on the pay before any work starts, and write it down. Pay can be by the hour, by the job, or as a share of the profit. Then pay exactly what you promised, on time, even on a slow day. A team that trusts you will work hard for you. Always get a parent's okay before anyone joins your business.`,
+      keyIdeas: [
+        "A team lets people do more together, each using their strengths.",
+        "Clear roles mean everyone knows their job and nothing is forgotten.",
+        "Delegate with clear directions and check-ins, and stay responsible for the result.",
+        "Agree on pay first, write it down, and pay what you promised on time.",
+      ],
+      hook: {
+        text: "Thomas Edison is often pictured as a lone genius. But at Menlo Park, a machinist named John Kruesi built the first phonograph from Edison's sketch in 1877, and a whole team of helpers, nicknamed the muckers, worked beside him. Could one person ever build a big business all alone?",
+      },
+      teach: [
+        {
+          title: "Why build a team",
+          teach:
+            "Some jobs are too big for one person. Thomas Edison is often pictured as a lone genius, but at his laboratory in Menlo Park, New Jersey, he worked with machinists, a glassblower, a mathematician and other helpers, who called themselves the muckers. His chief assistant, Charles Batchelor, ran experiments beside him for years. Machinist John Kruesi built many of Edison's machines from his sketches, including the first phonograph in 1877. A team is a group of people working toward the same goal, each doing a part. Different people bring different strengths, and together they can do far more than one person alone.",
+          visual: {
+            type: "hotspots",
+            title: "Edison's Menlo Park team",
+            center: "Menlo Park lab",
+            spots: [
+              { label: "Inventor", icon: "💡", detail: "Thomas Edison came up with ideas, sketched them, and led the work." },
+              { label: "Chief assistant", icon: "🔬", detail: "Charles Batchelor ran careful experiments and kept detailed notes beside Edison for years." },
+              { label: "Machinist", icon: "🛠️", detail: "John Kruesi turned sketches into working machines, including the first phonograph in 1877." },
+              { label: "Glassblower", icon: "🫙", detail: "A skilled glassblower shaped the glass bulbs for the electric light experiments." },
+              { label: "Mathematician", icon: "📐", detail: "Francis Upton did careful calculations for the electric lighting work." },
+            ],
+          },
+          probe: {
+            type: "number",
+            prompt: "Alone, you take 30 minutes to wash one car. With a team of 3, each doing a different job, the team finishes a car every 10 minutes. How many cars can the team finish in 2 hours?",
+            answer: 12,
+            tolerance: 0,
+            unit: "cars",
+            hint: "Turn 2 hours into minutes, then divide by the 10 minutes the team needs for each car.",
+            mistakes: [
+              { match: "4", coach: "That's how many YOU could wash alone at 30 minutes each. The team takes 10 minutes per car." },
+              { match: "6", coach: "Check the minutes: 2 hours is 120 minutes, not 60." },
+              { match: "36", coach: "That multiplied by the 3 people. The team finishes one car every 10 minutes together." },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "Why do growing businesses build teams?",
+            choices: [
+              "So the owner never has to work",
+              "So nobody is responsible",
+              "Because more people can do more work, each using their strengths",
+              "Because teams never make mistakes",
+            ],
+            answer: 2,
+            why: "A team can do more than one person, especially when each person does what they're good at.",
+            hints: [
+              "Leaders work hard too. A team helps, it doesn't replace you.",
+              "The leader is always responsible. Teams share the work, not the blame.",
+              "",
+              "Every team makes mistakes. Teams help because they can do more work.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A team is like a soccer team. One great player can't be the goalie, the defender, and the striker at the same time. Each player covers a part of the field.",
+            example:
+              "Ava's lemonade stand gets long lines on hot Saturdays. Alone, she serves 20 customers an hour. With her brother pouring while Ava takes the money, they serve 40 an hour. Same stand, twice the customers.",
+            simpler: {
+              q: "A team is...",
+              choices: ["one person doing every job", "a group working toward the same goal, each doing a part", "people who never talk"],
+              answer: 1,
+              why: "A team shares a goal and splits up the work.",
+              hints: ["That's working alone, not a team.", "", "Teams need to talk to work together."],
+            },
+          },
+        },
+        {
+          title: "Clear roles",
+          teach:
+            "A strong team needs clear roles. A role is a job that one person owns. At a car wash, one person greets drivers and takes orders, two people scrub, one dries, and one handles the money. When everyone knows their role, work moves fast and nothing is forgotten. When roles are fuzzy, two people both try to collect money while nobody dries the car. Give each role a name, list what it includes, and match it to the person whose strengths fit. A friendly, careful counter makes a great cashier. Someone with lots of energy might love scrubbing.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Role", back: "A job that one person owns on the team." },
+              { front: "Greeter", back: "Welcomes customers and takes their orders." },
+              { front: "Cashier", back: "Takes the money and counts change out loud. Needs to be careful and honest." },
+              { front: "Fuzzy roles", back: "When nobody is sure who does what, jobs get doubled or forgotten." },
+            ],
+          },
+          probe: {
+            type: "match",
+            prompt: "Your car wash team has four roles. Match each role to its job.",
+            pairs: [
+              { left: "Greeter", right: "Welcomes drivers and takes their order" },
+              { left: "Washer", right: "Soaps and scrubs each car" },
+              { left: "Dryer", right: "Towels the car dry so it doesn't spot" },
+              { left: "Cashier", right: "Collects money and counts change out loud" },
+            ],
+            hint: "Each role's name tells you a lot about its job.",
+            mistakes: [
+              { match: "Swapped greeter and cashier", coach: "The greeter says hello and takes the order. The cashier handles the money." },
+            ],
+            seconds: 35,
+          },
+          think: {
+            q: "At your bake sale, two helpers both take money and nobody restocks the table. What's the problem?",
+            choices: ["The prices are too low", "The cookies are too big", "There are too many customers", "The roles aren't clear"],
+            answer: 3,
+            why: "When roles are fuzzy, jobs get doubled or forgotten.",
+            hints: [
+              "Price doesn't decide who restocks the table.",
+              "Cookie size isn't why a job is being skipped.",
+              "Lots of customers is good news! The real trouble is who does what.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Clear roles are like an orchestra. Each musician plays their own part. If everyone grabbed the drums, you'd get noise instead of music.",
+            example:
+              "Bake sale roles. Baker: makes 3 batches Friday night. Setter: sets up the table, sign and napkins at 9. Seller: greets customers and hands out treats. Cashier: takes money and counts change out loud. Four clear jobs, no confusion.",
+            simpler: {
+              q: "A role is...",
+              choices: ["a kind of bread", "the price of your product", "a job that one person owns"],
+              answer: 2,
+              why: "Each person on a team owns a role, a clear job.",
+              hints: ["That's a roll, spelled differently! A role is a job.", "Price is what customers pay, not a job on the team.", ""],
+            },
+          },
+        },
+        {
+          title: "Delegating well",
+          teach:
+            "As the leader, you can't do every job, so you delegate, which means handing a task to someone else. Good delegating has steps. Choose the right person for the task. Explain the task and show what 'done well' looks like. Give them the tools and time they need. Check in partway through to help, not to boss. Finally, thank them. One rule matters most: you can hand off the task, but you're still responsible for the result. If the flyers go up with the wrong date, a good leader says, 'That's on me. I should have checked,' and helps fix it.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "Dumping a task",
+              points: ["'Just do it' with no directions", "No tools or time", "Never checks in", "Blames the helper if it goes wrong"],
+            },
+            right: {
+              title: "Delegating well",
+              points: ["Clear directions and an example", "Gives the tools and time needed", "Checks in to help", "Owns the result and says thank you"],
+            },
+          },
+          probe: {
+            type: "sequence",
+            prompt: "Put the steps of delegating well in order.",
+            steps: [
+              "Choose the right person for the task",
+              "Explain the task and what 'done well' looks like",
+              "Give them the tools and time they need",
+              "Check in partway through to help",
+              "Thank them for their work",
+            ],
+            hint: "Pick the person, explain, equip, check in, thank.",
+            mistakes: [
+              { match: "Checked in before explaining", coach: "You can't check on a task you haven't explained yet." },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "You asked a helper to post flyers, and they wrote the wrong date. What does a good leader say?",
+            choices: [
+              "'It's all your fault.'",
+              "'That's on me. I should have checked. Let's fix it together.'",
+              "'Nobody will notice.'",
+              "'I'm never asking anyone for help again.'",
+            ],
+            answer: 1,
+            why: "The leader stays responsible for the result, so they own the mistake and help fix it.",
+            hints: [
+              "Blaming the helper breaks trust. The leader is still responsible.",
+              "",
+              "Customers will show up on the wrong day! Fix it.",
+              "Mistakes happen. Check work next time instead of giving up on your team.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Delegating is like a relay race. You hand off the baton carefully, make sure your teammate has a good grip, and cheer them on. But the whole team still wins or loses together.",
+            example:
+              "Noah asks his sister to make the sign for his car wash. He explains: 'Car wash, $8, Saturday 9 to 12, big letters.' He gives her poster board and markers, checks the first draft, spots a missing price, and they fix it. Then he thanks her.",
+            simpler: {
+              q: "To delegate means...",
+              choices: ["to hand a task to someone else", "to do every job yourself", "to quit"],
+              answer: 0,
+              why: "Delegating is handing off a task while you stay responsible for it.",
+              hints: ["", "Doing everything yourself is the opposite of delegating.", "Delegating isn't quitting. You still lead."],
+            },
+          },
+        },
+        {
+          title: "Paying people fairly",
+          teach:
+            "If people help your business, pay them fairly. First, agree on the pay before any work starts, and write it down so nobody forgets. Pay can be by the hour, like $6 an hour, by the job, like $2 for each car dried, or as a share of the profit. Then pay exactly what you promised, on time, even on a slow day when profit is small. If your helper worked 3 hours at $6 an hour, you owe 3 times $6, or $18. Keeping your word builds a team that trusts you. Always get a parent's okay before anyone joins your business.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Pay by the hour", back: "A set amount for each hour worked, like $6 an hour." },
+              { front: "Pay by the job", back: "A set amount for each task done, like $2 for each car dried." },
+              { front: "Share of the profit", back: "The helper gets an agreed part of what the business keeps, like one quarter." },
+              { front: "Written agreement", back: "The pay, written down before work starts, so nobody forgets or argues later." },
+            ],
+          },
+          probe: {
+            type: "number",
+            prompt: "You agreed to pay your helper $2 for each car dried. They dried 7 cars. How much do you owe?",
+            answer: 14,
+            tolerance: 0,
+            unit: "$",
+            hint: "Pay by the job: multiply the number of cars by the pay for each car.",
+            mistakes: [
+              { match: "9", coach: "That added 7 and 2. Each car earns $2, so multiply." },
+              { match: "7", coach: "That's the number of cars. Each car earns $2." },
+              { match: "2", coach: "That's the pay for one car. They dried 7." },
+            ],
+            seconds: 25,
+          },
+          think: {
+            q: "You promised your helper $10 for the day, but sales were slow. What's fair?",
+            choices: [
+              "Pay $5 because sales were slow",
+              "Pay the $10 you promised",
+              "Pay nothing and say sorry",
+              "Pay with leftover cookies instead",
+            ],
+            answer: 1,
+            why: "A promise is a promise. Your helper did the work, so they get what you agreed.",
+            hints: [
+              "Slow sales are the owner's risk, not the helper's. Keep your word.",
+              "",
+              "They did the work. Paying nothing breaks your promise.",
+              "You promised money, not cookies. Changing the deal later isn't fair.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Paying fairly is like keeping a trade with a friend. If you agree to swap your sandwich for their apple, you hand over the sandwich, even if you get hungry later.",
+            example:
+              "Ella pays her friend $5 an hour to help at her craft table, and they wrote it down. They worked 2 and a half hours: 2.5 x $5 = $12.50. Ella pays $12.50 at the end of the day and writes it in her sales log as a cost.",
+            simpler: {
+              q: "Your helper worked 2 hours at $4 an hour. What do you owe?",
+              choices: ["$6", "$2", "$8"],
+              answer: 2,
+              why: "2 hours x $4 = $8.",
+              hints: ["That added 2 and 4. Multiply hours by pay per hour.", "That divided. Multiply hours by pay per hour.", ""],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sort",
+        prompt: "Sort each action: what would a fair, wise team leader do?",
+        buckets: ["Good team leader", "Poor team leader"],
+        items: [
+          { text: "Writes down the pay before work starts", bucket: 0 },
+          { text: "Pays less than promised because it was a slow day", bucket: 1 },
+          { text: "Gives each helper a clear role", bucket: 0 },
+          { text: "Blames a helper for a mistake in the directions", bucket: 1 },
+          { text: "Checks in partway through to help", bucket: 0 },
+          { text: "Hands off a task with no directions at all", bucket: 1 },
+          { text: "Thanks the team at the end of the day", bucket: 0 },
+          { text: "Lets two people do the same job while another job is skipped", bucket: 1 },
+        ],
+      },
+      explain: {
+        prompt: "Explain how you would build and lead a small team for your business.",
+        keyPoints: [
+          "A team can do more by using different strengths",
+          "Give each person a clear role",
+          "Delegate with clear directions, check-ins and thanks",
+          "The leader stays responsible for the result",
+          "Agree on pay first and pay what you promised on time",
+        ],
+      },
+      mastery: [
+        {
+          type: "number",
+          prompt: "Your car wash took in $90. Soap and sponges cost $10, and you paid each of your 2 helpers $15. How much is left for the business?",
+          answer: 50,
+          tolerance: 0.01,
+          unit: "$",
+          hint: "Start with $90. Subtract the supplies, then subtract the pay for BOTH helpers.",
+          mistakes: [
+            { match: "65", coach: "You paid only one helper. There were 2 helpers at $15 each." },
+            { match: "80", coach: "Don't forget to pay your helpers: 2 x $15 = $30." },
+            { match: "60", coach: "Don't forget the $10 for soap and sponges." },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "build",
+          prompt: "Build the leader's rule about delegating.",
+          tiles: ["You can hand off", "the task,", "but you are still", "responsible", "for the result."],
+          distractors: ["never responsible", "so blame your helper"],
+          hint: "The leader passes along the work, not the responsibility.",
+          mistakes: [
+            { match: "Used 'never responsible'", coach: "A leader is always responsible for the result, even for delegated work." },
+            { match: "Used 'so blame your helper'", coach: "Good leaders own mistakes and help fix them." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "match",
+          prompt: "Match each team word to its meaning.",
+          pairs: [
+            { left: "Team", right: "A group working toward the same goal, each doing a part" },
+            { left: "Role", right: "A job that one person owns" },
+            { left: "Delegate", right: "Hand a task to someone else" },
+            { left: "Check in", right: "Look in partway through to help" },
+            { left: "Written agreement", right: "The pay, written down before work starts" },
+          ],
+          hint: "Think about who does what, how you hand off work, and how you agree on pay.",
+          mistakes: [
+            { match: "Swapped role and delegate", coach: "A role is a job someone owns. Delegating is handing a task to them." },
+          ],
+          seconds: 50,
+        },
+        {
+          type: "number",
+          prompt: "Your helper worked 3 and a half hours at the $6 an hour you agreed on. How much do you owe?",
+          answer: 21,
+          tolerance: 0.01,
+          unit: "$",
+          hint: "Multiply the hours (3.5) by the pay per hour ($6).",
+          mistakes: [
+            { match: "18", coach: "That's only 3 hours. Don't forget the extra half hour: $3 more." },
+            { match: "9.5", coach: "That added the hours and the pay. Multiply instead." },
+            { match: "24", coach: "That's 4 hours. Your helper worked 3 and a half." },
+          ],
+          seconds: 40,
+        },
+      ],
+      check: [
+        {
+          q: "Who built the first phonograph from Edison's sketch in 1877?",
+          choices: ["Milton Hershey", "Machinist John Kruesi", "Luca Pacioli", "Mary Anderson"],
+          answer: 1,
+          why: "John Kruesi, a machinist on Edison's Menlo Park team, built it from Edison's sketch.",
+        },
+        {
+          q: "What is a role on a team?",
+          choices: ["A job that one person owns", "A kind of prize", "The team's name"],
+          answer: 0,
+          why: "Clear roles mean everyone knows their job.",
+        },
+        {
+          q: "When you delegate a task, who is responsible for the result?",
+          choices: ["Nobody", "Only the helper", "The customer", "You, the leader"],
+          answer: 3,
+          why: "You can hand off the task, but the leader is still responsible for the result.",
+        },
+        {
+          q: "When should you agree on a helper's pay?",
+          choices: ["After the work, if there's money left", "Never, it's a surprise", "Before any work starts, in writing"],
+          answer: 2,
+          why: "Agreeing first, in writing, keeps things fair and clear for everyone.",
+        },
+        {
+          q: "Your helper worked 4 hours at $5 an hour. What do you owe?",
+          choices: ["$9", "$20", "$1", "$45"],
+          answer: 1,
+          why: "4 hours x $5 = $20.",
+        },
+      ],
+      task: {
+        kind: "write",
+        prompt:
+          "Plan a team for your business (with a parent's okay before anyone actually joins). Write the name of each role and what the job includes, and who might fit it and why. Pick one task you would delegate and write the directions you would give, including what 'done well' looks like. Finally, write a simple pay agreement: how much, by the hour, by the job or as a share, and when you will pay.",
+        rubric: [
+          "Lists at least 3 clear roles with what each job includes",
+          "Matches people to roles based on their strengths",
+          "Writes clear delegating directions, including what 'done well' looks like",
+          "Includes a fair, written pay agreement with the amount and when it is paid",
+        ],
+      },
+    },
+    {
+      id: "business.bookkeeping",
+      title: "Bookkeeping: Tracking Every Dollar",
+      minutes: 35,
+      stage: "logic",
+      read: `Bookkeeping means writing down every bit of money that comes into your business and every bit that goes out. It sounds simple, and it is, but it is one of the most important habits a business owner can build.
+
+The method most businesses use goes back a long way. In 1494, in Venice, an Italian mathematician and friar named Luca Pacioli published a big math book that explained how merchants kept their accounts. Venetian merchants had used this system for years. Pacioli wrote it down so anyone could learn it, and today he is often called the father of accounting.
+
+Your records go in a ledger, which is a notebook or page with columns. A simple ledger has five columns: the date, what happened, money in, money out, and the balance. The balance is how much money the business has after each line. Start with what you had, add money in, subtract money out, and write the new balance on every line.
+
+Good bookkeepers have a few habits. They write each entry the same day, while they still remember. They keep receipts for things they buy. They keep business money separate from their own spending money. And at the end of each day they count the cash box and check that it matches the ledger. If it doesn't, they look for the mistake right away.
+
+There is one more big idea: profit is not the same as cash. Profit is what you earned: revenue minus costs. Cash is the money you actually have in hand right now. They can be different. If a neighbor owes you $10 for yard work and hasn't paid yet, you earned it, but you don't have the cash. If your mom lends you $5 for making change, you have more cash, but it isn't profit, because you have to pay it back. A business can show a profit and still run out of cash, so good bookkeepers watch both numbers.`,
+      keyIdeas: [
+        "Bookkeeping means writing down every dollar in and every dollar out.",
+        "A ledger has the date, what happened, money in, money out, and a running balance.",
+        "Keep receipts, keep business money separate, and check the cash against the ledger.",
+        "Profit is what you earned; cash is what you have right now.",
+      ],
+      hook: {
+        text: "In 1494, in Venice, a mathematician named Luca Pacioli published a giant math book. Inside was a clear explanation of how Venetian merchants tracked every coin coming in and going out. More than 500 years later, businesses around the world still use that same idea. What could be so powerful about writing down money?",
+      },
+      teach: [
+        {
+          title: "Why keep the books",
+          teach:
+            "Bookkeeping means writing down every bit of money that comes into your business and every bit that goes out. In 1494, in Venice, a mathematician and friar named Luca Pacioli published a big math book explaining how merchants kept their accounts. Venetian merchants had used this system for years, and Pacioli wrote it down so anyone could learn it. Today he's often called the father of accounting. Why does it matter? Good records show whether you're really making money, help you catch mistakes, prove you handled money honestly, and help you make better decisions next week.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Bookkeeping", back: "Writing down every dollar that comes in and every dollar that goes out." },
+              { front: "Ledger", back: "The notebook or page where you keep those records, in columns." },
+              { front: "Entry", back: "One line in the ledger: one sale, one purchase, one payment." },
+              { front: "Balance", back: "How much money the business has after each entry." },
+              { front: "Luca Pacioli", back: "Italian mathematician who explained merchants' bookkeeping in a book published in Venice in 1494." },
+            ],
+          },
+          probe: {
+            type: "cloze",
+            text: "Bookkeeping means writing down all the money that comes {0} and all the money that goes {1}. In {2}, Luca Pacioli published a book in Venice that explained how merchants kept their accounts.",
+            blanks: [{ answers: ["in"] }, { answers: ["out"] }, { answers: ["1494"] }],
+            bank: ["in", "out", "1494", "1776", "up", "away"],
+            hint: "Money comes in from customers and goes out for costs. Pacioli's book came out about 500 years ago.",
+            mistakes: [
+              { match: "1776", coach: "1776 is when the Declaration of Independence was signed. Pacioli's book came almost 300 years earlier." },
+            ],
+            seconds: 30,
+          },
+          think: {
+            q: "Which is NOT a reason to keep good records?",
+            choices: [
+              "To see if you're really making money",
+              "To catch mistakes",
+              "To hide money from your parents",
+              "To show you handled money honestly",
+            ],
+            answer: 2,
+            why: "Good records are about truth and honesty, never hiding things.",
+            hints: [
+              "That IS a reason: records show your real profit.",
+              "That IS a reason: records help you catch errors fast.",
+              "",
+              "That IS a reason: records prove you were honest.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Bookkeeping is like a diary for your money. Every day you write what happened, so later you can look back and know the true story instead of guessing.",
+            example:
+              "Without records, Jack thinks his car wash made about $50. With records, his ledger shows $64 in and $22 out for soap, sponges and a sign, so his real profit is $42. His guess was off by $8, and now he knows exactly where the money went.",
+            simpler: {
+              q: "Bookkeeping means...",
+              choices: ["writing down money in and money out", "reading library books", "guessing how much you earned"],
+              answer: 0,
+              why: "Bookkeepers record every dollar in and out.",
+              hints: ["", "It has 'book' in it, but it's about keeping money records.", "Bookkeeping replaces guessing with real records."],
+            },
+          },
+        },
+        {
+          title: "A simple ledger",
+          teach:
+            "Your records go in a ledger, a notebook or page with columns. A simple ledger has five columns: the date, what happened, money in, money out, and the balance. The balance is how much money the business has after each line. Start with what you had. Then, for each line, add any money in or subtract any money out, and write the new balance. Say you start with $20. You sell cookies for $15, so the balance is $35. You buy flour for $6, so it drops to $29. Each line tells one small piece of the story.",
+          visual: {
+            type: "hotspots",
+            title: "A simple ledger",
+            center: "Ledger page",
+            spots: [
+              { label: "Date", icon: "📅", detail: "When it happened, like Oct 3." },
+              { label: "What happened", icon: "📝", detail: "A few words: 'Sold 5 cookies' or 'Bought flour.'" },
+              { label: "Money in", icon: "➕", detail: "Money coming into the business, like a sale." },
+              { label: "Money out", icon: "➖", detail: "Money leaving the business, like buying supplies." },
+              { label: "Balance", icon: "💰", detail: "The running total: the last balance plus money in, minus money out." },
+            ],
+          },
+          probe: {
+            type: "number",
+            prompt: "Your ledger starts with a balance of $20. Then: sold cookies, in $15. Bought flour, out $6. Sold cookies, in $9. What is the balance after the last line?",
+            answer: 38,
+            tolerance: 0,
+            unit: "$",
+            hint: "Go line by line: $20 + $15, then - $6, then + $9.",
+            mistakes: [
+              { match: "50", coach: "That added the $6 flour. Money out gets SUBTRACTED." },
+              { match: "29", coach: "That's the balance after the flour. There's one more sale to add." },
+              { match: "18", coach: "That's just the money in minus money out. Don't forget the $20 you started with." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "Your balance is $35. You buy flour for $6. What is the new balance?",
+            choices: ["$41", "$29", "$6", "$35"],
+            answer: 1,
+            why: "Money out is subtracted: $35 - $6 = $29.",
+            hints: [
+              "That added. Buying flour is money OUT, so subtract.",
+              "",
+              "$6 is the flour, not the balance.",
+              "The balance changes when money goes out.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A running balance is like the scoreboard in basketball. After every basket, the score updates, so you always know where things stand right now.",
+            example:
+              "Oct 1: start, balance $10. Oct 2: sold 8 bracelets, in $24, balance $34. Oct 3: bought beads, out $7, balance $27. Oct 4: sold 3 bracelets, in $9, balance $36.",
+            simpler: {
+              q: "Money in makes the balance...",
+              choices: ["go down", "go up", "disappear"],
+              answer: 1,
+              why: "Money in is added to the balance.",
+              hints: ["Money OUT makes it go down. Money in adds.", "", "Money in doesn't disappear. It adds to the balance."],
+            },
+          },
+        },
+        {
+          title: "Habits of a good bookkeeper",
+          teach:
+            "Good bookkeepers have a few simple habits. They write each entry the same day, while they still remember. They keep receipts, the slips of paper that prove what they bought and what they paid. They keep business money separate from their own spending money, often in a labeled envelope or cash box. And at the end of each day, they count the cash and check that it matches the ledger's balance. If the ledger says $42 but the box holds only $37, something is $5 off. Maybe a sale was written twice or change was miscounted. Find it now, while it's fresh.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "Messy money habits",
+              points: ["Writes things down 'later'", "Throws away receipts", "Mixes allowance and business money", "Never counts the cash box"],
+            },
+            right: {
+              title: "Good bookkeeping habits",
+              points: ["Records every entry the same day", "Keeps receipts in an envelope", "Keeps business money separate", "Checks the cash box against the ledger"],
+            },
+          },
+          probe: {
+            type: "sort",
+            prompt: "Sort each habit.",
+            buckets: ["Good bookkeeping habit", "Bad bookkeeping habit"],
+            items: [
+              { text: "Writing each sale down the same day", bucket: 0 },
+              { text: "Keeping receipts in a labeled envelope", bucket: 0 },
+              { text: "Mixing business money with your allowance", bucket: 1 },
+              { text: "Counting the cash box each night and checking the ledger", bucket: 0 },
+              { text: "Writing down a month of sales from memory", bucket: 1 },
+              { text: "Throwing away receipts right after you shop", bucket: 1 },
+            ],
+            hint: "Good habits make your records complete, on time, and easy to check.",
+            mistakes: [
+              {
+                match: "Put mixing money in good habits",
+                coach: "When allowance and business money mix, you can't tell what the business really has.",
+              },
+              {
+                match: "Put writing from memory in good habits",
+                coach: "Memory fades. Write each entry the same day.",
+              },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "Your ledger says $42, but your cash box has only $37. What should you do?",
+            choices: [
+              "Ignore it, it's only $5",
+              "Change the ledger to $37 without checking why",
+              "Add $5 from your allowance and say nothing",
+              "Look through your entries for the mistake right away",
+            ],
+            answer: 3,
+            why: "Finding the real mistake now keeps your records true and helps you avoid it next time.",
+            hints: [
+              "Small mistakes grow. Find out what happened.",
+              "That hides the problem instead of finding it.",
+              "That mixes your own money in and hides the mistake.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Checking the cash box against the ledger is like counting the team's soccer balls after practice. If one is missing, you look now, not next month.",
+            example:
+              "Mia's ledger says $42, but her cash box has $37. She checks her entries and finds she wrote one $5 sale twice. She crosses out the extra line neatly and writes a note, and now the ledger and the box both say $37.",
+            simpler: {
+              q: "A receipt is...",
+              choices: ["a recipe for cookies", "a kind of coin", "a slip that proves what you bought and paid"],
+              answer: 2,
+              why: "Receipts are proof of each purchase, so keep them.",
+              hints: ["That's a recipe! A receipt proves a purchase.", "A receipt is paper proof, not money.", ""],
+            },
+          },
+        },
+        {
+          title: "Profit is not the same as cash",
+          teach:
+            "Here is a big idea many grown-ups miss: profit is not the same as cash. Profit is what you earned: revenue minus costs. Cash is the money you actually have in hand right now. They can be different. If a neighbor owes you $10 for yard work and hasn't paid yet, you earned it, but you don't have the cash. If your mom lends you $5 for making change, you have more cash, but it isn't profit, because you have to pay it back. A business can show a profit and still run out of cash, so good bookkeepers watch both numbers.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "Profit",
+              points: ["What you earned: revenue minus costs", "Counts work done, even if not paid yet", "Does NOT count loans"],
+            },
+            right: {
+              title: "Cash",
+              points: ["Money in your hand right now", "Doesn't include money people still owe you", "Goes up when you borrow, but loans must be repaid"],
+            },
+          },
+          probe: {
+            type: "number",
+            prompt: "This week you did $30 of yard work, but one neighbor still owes you $10 of it. You spent $12 on trash bags and gloves. Your mom lent you $5 for change. What is your PROFIT for the week?",
+            answer: 18,
+            tolerance: 0,
+            unit: "$",
+            hint: "Profit = what you earned minus costs. Work you did counts even if not paid yet. A loan is not profit.",
+            mistakes: [
+              { match: "8", coach: "The $10 is still earned, even though it isn't paid yet. Profit counts work done." },
+              { match: "23", coach: "The $5 from Mom is a loan, not profit. You have to pay it back." },
+              { match: "13", coach: "That's your CASH, not your profit. Profit counts all $30 you earned and no loans." },
+            ],
+            seconds: 60,
+          },
+          think: {
+            q: "A neighbor owes you $10 for yard work and hasn't paid yet. Which is true?",
+            choices: [
+              "You earned it, but you don't have the cash yet",
+              "It doesn't count at all",
+              "You have $10 more cash right now",
+              "It's a loan you must pay back",
+            ],
+            answer: 0,
+            why: "The work is done, so it counts as earned, but the cash hasn't arrived.",
+            hints: [
+              "",
+              "You did the work, so you earned it. It counts toward profit.",
+              "The neighbor hasn't paid yet, so the cash isn't in your box.",
+              "The neighbor owes YOU. You don't pay anything back.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Profit is like the tickets you won at a fair game. Cash is the tickets actually in your pocket. If the game owner still owes you some, you won them, but you can't spend them yet.",
+            example:
+              "Week totals: earned $30, a neighbor still owes $10, costs $12 paid, and Mom lent $5 for change. Profit = $30 - $12 = $18. Cash = $20 collected - $12 spent + $5 loan = $13. Profit $18, cash $13: different numbers, both true.",
+            simpler: {
+              q: "Mom lends you $5 for change. Is that $5 profit?",
+              choices: ["Yes, it's money in", "No, you have to pay it back", "Only on Saturdays"],
+              answer: 1,
+              why: "A loan adds cash, but it isn't profit because it must be repaid.",
+              hints: ["It's money in, but it isn't earned. You owe it back.", "", "Days of the week don't change it. A loan is never profit."],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sequence",
+        prompt: "Put the steps for recording a sale in order.",
+        steps: [
+          "Make the sale and collect the money",
+          "Put the money in the business cash box",
+          "Write the date and what happened in the ledger",
+          "Write the amount in the Money In column",
+          "Update the running balance",
+          "At day's end, count the cash box and check it matches",
+        ],
+      },
+      explain: {
+        prompt: "Explain how you would keep the books for a small business, and why profit and cash can be different.",
+        keyPoints: [
+          "Write down every dollar in and out",
+          "A ledger has the date, what happened, money in, money out and a balance",
+          "Keep receipts and keep business money separate",
+          "Check the cash box against the ledger",
+          "Profit is what you earned; cash is what you have now",
+        ],
+      },
+      mastery: [
+        {
+          type: "place",
+          prompt: "Each ledger line's balance builds on the line before. Drag each line's balance onto the number line.",
+          min: 0,
+          max: 30,
+          step: 1,
+          tolerance: 0,
+          items: [
+            { label: "Line 1: start with $10", value: 10 },
+            { label: "Line 2: sold cookies, in $8", value: 18 },
+            { label: "Line 3: bought bags, out $5", value: 13 },
+            { label: "Line 4: sold cookies, in $12", value: 25 },
+            { label: "Line 5: bought ice, out $4", value: 21 },
+          ],
+          hint: "Start at $10. Add money in and subtract money out, one line at a time.",
+          mistakes: [
+            { match: "Placed line 3 at 5", coach: "The balance isn't the $5 you spent. It's $18 - $5 = $13." },
+            { match: "Added the money out", coach: "Money out goes DOWN on the line: subtract it." },
+          ],
+          seconds: 70,
+        },
+        {
+          type: "number",
+          prompt: "You started the week with $0. You did $30 of yard work, but a neighbor still owes you $10 of it. You paid $12 for supplies. Your mom lent you $5 for change. How much CASH is in your box now?",
+          answer: 13,
+          tolerance: 0,
+          unit: "$",
+          hint: "Cash = money you actually collected, minus what you spent, plus the loan.",
+          mistakes: [
+            { match: "18", coach: "That's your profit. Cash counts only money actually collected, plus the loan." },
+            { match: "23", coach: "The neighbor hasn't paid the $10 yet, so it isn't in your box." },
+            { match: "8", coach: "Don't forget the $5 Mom lent you. It's in your box, even though it isn't profit." },
+          ],
+          seconds: 70,
+        },
+        {
+          type: "sort",
+          prompt: "Sort each one: does it add to profit, or only add cash?",
+          buckets: ["Adds to profit", "Adds cash but NOT profit"],
+          items: [
+            { text: "Selling 4 cookies for $4", bucket: 0 },
+            { text: "Dad lends you $20 to buy a cooler", bucket: 1 },
+            { text: "Getting paid $10 to rake leaves", bucket: 0 },
+            { text: "Borrowing $5 from your sister for change", bucket: 1 },
+            { text: "Putting $6 of your own allowance into the cash box", bucket: 1 },
+            { text: "Selling a bracelet for $3", bucket: 0 },
+          ],
+          hint: "Profit comes from selling things or doing work. Loans and your own money only add cash.",
+          mistakes: [
+            { match: "Put a loan in profit", coach: "Loans must be paid back, so they're never profit." },
+            { match: "Put the allowance in profit", coach: "Your own money isn't earned by the business, so it isn't profit." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "match",
+          prompt: "Match each bookkeeping word to its meaning.",
+          pairs: [
+            { left: "Ledger", right: "The notebook or page where you record money in and out" },
+            { left: "Balance", right: "How much money the business has after each line" },
+            { left: "Receipt", right: "A slip that proves what you bought and paid" },
+            { left: "Profit", right: "What you earned: revenue minus costs" },
+            { left: "Cash", right: "The money you actually have in hand right now" },
+          ],
+          hint: "Think about the book, the running total, the proof, and the two different 'how much' numbers.",
+          mistakes: [
+            { match: "Swapped profit and cash", coach: "Profit is what you earned. Cash is what's in your hand right now." },
+          ],
+          seconds: 50,
+        },
+      ],
+      check: [
+        {
+          q: "What is a ledger?",
+          choices: [
+            "A kind of cash register",
+            "A notebook or page where you record money in and out",
+            "A loan from a bank",
+          ],
+          answer: 1,
+          why: "A ledger holds your money records in columns.",
+        },
+        {
+          q: "Your balance is $25. You spend $8 on supplies. What's the new balance?",
+          choices: ["$33", "$8", "$17", "$25"],
+          answer: 2,
+          why: "Money out is subtracted: $25 - $8 = $17.",
+        },
+        {
+          q: "Who explained merchants' bookkeeping in a book published in Venice in 1494?",
+          choices: ["Thomas Edison", "Milton Hershey", "Benjamin Franklin", "Luca Pacioli"],
+          answer: 3,
+          why: "Luca Pacioli, an Italian mathematician, is often called the father of accounting.",
+        },
+        {
+          q: "Mom lends you $10 to buy supplies. What happens?",
+          choices: [
+            "Your cash goes up, but your profit does not",
+            "Your profit goes up by $10",
+            "Nothing changes at all",
+          ],
+          answer: 0,
+          why: "A loan adds cash, but it must be paid back, so it isn't profit.",
+        },
+        {
+          q: "Why count the cash box at the end of each day?",
+          choices: [
+            "To make the coins shiny",
+            "To check that it matches the ledger and catch mistakes early",
+            "Because it's fun to stack coins",
+            "So you can spend whatever is there",
+          ],
+          answer: 1,
+          why: "Checking the cash against the ledger catches mistakes while they're still fresh.",
+        },
+      ],
+      task: {
+        kind: "project",
+        prompt:
+          "Keep a real ledger for your business (or your own money) for one week. Make five columns: date, what happened, money in, money out, and balance. Record every entry the same day, keep your receipts in an envelope, and count your cash at the end of each day to check it matches. At the end of the week, write your profit and your cash, and explain in 2 or 3 sentences why they are the same or different.",
+        rubric: [
+          "Ledger has all five columns and an entry for every bit of money in and out",
+          "Running balance is correct on every line",
+          "Receipts are kept and the cash was checked against the ledger",
+          "Correctly finds profit and cash and explains why they match or differ",
+        ],
+      },
+    },
   ],
 };

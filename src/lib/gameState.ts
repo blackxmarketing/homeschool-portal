@@ -1,7 +1,7 @@
 import { getDb } from "./db";
 import { cleanHero, type Hero } from "./pixel/hero";
 import { LANDS, type LandId } from "./pixel/world";
-import { courseOverview, skillTable, teachProgress } from "./store";
+import { awardXp, courseOverview, skillTable, teachProgress } from "./store";
 import { STRANDS } from "./curriculum/skills";
 import { WORLDS } from "./game";
 
@@ -126,4 +126,36 @@ export function mainQuests(kidId: number): (Quest & { land: LandId; landName: st
     const q = landQuests(kidId, L.id).find((x) => x.status === "open" || x.status === "waiting");
     return q ? [{ ...q, land: L.id, landName: L.name, hue: L.hue }] : [];
   });
+}
+
+// ---------------- Story mini-games ----------------
+
+/** XP per newly earned star (replaying for the same stars earns nothing new). */
+const XP_PER_STAR = 10;
+
+export function miniGameProgress(kidId: number, game: string): Record<string, { stars: number; best: number | null; plays: number }> {
+  const rows = getDb().prepare("SELECT level, stars, best, plays FROM minigame_progress WHERE kid_id = ? AND game = ?").all(kidId, game) as {
+    level: string;
+    stars: number;
+    best: number | null;
+    plays: number;
+  }[];
+  return Object.fromEntries(rows.map((r) => [r.level, { stars: r.stars, best: r.best, plays: r.plays }]));
+}
+
+/** Saves a finished game (already scored on the server). Returns the XP awarded for new stars. */
+export function recordMiniGame(kidId: number, game: string, level: string, stars: number, best: number): { stars: number; best: number; xp: number; newBest: boolean } {
+  const db = getDb();
+  const prev = db.prepare("SELECT stars, best FROM minigame_progress WHERE kid_id = ? AND game = ? AND level = ?").get(kidId, game, level) as
+    | { stars: number; best: number | null }
+    | undefined;
+  const newStars = Math.max(0, stars - (prev?.stars ?? 0));
+  const newBest = prev?.best === null || prev?.best === undefined || best > prev.best;
+  db.prepare(
+    `INSERT INTO minigame_progress (kid_id, game, level, stars, best, plays) VALUES (?, ?, ?, ?, ?, 1)
+     ON CONFLICT (kid_id, game, level) DO UPDATE SET stars = MAX(stars, excluded.stars), best = MAX(COALESCE(best, excluded.best), excluded.best), plays = plays + 1, updated_at = datetime('now')`,
+  ).run(kidId, game, level, stars, best);
+  const xp = newStars * XP_PER_STAR;
+  if (xp) awardXp(kidId, xp);
+  return { stars: Math.max(stars, prev?.stars ?? 0), best: newBest ? best : (prev?.best ?? best), xp, newBest };
 }

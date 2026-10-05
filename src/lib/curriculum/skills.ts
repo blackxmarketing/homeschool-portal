@@ -11,9 +11,10 @@ import {
   simplify,
   type Rng,
 } from "./math";
+import { HIGH_SKILLS } from "./skillsHigh";
 
 /**
- * Math skill graph, grades 3-8.
+ * Math skill graph, grades 3-8 (high school skills, 9-12, are in skillsHigh.ts).
  *
  * Each skill is a small, testable step tied to a grade-level standard code.
  * Colorado's math standards (Colorado Academic Standards) use these same
@@ -80,7 +81,7 @@ const PLACE_NAMES: Record<number, string> = {
   100000: "hundred thousand",
 };
 
-export const SKILLS: Skill[] = [
+const BASE_SKILLS: Skill[] = [
   // ---------------- Grade 3 ----------------
   {
     id: "g3.mult-facts",
@@ -1708,6 +1709,8 @@ export const SKILLS: Skill[] = [
     },
   },
 ];
+
+export const SKILLS: Skill[] = [...BASE_SKILLS, ...HIGH_SKILLS];
 
 export const SKILL_BY_ID: Map<string, Skill> = new Map(SKILLS.map((s) => [s.id, s]));
 

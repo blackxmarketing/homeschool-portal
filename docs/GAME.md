@@ -59,7 +59,21 @@ paths back to its part of the world.
   family quests, visiting a sibling's hero.
 - **C** — Lessons as game scenes (each challenge type gets a game skin), a boss
   challenge for mastery, field missions. *(built)*
-- **D** — Lesson sets for grades 4–5 and 9–12.
+- **D** — Lesson sets for grades 4–5 and 9–12. *(built)* Each Academy course
+  has a grades 4–5 version (`<course>-45`) and a grades 9–12 version
+  (`<course>-hs`); kids only see the version for their grade band. High
+  school math skills (algebra, geometry, trig, statistics) are in
+  `src/lib/curriculum/skillsHigh.ts`. The grades 6–8 courses grew by four
+  lessons each.
+- **Story mini-games** *(built)* — one per land, played as side quests on the
+  land page (`/kid/play/<game>`), with three levels per grade band:
+  Lemonade Stand (Harbor: profit, price and demand), Pizza Party (Math:
+  fractions as fair shares), Rocket Launch (Science: force, mass and
+  acceleration), Voyage of Discovery (History: compass, dead reckoning,
+  set and drift), Bug Hunt (Writing: grammar and punctuation), Expedition
+  Leader (Summit: leadership tradeoffs, Shackleton). The server replays the
+  kid's moves to score them (`src/lib/minigames/`, `/api/play`), only for
+  the kid's own grade band; new stars give 10 XP each, plus coins.
 
 All pixel art is drawn in code (`src/lib/pixel/`), so it's free to change and
 consistent everywhere.

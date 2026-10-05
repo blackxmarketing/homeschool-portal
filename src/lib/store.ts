@@ -19,6 +19,7 @@ import { clampProfile, defaultProfile, parseProfile, type FocusProfile } from ".
 import { badges, levelInfo, type BadgeStats } from "./game";
 import { pickQuest, type Quest, type QuestKind } from "@/content/quests";
 import { allCourses, allQuests, blockById, courseById, drillSettings, focusPresets, questById, scheduleBlocks, teacherFor } from "./content";
+import { bandFor } from "./pixel/world";
 import { ideaFor, type Block } from "@/content/schedule";
 import { accuracyBand, factsPerMinute, forecast, GRADE_DONE, isStruggling, knowledgeGrade, wasteMeter } from "./engine/learningPlan";
 import type { Visual } from "./curriculum/answers";
@@ -474,6 +475,11 @@ export function submitAnswer(kidId: number, questionId: string, input: string): 
     addXp(kidId, xp);
     return { ...base, xpGained: xp, placement: { finished, ...placementProgress(state) } };
   })();
+}
+
+/** For the game layer (mini-games): the same XP-and-coins award as learning. */
+export function awardXp(kidId: number, xp: number): void {
+  addXp(kidId, xp);
 }
 
 /** XP for learning; coins come with it (1 coin per 5 XP, at least 1) for the game's shop. */
@@ -1155,10 +1161,17 @@ function statusOf(row: LessonRow | undefined, unlocked: boolean): LessonStatus {
 }
 
 /** Every course with each lesson's status. Lessons unlock in order. */
+/** Courses written for this kid's grade band (4-5, 6-8 or 9-12). */
+function coursesForKid(kidId: number) {
+  const grade = (getDb().prepare("SELECT grade FROM kids WHERE id = ?").get(kidId) as { grade: number } | undefined)?.grade ?? 7;
+  const band = bandFor(grade);
+  return allCourses().filter((c) => (c.band ?? "adventurer") === band);
+}
+
 export function courseOverview(kidId: number) {
   const rows = getDb().prepare("SELECT * FROM lesson_progress WHERE kid_id = ?").all(kidId) as LessonRow[];
   const byKey = new Map(rows.map((r) => [`${r.course_id}:${r.lesson_id}`, r]));
-  return allCourses().map((course) => {
+  return coursesForKid(kidId).map((course) => {
     let prevDone = true;
     const lessons = course.lessons.map((lesson) => {
       const row = byKey.get(`${course.id}:${lesson.id}`);

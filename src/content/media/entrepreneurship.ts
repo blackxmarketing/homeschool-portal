@@ -291,4 +291,198 @@ export const entrepreneurshipMedia: CourseMedia = {
       },
     ],
   },
+
+  "business.marketing": {
+    hook: {
+      show: [
+        { caption: "Milton Hershey built one of America's best-known chocolate companies.", photo: "Milton S. Hershey" },
+        { at: "until 1970", caption: "For decades, happy customers did most of the talking.", big: "1970" },
+        { at: "nobody can buy it", caption: "Nobody knows about it? Nobody buys it.", emoji: "🤫🍪🛒❌" },
+        { at: "the right people", caption: "Today: how to tell the right people, honestly.", emoji: "📣🎯" },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { caption: "Marketing: telling the right customers, clearly and honestly.", emoji: "📣🎯" },
+          { at: "who has the problem I solve", caption: "Who has the problem, and where can you find them?", big: "Who? Where?" },
+          { at: "Trying to talk to everybody", caption: "Talk to everybody, and nobody really listens.", emoji: "🗣️👥🙉" },
+          { at: "owns a beagle", caption: "Picture one real customer, like a neighbor with a beagle.", photo: "Beagle" },
+        ],
+      },
+      {
+        show: [
+          { caption: "Your message is what you say to customers.", emoji: "💬🪧" },
+          { at: "Why should I care?", caption: "Three questions: What is it? Why care? How do I get it?", big: "What · Why · How" },
+          { at: "Best cookies ever", caption: "Exciting, but it doesn't tell anyone anything useful.", big: "Best cookies ever!!!" },
+          { at: "Fresh-baked cookies, $1 each", caption: "What, price, when, where: now a hungry person knows what to do.", photo: "Chocolate chip cookie" },
+          { at: "in five seconds", caption: "The five-second test: can someone get it at a glance?", big: "⏱️ 5 seconds" },
+        ],
+      },
+      {
+        show: [
+          { caption: "The channel is how your message travels.", emoji: "📣➡️👀" },
+          { at: "a flyer on a community board", caption: "A community board can carry your flyer, with permission.", emoji: "📌📄📄📄" },
+          { at: "word of mouth", caption: "Word of mouth: happy customers telling friends.", emoji: "😊🗣️👫" },
+          { at: "go where your customers already are", caption: "The rule: go where your customers already are.", big: "Go where they are" },
+          { at: "How did you hear about us?", caption: "Ask, keep a tally, and spend time on what works.", emoji: "📝✅✅✅" },
+        ],
+      },
+      {
+        show: [
+          { caption: "Advertising asks people to buy.", emoji: "🪧📢" },
+          { at: "Good advertising is honest", caption: "Tell the truth: what it is, what it costs, what's included.", big: "Honest ads" },
+          { at: "hiding an extra fee", caption: "Tricks might win one sale, but customers never come back.", emoji: "🙈💸😠" },
+          { at: "Federal Trade Commission", caption: "In the U.S., laws require ads to be truthful.", emoji: "⚖️📜" },
+          { at: "as long as every fact is true", caption: "Be cheerful and excited, and keep every fact true.", emoji: "😄✅" },
+        ],
+      },
+    ],
+  },
+
+  "business.sales-service": {
+    hook: {
+      show: [
+        { caption: "Leon Leonwood Bean, an outdoorsman and shopkeeper from Maine.", photo: "Leon Leonwood Bean" },
+        { at: "100 pairs", caption: "He sold 100 pairs of his new boots by mail.", big: "100 pairs" },
+        { at: "90 pairs came back broken", caption: "Then 90 of them came back!", big: "90 returned 😬" },
+        { at: "What do you think he did?", caption: "What would YOU do?", emoji: "🤔🥾" },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { caption: "Selling well starts with listening.", emoji: "👂😊" },
+          { at: "Who is it for?", caption: "Friendly, open questions help you understand.", big: "Who is it for?" },
+          { at: "A pushy seller", caption: "Pushy sellers push the priciest thing.", emoji: "💰👉😣" },
+          { at: "A helpful seller asks", caption: "Helpful sellers ask, then suggest what fits.", photo: "Bracelet" },
+          { at: "comes back", caption: "Trust today brings customers back tomorrow.", emoji: "🔁🤝" },
+        ],
+      },
+      {
+        show: [
+          { caption: "A muddy spot after a car wash? Time to make it right.", photo: "Car wash" },
+          { at: "First, listen", caption: "Step 1: listen to the whole complaint.", big: "1. Listen 👂" },
+          { at: "Second, apologize", caption: "Step 2: say sorry, and mean it.", big: "2. Apologize 🙏" },
+          { at: "Third, fix it", caption: "Step 3: redo, replace, or refund.", big: "3. Fix 🔧" },
+          { at: "Fourth, thank", caption: "Step 4: thank them for telling you.", big: "4. Thank 😊" },
+        ],
+      },
+      {
+        show: [
+          { caption: "Loyal customers come back again and again.", emoji: "🔁😊" },
+          { at: "$6 a week for dog walks", caption: "One loyal dog-walking customer...", photo: "Dog walking" },
+          { at: "or $72", caption: "...adds up week after week.", big: "$6 × 12 = $72" },
+          { at: "a free $6 walk", caption: "A free walk to fix a mistake is a smart trade.", emoji: "🐕🎁" },
+          { at: "hope to see for years", caption: "Treat every customer like someone you'll see for years.", emoji: "🤝📅" },
+        ],
+      },
+      {
+        show: [
+          { caption: "A review is a customer's honest opinion.", big: "⭐⭐⭐⭐⭐" },
+          { at: "people trust their friends", caption: "People trust friends more than any sign.", emoji: "👫💬👍" },
+          { at: "Treat complaints as free advice", caption: "Complaints are free advice about what to fix.", emoji: "📝🔧" },
+          { at: "add up all the stars", caption: "Average rating: add the stars, divide by the number of reviews.", big: "Total ÷ Reviews" },
+          { at: "never write fake reviews", caption: "Fake reviews are lies. Never write or buy them.", emoji: "🚫⭐" },
+        ],
+      },
+    ],
+  },
+
+  "business.teams": {
+    hook: {
+      show: [
+        { caption: "Thomas Edison: a famous inventor, but not a lone one.", photo: "Thomas Edison" },
+        { at: "John Kruesi built the first phonograph", caption: "The phonograph could record sound and play it back.", photo: "Phonograph" },
+        { at: "nicknamed the muckers", caption: "His team called themselves the muckers.", emoji: "👷🛠️🔬📐" },
+        { at: "all alone", caption: "Could one person build a big business alone?", emoji: "🤔🧍" },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { caption: "Some jobs are too big for one person.", emoji: "🧍➡️👥" },
+          { at: "Menlo Park, New Jersey", caption: "Edison's Menlo Park lab, rebuilt today in a museum.", photo: "File:Menlo Park Laboratory.JPG" },
+          { at: "Charles Batchelor", caption: "Batchelor ran experiments; Kruesi built the machines.", emoji: "🔬🛠️" },
+          { at: "A team is a group", caption: "A team: one goal, everyone doing a part.", big: "One goal, many parts" },
+          { at: "different strengths", caption: "Different strengths add up to more.", emoji: "💪🧠🎨➕" },
+        ],
+      },
+      {
+        show: [
+          { caption: "A role is a job that one person owns.", big: "Role = my job" },
+          { at: "At a car wash", caption: "Greeter, washers, dryer, cashier: each has a job.", photo: "Car wash" },
+          { at: "nothing is forgotten", caption: "Clear roles: fast work, nothing forgotten.", emoji: "✅✅✅✅" },
+          { at: "When roles are fuzzy", caption: "Fuzzy roles: two cashiers and nobody drying.", emoji: "💵💵🚗💧" },
+          { at: "match it to the person", caption: "Match each role to someone's strengths.", emoji: "🧩🙋" },
+        ],
+      },
+      {
+        show: [
+          { caption: "Delegate: hand a task to someone else.", emoji: "🤲📋" },
+          { at: "Choose the right person", caption: "Choose the person, explain the task, give them the tools...", big: "Choose · Explain · Equip" },
+          { at: "Check in partway through", caption: "...then check in to help, and say thanks.", big: "Check in · Thank" },
+          { at: "you're still responsible", caption: "You hand off the task, not the responsibility.", big: "The leader owns it" },
+          { at: "That's on me", caption: "A good leader owns mistakes and helps fix them.", emoji: "🙋🔧" },
+        ],
+      },
+      {
+        show: [
+          { caption: "Pay helpers fairly, every time.", emoji: "🤝💵" },
+          { at: "write it down", caption: "Agree on the pay first, and write it down.", emoji: "📝✍️" },
+          { at: "by the hour", caption: "By the hour, by the job, or a share of the profit.", big: "Hour · Job · Share" },
+          { at: "even on a slow day", caption: "Pay exactly what you promised, even on a slow day.", photo: "Coin" },
+          { at: "3 times $6, or $18", caption: "3 hours at $6 an hour.", big: "3 × $6 = $18" },
+        ],
+      },
+    ],
+  },
+
+  "business.bookkeeping": {
+    hook: {
+      show: [
+        { caption: "Venice, a city of canals and busy merchants.", photo: "Venice" },
+        { at: "Luca Pacioli", caption: "A mathematician wrote down the merchants' method.", emoji: "👨‍🏫📖" },
+        { at: "every coin coming in and going out", caption: "Every coin in, every coin out, written down.", emoji: "🪙➡️📒" },
+        { at: "More than 500 years later", caption: "Businesses still use the idea today.", big: "500+ years" },
+      ],
+    },
+    teach: [
+      {
+        show: [
+          { caption: "Bookkeeping: write down every dollar in and out.", emoji: "💵📒✏️" },
+          { at: "In 1494", caption: "Pacioli's book was published in Venice.", big: "1494" },
+          { at: "father of accounting", caption: "Luca Pacioli, often called the father of accounting.", photo: "Luca Pacioli" },
+          { at: "Why does it matter?", caption: "Records show the truth: real profit, mistakes, honesty.", emoji: "🔍✅🤝" },
+        ],
+      },
+      {
+        show: [
+          { caption: "A ledger: a book with columns for your money.", emoji: "📒📏✏️" },
+          { at: "five columns", caption: "Date · What happened · Money in · Money out · Balance", big: "5 columns" },
+          { at: "The balance is how much", caption: "The balance: what the business has after each line.", emoji: "💰" },
+          { at: "so the balance is $35", caption: "Start with $20, plus $15 in.", big: "$20 + $15 = $35" },
+          { at: "it drops to $29", caption: "Minus $6 out for flour.", big: "$35 − $6 = $29" },
+        ],
+      },
+      {
+        show: [
+          { caption: "Good habits keep your records true.", emoji: "📒✅" },
+          { at: "the same day", caption: "Write each entry the same day.", emoji: "📅✏️" },
+          { at: "They keep receipts", caption: "Receipts prove what you bought and what you paid.", photo: "Receipt" },
+          { at: "separate from their own", caption: "Business money stays separate from spending money.", emoji: "🏪💵 ↔️ 🐷" },
+          { at: "something is $5 off", caption: "Ledger $42, box $37: find the missing $5 now.", big: "$42 ≠ $37" },
+        ],
+      },
+      {
+        show: [
+          { caption: "Profit and cash are NOT the same thing.", big: "Profit ≠ Cash" },
+          { at: "Profit is what you earned", caption: "Profit: what you earned, revenue minus costs.", emoji: "📈💵" },
+          { at: "Cash is the money", caption: "Cash: the money actually in your hand right now.", photo: "Piggy bank" },
+          { at: "owes you $10", caption: "Earned but not paid yet: profit without cash.", emoji: "🍂🧹⏳" },
+          { at: "lends you $5", caption: "A loan: more cash, but no profit. Pay it back!", emoji: "👩💵↩️" },
+        ],
+      },
+    ],
+  },
 };

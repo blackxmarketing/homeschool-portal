@@ -218,5 +218,7 @@ export interface Course {
   subject: Subject;
   blurb: string;
   teacher: { name: string; avatar: string; inspiredBy: string; voice: string };
+  /** Which grades it's written for: "sprout" 4-5, "adventurer" 6-8 (the default), "strategist" 9-12. */
+  band?: "sprout" | "adventurer" | "strategist";
   lessons: Lesson[];
 }

@@ -35,7 +35,7 @@ describe("talking back", () => {
 
 describe("teacher looks", () => {
   it("gives every course teacher their own look", () => {
-    for (const c of COURSES) expect(AVATARS[c.id], c.id).toBeDefined();
+    for (const c of COURSES) expect(AVATARS[c.id.replace(/-(45|hs)$/, "")], c.id).toBeDefined();
   });
 
   it("falls back to a stable look for unknown teachers", () => {

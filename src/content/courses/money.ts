@@ -2032,5 +2032,1692 @@ export const money: Course = {
         ],
       },
     },
+    {
+      id: "money.budgeting",
+      title: "Making a Monthly Budget",
+      minutes: 30,
+      stage: "logic",
+      read: p(
+        `Every month, money comes in and money goes out. A monthly budget is a plan, written down before the month begins, that gives every dollar a job. Without a plan, money drifts toward whatever is in front of you. With a plan, it goes where you decided it should.`,
+        `Start with income, the money coming in. For adults that is usually take-home pay, the amount left on a paycheck after taxes. Next, list your expenses, the money going out. Expenses come in two kinds. Fixed expenses cost about the same every month and are hard to change quickly: rent, a phone plan, insurance, a loan payment. Flexible expenses change from month to month and are partly up to you: groceries, gas, eating out, clothes and fun.`,
+        `Here is the key math. Income minus fixed expenses tells you what is left for everything else. Grace, age 23, takes home $2,800 a month. Her rent is $1,100, her phone is $45, her car insurance is $125 and her internet is $60. Her fixed expenses add up to $1,330. That leaves 2,800 - 1,330 = $1,470. She puts $400 into savings first, then splits the rest: groceries $350, gas $160, giving $150, fun and eating out $250, and clothes and other things $160. Add it up and you get $1,470. Every dollar has a job.`,
+        `A budget is not finished when you write it. At the end of the month, compare what you planned with what you actually spent. If Grace planned $250 for fun but spent $340, she went $90 over. She can cut back next month or move money from another flexible line. Fixed expenses rarely bend in a hurry, so flexible expenses are where you make adjustments.`,
+        `Ben Franklin warned, "Beware of little expenses; a small leak will sink a great ship." A budget is how you find the leaks before the ship goes down.`
+      ),
+      keyIdeas: [
+        "A monthly budget gives every dollar a job before the month begins.",
+        "Fixed expenses stay about the same each month; flexible expenses change and are where you can adjust.",
+        "Income minus fixed expenses shows what is left for saving and flexible spending.",
+        "At the end of each month, compare the plan with what you really spent, then adjust.",
+      ],
+      hook: {
+        text: "Two friends each take home $2,800 a month from their first full-time jobs. A year later, one has $4,800 saved and a calm feeling. The other has $0 saved, a credit card bill, and no idea where the money went. Same paycheck. What did the first friend do that the second did not?",
+      },
+      teach: [
+        {
+          title: "Money in, money out",
+          teach:
+            "Every budget starts with two lists. The first is income, the money coming in. For a grown-up with a job, that usually means take-home pay, what is left on a paycheck after taxes and other deductions come out. For you, income might be allowance, babysitting or mowing money. The second list is expenses, the money going out. A monthly budget is a plan you write before the month begins that matches the two lists. The rule is simple: expenses should never be bigger than income, and every dollar should have a job. When the plan uses up the income exactly, people call it a zero-based budget. Zero does not mean you have nothing. It means no dollar is left without a plan.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Income", back: "Money coming in: a paycheck, allowance, or money from jobs you do." },
+              { front: "Take-home pay", back: "What is left on a paycheck after taxes and other deductions." },
+              { front: "Expense", back: "Money going out: rent, groceries, a phone bill, a movie ticket." },
+              { front: "Zero-based budget", back: "A plan where income minus all planned spending and saving equals zero. Every dollar has a job." },
+            ],
+          },
+          probe: {
+            type: "cloze",
+            text: "Money coming in is called {0}. Money going out is called an {1}. A budget is a plan you make {2} the month begins, so every dollar has a {3}.",
+            blanks: [{ answers: ["income"] }, { answers: ["expense"] }, { answers: ["before"] }, { answers: ["job"] }],
+            bank: ["income", "expense", "before", "after", "job", "profit", "wish"],
+            hint: "Think about direction: which word means money arriving, and which means money leaving?",
+            mistakes: [
+              { match: "after", coach: "If you plan after the month, the money is already spent. A plan works best when it comes first." },
+              { match: "profit", coach: "Profit is what a business keeps after costs. For a person's budget, money coming in is income." },
+              { match: "wish", coach: "A wish is not a plan. In a budget, each dollar gets a real assignment, like a job." },
+            ],
+            seconds: 30,
+          },
+          think: {
+            q: "A teen earns $60 this month and plans $25 for savings, $20 for fun and $15 for a gift. Is this a zero-based budget?",
+            choices: [
+              "Yes, because the plan adds up to exactly $60",
+              "No, because there is money left over",
+              "No, because zero-based means saving nothing",
+              "Yes, because the teen spends nothing",
+            ],
+            answer: 0,
+            why: "25 + 20 + 15 = $60, which matches the income exactly. Every dollar has a job, so it is zero-based.",
+            hints: [
+              "",
+              "Add the three amounts: 25 + 20 + 15. Is anything actually left over?",
+              "Zero-based is about the leftover being zero, not the savings. Savings are one of the jobs a dollar can have.",
+              "The teen does spend: $20 on fun and $15 on a gift. Check whether the plan matches the income.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A budget is like a seating chart for a party. Before the guests arrive, every chair has a name on it, so nobody wanders around looking for a seat. In a budget, every dollar gets its seat before the month starts.",
+            example:
+              "Owen earns $90 a month walking dogs. His plan: save $30, give $10, art supplies $20, snacks and fun $30. Check: 30 + 10 + 20 + 30 = $90. The plan equals his income, so every dollar has a job and the budget is zero-based.",
+            simpler: {
+              q: "Which one is income?",
+              choices: ["$20 earned babysitting", "$20 spent on a movie", "A $20 phone bill"],
+              answer: 0,
+              why: "Babysitting money comes in to you, so it is income.",
+              hints: [
+                "",
+                "A movie ticket is money leaving your pocket. That makes it an expense.",
+                "A bill is something you pay, so the money goes out. Which one comes in?",
+              ],
+            },
+          },
+        },
+        {
+          title: "Fixed vs. flexible expenses",
+          teach:
+            "Not all expenses behave the same way. Fixed expenses cost about the same amount every month, and you cannot change them quickly. Rent, a phone plan, car insurance, internet and a loan payment are fixed. You signed up for them, and the bill shows up whether you feel like paying or not. Flexible expenses, sometimes called variable expenses, change from month to month, and you have real control over them. Groceries, gas, eating out, clothes, gifts and entertainment are flexible. Here is why the difference matters. When money gets tight, you cannot cut your rent in half by next Friday. But you can cook at home this week instead of eating out. Flexible expenses are where a budget bends.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "Fixed expenses",
+              points: ["About the same every month", "Hard to change quickly", "Examples: rent, phone plan, insurance, internet", "Pay these first"],
+            },
+            right: {
+              title: "Flexible expenses",
+              points: ["Change from month to month", "You control them day by day", "Examples: groceries, gas, eating out, fun", "Where you cut when money is tight"],
+            },
+          },
+          probe: {
+            type: "sort",
+            prompt: "Sort each expense: fixed (about the same each month) or flexible (changes, and you control it)?",
+            buckets: ["Fixed", "Flexible"],
+            items: [
+              { text: "Apartment rent", bucket: 0 },
+              { text: "Monthly phone plan", bucket: 0 },
+              { text: "Car insurance", bucket: 0 },
+              { text: "Car loan payment", bucket: 0 },
+              { text: "Groceries", bucket: 1 },
+              { text: "Eating out with friends", bucket: 1 },
+              { text: "Gas for the car", bucket: 1 },
+              { text: "New clothes", bucket: 1 },
+            ],
+            hint: "Ask: is this bill the same amount every month, or could I spend less on it this week if I chose to?",
+            mistakes: [
+              { match: "Put groceries in fixed", coach: "Everyone needs food, but the amount changes. Planning meals or cooking at home can lower it, so groceries are flexible." },
+              { match: "Put the phone plan in flexible", coach: "A phone plan bills the same amount every month until you change your contract, so it is fixed." },
+              { match: "Put gas in fixed", coach: "Gas changes with how much you drive and the price at the pump, so it is flexible." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "Grace's budget is $100 short this month. Which change can she make fastest?",
+            choices: [
+              "Move to a cheaper apartment",
+              "Pay less than her car insurance bill",
+              "Eat out less and cook at home",
+              "Stop paying her loan",
+            ],
+            answer: 2,
+            why: "Eating out is a flexible expense, so she can cut it this week. Rent, insurance and loans are fixed and cannot change quickly.",
+            hints: [
+              "Moving takes months of planning and usually costs money. Look for something she can change this week.",
+              "Insurance is a fixed bill. Paying less than you owe can cancel your coverage. Which expense is flexible?",
+              "",
+              "Skipping a loan payment brings late fees and damages your credit. Find a flexible expense instead.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Fixed expenses are like the walls of a house: solid and hard to move. Flexible expenses are like the furniture. You can rearrange the furniture this afternoon, but moving a wall takes months of planning.",
+            example:
+              "Dev's family budget is $150 short. Rent ($1,400) and insurance ($180) cannot change this month. So they look at flexible lines: eating out drops from $200 to $120 (saving $80), and groceries drop from $600 to $530 by planning meals (saving $70). 80 + 70 = $150. Problem solved without touching a fixed bill.",
+            simpler: {
+              q: "Which expense is the same every month?",
+              choices: ["Snacks at the movies", "A $40 phone plan", "Birthday gifts"],
+              answer: 1,
+              why: "A phone plan bills the same $40 each month, so it is fixed.",
+              hints: [
+                "Movie snacks depend on how often you go and what you buy, so they change.",
+                "",
+                "Gifts change a lot: some months have three birthdays and some have none.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Build it: fixed first, then the rest",
+          teach:
+            "Here is a simple order for building a monthly budget. Step one: write down your income. Step two: list your fixed expenses and add them up. Step three: subtract to find what is left. Step four: pay yourself first by setting aside savings. Step five: split the rest among flexible expenses. Grace takes home $2,800. Her rent, phone, car insurance and internet add up to $1,330. So 2,800 - 1,330 = $1,470 is left. She saves $400 first, which leaves $1,070 for groceries, gas, giving, fun and everything else. Try the sliders: change the plan and watch each slice grow or shrink.",
+          visual: {
+            type: "budget",
+            income: 2800,
+            categories: [
+              { label: "Fixed bills", pct: 48 },
+              { label: "Savings", pct: 14 },
+              { label: "Groceries and gas", pct: 18 },
+              { label: "Giving", pct: 5 },
+              { label: "Fun and other", pct: 15 },
+            ],
+          },
+          probe: {
+            type: "number",
+            prompt: "Marcus takes home $3,200 a month. His fixed expenses are rent $1,250, phone $50, car insurance $140 and internet $60. How much is left for savings and flexible spending?",
+            answer: 1700,
+            tolerance: 0.01,
+            unit: "$",
+            hint: "First add up all four fixed expenses. Then subtract that total from his income.",
+            mistakes: [
+              { match: "1500", coach: "That is the total of his fixed expenses. Now subtract it from his $3,200 income." },
+              { match: "1950", coach: "You subtracted only the rent. Phone, insurance and internet are fixed too." },
+              { match: "4700", coach: "You added the expenses to the income. Expenses are money going out, so subtract." },
+            ],
+            seconds: 50,
+          },
+          think: {
+            q: "Kate takes home $2,000. Her fixed expenses are $900. She wants to save $300. How much is left for flexible spending?",
+            choices: ["$1,100", "$800", "$1,400", "$700"],
+            answer: 1,
+            why: "2,000 - 900 = $1,100 after fixed bills. Then 1,100 - 300 = $800 after savings.",
+            hints: [
+              "That is what is left after fixed bills, but she still needs to set aside $300 for savings.",
+              "",
+              "You may have added the savings back in. Savings come out of the money, so subtract them.",
+              "Check your subtraction: 1,100 - 300 is not 700. Try again carefully.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Building a budget is like packing a suitcase. The big things that must go in, like shoes and a jacket, go in first. Then you fit the smaller things into the space that is left.",
+            example:
+              "Lena takes home $2,500. Fixed: rent $1,000 + phone $40 + insurance $110 + internet $50 = $1,200. Left: 2,500 - 1,200 = $1,300. Savings first: $300, leaving $1,000 for flexible spending. She plans groceries $350, gas $150, giving $150, fun $200 and other $150. Check: 350 + 150 + 150 + 200 + 150 = $1,000.",
+            simpler: {
+              q: "You earn $50, and your only fixed expense is $20. How much is left?",
+              choices: ["$70", "$30", "$20"],
+              answer: 1,
+              why: "50 - 20 = $30 is left after the fixed expense.",
+              hints: [
+                "You added. The $20 is money going out, so subtract it from the $50.",
+                "",
+                "That is the fixed expense itself. How much is left after you pay it?",
+              ],
+            },
+          },
+        },
+        {
+          title: "Track it and adjust",
+          teach:
+            "A budget is a plan, and plans meet real life. At the end of each month, compare what you planned with what you actually spent. Subtract to find the difference for each line. If Grace planned $250 for fun but spent $340, she was $90 over. If she planned $160 for gas but spent only $120, she was $40 under. Being over on one line means the money had to come from somewhere else, usually savings or another flexible line. Good budgeters do not quit when a month goes badly. They look for the leak, adjust the plan and try again next month. Franklin said a small leak will sink a great ship. Tracking is how you find the leak.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "Grace's plan",
+              points: ["Fun: $250", "Gas: $160", "Groceries: $350", "Clothes and other: $160"],
+            },
+            right: {
+              title: "What she really spent",
+              points: ["Fun: $340 ($90 over)", "Gas: $120 ($40 under)", "Groceries: $350 (right on plan)", "Clothes and other: $110 ($50 under)"],
+            },
+          },
+          probe: {
+            type: "match",
+            prompt: "Match each budget line to how it turned out.",
+            pairs: [
+              { left: "Planned $250 for fun, spent $340", right: "$90 over" },
+              { left: "Planned $160 for gas, spent $120", right: "$40 under" },
+              { left: "Planned $350 for groceries, spent $350", right: "Right on plan" },
+              { left: "Planned $80 for clothes, spent $105", right: "$25 over" },
+            ],
+            hint: "Subtract the smaller number from the bigger one. If you spent more than you planned, you are over.",
+            mistakes: [
+              { match: "Matched the gas line to over", coach: "Grace spent $120, which is less than the $160 she planned, so she is under, not over." },
+              { match: "Matched the clothes line to $90 over", coach: "105 - 80 is $25, not $90. Subtract the plan from what was spent." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "Grace spent $90 more on fun than she planned. What is the best next step?",
+            choices: [
+              "Stop budgeting, since it did not work",
+              "Ignore it and hope next month is better",
+              "Put the $90 on a credit card and forget about it",
+              "Find where the extra $90 went and adjust next month's flexible lines",
+            ],
+            answer: 3,
+            why: "A budget is a tool you adjust. Finding the leak and fixing next month's plan keeps the ship afloat.",
+            hints: [
+              "One bad month does not mean the plan failed. Navigators fix their course; they do not throw away the map.",
+              "Hoping does not fix a leak. What could she actually change?",
+              "A card bill with interest makes the leak bigger. Look for a fix inside her budget.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Tracking a budget is like a ship's navigator checking the map. Wind pushes the ship a little off course every day. The navigator does not throw away the map; she checks where the ship really is and turns the wheel.",
+            example:
+              "Theo planned $60 for snacks and spent $95, so he was 95 - 60 = $35 over. He planned $40 for a game but spent $0 because he decided to wait, so he was $40 under. Overall he is 40 - 35 = $5 ahead. Next month he plans $75 for snacks and brings lunch from home twice a week.",
+            simpler: {
+              q: "You planned to spend $20 and actually spent $30. How much over are you?",
+              choices: ["$10", "$50", "$20"],
+              answer: 0,
+              why: "30 - 20 = $10 more than the plan.",
+              hints: [
+                "",
+                "You added the two numbers. Subtract to find the difference between plan and actual.",
+                "That is the plan itself. How much more than the plan did you spend?",
+              ],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sequence",
+        prompt: "Put the steps for building and keeping a monthly budget in order.",
+        steps: [
+          "Write down your monthly income",
+          "List your fixed expenses and add them up",
+          "Subtract the fixed expenses from your income",
+          "Set aside savings first",
+          "Split what is left among flexible expenses",
+          "At the end of the month, compare plan to actual and adjust",
+        ],
+      },
+      explain: {
+        prompt:
+          "A cousin just got their first job. Explain how to make a monthly budget, and why flexible expenses matter when money gets tight.",
+        keyPoints: [
+          "Start with income, the money coming in",
+          "Fixed expenses stay about the same each month and are hard to change quickly",
+          "Flexible expenses change and are where you can cut back",
+          "Save first, then give every remaining dollar a job",
+          "Compare the plan with real spending each month and adjust",
+        ],
+      },
+      mastery: [
+        {
+          type: "number",
+          prompt: "Ava takes home $2,600 a month. Her fixed expenses total $1,150. She saves $350 first. How much is left for flexible expenses?",
+          answer: 1100,
+          tolerance: 0.01,
+          unit: "$",
+          hint: "Two subtractions: first the fixed expenses, then the savings.",
+          mistakes: [
+            { match: "1450", coach: "That is what is left after fixed expenses. She still sets aside $350 for savings." },
+            { match: "1500", coach: "That is fixed expenses plus savings together. Subtract that from her $2,600 income." },
+            { match: "1800", coach: "You may have added the savings back. Savings come out of the money left over." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "sort",
+          prompt: "Sort these expenses from a family budget: fixed or flexible?",
+          buckets: ["Fixed", "Flexible"],
+          items: [
+            { text: "Mortgage payment", bucket: 0 },
+            { text: "Internet service", bucket: 0 },
+            { text: "Health insurance", bucket: 0 },
+            { text: "Pizza night", bucket: 1 },
+            { text: "Movie tickets", bucket: 1 },
+            { text: "Birthday gifts", bucket: 1 },
+            { text: "Weekly groceries", bucket: 1 },
+          ],
+          hint: "Fixed bills come in the same size every month. Flexible ones grow or shrink with your choices.",
+          mistakes: [
+            { match: "Put internet in flexible", coach: "Internet bills the same amount each month on a plan, so it is fixed." },
+            { match: "Put groceries in fixed", coach: "Groceries change week to week, and smart planning can lower them. That makes them flexible." },
+          ],
+          seconds: 35,
+        },
+        {
+          type: "cloze",
+          text: "Rent and insurance are {0} expenses. Groceries and eating out are {1} expenses. When a budget comes up short, the quickest fix is to {2} back on flexible expenses, not to skip a fixed bill.",
+          blanks: [
+            { answers: ["fixed"] },
+            { answers: ["flexible", "variable"] },
+            { answers: ["cut", "scale"] },
+          ],
+          hint: "Which kind of expense is the same every month, and which kind can you change this week?",
+          mistakes: [
+            { match: "variable fixed", coach: "Rent is the same every month, so it is fixed. Groceries change, so they are flexible." },
+            { match: "savings", coach: "Cutting savings is a last resort. Look first at expenses you control, like eating out." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "place",
+          prompt: "Place each budget line at how far it went over (a positive number) or under (a negative number) the plan.",
+          min: -50,
+          max: 50,
+          step: 5,
+          tolerance: 2,
+          items: [
+            { label: "Planned $100 for groceries, spent $130", value: 30 },
+            { label: "Planned $40 for gas, spent $25", value: -15 },
+            { label: "Planned $60 for fun, spent $60", value: 0 },
+            { label: "Planned $80 for clothes, spent $35", value: -45 },
+          ],
+          hint: "Find actual minus plan. If you spent more than planned, the answer is positive; if less, it is negative.",
+          mistakes: [
+            { match: "Placed groceries at -30", coach: "Spending $130 when you planned $100 means you went over, so the number is positive." },
+            { match: "Placed clothes at 45", coach: "Spending $35 when you planned $80 is under the plan, so the number is negative." },
+          ],
+          seconds: 60,
+        },
+      ],
+      check: [
+        {
+          q: "Which of these is a fixed expense?",
+          choices: ["Eating out", "Monthly rent", "Movie tickets", "Snacks"],
+          answer: 1,
+          why: "Rent is the same amount every month and cannot change quickly, so it is fixed.",
+        },
+        {
+          q: "Income is $1,800, fixed expenses are $700, and savings are $200. How much is left for flexible spending?",
+          choices: ["$1,100", "$2,300", "$900", "$500"],
+          answer: 2,
+          why: "1,800 - 700 = $1,100, then 1,100 - 200 = $900.",
+        },
+        {
+          q: "What does a zero-based budget mean?",
+          choices: [
+            "Every dollar of income is given a job in the plan",
+            "You spend nothing all month",
+            "You have zero dollars in savings",
+          ],
+          answer: 0,
+          why: "Income minus everything planned (spending, saving and giving) equals zero, so no dollar is left without a job.",
+        },
+        {
+          q: "You planned $50 for fun and spent $72. How did that line turn out?",
+          choices: ["$22 under", "$122 over", "Right on plan", "$22 over"],
+          answer: 3,
+          why: "72 - 50 = $22 more than planned, so you were $22 over.",
+        },
+        {
+          q: "Why do budgeters usually adjust flexible expenses first?",
+          choices: [
+            "They are the only expenses that matter",
+            "They can change quickly, while fixed bills cannot",
+            "Fixed expenses are always small",
+          ],
+          answer: 1,
+          why: "You can cook at home this week, but you cannot cut your rent by Friday.",
+        },
+      ],
+      task: {
+        kind: "project",
+        prompt:
+          "Make a real monthly budget. Use your own money (allowance or earnings) or a pretend first-job paycheck of $2,800. List your income, at least three fixed expenses and at least four flexible expenses with amounts. Save something first, and show that the plan adds up exactly to your income. Then track your real spending for one week and write one adjustment you would make.",
+        rubric: [
+          "Lists income and labels each expense as fixed or flexible",
+          "Sets aside savings first",
+          "Math checks out: savings plus all expenses equals income",
+          "Tracks a week of spending and names one realistic adjustment",
+        ],
+      },
+    },
+    {
+      id: "money.smart-shopping",
+      title: "Smart Shopping",
+      minutes: 30,
+      stage: "logic",
+      read: p(
+        `Every store is designed to help you spend money. That is not wicked; stores have to sell things to stay open. But a smart shopper knows the tricks and does the math before reaching for a wallet.`,
+        `The first tool is the unit price, the cost of one unit, like one ounce or one roll. To find it, divide the price by the number of units. A 12-ounce box of cereal for $3.60 costs 3.60 / 12 = $0.30 an ounce. A 20-ounce box for $5.00 costs 5.00 / 20 = $0.25 an ounce. The bigger box is the better deal, but only if you eat it before it goes stale. Many shelf tags print the unit price in small type, so look for it.`,
+        `The second tool is checking sales. A sign that says 25 percent off a $40 jacket means you save 0.25 x 40 = $10 and pay $30. Stores also use tricks. A crossed-out "was" price makes the sale price feel cheap, even if the item rarely sold for that much. Prices like $9.99 feel like nine dollars, though they are really ten. "Limited time only" and "only 3 left" push you to buy before you think. Ads suggest that everyone has one, or use catchy music and famous faces to make you want things you did not need an hour ago.`,
+        `The third tool is the most powerful: opportunity cost. Every time you spend money, you give up the next-best thing that money could have done. If you spend $60 on a game, the opportunity cost might be the $60 bike helmet you needed, or $60 that would have grown in savings. Economists like to say there is no such thing as a free lunch: every choice costs something.`,
+        `A good habit is to wait. Many smart shoppers use a 24-hour rule for any want over a set amount, like $20. If you still want it tomorrow, and it beats the next-best use of the money, buy it with a clear head.`
+      ),
+      keyIdeas: [
+        "Unit price = price divided by units. Compare unit prices, not package prices.",
+        "To find a discount, multiply the price by the percent off.",
+        "Stores and ads use tricks like high 'was' prices, $9.99 prices and urgency.",
+        "Opportunity cost is the next-best thing you give up when you choose.",
+      ],
+      hook: {
+        text: "At the grocery store, a 12-ounce box of cereal costs $3.60 and a giant 20-ounce box costs $5.00. The big box costs more, so it must be the worse deal, right? And why is the cereal with the cartoon prize sitting right at a kid's eye level?",
+      },
+      teach: [
+        {
+          title: "Unit price: compare fairly",
+          teach:
+            "Packages come in different sizes, so the price on the front does not tell you which is the better deal. You need the unit price: the cost of one unit, like one ounce, one roll or one egg. To find it, divide the price by the number of units. A 12-ounce box for $3.60 costs 3.60 / 12 = $0.30 an ounce. A 20-ounce box for $5.00 costs 5.00 / 20 = $0.25 an ounce. The bigger box is cheaper for each ounce. But a bargain is only a bargain if you use it. If half the giant box goes stale, you paid more for the cereal you actually ate. Many shelf tags print the unit price in small type. Look for it.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "12-ounce box",
+              points: ["Price: $3.60", "3.60 / 12 = $0.30 an ounce", "Lower price on the tag", "Costs more per ounce"],
+            },
+            right: {
+              title: "20-ounce box",
+              points: ["Price: $5.00", "5.00 / 20 = $0.25 an ounce", "Higher price on the tag", "Costs less per ounce, if you finish it"],
+            },
+          },
+          probe: {
+            type: "number",
+            prompt: "Paper towels: a 6-roll pack costs $9.00 and an 8-roll pack costs $10.40. What is the unit price of the 8-roll pack, in dollars per roll?",
+            answer: 1.3,
+            tolerance: 0.01,
+            unit: "$",
+            hint: "Divide the price of the 8-roll pack by the number of rolls in it.",
+            mistakes: [
+              { match: "1.5", coach: "That is the unit price of the 6-roll pack: 9.00 / 6. Now find it for the 8-roll pack." },
+              { match: "83.2", coach: "You multiplied 10.40 by 8. To find the cost of one roll, divide instead." },
+              { match: "10.4", coach: "That is the price of the whole pack. How much is that for each of the 8 rolls?" },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "Juice comes in 64 ounces for $3.20 or 96 ounces for $5.76. Which is the better deal per ounce?",
+            choices: [
+              "The 96-ounce bottle, because bigger is always cheaper",
+              "The 64-ounce bottle, at $0.05 an ounce",
+              "They cost the same per ounce",
+              "The 96-ounce bottle, because it costs more",
+            ],
+            answer: 1,
+            why: "3.20 / 64 = $0.05 an ounce and 5.76 / 96 = $0.06 an ounce, so the smaller bottle wins this time.",
+            hints: [
+              "Bigger is often cheaper per ounce, but not always. Divide each price by its ounces and check.",
+              "",
+              "Divide both: 3.20 / 64 and 5.76 / 96. Are those really equal?",
+              "Costing more on the tag does not make something a better deal. Compare the cost of one ounce.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Comparing package prices without unit prices is like comparing two runners' times when one ran one mile and the other ran two. You need the time per mile to know who is really faster.",
+            example:
+              "Eggs: a dozen for $3.00 is 3.00 / 12 = $0.25 an egg. Eighteen eggs for $4.14 is 4.14 / 18 = $0.23 an egg. The 18-pack saves 2 cents an egg, which is 36 cents on 18 eggs, as long as your family uses them before they spoil.",
+            simpler: {
+              q: "A 4-pack of muffins costs $8. How much is one muffin?",
+              choices: ["$2", "$32", "$12"],
+              answer: 0,
+              why: "Split $8 evenly across 4 muffins: 8 / 4 = $2 each.",
+              hints: [
+                "",
+                "You multiplied. One muffin should cost less than the whole pack, so divide.",
+                "You added the price and the count. Share the $8 equally among the 4 muffins.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Sales and percent off",
+          teach:
+            "A sale can be a real deal. To see how much you save, turn the percent into a decimal and multiply by the price. Twenty-five percent off a $40 jacket saves 0.25 x 40 = $10, so you pay 40 - 10 = $30. Here is a shortcut: if you take 25 percent off, you pay 75 percent, and 0.75 x 40 = $30. Watch out for stacked discounts. Twenty percent off and then an extra 10 percent off is not 30 percent off, because the second discount comes off the already-lower price. On $50, 20 percent off makes $40, and 10 percent off $40 makes $36. That is $14 off, or 28 percent. And remember the biggest question of all: would you buy it at all if it were not on sale?",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Percent off", back: "The part of the price the store takes away. 25% off $40 = 0.25 x 40 = $10 saved." },
+              { front: "Percent you pay", back: "100% minus the discount. 25% off means you pay 75%." },
+              { front: "Sale price", back: "Original price minus the savings. $40 - $10 = $30." },
+              { front: "Stacked discount", back: "A second discount taken from the already-lower price. 20% then 10% off is 28% off, not 30%." },
+            ],
+          },
+          probe: {
+            type: "number",
+            prompt: "A $60 pair of shoes is 30 percent off. What is the sale price?",
+            answer: 42,
+            tolerance: 0.01,
+            unit: "$",
+            hint: "Find 30 percent of $60 (multiply by 0.30), then subtract it. Or multiply $60 by the 70 percent you still pay.",
+            mistakes: [
+              { match: "18", coach: "That is how much you save. The question asks what you pay after the savings come off." },
+              { match: "30", coach: "You took $30 off, but 30 percent of $60 is not $30. Multiply 0.30 x 60 first." },
+              { match: "78", coach: "You added the savings. A sale price is lower than the original, so subtract." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "An $80 game is 25 percent off. How much do you save?",
+            choices: ["$55", "$60", "$20", "$25"],
+            answer: 2,
+            why: "0.25 x 80 = $20 saved, so the game costs $60.",
+            hints: [
+              "You subtracted 25 dollars. Twenty-five percent means a quarter of the price, not $25.",
+              "That is the sale price, what you pay. The question asks how much you save.",
+              "",
+              "That is the percent, not the dollars. Multiply 0.25 by $80.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Percent off is like cutting a pizza into 100 tiny slices. Twenty-five percent off means the store takes back 25 slices, and you pay only for the 75 that are left.",
+            example:
+              "A $24 hoodie is 50 percent off: 0.50 x 24 = $12 saved, so you pay $12. A $36 hoodie is 25 percent off: 0.25 x 36 = $9 saved, so you pay $27. The bigger percent off also gave the lower price here, but always check both numbers.",
+            simpler: {
+              q: "Something costs $10 and is 50 percent off. What do you pay?",
+              choices: ["$15", "$5", "$50"],
+              answer: 1,
+              why: "Fifty percent is half. Half of $10 is $5 off, so you pay $5.",
+              hints: [
+                "You added. A sale makes the price go down, not up.",
+                "",
+                "That is the percent, not the price. Fifty percent means half.",
+              ],
+            },
+          },
+        },
+        {
+          title: "Tricks of the trade",
+          teach:
+            "Stores and advertisers study how people decide, and they use what they learn. Here are common tricks. Anchoring: a crossed-out 'was $80' price makes $50 feel like a steal, even if the item rarely sold for $80. Charm prices: $9.99 feels like nine dollars, but it is really ten. Urgency: 'Today only!' or 'Only 3 left!' rushes you before you think. Placement: treats sit at checkout lines, and prize cereals often sit at kids' eye level. Bandwagon: ads hint that everyone has one, so you should too. Bundles: 'Buy 2, get 1 free' is great if you need three and wasteful if you needed one. These tricks are not lies by themselves. But a smart shopper notices them, slows down and does the math.",
+          visual: {
+            type: "hotspots",
+            title: "A walk through the store",
+            center: "🛒",
+            spots: [
+              { label: "Big red sale sign", icon: "🏷️", detail: "A crossed-out 'was' price is an anchor. Ask what the item usually sells for, not what the sign says it once cost." },
+              { label: "Eye-level shelf", icon: "👀", detail: "Products a store most wants you to grab often sit right at eye level. Look up and down for cheaper choices." },
+              { label: "End of the aisle", icon: "📦", detail: "Big displays at the end of an aisle look like deals, but they are not always on sale. Check the unit price." },
+              { label: "Checkout line", icon: "🍫", detail: "Candy and small treats wait where you stand in line, hoping for an impulse buy." },
+              { label: "Bundle deal", icon: "🎁", detail: "'Buy 2, get 1 free' only saves money if you really need three." },
+            ],
+          },
+          probe: {
+            type: "match",
+            prompt: "Match each sign or ad to the trick it uses.",
+            pairs: [
+              { left: "Was $80, now $50!", right: "Anchoring" },
+              { left: "Only $19.99", right: "Charm price" },
+              { left: "Sale ends at midnight!", right: "Urgency" },
+              { left: "Everyone at school has one", right: "Bandwagon" },
+              { left: "Buy 2, get 1 free", right: "Bundle" },
+            ],
+            hint: "For each one, ask what feeling it is trying to create: a bargain, a rush, fitting in, or getting extra.",
+            mistakes: [
+              { match: "Matched midnight to anchoring", coach: "A deadline rushes you. That is urgency. Anchoring uses a high 'was' price." },
+              { match: "Matched $19.99 to anchoring", coach: "$19.99 is a charm price: it is really $20 but feels like $19." },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "A sign says 'Was $120, now $59! Today only!' What is the smartest first thought?",
+            choices: [
+              "Buy it now before it is gone",
+              "The store must be losing money, so it is a great deal",
+              "Would I buy this for $59 if there were no sign, and is 'today only' rushing me?",
+              "Buy two so I save twice as much",
+            ],
+            answer: 2,
+            why: "The 'was' price is an anchor and 'today only' is urgency. The real question is whether the item is worth $59 to you.",
+            hints: [
+              "That is exactly what the urgency trick wants you to do. Slow down first.",
+              "Stores rarely sell at a loss on purpose. The 'was' price might never have been the real price.",
+              "",
+              "Buying two means spending $118. You only save money on things you actually need.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Store tricks are like a magician's misdirection. While you watch the flashy hand, the big red SALE sign, the other hand does the real work. Knowing the trick lets you watch the right hand.",
+            example:
+              "Zoe sees earbuds marked 'Was $70, now $39.99, only 2 left!' She checks and finds the same earbuds sold for $40 at two other stores last month, so the 'was' price is an anchor. $39.99 is really $40. 'Only 2 left' is urgency. She waits a day and realizes she does not need them.",
+            simpler: {
+              q: "A price of $4.99 is closest to which amount?",
+              choices: ["$4", "$49", "$5"],
+              answer: 2,
+              why: "$4.99 is just one cent less than $5.",
+              hints: [
+                "That is what the charm price wants you to feel. How far is $4.99 from $5?",
+                "Check the decimal point: $4.99 is less than five dollars, not almost fifty.",
+                "",
+              ],
+            },
+          },
+        },
+        {
+          title: "Opportunity cost: the hidden price tag",
+          teach:
+            "Every price tag hides a second price. Opportunity cost is the next-best thing you give up when you make a choice. If you spend $60 on a video game, you cannot also spend that $60 on a bike helmet or put it in savings. Whatever you would have picked second is the real cost of your choice. Opportunity cost is not only about money. An afternoon of watching videos costs the afternoon you could have spent practicing piano or earning money mowing lawns. Smart shoppers ask two questions: 'What else could this money do?' and 'Is this purchase better than that?' A good tool is the 24-hour rule: for any want over a set amount, wait a day. If it still beats the next-best use, buy it with a clear head.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Opportunity cost", back: "The next-best thing you give up when you make a choice." },
+              { front: "Trade-off", back: "Getting one thing means giving up another. Every choice has one." },
+              { front: "24-hour rule", back: "For a want over a set amount, wait a day before buying. If you still want it, decide calmly." },
+            ],
+          },
+          probe: {
+            type: "highlight",
+            prompt: "Tap each sentence that describes an opportunity cost: something given up because of a choice.",
+            sentences: [
+              "Maya spent $30 on concert tickets instead of the $30 paint set she also wanted.",
+              "The movie theater is open until 11 o'clock.",
+              "By spending Saturday at the mall, Eli gave up earning $40 mowing lawns.",
+              "Ice cream costs $4 a scoop.",
+              "Choosing the $15 pizza meant Jada could not afford the $15 book she wanted.",
+            ],
+            correct: [0, 2, 4],
+            hint: "Look for sentences where someone chose one thing and had to give up another.",
+            mistakes: [
+              { match: "Picked the ice cream price", coach: "A price by itself is not an opportunity cost. Nobody gave anything up in that sentence." },
+              { match: "Picked the theater hours", coach: "Opening hours are just a fact. Look for a choice that cost someone something else." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "Noah has $50. He could buy a $50 video game, a $50 jacket, or save it. He wants the game most and the jacket second. What is the opportunity cost of buying the game?",
+            choices: [
+              "The $50 jacket, his next-best choice",
+              "Nothing, since he got what he wanted most",
+              "All three choices together",
+              "The money he saved last year",
+            ],
+            answer: 0,
+            why: "Opportunity cost is the next-best choice given up. For Noah, that is the jacket.",
+            hints: [
+              "",
+              "Every choice gives something up. He got the game, but what did he not get?",
+              "You can only give up what you did not choose. And the cost is the single next-best option.",
+              "Last year's savings were not part of this choice. Look at the options he had for this $50.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Opportunity cost is like picking one door in a hallway. Walking through one door means you do not see what is behind the others. The best door you skipped is the price of your choice.",
+            example:
+              "Ruby has $25. She could buy a shirt, or put it toward a $100 bike she has been saving for. She already has $75 saved, so the $25 would let her buy the bike today. The opportunity cost of the shirt is getting the bike now. Seeing it that way, she waits on the shirt.",
+            simpler: {
+              q: "You choose pizza over tacos for dinner. What did you give up?",
+              choices: ["The pizza", "Nothing at all", "The tacos"],
+              answer: 2,
+              why: "The tacos were the option you did not pick, so they are your opportunity cost.",
+              hints: [
+                "You got the pizza. What did you not get?",
+                "Every choice gives something up. Which dinner did you skip?",
+                "",
+              ],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sort",
+        prompt: "Sort each choice: is it a smart shopping move, or falling for a trick?",
+        buckets: ["Smart shopping move", "Falling for a trick"],
+        items: [
+          { text: "Comparing the unit prices of two sizes", bucket: 0 },
+          { text: "Buying because the sign said 'Only 2 left!'", bucket: 1 },
+          { text: "Waiting 24 hours before buying a $45 want", bucket: 0 },
+          { text: "Buying three for the bundle deal when you needed one", bucket: 1 },
+          { text: "Asking what else the money could do", bucket: 0 },
+          { text: "Thinking $19.99 is about $19", bucket: 1 },
+          { text: "Checking whether the 'was' price was ever real", bucket: 0 },
+          { text: "Grabbing candy at checkout just because it was there", bucket: 1 },
+        ],
+      },
+      explain: {
+        prompt:
+          "Explain to a younger sibling how to tell whether the big box at the store is really the better deal, and describe one trick stores use to get people to spend more.",
+        keyPoints: [
+          "Divide the price by the number of units to find the unit price",
+          "Compare unit prices, not the prices on the front",
+          "It is only a deal if you will use it all",
+          "Stores use tricks like high 'was' prices, $9.99 prices or urgency",
+          "Think about opportunity cost: what else the money could do",
+        ],
+      },
+      mastery: [
+        {
+          type: "number",
+          prompt: "Peanut butter comes in 16 ounces for $3.20 or 28 ounces for $4.76. Find the unit price of the jar that is cheaper per ounce, in dollars per ounce.",
+          answer: 0.17,
+          tolerance: 0.005,
+          unit: "$",
+          hint: "Find both unit prices (price divided by ounces), then give the smaller one.",
+          mistakes: [
+            { match: "0.2", coach: "That is the 16-ounce jar: 3.20 / 16. Check the 28-ounce jar too. It is cheaper per ounce." },
+            { match: "4.76", coach: "That is the price of the whole jar. Divide by the 28 ounces to get the price of one ounce." },
+          ],
+          seconds: 60,
+        },
+        {
+          type: "place",
+          prompt: "Place each item on the number line at its final sale price in dollars.",
+          min: 0,
+          max: 100,
+          step: 1,
+          tolerance: 1,
+          items: [
+            { label: "$40 shirt, 25% off", value: 30 },
+            { label: "$80 shoes, 50% off", value: 40 },
+            { label: "$100 bike helmet, 10% off", value: 90 },
+            { label: "$60 game, 20% off", value: 48 },
+            { label: "$50 jacket, 20% off, then an extra 10% off", value: 36 },
+          ],
+          hint: "For each item, multiply the price by the percent you still pay. For the jacket, take the second discount from the lower price.",
+          mistakes: [
+            { match: "Placed the jacket at 35", coach: "20% then 10% is not 30% off. $50 becomes $40, and 10% off $40 is $36." },
+            { match: "Placed the helmet at 10", coach: "That is how much you save. The sale price is $100 minus $10." },
+          ],
+          seconds: 75,
+        },
+        {
+          type: "cloze",
+          text: "The next-best thing you give up when you choose is called the {0} cost. A crossed-out high 'was' price is a trick called an {1}. A sign saying 'Today only!' uses {2} to rush you.",
+          blanks: [
+            { answers: ["opportunity"] },
+            { answers: ["anchor", "anchoring"] },
+            { answers: ["urgency"] },
+          ],
+          bank: ["opportunity", "anchor", "urgency", "unit", "bandwagon", "interest"],
+          hint: "One word is about what you give up, one is about a high price you compare against, and one is about hurrying.",
+          mistakes: [
+            { match: "unit", coach: "Unit price is the cost of one ounce or one roll. The cost of the choice you skipped has a different name." },
+            { match: "bandwagon", coach: "Bandwagon is the 'everyone has one' trick. A deadline uses a different trick." },
+          ],
+          seconds: 35,
+        },
+        {
+          type: "build",
+          prompt: "Build the rule for finding a unit price.",
+          tiles: ["Unit price", "equals", "total price", "divided by", "number of units"],
+          distractors: ["times", "minus"],
+          hint: "Start with what you want to find. Then split the total price across all the units.",
+          mistakes: [
+            { match: "Used times instead of divided by", coach: "Multiplying makes the number bigger than the package price. You want the price of just one unit." },
+            { match: "Put number of units first", coach: "Units divided by price gives units per dollar, not price per unit. Put the price first." },
+          ],
+          seconds: 30,
+        },
+      ],
+      check: [
+        {
+          q: "A 10-ounce bag costs $2.50 and a 25-ounce bag costs $5.00. Which is cheaper per ounce?",
+          choices: ["The 10-ounce bag", "The 25-ounce bag", "They are the same"],
+          answer: 1,
+          why: "2.50 / 10 = $0.25 an ounce, and 5.00 / 25 = $0.20 an ounce. The bigger bag wins.",
+        },
+        {
+          q: "An item costs $45 and is 20 percent off. What is the sale price?",
+          choices: ["$25", "$9", "$43", "$36"],
+          answer: 3,
+          why: "0.20 x 45 = $9 off, so you pay 45 - 9 = $36.",
+        },
+        {
+          q: "What is opportunity cost?",
+          choices: [
+            "The sales tax on a purchase",
+            "The next-best thing you give up when you choose",
+            "The price printed on the tag",
+            "A coupon discount",
+          ],
+          answer: 1,
+          why: "Opportunity cost is the value of the best option you did not pick.",
+        },
+        {
+          q: "Why do stores often use prices like $29.99?",
+          choices: [
+            "It feels closer to $20 than to $30, even though it is really $30",
+            "The law requires prices to end in 99",
+            "Pennies are worth more than dollars",
+          ],
+          answer: 0,
+          why: "Charm prices make an item feel cheaper because shoppers notice the first digit most.",
+        },
+        {
+          q: "A $100 item is 20 percent off, then an extra 10 percent off. What is the final price?",
+          choices: ["$70", "$80", "$72", "$90"],
+          answer: 2,
+          why: "20% off $100 is $80. Then 10% off $80 is $8, so the final price is $72.",
+        },
+      ],
+      task: {
+        kind: "project",
+        prompt:
+          "Be a price detective. On your next grocery trip with a parent, find three products that come in two sizes. Write down each price and size, calculate both unit prices, and circle the better deal. Then spot two store tricks, like charm prices, eye-level placement or 'was' prices, and describe what you saw.",
+        rubric: [
+          "Records the price and size of both packages for three products",
+          "Calculates unit prices correctly by dividing price by units",
+          "Picks the better deal and says whether the family would really use the bigger size",
+          "Describes two real store or ad tricks spotted on the trip",
+        ],
+      },
+    },
+    {
+      id: "money.giving",
+      title: "Generosity and Giving",
+      minutes: 30,
+      stage: "rhetoric",
+      read: p(
+        `Earning, saving and investing are about building. Giving is about what you build for. Across history, generous people have treated money as a tool to use well, not only for themselves but for their neighbors and communities.`,
+        `One of the oldest giving traditions is the tithe, which means a tenth. In the book of Genesis, Abraham gives a tenth to the priest-king Melchizedek, and the law of ancient Israel set aside a tenth of each harvest. Many families of faith still give 10 percent of their income to their church or to charity. Others choose a different percent. The math is the same either way: multiply income by the percent. A tenth of $50 is 0.10 x 50 = $5.`,
+        `Giving works best when it is planned. If you wait to give whatever is left at the end of the month, there is usually nothing left. That is why many people budget for giving the way they budget for savings: right off the top. The give jar makes generosity a habit instead of an accident.`,
+        `Choosing good causes takes wisdom. Before you give, ask: What does this group actually do? How much of the money reaches the work it promises? Can I see results? Giving close to home lets you see the results with your own eyes. And money is not the only gift. Time and talent count too, like volunteering at a food bank or tutoring a younger student.`,
+        `Ben Franklin was famously thrifty, but he was also generous. He helped start the Library Company of Philadelphia, one of America's first lending libraries, and Pennsylvania Hospital. When he died in 1790, his will left 1,000 pounds each to Boston and Philadelphia, to be loaned to young tradesmen and to grow for 200 years. Andrew Carnegie, the steel businessman, gave away most of his fortune and paid for more than 2,500 public libraries. Both men believed that building others up is one of the best uses of wealth.`
+      ),
+      keyIdeas: [
+        "A tithe means a tenth. Any giving amount is income times the percent.",
+        "Plan giving first, like savings, so it becomes a habit.",
+        "Choose causes wisely: what they do, where the money goes, and whether it works.",
+        "Time and talent are gifts too, not only money.",
+      ],
+      hook: {
+        text: "When Benjamin Franklin died in 1790, his will left 1,000 pounds each to the cities of Boston and Philadelphia, with strict instructions: lend it to young tradesmen starting out, collect the interest, and let it grow for 200 years. Why would a famously careful saver make a gift he would never see finished?",
+      },
+      teach: [
+        {
+          title: "Why give? Generosity as character",
+          teach:
+            "Money is a tool, and a tool can be used to build. Earning, saving and investing build your own house. Giving helps build your neighbor's house too. For thousands of years, teachers from many traditions have said that generosity is a mark of good character. The Greek thinker Aristotle counted generosity among the virtues: giving the right amount, to the right people, at the right time. Notice what that means. Generosity is not giving away everything carelessly, and it is not keeping everything out of fear. It is a balance you practice. Generous people also tend to see their money more clearly. When part of every paycheck has a purpose beyond yourself, you start asking what every dollar is for.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Generosity", back: "Giving freely and wisely: the right amount, to the right people, at the right time." },
+              { front: "Stinginess", back: "Holding on to everything, even when a real need is right in front of you." },
+              { front: "Wastefulness", back: "Giving or spending carelessly, so you cannot meet your own duties or help again later." },
+              { front: "Philanthropy", back: "From Greek words meaning 'love of humankind': giving to make life better for others." },
+            ],
+          },
+          probe: {
+            type: "sort",
+            prompt: "Aristotle said generosity sits between two mistakes. Sort each action: too little, generous, or too much (careless)?",
+            buckets: ["Too little", "Generous", "Too much"],
+            items: [
+              { text: "Never helping, even when a friend's family has a real need", bucket: 0 },
+              { text: "Refusing to help a neighbor carry groceries because it is not your job", bucket: 0 },
+              { text: "Planning to give 10 percent of each paycheck", bucket: 1 },
+              { text: "Volunteering two hours a month at a food bank", bucket: 1 },
+              { text: "Helping a younger kid learn to read after school", bucket: 1 },
+              { text: "Giving away your rent money so you cannot pay your bills", bucket: 2 },
+              { text: "Spending all your savings on gifts to impress people", bucket: 2 },
+            ],
+            hint: "Generosity is a balance. Ask: is this person holding back from a real need, giving wisely, or giving so much they hurt themselves or others?",
+            mistakes: [
+              { match: "Put giving away rent money in generous", coach: "Giving can be good, but not giving away what you owe others. Aristotle would call this too much." },
+              { match: "Put planning 10 percent in too much", coach: "A planned 10 percent leaves 90 percent for your needs and savings. That is a wise, steady balance." },
+            ],
+            seconds: 50,
+          },
+          think: {
+            q: "According to Aristotle, which person shows the virtue of generosity?",
+            choices: [
+              "Someone who keeps every dollar out of fear",
+              "Someone who gives the right amount, to the right people, at the right time",
+              "Someone who gives everything away without thinking",
+              "Someone who gives only when others are watching",
+            ],
+            answer: 1,
+            why: "Aristotle saw generosity as a balance between stinginess and wastefulness, guided by good judgment.",
+            hints: [
+              "Keeping everything out of fear is the 'too little' side. Generosity is in the middle.",
+              "",
+              "Giving without thinking is the 'too much' side. Aristotle wanted wisdom in giving.",
+              "Giving to be seen is about showing off, not about helping. What did Aristotle say makes giving good?",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Generosity is like seasoning food. Too little salt and the meal is bland; too much and it is ruined. The right amount at the right time makes everything better.",
+            example:
+              "Caleb earns $40 a month. He gives $4, saves $12 and spends $24. When a classmate's house had a fire, he gave an extra $10 from his savings. That is generous: steady planned giving every month, plus a wise choice to help more when a real need came up, without emptying his savings.",
+            simpler: {
+              q: "Which is an act of generosity?",
+              choices: ["Buying yourself a new game", "Helping a neighbor shovel snow for free", "Hiding your snacks from your brother"],
+              answer: 1,
+              why: "Shoveling for free helps someone else without expecting anything back.",
+              hints: [
+                "A new game is fun for you, but who else does it help?",
+                "",
+                "Hiding things is the opposite of sharing. Which choice helps another person?",
+              ],
+            },
+          },
+        },
+        {
+          title: "Tithing and budgeting for giving",
+          teach:
+            "One of the oldest giving traditions is the tithe, an old word for a tenth. In the book of Genesis, Abraham gives a tenth to the priest-king Melchizedek, and the law of ancient Israel set aside a tenth of each harvest. Many families of faith still give 10 percent of their income to their church or to charity. Others choose 5 percent, or 15. The math is the same: income times the percent. A tenth of $50 is 0.10 x 50 = $5. The habit that makes giving last is to plan it first, right off the top, just like paying yourself first with savings. If you give only what is left at the end of the month, there is usually nothing left. Try the budget sliders to see the give slice.",
+          visual: {
+            type: "budget",
+            income: 50,
+            categories: [
+              { label: "Give", pct: 10 },
+              { label: "Save", pct: 30 },
+              { label: "Spend", pct: 60 },
+            ],
+          },
+          probe: {
+            type: "number",
+            prompt: "Hannah earns $240 this month babysitting. She gives a tithe, one tenth of it. How much does she give?",
+            answer: 24,
+            tolerance: 0.01,
+            unit: "$",
+            hint: "A tenth means 10 percent. Multiply $240 by 0.10, or divide it by 10.",
+            mistakes: [
+              { match: "2.4", coach: "You moved the decimal point one place too far. A tenth of $240 is bigger than $10." },
+              { match: "216", coach: "That is what Hannah keeps after giving. The question asks how much she gives." },
+              { match: "10", coach: "Ten is the percent, not the dollars. Find 10 percent of $240." },
+            ],
+            seconds: 25,
+          },
+          think: {
+            q: "Eli earns $80 and plans to give 10 percent, save 30 percent and spend the rest. How much does he give?",
+            choices: ["$10", "$80", "$0.80", "$8"],
+            answer: 3,
+            why: "0.10 x 80 = $8.",
+            hints: [
+              "Ten is the percent, not the dollars. What is one tenth of $80?",
+              "That is all of his income. He gives only one tenth of it.",
+              "That is 1 percent. Ten percent is ten times bigger.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Planning to give first is like putting your homework in your backpack the night before. If you wait until the bus is honking, it gets left behind.",
+            example:
+              "Mia earns $150 a month from pet-sitting. She gives 10 percent: 0.10 x 150 = $15. She saves 30 percent: 0.30 x 150 = $45. She spends the rest: 150 - 15 - 45 = $90. Over a year, her $15 a month adds up to 15 x 12 = $180 given.",
+            simpler: {
+              q: "What is a tenth of $100?",
+              choices: ["$1", "$10", "$90"],
+              answer: 1,
+              why: "Split $100 into 10 equal parts; each part is $10.",
+              hints: [
+                "That is one hundredth. A tenth means splitting into 10 equal parts.",
+                "",
+                "That is what is left after giving a tenth. How big is the tenth itself?",
+              ],
+            },
+          },
+        },
+        {
+          title: "Choosing good causes",
+          teach:
+            "Wanting to help is good. Helping wisely is better. Before you give money to a group, ask three questions. First: what do they actually do? A food pantry hands out food, while a vague page about helping the world may never say. Second: how much of the money reaches the work? Every charity has some costs, like rent and staff, but a good one can show where donations go, and many publish yearly reports. Third: does it work? Look for real results, like meals served or kids tutored. Giving close to home has an advantage, because you can see the results with your own eyes. And be careful with strangers who pressure you to give right now, especially by phone or online. A good cause will still be good tomorrow, after you check.",
+          visual: {
+            type: "hotspots",
+            title: "Questions to ask before you give",
+            center: "🎁",
+            spots: [
+              { label: "What do they do?", icon: "🔍", detail: "A clear answer, like 'we serve hot meals' or 'we tutor kids in reading', is a good sign." },
+              { label: "Where does the money go?", icon: "💵", detail: "A good charity can show how donations are spent. Many publish a yearly report." },
+              { label: "Does it work?", icon: "📊", detail: "Look for results you can count: meals served, homes repaired, students helped." },
+              { label: "Can I see it?", icon: "👀", detail: "Local causes let you visit, volunteer and see the work for yourself." },
+              { label: "Am I being rushed?", icon: "⏰", detail: "Pressure to give right now, by phone or online, is a warning sign. Check first with a parent." },
+            ],
+          },
+          probe: {
+            type: "highlight",
+            prompt: "A charity flyer makes these claims. Tap the ones that would actually help you check whether it does good work.",
+            sentences: [
+              "Last year we served 48,000 meals to families in our county.",
+              "Give now or you will regret it forever!",
+              "Our yearly report shows how every dollar was spent.",
+              "Thousands of people love us.",
+              "Volunteers can visit our kitchen any Saturday to see the work.",
+            ],
+            correct: [0, 2, 4],
+            hint: "Look for facts you could check: numbers, reports, or a place you could visit.",
+            mistakes: [
+              { match: "Picked give now or regret it", coach: "That is pressure, not proof. It tells you nothing about what the group does." },
+              { match: "Picked thousands love us", coach: "Being liked is not the same as doing good work. Look for results you could check." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "A stranger calls and says, 'Give $100 by card in the next ten minutes or the chance is gone!' What should you do?",
+            choices: [
+              "Give right away so you do not miss out",
+              "Tell a parent, hang up, and look up the charity yourself before giving anything",
+              "Give half, just to be safe",
+              "Read them a card number slowly so they get it right",
+            ],
+            answer: 1,
+            why: "Pressure to give right now is a warning sign. A real cause will still be there after you check with a parent.",
+            hints: [
+              "That is exactly what the pressure is meant to make you do. Good causes do not need a ten-minute deadline.",
+              "",
+              "Giving any money to an unchecked caller is risky. Check first.",
+              "Never share card numbers with someone who calls you. Tell a parent instead.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Picking a charity is like hiring someone to fix your roof. You would not hand money to whoever knocks first. You would check what they have done, ask for proof and make sure the work gets done.",
+            example:
+              "Liam has $30 to give. Option A is a local food pantry where his scout troop volunteers; he has seen the shelves filled. Option B is a new web page with sad pictures but no address, report or results. Using the three questions, Liam picks the pantry: he knows what it does, where the money goes and that it works.",
+            simpler: {
+              q: "Which group could you check most easily?",
+              choices: ["A stranger's text asking for money", "A flyer with no name or address", "A local food pantry you can visit"],
+              answer: 2,
+              why: "You can visit a local pantry and see the work with your own eyes.",
+              hints: [
+                "A text from a stranger gives you nothing to check. Which one could you see in person?",
+                "With no name or address, how would you look it up?",
+                "",
+              ],
+            },
+          },
+        },
+        {
+          title: "Time, talent and treasure",
+          teach:
+            "Money is not the only way to give. People often talk about three kinds of gifts: time, talent and treasure. Time means showing up, like volunteering at a food bank or visiting an elderly neighbor. Talent means using a skill you have, like tutoring a younger kid in math, fixing a bike for a friend or playing music at a nursing home. Treasure means money or things, like the money in your give jar or a box of outgrown coats. Kids who do not have much money often have plenty of time and growing talents. Ben Franklin gave all three. He gave his time and ideas to start a library, a fire company and a hospital in Philadelphia, and his will gave his money a job for 200 years.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Time", back: "Showing up to help: volunteering, visiting, cleaning up a park." },
+              { front: "Talent", back: "Using a skill for others: tutoring, fixing, building, playing music." },
+              { front: "Treasure", back: "Money or things: your give jar, outgrown coats, canned food." },
+            ],
+          },
+          probe: {
+            type: "sort",
+            prompt: "Sort each gift: time, talent or treasure?",
+            buckets: ["Time", "Talent", "Treasure"],
+            items: [
+              { text: "Volunteering Saturday mornings at a food bank", bucket: 0 },
+              { text: "Visiting an elderly neighbor each week", bucket: 0 },
+              { text: "Picking up litter at the park for an afternoon", bucket: 0 },
+              { text: "Teaching a younger kid to read", bucket: 1 },
+              { text: "Fixing a friend's bike chain", bucket: 1 },
+              { text: "Putting $5 from your give jar in the offering", bucket: 2 },
+              { text: "Donating your outgrown winter coats", bucket: 2 },
+            ],
+            hint: "Ask: is the gift mostly showing up, using a special skill, or handing over money or things?",
+            mistakes: [
+              { match: "Put teaching to read in time", coach: "It takes time, but it uses a skill you have, reading well. That makes it mostly a gift of talent." },
+              { match: "Put coats in time", coach: "Coats are things you hand over, so they count as treasure." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "Sofia has only $3 but is great at math. Which is a strong way for her to give right now?",
+            choices: [
+              "Wait until she is rich to give anything",
+              "Give nothing, since $3 is too small to matter",
+              "Tutor a younger student in math for free",
+              "Feel guilty about not having more money",
+            ],
+            answer: 2,
+            why: "Her math skill is a talent she can give today, and it may be worth more to that student than money.",
+            hints: [
+              "Waiting means missing chances to help now. What does Sofia already have to give?",
+              "Even small gifts matter, and money is not the only gift. Think about her skills.",
+              "",
+              "Guilt does not help anyone. Which choice actually helps someone?",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Time, talent and treasure are like the three legs of a stool. A grown-up with a busy job might give mostly treasure, while a kid gives mostly time and talent. Every leg helps hold up the community.",
+            example:
+              "Grandpa Joe gives $20 a month to his church (treasure), fixes the church's leaky faucets (talent) and drives a neighbor to the doctor on Tuesdays (time). His granddaughter Ava gives $2 a week from her give jar, bakes bread for a new family on the street and rakes leaves for an older neighbor. Both give all three, each in their own size.",
+            simpler: {
+              q: "Volunteering at an animal shelter is mostly a gift of what?",
+              choices: ["Treasure", "Time", "Nothing"],
+              answer: 1,
+              why: "You are giving your hours by showing up to help.",
+              hints: [
+                "Treasure is money or things. What are you giving when you show up to help?",
+                "",
+                "Helping animals is a real gift. Which kind is it?",
+              ],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sequence",
+        prompt: "Put the steps of a wise giving plan in order.",
+        steps: [
+          "Decide what percent of your income you will give",
+          "When money comes in, set the giving amount aside first",
+          "Research a cause: what it does, where the money goes, and whether it works",
+          "Give your gift of money, time or talent",
+          "Look at the results and decide where to give next",
+        ],
+      },
+      explain: {
+        prompt:
+          "Explain to a friend how you would plan your giving for a year, and how you would choose a good cause to give to.",
+        keyPoints: [
+          "Pick a percent, like a tithe of 10 percent, and multiply by income",
+          "Set the giving money aside first, like savings",
+          "Check what a group does, where the money goes and whether it works",
+          "Time and talent count as gifts, not only money",
+        ],
+      },
+      mastery: [
+        {
+          type: "number",
+          prompt: "Jonah earns $35 a week mowing lawns for 12 weeks this summer. He gives 10 percent of everything he earns. How much does he give over the whole summer?",
+          answer: 42,
+          tolerance: 0.01,
+          unit: "$",
+          hint: "First find his total summer earnings, then take 10 percent of that total.",
+          mistakes: [
+            { match: "3.5", coach: "That is his giving for one week. He works 12 weeks." },
+            { match: "420", coach: "That is everything he earned. He gives one tenth of it." },
+            { match: "378", coach: "That is what he keeps after giving. How much does he give?" },
+          ],
+          seconds: 50,
+        },
+        {
+          type: "cloze",
+          text: "A {0} is an old word for a tenth. Planning to give {1}, right off the top, makes giving a habit. The three kinds of gifts are time, talent and {2}.",
+          blanks: [{ answers: ["tithe"] }, { answers: ["first"] }, { answers: ["treasure"] }],
+          bank: ["tithe", "first", "last", "treasure", "tax", "trophies"],
+          hint: "Think about the Bible's word for a tenth, when giving should happen in your budget, and the 'T' word for money or things.",
+          mistakes: [
+            { match: "tax", coach: "A tax is required by law. A tithe is a gift of a tenth, chosen freely." },
+            { match: "last", coach: "If you give last, there is usually nothing left. Giving works best planned first." },
+          ],
+          seconds: 30,
+        },
+        {
+          type: "sort",
+          prompt: "Sort each choice: wise giving or unwise giving?",
+          buckets: ["Wise giving", "Unwise giving"],
+          items: [
+            { text: "Giving to a food pantry you have seen at work", bucket: 0 },
+            { text: "Reading a charity's yearly report before giving", bucket: 0 },
+            { text: "Setting aside 10 percent each time you get paid", bucket: 0 },
+            { text: "Sending money to a stranger who texts you", bucket: 1 },
+            { text: "Giving away your bus fare so you cannot get to school", bucket: 1 },
+            { text: "Giving because a caller says you have five minutes to decide", bucket: 1 },
+          ],
+          hint: "Wise giving is planned and checked. Unwise giving is rushed, unchecked or leaves you unable to meet your own duties.",
+          mistakes: [
+            { match: "Put the stranger's text in wise", coach: "You cannot check who a stranger is or what they do. Talk to a parent first." },
+            { match: "Put the yearly report in unwise", coach: "Reading a report is how you learn where the money goes. That is wise." },
+          ],
+          seconds: 35,
+        },
+        {
+          type: "match",
+          prompt: "Match each giver to their gift.",
+          pairs: [
+            { left: "Andrew Carnegie", right: "Paid for more than 2,500 public libraries" },
+            { left: "Benjamin Franklin", right: "Left money to be loaned to young tradesmen for 200 years" },
+            { left: "Abraham, in the book of Genesis", right: "Gave a tenth to Melchizedek" },
+            { left: "Aristotle", right: "Called generosity a virtue: the right amount at the right time" },
+          ],
+          hint: "One is a steel businessman, one is a Founding Father, one is from the Bible and one is a Greek thinker.",
+          mistakes: [
+            { match: "Matched Franklin to libraries", coach: "Franklin did help start one library, but the 2,500 libraries were Carnegie's gift." },
+          ],
+          seconds: 40,
+        },
+      ],
+      check: [
+        {
+          q: "What does the word 'tithe' mean?",
+          choices: ["A tax on tea", "A tenth", "Half", "A bank loan"],
+          answer: 1,
+          why: "A tithe is a tenth, a giving tradition that goes back to ancient times.",
+        },
+        {
+          q: "You earn $70 and give 10 percent. How much do you give?",
+          choices: ["$7", "$0.70", "$10", "$63"],
+          answer: 0,
+          why: "0.10 x 70 = $7.",
+        },
+        {
+          q: "Why do many people set aside their giving money first?",
+          choices: [
+            "It is required by law",
+            "Banks pay extra interest on it",
+            "If they wait for leftovers, there is usually nothing left",
+          ],
+          answer: 2,
+          why: "Planning giving first, like savings, makes it a habit instead of an accident.",
+        },
+        {
+          q: "Which question best helps you choose a good charity?",
+          choices: [
+            "Does it have the saddest pictures?",
+            "How fast does it want my money?",
+            "Is its name easy to remember?",
+            "Can it show where donations go and what results it gets?",
+          ],
+          answer: 3,
+          why: "A good cause can show what it does with the money and what good it accomplishes.",
+        },
+        {
+          q: "Tutoring a younger student for free is mostly a gift of what?",
+          choices: ["Treasure", "Talent", "Debt"],
+          answer: 1,
+          why: "Tutoring uses a skill you have, so it is a gift of talent (and time too).",
+        },
+      ],
+      task: {
+        kind: "project",
+        prompt:
+          "Make a giving plan for the next three months. Choose a percent to give from any money you earn or receive, and calculate the amounts. With a parent, research one local cause using the three questions: what it does, where the money goes and whether it works. Then give at least one gift of time or talent, like volunteering or helping a neighbor, and write a few sentences about what you saw.",
+        rubric: [
+          "Chooses a giving percent and calculates the amounts correctly",
+          "Researches one real local cause using the three questions",
+          "Completes one gift of time or talent",
+          "Reflects in a few sentences on how the gift helped someone",
+        ],
+      },
+    },
+    {
+      id: "money.taxes",
+      title: "Taxes: How Communities Pay the Bills",
+      minutes: 30,
+      stage: "grammar",
+      read: p(
+        `Roads, fire trucks, public schools, courts, parks and the armed forces all cost money. Governments pay for them mostly with taxes, money that people and businesses are required by law to pay. The U.S. Constitution gives Congress the power to lay and collect taxes, and states, counties and cities collect their own taxes too.`,
+        `Taxes have a long history. In 1773, colonists in Boston dumped British tea into the harbor to protest a tea tax passed by Parliament, where they had no representatives. Their slogan, "no taxation without representation," meant that people should have a say, through elected representatives, in the taxes they pay. That idea is built into the Constitution: bills for raising money must start in the House of Representatives.`,
+        `The tax you will notice first is sales tax, added at the register when you buy things. It is set by states and local governments, so it differs from place to place, and a few states have no statewide sales tax at all. The math is percent times price. If sales tax is 7 percent, a $20 shirt has 0.07 x 20 = $1.40 in tax, so you pay $21.40.`,
+        `Income tax is a tax on what you earn. When you get a job, your employer withholds, or holds back, part of each paycheck and sends it to the government. Payroll taxes for Social Security and Medicare come out too. That is why your gross pay, what you earned, is bigger than your net pay, what lands in your account. Each spring, usually by April 15, people file a tax return that adds up the year. If too much was withheld, they get a refund. If too little, they owe the rest.`,
+        `The federal income tax uses brackets. Each slice of income is taxed at its own rate, and only the dollars above a bracket line are taxed at the higher rate. Citizens and their representatives debate how high taxes should be and what they should pay for. Your job for now is to understand how taxes work, so that someday you can pay them correctly and think clearly about them.`
+      ),
+      keyIdeas: [
+        "Taxes are required payments that fund shared things like roads, schools, courts and defense.",
+        "Sales tax = price x tax rate, added at the register.",
+        "Taxes are withheld from paychecks: gross pay minus taxes and deductions is net pay.",
+        "With brackets, only the dollars above each line are taxed at the higher rate.",
+      ],
+      hook: {
+        text: "You saved exactly $20 for a $20 shirt. You walk to the register, and the cashier says, 'That will be $21.40.' Where did the extra $1.40 come from, and where is it going?",
+      },
+      teach: [
+        {
+          title: "What taxes are and what they pay for",
+          teach:
+            "A tax is money that people and businesses are required by law to pay to the government. Governments use taxes to pay for things a whole community shares: roads and bridges, police and fire departments, public schools, courts, parks, and the armed forces that defend the country. The U.S. Constitution gives Congress the power to lay and collect taxes. States, counties and cities collect their own taxes too, so there are several levels. Taxes have a long history in America. In 1773, colonists dumped tea into Boston Harbor to protest a tea tax passed by the British Parliament, where they had no representatives. Their cry, 'no taxation without representation,' still shapes our laws: bills for raising money must start in the House of Representatives, whose members the people elect.",
+          visual: {
+            type: "hotspots",
+            title: "What taxes help pay for",
+            center: "🏛️",
+            spots: [
+              { label: "Roads and bridges", icon: "🛣️", detail: "Highways, streets and bridges are built and repaired mostly with tax money." },
+              { label: "Fire and police", icon: "🚒", detail: "Local taxes pay for fire stations, fire trucks, police officers and their training." },
+              { label: "Public schools", icon: "🏫", detail: "Public schools are paid for mostly by state and local taxes." },
+              { label: "Courts", icon: "⚖️", detail: "Judges and courthouses settle disputes and enforce the law." },
+              { label: "National defense", icon: "🛡️", detail: "The Army, Navy, Air Force, Marines and other forces are paid for by federal taxes." },
+              { label: "Parks", icon: "🌳", detail: "City, state and national parks are kept up with tax dollars and entrance fees." },
+            ],
+          },
+          probe: {
+            type: "sort",
+            prompt: "Sort each thing: paid for mostly by taxes, or paid for by the person who buys it?",
+            buckets: ["Mostly taxes", "The buyer pays"],
+            items: [
+              { text: "Interstate highways", bucket: 0 },
+              { text: "A public school classroom", bucket: 0 },
+              { text: "A city fire truck", bucket: 0 },
+              { text: "The U.S. Navy", bucket: 0 },
+              { text: "Your new sneakers", bucket: 1 },
+              { text: "A movie ticket", bucket: 1 },
+              { text: "A pizza delivery", bucket: 1 },
+              { text: "A phone plan", bucket: 1 },
+            ],
+            hint: "Ask: is this something the whole community shares, or something one person buys for themselves?",
+            mistakes: [
+              { match: "Put the fire truck in buyer pays", coach: "Nobody buys their own fire truck. The whole town pays for it with local taxes." },
+              { match: "Put sneakers in taxes", coach: "You may pay a little sales tax on sneakers, but you, the buyer, pay for them." },
+            ],
+            seconds: 35,
+          },
+          think: {
+            q: "Why did colonists hold the Boston Tea Party in 1773?",
+            choices: [
+              "They did not like the taste of British tea",
+              "They were taxed by a Parliament where they had no representatives",
+              "Tea was against the law in Boston",
+              "They wanted to stop paying for roads",
+            ],
+            answer: 1,
+            why: "The colonists protested being taxed by a Parliament where they had no vote: 'no taxation without representation.'",
+            hints: [
+              "Colonists drank plenty of tea. The protest was about something bigger than taste.",
+              "",
+              "Tea was legal and popular. What was the slogan of the protest?",
+              "The protest was not about roads. Think about who had passed the tax.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Taxes are like a family pitching in for a shared car. No one person needs the car every day, but everyone chips in so it is there when anyone needs a ride. Roads, fire trucks and courts work the same way for a whole town.",
+            example:
+              "When a house catches fire, nobody hands the firefighters a credit card. The fire station, trucks, hoses and training were already paid for, partly by local taxes from everyone in town, so help arrives for whoever needs it.",
+            simpler: {
+              q: "Which is usually paid for with taxes?",
+              choices: ["Your birthday cake", "A video game", "A city fire truck"],
+              answer: 2,
+              why: "A fire truck serves the whole town, so it is paid for with local taxes.",
+              hints: [
+                "A birthday cake is bought by a family for themselves.",
+                "A video game is something one person buys. Which item serves everyone?",
+                "",
+              ],
+            },
+          },
+        },
+        {
+          title: "Sales tax: a percent at the register",
+          teach:
+            "Sales tax is the tax you will notice first. It is added at the register when you buy many things, and the store sends it to the government. Sales tax rates are set by states and often by cities and counties too, so the rate depends on where you live. A few states have no statewide sales tax at all. The math is percent times price. To find the tax, turn the rate into a decimal and multiply. At 7 percent, a $20 shirt has 0.07 x 20 = $1.40 in tax. Add it to the price: 20 + 1.40 = $21.40. A quick shortcut is to multiply by 1.07, which finds the total in one step. Smart shoppers estimate the tax before they reach the register.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "Price on the tag",
+              points: ["What the store charges for the item", "Example: $20 shirt", "Same in every town for the same store", "Before tax"],
+            },
+            right: {
+              title: "Price at the register",
+              points: ["Tag price plus sales tax", "Example at 7%: $21.40", "Changes with your state and city tax rate", "What you actually pay"],
+            },
+          },
+          probe: {
+            type: "number",
+            prompt: "Sales tax is 6 percent. You buy a $35 pair of shoes. What is the total you pay?",
+            answer: 37.1,
+            tolerance: 0.01,
+            unit: "$",
+            hint: "Find the tax with 0.06 x 35, then add it to the price. Or multiply 35 by 1.06.",
+            mistakes: [
+              { match: "2.1", coach: "That is the tax. Add it to the $35 price to get the total." },
+              { match: "41", coach: "You added 6 dollars. Six percent of $35 is much less than $6." },
+              { match: "35.06", coach: "You added 6 cents. Six percent means 0.06 times the price." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "Sales tax is 5 percent. How much tax is on a $40 game?",
+            choices: ["$5", "$2", "$45", "$0.20"],
+            answer: 1,
+            why: "0.05 x 40 = $2 in tax, so the game costs $42 in all.",
+            hints: [
+              "Five is the percent, not the dollars. Multiply 0.05 by $40.",
+              "",
+              "You added 5 to 40. The tax is a percent of the price, not a flat $5.",
+              "Check the decimal: 0.05 x 40 is ten times bigger than $0.20.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Sales tax works like a toll on a highway. Every time you pass through the gate, a fee is added. At the store, the toll is a small percent of whatever you buy.",
+            example:
+              "Lily buys a $12 book and an $8 notebook where sales tax is 8 percent. Subtotal: 12 + 8 = $20. Tax: 0.08 x 20 = $1.60. Total: 20 + 1.60 = $21.60. Lily brought $21, so she is 60 cents short. Next time she will estimate the tax first.",
+            simpler: {
+              q: "Sales tax is 10 percent. What is the tax on a $10 item?",
+              choices: ["$10", "$0.10", "$1"],
+              answer: 2,
+              why: "Ten percent is one tenth, and one tenth of $10 is $1.",
+              hints: [
+                "That would be a 100 percent tax! Ten percent is only one tenth.",
+                "That is one percent of $10. Ten percent is ten times bigger.",
+                "",
+              ],
+            },
+          },
+        },
+        {
+          title: "Income tax: gross pay and net pay",
+          teach:
+            "Income tax is a tax on what you earn. The federal income tax has been collected since 1913, when the Sixteenth Amendment to the Constitution allowed it, and most states have an income tax too. When you get a job, your employer withholds, or holds back, part of every paycheck and sends it to the government for you. Payroll taxes come out as well: 6.2 percent for Social Security and 1.45 percent for Medicare, programs that mainly help older Americans. That is why your gross pay, everything you earned, is bigger than your net pay, the amount that lands in your account. Each spring, usually by April 15, people file a tax return to add up the whole year. If too much was withheld, they get a refund. If too little, they owe the rest.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Gross pay", back: "Everything you earned before anything is taken out. Hours x hourly rate." },
+              { front: "Withholding", back: "Tax your employer holds back from each paycheck and sends to the government." },
+              { front: "Net pay", back: "What actually lands in your account: gross pay minus taxes and other deductions." },
+              { front: "Tax return", back: "A yearly form, usually due by April 15, that adds up your income and the tax you owe." },
+              { front: "Refund", back: "Money sent back to you when more tax was withheld than you owed." },
+            ],
+          },
+          probe: {
+            type: "number",
+            prompt: "Your gross pay for a week at a summer job is $400. Payroll taxes for Social Security and Medicare take 7.65 percent. How many dollars are taken out for payroll taxes?",
+            answer: 30.6,
+            tolerance: 0.01,
+            unit: "$",
+            hint: "Turn 7.65 percent into a decimal (0.0765) and multiply by $400.",
+            mistakes: [
+              { match: "369.4", coach: "That is your net pay after payroll taxes. The question asks how much is taken out." },
+              { match: "3060", coach: "Check your decimal. 7.65 percent is 0.0765, not 7.65." },
+              { match: "306", coach: "Close, but the decimal is off by one place. 7.65 percent is 0.0765." },
+            ],
+            seconds: 50,
+          },
+          think: {
+            q: "A paycheck shows gross pay of $500 and $60 withheld for taxes. What is the net pay?",
+            choices: ["$560", "$500", "$60", "$440"],
+            answer: 3,
+            why: "Net pay is gross pay minus what is withheld: 500 - 60 = $440.",
+            hints: [
+              "You added the taxes. Withholding comes out of your pay, so subtract.",
+              "That is the gross pay, before taxes. Net pay is what is left after.",
+              "That is the tax withheld. What lands in your account?",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Withholding is like paying for a school field trip in small weekly amounts instead of all at once. At the end, the teacher checks the total. If you paid too much, you get money back; if you paid too little, you pay the rest.",
+            example:
+              "Nate earns $15 an hour for 20 hours, so his gross pay is 15 x 20 = $300. His pay stub shows $18.60 for Social Security, $4.35 for Medicare and $12 for income tax. Total taken out: 18.60 + 4.35 + 12 = $34.95. Net pay: 300 - 34.95 = $265.05.",
+            simpler: {
+              q: "Gross pay is $100, and $10 is taken out for taxes. What is net pay?",
+              choices: ["$110", "$90", "$10"],
+              answer: 1,
+              why: "Net pay = gross pay minus taxes: 100 - 10 = $90.",
+              hints: [
+                "You added. Taxes come out of your pay, so subtract them.",
+                "",
+                "That is the tax itself. How much is left for you?",
+              ],
+            },
+          },
+        },
+        {
+          title: "Tax brackets: only the new dollars",
+          teach:
+            "The federal income tax uses brackets, which are slices of income taxed at different rates. Here is a made-up, simple example to see how they work. Say the first $10,000 is taxed at 10 percent and every dollar above $10,000 is taxed at 20 percent. Someone earning $15,000 pays 10 percent on the first $10,000, which is $1,000, plus 20 percent on the $5,000 above the line, which is another $1,000. Total tax: $2,000. Notice what does not happen. Crossing the $10,000 line does not raise the tax on the first $10,000. Only the dollars above the line are taxed at the higher rate. So a raise leaves you with more take-home pay, not less. Real brackets have more slices, but they work the same way.",
+          visual: {
+            type: "compare",
+            left: {
+              title: "Myth",
+              points: ["A raise into a higher bracket taxes ALL your income at the higher rate", "A raise can shrink your take-home pay", "Better to turn down the raise"],
+            },
+            right: {
+              title: "Fact",
+              points: ["Only the dollars above the line get the higher rate", "Earlier dollars keep their lower rate", "A raise means more take-home pay"],
+            },
+          },
+          probe: {
+            type: "number",
+            prompt: "Use the pretend brackets: 10 percent on the first $10,000, and 20 percent on every dollar above $10,000. How much tax is owed on $18,000 of income?",
+            answer: 2600,
+            tolerance: 0.01,
+            unit: "$",
+            hint: "Tax the first $10,000 at 10 percent. Then tax only the $8,000 above the line at 20 percent. Add the two.",
+            mistakes: [
+              { match: "3600", coach: "You taxed all $18,000 at 20 percent. The first $10,000 keeps its 10 percent rate." },
+              { match: "1800", coach: "You taxed all $18,000 at 10 percent. The $8,000 above the line is taxed at 20 percent." },
+              { match: "1600", coach: "That is the tax on the top slice only. Add the $1,000 from the first $10,000." },
+            ],
+            seconds: 60,
+          },
+          think: {
+            q: "Pretend brackets: 10 percent on the first $10,000 and 20 percent above. Maria's income rises from $10,000 to $11,000. How much more tax does she owe?",
+            choices: ["$200", "$1,100", "$2,200", "$1,000"],
+            answer: 0,
+            why: "Only the new $1,000 is above the line, and 20 percent of $1,000 is $200.",
+            hints: [
+              "",
+              "That would be 10 percent of all $11,000, which is her whole tax, not the extra.",
+              "That treats all $11,000 as if it were taxed at 20 percent. Only the new dollars get the higher rate.",
+              "That is the tax on her first $10,000, which did not change. What about the new $1,000?",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Tax brackets are like filling a row of buckets with water. The first bucket fills to the top at one rate. Only the water that spills into the next bucket counts at the next rate. Spilling over never changes what is already in the first bucket.",
+            example:
+              "With the pretend brackets, earning $12,000 means 10 percent of $10,000 = $1,000, plus 20 percent of the $2,000 above = $400. Tax: $1,400. Take-home: 12,000 - 1,400 = $10,600. At $10,000, tax is $1,000 and take-home is $9,000. The raise added $1,600 to take-home pay.",
+            simpler: {
+              q: "Only dollars above $10,000 get the higher rate. If you earn $10,500, how many dollars get the higher rate?",
+              choices: ["$10,500", "$500", "$10,000"],
+              answer: 1,
+              why: "Only the $500 above the $10,000 line gets the higher rate.",
+              hints: [
+                "Not all of it. The first $10,000 stays at the lower rate.",
+                "",
+                "Those are the dollars below the line. Which dollars are above it?",
+              ],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sort",
+        prompt: "Sort each clue: is it about sales tax, or income and payroll taxes?",
+        buckets: ["Sales tax", "Income or payroll tax"],
+        items: [
+          { text: "Added at the register when you buy a bike", bucket: 0 },
+          { text: "Rate set by your state and city on purchases", bucket: 0 },
+          { text: "Makes a $20 shirt cost $21.40", bucket: 0 },
+          { text: "Printed on a store receipt", bucket: 0 },
+          { text: "Withheld from a paycheck", bucket: 1 },
+          { text: "Added up on a tax return each spring", bucket: 1 },
+          { text: "6.2 percent for Social Security", bucket: 1 },
+          { text: "The difference between gross pay and net pay", bucket: 1 },
+        ],
+      },
+      explain: {
+        prompt:
+          "Explain to a younger sibling why the price at the register is higher than the price tag, and why a first paycheck is smaller than hours times the hourly rate.",
+        keyPoints: [
+          "Sales tax is a percent of the price added at the register",
+          "Tax = price times the tax rate",
+          "Employers withhold income and payroll taxes from each paycheck",
+          "Gross pay minus taxes is net pay",
+          "Taxes pay for shared things like roads, schools and fire departments",
+        ],
+      },
+      mastery: [
+        {
+          type: "number",
+          prompt: "Sales tax is 8 percent. You buy a $25 jacket. What is the total you pay?",
+          answer: 27,
+          tolerance: 0.01,
+          unit: "$",
+          hint: "Find 8 percent of $25, then add it to the price.",
+          mistakes: [
+            { match: "2", coach: "That is the tax. Add it to the $25 price for the total." },
+            { match: "33", coach: "You added 8 dollars. Eight percent of $25 is only $2." },
+            { match: "25.08", coach: "You added 8 cents. Eight percent means 0.08 times the price." },
+          ],
+          seconds: 35,
+        },
+        {
+          type: "match",
+          prompt: "Match each tax word to its meaning.",
+          pairs: [
+            { left: "Gross pay", right: "Everything you earned before anything is taken out" },
+            { left: "Net pay", right: "The amount that actually lands in your account" },
+            { left: "Withholding", right: "Tax your employer holds back from each paycheck" },
+            { left: "Refund", right: "Money returned when too much tax was withheld" },
+            { left: "Sales tax", right: "A percent added to the price at the register" },
+          ],
+          hint: "Gross comes before taxes; net comes after. A refund comes back to you.",
+          mistakes: [
+            { match: "Swapped gross and net", coach: "Gross is the big number before taxes. Net is what is left after taxes come out." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "place",
+          prompt: "Place each item on the number line at its total price, tag price plus sales tax.",
+          min: 0,
+          max: 60,
+          step: 0.1,
+          tolerance: 0.5,
+          items: [
+            { label: "$10 book, 5% tax", value: 10.5 },
+            { label: "$20 shirt, 7% tax", value: 21.4 },
+            { label: "$40 shoes, 10% tax", value: 44 },
+            { label: "$50 bike helmet, 6% tax", value: 53 },
+          ],
+          hint: "For each item, multiply the price by the tax rate as a decimal, then add it to the price.",
+          mistakes: [
+            { match: "Placed the shoes at 50", coach: "Ten percent of $40 is $4, not $10. The total is $44." },
+            { match: "Placed the helmet at 56", coach: "Six percent of $50 is $3, so the total is $53." },
+          ],
+          seconds: 70,
+        },
+        {
+          type: "sequence",
+          prompt: "Put the path of a paycheck in order.",
+          steps: [
+            "You work your hours at a job",
+            "Your employer figures your gross pay",
+            "Taxes are withheld from your pay",
+            "Your net pay lands in your account",
+            "In spring, you file a tax return for the year",
+            "You get a refund or pay what you still owe",
+          ],
+          hint: "Start with the work, end with settling up for the whole year.",
+          mistakes: [
+            { match: "Put net pay before withholding", coach: "Net pay is what is left after taxes are withheld, so withholding has to come first." },
+          ],
+          seconds: 45,
+        },
+      ],
+      check: [
+        {
+          q: "Sales tax is 5 percent. What is the tax on a $60 purchase?",
+          choices: ["$5", "$65", "$3", "$0.30"],
+          answer: 2,
+          why: "0.05 x 60 = $3.",
+        },
+        {
+          q: "Which of these is usually paid for with taxes?",
+          choices: ["Your new phone", "A public fire department", "Movie tickets"],
+          answer: 1,
+          why: "Fire departments serve the whole community and are paid for mostly by local taxes.",
+        },
+        {
+          q: "What is net pay?",
+          choices: [
+            "Pay after taxes and deductions are taken out",
+            "Pay before anything is taken out",
+            "Your hourly rate",
+            "The tax you owe",
+          ],
+          answer: 0,
+          why: "Net pay is what actually lands in your account after taxes and deductions.",
+        },
+        {
+          q: "Pretend brackets: 10 percent on the first $10,000 and 20 percent above. What is the tax on $14,000?",
+          choices: ["$2,800", "$1,400", "$800", "$1,800"],
+          answer: 3,
+          why: "10% of $10,000 = $1,000, plus 20% of the $4,000 above = $800. Total: $1,800.",
+        },
+        {
+          q: "What did 'no taxation without representation' mean?",
+          choices: [
+            "People should never pay any taxes",
+            "People should have a say, through elected representatives, in the taxes they pay",
+            "Only kings should set taxes",
+          ],
+          answer: 1,
+          why: "The colonists objected to taxes passed by a Parliament where they had no representatives.",
+        },
+      ],
+      task: {
+        kind: "project",
+        prompt:
+          "With a parent, look at a real store receipt. Find the subtotal, the sales tax and the total, and figure out the tax rate by dividing the tax by the subtotal. Then make a pretend pay stub for a summer job: hours, hourly rate, gross pay, 7.65 percent payroll taxes and net pay. Finish with a list of five things in your town that taxes help pay for.",
+        rubric: [
+          "Finds the subtotal, tax and total on a real receipt",
+          "Calculates the tax rate correctly (tax divided by subtotal)",
+          "Builds a pretend pay stub with correct gross pay, payroll tax and net pay",
+          "Lists five real things in the community paid for by taxes",
+        ],
+      },
+    },
   ],
 };

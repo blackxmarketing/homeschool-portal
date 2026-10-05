@@ -8,7 +8,7 @@ export const writing: Course = {
   track: "academic",
   subject: "Writing",
   blurb:
-    "Read like a detective and write like a craftsman: close reading, strong sentences, solid paragraphs, persuasion, storytelling and great books.",
+    "Read like a detective and write like a craftsman: close reading, strong sentences, grammar, solid paragraphs, research reports, persuasion, storytelling, poetry, letters and speeches, and great books.",
   teacher: {
     name: "Mr. Lincoln",
     avatar: "🎩",
@@ -2516,6 +2516,1572 @@ The most important word in a review is "because." "I liked it" tells us little. 
           "States a clear opinion of the book.",
           "Supports the opinion with at least two specific reasons and examples from the book, using \"because\" or similar reasoning.",
           "Ends with a recommendation of who would enjoy the book, written in organized, clear paragraphs.",
+        ],
+      },
+    },
+    {
+      id: "writing.grammar",
+      title: "Parts of Speech",
+      minutes: 30,
+      stage: "grammar",
+      read: `Every word in a sentence has a job. Grammarians sort words by their jobs into groups called the parts of speech. English has eight traditional parts of speech, and five of them do most of the heavy lifting: nouns, verbs, adjectives, adverbs and conjunctions.
+
+A noun names a person, place, thing or idea: sailor, harbor, rope, courage. A verb shows an action or a state of being: The sailor climbed. The sea is calm. Every complete sentence needs a verb and someone or something doing it. Together they form the frame of the sentence.
+
+Adjectives and adverbs are describers. An adjective describes a noun. It answers which one, what kind or how many: the old sailor, three ropes, a stormy harbor. An adverb usually describes a verb, and it answers how, when, where or how much: The sailor climbed quickly. He climbed yesterday. He climbed upward. Many adverbs end in -ly, but not all of them. Words like soon, very, never and there are adverbs too. An adverb can even describe an adjective or another adverb: a very old sailor, climbing quite quickly.
+
+Conjunctions are connectors. The seven coordinating conjunctions are for, and, nor, but, or, yet and so. A handy way to remember them is the made-up word FANBOYS, spelled from their first letters. Conjunctions join words (salt and pepper), phrases (up the mast or down the ladder) and whole sentences: The wind died, so the ship drifted. When a conjunction joins two complete sentences, a comma goes before it.
+
+Here is the most important rule: a word's part of speech depends on its job in the sentence, not on the word itself. In "We went for a run," run is a noun. In "We run every morning," run is a verb. To label a word, ask what it is doing right now.
+
+Once you know the jobs, you can build sentences on purpose. Start with a noun and a verb. Add adjectives to sharpen the picture, adverbs to show how or when, and a conjunction to link two ideas. That is how a plain frame becomes a sentence worth reading.`,
+      keyIdeas: [
+        "Nouns name people, places, things and ideas; verbs show action or being. Together they are a sentence's frame.",
+        "Adjectives describe nouns; adverbs describe verbs, adjectives or other adverbs.",
+        "Conjunctions (FANBOYS: for, and, nor, but, or, yet, so) join words and ideas.",
+        "A word's part of speech depends on its job in the sentence.",
+      ],
+      hook: {
+        text: "Lewis Carroll wrote a poem full of made-up words: 'Twas brillig, and the slithy toves did gyre and gimble in the wabe.' Nobody knows what a tove is. Yet you can tell a tove is a thing, slithy describes it, and gyre is something toves do. How do you know? Your brain already understands the parts of speech. Today you learn their names and their jobs.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "toves", back: "A noun: it names the things in the poem (and takes an -s for more than one)." },
+            { front: "slithy", back: "An adjective: it sits before 'toves' and describes them." },
+            { front: "gyre and gimble", back: "Verbs joined by the conjunction 'and': things the toves do." },
+          ],
+        },
+      },
+      teach: [
+        {
+          title: "Nouns and verbs: the frame",
+          teach:
+            "Every word in a sentence has a job, and grammarians sort words by those jobs into the parts of speech. English has eight, but five do most of the work. Start with the two that build the frame. A noun names a person, place, thing or idea: sailor, harbor, rope, courage. A verb shows an action or a state of being: The sailor climbed. The sea is calm. Notice that 'is' counts as a verb, even though nothing moves. It tells what something is. Every complete sentence needs a verb and someone or something doing it. Find those two and you have found the backbone of the sentence.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Noun", back: "Names a person, place, thing or idea: sailor, harbor, rope, courage" },
+              { front: "Action verb", back: "Shows what someone does: climbed, shouted, swam" },
+              { front: "Being verb", back: "Tells what something is: is, are, was, were" },
+              { front: "The frame", back: "Noun + verb: 'The sailor climbed.' Everything else hangs on it." },
+            ],
+          },
+          probe: {
+            type: "sort",
+            prompt: "Sort each word: does it name something (noun) or show action or being (verb)?",
+            buckets: ["Noun", "Verb"],
+            items: [
+              { text: "courage", bucket: 0 },
+              { text: "climbed", bucket: 1 },
+              { text: "harbor", bucket: 0 },
+              { text: "shouted", bucket: 1 },
+              { text: "island", bucket: 0 },
+              { text: "is", bucket: 1 },
+              { text: "freedom", bucket: 0 },
+              { text: "swam", bucket: 1 },
+            ],
+            hint: "Ask: does it name something, even an idea you can't touch? Or does it tell what something does or is?",
+            mistakes: [
+              { match: "Put 'courage' or 'freedom' under verb", coach: "Courage and freedom are ideas. You can't touch them, but they still name something, so they are nouns." },
+              { match: "Put 'is' under noun", coach: "'Is' tells what something is, as in 'The sea is calm.' Being words are verbs." },
+            ],
+            seconds: 35,
+          },
+          think: {
+            q: "In 'The sailor climbed the mast,' which word is the verb?",
+            choices: ["sailor", "climbed", "mast", "the"],
+            answer: 1,
+            why: "'Climbed' tells what the sailor did, so it is the verb.",
+            hints: [
+              "'Sailor' names a person. Nouns name; verbs act.",
+              "",
+              "'Mast' names a thing on the ship. Look for the action word.",
+              "'The' just points to a noun. Which word shows what happened?",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Nouns and verbs are like the frame of a house. The walls and roof can't go up until the frame stands. A sentence works the same way: noun and verb first, then everything else.",
+            example:
+              "In 'The tired crew rowed home,' ask who is doing something: the crew, a noun. Ask what they did: rowed, a verb. 'Crew rowed' is the frame; 'tired' and 'home' hang on it.",
+            simpler: {
+              q: "Which word names a thing?",
+              choices: ["anchor", "jumped", "quickly"],
+              answer: 0,
+              why: "An anchor is a thing, so 'anchor' is a noun.",
+              hints: ["", "'Jumped' is an action, so it is a verb.", "'Quickly' tells how something happens. It doesn't name anything."],
+            },
+          },
+        },
+        {
+          title: "Adjectives and adverbs: the describers",
+          teach:
+            "Once the frame stands, describers add detail. An adjective describes a noun. It answers which one, what kind or how many: the old sailor, a stormy harbor, three ropes. An adverb usually describes a verb. It answers how, when, where or how much: He climbed quickly. He climbed yesterday. He climbed upward. Many adverbs end in -ly, but not all. Soon, never, there and very are adverbs too. Adverbs can even describe adjectives or other adverbs: a very old sailor, climbing quite quickly. Here is a quick test. Point to the word being described. If it is a noun, you have an adjective. If it is anything else, you have an adverb.",
+          visual: {
+            type: "compare",
+            left: { title: "Adjective", points: ["Describes a noun", "Which one? What kind? How many?", "the old sailor", "three ropes"] },
+            right: { title: "Adverb", points: ["Describes a verb, adjective or adverb", "How? When? Where? How much?", "climbed quickly", "a very old sailor"] },
+          },
+          probe: {
+            type: "sort",
+            prompt: "Look at the word in capitals. Is it an adjective or an adverb?",
+            buckets: ["Adjective", "Adverb"],
+            items: [
+              { text: "the OLD sailor", bucket: 0 },
+              { text: "climbed QUICKLY", bucket: 1 },
+              { text: "THREE ropes", bucket: 0 },
+              { text: "left YESTERDAY", bucket: 1 },
+              { text: "a STORMY night", bucket: 0 },
+              { text: "a VERY cold night", bucket: 1 },
+              { text: "a SILVER whistle", bucket: 0 },
+              { text: "sang SOFTLY", bucket: 1 },
+            ],
+            hint: "Find the word being described. If it's a noun, the describer is an adjective. If it's a verb, adjective or adverb, the describer is an adverb.",
+            mistakes: [
+              { match: "Put 'VERY' under adjective", coach: "'Very' describes 'cold,' which is itself an adjective. A word that describes an adjective is an adverb." },
+              { match: "Put 'YESTERDAY' under adjective", coach: "'Yesterday' tells when he left. Answering 'when?' about an action is an adverb's job." },
+              { match: "Put 'THREE' under adverb", coach: "'Three' tells how many ropes. It describes a noun, so it is an adjective." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "In 'The crew sang loudly,' what does 'loudly' describe, and what part of speech is it?",
+            choices: ["It describes 'crew,' so it is an adjective", "It describes 'sang,' so it is an adverb", "It names a thing, so it is a noun"],
+            answer: 1,
+            why: "'Loudly' tells how the crew sang. It describes a verb, so it is an adverb.",
+            hints: [
+              "Ask how the crew did something. 'Loudly' is about the singing, not the crew itself.",
+              "",
+              "'Loudly' doesn't name anything. It tells how an action happened.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Adjectives and adverbs are like paint and trim on a house. The frame holds it up; the describers make it look like one particular house instead of just any house.",
+            example:
+              "'The dog barked.' Add an adjective: 'The hungry dog barked.' Add an adverb: 'The hungry dog barked loudly.' 'Hungry' describes the dog, a noun. 'Loudly' describes barked, a verb.",
+            simpler: {
+              q: "In 'a red kite,' what does 'red' describe?",
+              choices: ["The kite, a noun", "An action", "Nothing at all"],
+              answer: 0,
+              why: "'Red' tells what kind of kite, so it describes a noun. That makes it an adjective.",
+              hints: ["", "Nothing is happening in 'a red kite.' 'Red' tells about the thing.", "'Red' tells you what kind of kite it is, so it does describe something."],
+            },
+          },
+        },
+        {
+          title: "Conjunctions: the connectors",
+          teach:
+            "A conjunction joins words, phrases or whole sentences. The seven most common are for, and, nor, but, or, yet and so. Take the first letter of each and you get FANBOYS, an easy way to remember them. Each one shows a different connection. And adds: salt and pepper. But and yet show a contrast: I was tired, but I kept rowing. Or offers a choice: tea or cocoa. So shows a result: The wind died, so the ship drifted. When a conjunction joins two complete sentences, put a comma before it. Choosing the right conjunction tells your reader exactly how two ideas fit together.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "FANBOYS", back: "for, and, nor, but, or, yet, so" },
+              { front: "and", back: "Adds one idea to another: salt and pepper" },
+              { front: "but / yet", back: "Shows a contrast: I was tired, but I kept rowing." },
+              { front: "or", back: "Offers a choice: tea or cocoa" },
+              { front: "so", back: "Shows a result: The wind died, so the ship drifted." },
+            ],
+          },
+          probe: {
+            type: "cloze",
+            text: "Result: The wind died, {0} the ship drifted. Contrast: I was tired, {1} I kept rowing. Choice: We can sail at dawn {2} wait until noon.",
+            blanks: [{ answers: ["so"] }, { answers: ["but", "yet"] }, { answers: ["or"] }],
+            bank: ["so", "but", "or", "and", "nor"],
+            hint: "Read the label before each sentence. 'So' shows a result, 'but' shows a contrast and 'or' offers a choice.",
+            mistakes: [
+              { match: "and", coach: "'And' just adds one idea to another. Look at the label: which conjunction shows that exact kind of connection?" },
+              { match: "nor", coach: "'Nor' adds another 'no,' as in 'He did not stop, nor did he rest.' None of these sentences needs that." },
+            ],
+            seconds: 35,
+          },
+          think: {
+            q: "Which conjunction best fits: 'The map was old, ___ it was still accurate.'",
+            choices: ["so", "but", "or", "and"],
+            answer: 1,
+            why: "Being old and still accurate is a surprising contrast, and 'but' shows contrast.",
+            hints: [
+              "'So' would mean the map was accurate because it was old. That's not the connection here.",
+              "",
+              "'Or' offers a choice, but this sentence isn't choosing between two things.",
+              "'And' works in grammar, but it misses the surprise: old maps are often wrong.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Conjunctions are like couplings between railroad cars. Each car is an idea, and the coupling decides how they travel together: one after another, in contrast, or as a choice.",
+            example:
+              "Two sentences: 'It rained all day.' 'The game was canceled.' Joined with 'so': 'It rained all day, so the game was canceled.' Now the reader knows the rain caused the cancellation.",
+            simpler: {
+              q: "Which word is a conjunction?",
+              choices: ["but", "ship", "quickly"],
+              answer: 0,
+              why: "'But' is one of the FANBOYS conjunctions. It joins ideas that contrast.",
+              hints: ["", "'Ship' names a thing, so it is a noun.", "'Quickly' tells how something happens, so it is an adverb."],
+            },
+          },
+        },
+        {
+          title: "The job decides",
+          teach:
+            "Here is the most important rule of the parts of speech: a word's part of speech depends on its job in the sentence, not on the word itself. In 'We went for a run,' run names a thing, so it is a noun. In 'We run every morning,' run is the action, so it is a verb. Fast works the same way. In 'the fast boat,' it describes a noun, so it is an adjective. In 'She swam fast,' it tells how she swam, so it is an adverb. You can't label a word just by looking it up. Read the whole sentence and ask what the word is doing right now.",
+          visual: {
+            type: "compare",
+            left: { title: "'run' as a noun", points: ["We went for a run.", "It names a thing", "Can follow 'a' or 'the'"] },
+            right: { title: "'run' as a verb", points: ["We run every morning.", "It is the action", "Changes with time: ran, running"] },
+          },
+          probe: {
+            type: "match",
+            prompt: "Each capital word has a job. Match each sentence to the part of speech of its capital word.",
+            pairs: [
+              { left: "We went for a RUN.", right: "Noun" },
+              { left: "We RUN every morning.", right: "Verb" },
+              { left: "The FAST boat won.", right: "Adjective" },
+              { left: "She swam FAST.", right: "Adverb" },
+              { left: "I wanted to stop, BUT I kept going.", right: "Conjunction" },
+            ],
+            hint: "Ask what each capital word is doing: naming, acting, describing a noun, describing an action, or joining two ideas.",
+            mistakes: [
+              { match: "Matched 'She swam FAST.' to Adjective", coach: "Here 'fast' tells how she swam. Describing a verb is an adverb's job." },
+              { match: "Matched 'We went for a RUN.' to Verb", coach: "After 'a,' run names the thing you went for. Words that name things are nouns." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "In 'The light from the lighthouse was bright,' what part of speech is 'light'?",
+            choices: ["Noun", "Verb", "Adverb"],
+            answer: 0,
+            why: "Here 'light' names a thing, the light coming from the lighthouse, so it is a noun.",
+            hints: [
+              "",
+              "'Light' can be a verb, as in 'light the candle,' but here nobody is lighting anything. The verb is 'was.'",
+              "Adverbs tell how, when or where. Here 'light' names something instead.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A word is like a ballplayer who plays different positions. The same player can pitch one day and play the outfield the next. You can only tell by watching where they stand in this game.",
+            example:
+              "'Light' three ways: 'Turn on the light' (noun, a thing). 'Light the candle' (verb, an action). 'A light jacket' (adjective, it describes the jacket). Same word, three jobs.",
+            simpler: {
+              q: "In 'I can fish,' what is 'fish' doing?",
+              choices: ["Showing an action, so it's a verb", "Naming an animal, so it's a noun"],
+              answer: 0,
+              why: "'Can fish' tells what I am able to do, so here 'fish' is an action: a verb.",
+              hints: ["", "Fish can be animals, but in 'I can fish' the word tells what I can do."],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sort",
+        prompt: "Sort each word from this sentence: 'The brave captain steered carefully, but the old ship leaked.'",
+        buckets: ["Noun", "Verb", "Adjective", "Adverb", "Conjunction"],
+        items: [
+          { text: "brave", bucket: 2 },
+          { text: "captain", bucket: 0 },
+          { text: "steered", bucket: 1 },
+          { text: "carefully", bucket: 3 },
+          { text: "but", bucket: 4 },
+          { text: "old", bucket: 2 },
+          { text: "ship", bucket: 0 },
+          { text: "leaked", bucket: 1 },
+        ],
+      },
+      explain: {
+        prompt: "Explain how you would figure out the part of speech of any word in a sentence.",
+        keyPoints: [
+          "Nouns name things and verbs show action or being; together they form the frame.",
+          "Adjectives describe nouns; adverbs describe verbs, adjectives or other adverbs.",
+          "Conjunctions like the FANBOYS join words and ideas.",
+          "A word's part of speech depends on its job in that sentence.",
+        ],
+      },
+      mastery: [
+        {
+          type: "cloze",
+          text: "A {0} names a person, place, thing or idea. A {1} shows action or being. An {2} describes a noun, and an {3} describes a verb.",
+          blanks: [{ answers: ["noun"] }, { answers: ["verb"] }, { answers: ["adjective"] }, { answers: ["adverb"] }],
+          bank: ["noun", "verb", "adjective", "adverb", "conjunction", "sentence"],
+          hint: "Think of the jobs: naming, doing, describing a noun, describing an action.",
+          mistakes: [
+            { match: "conjunction", coach: "A conjunction joins ideas, like 'and' or 'but.' None of these blanks is about joining." },
+            { match: "sentence", coach: "A sentence is the whole thing. Each blank asks for one part of speech." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "build",
+          prompt: "Build a sentence with this pattern: The + ADJECTIVE + NOUN + VERB + ADVERB.",
+          tiles: ["The", "brave", "captain", "sailed", "boldly."],
+          distractors: ["bravery", "boldness"],
+          hint: "Find the describer for the noun, the noun itself, the action, and then the word that tells how.",
+          mistakes: [
+            { match: "Used 'bravery' or 'boldness'", coach: "Those are nouns: they name ideas. The pattern needs an adjective and an adverb in those spots." },
+            { match: "Put 'boldly.' before 'sailed'", coach: "The pattern puts the adverb last, right after the verb it describes." },
+          ],
+          seconds: 30,
+        },
+        {
+          type: "highlight",
+          prompt: "Tap every sentence that joins two complete sentences with a FANBOYS conjunction.",
+          sentences: [
+            "The storm grew worse, so the crew lowered the sails.",
+            "The captain and the cook stood on deck.",
+            "The sea was rough, yet no one was afraid.",
+            "Because the wind was strong, we stayed inside.",
+            "You can steer the ship, or you can mend the nets.",
+          ],
+          correct: [0, 2, 4],
+          hint: "Check both sides of the conjunction. Each side must be a full sentence with its own noun and verb, and the joining word must be one of the FANBOYS.",
+          mistakes: [
+            { match: "Tapped 'The captain and the cook stood on deck.'", coach: "'And' joins two nouns here, not two complete sentences." },
+            { match: "Tapped 'Because the wind was strong, we stayed inside.'", coach: "'Because' is a joining word, but it isn't one of the FANBOYS: for, and, nor, but, or, yet, so." },
+          ],
+          seconds: 45,
+        },
+        {
+          type: "sort",
+          prompt: "Each capital word has a job in its sentence. Sort them by part of speech.",
+          buckets: ["Noun", "Verb", "Adjective", "Adverb"],
+          items: [
+            { text: "We heard a loud CRASH.", bucket: 0 },
+            { text: "Waves CRASH on the rocks.", bucket: 1 },
+            { text: "The DARK clouds gathered.", bucket: 2 },
+            { text: "The sun set SLOWLY.", bucket: 3 },
+            { text: "Their PLAN worked.", bucket: 0 },
+            { text: "We PLAN trips together.", bucket: 1 },
+            { text: "a GOLDEN sunset", bucket: 2 },
+            { text: "They arrived EARLY.", bucket: 3 },
+          ],
+          hint: "Same word, different jobs. Ask what the capital word is doing in that sentence.",
+          mistakes: [
+            { match: "Put 'a loud CRASH' under verb", coach: "After 'a loud,' crash names the sound you heard. That makes it a noun here." },
+            { match: "Put 'arrived EARLY' under adjective", coach: "'Early' tells when they arrived. Describing an action makes it an adverb." },
+          ],
+          seconds: 50,
+        },
+      ],
+      check: [
+        {
+          q: "Which word is a noun in 'The brave knight crossed the bridge'?",
+          choices: ["brave", "crossed", "bridge", "the"],
+          answer: 2,
+          why: "'Bridge' names a thing. 'Brave' is an adjective and 'crossed' is a verb.",
+        },
+        {
+          q: "What does an adverb usually describe?",
+          choices: ["A noun", "A verb, telling how, when or where", "Only the names of people"],
+          answer: 1,
+          why: "Adverbs most often describe verbs, answering how, when, where or how much.",
+        },
+        {
+          q: "Which list contains only coordinating conjunctions?",
+          choices: ["for, and, nor, but, or, yet, so", "run, jump, swim", "quickly, softly, soon", "big, red, three"],
+          answer: 0,
+          why: "Those are the FANBOYS, the seven coordinating conjunctions.",
+        },
+        {
+          q: "In 'She will fish in the lake,' what part of speech is 'fish'?",
+          choices: ["Noun", "Adjective", "Conjunction", "Verb"],
+          answer: 3,
+          why: "'Will fish' tells what she will do, so 'fish' is a verb in this sentence.",
+        },
+        {
+          q: "Why can 'light' be a noun in one sentence and a verb in another?",
+          choices: [
+            "Dictionaries disagree about it",
+            "It is spelled two different ways",
+            "A word's part of speech depends on its job in the sentence",
+            "Short words have no part of speech",
+          ],
+          answer: 2,
+          why: "The same word can name a thing in one sentence and show an action in another. Its job decides.",
+        },
+      ],
+      task: {
+        kind: "write",
+        prompt:
+          "Write a five-sentence paragraph describing a place you love, such as a kitchen, a creek or a workshop. Use at least three adjectives, two adverbs and two different FANBOYS conjunctions that join complete sentences. Then copy one of your sentences and label its nouns, verbs, adjectives, adverbs and conjunction.",
+        rubric: [
+          "Writes five clear, complete sentences about one place.",
+          "Uses at least three adjectives and two adverbs that add real detail.",
+          "Joins complete sentences with at least two different FANBOYS conjunctions, with a comma before each.",
+          "Correctly labels the nouns, verbs, adjectives, adverbs and conjunction in one sentence.",
+        ],
+      },
+    },
+    {
+      id: "writing.research-report",
+      title: "The Research Report",
+      minutes: 35,
+      stage: "logic",
+      read: `A research report answers a question with facts you have gathered, checked and organized. It is how scientists, historians and reporters share what they have learned, and it follows five steps.
+
+First, ask a good question. "Airplanes" is a topic, not a question. "When did the Wright brothers first fly?" can be answered with one fact. A strong research question is open enough to need several facts but narrow enough to answer in a few pages: How did the Wright brothers teach themselves to fly?
+
+Second, find trustworthy sources. A primary source comes from the time and people you are studying, such as a diary, a letter or a photograph. A secondary source is written later by someone who studied the primary sources, such as a biography or an encyclopedia. For each source, ask who wrote it, what they know and when they wrote it. Check important facts in at least two sources.
+
+Third, take notes in your own words. Write short phrases, not whole copied sentences, and write down where each fact came from. Passing off someone else's words or ideas as your own is called plagiarism, and it is a kind of stealing. If you want the exact words, put them in quotation marks and name the source.
+
+Fourth, organize your notes. Sort them into groups by subtopic, and each group becomes a body paragraph. For the Wright brothers, the groups might be getting ready, the first flight and what came next. Then build an outline: an introduction that asks the question and answers it in one sentence, the body paragraphs, and a conclusion.
+
+Fifth, write and cite. Here is a taste of what your notes might hold. Wilbur and Orville Wright ran a bicycle shop in Dayton, Ohio. In 1901 they built a small wind tunnel to test wing shapes. On December 17, 1903, near Kitty Hawk, North Carolina, Orville flew their engine-powered Flyer for 12 seconds and about 120 feet. At the end of your report, list your sources so a reader can check your work.
+
+Good research is honest research. You follow the facts where they lead, give credit to the people who found them, and say so when the evidence is unclear.`,
+      keyIdeas: [
+        "A strong research question needs several facts but fits in a few pages; how and why questions work well.",
+        "Primary sources come from the time itself; secondary sources are written later. Check facts in two sources.",
+        "Take notes in your own words with the source beside each one, so you never plagiarize.",
+        "Sort notes by subtopic, outline, write, and list your sources at the end.",
+      ],
+      hook: {
+        text: "In 1899 Wilbur Wright wrote a letter to the Smithsonian Institution asking for anything it had published about flight. He and his brother Orville ran a bicycle shop and had never gone to college. Four years later they made the first powered, controlled airplane flight. How? They asked sharp questions, read everything they could find, tested ideas and kept careful notes. That is research.",
+        visual: {
+          type: "timeline",
+          events: [
+            { year: 1899, label: "Wilbur writes to the Smithsonian", detail: "He asks for papers on flight and reads everything he receives." },
+            { year: 1901, label: "Homemade wind tunnel", detail: "The brothers test the lift of many small wing shapes and record the results." },
+            { year: 1903, label: "First powered flight", detail: "On December 17, near Kitty Hawk, North Carolina, Orville flies for 12 seconds." },
+          ],
+        },
+      },
+      teach: [
+        {
+          title: "Start with a good question",
+          teach:
+            "Every research report begins with a question, and the question decides how good the report can be. 'Airplanes' is only a topic. 'When did the Wright brothers first fly?' is a question, but one fact answers it, so there is nothing left to research. A strong research question sits in the middle. It is open enough to need several facts and narrow enough to answer in a few pages: 'How did the Wright brothers teach themselves to fly?' Good research questions often begin with how or why. Write your question at the top of your notes and let it guide every source you open.",
+          visual: {
+            type: "compare",
+            left: { title: "Weak question", points: ["Airplanes (just a topic)", "When did they fly? (one fact)", "What is everything about flight? (too big)"] },
+            right: { title: "Strong question", points: ["How did the Wright brothers teach themselves to fly?", "Needs several facts", "Fits in a few pages", "Often starts with how or why"] },
+          },
+          probe: {
+            type: "sort",
+            prompt: "Sort each research question by its size.",
+            buckets: ["Too big", "Strong research question", "One-fact question"],
+            items: [
+              { text: "What is the history of all transportation?", bucket: 0 },
+              { text: "How did the Wright brothers teach themselves to fly?", bucket: 1 },
+              { text: "What year did the Wright brothers first fly?", bucket: 2 },
+              { text: "Why do honeybees build six-sided cells?", bucket: 1 },
+              { text: "What is everything about the ocean?", bucket: 0 },
+              { text: "How many legs does a spider have?", bucket: 2 },
+            ],
+            hint: "Ask: would this take a whole library, a few pages, or a single fact to answer?",
+            mistakes: [
+              { match: "Put 'How many legs does a spider have?' under strong", coach: "One fact answers it: eight. Once you've said that, there's nothing left to research." },
+              { match: "Put 'What is the history of all transportation?' under strong", coach: "Think about everything that covers: ships, trains, cars, planes, thousands of years. That's a shelf of books, not a report." },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "Which is the best question for a short research report?",
+            choices: [
+              "Space",
+              "What year did people first land on the Moon?",
+              "What is the history of the universe?",
+              "How did astronauts train for the first Moon landing?",
+            ],
+            answer: 3,
+            why: "It needs several facts to answer but is focused enough to cover in a few pages.",
+            hints: [
+              "'Space' is a topic, not a question. What do you want to find out about it?",
+              "One fact answers this, so there's nothing left to research after the first line.",
+              "This would take a whole library. Narrow it down.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A research question is like a flashlight in a dark library. Too wide a beam lights everything dimly; too narrow a beam shows one dot. The right beam lights exactly the shelf you need.",
+            example:
+              "Start with the topic 'volcanoes.' One-fact version: 'Where is Mount Vesuvius?' Too big: 'Everything about volcanoes.' Just right: 'How do scientists warn people before a volcano erupts?'",
+            simpler: {
+              q: "Which of these is a question rather than a topic?",
+              choices: ["Bridges", "How do suspension bridges stay up?", "Steel"],
+              answer: 1,
+              why: "It asks something you can research and answer.",
+              hints: ["'Bridges' just names a subject. Turn it into something you want to find out.", "", "'Steel' is a topic. A question asks how, why or what about it."],
+            },
+          },
+        },
+        {
+          title: "Find trustworthy sources",
+          teach:
+            "Next you gather sources. A primary source comes from the time and people you are studying: a diary, a letter, a photograph, an object. The Wright brothers' own notebooks are primary sources. A secondary source is written later by someone who studied the primary sources, like a biography or an encyclopedia article. Both are useful. Secondary sources explain; primary sources let you see for yourself. Not every source deserves trust, so question each one. Who wrote it? Do they know the subject? When was it written? Are they just trying to sell something? Then check any important fact in at least two sources before you use it.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Primary source", back: "Made at the time by people who were there: diaries, letters, photos, objects" },
+              { front: "Secondary source", back: "Written later by someone who studied the primary sources: biographies, encyclopedias" },
+              { front: "Who wrote it?", back: "Does the author know the subject? Is it a museum, a university, an expert?" },
+              { front: "Check two sources", back: "If two trustworthy sources agree, you can use the fact with confidence." },
+            ],
+          },
+          probe: {
+            type: "sort",
+            prompt: "You are researching the Wright brothers. Sort each source.",
+            buckets: ["Primary source", "Secondary source"],
+            items: [
+              { text: "Orville Wright's diary from December 1903", bucket: 0 },
+              { text: "The photograph taken as the Flyer left the ground", bucket: 0 },
+              { text: "Wilbur's 1899 letter to the Smithsonian", bucket: 0 },
+              { text: "A biography of the brothers written in 2015", bucket: 1 },
+              { text: "An encyclopedia article about early airplanes", bucket: 1 },
+              { text: "A museum guide explaining how the Flyer was built", bucket: 1 },
+            ],
+            hint: "Ask: was this made at the time by the people who were there, or written later by someone studying them?",
+            mistakes: [
+              { match: "Put the photograph under secondary", coach: "The photo was taken at the very moment of the flight. Anything made at the time, by people who were there, is a primary source." },
+              { match: "Put the 2015 biography under primary", coach: "That biography was written more than a hundred years later by someone studying the old records, so it is secondary." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "Which question helps you most in judging whether a website is trustworthy?",
+            choices: [
+              "Does it have bright colors?",
+              "Is it the first search result?",
+              "Who wrote it, and do they know the subject?",
+              "Is it very long?",
+            ],
+            answer: 2,
+            why: "Knowing who wrote it and whether they are an expert tells you whether the facts are likely to be right.",
+            hints: [
+              "A site can look beautiful and still be wrong. Look at who made it.",
+              "Search results are ranked by many things, not by truth. Check the author.",
+              "",
+              "Length doesn't make facts true. A short page by an expert beats a long page by nobody.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Primary sources are like eyewitnesses at a game; secondary sources are like the sportswriter who interviewed the eyewitnesses afterward. You want both, and you check whether their stories agree.",
+            example:
+              "One book says the first flight lasted 12 seconds. Before using that fact, you look it up in an encyclopedia, and it also says 12 seconds. Two trustworthy sources agree, so the fact is confirmed.",
+            simpler: {
+              q: "A diary written by someone who was there is a...",
+              choices: ["Primary source", "Secondary source"],
+              answer: 0,
+              why: "It was made at the time by a person who saw the events.",
+              hints: ["", "Secondary sources are written later by people studying the past. A diary was written right then."],
+            },
+          },
+        },
+        {
+          title: "Take notes in your own words",
+          teach:
+            "Good notes are short, accurate and in your own words. Instead of copying a whole sentence, write the key facts as a quick phrase: 'Dec 17, 1903, Orville, 12 sec, about 120 ft.' Then write the source next to it, so you can find it again. Writing in your own words forces you to understand the idea, and it protects you from plagiarism, which means passing off someone else's words or ideas as your own. Plagiarism is a kind of stealing, and honest writers never do it. When a source says something so well that you want the exact words, copy them carefully inside quotation marks and note who said them.",
+          visual: {
+            type: "compare",
+            left: { title: "Copying", points: ["Whole sentences copied", "No source written down", "You may not understand it", "Risks plagiarism"] },
+            right: { title: "Good notes", points: ["Short phrases", "Source beside each fact", "In your own words", "Exact quotes in quotation marks"] },
+          },
+          probe: {
+            type: "highlight",
+            prompt: "Source sentence: 'On December 17, 1903, Orville Wright piloted the first powered flight, which lasted 12 seconds and covered 120 feet.' Tap the notes that are accurate, short and in the note-taker's own words.",
+            sentences: [
+              "Dec 17, 1903: Orville flew 12 sec, about 120 ft (encyclopedia)",
+              "On December 17, 1903, Orville Wright piloted the first powered flight, which lasted 12 seconds",
+              "First powered flight: 12 seconds long, Orville at the controls (encyclopedia)",
+              "Wilbur flew for 12 minutes in 1903",
+              "Short flight, 120 ft in 12 sec. Pilot: Orville (encyclopedia)",
+            ],
+            correct: [0, 2, 4],
+            hint: "A good note keeps the facts exactly right, uses fewer words than the source, and names where it came from.",
+            mistakes: [
+              { match: "Tapped the note that copies the sentence", coach: "That note copies the source word for word with no quotation marks. Shrink it to a few key facts in your own words." },
+              { match: "Tapped 'Wilbur flew for 12 minutes in 1903'", coach: "Check it against the source: it was Orville, and it lasted 12 seconds, not minutes. A note must be accurate." },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "What is plagiarism?",
+            choices: [
+              "Taking short notes",
+              "Using two sources to check a fact",
+              "Writing a conclusion",
+              "Passing off someone else's words or ideas as your own",
+            ],
+            answer: 3,
+            why: "Plagiarism means presenting another person's work as if it were yours.",
+            hints: [
+              "Short notes in your own words are exactly how you avoid plagiarism.",
+              "Checking two sources is good research, not cheating.",
+              "A conclusion is part of every report. Think about whose words you are using.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Taking notes in your own words is like retelling a movie to a friend. You don't recite the script; you tell what happened, and that proves you understood it.",
+            example:
+              "Source: 'In 1901 the brothers built a wind tunnel so they could measure how different wing shapes lifted.' Your note: '1901: homemade wind tunnel, tested wing shapes (encyclopedia).' Same facts, your words, source attached.",
+            simpler: {
+              q: "Which is a short note in your own words?",
+              choices: ["1903: Flyer stayed up 12 sec", "Copying the whole paragraph exactly", "Writing nothing down"],
+              answer: 0,
+              why: "It keeps the key fact in a few of your own words.",
+              hints: ["", "Copying a whole paragraph isn't a note, and without quotation marks it's plagiarism.", "With nothing written down, you'll forget the facts and where they came from."],
+            },
+          },
+        },
+        {
+          title: "Organize, write and cite",
+          teach:
+            "Now turn your pile of notes into a report. First, sort your notes into groups by subtopic. For the Wright brothers, the groups might be getting ready, the first flight and what came next. Each group becomes one body paragraph. Next, make an outline. The introduction asks your question and answers it in one clear sentence, called your thesis: 'The Wright brothers learned to fly through careful study, testing and practice.' The body paragraphs prove that answer with facts from your notes. The conclusion sums up and explains why it matters. Finally, list your sources at the end, so any reader can check your work.",
+          visual: {
+            type: "hotspots",
+            title: "A research report",
+            center: "📄",
+            spots: [
+              { label: "Introduction", icon: "🚪", detail: "Asks the question and gives your answer in one sentence: the thesis." },
+              { label: "Body paragraphs", icon: "🧱", detail: "One subtopic each, packed with facts from your notes." },
+              { label: "Conclusion", icon: "🎯", detail: "Sums up the answer and explains why it matters." },
+              { label: "Sources", icon: "📚", detail: "A list of every source you used, so readers can check your work." },
+            ],
+          },
+          probe: {
+            type: "sort",
+            prompt: "Sort these Wright brothers notes into the body paragraph where each belongs.",
+            buckets: ["Getting ready", "The first flight", "What came next"],
+            items: [
+              { text: "Ran a bicycle shop in Dayton, Ohio", bucket: 0 },
+              { text: "Built a wind tunnel in 1901 to test wing shapes", bucket: 0 },
+              { text: "Wilbur wrote to the Smithsonian for papers on flight", bucket: 0 },
+              { text: "Orville flew for 12 seconds on December 17, 1903", bucket: 1 },
+              { text: "Took off near Kitty Hawk, North Carolina", bucket: 1 },
+              { text: "Wilbur amazed crowds with flights in France in 1908", bucket: 2 },
+              { text: "The U.S. Army bought a Wright airplane in 1909", bucket: 2 },
+            ],
+            hint: "Look at the dates and ask: did this happen before the big day, on the big day, or after it?",
+            mistakes: [
+              { match: "Put the wind tunnel under the first flight", coach: "The wind tunnel was 1901, two years before the flight. It was part of getting ready." },
+              { match: "Put France 1908 under the first flight", coach: "1908 is five years after the first flight, so it belongs with what came next." },
+            ],
+            seconds: 50,
+          },
+          think: {
+            q: "Where does the thesis, your one-sentence answer to the research question, belong?",
+            choices: ["In the sources list", "Nowhere; reports have no thesis", "In the introduction", "Hidden in the last body paragraph"],
+            answer: 2,
+            why: "The introduction asks the question and gives your answer right away, so the reader knows what the report will prove.",
+            hints: [
+              "The sources list only names where facts came from. Your answer goes up front.",
+              "Every good report has a main answer. Readers need to know it early.",
+              "",
+              "If you hide your answer, the reader can't tell what your facts are proving. Put it up front.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Organizing notes is like sorting laundry before folding: socks with socks, shirts with shirts. Each pile becomes one paragraph, and nothing gets lost.",
+            example:
+              "Notes: bicycle shop, wind tunnel, 12-second flight, France 1908. Sorted: getting ready (shop, wind tunnel), the first flight (12 seconds), what came next (France). Three groups make three body paragraphs.",
+            simpler: {
+              q: "A group of notes about one subtopic becomes...",
+              choices: ["A body paragraph", "The title", "The sources list"],
+              answer: 0,
+              why: "Each subtopic gets its own body paragraph.",
+              hints: ["", "A title is just a few words. A whole group of notes needs more room.", "The sources list names where facts came from, not the facts themselves."],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sequence",
+        prompt: "Put the steps of writing a research report in order.",
+        steps: [
+          "Ask a strong research question",
+          "Find trustworthy primary and secondary sources",
+          "Take notes in your own words, with the source beside each",
+          "Sort the notes into subtopics and make an outline",
+          "Write the report and list your sources at the end",
+        ],
+      },
+      explain: {
+        prompt: "Explain how to write a research report that is honest and well organized.",
+        keyPoints: [
+          "Start with a question that needs several facts but fits in a few pages.",
+          "Use trustworthy primary and secondary sources and check facts in two of them.",
+          "Take notes in your own words and record each source to avoid plagiarism.",
+          "Sort notes into subtopics, outline, write, and list sources at the end.",
+        ],
+      },
+      mastery: [
+        {
+          type: "cloze",
+          text: "A diary written by someone who was there is a {0} source. A biography written a century later is a {1} source. Passing off someone else's words as your own is called {2}.",
+          blanks: [{ answers: ["primary"] }, { answers: ["secondary"] }, { answers: ["plagiarism"] }],
+          bank: ["primary", "secondary", "plagiarism", "paraphrase", "thesis", "outline"],
+          hint: "Was it made at the time or later? And what is the word for using someone's words without credit?",
+          mistakes: [
+            { match: "paraphrase", coach: "Paraphrasing means putting ideas in your own words, which is honest when you credit the source. The dishonest act has another name." },
+            { match: "thesis", coach: "A thesis is your one-sentence answer in the introduction. That's not what this blank describes." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "match",
+          prompt: "Match each research step to an example from a report about honeybees.",
+          pairs: [
+            { left: "Ask a question", right: "How do honeybees tell each other where flowers are?" },
+            { left: "Find sources", right: "Check a bee scientist's book and a university website" },
+            { left: "Take notes", right: "Waggle dance shows direction to food (bee book)" },
+            { left: "Organize", right: "Group the notes into scouts, dances and the hive" },
+          ],
+          hint: "Each step does one job: a question, a place to look, a short fact with its source, or a set of groups.",
+          mistakes: [
+            { match: "Matched 'Take notes' to the question", coach: "A note is a short fact with its source in parentheses. The question comes before any notes." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "highlight",
+          prompt: "You are researching how lighthouses work. Tap the sources you could trust most.",
+          sentences: [
+            "A book on lighthouse history by a maritime historian",
+            "An anonymous comment under a video",
+            "The U.S. Coast Guard's pages on lighthouse history",
+            "An ad for a lighthouse-shaped lamp",
+            "An encyclopedia article on lighthouses",
+          ],
+          correct: [0, 2, 4],
+          hint: "Trust sources whose authors know the subject and aren't trying to sell you something.",
+          mistakes: [
+            { match: "Tapped the anonymous comment", coach: "You can't tell who wrote it or what they know. Without an author, you can't check it." },
+            { match: "Tapped the ad", coach: "An ad is trying to sell a lamp, not teach you how lighthouses work." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "sort",
+          prompt: "Sort each one: is it a good research note, or a problem?",
+          buckets: ["Good note", "Problem"],
+          items: [
+            { text: "12 sec, 120 ft, Orville (encyclopedia)", bucket: 0 },
+            { text: "A whole paragraph copied with no quotation marks", bucket: 1 },
+            { text: "1901: wind tunnel, tested wings (museum website)", bucket: 0 },
+            { text: "A great fact with no idea where it came from", bucket: 1 },
+            { text: "An exact quote in quotation marks, with the speaker named", bucket: 0 },
+            { text: "A guess written down as if it were a fact", bucket: 1 },
+          ],
+          hint: "A good note is short, accurate, honest about whose words it uses, and tells you where it came from.",
+          mistakes: [
+            { match: "Put the exact quote under problem", coach: "Exact words are fine when they're inside quotation marks and credited. That's honest." },
+            { match: "Put the fact with no source under good note", coach: "Without a source, you can't check it or give credit. Always write where it came from." },
+          ],
+          seconds: 45,
+        },
+      ],
+      check: [
+        {
+          q: "Which is the strongest research question?",
+          choices: ["Volcanoes", "Where is Mount Vesuvius?", "How do scientists warn people before a volcano erupts?", "What is everything about Earth?"],
+          answer: 2,
+          why: "It needs several facts to answer and fits in a few pages.",
+        },
+        {
+          q: "Which is a primary source about the first flight?",
+          choices: ["Orville Wright's diary entry from that day", "A biography written a century later", "A textbook chapter about flight", "A cartoon about airplanes made decades later"],
+          answer: 0,
+          why: "The diary was written at the time by someone who was there.",
+        },
+        {
+          q: "Why should you write the source next to each note?",
+          choices: ["So the notes look longer", "Because sources are usually wrong", "It makes your handwriting neater", "So you can find the fact again and give credit"],
+          answer: 3,
+          why: "Recording the source lets you check facts, list your sources and give proper credit.",
+        },
+        {
+          q: "What should you do with a sentence you want to use word for word?",
+          choices: ["Copy it without telling anyone", "Put it in quotation marks and name the source", "Change one word so it counts as yours"],
+          answer: 1,
+          why: "Quotation marks and credit show honestly that the words belong to someone else.",
+        },
+        {
+          q: "How should you organize your notes into a report?",
+          choices: [
+            "Sort them by subtopic; each group becomes a body paragraph",
+            "Use them in the order you happened to find them",
+            "Put them all in the introduction",
+            "Leave out any that are interesting",
+          ],
+          answer: 0,
+          why: "Grouping by subtopic gives each body paragraph one clear job.",
+        },
+      ],
+      task: {
+        kind: "write",
+        prompt:
+          "Choose a research question about a science or history topic you are curious about, such as 'How do honeybees find flowers?' or 'How did the Romans build roads that lasted?' Use at least two trustworthy sources and take at least eight short notes in your own words. Then write a one-page report with an introduction that states your answer, two or three body paragraphs and a conclusion, and list your sources at the end.",
+        rubric: [
+          "Asks a clear research question that needs several facts but fits in one page.",
+          "Uses at least two trustworthy sources and lists them at the end.",
+          "Writes in their own words, with any exact quotes in quotation marks and credited.",
+          "Organizes the report into an introduction with a thesis, body paragraphs by subtopic, and a conclusion.",
+        ],
+      },
+    },
+    {
+      id: "writing.poetry",
+      title: "The Music of Poetry",
+      minutes: 35,
+      stage: "rhetoric",
+      subject: "Literature",
+      read: `Poetry is language with the volume turned up. A poem says a lot in a few words, and it uses sound and pictures to make you feel what it means. Four tools do most of the work: rhythm, rhyme, imagery and figurative language.
+
+Rhythm is the beat of a poem, made by stressed and unstressed syllables. Read this line by Robert Frost aloud and tap the strong beats: "Whose woods these are I think I know." You will hear da-DUM, da-DUM, da-DUM, da-DUM: eight syllables, four beats. Henry Wadsworth Longfellow gave "Paul Revere's Ride" a galloping rhythm, so the poem sounds like the horse it describes.
+
+Rhyme is the matching of ending sounds, like know and snow. Poets track rhymes with letters, called a rhyme scheme. Robert Louis Stevenson's "My Shadow" begins with lines ending in me, see, head and bed. The first two rhyme, so they are A and A. The next two make a new rhyme, B and B. The scheme is AABB.
+
+Imagery is language that appeals to the senses, so the reader can see, hear, touch, smell or taste the scene. Frost does not just say it was quiet in the snowy woods. He says the only other sound is "the sweep / Of easy wind and downy flake." You can almost hear the snow falling.
+
+Figurative language compares things in surprising ways. A simile uses like or as: Stevenson writes that the moon "has a face like the clock in the hall." A metaphor says one thing is another, with no like or as. In "Nothing Gold Can Stay," Frost writes of a tree's first spring buds, "Her early leaf's a flower." The comparison makes you see something familiar in a new way.
+
+To read a poem well, read it aloud at least twice. The first time, just listen. The second time, notice the beat, the rhymes, the pictures and the comparisons, and ask why the poet chose them. Then try writing a few lines of your own.`,
+      keyIdeas: [
+        "Rhythm is the beat made by stressed and unstressed syllables.",
+        "Rhyme matches ending sounds; a rhyme scheme like AABB tracks the pattern with letters.",
+        "Imagery uses the senses so the reader can see, hear and feel the scene.",
+        "A simile compares with like or as; a metaphor says one thing is another.",
+      ],
+      hook: {
+        text: "'Listen, my children, and you shall hear / Of the midnight ride of Paul Revere.' Henry Wadsworth Longfellow wrote those lines more than 160 years ago, and people still know them by heart. Why do poems stick in our memory when ordinary sentences slip away? The secret is music: beat, rhyme and pictures working together.",
+        visual: {
+          type: "compare",
+          left: { title: "Ordinary sentence", points: ["A man rode a horse at night to warn people.", "Easy to forget", "No beat, no rhyme"] },
+          right: { title: "Poem", points: ["Listen, my children, and you shall hear / Of the midnight ride of Paul Revere.", "Hard to forget", "A galloping beat and a rhyme"] },
+        },
+      },
+      teach: [
+        {
+          title: "Rhythm: the beat",
+          teach:
+            "Every word has syllables, and in English some syllables get more push than others. Say 'garden': GAR-den. That strong push is called a stress. Rhythm is the pattern of stressed and unstressed syllables in a line. Robert Frost wrote, 'Whose woods these are I think I know.' Tap the strong beats as you say it: whose WOODS these ARE i THINK i KNOW. That's eight syllables and four beats, in a steady da-DUM pattern, like footsteps in snow. Longfellow gave 'Paul Revere's Ride' a quicker, galloping rhythm to match the horse. Poets choose a rhythm the way a composer chooses a tempo.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Syllable", back: "One beat of sound in a word: gar-den has two" },
+              { front: "Stress", back: "The syllable that gets the strong push: GAR-den" },
+              { front: "Rhythm", back: "The pattern of stressed and unstressed syllables in a line" },
+              { front: "whose WOODS these ARE i THINK i KNOW", back: "Eight syllables, four strong beats: da-DUM, da-DUM, da-DUM, da-DUM" },
+            ],
+          },
+          probe: {
+            type: "number",
+            prompt: "Count the syllables in this line from Frost's 'Stopping by Woods on a Snowy Evening': 'And miles to go before I sleep.'",
+            answer: 8,
+            unit: "syllables",
+            hint: "Say it slowly and clap once for each syllable. 'Before' has two: be-FORE.",
+            mistakes: [
+              { match: "7", coach: "Close! Did you count 'before' as two claps, be-FORE?" },
+              { match: "4", coach: "Four is the number of strong beats. Count every syllable, strong and weak." },
+            ],
+            seconds: 30,
+          },
+          think: {
+            q: "In the line 'Whose woods these are I think I know,' how many strong beats are there?",
+            choices: ["Two", "Four", "Eight", "Twelve"],
+            answer: 1,
+            why: "The beats fall on woods, are, think and know: four strong beats in eight syllables.",
+            hints: [
+              "Tap again: whose WOODS these ARE i THINK i KNOW. There are more than two.",
+              "",
+              "Eight is the number of syllables. Only every other one gets a strong beat.",
+              "The line only has eight syllables in all, so it can't have twelve beats.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Rhythm in poetry is like the drum in a marching band. The drum keeps a steady pattern, and everyone's steps fall into it without thinking.",
+            example:
+              "Clap the line 'And miles to go before I sleep': and MILES to GO be-FORE i SLEEP. Eight claps, four of them loud. Weak, strong, weak, strong, all the way across.",
+            simpler: {
+              q: "How many syllables are in the word 'garden'?",
+              choices: ["One", "Two", "Three"],
+              answer: 1,
+              why: "Gar-den: two claps, two syllables.",
+              hints: ["Clap it: gar-den. That's more than one.", "", "Clap it slowly: gar-den. Only two claps."],
+            },
+          },
+        },
+        {
+          title: "Rhyme and rhyme scheme",
+          teach:
+            "Rhyme is the matching of ending sounds: know and snow, head and bed. Rhymes at the ends of lines give a poem a satisfying click, like a lid snapping shut. Poets track rhymes with letters, called a rhyme scheme. The first ending sound is A. The next new sound is B, and so on. Robert Louis Stevenson's poem 'My Shadow' begins with lines ending in me, see, head and bed. Me and see rhyme, so they are A and A. Head and bed are a new rhyme, B and B. The scheme is AABB. In Frost's snowy woods, the first stanza ends with know, though, here and snow. Since here doesn't rhyme with the others, it's AABA.",
+          visual: {
+            type: "compare",
+            left: { title: "AABB (Stevenson)", points: ["...goes in and out with me (A)", "...is more than I can see (A)", "...from the heels up to the head (B)", "...when I jump into my bed (B)"] },
+            right: { title: "AABA (Frost)", points: ["Whose woods these are I think I know. (A)", "His house is in the village though; (A)", "He will not see me stopping here (B)", "To watch his woods fill up with snow. (A)"] },
+          },
+          probe: {
+            type: "match",
+            prompt: "These words end lines in poems by Frost and Stevenson. Match each word to the word it rhymes with.",
+            pairs: [
+              { left: "know", right: "snow" },
+              { left: "me", right: "see" },
+              { left: "head", right: "bed" },
+              { left: "lake", right: "shake" },
+              { left: "near", right: "year" },
+            ],
+            hint: "Say each pair out loud. Rhymes share the same ending sound, starting from the last strong vowel.",
+            mistakes: [
+              { match: "Matched 'near' with 'see'", coach: "They both have an 'ee' sound, but 'near' ends with an 'r.' Find the word that ends the same way." },
+            ],
+            seconds: 35,
+          },
+          think: {
+            q: "Four lines end with: day, play, sun, run. What is the rhyme scheme?",
+            choices: ["ABAB", "AABB", "ABCD", "AAAA"],
+            answer: 1,
+            why: "Day and play rhyme (A, A); sun and run are a new rhyme (B, B).",
+            hints: [
+              "ABAB would mean the first and third lines rhyme. Do day and sun rhyme?",
+              "",
+              "ABCD means nothing rhymes, but day and play clearly do.",
+              "AAAA means all four rhyme. Does day rhyme with sun?",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A rhyme scheme is like a color code. Give every new ending sound its own letter, and the pattern of the poem appears, like stripes on a flag.",
+            example:
+              "Lines end in: night, light, tree, bright. Night is A. Light rhymes with it, so A. Tree is a new sound, so B. Bright rhymes with night, so A. The scheme is AABA, just like Frost's.",
+            simpler: {
+              q: "Which word rhymes with 'snow'?",
+              choices: ["know", "snap", "sun"],
+              answer: 0,
+              why: "Snow and know share the same ending sound: -ow.",
+              hints: ["", "'Snap' starts the same way, but rhymes match at the end.", "'Sun' ends with a different sound. Listen to the end of each word."],
+            },
+          },
+        },
+        {
+          title: "Imagery: painting with the senses",
+          teach:
+            "Imagery is language that lets the reader see, hear, touch, smell or taste a scene. Weak poetry tells: 'It was quiet in the woods.' Strong poetry shows. Frost writes that the only other sound is 'the sweep / Of easy wind and downy flake.' Now you can hear the hush and feel the soft snow. In 'The Village Blacksmith,' Longfellow pictures the smith 'Under a spreading chestnut tree,' a mighty man 'With large and sinewy hands.' You can see him before you meet him. When you write, ask which sense each line reaches. The best images use exact, concrete words instead of vague ones.",
+          visual: {
+            type: "hotspots",
+            title: "Imagery reaches the senses",
+            center: "🌲❄️",
+            spots: [
+              { label: "Sight", icon: "👀", detail: "'The woods are lovely, dark and deep.' (Frost)" },
+              { label: "Sound", icon: "👂", detail: "'He gives his harness bells a shake.' (Frost)" },
+              { label: "Touch", icon: "✋", detail: "The icy railing stung my fingers." },
+              { label: "Smell", icon: "👃", detail: "Pine smoke drifted from the chimney." },
+              { label: "Taste", icon: "👅", detail: "Hot cocoa, sweet and a little bitter." },
+            ],
+          },
+          probe: {
+            type: "sort",
+            prompt: "Which sense does each image reach most?",
+            buckets: ["Sight", "Sound", "Touch"],
+            items: [
+              { text: "The woods are lovely, dark and deep", bucket: 0 },
+              { text: "He gives his harness bells a shake", bucket: 1 },
+              { text: "With large and sinewy hands", bucket: 0 },
+              { text: "The crackle of logs in the fireplace", bucket: 1 },
+              { text: "The icy railing stung my fingers", bucket: 2 },
+              { text: "Rough wool scratched my neck", bucket: 2 },
+              { text: "A red barn against white snow", bucket: 0 },
+            ],
+            hint: "Imagine you are there. Would you notice it with your eyes, your ears or your skin?",
+            mistakes: [
+              { match: "Put the harness bells under sight", coach: "You might see the horse, but the shake makes the bells ring. Frost wants you to hear them." },
+              { match: "Put the icy railing under sight", coach: "'Stung my fingers' is a feeling on your skin. That's touch." },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "Which line uses the strongest imagery?",
+            choices: ["It was a nice day.", "Things were good outside.", "Warm bread steamed on the cold windowsill.", "The weather was okay."],
+            answer: 2,
+            why: "It gives exact details you can see, feel and almost smell.",
+            hints: [
+              "'Nice' is vague. What exactly would you see or hear?",
+              "'Things' and 'good' don't put a picture in anyone's head.",
+              "",
+              "'Okay' tells, it doesn't show. Reach for a sense.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Imagery is like a movie camera inside the reader's head. Vague words leave the screen blank; exact sense words fill it with color, sound and texture.",
+            example:
+              "Telling: 'The kitchen smelled good.' Imagery: 'Cinnamon and baking apples drifted through the kitchen.' Now the reader can smell exactly what you smelled.",
+            simpler: {
+              q: "Which sense does 'the crunch of boots on snow' reach?",
+              choices: ["Hearing", "Taste", "Smell"],
+              answer: 0,
+              why: "A crunch is a sound.",
+              hints: ["", "You don't taste boots on snow! Listen to the word 'crunch.'", "'Crunch' is something you notice with your ears, not your nose."],
+            },
+          },
+        },
+        {
+          title: "Simile and metaphor",
+          teach:
+            "Figurative language compares two unlike things to help us see one of them freshly. A simile makes the comparison with like or as. Stevenson writes that the moon 'has a face like the clock in the hall.' Suddenly the moon is round, pale and watching over the house. A metaphor is bolder: it says one thing is another, with no like or as. In 'Nothing Gold Can Stay,' Frost describes a tree's first spring buds: 'Her early leaf's a flower.' He doesn't say the leaf is like a flower; he says it is one. Careful: not every 'like' makes a simile. 'I like apples' compares nothing at all.",
+          visual: {
+            type: "compare",
+            left: { title: "Simile", points: ["Compares using like or as", "The moon has a face like the clock in the hall.", "as brave as a lion"] },
+            right: { title: "Metaphor", points: ["Says one thing IS another", "Her early leaf's a flower.", "The classroom was a beehive."] },
+          },
+          probe: {
+            type: "sort",
+            prompt: "Sort each comparison: simile or metaphor?",
+            buckets: ["Simile", "Metaphor"],
+            items: [
+              { text: "The moon has a face like the clock in the hall.", bucket: 0 },
+              { text: "Her early leaf's a flower.", bucket: 1 },
+              { text: "The snow was as soft as a pillow.", bucket: 0 },
+              { text: "Time is a thief.", bucket: 1 },
+              { text: "He ran like the wind.", bucket: 0 },
+              { text: "The classroom was a beehive of activity.", bucket: 1 },
+            ],
+            hint: "Look for the signal words like or as. If they're doing the comparing, it's a simile. If one thing simply IS the other, it's a metaphor.",
+            mistakes: [
+              { match: "Put 'Time is a thief.' under simile", coach: "There's no like or as. Time doesn't resemble a thief; the line says it IS one. That's a metaphor." },
+              { match: "Put 'The snow was as soft as a pillow.' under metaphor", coach: "'As soft as' is the signal: the comparison uses as, so it's a simile." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "Which line is a metaphor?",
+            choices: ["Her smile was like sunshine.", "The lake was a mirror.", "He was as quiet as a mouse.", "I like the lake."],
+            answer: 1,
+            why: "It says the lake IS a mirror, with no like or as.",
+            hints: [
+              "'Like sunshine' uses like to compare, so it's a simile.",
+              "",
+              "'As quiet as' compares with as, so it's a simile.",
+              "Here 'like' means enjoy. Nothing is being compared.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A simile is like holding two pictures side by side and pointing: see how alike they are? A metaphor pastes one picture right on top of the other.",
+            example:
+              "Start with 'The fog was thick.' Simile: 'The fog was like a gray blanket.' Metaphor: 'The fog was a gray blanket over the town.' Same idea; the metaphor is bolder.",
+            simpler: {
+              q: "Which word often signals a simile?",
+              choices: ["like", "the", "and"],
+              answer: 0,
+              why: "Similes compare using like or as.",
+              hints: ["", "'The' points to a noun. It doesn't compare anything.", "'And' joins ideas. It doesn't compare them."],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sort",
+        prompt: "Sort each line: simile, metaphor, or no comparison at all?",
+        buckets: ["Simile", "Metaphor", "No comparison"],
+        items: [
+          { text: "The stars were diamonds in the sky.", bucket: 1 },
+          { text: "The cat sat as still as a statue.", bucket: 0 },
+          { text: "I like my new boots.", bucket: 2 },
+          { text: "The waves were galloping horses.", bucket: 1 },
+          { text: "His voice boomed like thunder.", bucket: 0 },
+          { text: "We walked to the lake after lunch.", bucket: 2 },
+          { text: "My brother is a night owl.", bucket: 1 },
+          { text: "The bread was as hard as a rock.", bucket: 0 },
+        ],
+      },
+      explain: {
+        prompt: "Explain the four tools poets use to make a poem sing, with an example of each.",
+        keyPoints: [
+          "Rhythm is the beat made by stressed and unstressed syllables.",
+          "Rhyme matches ending sounds, and a rhyme scheme like AABB tracks the pattern.",
+          "Imagery uses sense words so the reader can see, hear or feel the scene.",
+          "A simile compares with like or as; a metaphor says one thing is another.",
+        ],
+      },
+      mastery: [
+        {
+          type: "number",
+          prompt: "Count the syllables in Frost's line 'The woods are lovely, dark and deep.'",
+          answer: 8,
+          unit: "syllables",
+          hint: "Clap once for every syllable. 'Lovely' has two: LOVE-ly.",
+          mistakes: [
+            { match: "7", coach: "Did you count 'lovely' as two claps? LOVE-ly." },
+            { match: "4", coach: "Four is the number of strong beats. Count every syllable, strong and weak." },
+          ],
+          seconds: 30,
+        },
+        {
+          type: "cloze",
+          text: "Lines ending in day, play, night and light have the rhyme scheme {0}. Lines ending in know, though, here and snow have the rhyme scheme {1}.",
+          blanks: [{ answers: ["AABB"] }, { answers: ["AABA"] }],
+          bank: ["AABB", "AABA", "ABAB", "ABCD"],
+          hint: "Give the first ending sound the letter A. Each new sound gets the next letter. A sound that comes back gets its old letter.",
+          mistakes: [
+            { match: "ABAB", coach: "ABAB means lines 1 and 3 rhyme. Check: does the first line rhyme with the third?" },
+            { match: "ABCD", coach: "ABCD means no lines rhyme. But day and play clearly do, and so do know and though." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "build",
+          prompt: "Build a simile about the moon. Remember: a simile compares using like or as.",
+          tiles: ["The moon", "hung", "like", "a silver coin."],
+          distractors: ["is a", "and"],
+          hint: "Start with what you're describing, add what it did, then the signal word, then what it's compared to.",
+          mistakes: [
+            { match: "Used 'is a'", coach: "'The moon is a...' would make a metaphor. A simile needs like or as." },
+          ],
+          seconds: 25,
+        },
+        {
+          type: "highlight",
+          prompt: "Tap every line that uses a metaphor.",
+          sentences: [
+            "Her early leaf's a flower.",
+            "The moon has a face like the clock in the hall.",
+            "The frozen pond was a sheet of glass.",
+            "The woods are lovely, dark and deep.",
+            "My little brother is a tornado in the kitchen.",
+          ],
+          correct: [0, 2, 4],
+          hint: "A metaphor says one thing IS another, with no like or as.",
+          mistakes: [
+            { match: "Tapped the moon line", coach: "'Like the clock in the hall' uses like, so it's a simile, not a metaphor." },
+            { match: "Tapped 'The woods are lovely, dark and deep.'", coach: "That's beautiful imagery, but it describes the woods without comparing them to anything." },
+          ],
+          seconds: 40,
+        },
+      ],
+      check: [
+        {
+          q: "What is rhythm in a poem?",
+          choices: ["The pattern of stressed and unstressed syllables", "The poem's title", "The number of stanzas", "The poet's name"],
+          answer: 0,
+          why: "Rhythm is the beat made by strong and weak syllables.",
+        },
+        {
+          q: "Four lines end in cat, hat, sun and fun. What is the rhyme scheme?",
+          choices: ["ABAB", "ABCD", "AABB", "AAAA"],
+          answer: 2,
+          why: "Cat and hat rhyme (A, A); sun and fun are a new rhyme (B, B).",
+        },
+        {
+          q: "Which line is a simile?",
+          choices: ["The moon is a lantern.", "The moon has a face like the clock in the hall.", "The moon rose over the hill.", "I like the moon."],
+          answer: 1,
+          why: "It compares the moon's face to a clock using like.",
+        },
+        {
+          q: "Which line has the strongest imagery?",
+          choices: ["It was cold.", "Winter was bad.", "It was a winter day.", "Frost crackled under my boots as my breath puffed white."],
+          answer: 3,
+          why: "It uses exact details you can hear, see and feel.",
+        },
+        {
+          q: "Why do poets use metaphors?",
+          choices: ["To make poems longer", "To avoid using rhyme", "To help readers see something familiar in a new way", "Because they forgot the word 'like'"],
+          answer: 2,
+          why: "A metaphor's bold comparison makes the reader look at something with fresh eyes.",
+        },
+      ],
+      task: {
+        kind: "write",
+        prompt:
+          "Write a poem of 8 to 12 lines about a season, a place you love or an animal. Give it a beat you can clap, follow a rhyme scheme such as AABB or ABAB, and include at least two strong sense images, one simile and one metaphor. Under your poem, write the rhyme scheme and point out your simile and your metaphor. Then read it aloud to someone.",
+        rubric: [
+          "Has 8 to 12 lines with a beat that stays fairly steady when read aloud.",
+          "Follows a clear rhyme scheme and labels it correctly.",
+          "Uses at least two vivid images that reach the senses.",
+          "Includes one simile and one metaphor, correctly labeled.",
+        ],
+      },
+    },
+    {
+      id: "writing.letters-speeches",
+      title: "Letters and Speeches",
+      minutes: 35,
+      stage: "rhetoric",
+      read: `Before you write a letter or a speech, answer two questions. What is my purpose? And who is my audience? Your purpose is the job the words must do: thank someone, ask for something, explain something or persuade someone to act. Your audience is the person or people who will read or hear it. A thank-you note to your grandmother and a request to a museum director need very different words.
+
+A letter has five parts. The heading gives the date and, in a formal letter, your address. The greeting names the reader: "Dear Aunt Ruth," for family, or "Dear Mr. Hayes:" for a formal letter. The body does the job, getting to the point in the first sentence or two. The closing, such as "Love," or "Sincerely," says goodbye, and your signature comes last.
+
+Letters can make history. In 1860 an eleven-year-old girl named Grace Bedell wrote to Abraham Lincoln, who was running for president. She told him his face was thin and that he would look better with whiskers. Lincoln wrote back politely. By the time he traveled east to take office, he had a beard, and when his train stopped in her town of Westfield, New York, he asked to meet her. A clear purpose and a polite tone got her letter read.
+
+A speech is a letter you deliver with your voice, so it must be easy to follow by ear. Open with a hook: a question, a short story or a surprising fact. State your purpose clearly. Give two or three main points, each with an example. End with a memorable line or a call to action that tells the audience what to do.
+
+Short can be powerful. At Gettysburg in 1863, the main speaker, Edward Everett, spoke for about two hours. Lincoln followed with about two minutes, fewer than three hundred words, and his speech is the one remembered. It ends with a line built on the rule of three: "government of the people, by the people, for the people." Everett later wrote to Lincoln that he wished he had come as close to the heart of the occasion in two hours as Lincoln had in two minutes.
+
+Whatever you write, know your purpose, picture your audience and choose every word to fit them both.`,
+      keyIdeas: [
+        "Decide your purpose (the job of your words) and your audience (who will read or hear them) first.",
+        "A letter has five parts: heading, greeting, body, closing and signature.",
+        "Match the tone to the reader: friendly or formal, but always polite.",
+        "A speech opens with a hook, gives two or three clear points, and ends with a memorable line or call to action.",
+      ],
+      hook: {
+        text: "In October 1860 an eleven-year-old girl in New York wrote a letter to Abraham Lincoln with some advice: grow a beard. Lincoln wrote back. A few months later, wearing a full beard, he stopped in her town and asked to meet her. One short, polite letter with a clear purpose reached one of the most famous men in America.",
+        visual: {
+          type: "timeline",
+          events: [
+            { year: 1860, label: "Grace Bedell's letter", detail: "An eleven-year-old from Westfield, New York, writes that whiskers would suit Lincoln's thin face." },
+            { year: 1861, label: "The meeting", detail: "Lincoln's train stops in Westfield. Now bearded, he asks to meet the girl who wrote to him." },
+            { year: 1863, label: "The Gettysburg Address", detail: "Lincoln speaks for about two minutes and gives one of the most famous speeches ever." },
+          ],
+        },
+      },
+      teach: [
+        {
+          title: "Purpose and audience",
+          teach:
+            "Every letter or speech starts with two questions. First, what is my purpose? Purpose is the job your words must do: thank someone, ask for something, explain something or persuade someone to act. Second, who is my audience? That is the person or group who will read or hear your words. The answers change everything. A thank-you note to your grandmother can be warm and chatty. A letter asking a museum director if your family can tour the fossil lab must be polite, clear and brief. Before you write a single word, finish this sentence: 'I am writing to ___ so that ___ will ___.'",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Purpose", back: "The job your words must do" },
+              { front: "Audience", back: "The person or people who will read or hear them" },
+              { front: "Thank", back: "Show gratitude: 'Thank you for the field guide to birds.'" },
+              { front: "Request", back: "Ask for something: 'Could our family tour your fossil lab?'" },
+              { front: "Persuade", back: "Move someone to act: 'Please add a chess club at the library.'" },
+              { front: "Inform", back: "Explain something: 'Here is how our trash pickup works.'" },
+            ],
+          },
+          probe: {
+            type: "match",
+            prompt: "Match each situation to the main purpose of the letter you would write.",
+            pairs: [
+              { left: "Grandma sent you a book for your birthday.", right: "Thank" },
+              { left: "You hope to visit a museum's fossil lab with your family.", right: "Request" },
+              { left: "You want the library to start a weekly chess club.", right: "Persuade" },
+              { left: "A new neighbor asks how trash pickup works on your street.", right: "Inform" },
+            ],
+            hint: "Ask: is the writer showing gratitude, asking a favor, trying to change a mind, or explaining facts?",
+            mistakes: [
+              { match: "Matched the chess club to Request", coach: "It is a kind of request, but the library has to be convinced it's a good idea. Giving reasons to change a mind is persuading." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "You are writing to a bakery owner to ask whether your homeschool group can watch bread being made. Who is your audience?",
+            choices: ["Your best friend", "Everyone in town", "Yourself", "The bakery owner"],
+            answer: 3,
+            why: "The audience is the person who will read the letter: the bakery owner.",
+            hints: [
+              "Your friend might hear about the trip, but you aren't writing to them.",
+              "The letter goes to one person, not the whole town.",
+              "You write it, but someone else must read it and say yes.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Purpose and audience are like what's in a package and the address on the label. You decide both before you tape the box shut, or the package goes nowhere useful.",
+            example:
+              "Purpose: thank. Audience: Uncle Joe, who taught you to fish. 'I am writing to thank Uncle Joe so that he will know how much the fishing trip meant to me.' Now every sentence has a job.",
+            simpler: {
+              q: "If you write to say thanks for a gift, your purpose is to...",
+              choices: ["Thank someone", "Sell something", "Argue a point"],
+              answer: 0,
+              why: "The job of a thank-you letter is to show gratitude.",
+              hints: ["", "You aren't selling anything in a thank-you note.", "There's nothing to argue about. You're showing gratitude."],
+            },
+          },
+        },
+        {
+          title: "The five parts of a letter",
+          teach:
+            "Letters follow a pattern readers expect. The heading comes first: the date and, in a formal letter, your address. Next is the greeting, which names your reader. Friendly letters use a comma, as in 'Dear Aunt Ruth,' and formal letters often use a colon, as in 'Dear Mr. Hayes:'. Then comes the body, where the real work happens. Get to your purpose in the first sentence or two, then give details. After the body comes the closing, such as 'Love,' for family or 'Sincerely,' for a formal letter. Last is your signature. Skip a part and the letter feels unfinished, like a handshake without a smile.",
+          visual: {
+            type: "hotspots",
+            title: "The parts of a letter",
+            center: "✉️",
+            spots: [
+              { label: "Heading", icon: "📅", detail: "The date, plus your address in a formal letter." },
+              { label: "Greeting", icon: "👋", detail: "'Dear Aunt Ruth,' (friendly) or 'Dear Mr. Hayes:' (formal)." },
+              { label: "Body", icon: "📝", detail: "Your purpose in the first sentence or two, then the details." },
+              { label: "Closing", icon: "🤝", detail: "'Love,' for family or 'Sincerely,' for a formal letter." },
+              { label: "Signature", icon: "✍️", detail: "Your name, written last." },
+            ],
+          },
+          probe: {
+            type: "sequence",
+            prompt: "Put the parts of this letter in order, from top to bottom.",
+            steps: [
+              "March 12",
+              "Dear Aunt Ruth,",
+              "Thank you so much for the field guide to birds. I spotted a red-tailed hawk with it on Saturday!",
+              "Love,",
+              "Sam",
+            ],
+            hint: "Date first, then hello, then the message, then goodbye, then your name.",
+            mistakes: [
+              { match: "Put 'Love,' before the body", coach: "'Love,' is the closing. You say goodbye after you've said what you came to say." },
+              { match: "Put 'March 12' after the greeting", coach: "The date goes in the heading, at the very top, before you greet anyone." },
+            ],
+            seconds: 30,
+          },
+          think: {
+            q: "Which part of a letter says goodbye, like 'Sincerely,'?",
+            choices: ["Heading", "Greeting", "Body", "Closing"],
+            answer: 3,
+            why: "The closing comes after the body and says goodbye before your signature.",
+            hints: [
+              "The heading is the date at the top.",
+              "The greeting says hello, like 'Dear Mr. Hayes:'.",
+              "The body is where the main message goes.",
+              "",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A letter's parts are like a visit to a friend's house: you arrive (heading), say hello (greeting), talk (body), say goodbye (closing) and wave as you leave (signature).",
+            example:
+              "March 12. Dear Uncle Joe, Thank you for teaching me to cast a line. I caught my first bass on Saturday! Your nephew, Sam. All five parts, in order, in under forty words.",
+            simpler: {
+              q: "Which part of a letter comes first?",
+              choices: ["The heading with the date", "The signature", "The closing"],
+              answer: 0,
+              why: "The heading, with the date, goes at the very top.",
+              hints: ["", "Your signature comes last, at the bottom.", "The closing comes near the end, just before your signature."],
+            },
+          },
+        },
+        {
+          title: "Tone: fit the words to the reader",
+          teach:
+            "Tone is the attitude your words carry, and it should fit your audience. A friendly letter to a cousin can use contractions, jokes and exclamation points: 'You won't believe the size of the fish I caught!' A formal letter to a business, a museum or an official uses complete, polite sentences and no slang: 'I am writing to ask whether your museum offers tours for families.' Formal doesn't mean stiff or fancy. It means respectful and clear. Whatever the tone, always be courteous, say exactly what you need, and thank the reader for their time. Grace Bedell's letter to Lincoln was bold, but it was also polite, and it got answered.",
+          visual: {
+            type: "compare",
+            left: { title: "Friendly", points: ["To family and friends", "Contractions and jokes are fine", "Dear Aunt Ruth,", "Love,"] },
+            right: { title: "Formal", points: ["To businesses, officials, experts", "Complete, polite sentences, no slang", "Dear Mr. Hayes:", "Sincerely,"] },
+          },
+          probe: {
+            type: "sort",
+            prompt: "Sort each line: does it belong in a friendly letter to a cousin or a formal letter to a museum?",
+            buckets: ["Friendly letter to a cousin", "Formal letter to a museum"],
+            items: [
+              { text: "You won't believe the size of the fish I caught!", bucket: 0 },
+              { text: "I am writing to ask whether your museum offers family tours.", bucket: 1 },
+              { text: "Thank you for considering my request.", bucket: 1 },
+              { text: "Can't wait to see you at the lake!", bucket: 0 },
+              { text: "Sincerely,", bucket: 1 },
+              { text: "Love,", bucket: 0 },
+              { text: "Please let me know which dates are available.", bucket: 1 },
+              { text: "Guess what our dog did yesterday?", bucket: 0 },
+            ],
+            hint: "Friendly lines sound like talking to someone you know well. Formal lines are polite, complete and get to business.",
+            mistakes: [
+              { match: "Put 'Sincerely,' under friendly", coach: "'Sincerely,' is the standard closing for a formal letter. Family letters usually close with 'Love,' or 'Your nephew,'." },
+              { match: "Put 'Thank you for considering my request.' under friendly", coach: "Talking about 'my request' is business language. It fits a letter asking a museum for something." },
+            ],
+            seconds: 45,
+          },
+          think: {
+            q: "Which line fits a formal letter to a company?",
+            choices: ["Hey, what's up?", "Thank you for taking the time to read my letter.", "LOL, that was so funny!", "See ya!"],
+            answer: 1,
+            why: "It is polite, complete and respectful, which is exactly what a formal letter needs.",
+            hints: [
+              "'Hey, what's up?' is how you'd greet a friend, not a company.",
+              "",
+              "Texting shortcuts like LOL don't belong in a formal letter.",
+              "'See ya!' is too casual for someone you're asking a favor of.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "Tone is like your clothes. You might wear a T-shirt to a picnic and a pressed shirt to a wedding. You're the same person; you just dress for the occasion.",
+            example:
+              "Friendly: 'Thanks a ton for the bike, it's awesome!' Formal: 'Thank you for donating a bicycle to our homeschool group; it will be put to good use.' Same thanks, different tone.",
+            simpler: {
+              q: "Is 'Dear Mr. Hayes:' friendly or formal?",
+              choices: ["Formal", "Friendly"],
+              answer: 0,
+              why: "A title like 'Mr.' and a colon after the name mark a formal greeting.",
+              hints: ["", "A friendly letter would use a first name and a comma, like 'Dear Aunt Ruth,'."],
+            },
+          },
+        },
+        {
+          title: "Writing a short speech",
+          teach:
+            "A speech is a letter delivered with your voice, so listeners must follow it by ear. Open with a hook: a question, a short story or a surprising fact. State your purpose plainly. Give two or three main points, each with an example. End with a memorable line or a call to action that tells the audience what to do. Short can be powerful. At Gettysburg in 1863, Edward Everett spoke for about two hours. Lincoln spoke for about two minutes, and his words are the ones remembered. He closed with the rule of three: 'government of the people, by the people, for the people.' Repetition and groups of three help listeners remember.",
+          visual: {
+            type: "flip",
+            cards: [
+              { front: "Hook", back: "A question, a short story or a surprising fact that grabs attention" },
+              { front: "Purpose", back: "Say plainly what you want the audience to know or do" },
+              { front: "Points", back: "Two or three main points, each with an example" },
+              { front: "Ending", back: "A memorable line or a call to action" },
+              { front: "Rule of three", back: "'of the people, by the people, for the people': groups of three stick in memory" },
+            ],
+          },
+          probe: {
+            type: "sort",
+            prompt: "Sort these opening lines for a speech: strong hook or weak opening?",
+            buckets: ["Strong hook", "Weak opening"],
+            items: [
+              { text: "Um, so, I'm supposed to talk about gardens.", bucket: 1 },
+              { text: "Imagine standing on a windy beach as a wooden airplane lifts into the sky.", bucket: 0 },
+              { text: "My speech is about saving money, I guess.", bucket: 1 },
+              { text: "What if a penny doubled every day for a month?", bucket: 0 },
+              { text: "This is my speech. It is about bridges.", bucket: 1 },
+              { text: "Why do some Roman bridges still stand after two thousand years?", bucket: 0 },
+            ],
+            hint: "A strong hook makes listeners curious with a question, a picture or a surprise. A weak opening just announces the topic or apologizes.",
+            mistakes: [
+              { match: "Put 'This is my speech. It is about bridges.' under strong", coach: "It names the topic, but it gives no reason to lean in. Compare it with the question about Roman bridges." },
+            ],
+            seconds: 40,
+          },
+          think: {
+            q: "What is the best way to end a short speech?",
+            choices: ["Say 'That's it, I guess.'", "With a memorable line or a call to action", "By reading a long list of facts", "By apologizing for being nervous"],
+            answer: 1,
+            why: "A strong ending sticks in memory or tells the audience exactly what to do next.",
+            hints: [
+              "Trailing off makes your whole speech feel weaker. End on purpose.",
+              "",
+              "A list of facts is hard to remember by ear. Finish with one strong line.",
+              "Apologizing draws attention away from your message. Finish strong instead.",
+            ],
+          },
+          approaches: {
+            analogy:
+              "A speech is like a guided hike. The hook gets everyone to the trailhead, the points are the scenic stops, and the ending is the view from the top that they'll remember.",
+            example:
+              "Purpose: get the family to start a garden. Hook: 'What if dinner grew in our backyard?' Points: fresher food, money saved, time outside together. Ending: 'Let's plant our first seeds this Saturday.'",
+            simpler: {
+              q: "Which of these is a hook?",
+              choices: ["A surprising question", "'Um, hi.'", "'The end.'"],
+              answer: 0,
+              why: "A surprising question makes listeners curious right away.",
+              hints: ["", "'Um, hi' doesn't give anyone a reason to listen.", "'The end' is a closing, and a weak one at that."],
+            },
+          },
+        },
+      ],
+      activity: {
+        type: "sequence",
+        prompt: "Put the steps of planning a short speech in order.",
+        steps: [
+          "Decide your purpose and picture your audience",
+          "Open with a hook that grabs attention",
+          "State your purpose plainly",
+          "Give two or three points, each with an example",
+          "End with a memorable line or a call to action",
+        ],
+      },
+      explain: {
+        prompt: "Explain how to write a letter or a short speech that does its job.",
+        keyPoints: [
+          "Decide your purpose and picture your audience first.",
+          "A letter has a heading, greeting, body, closing and signature.",
+          "Match the tone to the reader: friendly or formal, but always polite.",
+          "A speech opens with a hook, gives a few clear points, and ends with a memorable line or call to action.",
+        ],
+      },
+      mastery: [
+        {
+          type: "cloze",
+          text: "Before writing, decide your {0}, the job your words must do, and your {1}, the people who will read or hear them. A formal letter usually ends with a closing like {2}.",
+          blanks: [{ answers: ["purpose"] }, { answers: ["audience"] }, { answers: ["sincerely", "sincerely,", "respectfully", "yours truly"] }],
+          bank: ["purpose", "audience", "Sincerely,", "Love,", "topic", "signature"],
+          hint: "One word means the job; one means the readers; and the closing should fit a formal letter.",
+          mistakes: [
+            { match: "Love,", coach: "'Love,' is a warm closing for family. A formal letter needs something more businesslike." },
+            { match: "topic", coach: "A topic is what you write about. This blank asks for the job your words must do." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "match",
+          prompt: "Match each part of a formal letter to its example.",
+          pairs: [
+            { left: "Heading", right: "March 12" },
+            { left: "Greeting", right: "Dear Mr. Hayes:" },
+            { left: "Body", right: "I am writing to ask whether your museum offers family tours." },
+            { left: "Closing", right: "Sincerely," },
+            { left: "Signature", right: "Sam Carter" },
+          ],
+          hint: "Picture the letter from top to bottom: date, hello, message, goodbye, name.",
+          mistakes: [
+            { match: "Matched Closing to 'Dear Mr. Hayes:'", coach: "'Dear Mr. Hayes:' says hello, so it's the greeting. The closing says goodbye." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "highlight",
+          prompt: "Purpose: ask the library to start a chess club. Tap the sentences that belong in this formal letter.",
+          sentences: [
+            "I am writing to ask whether the library could host a weekly chess club.",
+            "Yo, chess is awesome!!!",
+            "Several kids in our homeschool group already play and would come every week.",
+            "My favorite food is pizza.",
+            "Thank you for considering this idea.",
+          ],
+          correct: [0, 2, 4],
+          hint: "Keep only the sentences that are polite and help the purpose: asking for a chess club.",
+          mistakes: [
+            { match: "Tapped 'Yo, chess is awesome!!!'", coach: "Slang and a pile of exclamation points don't fit a formal letter. Say it politely instead." },
+            { match: "Tapped 'My favorite food is pizza.'", coach: "True, maybe, but it has nothing to do with the chess club. Every sentence should serve the purpose." },
+          ],
+          seconds: 40,
+        },
+        {
+          type: "build",
+          prompt: "Build a strong call to action to end a speech about starting a family garden.",
+          tiles: ["Let's", "plant", "our first seeds", "this Saturday."],
+          distractors: ["maybe,", "um,"],
+          hint: "A call to action tells the audience exactly what to do and when. Leave out the words that sound unsure.",
+          mistakes: [
+            { match: "Used 'maybe,' or 'um,'", coach: "Those words make you sound unsure. A call to action should be clear and confident." },
+          ],
+          seconds: 25,
+        },
+      ],
+      check: [
+        {
+          q: "What is the purpose of a letter?",
+          choices: ["The job the words must do, like thanking or asking", "The paper it is written on", "The reader's address", "The closing line"],
+          answer: 0,
+          why: "Purpose is the job the letter must do, such as thank, request, inform or persuade.",
+        },
+        {
+          q: "Which greeting fits a formal letter?",
+          choices: ["Hey buddy!", "Yo,", "Dear Mr. Hayes:", "Sup"],
+          answer: 2,
+          why: "A title, a last name and a colon make a polite, formal greeting.",
+        },
+        {
+          q: "What did Grace Bedell suggest in her 1860 letter to Abraham Lincoln?",
+          choices: ["That he move to New York", "That he grow whiskers", "That he give shorter speeches"],
+          answer: 1,
+          why: "She wrote that his face was thin and that whiskers would make him look better.",
+        },
+        {
+          q: "Which is the strongest way to open a speech?",
+          choices: ["Um, okay, so...", "I didn't have much time to get ready.", "My speech is about bridges.", "Why do some Roman bridges still stand after two thousand years?"],
+          answer: 3,
+          why: "A surprising question makes the audience curious and ready to listen.",
+        },
+        {
+          q: "Why is the Gettysburg Address a good model for a speech?",
+          choices: ["It was the longest speech that day", "It was short, clear and ended with a memorable rule of three", "It was full of jokes"],
+          answer: 1,
+          why: "In about two minutes it made its point and ended with 'of the people, by the people, for the people.'",
+        },
+      ],
+      task: {
+        kind: "project",
+        prompt:
+          "Do two things. First, write a real letter to someone who matters to you or who could help you, such as a grandparent, a local business owner or a museum, with all five parts, a clear purpose and the right tone. Then write and give a 1- to 2-minute speech to your family with a clear purpose, such as starting a new family tradition or teaching something you've learned.",
+        rubric: [
+          "The letter has all five parts and a tone that fits its reader.",
+          "The letter states its purpose in the first sentence or two and thanks the reader.",
+          "The speech opens with a hook, gives two or three points with examples, and ends with a memorable line or call to action.",
+          "The speech is delivered clearly, with eye contact, in 1 to 2 minutes.",
         ],
       },
     },
