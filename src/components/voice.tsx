@@ -15,12 +15,17 @@ interface VoiceSettings {
   speakOn: boolean;
   /** Parent switch: kids can use the microphone. */
   micOn: boolean;
+  /** Natural voices (ElevenLabs) are set up on the server. */
+  natural?: boolean;
+  /** Show the teacher's face (otherwise a voice indicator). */
+  faces?: boolean;
 }
 
 const VoiceCtx = createContext<VoiceSettings>({ speakOn: true, micOn: true });
 
-export function VoiceProvider({ speakOn, micOn, children }: VoiceSettings & { children: React.ReactNode }) {
-  return <VoiceCtx.Provider value={{ speakOn, micOn }}>{children}</VoiceCtx.Provider>;
+export function VoiceProvider({ speakOn, micOn, natural = false, faces = false, children }: VoiceSettings & { children: React.ReactNode }) {
+  naturalOn = natural;
+  return <VoiceCtx.Provider value={{ speakOn, micOn, natural, faces }}>{children}</VoiceCtx.Provider>;
 }
 
 export const useVoiceSettings = () => useContext(VoiceCtx);
@@ -40,10 +45,12 @@ export const useTeacherVoice = () => useContext(TeacherVoiceCtx);
 export interface VoicePrefs {
   autoRead: boolean;
   rate: number;
+  /** Little sounds for right answers and streaks. */
+  sounds: boolean;
 }
 
 const PREFS_KEY = "voice-prefs";
-const DEFAULT_PREFS: VoicePrefs = { autoRead: true, rate: 1 };
+const DEFAULT_PREFS: VoicePrefs = { autoRead: true, rate: 1, sounds: true };
 let prefs: VoicePrefs = DEFAULT_PREFS;
 let prefsLoaded = false;
 const prefListeners = new Set<() => void>();
@@ -57,6 +64,7 @@ function loadPrefs(): VoicePrefs {
         prefs = {
           autoRead: typeof raw.autoRead === "boolean" ? raw.autoRead : DEFAULT_PREFS.autoRead,
           rate: [0.8, 1, 1.2].includes(raw.rate) ? raw.rate : DEFAULT_PREFS.rate,
+          sounds: typeof raw.sounds === "boolean" ? raw.sounds : DEFAULT_PREFS.sounds,
         };
       }
     } catch {
@@ -99,9 +107,11 @@ export interface SpeechState {
   /** True when this voice reports word positions. */
   words: boolean;
   paused: boolean;
+  /** The last piece of text that was read all the way to the end. */
+  lastDone: string | null;
 }
 
-const IDLE: SpeechState = { id: null, charIndex: -1, sentence: [-1, -1], words: false, paused: false };
+const IDLE: SpeechState = { id: null, charIndex: -1, sentence: [-1, -1], words: false, paused: false, lastDone: null };
 let speech: SpeechState = IDLE;
 const speechListeners = new Set<() => void>();
 let runToken = 0;
@@ -137,6 +147,8 @@ export function pickVoice(voices: SpeechSynthesisVoice[], kind: VoiceKind): { vo
     if (voiceKindOf(v.name) === kind) s += 20;
     if (v.lang.toLowerCase() === "en-us") s += 3;
     if (/natural|neural|online|premium|enhanced/.test(n)) s += 8;
+    // Chrome's Google voices sound far less robotic than the old desktop voices.
+    if (/^google/.test(n)) s += 6;
     if (/novelty|whisper|bad news|bells|boing|bubbles|cellos|zarvox|trinoids|albert|jester|organ|superstar|wobble|grandpa|grandma|eddy|flo|shelley|sandy|rocko/.test(n)) s -= 40;
     return s;
   };
@@ -160,23 +172,131 @@ export function sentences(text: string): [number, number][] {
 }
 
 /** Reads text aloud, sentence by sentence (long single utterances get cut off in some browsers). */
+// ---------------- Natural voices (ElevenLabs, made on the server) ----------------
+
+let naturalOn = false;
+let audioEl: HTMLAudioElement | null = null;
+let frame = 0;
+const clipCache = new Map<string, Promise<{ id: string; starts: number[] } | null>>();
+
+/** Asks the server for the natural voice of this text (made once, then cached). */
+export function fetchClip(text: string, kind: VoiceKind): Promise<{ id: string; starts: number[] } | null> {
+  const key = `${kind}|${text}`;
+  let p = clipCache.get(key);
+  if (!p) {
+    p = fetch("/api/voice", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, kind }) })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => (d && typeof d.id === "string" && Array.isArray(d.starts) ? { id: d.id, starts: d.starts } : null))
+      .catch(() => null);
+    clipCache.set(key, p);
+    // Failures can be retried later.
+    p.then((r) => r === null && clipCache.delete(key));
+  }
+  return p;
+}
+
+/** Gets the next line ready ahead of time so it starts without a pause. */
+export function prefetchVoice(text: string, kind: VoiceKind) {
+  if (naturalOn && text.trim()) void fetchClip(text, kind);
+}
+
+/** Index of the last character whose start time has passed. */
+export function charAt(starts: number[], t: number): number {
+  let lo = 0;
+  let hi = starts.length - 1;
+  let ans = -1;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    if (starts[mid] <= t) {
+      ans = mid;
+      lo = mid + 1;
+    } else hi = mid - 1;
+  }
+  return ans;
+}
+
+function stopAudio() {
+  cancelAnimationFrame(frame);
+  if (audioEl) {
+    audioEl.onended = null;
+    audioEl.onerror = null;
+    audioEl.pause();
+    audioEl = null;
+  }
+}
+
+function playNatural(id: string, text: string, clip: { id: string; starts: number[] }, rate: number, token: number, fallback: () => void) {
+  const parts = sentences(text);
+  const a = new Audio(`/api/voice/${clip.id}`);
+  audioEl = a;
+  a.playbackRate = rate;
+  (a as HTMLAudioElement & { preservesPitch?: boolean }).preservesPitch = true;
+  const scale = clip.starts.length && clip.starts.length !== text.length ? text.length / clip.starts.length : 1;
+  const tick = () => {
+    if (token !== runToken || audioEl !== a) return;
+    const i = charAt(clip.starts, a.currentTime);
+    if (i >= 0) {
+      const ci = Math.min(text.length - 1, Math.round(i * scale));
+      const sentence = parts.find(([s0, e0]) => ci >= s0 && ci < e0) ?? parts[0];
+      if (ci !== speech.charIndex) setSpeech({ charIndex: ci, sentence, words: true });
+    }
+    frame = requestAnimationFrame(tick);
+  };
+  a.onended = () => {
+    if (token !== runToken) return;
+    cancelAnimationFrame(frame);
+    audioEl = null;
+    setSpeech({ ...IDLE, lastDone: id });
+  };
+  a.onerror = () => token === runToken && fallback();
+  a.play().then(
+    () => (frame = requestAnimationFrame(tick)),
+    () => token === runToken && fallback(),
+  );
+}
+
 export function speak(id: string, text: string, opts: { rate?: number; kind?: VoiceKind } = {}) {
-  if (!speechSupported() || !text.trim()) return;
+  if (typeof window === "undefined" || !text.trim()) return;
   const rate = opts.rate ?? loadPrefs().rate;
   const kind = opts.kind ?? "female";
+  stopAudio();
+  if (speechSupported()) window.speechSynthesis.cancel();
+  const token = ++runToken;
+  if (naturalOn) {
+    const parts = sentences(text);
+    setSpeech({ id, charIndex: -1, sentence: parts[0], words: true, paused: false, lastDone: null });
+    const fallback = () => {
+      stopAudio();
+      if (token === runToken) speakBrowser(id, text, rate, kind, token);
+    };
+    fetchClip(text, kind).then((clip) => {
+      if (token !== runToken) return;
+      if (clip) playNatural(id, text, clip, rate, token, fallback);
+      else fallback();
+    });
+    return;
+  }
+  speakBrowser(id, text, rate, kind, token);
+}
+
+/** The browser's built-in voice (used when natural voices are off or unavailable). */
+function speakBrowser(id: string, text: string, rate: number, kind: VoiceKind, token: number) {
+  if (!speechSupported()) {
+    setSpeech(IDLE);
+    return;
+  }
   const synth = window.speechSynthesis;
   synth.cancel();
-  const token = ++runToken;
   const parts = sentences(text);
   const { voice, matched } = pickVoice(synth.getVoices(), kind);
   // No voice of the right kind on this computer: shift the pitch so it still sounds right.
   const pitch = matched ? 1 : kind === "male" ? 0.75 : 1.2;
-  setSpeech({ id, charIndex: -1, sentence: parts[0], words: false, paused: false });
+  setSpeech({ id, charIndex: -1, sentence: parts[0], words: false, paused: false, lastDone: null });
 
   const say = (i: number) => {
     if (token !== runToken) return;
     if (i >= parts.length) {
-      setSpeech(IDLE);
+      setSpeech({ ...IDLE, lastDone: id });
       return;
     }
     const [start, end] = parts[i];
@@ -199,19 +319,22 @@ export function speak(id: string, text: string, opts: { rate?: number; kind?: Vo
 
 export function stopSpeaking() {
   runToken++;
+  stopAudio();
   if (speechSupported()) window.speechSynthesis.cancel();
   setSpeech(IDLE);
 }
 
 export function pauseSpeaking() {
-  if (!speechSupported() || !speech.id) return;
-  window.speechSynthesis.pause();
+  if (!speech.id) return;
+  if (audioEl) audioEl.pause();
+  else if (speechSupported()) window.speechSynthesis.pause();
   setSpeech({ paused: true });
 }
 
 export function resumeSpeaking() {
-  if (!speechSupported() || !speech.id) return;
-  window.speechSynthesis.resume();
+  if (!speech.id) return;
+  if (audioEl) void audioEl.play();
+  else if (speechSupported()) window.speechSynthesis.resume();
   setSpeech({ paused: false });
 }
 
@@ -439,4 +562,34 @@ export function SayButton({ id, text, label }: { id: string; text: string; label
       {label && <span>{on ? "Stop" : label}</span>}
     </button>
   );
+}
+
+// ---------------- Little sounds ----------------
+
+let audio: AudioContext | null = null;
+
+/** A short, soft chime: "right" (two rising notes), "streak" (three) or "oops" (one low note). */
+export function chime(kind: "right" | "streak" | "oops") {
+  if (typeof window === "undefined" || !loadPrefs().sounds) return;
+  try {
+    const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!Ctx) return;
+    audio ??= new Ctx();
+    const notes = kind === "right" ? [660, 880] : kind === "streak" ? [660, 880, 1175] : [220];
+    notes.forEach((f, i) => {
+      const o = audio!.createOscillator();
+      const g = audio!.createGain();
+      const t = audio!.currentTime + i * 0.11;
+      o.type = kind === "oops" ? "triangle" : "sine";
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+      o.connect(g).connect(audio!.destination);
+      o.start(t);
+      o.stop(t + 0.3);
+    });
+  } catch {
+    // Sound is a bonus; never let it break the lesson.
+  }
 }

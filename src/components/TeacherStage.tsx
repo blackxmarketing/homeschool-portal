@@ -31,10 +31,10 @@ export interface StageTeacher {
   title?: string;
 }
 
-const lookOf = (t: StageTeacher) => t.look ?? avatarFor(t.name);
+export const lookOf = (t: StageTeacher) => t.look ?? avatarFor(t.name);
 
 /** The text being read, with the current sentence and word lit up like captions. */
-function Captions({ id, text }: { id: string; text: string }) {
+export function Captions({ id, text }: { id: string; text: string }) {
   const s = useSpeech();
   const active = s.id === id;
   const tokens: { t: string; start: number }[] = [];
@@ -63,7 +63,7 @@ function Captions({ id, text }: { id: string; text: string }) {
 }
 
 /** Listen / pause / replay, speed and auto-read. */
-function StageControls({ id, text }: { id: string; text: string }) {
+export function StageControls({ id, text }: { id: string; text: string }) {
   const s = useSpeech();
   const kind = useTeacherVoice();
   const [p, setP] = useVoicePrefs();

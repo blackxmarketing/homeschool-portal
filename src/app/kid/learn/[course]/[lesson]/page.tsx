@@ -60,7 +60,7 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
       : [];
 
   return (
-    <main className="wrap" style={{ maxWidth: 860 }}>
+    <main className={`wrap ${f.tutorMode && L.teach?.length ? "lesson-tutor" : ""}`} style={{ maxWidth: f.tutorMode && L.teach?.length ? 1240 : 860 }}>
       <div className="topbar">
         <Link href={`/kid/learn/${course}`} className="backlink">
           ← {v.course.icon} {v.course.title}
@@ -74,6 +74,8 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
       {L.teach?.length && state ? (
         <LessonFlow
           player={player}
+          tutorMode={f.tutorMode}
+          kidName={kid.name}
           interactiveDone={v.status === "done" || interactiveDone(L, state)}
           teach={{
             hook: L.hook

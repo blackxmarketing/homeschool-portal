@@ -49,6 +49,8 @@ SESSION_SECRET=$(openssl rand -hex 32)
 APP_TIMEZONE=America/Denver
 # Optional: turns on AI tutor hints and weekly summaries.
 ANTHROPIC_API_KEY=
+# Optional: natural teacher voices (see docs/UPDATING.md).
+ELEVENLABS_API_KEY=
 ENV
   chmod 600 .env
 fi

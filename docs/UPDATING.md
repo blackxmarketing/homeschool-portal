@@ -72,6 +72,30 @@ Every message kids send and every reply is saved; parents can read them on each
 kid's page under "Teacher conversations". `AI_LIMITS` in `features.ts` caps how
 many messages each kid can send per day.
 
+## Turning on the natural teacher voice (ElevenLabs)
+
+Without a key, teachers read aloud with the browser's built-in voice. For a
+natural, human-sounding voice:
+
+1. Make an account at elevenlabs.io and pick a plan (the Starter plan covers
+   a family; every sentence is made once and saved on the server, so lessons
+   are only paid for the first time they're heard).
+2. In ElevenLabs: your profile → API Keys → create a key (you can limit it to
+   "Text to Speech" and "Voices: read").
+3. On the server:
+
+```bash
+nano /opt/homeschool-portal/.env      # add ELEVENLABS_API_KEY=...  then Ctrl+O, Enter, Ctrl+X
+cd /opt/homeschool-portal && docker compose up -d
+```
+
+The portal picks a warm male and female narrator from your ElevenLabs voices
+(male teachers get the male voice). To choose your own, add their voice ids:
+`ELEVENLABS_VOICE_MALE=...` and `ELEVENLABS_VOICE_FEMALE=...`.
+`ELEVENLABS_DAILY_CHARS` (default 20000) caps how many new characters can be
+made per day, so nothing can run up a bill. If ElevenLabs is ever unavailable,
+the browser voice takes over automatically.
+
 ## Checking a change before it goes live
 
 On a computer with Node 22+:

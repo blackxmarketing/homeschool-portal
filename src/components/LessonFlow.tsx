@@ -3,6 +3,7 @@
 import { useState } from "react";
 import LessonPlayer from "./LessonPlayer";
 import TeachPlayer, { type AdaptView, type PublicSegment, type TeachInitial } from "./TeachPlayer";
+import TutorSession from "./TutorSession";
 import { MasteryCheck } from "./Assess";
 import type { PublicWidget } from "@/lib/teaching";
 import type { PublicProbe } from "@/lib/probes";
@@ -18,6 +19,8 @@ export default function LessonFlow({
   player,
   teach,
   interactiveDone,
+  tutorMode = false,
+  kidName,
 }: {
   player: PlayerProps;
   teach: {
@@ -31,12 +34,16 @@ export default function LessonFlow({
     mastery?: PublicProbe[];
   };
   interactiveDone: boolean;
+  tutorMode?: boolean;
+  kidName?: string;
 }) {
   const [teachingDone, setTeachingDone] = useState(interactiveDone);
   const [checkPassed, setCheckPassed] = useState(player.initial.checkPassed);
   if (!teachingDone) {
+    const Player = tutorMode ? TutorSession : TeachPlayer;
     return (
-      <TeachPlayer
+      <Player
+        kidName={kidName}
         courseId={player.courseId}
         lessonId={player.lesson.id}
         teacher={player.teacher}

@@ -28,6 +28,35 @@ and civics. Each phase can be switched on or off in `src/content/features.ts`.
 - Struggle detector (drops back to prerequisites) and math-fact speed drills
 - MAP test score tracking (percentile and growth, three times a year)
 
+## ✅ Phase 4a — The tutor (Synthesis-style lessons) (built)
+- Lessons run as a one-on-one conversation on one screen: the teacher's
+  voice with live captions in a bar on top, a big hands-on workspace below.
+  The teacher says one or two sentences at a time with a matching slide; the
+  hands-on model comes halfway through each part and every part ends with a
+  hands-on challenge (fill in, build, match, sort, place on a line, run a
+  simulation). No multiple choice. Every existing lesson is converted
+  automatically (`src/lib/tutorFlow.ts`).
+- Game scoring: each challenge is worth up to 3 stars (first try, no help),
+  plus a streak counter, XP, bursts of color and soft chimes.
+- Natural voices: with `ELEVENLABS_API_KEY` on the server, teachers speak
+  with ElevenLabs voices (male teachers male, female teachers female), with
+  word-by-word captions; each sentence is made once and saved
+  (`src/lib/tts.ts`). Without a key, the browser voice is used.
+- The teacher is a voice, not a face (parents can turn faces back on with
+  "Teacher faces").
+- Predicting struggle (`src/lib/struggle.ts`): the tutor watches time vs.
+  expected, not starting, going quiet, wrong tries, quick guesses, "say that
+  again" taps, hints, and the learner model's history for the subject. It
+  offers a hint before a wrong answer, steps in with a new explanation
+  (analogy, worked example, a smaller first step, an AI re-explanation) when
+  a kid is stuck, and stops fast guessing ("let's slow down").
+- Pace: support mode speaks one sentence at a time and shows worked examples;
+  challenge mode uses longer lines and skips check-ins; three quick right
+  answers in a row turn on the "fast lane" mid-lesson.
+- Motivation: streak counter, XP, bursts of color and soft chimes (can be
+  muted), and a friendly start screen that greets the kid by name.
+- Parent switch: "Tutor mode" (off = the classic teaching page).
+
 ## ✅ Phase 3f — Lifelike teachers and a one-screen home (built)
 - Every teacher is a photo-real (AI-generated, original) person in
   `public/teachers/<id>.jpg`, with short looping clips (<id>-talk.mp4 while

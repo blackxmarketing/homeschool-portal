@@ -61,7 +61,9 @@ Write scripts to a file with the Write tool and run them with node instead.
   `learner.ts` (learner model and early warnings), `ai.ts` (Claude:
   `claude-opus-5-5` via `@anthropic-ai/sdk`), `media.ts` / `mediaFetch.ts`
   (Wikimedia photos, cached).
-- `src/components/` — `TeachPlayer.tsx` (lesson teaching), `TeacherStage.tsx`
+- `src/components/` — `TutorSession.tsx` (lessons as a tutor conversation;
+  uses `src/lib/tutorFlow.ts` to build the steps and `src/lib/struggle.ts`
+  to predict struggle), `TeachPlayer.tsx` (classic lesson page), `TeacherStage.tsx`
   (teacher + captions + controls), `TeacherFace.tsx` (photo teacher with
   looping clips), `voice.tsx` (read-aloud and mic), `StoryBoard.tsx` (slides),
   `Probes.tsx` (interactive questions).
@@ -84,5 +86,8 @@ Write scripts to a file with the Write tool and run them with node instead.
 - Lesson videos are reviewed by the parents on the Content page; pick only
   short, non-political clips from educational channels and verify the YouTube
   id exists (oEmbed) before adding one.
-- Read-aloud and the mic use the browser's built-in speech. Microsoft Edge has
-  the most natural voices.
+- Read-aloud uses ElevenLabs when `ELEVENLABS_API_KEY` is set on the server
+  (`src/lib/tts.ts`, clips cached in DATA_DIR/voice), otherwise the browser's
+  built-in speech. The mic uses the browser's speech-to-text.
+- No multiple choice in lessons: kids solve hands-on problems (probes and
+  widgets). Teachers are a voice by default ("Teacher faces" switch).

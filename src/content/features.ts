@@ -23,6 +23,10 @@ export const FEATURES = {
   lessonSlides: true,
   /** Short lesson videos (YouTube, loaded only when a kid presses play). */
   lessonVideos: true,
+  /** Lessons as a one-on-one tutor conversation (short lines, constant hands-on steps, early help when a kid is stuck). Off = the classic teaching page. */
+  tutorMode: true,
+  /** Show the teacher's photo and video. Off = just the teacher's voice, with captions. */
+  teacherFaces: false,
 };
 
 /** Limits on AI use, to keep costs predictable. */

@@ -3,6 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import TeacherAvatar from "./TeacherAvatar";
 import type { AvatarLook } from "@/content/avatars";
+import { useVoiceSettings } from "./voice";
+
+/** The teacher's voice, shown as a softly glowing circle with sound bars that move while they talk. */
+export function VoiceOrb({ talking = false, size = 64 }: { talking?: boolean; size?: number }) {
+  return (
+    <div className={`voice-orb ${talking ? "talking" : ""}`} style={{ width: size, height: size }} aria-hidden>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <span key={i} style={{ animationDelay: `${i * 0.12}s` }} />
+      ))}
+    </div>
+  );
+}
 
 /**
  * The teacher's face. Teachers with a photo-real portrait (public/teachers/)
@@ -11,6 +23,7 @@ import type { AvatarLook } from "@/content/avatars";
  * Teachers without a portrait use the drawn character.
  */
 export default function TeacherFace({ look, talking = false, size = 150, still = false }: { look: AvatarLook; talking?: boolean; size?: number; still?: boolean }) {
+  const { faces } = useVoiceSettings();
   const [reduced, setReduced] = useState(false);
   // If the photo can't load, fall back to the drawn teacher.
   const [broken, setBroken] = useState(false);
@@ -27,6 +40,7 @@ export default function TeacherFace({ look, talking = false, size = 150, still =
     } else v.pause();
   }, [talking]);
 
+  if (!faces) return <VoiceOrb talking={talking} size={size} />;
   if (!look.photo || broken) return <TeacherAvatar look={look} talking={talking} size={size} />;
   const base = `/teachers/${look.photo}`;
   const moving = look.clips && !still && !reduced;

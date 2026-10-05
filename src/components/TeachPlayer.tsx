@@ -39,6 +39,8 @@ interface Props {
   courseId: string;
   lessonId: string;
   teacher: StageTeacher;
+  /** Used by the tutor's greeting. */
+  kidName?: string;
   hook?: { text: string; visual?: PublicWidget; show?: PublicShow };
   segments: PublicSegment[];
   activity?: PublicWidget;

@@ -30,6 +30,8 @@ const FEATURE_INFO: Record<string, { label: string; text: string }> = {
   courses: { label: "Courses (Academy)", text: "Science, history, writing, money, business and leadership lessons with checks and tasks." },
   readAloud: { label: "Teacher reads aloud", text: "An illustrated teacher reads each lesson out loud with captions. Uses the voice built into the browser (some browsers send text to their maker to make the most natural voices)." },
   kidMic: { label: "Kids can talk back (microphone)", text: "Kids can answer, explain and ask questions out loud. The browser maker (Google, Microsoft or Apple) turns speech into text; the portal saves only the text, never audio. You can read every question on each kid's page." },
+  teacherFaces: { label: "Teacher faces", text: "Show the teachers' photos and talking videos. Off = just the teacher's voice, with captions, and more room for the lesson." },
+  tutorMode: { label: "Tutor mode", text: "Lessons run as a one-on-one tutor conversation: the teacher says a line or two, then the kid does something, and the tutor steps in early when it sees them getting stuck (or speeds up when they're flying). Off = the classic teaching page." },
   lessonSlides: { label: "Picture slides", text: "Real photos and pictures that change as the teacher talks. Photos come from Wikimedia Commons (free to use, with credits shown)." },
   lessonVideos: { label: "Lesson videos", text: "A short video in some lessons from educational channels (NASA, Khan Academy, TED-Ed and similar). Nothing loads from YouTube until a kid presses play. Review or hide each video below." },
 };
