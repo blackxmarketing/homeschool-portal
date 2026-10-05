@@ -6,6 +6,8 @@ import type { PublicWidget } from "@/lib/teaching";
 import type { PublicProbe } from "@/lib/probes";
 import ProbeView, { type ProbeResult } from "./Probes";
 import { MasteryCheck, ReviewWarmup } from "./Assess";
+import { AskTeacher, CoachLine, TeacherStage, type StageTeacher } from "./TeacherStage";
+import { appendSpoken, MicButton, SayButton } from "./voice";
 
 export interface PublicSegment {
   title: string;
@@ -33,7 +35,7 @@ export interface TeachInitial {
 interface Props {
   courseId: string;
   lessonId: string;
-  teacher: { name: string; avatar: string };
+  teacher: StageTeacher;
   hook?: { text: string; visual?: PublicWidget };
   segments: PublicSegment[];
   activity?: PublicWidget;
@@ -60,18 +62,6 @@ async function coach<T>(body: Record<string, unknown>): Promise<T> {
   return data as T;
 }
 
-function Coach({ teacher, children, tone = "" }: { teacher: { name: string; avatar: string }; children: React.ReactNode; tone?: string }) {
-  return (
-    <div className={`coach-bubble ${tone}`}>
-      <div className="coach-avatar">{teacher.avatar}</div>
-      <div>
-        <div className="coach-name">{teacher.name}</div>
-        <div className="coach-text">{children}</div>
-      </div>
-    </div>
-  );
-}
-
 function SegmentView({
   courseId,
   lessonId,
@@ -85,7 +75,7 @@ function SegmentView({
   lessonId: string;
   index: number;
   seg: PublicSegment;
-  teacher: { name: string; avatar: string };
+  teacher: StageTeacher;
   alreadyDone: boolean;
   onDone: () => void;
 }) {
@@ -190,15 +180,16 @@ function SegmentView({
   }
 
   return (
-    <div className="kcard teach-seg pop">
-      <div className="eyebrow">Part {index + 1}</div>
-      <h2>{seg.title}</h2>
-      <Coach teacher={teacher}>{seg.teach}</Coach>
+    <div className="teach-seg pop">
+      <TeacherStage teacher={teacher} id={`${lessonId}:seg${index}`} eyebrow={`Part ${index + 1}`} heading={seg.title} text={seg.teach} auto={!alreadyDone} />
+      <div className="kcard stage-work">
       {seg.visual && <WidgetView w={seg.visual} onCheck={checkVisual} />}
 
       {seg.example && (
         <div className="approach">
-          <div className="eyebrow">Watch one first</div>
+          <div className="eyebrow">
+            Watch one first <SayButton id={`${lessonId}:ex${index}`} text={seg.example} />
+          </div>
           <p>{seg.example}</p>
         </div>
       )}
@@ -211,7 +202,13 @@ function SegmentView({
       ) : (
       <div className="think">
         <div className="eyebrow">Quick think</div>
-        <div className="check-text">{seg.think.q}</div>
+        <div className="check-text">
+          {seg.think.q}{" "}
+          <SayButton
+            id={`${lessonId}:q${index}`}
+            text={`${seg.think.q} ${seg.think.choices.map((c, i) => `${String.fromCharCode(65 + i)}: ${c}.`).join(" ")}`}
+          />
+        </div>
         <div className="check-choices">
           {seg.think.choices.map((c, i) => (
             <button
@@ -228,20 +225,33 @@ function SegmentView({
       )}
 
       {correctWhy !== null && (
-        <Coach teacher={teacher} tone="good">
+        <CoachLine
+          teacher={teacher}
+          id={`${lessonId}:right${index}`}
+          tone="good"
+          auto={!alreadyDone}
+          say={`${wrongPicks.length === 0 ? "Exactly right!" : "You worked it out! That's how learning happens."} ${correctWhy}`}
+        >
           ✅ {wrongPicks.length === 0 ? "Exactly right!" : "You worked it out! That's how learning happens."} {correctWhy}
-        </Coach>
+        </CoachLine>
       )}
 
       {revealed && (
-        <Coach teacher={teacher} tone="good">
-          The answer is shown above. Look at how it works; we&apos;ll come back to this idea so it sticks.
-        </Coach>
+        <CoachLine
+          teacher={teacher}
+          id={`${lessonId}:revealed${index}`}
+          tone="good"
+          say="The answer is shown above. Look at how it works; we'll come back to this idea so it sticks."
+        />
       )}
 
       {coaching && correctWhy === null && !revealed && (
         <div className="ladder">
-          {coaching.hint && <Coach teacher={teacher} tone="warn">🤔 {coaching.hint}</Coach>}
+          {coaching.hint && (
+            <CoachLine teacher={teacher} id={`${lessonId}:hint${index}:${wrongPicks.length}`} tone="warn" say={coaching.hint}>
+              🤔 {coaching.hint}
+            </CoachLine>
+          )}
           {coaching.analogy && (
             <div className="approach">
               <div className="eyebrow">Another way to see it</div>
@@ -255,9 +265,9 @@ function SegmentView({
             </div>
           )}
           {rescue && (
-            <Coach teacher={teacher} tone="ai">
+            <CoachLine teacher={teacher} id={`${lessonId}:rescue${index}:${rescue.tryThis}`} tone="ai" say={`${rescue.explanation} ${rescue.tryThis}`}>
               {rescue.explanation} <strong>{rescue.tryThis}</strong>
-            </Coach>
+            </CoachLine>
           )}
           {coaching.simpler && !coaching.reveal && (
             <div className="approach">
@@ -280,10 +290,15 @@ function SegmentView({
             </div>
           )}
           {coaching.reveal && (
-            <Coach teacher={teacher} tone="good">
+            <CoachLine
+              teacher={teacher}
+              id={`${lessonId}:reveal${index}`}
+              tone="good"
+              say={`Here's the answer: ${seg.think.choices[coaching.reveal.answer]}. ${coaching.reveal.why} We'll come back to this idea later so it sticks.`}
+            >
               Here&apos;s the answer: <strong>{seg.think.choices[coaching.reveal.answer]}</strong>. {coaching.reveal.why} We&apos;ll come back to
               this idea later so it sticks.
-            </Coach>
+            </CoachLine>
           )}
           {!coaching.reveal && <p className="kmuted small">Give it another try{seg.probe ? ": change your answer above and check again" : ""}. Every miss teaches your brain something.</p>}
         </div>
@@ -298,6 +313,7 @@ function SegmentView({
           {nudge && <span className="kmuted small">Taking a while? That&apos;s OK. Want me to explain it another way?</span>}
         </div>
       )}
+      <AskTeacher teacher={teacher} ask={async (text) => (await coach<{ answer: string }>({ action: "ask", courseId, lessonId, seg: index, text })).answer} />
       {done && (
         <div className="btnrow">
           <button className="kbtn big" onClick={onDone}>
@@ -305,6 +321,7 @@ function SegmentView({
           </button>
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -395,13 +412,14 @@ export default function TeachPlayer({ courseId, lessonId, teacher, hook, segment
       {current === "review" && review?.length ? <ReviewWarmup courseId={courseId} items={review} onDone={next} /> : null}
 
       {current === "hook" && (
-        <div className="kcard pop">
-          <div className="eyebrow">Let&apos;s start with this</div>
-          <Coach teacher={teacher}>{hook?.text ?? "Ready? Let's dig in."}</Coach>
-          {hook?.visual && <WidgetView w={hook.visual} />}
-          <button className="kbtn big" onClick={next}>
-            Let&apos;s learn →
-          </button>
+        <div className="pop">
+          <TeacherStage teacher={teacher} id={`${lessonId}:hook`} eyebrow="Let's start with this" text={hook?.text ?? "Ready? Let's dig in."} />
+          <div className="kcard stage-work">
+            {hook?.visual && <WidgetView w={hook.visual} />}
+            <button className="kbtn big" onClick={next}>
+              Let&apos;s learn →
+            </button>
+          </div>
         </div>
       )}
 
@@ -431,11 +449,14 @@ export default function TeachPlayer({ courseId, lessonId, teacher, hook, segment
       )}
 
       {current === "explain" && explain && (
-        <div className="kcard pop">
-          <div className="eyebrow">Explain it back</div>
-          <Coach teacher={teacher}>
-            {explain.prompt} Use your own words. Real understanding means you can teach it.
-          </Coach>
+        <div className="pop">
+          <TeacherStage
+            teacher={teacher}
+            id={`${lessonId}:explain`}
+            eyebrow="Explain it back"
+            text={`${explain.prompt} Use your own words. Real understanding means you can teach it. You can type, or press Talk and tell me out loud.`}
+          />
+          <div className="kcard stage-work">
           <textarea
             className="kinput"
             rows={6}
@@ -444,12 +465,22 @@ export default function TeachPlayer({ courseId, lessonId, teacher, hook, segment
             placeholder="Explain it like you're teaching a friend…"
             disabled={ex.result?.done}
           />
+          {!ex.result?.done && (
+            <div className="btnrow">
+              <MicButton onText={(t) => setEx((cur) => ({ ...cur, text: appendSpoken(cur.text, t) }))} label="Talk it out" />
+            </div>
+          )}
           {error && <div className="error">{error}</div>}
           {ex.result && (
             <div className="explain-result">
-              <Coach teacher={teacher} tone={ex.result.understood ? "good" : "warn"}>
+              <CoachLine
+                teacher={teacher}
+                id={`${lessonId}:explain-fb:${ex.result.feedback}`}
+                tone={ex.result.understood ? "good" : "warn"}
+                say={`${ex.result.feedback} ${ex.result.followUp}`}
+              >
                 {ex.result.feedback} {ex.result.followUp && <strong>{ex.result.followUp}</strong>}
-              </Coach>
+              </CoachLine>
               <div className="w-chips">
                 {ex.result.covered.map((c) => (
                   <span key={c} className="w-chip right">
@@ -475,6 +506,7 @@ export default function TeachPlayer({ courseId, lessonId, teacher, hook, segment
                 {ex.result.understood ? "Show what I know →" : "Keep going →"}
               </button>
             )}
+          </div>
           </div>
         </div>
       )}

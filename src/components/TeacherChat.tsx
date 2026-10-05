@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { appendSpoken, MicButton, SayButton } from "./voice";
 
 export interface TeacherInfo {
   name: string;
@@ -72,6 +73,7 @@ export function TeacherChat({ t, questionId, answered, onHelped }: { t: TeacherI
         {msgs.map((m, i) => (
           <div key={i} className={`bubble ${m.role}`}>
             {m.content}
+            {m.role === "teacher" && <SayButton id={`chat-${i}-${m.content.slice(0, 20)}`} text={m.content} />}
           </div>
         ))}
         {busy && <div className="bubble teacher typing">{t.name} is thinking…</div>}
@@ -87,6 +89,7 @@ export function TeacherChat({ t, questionId, answered, onHelped }: { t: TeacherI
           maxLength={500}
           aria-label={`Message ${t.name}`}
         />
+        <MicButton onText={(t) => setText((cur) => appendSpoken(cur, t))} disabled={busy} label="Talk" compact />
         <button className="kbtn" disabled={busy || !text.trim()}>
           Send
         </button>

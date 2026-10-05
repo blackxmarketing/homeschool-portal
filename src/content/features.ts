@@ -15,6 +15,10 @@ export const FEATURES = {
   twoHourDay: true,
   /** Phase 3: courses beyond math (science, history, writing, money, business, leadership). */
   courses: true,
+  /** Teachers read lessons out loud (the browser's built-in voice). */
+  readAloud: true,
+  /** Kids can talk back with the microphone. Speech-to-text is done by the browser maker (Google, Microsoft or Apple); the portal saves only the text. */
+  kidMic: true,
 };
 
 /** Limits on AI use, to keep costs predictable. */

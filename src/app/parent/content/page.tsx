@@ -27,6 +27,8 @@ const FEATURE_INFO: Record<string, { label: string; text: string }> = {
   aiTeachers: { label: "AI teachers", text: "Teacher characters: mini-lessons, chat about a question, \"why was I wrong?\"" },
   twoHourDay: { label: "The 2-hour day", text: "Daily block rings, grade towers, goals, fact drills, struggle detector and the learning plan." },
   courses: { label: "Courses (Academy)", text: "Science, history, writing, money, business and leadership lessons with checks and tasks." },
+  readAloud: { label: "Teacher reads aloud", text: "An illustrated teacher reads each lesson out loud with captions. Uses the voice built into the browser (some browsers send text to their maker to make the most natural voices)." },
+  kidMic: { label: "Kids can talk back (microphone)", text: "Kids can answer, explain and ask questions out loud. The browser maker (Google, Microsoft or Apple) turns speech into text; the portal saves only the text, never audio. You can read every question on each kid's page." },
 };
 
 const SECTIONS = [

@@ -1,0 +1,224 @@
+/*
+ * Kid theme: bright and clean. Royal blue and white, soft-serif display
+ * headings, pill buttons and white cards, in the spirit of the
+ * "2-hour learning" school style. Loaded after game.css and teach.css so
+ * these tokens win.
+ */
+
+.kidworld {
+  --k-bg1: #f3f5ff;
+  --k-bg2: #eaefff;
+  --k-card: #ffffff;
+  --k-card-line: #dfe5f6;
+  --k-panel: #f7f9ff;
+  --k-ink: #0c1a4b;
+  --k-muted: #5a6489;
+  --k-accent: #2340ff;
+  --k-accent-dark: #1428c8;
+  --k-accent2: #0a7ea4;
+  --k-lime: #15913f;
+  --k-warn: #c76a00;
+  --k-pink: #d02679;
+  --k-track: #e4e9f7;
+  --k-tint: #f4f6fe;
+  --k-tint-2: #eaeefc;
+  --k-well: #f6f8ff;
+  --k-good-ink: #146c35;
+  --k-bad-ink: #b42318;
+  --k-warn-ink: #8a4b00;
+  --v-ink: #0c1a4b;
+  --v-line: #cfd6ec;
+  --v-soft: #e7ebf8;
+  --v-a: #2340ff;
+  --v-b: #0a9ec4;
+  --v-c: #f59e0b;
+  color: var(--k-ink);
+  background:
+    radial-gradient(900px 380px at 50% -160px, rgba(35, 64, 255, .16), transparent 70%),
+    var(--k-bg1);
+  background-attachment: scroll;
+}
+
+/* Typography: a soft serif for headings, Lexend for reading. */
+.kidworld h1,
+.kidworld h2,
+.kidworld .hud-title,
+.kidworld .course-title,
+.kidworld .quest-name,
+.kidworld .stage-title {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.kidworld h1 { font-size: 2.1rem; }
+.kidworld a { color: var(--k-accent); }
+.kidworld .eyebrow { color: var(--k-accent); letter-spacing: .12em; }
+.kidworld .kmuted { color: var(--k-muted); }
+
+/* Cards */
+.kidworld .kcard,
+.kidworld .kstat,
+.kidworld .card {
+  background: var(--k-card);
+  border: 1px solid var(--k-card-line);
+  box-shadow: 0 10px 30px rgba(18, 36, 110, .07);
+  backdrop-filter: none;
+}
+.kidworld .kcard { border-radius: 26px; }
+
+/* Buttons: royal-blue pills. */
+.kidworld .kbtn {
+  border-radius: 999px;
+  background: var(--k-accent);
+  color: #fff !important;
+  box-shadow: 0 6px 18px rgba(35, 64, 255, .28);
+  font-weight: 800;
+}
+.kidworld .kbtn:hover { background: var(--k-accent-dark); filter: none; }
+.kidworld .kbtn:active { transform: translateY(2px); box-shadow: 0 2px 8px rgba(35, 64, 255, .3); }
+.kidworld .kbtn.ghost {
+  background: #fff;
+  color: var(--k-accent) !important;
+  border: 2px solid var(--k-accent);
+  box-shadow: none;
+}
+.kidworld .kbtn.ghost:hover { background: var(--k-tint); }
+.kidworld .kbtn.choice { background: #fff; color: var(--k-ink) !important; border: 2px solid var(--k-card-line); box-shadow: none; }
+.kidworld .kbtn.choice.right { background: #e7f7ec; border-color: var(--k-lime); }
+.kidworld .linkbtn { color: var(--k-accent); }
+
+/* Inputs */
+.kidworld .kinput,
+.kidworld .pin { background: #fff; border: 2px solid var(--k-card-line); color: var(--k-ink); }
+.kidworld .kinput:focus { border-color: var(--k-accent); box-shadow: 0 0 0 4px rgba(35, 64, 255, .14); }
+
+/* Home base hero */
+.kidworld .hero-avatar { background: var(--k-accent); box-shadow: 0 10px 26px rgba(35, 64, 255, .3); }
+.kidworld .rank { color: var(--k-warn); }
+.kidworld .xpbar span { background: linear-gradient(90deg, var(--k-accent), #3aa0ff, #22c55e); }
+
+/* Status colors on white */
+.kidworld .tag { background: var(--k-tint-2); color: var(--k-ink); }
+.kidworld .tag.ok { background: #e3f6e9; color: var(--k-good-ink); }
+.kidworld .tag.wait { background: #fff2dc; color: var(--k-warn-ink); }
+.kidworld .feedback.good, .kidworld .coach-bubble.good { background: #ecf9f0; border-color: #a8e2bb; color: var(--k-good-ink); }
+.kidworld .feedback.bad { background: #fdeeee; color: var(--k-bad-ink); }
+.kidworld .coach-bubble.warn { background: #fff6e6; border-color: #f7d49a; }
+.kidworld .coach-bubble.ai { background: #eef1ff; border-color: #b9c4ff; }
+.kidworld .hint { background: #fff6e6; color: var(--k-warn-ink); }
+.kidworld .cue { background: #fff2dc; color: var(--k-warn-ink); }
+.kidworld .approach { background: #eef7fb; border-color: #b8e1ee; }
+.kidworld .key-ideas, .kidworld .goal { background: #fff8e8; border-color: #f6dc9c; }
+.kidworld .xpchip { background: #e3f6e9; color: var(--k-good-ink); }
+.kidworld .combo { background: #fff0e0; color: #b45309; }
+.kidworld .error { background: #fdeeee; color: var(--k-bad-ink); }
+.kidworld .w-feedback { background: #fff6e6; color: var(--k-warn-ink); }
+.kidworld .w-feedback.ok { background: #ecf9f0; color: var(--k-good-ink); }
+.kidworld .reveal { background: #ecf9f0; color: var(--k-good-ink); }
+.kidworld .check-why.good { color: var(--k-good-ink); }
+.kidworld .check-why.bad { color: var(--k-bad-ink); }
+.kidworld .band-kid.good { background: #e3f6e9; color: var(--k-good-ink); }
+.kidworld .band-kid.bad { background: #fdeeee; color: var(--k-bad-ink); }
+.kidworld .target-readout { background: #fdeeee; color: var(--k-bad-ink); }
+.kidworld .target-readout.ok { background: #e3f6e9; color: var(--k-good-ink); }
+.kidworld .dots span.n { background: #ef4444; }
+.kidworld .w-hot-spot { background: #fff; }
+.kidworld .w-hot-center { background: radial-gradient(circle, #dfe5ff, #eef1ff); border-color: var(--k-accent); }
+.kidworld .w-flip { background: linear-gradient(160deg, #e8edff, #f4f7ff); }
+.kidworld .w-flip.open { background: linear-gradient(160deg, #e6f7ec, #fff8e6); }
+.kidworld .mastery-num { background: var(--k-accent); color: #fff; }
+.kidworld .node.ready { background: var(--k-accent); color: #fff; }
+.kidworld .lesson-step.active { background: var(--k-accent); border-color: var(--k-accent); color: #fff; }
+.kidworld .mastered-banner { background: linear-gradient(135deg, #2340ff, #3aa0ff); box-shadow: 0 10px 30px rgba(35, 64, 255, .3); }
+.kidworld .adapt-banner { background: #eef3ff; border-color: #c4d0ff; }
+.kidworld .adapt-banner.challenge { background: #ecf9f0; border-color: #a8e2bb; }
+.kidworld .confetti span { opacity: .9; }
+
+/* ---------------- The teacher stage ---------------- */
+.stage {
+  display: grid;
+  grid-template-columns: 170px 1fr;
+  gap: 18px;
+  align-items: start;
+  padding: 18px;
+  border-radius: 26px;
+  background: linear-gradient(180deg, #2340ff 0, #2340ff 120px, transparent 120px);
+}
+.stage-teacher {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--k-ink);
+}
+.stage-avatar { width: 150px; height: 150px; border-radius: 50%; background: #fff; box-shadow: 0 10px 30px rgba(12, 26, 75, .25); overflow: hidden; }
+.stage-avatar svg { width: 100%; height: 100%; display: block; }
+.stage-name { font-family: var(--font-display), Georgia, serif; font-weight: 700; font-size: 1.05rem; }
+.stage-title-tag { font-size: .7rem; text-transform: uppercase; letter-spacing: .12em; color: var(--k-muted); text-align: center; }
+.stage-board {
+  position: relative;
+  background: #fff;
+  border-radius: 22px;
+  padding: 20px 22px;
+  box-shadow: 0 12px 34px rgba(12, 26, 75, .12);
+  border: 1px solid var(--k-card-line);
+  min-height: 150px;
+}
+.stage-board::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 52px;
+  border: 10px solid transparent;
+  border-right-color: #fff;
+  border-left: 0;
+}
+.stage-text { font-size: 1.15rem; line-height: 1.65; white-space: pre-line; }
+.stage-text .w { transition: background .1s, color .1s; border-radius: 4px; }
+.stage-text .w.now { background: #ffe58f; box-shadow: 0 0 0 2px #ffe58f; }
+.stage-text.speaking .w { color: #8a93b5; }
+.stage-text.speaking .w.done { color: var(--k-ink); }
+.stage-text.speaking .w.cur { color: var(--k-ink); }
+.stage-avatar.talking { box-shadow: 0 0 0 6px rgba(255, 255, 255, .45), 0 10px 30px rgba(12, 26, 75, .25); }
+.stage-btn.on-soft { border-color: var(--k-accent); color: var(--k-accent); }
+.stage-work { margin-top: 14px; }
+.teach-seg { display: block; }
+
+/* Teacher lines (hints, praise, answers) with a small illustrated face */
+.coach-face { flex: 0 0 52px; width: 52px; height: 52px; border-radius: 50%; overflow: hidden; background: #fff; box-shadow: 0 3px 10px rgba(12, 26, 75, .12); }
+.coach-face svg { display: block; }
+.say-btn { font: inherit; font-size: .8rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; padding: 2px 9px; border-radius: 999px; border: 1.5px solid var(--k-card-line); background: #fff; color: var(--k-accent); cursor: pointer; vertical-align: middle; line-height: 1.5; }
+.say-btn:hover { border-color: var(--k-accent); }
+.say-btn.on { background: var(--k-accent); border-color: var(--k-accent); color: #fff; }
+.probe-say { display: flex; justify-content: flex-end; margin-bottom: 6px; }
+.mic-wrap { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.raise-hand { margin-top: 14px; }
+.ask .bubble.kid { margin-left: auto; max-width: 80%; width: fit-content; padding: 8px 14px; border-radius: 16px 16px 4px 16px; background: var(--k-accent); color: #fff; margin-bottom: 8px; }
+.stage-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 14px; }
+.stage-btn { font: inherit; font-weight: 800; font-size: .85rem; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px; border: 2px solid var(--k-card-line); background: #fff; color: var(--k-ink); cursor: pointer; }
+.stage-btn:hover { border-color: var(--k-accent); color: var(--k-accent); }
+.stage-btn.on { background: var(--k-accent); border-color: var(--k-accent); color: #fff; }
+.stage-btn:disabled { opacity: .45; cursor: default; }
+.stage-select { font: inherit; font-size: .85rem; padding: 6px 10px; border-radius: 999px; border: 2px solid var(--k-card-line); background: #fff; color: var(--k-ink); width: auto; }
+
+/* Microphone */
+.mic-btn { font: inherit; font-weight: 800; display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 999px; border: 2px solid var(--k-accent); background: #fff; color: var(--k-accent); cursor: pointer; }
+.mic-btn.listening { background: #ef4444; border-color: #ef4444; color: #fff; animation: micpulse 1.2s infinite; }
+.mic-btn:disabled { opacity: .5; cursor: default; }
+@keyframes micpulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, .45); } 70% { box-shadow: 0 0 0 14px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+.mic-interim { font-style: italic; color: var(--k-muted); font-size: .9rem; }
+
+/* Ask the teacher */
+.ask { margin-top: 14px; padding: 14px 16px; border-radius: 18px; background: var(--k-tint); border: 1px solid var(--k-card-line); }
+.ask-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.ask-row .kinput { flex: 1 1 220px; }
+.ask-answer { margin-top: 10px; }
+
+@media (max-width: 640px) {
+  .stage { grid-template-columns: 1fr; background: linear-gradient(180deg, #2340ff 0, #2340ff 150px, transparent 150px); }
+  .stage-avatar { width: 120px; height: 120px; }
+  .stage-board::before { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mic-btn.listening { animation: none; }
+}

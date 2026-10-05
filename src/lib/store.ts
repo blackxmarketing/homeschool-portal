@@ -1439,6 +1439,24 @@ export function explainContext(kidId: number, courseId: string, lessonId: string
   return ctx;
 }
 
+/** Context for a question a kid asks their teacher during one part of a lesson. */
+export function askContext(kidId: number, courseId: string, lessonId: string, seg: number) {
+  const ctx = teachContext(kidId, courseId, lessonId);
+  const segment = Number.isInteger(seg) && seg >= 0 ? ctx.lesson.teach?.[seg] : undefined;
+  return { ...ctx, segment };
+}
+
+/**
+ * What a kid has said to their teachers in this course before (questions they
+ * asked, explanations they gave), newest first. Teachers use it to connect
+ * ideas across lessons.
+ */
+export function kidVoiceMemory(kidId: number, courseId: string, limit = 8): string[] {
+  return (getDb()
+    .prepare("SELECT content FROM tutor_messages WHERE kid_id = ? AND teacher_id = ? AND role = 'kid' ORDER BY id DESC LIMIT ?")
+    .all(kidId, `course:${courseId}`, limit) as { content: string }[]).map((r) => r.content.slice(0, 240));
+}
+
 /** Lessons where a kid needed extra help, for the parent's page. */
 export function supportReport(kidId: number) {
   const rows = getDb()

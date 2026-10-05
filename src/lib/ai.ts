@@ -337,3 +337,48 @@ Judge understanding, not spelling or wording: their own words and examples count
     EXPLAIN_SCHEMA,
   );
 }
+
+const ASK_SCHEMA = {
+  type: "object",
+  properties: {
+    answer: { type: "string" },
+    onTopic: { type: "boolean" },
+  },
+  required: ["answer", "onTopic"],
+  additionalProperties: false,
+} as const;
+
+/**
+ * A kid asks the teacher a question out loud (or typed) during a lesson.
+ * The teacher answers in context, remembers what the kid asked before, and
+ * never gives away the answer to the current check.
+ */
+export async function coachAsk(input: {
+  teacher: { name: string; inspiredBy: string; voice: string };
+  lessonTitle: string;
+  segmentTitle: string;
+  teachText: string;
+  secret: string;
+  question: string;
+  memory: string[];
+}): Promise<{ answer: string; onTopic: boolean } | null> {
+  const result = await askStructured<{ answer: string; onTopic: boolean }>(
+    coachSystem(input.teacher),
+    `You are teaching a live lesson and the student just asked you a question (it may come from speech-to-text, so forgive odd wording).
+Lesson: ${input.lessonTitle}
+Part: ${input.segmentTitle}
+What you just taught: ${input.teachText}
+The answer to this part's check (SECRET, never say it or quote it): ${input.secret}
+${input.memory.length ? `Things this student said or asked in earlier lessons (use them to connect ideas when it helps):\n${input.memory.map((m) => `- ${m}`).join("\n")}\n` : ""}
+Student's question:
+"""
+${input.question}
+"""
+
+answer: 2-4 short sentences, spoken aloud by you, warm and clear, at a 6th-8th grade level. Help them understand; if they ask for the check's answer, guide them to reason it out instead. If the question is off-topic or not appropriate for school, kindly steer back to the lesson and set onTopic false.`,
+    ASK_SCHEMA,
+  );
+  if (!result) return null;
+  if (input.secret.length >= 4 && result.answer.toLowerCase().includes(input.secret.toLowerCase())) return null;
+  return result;
+}

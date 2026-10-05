@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { kidFromRequest } from "@/lib/auth";
-import { aiEnabled, coachExplain, coachRescue } from "@/lib/ai";
+import { aiEnabled, coachAsk, coachExplain, coachRescue } from "@/lib/ai";
 import { aiLimits, features } from "@/lib/content";
 import { keywordExplainCheck } from "@/lib/teaching";
 import {
   answerActivity,
+  askContext,
+  kidVoiceMemory,
   answerMasteryItem,
   retryMastery,
   answerProbe,
@@ -28,6 +30,7 @@ import {
  *  { action: "lost",     courseId, lessonId, seg }           "I'm lost" -> next kind of help
  *  { action: "activity", courseId, lessonId, answer }        hands-on activity
  *  { action: "explain",  courseId, lessonId, text }          explain it back in your own words
+ *  { action: "ask",      courseId, lessonId, seg, text }     the kid asks the teacher a question (spoken or typed)
  */
 export async function POST(req: Request) {
   const kid = await kidFromRequest();
@@ -155,6 +158,36 @@ export async function POST(req: Request) {
       }
       const state = recordExplain(kid.id, courseId, lessonId, verdict.understood, verdict.feedback);
       return NextResponse.json({ ...verdict, done: state.done, tries: state.tries });
+    }
+
+    if (b.action === "ask" && typeof b.text === "string") {
+      const question = b.text.trim().slice(0, aiLimits().maxMessageChars);
+      if (question.length < 3) return NextResponse.json({ error: "Ask your question in a few words." }, { status: 400 });
+      const ctx = askContext(kid.id, courseId, lessonId, seg);
+      const s = ctx.segment;
+      const memory = kidVoiceMemory(kid.id, courseId);
+      const base = { questionId: `ask:${courseId}:${lessonId}`, skillId: `course:${courseId}`, teacherId: `course:${courseId}`, kind: "chat" as const };
+      const reply = aiOk()
+        ? await coachAsk({
+            teacher: ctx.course.teacher,
+            lessonTitle: ctx.lesson.title,
+            segmentTitle: s?.title ?? ctx.lesson.title,
+            teachText: s?.teach ?? ctx.lesson.read.slice(0, 1500),
+            secret: s ? s.think.choices[s.think.answer] : "",
+            question,
+            memory,
+          })
+        : null;
+      logTutor(kid.id, { ...base, role: "kid", content: `Asked in "${ctx.lesson.title}": ${question}` });
+      if (reply) {
+        logTutor(kid.id, { ...base, role: "teacher", content: reply.answer });
+        return NextResponse.json({ answer: reply.answer, ai: true });
+      }
+      // Without AI the teacher offers another way in from the lesson itself, and the question is saved for a parent.
+      const fallback = s
+        ? `Great question. Here's another way to think about it: ${s.approaches.analogy} I saved your question so a parent can talk it through with you too.`
+        : "Great question. I saved it so a parent can talk it through with you.";
+      return NextResponse.json({ answer: fallback, ai: false });
     }
 
     return NextResponse.json({ error: "Bad request." }, { status: 400 });

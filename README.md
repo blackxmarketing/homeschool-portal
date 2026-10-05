@@ -61,6 +61,12 @@ Colorado records.
   feeds a learner profile per subject that flags kids who are starting to slip
   (before they fail) and adapts the teaching: worked examples first, warm-up
   review, the help that works best for them, or a test-out when they're ahead.
+- **A teacher who talks (Phase 3d).** An illustrated teacher reads every
+  lesson aloud with word-by-word captions (pause, replay, slower/faster,
+  auto-read). Kids answer, explain and ask questions out loud with the mic
+  ("Raise my hand"), and teachers remember what each kid asked in earlier
+  lessons. Uses the browser's own voice and speech-to-text (best in Chrome,
+  Edge or Safari); only text is saved. Parents can switch either off.
 - **Real-world missions.** Off-screen tasks about money, business, leadership,
   character, science, history and civics. A parent approves each one, which
   awards XP and logs the minutes under the right subject for records.

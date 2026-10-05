@@ -7,6 +7,7 @@ import { features } from "@/lib/content";
 import { interactiveDone, publicThink, publicWidget } from "@/lib/teaching";
 import { adaptationFor, lessonView, reviewItems, teachProgress } from "@/lib/store";
 import { publicProbe } from "@/lib/probes";
+import { avatarFor } from "@/content/avatars";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,7 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
     courseId: v.course.id,
     courseTitle: v.course.title,
     hue: v.course.hue,
-    teacher: v.course.teacher,
+    teacher: { ...v.course.teacher, look: avatarFor(v.course.id), title: `${v.course.title} teacher` },
     lesson: { ...v.lesson, check: v.lesson.check.map(({ q, choices }) => ({ q, choices })) },
     next: v.next ? { id: v.next.id, title: v.next.title } : null,
     initial: {

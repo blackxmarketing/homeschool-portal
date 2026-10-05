@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import WidgetView from "./Widgets";
+import { SayButton } from "./voice";
 import type { PublicProbe } from "@/lib/probes";
 
 /**
@@ -332,7 +333,7 @@ function Target({ p, submit, locked }: { p: Extract<PublicProbe, { type: "target
           <text x={40} y={60} textAnchor="middle" fontSize={12} fill="#fff" fontWeight={800}>{p.load}kg</text>
         </g>
         <polygon points={`${20 + v * 3.6},78 ${8 + v * 3.6},110 ${32 + v * 3.6},110`} fill="var(--k-warn)" />
-        <text x={385} y={132} textAnchor="end" fontSize={13} fill={push <= p.maxPush ? "var(--k-lime)" : "#fca5a5"} fontWeight={800}>push {push.toFixed(1)} kg</text>
+        <text x={385} y={132} textAnchor="end" fontSize={13} fill={push <= p.maxPush ? "var(--k-lime)" : "#dc2626"} fontWeight={800}>push {push.toFixed(1)} kg</text>
         <text x={200} y={20} textAnchor="middle" fontSize={12} fill="var(--k-muted)">goal: push {p.maxPush} kg or less</text>
       </svg>
     );
@@ -391,7 +392,28 @@ function Target({ p, submit, locked }: { p: Extract<PublicProbe, { type: "target
   );
 }
 
+/** The question as the teacher would say it out loud. */
+export function probeSpeech(p: PublicProbe): string {
+  if (p.type === "cloze") return `Fill in the blanks. ${p.parts.map((x) => x.trim()).join(" blank ").trim()}`;
+  const prompt = (p as { prompt?: string }).prompt;
+  return prompt ?? "";
+}
+
 export default function ProbeView({ p, submit, locked = false }: { p: PublicProbe; submit: Submit; locked?: boolean }) {
+  const said = probeSpeech(p);
+  return (
+    <>
+      {said && !locked && (
+        <div className="probe-say">
+          <SayButton id={`probe:${said}`} text={said} label="Read it to me" />
+        </div>
+      )}
+      <ProbeBody p={p} submit={submit} locked={locked} />
+    </>
+  );
+}
+
+function ProbeBody({ p, submit, locked }: { p: PublicProbe; submit: Submit; locked: boolean }) {
   const elapsed = useTimer();
   switch (p.type) {
     case "cloze":

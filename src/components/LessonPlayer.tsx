@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { Task } from "@/content/courses/types";
+import type { AvatarLook } from "@/content/avatars";
+import { CoachLine, TeacherStage } from "./TeacherStage";
+import { appendSpoken, MicButton } from "./voice";
 
 const STAGE_LABEL = { grammar: "Learn the facts", logic: "Reason it out", rhetoric: "Make & explain" } as const;
 const TASK_LABEL = { write: "✍️ Write", project: "🛠️ Project", lab: "🧪 Lab", speak: "🎤 Speak" } as const;
@@ -11,7 +14,7 @@ interface Props {
   courseId: string;
   courseTitle: string;
   hue: number;
-  teacher: { name: string; avatar: string; inspiredBy: string };
+  teacher: { name: string; avatar: string; inspiredBy: string; look?: AvatarLook; title?: string };
   lesson: { id: string; title: string; minutes: number; stage: "grammar" | "logic" | "rhetoric"; read: string; keyIdeas: string[]; check: { q: string; choices: string[] }[]; task?: Task };
   initial: { checkPassed: boolean; checkBest: number; taskStatus: string; taskResponse: string; taskFeedback: string; done: boolean };
   next: { id: string; title: string } | null;
@@ -73,8 +76,6 @@ export default function LessonPlayer({ courseId, courseTitle, hue, teacher, less
     }
   }
 
-  const paragraphs = lesson.read.split(/\n\s*\n/);
-
   return (
     <div style={{ ["--t-hue" as string]: hue }}>
       <div className="lesson-steps">
@@ -101,17 +102,7 @@ export default function LessonPlayer({ courseId, courseTitle, hue, teacher, less
           <div className="eyebrow">
             {courseTitle} · {STAGE_LABEL[lesson.stage]} · ~{lesson.minutes} min
           </div>
-          <div className="teacher-badge">
-            <div className="teacher-avatar" title={teacher.inspiredBy ? `Inspired by ${teacher.inspiredBy}` : undefined}>
-              {teacher.avatar}
-            </div>
-            <div className="teacher-name">{teacher.name}</div>
-          </div>
-          {paragraphs.map((p, i) => (
-            <p key={i} className="big-text">
-              {p}
-            </p>
-          ))}
+          <TeacherStage teacher={teacher} id={`${lesson.id}:read`} text={lesson.read.trim()} />
           {lesson.keyIdeas.length > 0 && (
             <div className="key-ideas">
               <div className="eyebrow">Key ideas</div>
@@ -215,6 +206,11 @@ export default function LessonPlayer({ courseId, courseTitle, hue, teacher, less
             placeholder={lesson.task.kind === "write" ? "Write here…" : "What did you do, and what did you find out?"}
             disabled={taskStatus === "pending" || taskStatus === "approved"}
           />
+          {taskStatus !== "pending" && taskStatus !== "approved" && (
+            <div className="btnrow">
+              <MicButton onText={(t) => setText((cur) => appendSpoken(cur, t))} label={lesson.task.kind === "write" ? "Talk my draft" : "Tell it out loud"} />
+            </div>
+          )}
           {error && <div className="error">{error}</div>}
           {taskStatus === "pending" ? (
             <div className="tag wait">⏳ Waiting for a parent to check</div>
@@ -230,11 +226,9 @@ export default function LessonPlayer({ courseId, courseTitle, hue, teacher, less
           )}
           {feedback && (
             <div className="teacher-note">
-              <div className="teacher-badge">
-                <div className="teacher-avatar">{teacher.avatar}</div>
-                <div className="teacher-name">{teacher.name}&apos;s feedback</div>
-              </div>
-              <div className="lesson-text">{feedback}</div>
+              <CoachLine teacher={teacher} id={`${lesson.id}:feedback`} say={feedback} auto={false}>
+                <div className="lesson-text">{feedback}</div>
+              </CoachLine>
               <p className="kmuted small">Revise and turn it in again any time. Great writers rewrite.</p>
             </div>
           )}

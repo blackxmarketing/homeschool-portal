@@ -28,6 +28,25 @@ and civics. Each phase can be switched on or off in `src/content/features.ts`.
 - Struggle detector (drops back to prerequisites) and math-fact speed drills
 - MAP test score tracking (percentile and growth, three times a year)
 
+## ✅ Phase 3d — The teacher teaches out loud (built)
+- An illustrated teacher for each course stands at the front
+  of every lesson part, in a bright royal-blue and white look inspired by
+  2 Hour Learning and Alpha School. Teachers blink and their mouths move as
+  they talk. Looks live in `src/content/avatars.ts`.
+- The teacher reads each part aloud with captions that highlight the current
+  sentence and word. Kids can pause, start over, slow down or speed up, and
+  turn auto-read off. Hints, praise, answers and feedback are read too, and
+  every question has "Read it to me."
+- Kids talk back with the mic: explain-it-back, writing and project tasks,
+  the math teacher chat, and "Raise my hand" to ask the teacher anything
+  during a lesson. Answers are read aloud and never give away the check.
+- Teachers remember: what a kid asked or explained in earlier lessons of a
+  course is given to the teacher, who connects new ideas to it. Parents can
+  read every question on the kid's page.
+- Parent switches on the Content page: "Teacher reads aloud" and "Kids can
+  talk back (microphone)". Speech-to-text is done by the browser maker; the
+  portal saves only text, never audio.
+
 ## ✅ Phase 3c — Interactive assessment and the learner model (built)
 - Multiple choice replaced by interactive questions in every lesson part and
   every final check: fill in the blank (typed or word bank), number entry,
