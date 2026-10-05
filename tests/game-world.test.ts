@@ -86,3 +86,29 @@ describe("the world of Lumina", () => {
     expect([9, 12].map(bandFor)).toEqual(["strategist", "strategist"]);
   });
 });
+
+import { obstacleFor, obstacleGrid, OBSTACLE_TEXT, sceneBackground, shadeGrid, SCENE_H, SCENE_W } from "@/lib/pixel/scene";
+
+describe("quest scenes and bosses", () => {
+  it("every kind of challenge has an obstacle with a goal and a win", () => {
+    for (const t of ["cloze", "number", "place", "match", "build", "target", "sort", "sequence", "highlight"]) {
+      const o = obstacleFor(t);
+      expect(OBSTACLE_TEXT[o].goal.length).toBeGreaterThan(5);
+      expect(obstacleGrid(o, false).runs()).not.toEqual(obstacleGrid(o, true).runs());
+    }
+  });
+
+  it("every land has its own scenery and Shade", () => {
+    for (const L of LANDS) {
+      const bg = sceneBackground(L, "adventurer");
+      expect([bg.w, bg.h]).toEqual([SCENE_W, SCENE_H]);
+      expect(bg.get(0, 0)).not.toBeNull();
+      expect(shadeGrid(L, "idle").runs()).not.toEqual(shadeGrid(L, "gone").runs());
+    }
+  });
+
+  it("night scenery for grades 9-12", () => {
+    const L = LANDS[1];
+    expect(sceneBackground(L, "strategist").get(0, 0)).not.toBe(sceneBackground(L, "sprout").get(0, 0));
+  });
+});

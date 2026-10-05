@@ -4,6 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import WidgetView, { type CheckFn } from "./Widgets";
 import ProbeView, { probeSpeech, type ProbeResult } from "./Probes";
 import { MasteryCheck, ReviewWarmup } from "./Assess";
+import { QuestScene, type GameInfo } from "./pixel/QuestScene";
+import BossBattle from "./pixel/BossBattle";
+import { obstacleFor } from "@/lib/pixel/scene";
 import TeacherFace from "./TeacherFace";
 import { StoryBoard, VideoCard } from "./StoryBoard";
 import { AskTeacher, Captions, lookOf, type StageTeacher } from "./TeacherStage";
@@ -45,6 +48,8 @@ interface Props {
   adaptation?: AdaptView;
   review?: { lessonId: string; seg: number; title: string; probe: PublicProbe }[];
   mastery?: PublicProbe[];
+  /** The game world: challenges become quest scenes in this land. */
+  game?: GameInfo;
 }
 
 async function coach<T>(body: Record<string, unknown>): Promise<T> {
@@ -228,7 +233,11 @@ export default function TutorSession(props: Props) {
   );
 
   if (testOut && mastery?.length) {
-    return <MasteryCheck courseId={courseId} lessonId={lessonId} probes={mastery} testOut onPassed={() => onFinished("tested-out")} onCancel={() => setTestOut(false)} />;
+    return props.game ? (
+      <BossBattle game={props.game} courseId={courseId} lessonId={lessonId} probes={mastery} testOut onPassed={() => onFinished("tested-out")} onCancel={() => setTestOut(false)} />
+    ) : (
+      <MasteryCheck courseId={courseId} lessonId={lessonId} probes={mastery} testOut onPassed={() => onFinished("tested-out")} onCancel={() => setTestOut(false)} />
+    );
   }
 
   if (!started) {
@@ -314,7 +323,7 @@ export default function TutorSession(props: Props) {
               step={step}
               courseId={courseId}
               lessonId={lessonId}
-
+              game={props.game}
               replays={replays}
               priorRisk={priorRiskFor(adaptation?.mode)}
               setLine={setLine}
@@ -343,6 +352,7 @@ function InteractiveStep({
   onStars,
   onNext,
   teacherName,
+  game,
 }: {
   step: Exclude<TutorStep, { kind: "say" | "review" }>;
   courseId: string;
@@ -355,6 +365,7 @@ function InteractiveStep({
   onStars: (n: number) => void;
   onNext: () => void;
   teacherName: string;
+  game?: GameInfo;
 }) {
   const seg = "seg" in step ? step.seg : null;
   const expectedMs =
@@ -593,7 +604,17 @@ function InteractiveStep({
   return (
     <div className="tutor-step" onPointerDownCapture={touch} onKeyDownCapture={touch}>
       {locked && <div className="tutor-lock">🐢 Read it with me first…</div>}
-      {challenge && (
+      {challenge && game && (
+        <QuestScene
+          game={game}
+          obstacle={step.kind === "probe" ? obstacleFor(step.probe.type) : "chest"}
+          solved={done}
+          miss={wrong}
+          stars={earned}
+          possible={possible}
+        />
+      )}
+      {challenge && !game && (
         <div className={`challenge-head ${earned !== null ? "won" : ""}`}>
           <span className="challenge-tag">⚡ {step.kind === "activity" ? "Mission" : "Challenge"}</span>
           <span className="challenge-stars" aria-label={earned !== null ? `${earned} of 3 stars` : `Up to ${possible} stars`}>

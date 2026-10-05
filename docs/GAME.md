@@ -58,7 +58,7 @@ paths back to its part of the world.
 - **B** — Shop (gear, pets), parents' real-rewards catalog and approvals,
   family quests, visiting a sibling's hero.
 - **C** — Lessons as game scenes (each challenge type gets a game skin), a boss
-  challenge for mastery, field missions.
+  challenge for mastery, field missions. *(built)*
 - **D** — Lesson sets for grades 4–5 and 9–12.
 
 All pixel art is drawn in code (`src/lib/pixel/`), so it's free to change and

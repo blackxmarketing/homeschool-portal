@@ -5,6 +5,9 @@ import LessonPlayer from "./LessonPlayer";
 import TeachPlayer, { type AdaptView, type PublicSegment, type TeachInitial } from "./TeachPlayer";
 import TutorSession from "./TutorSession";
 import { MasteryCheck } from "./Assess";
+import BossBattle from "./pixel/BossBattle";
+import { HeroSprite } from "./pixel/PixelArt";
+import type { GameInfo } from "./pixel/QuestScene";
 import type { PublicWidget } from "@/lib/teaching";
 import type { PublicProbe } from "@/lib/probes";
 import type { PublicShow } from "@/lib/storyboard";
@@ -21,6 +24,7 @@ export default function LessonFlow({
   interactiveDone,
   tutorMode = false,
   kidName,
+  game,
 }: {
   player: PlayerProps;
   teach: {
@@ -36,6 +40,8 @@ export default function LessonFlow({
   interactiveDone: boolean;
   tutorMode?: boolean;
   kidName?: string;
+  /** The game world, when the kid has a hero. */
+  game?: GameInfo;
 }) {
   const [teachingDone, setTeachingDone] = useState(interactiveDone);
   const [checkPassed, setCheckPassed] = useState(player.initial.checkPassed);
@@ -44,6 +50,7 @@ export default function LessonFlow({
     return (
       <Player
         kidName={kidName}
+        game={game}
         courseId={player.courseId}
         lessonId={player.lesson.id}
         teacher={player.teacher}
@@ -64,14 +71,26 @@ export default function LessonFlow({
   }
   // Interactive "show what you know" replaces the multiple-choice check.
   if (teach.mastery?.length && !checkPassed) {
-    return (
-      <MasteryCheck
-        courseId={player.courseId}
-        lessonId={player.lesson.id}
-        probes={teach.mastery}
-        onPassed={() => setCheckPassed(true)}
-      />
+    return game ? (
+      <BossBattle game={game} courseId={player.courseId} lessonId={player.lesson.id} probes={teach.mastery} onPassed={() => setCheckPassed(true)} />
+    ) : (
+      <MasteryCheck courseId={player.courseId} lessonId={player.lesson.id} probes={teach.mastery} onPassed={() => setCheckPassed(true)} />
     );
   }
-  return <LessonPlayer key={String(checkPassed)} {...player} initial={{ ...player.initial, checkPassed }} startAt="check" />;
+  return (
+    <>
+      {game && player.lesson.task && (
+        <div className="field-mission">
+          <HeroSprite hero={game.hero} scale={3} />
+          <div>
+            <div className="pixel-title small">Field mission</div>
+            <p>
+              Take what you learned into the real world. Finish this mission (a parent checks the hands-on ones) and the beacon lights for good.
+            </p>
+          </div>
+        </div>
+      )}
+      <LessonPlayer key={String(checkPassed)} {...player} initial={{ ...player.initial, checkPassed }} startAt="check" />
+    </>
+  );
 }

@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { heroOf } from "@/lib/gameState";
+import { LANDS } from "@/lib/pixel/world";
 import { requireKid } from "@/lib/auth";
 import { features } from "@/lib/content";
 import { courseOverview } from "@/lib/store";
@@ -14,6 +16,9 @@ export default async function CoursePage({ params }: { params: Promise<{ course:
   const { kid } = await requireKid();
   if (!features().courses) notFound();
   const { course: courseId } = await params;
+  // In the game world, a course is a land.
+  const land = LANDS.find((l) => l.courses.includes(courseId));
+  if (land && heroOf(kid.id)) redirect(`/kid/land/${land.id}`);
   const c = courseOverview(kid.id).find((x) => x.course.id === courseId);
   if (!c) notFound();
 

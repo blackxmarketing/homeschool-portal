@@ -28,6 +28,19 @@ and civics. Each phase can be switched on or off in `src/content/features.ts`.
 - Struggle detector (drops back to prerequisites) and math-fact speed drills
 - MAP test score tracking (percentile and growth, three times a year)
 
+## ✅ Phase 5c — Lessons as game scenes (built)
+- Every challenge in a lesson is a scene in its land's scenery: the hero
+  faces an obstacle that solving the problem overcomes (fill in -> rune gate,
+  build -> bridge, match -> portals, numbers -> target, place -> crystal,
+  sort/order/highlight -> treasure chest, simulations -> machine). Wrong tries
+  shake it; solving it plays the win and shows the stars (`src/lib/pixel/scene.ts`).
+- "Show what you know" is a boss battle against the land's Shade: one
+  question at a time, each right answer drains its darkness (full hit first
+  try, half on the second), 80% turns it back into light. Testing out early
+  fights the same boss.
+- The task is a field mission that lights the beacon for good. Course pages
+  now open the matching land.
+
 ## ✅ Phase 5a — Lumina, the game world (built)
 See docs/GAME.md for the whole design.
 - The kid home is a pixel-art world: a HUD (hero, level, XP, coins, streak,

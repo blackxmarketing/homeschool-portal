@@ -10,7 +10,8 @@ import { publicProbe } from "@/lib/probes";
 import { avatarFor } from "@/content/avatars";
 import { TeacherVoice } from "@/components/voice";
 import { photosFor } from "@/lib/media";
-import { LANDS } from "@/lib/pixel/world";
+import { bandFor, LANDS, type LandId } from "@/lib/pixel/world";
+import { heroOf } from "@/lib/gameState";
 import { publicShow } from "@/lib/storyboard";
 import type { Beat, Video } from "@/content/courses/types";
 
@@ -47,6 +48,8 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
   const f = features();
   // Lessons are quests in a land of the game world; "back" goes to that land.
   const landFor = LANDS.find((l) => l.courses.includes(v.course.id));
+  const hero = heroOf(kid.id);
+  const game = hero && landFor ? { land: landFor.id as LandId, band: bandFor(kid.grade), hero } : undefined;
   const photos = f.lessonSlides
     ? await photosFor([...(L.hook?.show ?? []), ...(L.teach ?? []).flatMap((s) => s.show ?? [])].map((b) => b.photo ?? "").filter(Boolean))
     : {};
@@ -78,6 +81,7 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
         <LessonFlow
           player={player}
           tutorMode={f.tutorMode}
+          game={game}
           kidName={kid.name}
           interactiveDone={v.status === "done" || interactiveDone(L, state)}
           teach={{

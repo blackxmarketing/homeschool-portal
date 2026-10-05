@@ -157,3 +157,46 @@ a.ql-item:active { transform: translateY(3px); box-shadow: 0 1px 0 #1b1530; }
   .map-hero { transition: none; }
   .quest-node.picked { animation: none; }
 }
+
+/* ---------------- Quest scenes and boss battles (Phase C) ---------------- */
+.quest-scene { position: relative; width: 100%; aspect-ratio: 160 / 60; border-radius: 12px; overflow: hidden; border: 3px solid #1b1530; box-shadow: 0 4px 0 #1b1530; flex-shrink: 0; }
+.scene-bg { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.scene-sprite { position: absolute; transition: left .9s steps(9); }
+.scene-pixels { width: 100% !important; height: auto !important; }
+.scene-caption { position: absolute; top: 6px; left: 8px; max-width: 68%; padding: 4px 10px; white-space: normal; line-height: 1.5; border-radius: 6px; background: rgba(27, 21, 48, .82); color: #fff; font-family: var(--font-pixel), monospace; font-size: .55rem; white-space: nowrap; }
+.quest-scene.won .scene-caption { background: #15803d; animation: sbpop .4s both; }
+.scene-stars { position: absolute; top: 4px; right: 8px; display: flex; gap: 2px; font-size: 1.3rem; text-shadow: 0 2px 0 #1b1530; }
+.scene-stars .star { color: rgba(255, 255, 255, .55); }
+.scene-stars .star.lit { color: #ffd43b; }
+.scene-obstacle.shake, .scene-boss.shake { animation: shake .45s; }
+@keyframes shake { 20% { transform: translateX(-4px); } 40% { transform: translateX(4px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(2px); } }
+.scene-hero.flinch { animation: flinch .4s; }
+@keyframes flinch { 30% { transform: translateX(-5px) rotate(-6deg); } }
+.scene-hero.attack { animation: attack .45s; }
+@keyframes attack { 40% { transform: translateX(60%); } }
+.quest-scene.won .scene-hero { animation: hop .5s .9s 2; }
+@keyframes hop { 50% { transform: translateY(-14%); } }
+.scene-sparkle { position: absolute; inset: -20%; border-radius: 50%; background: radial-gradient(circle, rgba(255, 243, 191, .95), rgba(255, 212, 59, .5) 35%, transparent 65%); animation: sparkle .9s ease-out both; pointer-events: none; }
+@keyframes sparkle { from { transform: scale(.2); opacity: 1; } to { transform: scale(1.4); opacity: 0; } }
+.boss-hp { position: absolute; bottom: 6px; right: 8px; display: flex; gap: 3px; padding: 4px 6px; border-radius: 6px; background: rgba(27, 21, 48, .8); }
+.boss-hp span { width: 10px; height: 10px; border-radius: 2px; background: #3b2a63; border: 1px solid #000; }
+.boss-hp span.full { background: #9775fa; box-shadow: 0 0 4px #b197fc; }
+.boss-battle { display: flex; flex-direction: column; gap: 12px; max-width: 980px; margin: 0 auto; }
+.boss-panel { padding: 16px; border-radius: 14px; background: #fff; border: 3px solid #1b1530; box-shadow: 0 5px 0 #1b1530; display: flex; flex-direction: column; gap: 12px; }
+.boss-count { font-family: var(--font-pixel), monospace; font-size: .58rem; color: #6b3fd4; }
+.boss-result { text-align: center; padding: 10px; }
+.boss-result.won .pixel-title { color: #15803d; animation: sbpop .5s both; }
+.boss-result .btnrow { justify-content: center; }
+.field-mission { display: flex; gap: 14px; align-items: center; padding: 12px 16px; margin-bottom: 12px; border-radius: 14px; background: linear-gradient(90deg, #fff3bf, #fff); border: 3px solid #1b1530; box-shadow: 0 4px 0 #1b1530; }
+.field-mission p { margin: 4px 0 0; }
+.tutor-step .quest-scene { width: min(100%, calc(34vh * 160 / 60)); align-self: center; }
+.band-strategist .boss-panel { background: #151a2e; color: #e6e9f5; border-color: #0b0e1a; }
+@media (max-width: 640px) {
+  .scene-caption { font-size: .42rem; }
+  .scene-stars { font-size: 1rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene-sprite { transition: none; }
+  .scene-obstacle.shake, .scene-boss.shake, .scene-hero.flinch, .scene-hero.attack, .quest-scene.won .scene-hero, .scene-sparkle { animation: none; }
+}
+.boss-battle .quest-scene { width: min(100%, calc(40vh * 160 / 60)); align-self: center; }

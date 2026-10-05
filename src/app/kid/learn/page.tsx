@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { heroOf } from "@/lib/gameState";
 import { requireKid } from "@/lib/auth";
 import { features } from "@/lib/content";
 import { courseOverview } from "@/lib/store";
@@ -31,6 +32,8 @@ function CourseCard({ c }: { c: ReturnType<typeof courseOverview>[number] }) {
 
 export default async function Learn() {
   const { kid } = await requireKid();
+  // In the game world, the Academy is the world map.
+  if (heroOf(kid.id)) redirect("/kid");
   if (!features().courses) notFound();
   const all = courseOverview(kid.id).filter((c) => c.course.lessons.length > 0);
   const academic = all.filter((c) => c.course.track === "academic");

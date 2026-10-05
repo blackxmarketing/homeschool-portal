@@ -41,6 +41,8 @@ interface Props {
   teacher: StageTeacher;
   /** Used by the tutor's greeting. */
   kidName?: string;
+  /** Used by the tutor's game scenes (the classic page ignores it). */
+  game?: unknown;
   hook?: { text: string; visual?: PublicWidget; show?: PublicShow };
   segments: PublicSegment[];
   activity?: PublicWidget;
