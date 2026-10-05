@@ -110,14 +110,15 @@ contains the answer is thrown away, and the built-in hint is shown instead.
 Requires Node 22+.
 
 ```bash
-cd learning-portal
+cd homeschool-portal
 npm install
 cp .env.example .env.local   # optional: add ANTHROPIC_API_KEY for AI hints
 npm run dev                  # http://localhost:3000
 ```
 
 The first visit takes you to **/setup** to create the parent account. Then add
-the kids in **Settings**.
+the kids in **Settings**. To practice with a demo family instead, see
+[docs/NEW-COMPUTER.md](docs/NEW-COMPUTER.md).
 
 ```bash
 npm test          # curriculum, mastery, placement, planner and compliance tests
