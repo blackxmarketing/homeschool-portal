@@ -12,6 +12,8 @@ import type { AvatarLook } from "@/content/avatars";
  */
 export default function TeacherFace({ look, talking = false, size = 150, still = false }: { look: AvatarLook; talking?: boolean; size?: number; still?: boolean }) {
   const [reduced, setReduced] = useState(false);
+  // If the photo can't load, fall back to the drawn teacher.
+  const [broken, setBroken] = useState(false);
   const talk = useRef<HTMLVideoElement>(null);
   useEffect(() => setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches), []);
 
@@ -25,13 +27,13 @@ export default function TeacherFace({ look, talking = false, size = 150, still =
     } else v.pause();
   }, [talking]);
 
-  if (!look.photo) return <TeacherAvatar look={look} talking={talking} size={size} />;
+  if (!look.photo || broken) return <TeacherAvatar look={look} talking={talking} size={size} />;
   const base = `/teachers/${look.photo}`;
   const moving = look.clips && !still && !reduced;
   return (
     <div className={`teacher-face ${talking ? "talking" : ""}`} style={{ width: size, height: size }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`${base}.jpg`} alt="Your teacher" width={size} height={size} />
+      <img src={`${base}.jpg`} alt="Your teacher" width={size} height={size} onError={() => setBroken(true)} />
       {moving && (
         <>
           <video className="tf-idle" src={`${base}-idle.mp4`} poster={`${base}.jpg`} autoPlay muted loop playsInline preload="auto" aria-hidden />
