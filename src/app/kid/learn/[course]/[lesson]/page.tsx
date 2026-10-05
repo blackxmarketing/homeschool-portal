@@ -3,11 +3,14 @@ import { notFound, redirect } from "next/navigation";
 import LessonFlow from "@/components/LessonFlow";
 import LessonPlayer from "@/components/LessonPlayer";
 import { requireKid } from "@/lib/auth";
-import { features } from "@/lib/content";
+import { features, hiddenVideos } from "@/lib/content";
 import { interactiveDone, publicThink, publicWidget } from "@/lib/teaching";
 import { adaptationFor, lessonView, reviewItems, teachProgress } from "@/lib/store";
 import { publicProbe } from "@/lib/probes";
 import { avatarFor } from "@/content/avatars";
+import { photosFor } from "@/lib/media";
+import { publicShow } from "@/lib/storyboard";
+import type { Beat, Video } from "@/content/courses/types";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +41,14 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
   };
   const L = v.lesson;
   const seed = `${kid.id}:${L.id}`;
+  // Slides: real photos are looked up (and cached) on the server.
+  const f = features();
+  const photos = f.lessonSlides
+    ? await photosFor([...(L.hook?.show ?? []), ...(L.teach ?? []).flatMap((s) => s.show ?? [])].map((b) => b.photo ?? "").filter(Boolean))
+    : {};
+  const hidden = hiddenVideos();
+  const slides = (show: Beat[] | undefined, watch: Video | undefined) =>
+    publicShow(f.lessonSlides ? show : undefined, f.lessonVideos && watch && !hidden.has(watch.youtube) ? watch : undefined, photos);
   const state = L.teach?.length ? teachProgress(kid.id, v.course.id, L.id) : null;
   // The learner model decides how to adapt this lesson for this kid.
   const adaptation = state ? adaptationFor(kid.id, v.course.id) : null;
@@ -63,10 +74,13 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
           player={player}
           interactiveDone={v.status === "done" || interactiveDone(L, state)}
           teach={{
-            hook: L.hook ? { text: L.hook.text, visual: L.hook.visual ? publicWidget(L.hook.visual, `${seed}:hook`) : undefined } : undefined,
+            hook: L.hook
+              ? { text: L.hook.text, visual: L.hook.visual ? publicWidget(L.hook.visual, `${seed}:hook`) : undefined, show: slides(L.hook.show, L.hook.watch) }
+              : undefined,
             segments: L.teach.map((s, i) => ({
               title: s.title,
               teach: s.teach,
+              show: slides(s.show, s.watch),
               visual: s.visual ? publicWidget(s.visual, `${seed}:${i}`) : undefined,
               think: publicThink(s.think),
               ...(s.probe ? { probe: publicProbe(s.probe, `${seed}:p${i}`) } : {}),

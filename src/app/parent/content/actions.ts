@@ -142,6 +142,15 @@ export async function saveFocusAction(form: FormData) {
   done("focus");
 }
 
+/** Which lesson videos kids can see. Each video on the list has a "show" checkbox. */
+export async function saveVideosAction(form: FormData) {
+  await requireParent();
+  const all = form.getAll("all").map(String);
+  const shown = new Set(form.getAll("show").map(String));
+  setContent("hiddenVideos", all.filter((id) => !shown.has(id)));
+  done("videos");
+}
+
 export async function resetContentAction(form: FormData) {
   await requireParent();
   const section = s(form, "section");
@@ -152,6 +161,7 @@ export async function resetContentAction(form: FormData) {
     quests: ["quests"],
     focus: ["focusPresets", "breaks"],
     courses: ["courses"],
+    videos: ["hiddenVideos"],
   };
   for (const k of keys[section] ?? []) if (CONTENT_KEYS.includes(k)) resetContent(k);
   revalidatePath("/", "layout");

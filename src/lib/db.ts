@@ -219,6 +219,13 @@ CREATE TABLE IF NOT EXISTS learning_events (
 );
 CREATE INDEX IF NOT EXISTS learning_events_kid ON learning_events (kid_id, subject, at);
 
+-- Photos found on Wikimedia for lesson slides (see lib/media.ts). json is NULL when none was found.
+CREATE TABLE IF NOT EXISTS media_cache (
+  ref TEXT PRIMARY KEY,
+  json TEXT,
+  fetched_at INTEGER NOT NULL
+);
+
 -- Finished focus sprints (Pomodoro-style work blocks).
 CREATE TABLE IF NOT EXISTS sprint_log (
   id INTEGER PRIMARY KEY,

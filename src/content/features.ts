@@ -19,6 +19,10 @@ export const FEATURES = {
   readAloud: true,
   /** Kids can talk back with the microphone. Speech-to-text is done by the browser maker (Google, Microsoft or Apple); the portal saves only the text. */
   kidMic: true,
+  /** Picture slides (real photos from Wikimedia Commons, with credits) that change as the teacher talks. */
+  lessonSlides: true,
+  /** Short lesson videos (YouTube, loaded only when a kid presses play). */
+  lessonVideos: true,
 };
 
 /** Limits on AI use, to keep costs predictable. */

@@ -67,6 +67,11 @@ Colorado records.
   ("Raise my hand"), and teachers remember what each kid asked in earlier
   lessons. Uses the browser's own voice and speech-to-text (best in Chrome,
   Edge or Safari); only text is saved. Parents can switch either off.
+- **Picture slides and videos (Phase 3e).** While the teacher talks, a screen
+  shows real photos (freely licensed, from Wikimedia Commons, with credits),
+  emoji pictures and big key facts that change right on cue. Some lessons add
+  a short video from an educational channel; parents can preview and hide
+  each one on the Content page.
 - **Real-world missions.** Off-screen tasks about money, business, leadership,
   character, science, history and civics. A parent approves each one, which
   awards XP and logs the minutes under the right subject for records.

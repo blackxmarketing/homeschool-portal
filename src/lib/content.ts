@@ -7,7 +7,8 @@ import { BREAKS, PRESETS, type AttentionAnswer, type FocusProfile } from "./focu
 import { SUBJECTS, type Subject } from "./compliance";
 import { STRANDS, type Strand } from "./curriculum/skills";
 import { COURSES, type Course } from "@/content/courses";
-import { sanitizeCourses } from "./courseContent";
+import { sanitizeCourses, withDefaultMedia } from "./courseContent";
+import { isYoutubeId } from "./storyboard";
 
 /**
  * Editable content. The files in src/content/ (and the presets in lib/focus)
@@ -33,6 +34,8 @@ export interface ContentMap {
   focusPresets: Presets;
   breaks: BreakIdea[];
   courses: Course[];
+  /** Lesson videos a parent chose to hide (YouTube ids). */
+  hiddenVideos: string[];
 }
 
 export type ContentKey = keyof ContentMap;
@@ -48,6 +51,7 @@ export const DEFAULTS: ContentMap = {
   focusPresets: PRESETS,
   breaks: BREAKS,
   courses: COURSES,
+  hiddenVideos: [],
 };
 
 export const CONTENT_KEYS = Object.keys(DEFAULTS) as ContentKey[];
@@ -189,7 +193,9 @@ export function sanitize<K extends ContentKey>(key: K, raw: unknown): ContentMap
       return (list.length ? list : d) as ContentMap[K];
     }
     case "courses":
-      return sanitizeCourses(raw, COURSES) as ContentMap[K];
+      return withDefaultMedia(sanitizeCourses(raw, COURSES), COURSES) as ContentMap[K];
+    case "hiddenVideos":
+      return (Array.isArray(raw) ? [...new Set(raw.filter((v): v is string => typeof v === "string" && isYoutubeId(v)))].slice(0, 500) : []) as ContentMap[K];
   }
   return d;
 }
@@ -233,3 +239,4 @@ export const focusPresets = () => getContent("focusPresets");
 export const breakIdeas = () => getContent("breaks");
 export const allCourses = () => getContent("courses");
 export const courseById = (id: string) => allCourses().find((c) => c.id === id);
+export const hiddenVideos = () => new Set(getContent("hiddenVideos"));

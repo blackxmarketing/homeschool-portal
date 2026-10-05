@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import WidgetView, { type CheckFn } from "./Widgets";
 import type { PublicWidget } from "@/lib/teaching";
 import type { PublicProbe } from "@/lib/probes";
+import type { PublicShow } from "@/lib/storyboard";
 import ProbeView, { type ProbeResult } from "./Probes";
 import { MasteryCheck, ReviewWarmup } from "./Assess";
 import { AskTeacher, CoachLine, TeacherStage, type StageTeacher } from "./TeacherStage";
@@ -12,6 +13,8 @@ import { appendSpoken, MicButton, SayButton } from "./voice";
 export interface PublicSegment {
   title: string;
   teach: string;
+  /** Slides and a video that go with the teacher's words. */
+  show?: PublicShow;
   visual?: PublicWidget;
   think: { q: string; choices: string[] };
   /** Interactive check (replaces the multiple-choice think). */
@@ -36,7 +39,7 @@ interface Props {
   courseId: string;
   lessonId: string;
   teacher: StageTeacher;
-  hook?: { text: string; visual?: PublicWidget };
+  hook?: { text: string; visual?: PublicWidget; show?: PublicShow };
   segments: PublicSegment[];
   activity?: PublicWidget;
   explain?: { prompt: string };
@@ -181,7 +184,7 @@ function SegmentView({
 
   return (
     <div className="teach-seg pop">
-      <TeacherStage teacher={teacher} id={`${lessonId}:seg${index}`} eyebrow={`Part ${index + 1}`} heading={seg.title} text={seg.teach} auto={!alreadyDone} />
+      <TeacherStage teacher={teacher} id={`${lessonId}:seg${index}`} eyebrow={`Part ${index + 1}`} heading={seg.title} text={seg.teach} auto={!alreadyDone} show={seg.show} />
       <div className="kcard stage-work">
       {seg.visual && <WidgetView w={seg.visual} onCheck={checkVisual} />}
 
@@ -413,7 +416,7 @@ export default function TeachPlayer({ courseId, lessonId, teacher, hook, segment
 
       {current === "hook" && (
         <div className="pop">
-          <TeacherStage teacher={teacher} id={`${lessonId}:hook`} eyebrow="Let's start with this" text={hook?.text ?? "Ready? Let's dig in."} />
+          <TeacherStage teacher={teacher} id={`${lessonId}:hook`} eyebrow="Let's start with this" text={hook?.text ?? "Ready? Let's dig in."} show={hook?.show} />
           <div className="kcard stage-work">
             {hook?.visual && <WidgetView w={hook.visual} />}
             <button className="kbtn big" onClick={next}>

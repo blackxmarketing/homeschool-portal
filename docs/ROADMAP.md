@@ -28,6 +28,23 @@ and civics. Each phase can be switched on or off in `src/content/features.ts`.
 - Struggle detector (drops back to prerequisites) and math-fact speed drills
 - MAP test score tracking (percentile and growth, three times a year)
 
+## ✅ Phase 3e — Picture slides and videos (built)
+- The teacher's board has a screen. As the teacher reads, slides change at
+  the words they go with: real photos and paintings (from Wikimedia Commons,
+  freely licensed, with the credit shown), big emoji pictures, and big numbers
+  or key words. Kids can also flip through them.
+- Every lesson in all six courses has slides for its opening and each
+  teaching part; slides live in `src/content/media/<course>.ts` and show up
+  in each lesson's teaching JSON on the Content page (`show` on a part).
+- Short videos from educational channels (TED-Ed, Smithsonian, PBS and
+  similar) in some lessons. Nothing loads from YouTube until a kid presses
+  play (privacy-friendly player, no recommendations). Parents see every video
+  on the Content page, can watch it first and hide any of them, and can add
+  one by pasting a YouTube link into a part's `watch`.
+- Photos are looked up on the server once and cached (30 days). Switches:
+  "Picture slides" and "Lesson videos". Test: `MEDIA_NET=1 npx vitest run
+  tests/media-net.test.ts` checks every photo and video still exists.
+
 ## ✅ Phase 3d — The teacher teaches out loud (built)
 - An illustrated teacher for each course stands at the front
   of every lesson part, in a bright royal-blue and white look inspired by

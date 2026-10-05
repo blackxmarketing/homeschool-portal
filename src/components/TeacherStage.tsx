@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import TeacherAvatar from "./TeacherAvatar";
+import { StoryBoard, VideoCard } from "./StoryBoard";
+import type { PublicShow } from "@/lib/storyboard";
 import { avatarFor, type AvatarLook } from "@/content/avatars";
 import {
   appendSpoken,
@@ -122,6 +124,7 @@ export function TeacherStage({
   heading,
   children,
   auto = true,
+  show,
 }: {
   teacher: StageTeacher;
   id: string;
@@ -130,6 +133,8 @@ export function TeacherStage({
   heading?: string;
   children?: React.ReactNode;
   auto?: boolean;
+  /** Slides that change as the teacher talks, and a short video. */
+  show?: PublicShow;
 }) {
   const { speakOn } = useVoiceSettings();
   const s = useSpeech();
@@ -150,9 +155,11 @@ export function TeacherStage({
       <div className="stage-board">
         {eyebrow && <div className="eyebrow">{eyebrow}</div>}
         {heading && <h2 className="stage-title">{heading}</h2>}
+        {show?.beats.length ? <StoryBoard id={id} text={text} show={show} /> : null}
         <Captions id={id} text={text} />
         {children}
         {speakOn && supported && <StageControls id={id} text={text} />}
+        {show?.watch && <VideoCard video={show.watch} />}
       </div>
     </section>
   );

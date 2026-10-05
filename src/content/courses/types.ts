@@ -127,11 +127,46 @@ export type Probe = (
   seconds?: number;
 };
 
+/**
+ * One slide on the teacher's screen. Slides change as the teacher reads:
+ * each appears when the teacher reaches its `at` words.
+ */
+export interface Beat {
+  /** Words from the teacher's text (copied exactly) where this slide appears. Leave out for the first slide. */
+  at?: string;
+  /** A short line under the picture. */
+  caption: string;
+  /**
+   * A real photo: a Wikipedia article title (its main freely licensed image,
+   * e.g. "Francesco Redi") or a Wikimedia Commons file ("File:Lever.jpg").
+   */
+  photo?: string;
+  /** A big emoji picture instead of a photo, e.g. "🧊➡️💧". */
+  emoji?: string;
+  /** A big number or word to show, e.g. "1668". */
+  big?: string;
+}
+
+/** A short video to watch after the teacher explains. Shown only after the kid presses play. */
+export interface Video {
+  /** The YouTube video id (the part after v= in the link). */
+  youtube: string;
+  title: string;
+  channel: string;
+  /** Start and end, in seconds, to show just the useful clip. */
+  start?: number;
+  end?: number;
+}
+
 /** One small chunk of teaching: explain, show, then a quick think. */
 export interface Segment {
   title: string;
   /** 60-130 words, plain text. */
   teach: string;
+  /** Slides that go along with the teacher's words. */
+  show?: Beat[];
+  /** A short video for this part. */
+  watch?: Video;
   visual?: Widget;
   /** The interactive check for this part. When present it replaces the multiple-choice think. */
   probe?: Probe;
@@ -161,7 +196,7 @@ export interface Lesson {
   /** 2-4 short takeaways shown after the reading. */
   keyIdeas: string[];
   /** Interactive teaching model. Lessons without it fall back to read-then-check. */
-  hook?: { text: string; visual?: Widget };
+  hook?: { text: string; visual?: Widget; show?: Beat[]; watch?: Video };
   teach?: Segment[];
   /** A hands-on activity after the teaching (sort, sequence or highlight). */
   activity?: Widget;

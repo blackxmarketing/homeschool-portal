@@ -1,4 +1,5 @@
-import type { CheckQuestion, Course, Lesson, Probe, Segment, Stage, TaskKind, ThinkQuestion, Widget } from "@/content/courses/types";
+import type { Beat, CheckQuestion, Course, Lesson, Probe, Segment, Stage, TaskKind, ThinkQuestion, Video, Widget } from "@/content/courses/types";
+import { isYoutubeId } from "./storyboard";
 import { SUBJECTS, type Subject } from "./compliance";
 
 /**
@@ -52,6 +53,35 @@ function sanitizeLesson(raw: unknown, courseSubject: Subject, seen: Set<string>)
       : {}),
     ...sanitizeTeaching(raw),
   };
+}
+
+/**
+ * New slides and videos from the defaults are added to a parent's saved
+ * courses wherever the teacher's words are unchanged (and the parent hasn't
+ * set that part's slides themselves).
+ */
+export function withDefaultMedia(courses: Course[], defaults: Course[]): Course[] {
+  return courses.map((c) => {
+    const dc = defaults.find((d) => d.id === c.id);
+    if (!dc) return c;
+    return {
+      ...c,
+      lessons: c.lessons.map((l) => {
+        const dl = dc.lessons.find((d) => d.id === l.id);
+        if (!dl) return l;
+        const hook =
+          l.hook && dl.hook && l.hook.text === dl.hook.text
+            ? { ...l.hook, ...(l.hook.show === undefined && dl.hook.show ? { show: dl.hook.show } : {}), ...(!l.hook.watch && dl.hook.watch ? { watch: dl.hook.watch } : {}) }
+            : l.hook;
+        const teach = l.teach?.map((s, i) => {
+          const ds = dl.teach?.[i];
+          if (!ds || ds.teach !== s.teach) return s;
+          return { ...s, ...(s.show === undefined && ds.show ? { show: ds.show } : {}), ...(!s.watch && ds.watch ? { watch: ds.watch } : {}) };
+        });
+        return { ...l, ...(hook ? { hook } : {}), ...(teach ? { teach } : {}) };
+      }),
+    };
+  });
 }
 
 export function sanitizeCourses(raw: unknown, defaults: Course[]): Course[] {
@@ -190,6 +220,49 @@ export function sanitizeWidget(raw: unknown): Widget | null {
   return null;
 }
 
+/** Slides: each needs a caption and a photo, emoji or big word. An empty list means "no slides here". */
+export function sanitizeShow(raw: unknown): Beat[] | null {
+  if (!Array.isArray(raw)) return null;
+  const beats = raw
+    .map((b): Beat | null => {
+      if (!isObj(b)) return null;
+      const caption = str(b.caption, 140);
+      const photo = str(b.photo, 200);
+      const emoji = str(b.emoji, 40);
+      const big = str(b.big, 60);
+      if (!caption || !(photo || emoji || big)) return null;
+      const at = str(b.at, 120);
+      return { ...(at ? { at } : {}), caption, ...(photo ? { photo } : emoji ? { emoji } : { big }) };
+    })
+    .filter((b): b is Beat => !!b)
+    .slice(0, 8);
+  return beats;
+}
+
+/** A YouTube id from an id or any YouTube link a parent pastes. */
+export function youtubeId(v: string): string | null {
+  const t = v.trim();
+  if (isYoutubeId(t)) return t;
+  const m = t.match(/(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/|\/live\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+export function sanitizeVideo(raw: unknown): Video | null {
+  if (!isObj(raw)) return null;
+  const youtube = youtubeId(str(raw.youtube, 200));
+  if (!youtube) return null;
+  const start = Number(raw.start);
+  const end = Number(raw.end);
+  const hasStart = Number.isFinite(start) && start > 0;
+  return {
+    youtube,
+    title: str(raw.title, 160) || "Watch this",
+    channel: str(raw.channel, 80),
+    ...(hasStart ? { start: Math.round(start) } : {}),
+    ...(Number.isFinite(end) && end > (hasStart ? start : 0) ? { end: Math.round(end) } : {}),
+  };
+}
+
 function sanitizeSegment(raw: unknown): Segment | null {
   if (!isObj(raw)) return null;
   const title = str(raw.title, 120);
@@ -200,9 +273,13 @@ function sanitizeSegment(raw: unknown): Segment | null {
   if (!title || !teach || !think || !simpler) return null;
   const visual = raw.visual ? sanitizeWidget(raw.visual) : null;
   const probe = raw.probe ? sanitizeProbe(raw.probe) : null;
+  const show = sanitizeShow(raw.show);
+  const watch = sanitizeVideo(raw.watch);
   return {
     title,
     teach,
+    ...(show ? { show } : {}),
+    ...(watch ? { watch } : {}),
     ...(visual ? { visual } : {}),
     ...(probe ? { probe } : {}),
     think,
@@ -215,7 +292,9 @@ export function sanitizeTeaching(raw: Record<string, unknown>): Pick<Lesson, "ho
   const out: Pick<Lesson, "hook" | "teach" | "activity" | "explain" | "mastery"> = {};
   if (isObj(raw.hook) && str(raw.hook.text)) {
     const visual = raw.hook.visual ? sanitizeWidget(raw.hook.visual) : null;
-    out.hook = { text: str(raw.hook.text, 1000), ...(visual ? { visual } : {}) };
+    const show = sanitizeShow(raw.hook.show);
+    const watch = sanitizeVideo(raw.hook.watch);
+    out.hook = { text: str(raw.hook.text, 1000), ...(visual ? { visual } : {}), ...(show ? { show } : {}), ...(watch ? { watch } : {}) };
   }
   const teach = (Array.isArray(raw.teach) ? raw.teach : []).map(sanitizeSegment).filter((s): s is Segment => !!s).slice(0, 8);
   if (teach.length) out.teach = teach;

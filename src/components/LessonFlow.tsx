@@ -6,6 +6,7 @@ import TeachPlayer, { type AdaptView, type PublicSegment, type TeachInitial } fr
 import { MasteryCheck } from "./Assess";
 import type { PublicWidget } from "@/lib/teaching";
 import type { PublicProbe } from "@/lib/probes";
+import type { PublicShow } from "@/lib/storyboard";
 
 type PlayerProps = React.ComponentProps<typeof LessonPlayer>;
 
@@ -20,7 +21,7 @@ export default function LessonFlow({
 }: {
   player: PlayerProps;
   teach: {
-    hook?: { text: string; visual?: PublicWidget };
+    hook?: { text: string; visual?: PublicWidget; show?: PublicShow };
     segments: PublicSegment[];
     activity?: PublicWidget;
     explain?: { prompt: string };
