@@ -50,9 +50,9 @@ describe("the world of Lumina", () => {
     expect(roads).toBeGreaterThan(60);
   });
 
-  it("every course is a land", () => {
+  it("every grades 4-12 course is a land (K-5 courses live in the explore worlds)", () => {
     const covered = LANDS.flatMap((L) => L.courses);
-    for (const c of COURSES) expect(covered, c.id).toContain(c.id);
+    for (const c of COURSES.filter((x) => x.grade === undefined)) expect(covered, c.id).toContain(c.id);
   });
 
   it("lands light up from their landmark as lessons are mastered", () => {

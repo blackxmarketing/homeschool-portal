@@ -1,6 +1,6 @@
 # Roadmap
 
-Goal: real learning (not test prep) for grades 6–8, modeled on mastery-based
+Goal: real learning (not test prep) for grades K–12 (the family's kids are in 6–8), modeled on mastery-based
 "2-hour learning": short focused academic blocks with an AI tutor, then
 real-world skills — money, business, leadership, character, science, history
 and civics. Each phase can be switched on or off in `src/content/features.ts`.
@@ -27,6 +27,22 @@ and civics. Each phase can be switched on or off in `src/content/features.ts`.
   (and with +1 hour/day), accuracy band (too easy / too hard), waste meter
 - Struggle detector (drops back to prerequisites) and math-fact speed drills
 - MAP test score tracking (percentile and growth, three times a year)
+
+## ✅ Phase 6 — Grades K–5: a world for every grade (built)
+- Six walkable pixel worlds, one per grade (Sunny Meadow, Whisperwood Forest,
+  Riverbend Valley, Sky Islands, Canyon of Echoes, Starpeak Frontier), each a
+  chapter of one story told by Pip the firefly. See `docs/WORLDS.md`.
+- Each world: a village, five subject zones with lesson stones, a lantern and
+  an arcade, a landmark, villagers, a side quest, hidden sparks and treasure
+  chests. The map view and an arrow point the way to the next lesson.
+- 30 new courses (math, reading and writing, science, social studies, and a
+  Spanish elective for each grade), every lesson tagged with its Common Core,
+  NGSS, C3 or ACTFL standards; a test checks every required standard is taught.
+- 13 new games with levels for each grade K–5, plus the grade 4–5 levels of
+  the older games.
+- The hero carries over; new colors, hair, hats and pets unlock in each world
+  (checked on the server). Kindergarten is a grade; parents can switch the
+  Spanish elective off per kid.
 
 ## ✅ Phase 5d — Lessons for every grade, and story mini-games (built)
 - Grades 4–5 and 9–12 versions of all six Academy courses (5 lessons each),

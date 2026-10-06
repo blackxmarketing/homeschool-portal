@@ -1,0 +1,128 @@
+/* Array Garden: the garden grid, steppers, number pad and area model. */
+
+.garden { min-width: 0; }
+
+.ask { margin: 0; font-size: 1.05rem; font-weight: 700; }
+.q { margin: 0; font-size: 1.35rem; font-weight: 900; text-align: center; }
+.small { margin: 0; font-size: 0.95rem; }
+
+.ref { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 0.9rem; }
+.ref :global(svg) { max-width: 40vw; height: auto; }
+
+.gardenWrap { width: 100%; margin: 0 auto; min-width: 0; }
+
+.grid {
+  position: relative;
+  display: grid;
+  border: 3px solid #1b1530;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #8a5a2a;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.live { touch-action: none; cursor: pointer; }
+
+.cell {
+  aspect-ratio: 1;
+  background: #9c6b3a;
+  box-shadow: inset 0 0 0 1px rgba(27, 21, 48, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+.alt { background: #93633a; }
+.bed { background: #c99a62; }
+.bed.alt { background: #c2925a; }
+
+.flower { width: 92%; height: 92%; display: block; animation: sprout 0.25s ease-out both; }
+
+@keyframes sprout {
+  from { transform: scale(0.3); opacity: 0.2; }
+  to { transform: none; opacity: 1; }
+}
+
+.bedLine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 3px dashed #fff3bf;
+  border-radius: 4px;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.fence {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 4px dashed #6b3f12;
+  outline: 2px solid #f1c27d;
+  outline-offset: -6px;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+.topLab, .sideLab {
+  position: absolute;
+  background: #fff;
+  border: 2px solid #1b1530;
+  border-radius: 6px;
+  padding: 0 6px;
+  font-weight: 900;
+  font-size: 0.85rem;
+  color: #1b1530;
+}
+.topLab { top: 2px; left: 50%; transform: translateX(-50%); }
+.sideLab { left: 2px; top: 50%; transform: translateY(-50%); }
+
+.cut {
+  position: absolute;
+  top: 0;
+  width: 0;
+  border-left: 4px dashed #e03131;
+  transform: translateX(-2px);
+  pointer-events: none;
+}
+
+.now { text-align: center; font-weight: 800; font-size: 0.9rem; margin-top: 4px; }
+
+.steppers { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.stepper { display: flex; align-items: center; gap: 6px; }
+.stepper button { min-width: 56px; min-height: 56px; font-size: 1.5rem; font-weight: 900; padding: 0; }
+.stepLabel { font-weight: 800; font-size: 0.85rem; min-width: 52px; text-align: right; }
+.stepVal { min-width: 2ch; text-align: center; font-size: 1.4rem; }
+
+.row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.row :global(.kbtn) { min-height: 56px; }
+.sub { display: block; font-size: 0.65rem; font-weight: 700; opacity: 0.85; }
+
+.found { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; }
+.pair { padding: 3px 10px; border-radius: 8px; border: 2px solid #1b1530; background: #d3f9d8; font-weight: 900; }
+.missed { background: #fff3bf; border-style: dashed; }
+
+.pad { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; max-width: 420px; width: 100%; margin: 0 auto; }
+.pad button { min-height: 56px; font-size: 1.4rem; font-weight: 900; padding: 0; min-width: 0; }
+
+.model { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.modelTop { display: flex; margin-left: 30px; font-weight: 900; }
+.modelTop span { text-align: center; overflow: hidden; }
+.modelRow { display: flex; align-items: stretch; gap: 6px; }
+.modelSide { width: 24px; display: flex; align-items: center; justify-content: center; font-weight: 900; }
+.modelBox { position: relative; flex: 1; min-width: 0; height: 130px; border: 3px solid #1b1530; border-radius: 6px; overflow: hidden; }
+.modelSvg { display: block; width: 100%; height: 100%; }
+.modelArea {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+  font-weight: 900;
+  font-size: 0.9rem;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flower { animation: none; }
+}

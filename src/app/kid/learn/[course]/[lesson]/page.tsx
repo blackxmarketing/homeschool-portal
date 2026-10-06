@@ -13,6 +13,7 @@ import { photosFor } from "@/lib/media";
 import { bandFor, LANDS, type LandId } from "@/lib/pixel/world";
 import { heroOf } from "@/lib/gameState";
 import { publicShow } from "@/lib/storyboard";
+import { gradeKey } from "@/content/courses/k5/base";
 import type { Beat, Video } from "@/content/courses/types";
 
 export const dynamic = "force-dynamic";
@@ -68,8 +69,8 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
   return (
     <main className={`wrap ${f.tutorMode && L.teach?.length ? "lesson-tutor" : ""}`} style={{ maxWidth: f.tutorMode && L.teach?.length ? 1240 : 860 }}>
       <div className="topbar">
-        <Link href={landFor ? `/kid/land/${landFor.id}` : `/kid/learn/${course}`} className="backlink">
-          ← {landFor ? landFor.name : `${v.course.icon} ${v.course.title}`}
+        <Link href={v.course.grade !== undefined ? `/kid/explore/${gradeKey(v.course.grade)}` : landFor ? `/kid/land/${landFor.id}` : `/kid/learn/${course}`} className="backlink">
+          ← {v.course.grade !== undefined ? "Back to the world" : landFor ? landFor.name : `${v.course.icon} ${v.course.title}`}
         </Link>
         <span className="kmuted small">
           Lesson {v.index + 1} of {v.course.lessons.length}

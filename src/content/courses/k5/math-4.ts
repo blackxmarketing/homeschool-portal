@@ -1,0 +1,2998 @@
+import type { Lesson } from "../types";
+import { k5Course } from "./base";
+
+/**
+ * math-4: Grade 4 math (Common Core), taught by Professor Pascal in the
+ * Canyon of Echoes (red canyons, cliff dwellings and a railroad town).
+ * Teaching text is read aloud line by line, so decimals and symbols are
+ * written in words there and shown on the slides.
+ */
+const lessons: Lesson[] = [
+  // 1. Place value to a million, comparing and rounding
+  {
+    id: "math-4.placevalue",
+    title: "Big Numbers: Place Value to a Million",
+    minutes: 30,
+    stage: "grammar",
+    standards: ["4.NBT.A.1", "4.NBT.A.2", "4.NBT.A.3"],
+    read: [
+      "Our number system uses only ten digits, 0 through 9, yet it can write numbers as big as you like. The secret is place value: where a digit sits tells you what it is worth.",
+      "Each place is worth ten times the place to its right. Ten ones make a ten. Ten tens make a hundred. Ten hundreds make a thousand. It keeps going: ten thousands, hundred thousands, and then one million. In the number 7,700, both digits are 7, but the 7 in the thousands place is worth 7,000, which is ten times the 700 next to it.",
+      "Big numbers are split into groups of three digits by commas. The commas help you read them. The number 472,815 is read as four hundred seventy-two thousand, eight hundred fifteen. In expanded form it is 400,000 + 70,000 + 2,000 + 800 + 10 + 5. Every digit shows its full value.",
+      "To compare two big numbers, first count the digits. A number with more digits is bigger. If they have the same number of digits, start at the left and compare place by place until two digits are different. So 63,481 > 63,418, because 8 tens is more than 1 ten. We write > for greater than, < for less than and = for equal.",
+      "Sometimes we don't need an exact number. Rounding gives a friendly number that is close. To round to a place, look at the digit just to its right. If that digit is 5 or more, round up. If it is 4 or less, keep the digit the same. Then every digit after the rounding place becomes a zero. Rounded to the nearest thousand, 472,815 becomes 473,000. Rounded to the nearest hundred thousand, it becomes 500,000.",
+      "Place value is the key to everything else this year: adding, multiplying, dividing and decimals. Let's figure it out together!",
+    ].join("\n\n"),
+    keyIdeas: [
+      "Each place is worth ten times the place to its right.",
+      "Commas split big numbers into groups of three digits, which helps you read them.",
+      "Compare big numbers from the left, place by place.",
+      "To round, look at the digit just to the right: 5 or more rounds up, 4 or less stays.",
+    ],
+    hook: {
+      text: "Pip found an old sign in the railroad town of the Canyon of Echoes. It says the trains carried 472,815 riders in their first year! That is a huge number. How do you even say it? And is it closer to 400,000 or 500,000? Let's figure it out together!",
+    },
+    teach: [
+      {
+        title: "Ten Times Bigger",
+        teach:
+          "Our number system has a beautiful rule. Each place is worth ten times the place to its right. Ten ones make one ten. Ten tens make one hundred. Ten hundreds make one thousand. The places keep growing: ten thousands, then hundred thousands, then one million. Look at the number 5,500. Both digits are 5, but they are not worth the same. The 5 in the hundreds place is worth 500. The 5 in the thousands place is worth 5,000. That is ten times as much, just because it sits one place to the left.",
+        visual: {
+          type: "hotspots",
+          title: "The places in 472,815",
+          center: "472,815",
+          spots: [
+            { label: "Hundred thousands", icon: "4️⃣", detail: "The 4 is worth 400,000." },
+            { label: "Ten thousands", icon: "7️⃣", detail: "The 7 is worth 70,000." },
+            { label: "Thousands", icon: "2️⃣", detail: "The 2 is worth 2,000." },
+            { label: "Hundreds", icon: "8️⃣", detail: "The 8 is worth 800." },
+            { label: "Tens", icon: "1️⃣", detail: "The 1 is worth 10." },
+            { label: "Ones", icon: "5️⃣", detail: "The 5 is worth 5." },
+          ],
+        },
+        probe: {
+          type: "cloze",
+          text: "In 5,500, the 5 in the thousands place is worth {0}. The 5 in the hundreds place is worth {1}. So the first 5 is worth {2} times as much as the second.",
+          blanks: [{ answers: ["5,000", "5000"] }, { answers: ["500"] }, { answers: ["10", "ten"] }],
+          hint: "Read each digit with its place. Then ask: how many 500s make 5,000?",
+          mistakes: [
+            { match: "5", coach: "The digit is 5, but its value depends on its place. A 5 in the thousands place is worth 5,000." },
+            { match: "2", coach: "Each step to the left is ten times bigger, not two times. 500 times 10 is 5,000." },
+          ],
+          seconds: 45,
+        },
+        think: {
+          q: "In 3,300, how does the first 3 compare to the second 3?",
+          choices: ["They are worth the same", "The first is worth 10 times as much", "The first is worth 100 times as much"],
+          answer: 1,
+          why: "The first 3 is worth 3,000 and the second is worth 300. 3,000 is ten times 300.",
+          hints: [
+            "The digits look the same, but their places are different. A 3 in the thousands place is worth 3,000.",
+            "",
+            "They are only one place apart. One step to the left is ten times, not a hundred times.",
+          ],
+        },
+        approaches: {
+          analogy: "Place value is like trading coins at a bank: ten pennies trade for one dime, ten dimes for one dollar, ten dollars for a ten-dollar bill. Each step up is worth ten of the one before.",
+          example: "In 44,000, the 4 in the ten thousands place is worth 40,000 and the 4 next to it is worth 4,000. 4,000 × 10 = 40,000, so the left 4 is worth ten times as much.",
+          simpler: {
+            q: "How many tens make one hundred?",
+            choices: ["10", "100", "2"],
+            answer: 0,
+            why: "10 tens make 100.",
+            hints: ["", "100 tens would make one thousand. A hundred is only ten tens.", "Two tens make only 20. Keep counting by tens to 100."],
+          },
+        },
+      },
+      {
+        title: "Reading and Writing Big Numbers",
+        teach:
+          "Big numbers are split by commas into groups of three digits. Read the group before the comma, then say thousand, then read the last group. So 472,815 is four hundred seventy-two thousand, eight hundred fifteen. Expanded form shows what every digit is worth. 472,815 equals 400,000 plus 70,000 plus 2,000 plus 800 plus 10 plus 5. A zero holds a place even when nothing is there. In 304,217, the zero tells us there are no ten thousands. Without it, the number would shrink to 34,217.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "Standard form", back: "The number in digits: 304,217" },
+            { front: "Word form", back: "Three hundred four thousand, two hundred seventeen" },
+            { front: "Expanded form", back: "300,000 + 4,000 + 200 + 10 + 7" },
+            { front: "Why the 0?", back: "It holds the ten thousands place. Without it, 304,217 would become 34,217." },
+          ],
+        },
+        probe: {
+          type: "cloze",
+          text: "Write 304,217 in expanded form: 300,000 + {0} + 200 + {1} + 7",
+          blanks: [{ answers: ["4,000", "4000"] }, { answers: ["10"] }],
+          hint: "Write what each digit is worth. The 4 is in the thousands place. The 1 is in the tens place.",
+          mistakes: [
+            { match: "4", coach: "The 4 sits in the thousands place, so it is worth 4,000." },
+            { match: "40,000", coach: "Count the places again. The 0 is in the ten thousands place, so the 4 is in the thousands place: 4,000." },
+            { match: "1", coach: "The 1 is in the tens place, so it is worth 10." },
+          ],
+          seconds: 45,
+        },
+        think: {
+          q: "Which is the expanded form of 60,503?",
+          choices: ["6,000 + 500 + 3", "60,000 + 500 + 3", "60,000 + 50 + 3"],
+          answer: 1,
+          why: "The 6 is worth 60,000, the 5 is worth 500 and the 3 is worth 3.",
+          hints: [
+            "Count the digits: 60,503 has five digits, so the 6 is in the ten thousands place.",
+            "",
+            "The 5 is in the hundreds place, so it is worth 500, not 50.",
+          ],
+        },
+        approaches: {
+          analogy: "Reading a big number is like reading a train: each car (group of three digits) has a name painted on it. The first car is the thousands car, and the last car is the ones car.",
+          example: "Read 815,026: say the first group, eight hundred fifteen, then say thousand, then the last group, twenty-six. Expanded form: 800,000 + 10,000 + 5,000 + 20 + 6.",
+          simpler: {
+            q: "In 2,345, what is the 2 worth?",
+            choices: ["2", "200", "2,000"],
+            answer: 2,
+            why: "The 2 is in the thousands place, so it is worth 2,000.",
+            hints: ["2 is just the digit. Its place makes it worth more.", "The 3 is in the hundreds place. The 2 is one place further left.", ""],
+          },
+        },
+      },
+      {
+        title: "Comparing Big Numbers",
+        teach:
+          "Which is bigger, 63,481 or 63,418? First, count the digits. A number with more digits is always bigger. Both of these have five digits, so start at the left and compare place by place. Ten thousands: 6 and 6, the same. Thousands: 3 and 3, the same. Hundreds: 4 and 4, the same. Tens: 8 and 1. Now they are different! 8 tens is more than 1 ten, so 63,481 is greater. We write it with the greater-than sign. The open side of the sign always faces the bigger number.",
+        visual: {
+          type: "compare",
+          left: { title: "63,481", points: ["6 ten thousands", "3 thousands", "4 hundreds", "8 tens", "1 one"] },
+          right: { title: "63,418", points: ["6 ten thousands", "3 thousands", "4 hundreds", "1 ten", "8 ones"] },
+        },
+        probe: {
+          type: "sequence",
+          prompt: "Put these numbers in order from least to greatest.",
+          steps: ["9,870", "45,099", "45,190", "45,901", "405,000"],
+          hint: "Count the digits first. Then compare same-size numbers from the left.",
+          mistakes: [{ match: "9,870 placed last", coach: "9,870 has only four digits. Every five-digit number is bigger, so it comes first." }],
+          seconds: 50,
+        },
+        think: {
+          q: "Which is true?",
+          choices: ["52,906 > 52,960", "52,906 < 52,960", "52,906 = 52,960"],
+          answer: 1,
+          why: "The numbers match until the tens place: 0 tens is less than 6 tens, so 52,906 is less.",
+          hints: [
+            "Look at the tens place: 52,906 has 0 tens and 52,960 has 6 tens.",
+            "",
+            "The digits are in a different order, so the numbers are not equal.",
+          ],
+        },
+        approaches: {
+          analogy: "Comparing numbers is like a race where runners line up by their biggest stride. The first place where one number pulls ahead decides the whole race.",
+          example: "Compare 718,250 and 781,025. Hundred thousands: 7 and 7. Ten thousands: 1 and 8. 8 is bigger, so 781,025 > 718,250. We can stop there.",
+          simpler: {
+            q: "Which number is bigger: 999 or 1,000?",
+            choices: ["999", "1,000", "They are equal"],
+            answer: 1,
+            why: "1,000 has four digits and 999 has three, so 1,000 is bigger.",
+            hints: ["999 has big digits, but only three of them. Count the digits.", "", "999 is one less than 1,000, so they are not equal."],
+          },
+        },
+      },
+      {
+        title: "Rounding",
+        teach:
+          "Rounding gives a friendly number that is close to the real one. To round, find the place you are rounding to. Then look at the digit just to its right. If that digit is 5 or more, round up. If it is 4 or less, keep the digit the same. Every digit after the rounding place becomes a zero. Let's round 472,815 to the nearest thousand. The thousands digit is 2. The digit to its right is 8, which is 5 or more, so the 2 rounds up to 3. The answer is 473,000.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "Round 472,815 to the nearest ten thousand", back: "Look at the thousands digit, 2. It is 4 or less, so keep the 7: 470,000." },
+            { front: "Round 472,815 to the nearest hundred thousand", back: "Look at the ten thousands digit, 7. It is 5 or more, so round up: 500,000." },
+            { front: "Round 3,650 to the nearest hundred", back: "Look at the tens digit, 5. 5 rounds up: 3,700." },
+          ],
+        },
+        probe: {
+          type: "cloze",
+          text: "Round 286,439 to the nearest thousand: {0}. Round it to the nearest hundred thousand: {1}.",
+          blanks: [{ answers: ["286,000", "286000"] }, { answers: ["300,000", "300000"] }],
+          hint: "For the nearest thousand, look at the hundreds digit. For the nearest hundred thousand, look at the ten thousands digit.",
+          mistakes: [
+            { match: "287,000", coach: "The hundreds digit is 4, and 4 or less means keep the thousands digit the same: 286,000." },
+            { match: "200,000", coach: "The ten thousands digit is 8, which is 5 or more, so round up to 300,000." },
+          ],
+          seconds: 50,
+        },
+        think: {
+          q: "What is 64,512 rounded to the nearest ten thousand?",
+          choices: ["60,000", "65,000", "70,000"],
+          answer: 0,
+          why: "The thousands digit is 4, so the 6 stays the same: 60,000.",
+          hints: [
+            "",
+            "That is rounding to the nearest thousand. We want the nearest ten thousand.",
+            "Look at the digit to the right of the 6. It is 4, which keeps the 6 the same.",
+          ],
+        },
+        approaches: {
+          analogy: "Rounding is like a ball on a hill between two valleys. If it sits past the halfway point, it rolls into the next valley. If it sits before halfway, it rolls back.",
+          example: "Round 8,349 to the nearest hundred. The hundreds digit is 3. The digit to its right is 4, so the 3 stays. Change the rest to zeros: 8,300.",
+          simpler: {
+            q: "Is 47 closer to 40 or to 50?",
+            choices: ["40", "50"],
+            answer: 1,
+            why: "47 is 3 away from 50 and 7 away from 40.",
+            hints: ["47 is 7 away from 40 but only 3 away from 50.", ""],
+          },
+        },
+      },
+    ],
+    activity: {
+      type: "sort",
+      prompt: "Round each number to the nearest thousand. Sort it into the right bucket.",
+      buckets: ["Rounds to 25,000", "Rounds to 26,000", "Rounds to 27,000"],
+      items: [
+        { text: "24,800", bucket: 0 },
+        { text: "25,499", bucket: 0 },
+        { text: "25,500", bucket: 1 },
+        { text: "26,099", bucket: 1 },
+        { text: "26,450", bucket: 1 },
+        { text: "26,500", bucket: 2 },
+        { text: "27,302", bucket: 2 },
+      ],
+    },
+    explain: {
+      prompt: "Explain to Professor Pascal how to round 358,642 to the nearest ten thousand, and why the digits after it become zeros.",
+      keyPoints: [
+        "Find the ten thousands digit, 5",
+        "Look at the digit to its right, 8",
+        "8 is 5 or more, so round up to 6",
+        "The answer is 360,000 with zeros after the rounding place",
+      ],
+    },
+    mastery: [
+      {
+        type: "number",
+        prompt: "What is the value of the 9 in 290,346?",
+        answer: 90000,
+        hint: "Count the places from the right: ones, tens, hundreds, thousands, ten thousands.",
+        mistakes: [
+          { match: "9", coach: "9 is the digit. Its value comes from its place, the ten thousands." },
+          { match: "9000", coach: "The 9 is one more place to the left than the thousands. It is in the ten thousands place." },
+        ],
+        seconds: 30,
+      },
+      {
+        type: "cloze",
+        text: "Put the right sign in each box: 81,204 {0} 81,240 and 700,000 {1} 99,999",
+        blanks: [{ answers: ["<"] }, { answers: [">"] }],
+        bank: ["<", ">", "="],
+        hint: "Compare from the left. If one number has more digits, it is bigger.",
+        mistakes: [{ match: "=", coach: "These numbers have different digits, so they are not equal." }],
+        seconds: 40,
+      },
+      {
+        type: "place",
+        prompt: "Drag each number to its spot on the number line.",
+        min: 0,
+        max: 100000,
+        step: 10000,
+        tolerance: 5000,
+        items: [
+          { label: "30,000", value: 30000 },
+          { label: "70,000", value: 70000 },
+          { label: "90,000", value: 90000 },
+        ],
+        hint: "Each tick mark is 10,000 more than the one before.",
+        seconds: 40,
+      },
+      {
+        type: "match",
+        prompt: "Match each number to its word form.",
+        pairs: [
+          { left: "405,060", right: "four hundred five thousand, sixty" },
+          { left: "450,600", right: "four hundred fifty thousand, six hundred" },
+          { left: "45,006", right: "forty-five thousand, six" },
+          { left: "400,506", right: "four hundred thousand, five hundred six" },
+        ],
+        hint: "Read the group before the comma first, then say thousand, then read the last group.",
+        seconds: 60,
+      },
+    ],
+    check: [
+      { q: "In 6,600, the first 6 is worth how many times the second 6?", choices: ["10 times", "2 times", "100 times"], answer: 0, why: "The first 6 is worth 6,000 and the second is worth 600. 6,000 is ten times 600." },
+      { q: "Which number is three hundred eight thousand, forty?", choices: ["380,040", "308,400", "308,040"], answer: 2, why: "Three hundred eight thousand is 308, then a comma, then forty is 040: 308,040." },
+      { q: "Which is greatest?", choices: ["98,765", "123,456", "99,999"], answer: 1, why: "123,456 has six digits. The others have only five." },
+      { q: "What is 547,281 rounded to the nearest ten thousand?", choices: ["540,000", "550,000", "500,000"], answer: 1, why: "The thousands digit is 7, so the 4 in the ten thousands place rounds up to 5: 550,000." },
+    ],
+    task: {
+      kind: "project",
+      prompt: "Find three big numbers in the real world with a parent: the population of your town or state, the miles on a car, or the height of a mountain. Write each one in standard form, word form and expanded form, then round each to the nearest thousand.",
+      rubric: [
+        "Finds three real numbers of four digits or more",
+        "Writes each number correctly in standard, word and expanded form",
+        "Rounds each to the nearest thousand correctly",
+      ],
+    },
+  },
+
+  // 2. Adding and subtracting multi-digit numbers
+  {
+    id: "math-4.addsub",
+    title: "Adding and Subtracting Big Numbers",
+    minutes: 30,
+    stage: "logic",
+    standards: ["4.NBT.B.4", "4.OA.A.3"],
+    read: [
+      "When numbers get big, we need a method that works every time. The standard method for adding and subtracting is to stack the numbers so the places line up: ones under ones, tens under tens, hundreds under hundreds, and so on. Then work from right to left, one place at a time.",
+      "To add 3,486 + 2,759, start with the ones: 6 + 9 = 15. That is 1 ten and 5 ones. Write the 5 and carry the 1 ten over to the tens column. This is called regrouping. Tens: 8 + 5 + 1 = 14 tens. Write 4 and carry 1 hundred. Hundreds: 4 + 7 + 1 = 12. Write 2 and carry 1 thousand. Thousands: 3 + 2 + 1 = 6. The sum is 6,245.",
+      "Subtracting works the same way, from right to left. When the top digit is too small, borrow 1 from the next place to the left. That 1 is worth 10 in the place you need. To subtract 3,486 − 2,759, the ones are 6 − 9, which won't work. Borrow a ten, so 16 − 9 = 7. Keep going, place by place, and the answer is 727. When there are zeros on top, like 5,000 − 1,234, you borrow across the zeros, and each zero becomes a 9.",
+      "Good mathematicians check their work. Estimate by rounding first. 3,486 is about 3,000, and 2,759 is about 3,000. So the sum should be near 6,000. Our answer, 6,245, is close, so it is reasonable. If we had gotten 62,450, the estimate would warn us right away.",
+      "Many real problems take more than one step. Write an equation with a letter for the unknown number. If a ticket office had 1,500 tickets and sold 628 on Monday and 547 on Tuesday, then t = 1,500 − 628 − 547. Solve one step at a time: t = 325 tickets left.",
+    ].join("\n\n"),
+    keyIdeas: [
+      "Line up the places and work from right to left.",
+      "Regroup when a column makes 10 or more, and borrow when the top digit is too small.",
+      "Estimate first by rounding to check that your answer is reasonable.",
+      "In word problems, use a letter for the unknown and solve one step at a time.",
+    ],
+    hook: {
+      text: "Two trains run through the Canyon of Echoes. The Red Rock Express rolled 3,486 miles this month. The Mesa Runner rolled 2,759 miles. How far did they go together? And how much farther did the Express go? Pip wants to know, and so do the railroad bosses!",
+    },
+    teach: [
+      {
+        title: "Line Up and Add",
+        teach:
+          "To add big numbers, stack them so the places line up. Ones go under ones and tens under tens. Then add from right to left. Let's add 3,486 and 2,759. Ones: 6 plus 9 is 15. That is 1 ten and 5 ones, so write 5 and carry the 1 to the tens. Tens: 8 plus 5 plus the carried 1 is 14. Write 4 and carry 1. Hundreds: 4 plus 7 plus 1 is 12. Write 2 and carry 1. Thousands: 3 plus 2 plus 1 is 6. Together the trains went 6,245 miles!",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "Ones: 6 + 9", back: "15. Write 5, carry 1 ten." },
+            { front: "Tens: 8 + 5 + 1", back: "14 tens. Write 4, carry 1 hundred." },
+            { front: "Hundreds: 4 + 7 + 1", back: "12 hundreds. Write 2, carry 1 thousand." },
+            { front: "Thousands: 3 + 2 + 1", back: "6 thousands. The sum is 6,245." },
+          ],
+        },
+        probe: {
+          type: "number",
+          prompt: "Line up the places and add: 45,368 + 27,594 = ?",
+          answer: 72962,
+          hint: "Start with the ones: 8 + 4 = 12. Write 2 and carry 1. Keep going left.",
+          mistakes: [
+            { match: "62962", coach: "Did you forget to carry? 5 + 7 + 1 in the thousands makes 13, so you carry 1 to the ten thousands." },
+            { match: "72852", coach: "Check the tens: 6 + 9 + 1 is 16. Write 6 and carry 1." },
+          ],
+          seconds: 60,
+        },
+        think: {
+          q: "In 258 + 367, what do you write in the ones place?",
+          choices: ["15", "5", "1"],
+          answer: 1,
+          why: "8 + 7 = 15. Write the 5 and carry the 1 ten.",
+          hints: [
+            "Only one digit fits in each place. 15 is 1 ten and 5 ones.",
+            "",
+            "The 1 is the ten you carry to the tens column. The ones place gets the 5.",
+          ],
+        },
+        approaches: {
+          analogy: "Regrouping is like trading in coins: when you get ten pennies, you trade them for one dime and put it in the dime pile. Ten ones become one ten in the next column.",
+          example: "1,675 + 2,548. Ones: 5 + 8 = 13, write 3, carry 1. Tens: 7 + 4 + 1 = 12, write 2, carry 1. Hundreds: 6 + 5 + 1 = 12, write 2, carry 1. Thousands: 1 + 2 + 1 = 4. Sum: 4,223.",
+          simpler: {
+            q: "What is 47 + 38?",
+            choices: ["75", "85", "715"],
+            answer: 1,
+            why: "7 + 8 = 15, write 5 and carry 1. 4 + 3 + 1 = 8. So 85.",
+            hints: ["You forgot the carried ten. 4 + 3 + 1 = 8 tens.", "", "Don't write 15 in the ones place. Write 5 and carry the 1."],
+          },
+        },
+      },
+      {
+        title: "Subtract with Regrouping",
+        teach:
+          "Now let's find how much farther the Express went: 3,486 minus 2,759. Start with the ones. 6 minus 9 won't work, so borrow 1 ten from the tens. Now the ones have 16, and 16 minus 9 is 7. The tens drop from 8 to 7, and 7 minus 5 is 2. Hundreds: 4 minus 7 won't work, so borrow a thousand. 14 minus 7 is 7. Thousands: 2 minus 2 is 0. The Express went 727 miles farther. With zeros on top, borrow across them. Each zero becomes a 9.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "Ones: 6 − 9", back: "Too small! Borrow a ten: 16 − 9 = 7." },
+            { front: "Tens: 7 − 5", back: "The 8 became 7 after borrowing. 7 − 5 = 2." },
+            { front: "Hundreds: 4 − 7", back: "Borrow a thousand: 14 − 7 = 7." },
+            { front: "Thousands: 2 − 2", back: "0. The answer is 727." },
+            { front: "5,000 − 1,234", back: "Borrow across the zeros: 5,000 becomes 4 thousands, 9 hundreds, 9 tens and 10 ones. Answer: 3,766." },
+          ],
+        },
+        probe: {
+          type: "number",
+          prompt: "Subtract, borrowing across the zeros: 6,003 − 2,457 = ?",
+          answer: 3546,
+          hint: "6,003 becomes 5 thousands, 9 hundreds, 9 tens and 13 ones. Now subtract each place.",
+          mistakes: [
+            { match: "4454", coach: "It looks like you subtracted the smaller digit from the bigger one in each place. When the top digit is too small, you must borrow." },
+            { match: "4546", coach: "When you borrow across the zeros, the 6 thousands becomes 5 thousands. 5 − 2 = 3." },
+          ],
+          seconds: 70,
+        },
+        think: {
+          q: "To subtract 52 − 38, what do you do first?",
+          choices: ["Subtract 8 − 2 instead", "Borrow a ten so the ones become 12", "Write 0 in the ones place"],
+          answer: 1,
+          why: "2 − 8 won't work, so borrow a ten: 12 − 8 = 4.",
+          hints: [
+            "You can't flip the digits around. The top number's ones are 2, not 8.",
+            "",
+            "The answer's ones digit isn't 0. Borrow a ten first, then subtract.",
+          ],
+        },
+        approaches: {
+          analogy: "Borrowing is like breaking a ten-dollar bill into ten ones when you need to pay for something that costs less than ten but more than you have in ones.",
+          example: "4,215 − 1,738. Ones: 5 − 8, borrow: 15 − 8 = 7. Tens: 0 − 3, borrow: 10 − 3 = 7. Hundreds: 1 − 7, borrow: 11 − 7 = 4. Thousands: 3 − 1 = 2. Answer: 2,477.",
+          simpler: {
+            q: "What is 40 − 17?",
+            choices: ["23", "37", "27"],
+            answer: 0,
+            why: "Borrow a ten: 10 − 7 = 3 ones, and 3 − 1 = 2 tens. So 23.",
+            hints: ["", "37 comes from subtracting 0 from 7. Borrow first so the ones become 10.", "Close! After borrowing, the 4 tens become 3 tens. 3 − 1 = 2 tens."],
+          },
+        },
+      },
+      {
+        title: "Estimate to Check",
+        teach:
+          "Smart mathematicians check their answers with an estimate. Round each number to a friendly place, then add or subtract in your head. The Express went 3,486 miles, which rounds to 3,000. The Mesa Runner went 2,759 miles, which rounds to 3,000. So together they went about 6,000 miles. Our exact answer, 6,245, is close to 6,000, so it makes sense. If we had written 62,450 by mistake, the estimate would catch it right away. An estimate is your answer's safety net.",
+        visual: {
+          type: "compare",
+          left: { title: "Exact", points: ["3,486 + 2,759", "Line up and regroup", "= 6,245"] },
+          right: { title: "Estimate", points: ["3,000 + 3,000", "Quick, in your head", "= about 6,000"] },
+        },
+        probe: {
+          type: "cloze",
+          text: "Estimate 4,812 + 3,195 by rounding to the nearest thousand. 4,812 rounds to {0}. 3,195 rounds to {1}. So the sum is about {2}.",
+          blanks: [{ answers: ["5,000", "5000"] }, { answers: ["3,000", "3000"] }, { answers: ["8,000", "8000"] }],
+          hint: "Look at the hundreds digit of each number to round to the nearest thousand.",
+          mistakes: [
+            { match: "4,000", coach: "The hundreds digit of 4,812 is 8, which is 5 or more, so it rounds up to 5,000." },
+            { match: "4000", coach: "The hundreds digit of 4,812 is 8, which is 5 or more, so it rounds up to 5,000." },
+          ],
+          seconds: 50,
+        },
+        think: {
+          q: "About how much is 7,912 − 2,104?",
+          choices: ["About 6,000", "About 10,000", "About 600"],
+          answer: 0,
+          why: "8,000 − 2,000 = 6,000.",
+          hints: [
+            "",
+            "That would be adding. This problem subtracts.",
+            "Check the places: 8,000 − 2,000 is thousands, not hundreds.",
+          ],
+        },
+        approaches: {
+          analogy: "An estimate is like checking a map before a trip. You don't know the exact minutes yet, but you know it should take about an hour, not a week.",
+          example: "Is 5,982 + 1,047 = 7,029 reasonable? 6,000 + 1,000 = 7,000. 7,029 is close to 7,000, so yes.",
+          simpler: {
+            q: "What is 4,000 + 3,000?",
+            choices: ["7,000", "700", "43,000"],
+            answer: 0,
+            why: "4 thousands plus 3 thousands is 7 thousands.",
+            hints: ["", "4 thousands and 3 thousands are thousands, not hundreds.", "Don't put the numbers side by side. Add the thousands: 4 + 3 = 7."],
+          },
+        },
+      },
+      {
+        title: "Two-Step Problems with a Letter",
+        teach:
+          "Some problems take two steps. The town ticket office had 1,500 train tickets. It sold 628 on Monday and 547 on Tuesday. How many are left? Use a letter, like t, for the unknown number. Then write an equation: t equals 1,500 minus 628 minus 547. Solve one step at a time. 628 plus 547 is 1,175 tickets sold. 1,500 minus 1,175 is 325. So t is 325 tickets left. Check with an estimate: 1,500 minus about 600 minus about 500 is about 400. 325 is close.",
+        visual: {
+          type: "hotspots",
+          title: "Solving a two-step problem",
+          center: "t = ?",
+          spots: [
+            { label: "Read", icon: "📖", detail: "What do we know? 1,500 tickets. 628 and 547 were sold." },
+            { label: "Letter", icon: "🔤", detail: "Let t be the tickets left." },
+            { label: "Equation", icon: "✏️", detail: "t = 1,500 − (628 + 547)" },
+            { label: "Solve", icon: "🧮", detail: "628 + 547 = 1,175. 1,500 − 1,175 = 325." },
+            { label: "Check", icon: "✅", detail: "Estimate: 1,500 − 600 − 500 = 400. 325 is close." },
+          ],
+        },
+        probe: {
+          type: "build",
+          prompt: "A store had 2,000 postcards. It sold 845 in spring and 690 in summer. Build an equation for p, the postcards left.",
+          tiles: ["p", "=", "2,000", "−", "(845 + 690)"],
+          distractors: ["+", "(845 − 690)"],
+          hint: "Start with what the store had. Take away everything it sold.",
+          mistakes: [{ match: "+", coach: "Selling postcards makes the pile smaller, so we subtract." }],
+          seconds: 45,
+        },
+        think: {
+          q: "A farmer has 900 seeds. She plants 240 and then 315. Which equation finds s, the seeds left?",
+          choices: ["s = 900 + 240 + 315", "s = 900 − 240 − 315", "s = 240 + 315"],
+          answer: 1,
+          why: "Start with 900 and take away both plantings.",
+          hints: [
+            "Planting uses up seeds, so the pile gets smaller, not bigger.",
+            "",
+            "That finds how many she planted, not how many are left.",
+          ],
+        },
+        approaches: {
+          analogy: "A letter in an equation is like an empty box with a label on it. You know the box is there, and the math tells you what goes inside.",
+          example: "A library had 3,250 books. It got 480 new ones and gave away 130. b = 3,250 + 480 − 130. 3,250 + 480 = 3,730. 3,730 − 130 = 3,600 books.",
+          simpler: {
+            q: "If n + 5 = 12, what is n?",
+            choices: ["17", "7", "5"],
+            answer: 1,
+            why: "7 + 5 = 12.",
+            hints: ["17 + 5 is 22, not 12.", "", "5 + 5 is only 10. We need 12."],
+          },
+        },
+      },
+    ],
+    activity: {
+      type: "sort",
+      prompt: "Use estimating. Is each answer reasonable, or should it be checked again?",
+      buckets: ["Reasonable", "Not reasonable: check again!"],
+      items: [
+        { text: "2,980 + 4,105 = 7,085", bucket: 0 },
+        { text: "6,210 − 1,990 = 4,220", bucket: 0 },
+        { text: "5,075 + 2,950 = 8,025", bucket: 0 },
+        { text: "9,012 − 3,987 = 15,025", bucket: 1 },
+        { text: "4,400 + 3,600 = 800", bucket: 1 },
+        { text: "7,800 − 2,100 = 1,700", bucket: 1 },
+      ],
+    },
+    explain: {
+      prompt: "Explain how you would subtract 4,002 − 1,358 and how you would check that your answer makes sense.",
+      keyPoints: [
+        "Line up the places and start with the ones",
+        "Borrow across the zeros when the top digit is too small",
+        "The answer is 2,644",
+        "Estimate by rounding, 4,000 − 1,000 = 3,000, to check",
+      ],
+    },
+    mastery: [
+      {
+        type: "number",
+        prompt: "Add: 38,207 + 46,958 = ?",
+        answer: 85165,
+        hint: "Line up the places. Ones: 7 + 8 = 15, write 5 and carry 1.",
+        mistakes: [{ match: "84165", coach: "Check the thousands: 8 + 6 + 1 carried = 15. Write 5 and carry 1 to the ten thousands." }],
+        seconds: 60,
+      },
+      {
+        type: "number",
+        prompt: "A museum hoped for 6,000 visitors in June and July. It had 2,345 in June and 3,018 in July. How many visitors short of the goal was it?",
+        answer: 637,
+        hint: "Step 1: add the two months. Step 2: subtract that from 6,000.",
+        mistakes: [{ match: "5363", coach: "That's how many visitors came. Now subtract from 6,000 to find how many short." }],
+        seconds: 90,
+      },
+      {
+        type: "cloze",
+        text: "Estimate 8,764 − 3,291 to the nearest thousand: {0} − 3,000 = {1}.",
+        blanks: [{ answers: ["9,000", "9000"] }, { answers: ["6,000", "6000"] }],
+        hint: "8,764 has 7 hundreds, so it rounds up.",
+        mistakes: [{ match: "8,000", coach: "The hundreds digit of 8,764 is 7, so round up to 9,000." }],
+        seconds: 40,
+      },
+      {
+        type: "match",
+        prompt: "Match each problem to its equation.",
+        pairs: [
+          { left: "Sam had 500 stamps and bought 120 more, then gave away 80.", right: "s = 500 + 120 − 80" },
+          { left: "Sam had 500 stamps and gave away 120, then 80 more.", right: "s = 500 − 120 − 80" },
+          { left: "Sam had 500 stamps and bought 120, then 80 more.", right: "s = 500 + 120 + 80" },
+        ],
+        hint: "Buying adds stamps. Giving away takes them away.",
+        seconds: 60,
+      },
+    ],
+    check: [
+      { q: "What is 2,647 + 1,585?", choices: ["3,122", "4,232", "4,222"], answer: 1, why: "7 + 5 = 12, 4 + 8 + 1 = 13, 6 + 5 + 1 = 12, 2 + 1 + 1 = 4. The sum is 4,232." },
+      { q: "What is 7,000 − 2,365?", choices: ["4,635", "5,365", "5,635"], answer: 0, why: "Borrow across the zeros: 6 thousands, 9 hundreds, 9 tens and 10 ones. 10 − 5 = 5, 9 − 6 = 3, 9 − 3 = 6, 6 − 2 = 4. So 4,635." },
+      { q: "Which estimate best checks 5,912 + 2,087?", choices: ["5,000 + 2,000 = 7,000", "600 + 200 = 800", "6,000 + 2,000 = 8,000"], answer: 2, why: "5,912 rounds to 6,000 and 2,087 rounds to 2,000." },
+      { q: "A school had 1,200 pencils. It used 450 in fall and 380 in spring. How many are left?", choices: ["370", "830", "2,030"], answer: 0, why: "450 + 380 = 830 used. 1,200 − 830 = 370." },
+    ],
+    task: {
+      kind: "project",
+      prompt: "With a parent, look up the driving distances (in miles) between three cities you would like to visit. Plan a trip: add up the total miles, then find how much longer the longest leg is than the shortest. Estimate first, then find the exact answers.",
+      rubric: [
+        "Finds at least three real distances",
+        "Adds and subtracts with the standard method correctly",
+        "Writes an estimate and checks that the exact answer is close to it",
+      ],
+    },
+  },
+
+  // 3. Multiplicative comparison and multiplying
+  {
+    id: "math-4.multiply",
+    title: "Times as Many: Multiplying Bigger Numbers",
+    minutes: 35,
+    stage: "logic",
+    standards: ["4.OA.A.1", "4.OA.A.2", "4.NBT.B.5"],
+    read: [
+      "Multiplication can compare two amounts. The equation 24 = 4 × 6 can mean that 24 is 4 times as many as 6. If a short train has 6 cars and a long train has 4 times as many, the long train has 24 cars. That is different from saying it has 4 more cars, which would be only 10. Words like 'times as many', 'times as tall' and 'times as far' tell you to multiply or divide. Words like 'how many more' and 'how much farther' tell you to add or subtract.",
+      "You can use comparison to find a missing number, too. If a hawk flew 45 miles, which is 5 times as far as a crow flew, then the crow flew 45 ÷ 5 = 9 miles.",
+      "To multiply a big number by a one-digit number, break the big number into its places. For 4 × 1,326, multiply each part: 4 × 1,000 = 4,000, 4 × 300 = 1,200, 4 × 20 = 80 and 4 × 6 = 24. These are called partial products. Add them: 4,000 + 1,200 + 80 + 24 = 5,304.",
+      "To multiply two 2-digit numbers, draw an area model, a rectangle split into four boxes. For 23 × 14, split 23 into 20 and 3, and 14 into 10 and 4. The four boxes are 20 × 10 = 200, 20 × 4 = 80, 3 × 10 = 30 and 3 × 4 = 12. Add them up: 200 + 80 + 30 + 12 = 322. This works because of the distributive property: you can break numbers into parts, multiply each part, and add.",
+      "Always estimate to check. 23 × 14 is about 20 × 15 = 300, so 322 makes sense.",
+    ].join("\n\n"),
+    keyIdeas: [
+      "24 = 4 × 6 can mean 24 is 4 times as many as 6.",
+      "'Times as many' means multiply or divide; 'how many more' means add or subtract.",
+      "Break big numbers into place-value parts, multiply each part, then add the partial products.",
+      "An area model shows two-digit times two-digit as four boxes.",
+    ],
+    hook: {
+      text: "At the canyon station, a short mail train has 6 cars. A long freight train has 4 times as many cars. Pip says the long train has 10 cars. Is Pip right? Let's figure it out together!",
+    },
+    teach: [
+      {
+        title: "Times as Many",
+        teach:
+          "Multiplication can compare two amounts. The short train has 6 cars. The long train has 4 times as many. That means 4 groups of 6, and 4 times 6 is 24 cars. Pip added 4 and got 10, but 4 times as many is not the same as 4 more! We can read the equation 24 equals 4 times 6 as a comparison: 24 is 4 times as many as 6. It also says 24 is 6 times as many as 4. One equation, two comparisons.",
+        visual: {
+          type: "compare",
+          left: { title: "4 more than 6", points: ["Add: 6 + 4", "= 10 cars", "Only a little bigger"] },
+          right: { title: "4 times as many as 6", points: ["Multiply: 4 × 6", "= 24 cars", "Four whole trains' worth"] },
+        },
+        probe: {
+          type: "cloze",
+          text: "35 = 5 × 7 means 35 is {0} times as many as 7. It also means 35 is {1} times as many as 5.",
+          blanks: [{ answers: ["5", "five"] }, { answers: ["7", "seven"] }],
+          hint: "In 35 = 5 × 7, if you compare 35 to one factor, the other factor tells how many times as many.",
+          mistakes: [{ match: "28", coach: "28 is how many more 35 is than 7. We want how many times as many: 35 ÷ 7 = 5." }],
+          seconds: 40,
+        },
+        think: {
+          q: "A rope is 8 feet long. Another rope is 3 times as long. How long is it?",
+          choices: ["11 feet", "24 feet", "5 feet"],
+          answer: 1,
+          why: "3 times as long means 3 × 8 = 24 feet.",
+          hints: [
+            "That is 3 feet more. 3 times as long means three ropes' worth.",
+            "",
+            "Subtracting makes it shorter. 3 times as long is longer.",
+          ],
+        },
+        approaches: {
+          analogy: "If your little cousin has 5 marbles and you have 3 times as many, picture three piles that each look exactly like your cousin's pile.",
+          example: "Mia read 9 books. Leo read 4 times as many. 4 × 9 = 36 books. The equation 36 = 4 × 9 says 36 is 4 times as many as 9.",
+          simpler: {
+            q: "What is 2 times as many as 5?",
+            choices: ["7", "10", "3"],
+            answer: 1,
+            why: "2 × 5 = 10.",
+            hints: ["7 is 2 more than 5. Times as many means multiply.", "", "3 is 2 less than 5. We need to multiply."],
+          },
+        },
+      },
+      {
+        title: "More or Times?",
+        teach:
+          "Word problems give clues. 'Times as many', 'times as tall' and 'times as far' mean multiply or divide. 'How many more' and 'how much farther' mean add or subtract. Here's a hard one. A hawk flew 45 miles. That is 5 times as far as a crow flew. How far did the crow fly? The crow's distance times 5 is 45, so divide: 45 divided by 5 is 9 miles. Now a different question: how much farther did the hawk fly? Subtract: 45 minus 9 is 36 miles farther.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "'times as many'", back: "Multiply or divide. 5 times as far as 9 miles: 5 × 9 = 45." },
+            { front: "'how many more'", back: "Add or subtract. How much farther is 45 than 9? 45 − 9 = 36." },
+            { front: "Missing the smaller amount?", back: "Divide. 45 is 5 times as far as what? 45 ÷ 5 = 9." },
+          ],
+        },
+        probe: {
+          type: "sort",
+          prompt: "Sort each problem: is it a 'times as many' problem or a 'how many more' problem?",
+          buckets: ["Times as many (multiply or divide)", "How many more (add or subtract)"],
+          items: [
+            { text: "A cactus is 3 times as tall as a 4-foot bush. How tall is the cactus?", bucket: 0 },
+            { text: "Ana has 32 stickers, 4 times as many as Ben. How many does Ben have?", bucket: 0 },
+            { text: "A mule carries 6 times as much as a dog. The dog carries 9 pounds. How much does the mule carry?", bucket: 0 },
+            { text: "Ana has 32 stickers. Ben has 8. How many more does Ana have?", bucket: 1 },
+            { text: "A trail is 12 miles. Another is 5 miles longer. How long is it?", bucket: 1 },
+            { text: "A hawk flew 45 miles and a crow flew 9. How much farther did the hawk fly?", bucket: 1 },
+          ],
+          hint: "Look for the clue words 'times as' versus 'more' or 'longer'.",
+          mistakes: [{ match: "Sticker 'times as many' sorted as how many more", coach: "'4 times as many as Ben' is a comparison by multiplying. Divide 32 by 4 to find Ben's stickers." }],
+          seconds: 70,
+        },
+        think: {
+          q: "A canyon wall is 72 feet tall, 9 times as tall as a boulder. How tall is the boulder?",
+          choices: ["63 feet", "8 feet", "81 feet"],
+          answer: 1,
+          why: "The boulder times 9 is 72, so 72 ÷ 9 = 8 feet.",
+          hints: [
+            "That subtracts 9. But the wall is 9 times as tall, so divide.",
+            "",
+            "The boulder is smaller than the wall, so the answer must be less than 72.",
+          ],
+        },
+        approaches: {
+          analogy: "'More' is like stacking extra blocks on top. 'Times as many' is like copying the whole tower again and again.",
+          example: "A ladder is 18 feet. It is 3 times as long as a step stool. Stool × 3 = 18, so the stool is 18 ÷ 3 = 6 feet. The ladder is 18 − 6 = 12 feet longer.",
+          simpler: {
+            q: "12 is how many times as many as 4?",
+            choices: ["3", "8", "16"],
+            answer: 0,
+            why: "3 × 4 = 12.",
+            hints: ["", "8 is how many more. We want how many times as many.", "16 is 12 + 4. We want to divide."],
+          },
+        },
+      },
+      {
+        title: "Multiply by One Digit",
+        teach:
+          "To multiply a big number by a one-digit number, break the big number into its places. Let's find 4 times 1,326. Split 1,326 into 1,000, 300, 20 and 6. Multiply each part by 4. 4 times 1,000 is 4,000. 4 times 300 is 1,200. 4 times 20 is 80. 4 times 6 is 24. These are partial products. Now add them all: 4,000 plus 1,200 plus 80 plus 24 is 5,304. Check: 4 times about 1,300 is about 5,200. Close!",
+        visual: {
+          type: "hotspots",
+          title: "4 × 1,326 with partial products",
+          center: "5,304",
+          spots: [
+            { label: "4 × 1,000", icon: "🟥", detail: "4,000" },
+            { label: "4 × 300", icon: "🟧", detail: "1,200" },
+            { label: "4 × 20", icon: "🟨", detail: "80" },
+            { label: "4 × 6", icon: "🟩", detail: "24" },
+            { label: "Add them", icon: "➕", detail: "4,000 + 1,200 + 80 + 24 = 5,304" },
+          ],
+        },
+        probe: {
+          type: "cloze",
+          text: "3 × 2,415 = 6,000 + {0} + 30 + 15 = {1}",
+          blanks: [{ answers: ["1,200", "1200"] }, { answers: ["7,245", "7245"] }],
+          hint: "Multiply 3 by the hundreds part, 400. Then add all four partial products.",
+          mistakes: [
+            { match: "12", coach: "3 × 4 is 12, but this 4 is 400. So 3 × 400 = 1,200." },
+            { match: "120", coach: "The 4 is in the hundreds place, so it's 400. 3 × 400 = 1,200." },
+          ],
+          seconds: 60,
+        },
+        think: {
+          q: "What is 5 × 300?",
+          choices: ["150", "1,500", "15,000"],
+          answer: 1,
+          why: "5 × 3 = 15, and 3 hundreds makes it 15 hundreds: 1,500.",
+          hints: [
+            "That is 5 × 30. We have 300.",
+            "",
+            "That is 5 × 3,000. Count the zeros in 300.",
+          ],
+        },
+        approaches: {
+          analogy: "Partial products are like paying for a big order one item type at a time: first all the tickets, then all the snacks, then the drinks, and then adding up the receipts.",
+          example: "6 × 1,208: 6 × 1,000 = 6,000, 6 × 200 = 1,200, 6 × 0 = 0, 6 × 8 = 48. 6,000 + 1,200 + 48 = 7,248.",
+          simpler: {
+            q: "What is 2 × 40?",
+            choices: ["80", "8", "42"],
+            answer: 0,
+            why: "2 × 4 tens = 8 tens = 80.",
+            hints: ["", "That is 2 × 4. 40 is 4 tens, so the answer is 8 tens.", "Don't add. Multiply: 2 groups of 40."],
+          },
+        },
+      },
+      {
+        title: "Two Digits Times Two Digits",
+        teach:
+          "For two-digit times two-digit, draw an area model. It is a rectangle split into four boxes. Let's find 23 times 14. Split 23 into 20 and 3. Split 14 into 10 and 4. Now fill the boxes. 20 times 10 is 200. 20 times 4 is 80. 3 times 10 is 30. 3 times 4 is 12. Add all four boxes: 200 plus 80 plus 30 plus 12 is 322. Estimate to check: 20 times 15 is 300. So 322 makes sense!",
+        visual: {
+          type: "hotspots",
+          title: "Area model for 23 × 14",
+          center: "322",
+          spots: [
+            { label: "20 × 10", icon: "🟦", detail: "200" },
+            { label: "20 × 4", icon: "🟪", detail: "80" },
+            { label: "3 × 10", icon: "🟫", detail: "30" },
+            { label: "3 × 4", icon: "⬜", detail: "12" },
+            { label: "Total", icon: "➕", detail: "200 + 80 + 30 + 12 = 322" },
+          ],
+        },
+        probe: {
+          type: "cloze",
+          text: "Area model for 36 × 25. 30 × 20 = {0}. 30 × 5 = {1}. 6 × 20 = {2}. 6 × 5 = {3}. Total: {4}.",
+          blanks: [{ answers: ["600"] }, { answers: ["150"] }, { answers: ["120"] }, { answers: ["30"] }, { answers: ["900"] }],
+          hint: "Fill each box by multiplying its two edges. Then add all four boxes.",
+          mistakes: [
+            { match: "60", coach: "3 tens × 2 tens = 6 hundreds, so 30 × 20 = 600." },
+            { match: "750", coach: "That's only the top row. Add the bottom row too: 120 + 30." },
+          ],
+          seconds: 90,
+        },
+        think: {
+          q: "In the area model for 42 × 13, which four boxes do you need?",
+          choices: ["40 × 10, 40 × 3, 2 × 10, 2 × 3", "40 × 10 and 2 × 3 only", "42 × 1 and 42 × 3"],
+          answer: 0,
+          why: "Split 42 into 40 and 2, and 13 into 10 and 3. Every part times every part makes four boxes.",
+          hints: [
+            "",
+            "That skips two boxes. Every part of 42 must be multiplied by every part of 13.",
+            "The 1 in 13 is really 10. Use 42 × 10, or split both numbers.",
+          ],
+        },
+        approaches: {
+          analogy: "An area model is like a garden split into four beds. Find the size of each bed, then add them to get the whole garden.",
+          example: "47 × 32: 40 × 30 = 1,200, 40 × 2 = 80, 7 × 30 = 210, 7 × 2 = 14. 1,200 + 80 + 210 + 14 = 1,504.",
+          simpler: {
+            q: "What is 20 × 30?",
+            choices: ["50", "60", "600"],
+            answer: 2,
+            why: "2 × 3 = 6, and tens times tens make hundreds: 600.",
+            hints: ["That adds them. We multiply.", "2 × 3 = 6, but 2 tens × 3 tens is 6 hundreds.", ""],
+          },
+        },
+      },
+    ],
+    activity: {
+      type: "sequence",
+      prompt: "Put the steps for 23 × 14 with an area model in order.",
+      steps: [
+        "Split 23 into 20 + 3 and 14 into 10 + 4",
+        "Draw a rectangle with four boxes",
+        "Multiply to fill each box: 200, 80, 30 and 12",
+        "Add the four boxes: 322",
+        "Estimate to check: 20 × 15 = 300, so 322 makes sense",
+      ],
+    },
+    explain: {
+      prompt: "Explain how to find 34 × 21 with an area model, and why it works.",
+      keyPoints: [
+        "Split 34 into 30 and 4, and 21 into 20 and 1",
+        "Multiply to fill four boxes: 600, 30, 80 and 4",
+        "Add the boxes to get 714",
+        "Breaking numbers into parts and adding the products gives the same answer",
+      ],
+    },
+    mastery: [
+      {
+        type: "number",
+        prompt: "Multiply: 6 × 1,208 = ?",
+        answer: 7248,
+        hint: "Partial products: 6 × 1,000, 6 × 200, 6 × 8. Then add.",
+        mistakes: [{ match: "6248", coach: "Don't forget 6 × 200 = 1,200. Add it in." }],
+        seconds: 60,
+      },
+      {
+        type: "number",
+        prompt: "Multiply: 47 × 32 = ?",
+        answer: 1504,
+        hint: "Area model: 40 × 30, 40 × 2, 7 × 30, 7 × 2. Add all four.",
+        mistakes: [{ match: "1214", coach: "That's only 40 × 30 and 7 × 2. Add the middle boxes too: 80 and 210." }],
+        seconds: 90,
+      },
+      {
+        type: "match",
+        prompt: "Match each comparison to its equation.",
+        pairs: [
+          { left: "56 is 8 times as many as 7", right: "56 = 8 × 7" },
+          { left: "18 is 3 times as many as 6", right: "18 = 3 × 6" },
+          { left: "45 is 9 times as many as 5", right: "45 = 9 × 5" },
+          { left: "18 is 6 more than 12", right: "18 = 12 + 6" },
+        ],
+        hint: "'Times as many' is a multiplication equation. 'More than' is an addition equation.",
+        seconds: 50,
+      },
+      {
+        type: "cloze",
+        text: "A hawk flew 63 miles. That is 7 times as far as a crow flew. The crow flew {0} miles. The hawk flew {1} miles farther than the crow.",
+        blanks: [{ answers: ["9"] }, { answers: ["54"] }],
+        hint: "Crow × 7 = 63, so divide. Then subtract to find how much farther.",
+        mistakes: [{ match: "56", coach: "56 is 63 − 7. The hawk flew 7 TIMES as far, so divide: 63 ÷ 7 = 9." }],
+        seconds: 60,
+      },
+    ],
+    check: [
+      { q: "Which means the same as 32 = 4 × 8?", choices: ["32 is 4 more than 8", "32 is 8 times as many as 4", "8 is 4 times as many as 32"], answer: 1, why: "32 = 4 × 8 says 32 is 8 times as many as 4 (and 4 times as many as 8)." },
+      { q: "A red rock is 6 feet tall. A pillar is 7 times as tall. How tall is the pillar?", choices: ["13 feet", "1 foot", "42 feet"], answer: 2, why: "7 times as tall means 7 × 6 = 42 feet." },
+      { q: "What is 3 × 2,104?", choices: ["6,312", "6,302", "6,412"], answer: 0, why: "6,000 + 300 + 0 + 12 = 6,312." },
+      { q: "What is 25 × 14?", choices: ["250", "350", "300"], answer: 1, why: "20 × 10 = 200, 20 × 4 = 80, 5 × 10 = 50, 5 × 4 = 20. 200 + 80 + 50 + 20 = 350." },
+    ],
+    task: {
+      kind: "project",
+      prompt: "Measure a room in your home in feet, or count floor tiles across and down. Use an area model to multiply the two numbers. Then write two 'times as many' comparisons about things in your home, like 'the couch is 3 times as long as the chair'.",
+      rubric: [
+        "Measures or counts two real lengths",
+        "Draws an area model with correct partial products and total",
+        "Writes two correct 'times as many' comparisons with equations",
+      ],
+    },
+  },
+
+  // 4. Factors, multiples, primes and patterns
+  {
+    id: "math-4.factors",
+    title: "Factors, Multiples, Primes and Patterns",
+    minutes: 30,
+    stage: "logic",
+    standards: ["4.OA.B.4", "4.OA.C.5"],
+    read: [
+      "Factors are numbers you multiply to get another number. Because 4 × 6 = 24, both 4 and 6 are factors of 24. Together they make a factor pair. The number 24 has four factor pairs: 1 × 24, 2 × 12, 3 × 8 and 4 × 6. So its factors are 1, 2, 3, 4, 6, 8, 12 and 24. To find all the factor pairs of a number, start at 1 and test each number in order. When the pairs start to repeat, you have found them all.",
+      "A multiple is what you get when you multiply a number by 1, 2, 3 and so on. The multiples of 6 are 6, 12, 18, 24, 30 and onward forever. Factors and multiples are partners: since 6 is a factor of 24, 24 is a multiple of 6. A number is a multiple of each of its factors. To check whether 72 is a multiple of 8, ask whether 8 times some whole number makes 72. It does: 8 × 9 = 72.",
+      "Some numbers have only two factors, 1 and the number itself. These are prime numbers. The number 13 is prime, because only 1 × 13 makes 13. Numbers with more than two factors are composite. The number 15 is composite, because 3 × 5 = 15. The number 1 is special: it has only one factor, so it is neither prime nor composite. The number 2 is the only even prime.",
+      "Patterns follow a rule. Start at 3 and add 4: 3, 7, 11, 15, 19. The rule only says 'add 4', but if you look closely you can notice more. Every number in this pattern is odd. Why? Because the first number is odd, and adding an even number to an odd number always gives an odd number. Noticing features like this is how mathematicians find new ideas.",
+    ].join("\n\n"),
+    keyIdeas: [
+      "Factors multiply to make a number: 4 and 6 are a factor pair of 24.",
+      "A number is a multiple of each of its factors.",
+      "A prime number has exactly two factors; a composite number has more than two; 1 is neither.",
+      "A pattern follows a rule, and it can have features the rule doesn't say.",
+    ],
+    hook: {
+      text: "Pip has 24 square tiles to make a rectangular patio in the canyon town. A row of 24 tiles works. So does 2 rows of 12. How many different rectangles can Pip make? And why can 13 tiles only make one long, skinny row? Let's figure it out together!",
+    },
+    teach: [
+      {
+        title: "Factor Pairs",
+        teach:
+          "Factors are numbers you multiply to make another number. Each rectangle Pip can build with 24 tiles shows a factor pair. One row of 24 is 1 times 24. Two rows of 12 is 2 times 12. Three rows of 8 is 3 times 8. Four rows of 6 is 4 times 6. What about 5? No, 5 rows won't come out even. Next is 6 times 4, but we already have that pair! When the pairs start to repeat, you have found them all. So the factors of 24 are 1, 2, 3, 4, 6, 8, 12 and 24.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "1 × 24", back: "One long row of 24 tiles" },
+            { front: "2 × 12", back: "2 rows of 12 tiles" },
+            { front: "3 × 8", back: "3 rows of 8 tiles" },
+            { front: "4 × 6", back: "4 rows of 6 tiles" },
+            { front: "5?", back: "24 ÷ 5 leaves a remainder, so 5 is not a factor of 24." },
+          ],
+        },
+        probe: {
+          type: "cloze",
+          text: "Factor pairs of 36: 1 × 36, 2 × {0}, 3 × {1}, 4 × {2}, 6 × {3}.",
+          blanks: [{ answers: ["18"] }, { answers: ["12"] }, { answers: ["9"] }, { answers: ["6"] }],
+          hint: "For each pair, ask: what times this number makes 36? Use division: 36 ÷ 2, 36 ÷ 3...",
+          mistakes: [{ match: "8", coach: "4 × 8 is 32, not 36. Try 4 × 9." }],
+          seconds: 60,
+        },
+        think: {
+          q: "Which is a factor pair of 30?",
+          choices: ["4 and 7", "5 and 6", "3 and 9"],
+          answer: 1,
+          why: "5 × 6 = 30.",
+          hints: ["4 × 7 is 28, not 30.", "", "3 × 9 is 27, not 30."],
+        },
+        approaches: {
+          analogy: "Factor pairs are like the ways to line up a marching band into equal rows. Every way that works with no one left over is a factor pair.",
+          example: "Factor pairs of 18: 1 × 18, 2 × 9, 3 × 6. 4 and 5 don't work. 6 × 3 repeats, so stop. Factors: 1, 2, 3, 6, 9, 18.",
+          simpler: {
+            q: "Is 3 a factor of 12?",
+            choices: ["Yes, because 3 × 4 = 12", "No, because 12 is even"],
+            answer: 0,
+            why: "3 × 4 = 12, so 3 is a factor.",
+            hints: ["", "Even numbers can still have odd factors. Does 3 times something make 12?"],
+          },
+        },
+      },
+      {
+        title: "Multiples",
+        teach:
+          "A multiple is what you get when you multiply a number by 1, 2, 3 and so on. Skip counting gives multiples. The multiples of 6 are 6, 12, 18, 24, 30 and they go on forever. Factors and multiples are partners. Since 6 is a factor of 24, 24 is a multiple of 6. A number is always a multiple of each of its factors. Is 72 a multiple of 8? Ask: does 8 times a whole number make 72? Yes, 8 times 9 is 72. So 72 is a multiple of 8.",
+        visual: {
+          type: "compare",
+          left: { title: "Factors of 24", points: ["1, 2, 3, 4, 6, 8, 12, 24", "Only 8 of them", "All are 24 or less"] },
+          right: { title: "Multiples of 6", points: ["6, 12, 18, 24, 30, 36...", "They go on forever", "All are 6 or more"] },
+        },
+        probe: {
+          type: "sort",
+          prompt: "Sort each number: is it a multiple of 6 or not?",
+          buckets: ["Multiple of 6", "Not a multiple of 6"],
+          items: [
+            { text: "42", bucket: 0 },
+            { text: "54", bucket: 0 },
+            { text: "36", bucket: 0 },
+            { text: "90", bucket: 0 },
+            { text: "44", bucket: 1 },
+            { text: "15", bucket: 1 },
+            { text: "63", bucket: 1 },
+            { text: "100", bucket: 1 },
+          ],
+          hint: "Ask: does 6 times a whole number make it? A multiple of 6 must be even and a multiple of 3.",
+          mistakes: [{ match: "63 sorted as a multiple of 6", coach: "63 is 9 × 7, but 63 is odd. Multiples of 6 are always even." }],
+          seconds: 60,
+        },
+        think: {
+          q: "Which number is a multiple of 7?",
+          choices: ["27", "49", "57"],
+          answer: 1,
+          why: "7 × 7 = 49.",
+          hints: ["7 × 3 is 21 and 7 × 4 is 28. 27 is in between.", "", "7 × 8 is 56 and 7 × 9 is 63. 57 is in between."],
+        },
+        approaches: {
+          analogy: "Multiples are like the stops of a train that always moves the same number of miles. A train that moves 6 miles at a time stops at 6, 12, 18, 24 and never at 20.",
+          example: "Is 45 a multiple of 5? 5 × 9 = 45, so yes. Is 45 a multiple of 4? 4 × 11 = 44 and 4 × 12 = 48, so no.",
+          simpler: {
+            q: "What are the first three multiples of 4?",
+            choices: ["4, 8, 12", "1, 2, 4", "4, 5, 6"],
+            answer: 0,
+            why: "4 × 1, 4 × 2, 4 × 3 = 4, 8, 12.",
+            hints: ["", "Those are factors of 4. Multiples come from multiplying 4 by 1, 2, 3.", "That counts by ones. Skip count by fours."],
+          },
+        },
+      },
+      {
+        title: "Prime or Composite?",
+        teach:
+          "Remember why 13 tiles only make one long row? 13 has just two factors: 1 and 13. A number with exactly two factors, 1 and itself, is called prime. Some primes are 2, 3, 5, 7, 11 and 13. A number with more than two factors is called composite. 15 is composite because 3 times 5 is 15. The number 1 is special. It has only one factor, so it is neither prime nor composite. And 2 is the only even prime. Every other even number has 2 as a factor.",
+        visual: {
+          type: "hotspots",
+          title: "Kinds of whole numbers",
+          center: "Factors",
+          spots: [
+            { label: "Prime", icon: "💎", detail: "Exactly two factors: 1 and itself. Examples: 2, 3, 5, 7, 11, 13, 29." },
+            { label: "Composite", icon: "🧱", detail: "More than two factors. Examples: 4, 9, 15, 21, 51 (3 × 17)." },
+            { label: "The number 1", icon: "1️⃣", detail: "Only one factor, so it is neither prime nor composite." },
+            { label: "The number 2", icon: "2️⃣", detail: "The only even prime." },
+          ],
+        },
+        probe: {
+          type: "sort",
+          prompt: "Sort each number: prime or composite?",
+          buckets: ["Prime", "Composite"],
+          items: [
+            { text: "2", bucket: 0 },
+            { text: "13", bucket: 0 },
+            { text: "29", bucket: 0 },
+            { text: "41", bucket: 0 },
+            { text: "9", bucket: 1 },
+            { text: "21", bucket: 1 },
+            { text: "27", bucket: 1 },
+            { text: "51", bucket: 1 },
+          ],
+          hint: "Try dividing by 2, 3, 5 and 7. If anything besides 1 and the number works, it is composite.",
+          mistakes: [
+            { match: "51 sorted as prime", coach: "51 looks prime, but 3 × 17 = 51. So it is composite." },
+            { match: "2 sorted as composite", coach: "2 is even, but its only factors are 1 and 2. It is prime." },
+          ],
+          seconds: 70,
+        },
+        think: {
+          q: "Why is 9 composite?",
+          choices: ["Because it is odd", "Because 3 × 3 = 9, so it has more than two factors", "Because it is less than 10"],
+          answer: 1,
+          why: "9 has factors 1, 3 and 9. That is more than two.",
+          hints: [
+            "Being odd doesn't decide it. 7 is odd and prime.",
+            "",
+            "Size doesn't decide it. 7 is less than 10 and still prime.",
+          ],
+        },
+        approaches: {
+          analogy: "A prime number is like a stick of candy you can only share fairly two ways: give the whole stick to one person, or split it into pieces of size 1. A composite number can be shared in more ways.",
+          example: "Is 23 prime? 23 ÷ 2, ÷ 3, ÷ 4 all leave remainders. 5 × 5 = 25 is already too big, so we can stop. 23 is prime.",
+          simpler: {
+            q: "How many factors does 7 have?",
+            choices: ["2", "7", "1"],
+            answer: 0,
+            why: "Only 1 and 7 multiply to make 7.",
+            hints: ["", "7 is the number itself. Its factors are only 1 and 7.", "Every number above 1 has at least two factors: 1 and itself."],
+          },
+        },
+      },
+      {
+        title: "Patterns with a Rule",
+        teach:
+          "A pattern follows a rule. Here's one: start at 3 and add 4. The pattern goes 3, 7, 11, 15, 19. The rule only says add 4. But look closely and you can notice more. Every number is odd! Why? The first number is odd, and adding an even number to an odd number always gives an odd number. Shapes can follow rules too: triangle, square, square, triangle, square, square. The 3rd, 6th and 9th shapes are all squares. Mathematicians love finding these hidden features.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "Start at 3, add 4", back: "3, 7, 11, 15, 19 ... all odd!" },
+            { front: "Start at 2, add 4", back: "2, 6, 10, 14, 18 ... all even!" },
+            { front: "Start at 1, add 5", back: "1, 6, 11, 16, 21 ... odd, even, odd, even!" },
+            { front: "🔺⬜⬜🔺⬜⬜", back: "Every 3rd shape is a square, and the pattern repeats every 3 shapes." },
+          ],
+        },
+        probe: {
+          type: "cloze",
+          text: "Start at 5 and add 6: 5, 11, 17, {0}, {1}. Every number in this pattern is {2}.",
+          blanks: [{ answers: ["23"] }, { answers: ["29"] }, { answers: ["odd"] }],
+          bank: ["23", "29", "odd", "even", "22", "28"],
+          hint: "Add 6 each time. Then look: is each number odd or even?",
+          mistakes: [
+            { match: "even", coach: "5, 11 and 17 are all odd. Odd plus an even number (6) stays odd." },
+            { match: "22", coach: "17 + 6 is 23. Count on carefully." },
+          ],
+          seconds: 50,
+        },
+        think: {
+          q: "The rule is: start at 10 and add 5. Which feature is true?",
+          choices: ["All the numbers are odd", "The numbers end in 0 or 5", "The numbers get smaller"],
+          answer: 1,
+          why: "10, 15, 20, 25, 30... every number ends in 0 or 5.",
+          hints: [
+            "10 and 20 are in the pattern, and they are even.",
+            "",
+            "Adding 5 makes numbers bigger, not smaller.",
+          ],
+        },
+        approaches: {
+          analogy: "A rule is like a recipe, and the features are like noticing that every cake from that recipe comes out round. The recipe never said 'round', but it's true every time.",
+          example: "Rule: start at 4, add 3. Pattern: 4, 7, 10, 13, 16. Feature: the numbers go even, odd, even, odd, because adding 3 (odd) flips odd and even each time.",
+          simpler: {
+            q: "Start at 2 and add 2. What comes after 2, 4, 6?",
+            choices: ["7", "8", "10"],
+            answer: 1,
+            why: "6 + 2 = 8.",
+            hints: ["That adds 1. The rule adds 2.", "", "That skips a number. 6 + 2 = 8."],
+          },
+        },
+      },
+    ],
+    activity: {
+      type: "highlight",
+      prompt: "Tap every sentence that is true.",
+      sentences: [
+        "24 is a multiple of 6.",
+        "8 is a factor of 24.",
+        "24 is a prime number.",
+        "5 is a factor of 24.",
+        "24 is a multiple of 12.",
+        "1 is a prime number.",
+        "17 is a prime number.",
+      ],
+      correct: [0, 1, 4, 6],
+    },
+    explain: {
+      prompt: "Explain how you know whether a number like 21 is prime or composite.",
+      keyPoints: [
+        "A prime number has exactly two factors, 1 and itself",
+        "A composite number has more than two factors",
+        "21 = 3 × 7, so it has more than two factors",
+        "So 21 is composite",
+      ],
+    },
+    mastery: [
+      {
+        type: "number",
+        prompt: "How many factors does 36 have? (List them all, then count.)",
+        answer: 9,
+        hint: "Find all the factor pairs: 1 × 36, 2 × 18, 3 × 12, 4 × 9, 6 × 6. Count 6 only once.",
+        mistakes: [{ match: "10", coach: "6 × 6 uses the same factor twice. Count 6 only once." }],
+        seconds: 60,
+      },
+      {
+        type: "sort",
+        prompt: "Sort each number.",
+        buckets: ["Prime", "Composite", "Neither"],
+        items: [
+          { text: "1", bucket: 2 },
+          { text: "31", bucket: 0 },
+          { text: "5", bucket: 0 },
+          { text: "57", bucket: 1 },
+          { text: "35", bucket: 1 },
+          { text: "100", bucket: 1 },
+          { text: "43", bucket: 0 },
+        ],
+        hint: "1 has only one factor. For the others, try dividing by 2, 3, 5 and 7.",
+        mistakes: [{ match: "57 sorted as prime", coach: "57 = 3 × 19, so it is composite." }],
+        seconds: 60,
+      },
+      {
+        type: "cloze",
+        text: "Start at 1 and add 4: 1, 5, 9, {0}, {1}. Since 1 is odd and 4 is even, every number is {2}.",
+        blanks: [{ answers: ["13"] }, { answers: ["17"] }, { answers: ["odd"] }],
+        bank: ["13", "17", "odd", "even", "12", "16"],
+        hint: "Add 4 each time. Odd plus even stays odd.",
+        seconds: 45,
+      },
+      {
+        type: "match",
+        prompt: "Match each number to a factor pair.",
+        pairs: [
+          { left: "48", right: "6 × 8" },
+          { left: "42", right: "6 × 7" },
+          { left: "45", right: "5 × 9" },
+          { left: "32", right: "4 × 8" },
+        ],
+        hint: "Multiply each pair and find the number it makes.",
+        seconds: 45,
+      },
+    ],
+    check: [
+      { q: "Which list shows all the factors of 20?", choices: ["2, 4, 5, 10", "1, 2, 4, 5, 10, 20", "20, 40, 60, 80"], answer: 1, why: "The factor pairs are 1 × 20, 2 × 10 and 4 × 5." },
+      { q: "Which number is prime?", choices: ["39", "49", "37"], answer: 2, why: "37 has only the factors 1 and 37. 39 = 3 × 13 and 49 = 7 × 7." },
+      { q: "Is 56 a multiple of 8?", choices: ["Yes, 8 × 7 = 56", "No, 56 is not in the 8s", "Only if you add 8"], answer: 0, why: "8 × 7 = 56, so 56 is a multiple of 8." },
+      { q: "Start at 20 and add 10. Which feature is true for every number?", choices: ["They are odd", "They end in 5", "They end in 0"], answer: 2, why: "20, 30, 40, 50... all end in 0." },
+    ],
+    task: {
+      kind: "project",
+      prompt: "Get 12, 13, 16 and 18 small objects (coins, beans or blocks). For each number, build every rectangle you can and write its factor pairs. Then tell a parent which numbers are prime and which are composite, and how you know.",
+      rubric: [
+        "Builds rectangles for all four numbers",
+        "Lists every factor pair correctly",
+        "Identifies 13 as prime and the others as composite, with a reason",
+      ],
+    },
+  },
+
+  // 5. Dividing with remainders
+  {
+    id: "math-4.divide",
+    title: "Dividing and Remainders",
+    minutes: 35,
+    stage: "logic",
+    standards: ["4.NBT.B.6", "4.OA.A.3"],
+    read: [
+      "Division splits a number into equal groups. In 852 ÷ 4 = 213, the 852 is the dividend (the number being split), 4 is the divisor (how many groups or how big each group is), and 213 is the quotient (the answer).",
+      "You can divide big numbers one place at a time. To find 852 ÷ 4, split 852 into 800 + 40 + 12. Then 800 ÷ 4 = 200, 40 ÷ 4 = 10 and 12 ÷ 4 = 3. Add the parts: 200 + 10 + 3 = 213. These pieces are called partial quotients.",
+      "Long division does the same thing in a tidy way. The steps repeat: divide, multiply, subtract, bring down. For 1,476 ÷ 6, there are not enough thousands to share, so start with 14 hundreds. 14 ÷ 6 = 2 hundreds. Multiply 2 × 6 = 12 and subtract: 14 − 12 = 2. Bring down the 7 to make 27 tens. 27 ÷ 6 = 4 tens, 4 × 6 = 24, 27 − 24 = 3. Bring down the 6 to make 36. 36 ÷ 6 = 6. The quotient is 246. Check by multiplying: 246 × 6 = 1,476.",
+      "Sometimes a number does not split evenly. The amount left over is the remainder. For 157 ÷ 6, 6 × 26 = 156, which leaves 1. So 157 ÷ 6 = 26 R 1. The remainder must always be smaller than the divisor.",
+      "In a word problem, think about what the remainder means. If 157 riders take train cars that hold 6 each, 26 full cars leave 1 rider waiting, so you need 27 cars. Round up. If you pack 50 cookies in boxes of 6 and ask how many full boxes you have, the answer is 8. Drop the remainder. If you ask how many cookies are left over, the remainder, 2, is the answer.",
+    ].join("\n\n"),
+    keyIdeas: [
+      "Divide one place at a time, using partial quotients or long division.",
+      "Long division repeats: divide, multiply, subtract, bring down.",
+      "The remainder is what's left over, and it is always smaller than the divisor.",
+      "In word problems, decide whether to round up, drop the remainder, or use it as the answer.",
+    ],
+    hook: {
+      text: "157 passengers are waiting at the canyon station. Each train car holds 6 people. The conductor divides and gets 26 with 1 left over. So she orders 26 cars. Uh oh! Who is left standing on the platform? Let's figure it out together!",
+    },
+    teach: [
+      {
+        title: "Divide by Place Value",
+        teach:
+          "Division splits a number into equal groups. Big numbers are easier to divide one place at a time. Let's find 852 divided by 4. Break 852 into friendly parts: 800 plus 40 plus 12. Now divide each part by 4. 800 divided by 4 is 200. 40 divided by 4 is 10. 12 divided by 4 is 3. Add up the answers: 200 plus 10 plus 3 is 213. These pieces are called partial quotients. Check by multiplying: 213 times 4 is 852. It works!",
+        visual: {
+          type: "hotspots",
+          title: "852 ÷ 4 by place value",
+          center: "213",
+          spots: [
+            { label: "800 ÷ 4", icon: "🟥", detail: "200" },
+            { label: "40 ÷ 4", icon: "🟨", detail: "10" },
+            { label: "12 ÷ 4", icon: "🟩", detail: "3" },
+            { label: "Check", icon: "✅", detail: "213 × 4 = 852" },
+          ],
+        },
+        probe: {
+          type: "cloze",
+          text: "936 ÷ 3: 900 ÷ 3 = {0}. 30 ÷ 3 = {1}. 6 ÷ 3 = {2}. So 936 ÷ 3 = {3}.",
+          blanks: [{ answers: ["300"] }, { answers: ["10"] }, { answers: ["2"] }, { answers: ["312"] }],
+          hint: "Divide each place by 3. Then add the partial quotients.",
+          mistakes: [{ match: "3", coach: "9 ÷ 3 = 3, but this is 900. 900 ÷ 3 = 300." }],
+          seconds: 50,
+        },
+        think: {
+          q: "What is 600 ÷ 3?",
+          choices: ["2", "200", "20"],
+          answer: 1,
+          why: "6 hundreds ÷ 3 = 2 hundreds = 200.",
+          hints: ["6 ÷ 3 = 2, but we have 6 hundreds.", "", "Check: 20 × 3 is only 60."],
+        },
+        approaches: {
+          analogy: "Dividing by place value is like sharing money: first hand out the hundred-dollar bills, then the tens, then the ones.",
+          example: "484 ÷ 4: 400 ÷ 4 = 100, 80 ÷ 4 = 20, 4 ÷ 4 = 1. 100 + 20 + 1 = 121.",
+          simpler: {
+            q: "What is 80 ÷ 4?",
+            choices: ["20", "2", "40"],
+            answer: 0,
+            why: "8 tens ÷ 4 = 2 tens = 20.",
+            hints: ["", "8 ÷ 4 = 2, but 80 is 8 tens, so the answer is 2 tens.", "40 is half of 80. Dividing by 4 makes 4 equal groups."],
+          },
+        },
+      },
+      {
+        title: "Long Division",
+        teach:
+          "Long division is a tidy way to divide one place at a time. The steps repeat: divide, multiply, subtract, bring down. Let's try 1,476 divided by 6. There aren't enough thousands, so start with 14 hundreds. 14 divided by 6 is 2. Multiply 2 times 6 to get 12. Subtract to get 2. Bring down the 7 to make 27. 27 divided by 6 is 4. 4 times 6 is 24, and 27 minus 24 is 3. Bring down the 6 to make 36. 36 divided by 6 is 6. The answer is 246!",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "Divide", back: "How many times does 6 go into 14? 2 times." },
+            { front: "Multiply", back: "2 × 6 = 12" },
+            { front: "Subtract", back: "14 − 12 = 2" },
+            { front: "Bring down", back: "Bring down the 7 to make 27. Then repeat!" },
+            { front: "Check", back: "246 × 6 = 1,476" },
+          ],
+        },
+        probe: {
+          type: "number",
+          prompt: "Use long division: 2,184 ÷ 7 = ?",
+          answer: 312,
+          hint: "7 doesn't go into 2, so start with 21 hundreds. 21 ÷ 7 = 3.",
+          mistakes: [
+            { match: "32", coach: "Don't skip a place! After 21 hundreds, bring down the 8: 8 ÷ 7 = 1 with 1 left. Then bring down the 4 to make 14." },
+            { match: "3012", coach: "The first digit goes in the hundreds place, because we started with 21 hundreds." },
+          ],
+          seconds: 90,
+        },
+        think: {
+          q: "In long division, what comes right after you subtract?",
+          choices: ["Divide again", "Bring down the next digit", "Write the remainder"],
+          answer: 1,
+          why: "Divide, multiply, subtract, bring down, then repeat.",
+          hints: [
+            "You need a new number to divide first. Bring down the next digit.",
+            "",
+            "Only write a remainder when there are no digits left to bring down.",
+          ],
+        },
+        approaches: {
+          analogy: "Long division is like a dance with four steps: divide, multiply, subtract, bring down. You repeat the same four steps until the music (the digits) runs out.",
+          example: "965 ÷ 5: 9 ÷ 5 = 1, 9 − 5 = 4, bring down 6: 46. 46 ÷ 5 = 9, 46 − 45 = 1, bring down 5: 15. 15 ÷ 5 = 3. Answer: 193.",
+          simpler: {
+            q: "What is 27 ÷ 3?",
+            choices: ["8", "9", "24"],
+            answer: 1,
+            why: "3 × 9 = 27.",
+            hints: ["3 × 8 is 24, which leaves 3 more.", "", "24 is 27 − 3. We need to divide."],
+          },
+        },
+      },
+      {
+        title: "Remainders",
+        teach:
+          "Sometimes a number doesn't split evenly. What's left over is called the remainder. Back to the station: 157 people, 6 in each car. 6 times 26 is 156. That leaves 1 person. So 157 divided by 6 is 26, remainder 1. We write it as 26 R 1. Here's an important rule: the remainder must be smaller than the divisor. If you have 6 or more left over, you can make another group. So a remainder of 7 when dividing by 6 means you need to go back and divide more.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "157 ÷ 6", back: "26 R 1, because 6 × 26 = 156 and 1 is left." },
+            { front: "47 ÷ 5", back: "9 R 2, because 5 × 9 = 45 and 2 is left." },
+            { front: "Remainder rule", back: "The remainder is always smaller than the divisor." },
+          ],
+        },
+        probe: {
+          type: "cloze",
+          text: "50 ÷ 6 = {0} R {1}, because 6 × 8 = 48.",
+          blanks: [{ answers: ["8"] }, { answers: ["2"] }],
+          hint: "Find the biggest multiple of 6 that fits in 50. What is left over?",
+          mistakes: [{ match: "7", coach: "6 × 7 is 42, leaving 8, and 8 is more than 6. You can fit another group of 6." }],
+          seconds: 40,
+        },
+        think: {
+          q: "A kid says 38 ÷ 5 = 6 R 8. What's wrong?",
+          choices: ["Nothing, it's right", "The remainder 8 is bigger than 5, so another group fits", "The answer should have no remainder"],
+          answer: 1,
+          why: "5 × 7 = 35, leaving 3. So 38 ÷ 5 = 7 R 3.",
+          hints: [
+            "Check the rule: the remainder must be smaller than the divisor.",
+            "",
+            "38 isn't a multiple of 5, so there will be a remainder. It just has to be smaller than 5.",
+          ],
+        },
+        approaches: {
+          analogy: "A remainder is like the last few eggs after you fill as many full cartons as you can. If you have enough left to fill another carton, you aren't done packing!",
+          example: "29 ÷ 4: 4 × 7 = 28. 29 − 28 = 1. So 29 ÷ 4 = 7 R 1.",
+          simpler: {
+            q: "What is 13 ÷ 4?",
+            choices: ["3 R 1", "2 R 5", "4 R 1"],
+            answer: 0,
+            why: "4 × 3 = 12, and 1 is left.",
+            hints: ["", "A remainder of 5 is too big when dividing by 4.", "4 × 4 is 16, which is more than 13."],
+          },
+        },
+      },
+      {
+        title: "What Does the Remainder Mean?",
+        teach:
+          "In a story, you must decide what the remainder means. There are three choices. First, round up. 157 riders need 26 full cars plus one more car for the last rider, so 27 cars. Second, drop the remainder. If you pack 50 cookies in boxes of 6, you can fill 8 boxes. The extra cookies don't make a full box. Third, the remainder is the answer. How many cookies are left over after filling the boxes? 2 cookies. Always read the question again before you answer.",
+        visual: {
+          type: "hotspots",
+          title: "Three ways to use a remainder",
+          center: "R ?",
+          spots: [
+            { label: "Round up", icon: "⬆️", detail: "Everyone needs a seat: 157 riders, 6 per car, so 27 cars." },
+            { label: "Drop it", icon: "✂️", detail: "Only full boxes count: 50 cookies, 6 per box, so 8 full boxes." },
+            { label: "It's the answer", icon: "🎯", detail: "How many are left over? 50 cookies in boxes of 6 leaves 2." },
+          ],
+        },
+        probe: {
+          type: "sort",
+          prompt: "Sort each problem by what you do with the remainder.",
+          buckets: ["Round up", "Drop the remainder", "The remainder is the answer"],
+          items: [
+            { text: "30 hikers ride in jeeps that hold 7. How many jeeps are needed?", bucket: 0 },
+            { text: "45 books go on shelves that hold 8. How many shelves are needed?", bucket: 0 },
+            { text: "Kites cost $4. How many can you buy with $25?", bucket: 1 },
+            { text: "A board is 50 inches. How many 6-inch blocks can be cut from it?", bucket: 1 },
+            { text: "25 stickers are shared equally by 4 friends. How many are left for the teacher?", bucket: 2 },
+            { text: "70 apples are packed in bags of 8. How many apples don't fit in a full bag?", bucket: 2 },
+          ],
+          hint: "Ask: does everyone need a spot (round up)? Do only full groups count (drop it)? Or does the question ask what's left (the remainder)?",
+          mistakes: [{ match: "Jeeps sorted as drop the remainder", coach: "If you drop the remainder, 2 hikers get left behind! You need one more jeep." }],
+          seconds: 90,
+        },
+        think: {
+          q: "38 kids go on a trip. Each van holds 8 kids. How many vans are needed?",
+          choices: ["4", "5", "6"],
+          answer: 1,
+          why: "38 ÷ 8 = 4 R 6. The 6 extra kids need a van too, so round up to 5.",
+          hints: [
+            "4 vans carry only 32 kids, and 6 would be left behind.",
+            "",
+            "6 is the remainder, not the number of vans.",
+          ],
+        },
+        approaches: {
+          analogy: "Think about real life. A bus can't leave a kid behind (round up). A store only sells full packs (drop it). And sometimes you just want to know what's left on the plate (the remainder).",
+          example: "100 cups go in stacks of 12. 100 ÷ 12 = 8 R 4. Full stacks: 8 (drop). Stacks needed to hold every cup: 9 (round up). Cups left over: 4 (remainder).",
+          simpler: {
+            q: "9 kids need rides, and each car holds 4. How many cars?",
+            choices: ["2", "3", "1"],
+            answer: 1,
+            why: "2 cars hold 8 kids. One more kid needs a car, so 3.",
+            hints: ["2 cars hold 8. One kid would be left behind.", "", "1 car holds only 4 kids."],
+          },
+        },
+      },
+    ],
+    activity: {
+      type: "sequence",
+      prompt: "Put the steps for 1,476 ÷ 6 in order.",
+      steps: [
+        "Start with 14 hundreds: 14 ÷ 6 = 2",
+        "Multiply 2 × 6 = 12 and subtract: 14 − 12 = 2",
+        "Bring down the 7 to make 27",
+        "27 ÷ 6 = 4, and 27 − 24 = 3",
+        "Bring down the 6 to make 36",
+        "36 ÷ 6 = 6, so the answer is 246",
+      ],
+    },
+    explain: {
+      prompt: "Explain how to solve this: 157 riders take train cars that hold 6 each. How many cars are needed?",
+      keyPoints: [
+        "Divide 157 by 6",
+        "157 ÷ 6 = 26 R 1",
+        "The 1 extra rider still needs a seat",
+        "Round up to 27 cars",
+      ],
+    },
+    mastery: [
+      {
+        type: "number",
+        prompt: "Divide: 1,845 ÷ 5 = ?",
+        answer: 369,
+        hint: "Start with 18 hundreds. 18 ÷ 5 = 3 with 3 left over.",
+        mistakes: [{ match: "36", coach: "You need a digit for every place. 18 hundreds, 34 tens, 45 ones: 3, 6, 9." }],
+        seconds: 90,
+      },
+      {
+        type: "cloze",
+        text: "3,059 ÷ 4 = {0} R {1}",
+        blanks: [{ answers: ["764"] }, { answers: ["3"] }],
+        hint: "4 doesn't go into 3, so start with 30 hundreds. Check: quotient × 4 + remainder should be 3,059.",
+        mistakes: [{ match: "7", coach: "A remainder of 7 is too big when dividing by 4. Another group of 4 fits." }],
+        seconds: 100,
+      },
+      {
+        type: "number",
+        prompt: "A ranger has 230 trail maps. She bundles them in stacks of 8. How many full stacks can she make?",
+        answer: 28,
+        hint: "230 ÷ 8 = 28 R 6. Only full stacks count.",
+        mistakes: [{ match: "29", coach: "The 29th stack would have only 6 maps. The question asks for full stacks." }],
+        seconds: 70,
+      },
+      {
+        type: "match",
+        prompt: "Match each division to its answer.",
+        pairs: [
+          { left: "47 ÷ 5", right: "9 R 2" },
+          { left: "62 ÷ 7", right: "8 R 6" },
+          { left: "35 ÷ 4", right: "8 R 3" },
+          { left: "50 ÷ 6", right: "8 R 2" },
+        ],
+        hint: "Multiply the quotient by the divisor and add the remainder to check.",
+        seconds: 60,
+      },
+    ],
+    check: [
+      { q: "What is 963 ÷ 3?", choices: ["321", "312", "3,021"], answer: 0, why: "900 ÷ 3 = 300, 60 ÷ 3 = 20, 3 ÷ 3 = 1. So 321." },
+      { q: "What is 58 ÷ 6?", choices: ["8 R 10", "9 R 4", "10 R 2"], answer: 1, why: "6 × 9 = 54, and 58 − 54 = 4." },
+      { q: "46 campers sleep in tents that hold 4. How many tents are needed?", choices: ["11", "10", "12"], answer: 2, why: "46 ÷ 4 = 11 R 2. The 2 extra campers need a tent, so 12." },
+      { q: "Which remainder is impossible when dividing by 5?", choices: ["4", "6", "0"], answer: 1, why: "The remainder must be smaller than the divisor, so 6 can't be a remainder when dividing by 5." },
+    ],
+    task: {
+      kind: "project",
+      prompt: "Count a big pile of something at home: dried beans, pennies or cards (at least 100). Share them equally into 3, then 4, then 7 groups. Write each division with its remainder, and check by multiplying and adding the remainder.",
+      rubric: [
+        "Counts a pile of 100 or more",
+        "Writes each division with the correct quotient and remainder",
+        "Checks each one by multiplying and adding the remainder",
+      ],
+    },
+  },
+
+  // 6. Equivalent fractions and comparing fractions
+  {
+    id: "math-4.fractions",
+    title: "Equivalent Fractions and Comparing Fractions",
+    minutes: 35,
+    stage: "logic",
+    standards: ["4.NF.A.1", "4.NF.A.2"],
+    read: [
+      "A fraction names part of a whole. In 3/4, the bottom number, the denominator, tells how many equal parts the whole is cut into. The top number, the numerator, tells how many of those parts we have.",
+      "Different fractions can name the same amount. Cut a pie into 4 equal slices and take 3. Now imagine cutting every slice in half. There are 8 slices, and you have 6 of them. You still have the same amount of pie, so 3/4 = 6/8. These are called equivalent fractions. Cutting each piece into 2 doubled both the number of pieces and the number you have. That is why multiplying the numerator and denominator by the same number makes an equivalent fraction: 3/4 = (3 × 2)/(4 × 2) = 6/8. Dividing both by the same number works too: 6/8 = 3/4.",
+      "To compare two fractions, it helps to make them alike. One way is to find a common denominator. To compare 2/3 and 3/4, rewrite both as twelfths: 2/3 = 8/12 and 3/4 = 9/12. Now the pieces are the same size, and 9 pieces are more than 8, so 3/4 > 2/3.",
+      "If two fractions have the same numerator, compare the size of the pieces. 3/5 and 3/8 both have 3 pieces, but fifths are bigger than eighths, so 3/5 > 3/8.",
+      "Another trick is to compare each fraction to a benchmark like 1/2. The fraction 3/8 is less than half, because half of 8 is 4. The fraction 5/6 is more than half, because half of 6 is 3. So 5/6 > 3/8.",
+      "One warning: comparing only works when both fractions are parts of the same size whole. Half of a big pizza is more pizza than half of a small one.",
+    ].join("\n\n"),
+    keyIdeas: [
+      "Equivalent fractions name the same amount, like 3/4 = 6/8.",
+      "Multiply or divide the numerator and denominator by the same number to make an equivalent fraction.",
+      "Compare fractions with a common denominator, a common numerator, or a benchmark like 1/2.",
+      "Comparisons only make sense when the wholes are the same size.",
+    ],
+    hook: {
+      text: "At the canyon bake sale, two pies are exactly the same size. Pip ate three fourths of the first pie. Pip's friend ate six eighths of the second pie. Pip says, 'I ate more, because three fourths has bigger pieces!' The friend says, 'No, I ate more, because I had 6 pieces!' Who is right?",
+    },
+    teach: [
+      {
+        title: "Same Amount, Different Names",
+        teach:
+          "Cut a pie into 4 equal slices and take 3. That is three fourths. Now cut every slice in half. The pie has 8 slices, and you have 6 of them. Did you get more pie? No! It is the same amount, just cut smaller. So three fourths equals six eighths. Fractions that name the same amount are called equivalent fractions. Cutting each piece into 2 doubled the total pieces and doubled your pieces. Both numbers were multiplied by 2. So Pip and the friend ate exactly the same amount!",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "1/2", back: "= 2/4 = 4/8. The same half, cut into more pieces." },
+            { front: "3/4", back: "= 6/8. Cut each fourth in half: twice the pieces, twice as many taken." },
+            { front: "2/3", back: "= 4/6 = 8/12. Multiply top and bottom by 2, then by 2 again." },
+          ],
+        },
+        probe: {
+          type: "cloze",
+          text: "2/3 = {0}/6 = 8/{1}",
+          blanks: [{ answers: ["4"] }, { answers: ["12"] }],
+          hint: "To go from thirds to sixths, the denominator was multiplied by 2. Do the same to the numerator.",
+          mistakes: [
+            { match: "3", coach: "Adding 1 doesn't keep the amount the same. Multiply: 2 × 2 = 4." },
+            { match: "9", coach: "Adding doesn't make equivalent fractions. 2 × 4 = 8, so multiply 3 × 4 = 12." },
+          ],
+          seconds: 40,
+        },
+        think: {
+          q: "Which fraction is equivalent to 1/2?",
+          choices: ["2/3", "4/8", "1/4"],
+          answer: 1,
+          why: "4/8 is half of 8 pieces. 1 × 4 = 4 and 2 × 4 = 8.",
+          hints: [
+            "2/3 is more than half. Half of 3 pieces would be 1 and a half.",
+            "",
+            "1/4 is only half of a half.",
+          ],
+        },
+        approaches: {
+          analogy: "Equivalent fractions are like a dollar bill and four quarters. They look different, but they are worth exactly the same.",
+          example: "Fold a paper strip in thirds and shade 1 part: 1/3. Fold it in half again: now 6 parts, and 2 are shaded. 1/3 = 2/6.",
+          simpler: {
+            q: "If you cut every slice of a pie in half, what happens to the number of slices?",
+            choices: ["It doubles", "It stays the same", "It is cut in half"],
+            answer: 0,
+            why: "Each slice becomes 2, so there are twice as many slices.",
+            hints: ["", "Each slice becomes two slices, so the number changes.", "The slices get smaller, but there are more of them."],
+          },
+        },
+      },
+      {
+        title: "Making Equivalent Fractions",
+        teach:
+          "Here is the rule. Multiply the numerator and the denominator by the same number, and you get an equivalent fraction. Three fourths times 2 over 2 is six eighths. Times 3 over 3 is nine twelfths. Why does it work? Multiplying by the same number on top and bottom is just cutting every piece into that many smaller pieces. You can also divide both by the same number. Six eighths divided by 2 over 2 is three fourths again. That is called simplifying.",
+        visual: {
+          type: "hotspots",
+          title: "Equivalent to 3/4",
+          center: "3/4",
+          spots: [
+            { label: "× 2/2", icon: "✌️", detail: "6/8: cut every piece into 2" },
+            { label: "× 3/3", icon: "3️⃣", detail: "9/12: cut every piece into 3" },
+            { label: "× 25/25", icon: "💯", detail: "75/100: three quarters of a dollar" },
+            { label: "÷ 2/2", icon: "⬅️", detail: "6/8 ÷ 2/2 = 3/4 again" },
+          ],
+        },
+        probe: {
+          type: "match",
+          prompt: "Match each fraction to an equivalent fraction.",
+          pairs: [
+            { left: "1/2", right: "5/10" },
+            { left: "3/4", right: "9/12" },
+            { left: "2/5", right: "4/10" },
+            { left: "1/3", right: "3/9" },
+          ],
+          hint: "Multiply the top and bottom of each fraction on the left by the same number.",
+          seconds: 50,
+        },
+        think: {
+          q: "Which is equivalent to 5/6?",
+          choices: ["10/12", "6/7", "5/12"],
+          answer: 0,
+          why: "5 × 2 = 10 and 6 × 2 = 12.",
+          hints: [
+            "",
+            "Adding 1 to the top and bottom changes the amount.",
+            "Only the bottom was doubled. Both numbers must be multiplied.",
+          ],
+        },
+        approaches: {
+          analogy: "It's like changing dollars to dimes. 3 dollars out of 4 dollars is the same share as 30 dimes out of 40 dimes. Everything got multiplied by 10.",
+          example: "Make fractions equivalent to 2/5: × 2/2 gives 4/10, × 3/3 gives 6/15, × 20/20 gives 40/100.",
+          simpler: {
+            q: "1/2 = ?/4",
+            choices: ["1", "3", "2"],
+            answer: 2,
+            why: "2 × 2 = 4, so 1 × 2 = 2.",
+            hints: ["1/4 is less than half. 4 is twice 2, so double the 1.", "3/4 is more than half.", ""],
+          },
+        },
+      },
+      {
+        title: "Comparing Fractions",
+        teach:
+          "Which is more, two thirds or three fourths? Their pieces are different sizes, so make them alike. Find a common denominator. Thirds and fourths can both become twelfths. Two thirds is eight twelfths. Three fourths is nine twelfths. Now the pieces are the same size, and 9 is more than 8. So three fourths is greater. If two fractions have the same numerator, just compare the pieces. Three fifths is more than three eighths, because fifths are bigger pieces than eighths.",
+        visual: {
+          type: "compare",
+          left: { title: "2/3", points: ["= 8/12", "8 twelfths", "Less"] },
+          right: { title: "3/4", points: ["= 9/12", "9 twelfths", "Greater"] },
+        },
+        probe: {
+          type: "cloze",
+          text: "Write >, < or =. 5/6 {0} 7/12. 2/5 {1} 3/4. 3/8 {2} 6/16.",
+          blanks: [{ answers: [">"] }, { answers: ["<"] }, { answers: ["="] }],
+          bank: [">", "<", "="],
+          hint: "Make common denominators: 5/6 = 10/12. For 2/5 and 3/4, use twentieths. For 3/8, multiply by 2/2.",
+          mistakes: [{ match: "=", coach: "Check with a common denominator. Only fractions that name the same amount are equal." }],
+          seconds: 70,
+        },
+        think: {
+          q: "Which is greater, 4/5 or 4/9?",
+          choices: ["4/9, because 9 is bigger", "4/5, because fifths are bigger pieces", "They are equal"],
+          answer: 1,
+          why: "Both have 4 pieces, but fifths are bigger than ninths.",
+          hints: [
+            "A bigger denominator means the whole is cut into more, smaller pieces.",
+            "",
+            "Both have 4 pieces, but the pieces are different sizes.",
+          ],
+        },
+        approaches: {
+          analogy: "Comparing 3/5 and 3/8 is like comparing 3 slices from a pizza cut into 5 with 3 slices from one cut into 8. Fewer cuts means bigger slices.",
+          example: "Compare 3/4 and 5/8. 3/4 = 6/8. 6/8 > 5/8, so 3/4 > 5/8.",
+          simpler: {
+            q: "Which is greater, 5/8 or 3/8?",
+            choices: ["5/8", "3/8", "They are equal"],
+            answer: 0,
+            why: "Same size pieces, and 5 is more than 3.",
+            hints: ["", "The pieces are the same size, so the one with more pieces is greater.", "5 eighths and 3 eighths are different amounts."],
+          },
+        },
+      },
+      {
+        title: "Benchmark: Half",
+        teach:
+          "Here's a fast trick: compare each fraction to one half. Half of 8 is 4, so four eighths is one half. Three eighths is a little less than half. Half of 6 is 3, so five sixths is more than half. That means five sixths is greater than three eighths, with no common denominator needed! You can use one whole as a benchmark too. Seven eighths is just one eighth away from a whole. One warning: comparing only works when the wholes are the same size. Half of a giant pie beats half of a tiny tart!",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "Less than 1/2", back: "The numerator is less than half the denominator: 3/8, 2/5, 4/10." },
+            { front: "Equal to 1/2", back: "The numerator is exactly half the denominator: 4/8, 5/10, 6/12." },
+            { front: "More than 1/2", back: "The numerator is more than half the denominator: 5/6, 7/10, 5/8." },
+          ],
+        },
+        probe: {
+          type: "place",
+          prompt: "Drag each fraction to its spot on the number line from 0 to 1.",
+          min: 0,
+          max: 1,
+          step: 0.125,
+          tolerance: 0.06,
+          items: [
+            { label: "1/4", value: 0.25 },
+            { label: "1/2", value: 0.5 },
+            { label: "5/8", value: 0.625 },
+            { label: "7/8", value: 0.875 },
+          ],
+          hint: "Find 1/2 first, in the middle. Each tick is one eighth. 1/4 is the same as 2/8.",
+          mistakes: [{ match: "Put 1/4 past the middle", coach: "1/4 is less than half, so it goes between 0 and 1/2." }],
+          seconds: 50,
+        },
+        think: {
+          q: "Which fraction is less than 1/2?",
+          choices: ["4/7", "2/5", "6/10"],
+          answer: 1,
+          why: "Half of 5 is 2 and a half, and 2 is less than that.",
+          hints: [
+            "Half of 7 is 3 and a half. 4 is more than that.",
+            "",
+            "Half of 10 is 5. 6 is more than 5.",
+          ],
+        },
+        approaches: {
+          analogy: "Using 1/2 as a benchmark is like asking whether a glass is less than half full or more than half full. You can tell at a glance without measuring exactly.",
+          example: "Compare 4/10 and 5/8. Half of 10 is 5, so 4/10 is less than half. Half of 8 is 4, so 5/8 is more than half. So 5/8 > 4/10.",
+          simpler: {
+            q: "What fraction of 10 equals one half?",
+            choices: ["2/10", "5/10", "10/10"],
+            answer: 1,
+            why: "5 is half of 10.",
+            hints: ["2 is much less than half of 10.", "", "10/10 is a whole, not a half."],
+          },
+        },
+      },
+    ],
+    activity: {
+      type: "sort",
+      prompt: "Sort each fraction: less than, equal to, or more than one half?",
+      buckets: ["Less than 1/2", "Equal to 1/2", "More than 1/2"],
+      items: [
+        { text: "2/5", bucket: 0 },
+        { text: "3/8", bucket: 0 },
+        { text: "1/6", bucket: 0 },
+        { text: "4/8", bucket: 1 },
+        { text: "5/10", bucket: 1 },
+        { text: "6/12", bucket: 1 },
+        { text: "3/4", bucket: 2 },
+        { text: "7/10", bucket: 2 },
+        { text: "5/8", bucket: 2 },
+      ],
+    },
+    explain: {
+      prompt: "Explain why 3/4 and 6/8 are equal, and how you would compare 2/3 and 3/4.",
+      keyPoints: [
+        "Cutting each fourth into 2 pieces makes eighths",
+        "Multiplying the top and bottom by 2 gives 6/8, the same amount",
+        "Use a common denominator: 2/3 = 8/12 and 3/4 = 9/12",
+        "9/12 is more than 8/12, so 3/4 is greater",
+      ],
+    },
+    mastery: [
+      {
+        type: "number",
+        prompt: "3/4 = ?/12. What is the missing numerator?",
+        answer: 9,
+        hint: "4 × 3 = 12, so multiply the 3 on top by 3 too.",
+        mistakes: [{ match: "11", coach: "Adding 8 to the top and bottom doesn't keep the amount the same. Multiply both by 3." }],
+        seconds: 30,
+      },
+      {
+        type: "cloze",
+        text: "Write >, < or =. 4/6 {0} 2/3. 5/12 {1} 1/2. 3/5 {2} 3/10.",
+        blanks: [{ answers: ["="] }, { answers: ["<"] }, { answers: [">"] }],
+        bank: [">", "<", "="],
+        hint: "4/6 and 2/3: divide the top and bottom by 2. 5/12: compare to half of 12. 3/5 and 3/10: same numerator, which pieces are bigger?",
+        seconds: 60,
+      },
+      {
+        type: "place",
+        prompt: "Drag each fraction to its spot on the number line from 0 to 1.",
+        min: 0,
+        max: 1,
+        step: 0.1,
+        tolerance: 0.05,
+        items: [
+          { label: "3/10", value: 0.3 },
+          { label: "1/2", value: 0.5 },
+          { label: "4/5", value: 0.8 },
+        ],
+        hint: "Each tick is one tenth. 1/2 = 5/10 and 4/5 = 8/10.",
+        seconds: 45,
+      },
+      {
+        type: "sequence",
+        prompt: "Put these fractions in order from least to greatest.",
+        steps: ["1/8", "1/3", "1/2", "2/3", "7/8"],
+        hint: "Compare each fraction to 1/2 first. Then compare the ones on the same side.",
+        seconds: 60,
+      },
+    ],
+    check: [
+      { q: "Which fraction equals 2/5?", choices: ["4/10", "3/6", "2/10"], answer: 0, why: "2 × 2 = 4 and 5 × 2 = 10, so 2/5 = 4/10." },
+      { q: "Which is greater, 3/4 or 5/6?", choices: ["3/4", "They are equal", "5/6"], answer: 2, why: "3/4 = 9/12 and 5/6 = 10/12. 10/12 is more." },
+      { q: "Which fraction is more than 1/2?", choices: ["3/7", "5/9", "4/8"], answer: 1, why: "Half of 9 is 4 and a half, and 5 is more than that." },
+      { q: "Why is 1/3 greater than 1/5?", choices: ["Because 3 is less than 5", "Thirds are bigger pieces than fifths", "Because 1/3 has more pieces"], answer: 1, why: "When a whole is cut into fewer parts, each part is bigger." },
+    ],
+    task: {
+      kind: "project",
+      prompt: "Fold three paper strips of the same length into halves, fourths and eighths, and label each part. Use the strips to show a parent three pairs of equivalent fractions and to compare 3/4 with 5/8.",
+      rubric: [
+        "Folds and labels equal parts on each strip",
+        "Shows three correct pairs of equivalent fractions",
+        "Correctly shows that 3/4 is greater than 5/8, using the strips",
+      ],
+    },
+  },
+
+  // 7. Adding, subtracting and multiplying fractions; line plots
+  {
+    id: "math-4.addfractions",
+    title: "Adding Fractions and Mixed Numbers",
+    minutes: 35,
+    stage: "logic",
+    standards: ["4.NF.B.3", "4.NF.B.4", "4.MD.B.4"],
+    read: [
+      "A fraction like 5/8 is made of unit fractions: 5/8 = 1/8 + 1/8 + 1/8 + 1/8 + 1/8. You can break it apart other ways too, like 5/8 = 2/8 + 3/8 or 5/8 = 1/8 + 4/8.",
+      "To add fractions with the same denominator, add the numerators and keep the denominator. If a trail crew builds 3/8 of a mile on Monday and 4/8 of a mile on Tuesday, they built 7/8 of a mile. The denominator stays 8 because the pieces are still eighths. Subtracting works the same way: 7/10 − 4/10 = 3/10.",
+      "A mixed number has a whole number and a fraction, like 2 1/4. To add mixed numbers, add the wholes, then add the fractions: 2 1/4 + 1 2/4 = 3 3/4. If the fractions add up to a whole or more, regroup: 2 3/4 + 1 3/4 = 3 6/4 = 4 2/4. To subtract when the top fraction is too small, borrow a whole: 3 1/5 − 1 3/5 becomes 2 6/5 − 1 3/5 = 1 3/5.",
+      "Multiplying a fraction by a whole number is repeated adding. If a crew builds 3/8 of a mile every day for 5 days, that is 5 × 3/8 = 15/8 of a mile. Think of it as 5 groups of 3 eighths, which is 15 eighths. Since 8/8 is one whole, 15/8 = 1 7/8 miles.",
+      "Scientists record measurements in fractions on a line plot. A line plot is a number line with an X for each measurement. If Pip measures feathers and gets 2 1/4, 2 1/2, 2 1/2, 2 3/4 and 3 inches, each length gets an X above its spot. The line plot makes it easy to answer questions like: what is the difference between the longest and shortest feather? 3 − 2 1/4 = 3/4 of an inch.",
+    ].join("\n\n"),
+    keyIdeas: [
+      "Add or subtract fractions with the same denominator by adding or subtracting the numerators; the denominator stays.",
+      "Add mixed numbers by adding wholes and fractions, and regroup when the fractions make a whole.",
+      "A whole number times a fraction is repeated adding: 5 × 3/8 = 15/8.",
+      "Line plots show fraction measurements and help you add and subtract them.",
+    ],
+    hook: {
+      text: "A trail crew is building a path to the cliff dwellings. On Monday they build three eighths of a mile. On Tuesday they build four eighths of a mile. How far have they built? Pip says seven sixteenths! Is that right? Let's figure it out together!",
+    },
+    teach: [
+      {
+        title: "Adding Like Fractions",
+        teach:
+          "Three eighths plus four eighths. Count the pieces: 3 eighths and 4 more eighths make 7 eighths. So the crew built seven eighths of a mile. Pip added the bottoms too and got sixteenths. But the pieces didn't change size! They are still eighths, so the denominator stays 8. Add the numerators and keep the denominator. Subtracting works the same way. Seven tenths minus four tenths is three tenths. You can also break a fraction apart: five eighths is one eighth plus four eighths, or two eighths plus three eighths.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "3/8 + 4/8", back: "7/8. Add the pieces; they are still eighths." },
+            { front: "Why not 7/16?", back: "Sixteenths are smaller pieces. Adding doesn't change the size of the pieces." },
+            { front: "7/10 − 4/10", back: "3/10" },
+            { front: "Break apart 5/8", back: "1/8 + 4/8, or 2/8 + 3/8, or 1/8 + 1/8 + 3/8" },
+          ],
+        },
+        probe: {
+          type: "cloze",
+          text: "2/6 + 3/6 = {0}. 9/10 − 4/10 = {1}. 5/8 = 2/8 + {2}.",
+          blanks: [{ answers: ["5/6"] }, { answers: ["5/10", "1/2"] }, { answers: ["3/8"] }],
+          hint: "Add or subtract the numerators. Keep the denominator the same.",
+          mistakes: [
+            { match: "5/12", coach: "The pieces are still sixths. Keep the denominator: 5/6." },
+            { match: "5/0", coach: "Don't subtract the denominators. The pieces are still tenths: 5/10." },
+          ],
+          seconds: 50,
+        },
+        think: {
+          q: "What is 4/9 + 3/9?",
+          choices: ["7/18", "7/9", "1/9"],
+          answer: 1,
+          why: "4 ninths and 3 ninths make 7 ninths.",
+          hints: [
+            "Adding doesn't make the pieces smaller. Keep the denominator.",
+            "",
+            "That subtracts. We are adding.",
+          ],
+        },
+        approaches: {
+          analogy: "Adding fractions with the same denominator is like adding apples: 3 apples plus 4 apples is 7 apples, not 7 'double apples'. The 'eighths' is the name of the thing you are counting.",
+          example: "2/5 + 2/5 = 4/5. Shade 2 of 5 parts on a strip, then shade 2 more. 4 of the 5 parts are shaded.",
+          simpler: {
+            q: "What is 1/4 + 1/4 + 1/4?",
+            choices: ["3/12", "3/4", "1/12"],
+            answer: 1,
+            why: "3 one-fourths make 3/4.",
+            hints: ["The pieces stay fourths. Count them: 3 fourths.", "", "Count the fourths: 1, 2, 3."],
+          },
+        },
+      },
+      {
+        title: "Mixed Numbers",
+        teach:
+          "A mixed number has a whole number and a fraction, like two and one fourth. To add mixed numbers, add the wholes, then add the fractions. Two and one fourth plus one and two fourths is three and three fourths. Sometimes the fractions make another whole. Two and three fourths plus one and three fourths is three and six fourths. Four fourths is one whole, so regroup: four and two fourths. To subtract, borrow a whole when the fraction on top is too small, just like borrowing a ten.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "2 1/4 + 1 2/4", back: "Wholes: 3. Fourths: 3/4. Answer: 3 3/4." },
+            { front: "2 3/4 + 1 3/4", back: "3 6/4. 4/4 is a whole, so regroup: 4 2/4." },
+            { front: "3 1/5 − 1 3/5", back: "Borrow a whole: 3 1/5 = 2 6/5. Then 2 6/5 − 1 3/5 = 1 3/5." },
+          ],
+        },
+        probe: {
+          type: "cloze",
+          text: "2 3/8 + 1 4/8 = {0} {1}/8",
+          blanks: [{ answers: ["3"] }, { answers: ["7"] }],
+          hint: "Add the wholes: 2 + 1. Add the eighths: 3 + 4.",
+          mistakes: [{ match: "4", coach: "Check the whole numbers: 2 + 1 = 3. The eighths only make 7/8, not a whole." }],
+          seconds: 45,
+        },
+        think: {
+          q: "What is 1 5/6 + 2 3/6?",
+          choices: ["3 8/6, which is 4 2/6", "3 8/12", "3 2/6"],
+          answer: 0,
+          why: "Wholes: 3. Sixths: 8/6, which is 1 whole and 2/6. So 4 2/6.",
+          hints: [
+            "",
+            "Keep the denominator. The pieces are still sixths.",
+            "5/6 + 3/6 is 8/6, which is more than a whole. Regroup it.",
+          ],
+        },
+        approaches: {
+          analogy: "Mixed numbers are like money in dollars and quarters. Add the dollars, add the quarters, and if you get 4 or more quarters, trade 4 of them for another dollar.",
+          example: "4 1/3 − 1 2/3: 1/3 is too small, so borrow a whole: 4 1/3 = 3 4/3. 3 4/3 − 1 2/3 = 2 2/3.",
+          simpler: {
+            q: "How many fourths make one whole?",
+            choices: ["2", "4", "1"],
+            answer: 1,
+            why: "4/4 = 1 whole.",
+            hints: ["2 fourths is only one half.", "", "1 fourth is just one piece of four."],
+          },
+        },
+      },
+      {
+        title: "A Whole Number Times a Fraction",
+        teach:
+          "The crew builds three eighths of a mile every day for 5 days. How far? That is 5 times three eighths. Multiplying is repeated adding, so it is 5 groups of 3 eighths. 5 times 3 is 15, so the answer is 15 eighths. The pieces are still eighths. Eight eighths is one whole mile, so 15 eighths is 1 whole and 7 eighths left over. The crew built one and seven eighths miles. Here's another way to see it: three eighths is 3 times one eighth, so 5 times three eighths is 15 times one eighth.",
+        visual: {
+          type: "hotspots",
+          title: "5 × 3/8",
+          center: "15/8",
+          spots: [
+            { label: "Day 1", icon: "1️⃣", detail: "3/8" },
+            { label: "Day 2", icon: "2️⃣", detail: "6/8" },
+            { label: "Day 3", icon: "3️⃣", detail: "9/8" },
+            { label: "Day 4", icon: "4️⃣", detail: "12/8" },
+            { label: "Day 5", icon: "5️⃣", detail: "15/8 = 1 7/8 miles" },
+          ],
+        },
+        probe: {
+          type: "cloze",
+          text: "4 × 2/3 = {0}/3, which is the same as {1} and 2/3.",
+          blanks: [{ answers: ["8"] }, { answers: ["2"] }],
+          hint: "Multiply the whole number by the numerator. Keep the thirds. Then count how many wholes (3/3) fit.",
+          mistakes: [{ match: "12", coach: "Don't multiply the denominator. The pieces are still thirds: 4 × 2 = 8 thirds." }],
+          seconds: 50,
+        },
+        think: {
+          q: "What is 3 × 2/5?",
+          choices: ["6/15", "6/5", "5/5"],
+          answer: 1,
+          why: "3 groups of 2 fifths is 6 fifths.",
+          hints: [
+            "Only multiply the numerator. The pieces are still fifths.",
+            "",
+            "That adds 3 to the numerator. We need 3 groups of 2 fifths.",
+          ],
+        },
+        approaches: {
+          analogy: "If one scoop holds 3/4 cup of flour and you need 4 scoops, it's like counting quarter-cups: 3 + 3 + 3 + 3 = 12 quarter-cups, which is 3 whole cups.",
+          example: "6 × 1/4: 6 groups of one fourth is 6/4 = 1 2/4. So 6 quarter-hours is 1 and a half hours.",
+          simpler: {
+            q: "What is 1/5 + 1/5 + 1/5?",
+            choices: ["3/5", "3/15", "1/15"],
+            answer: 0,
+            why: "Three one-fifths make three fifths.",
+            hints: ["", "The pieces are still fifths.", "Count the fifths: 1, 2, 3."],
+          },
+        },
+      },
+      {
+        title: "Line Plots with Fractions",
+        teach:
+          "Scientists measure things and record the data. Pip measured five feathers found on the canyon trail. The lengths were 2 and one fourth, 2 and one half, 2 and one half, 2 and three fourths, and 3 inches. A line plot shows this data. It is a number line with an X above the spot for each measurement. Two Xs stack above 2 and one half. Now we can ask questions. What is the difference between the longest and the shortest feather? 3 minus 2 and one fourth is three fourths of an inch.",
+        visual: {
+          type: "hotspots",
+          title: "Feather line plot (inches)",
+          center: "✖ = 1 feather",
+          spots: [
+            { label: "2 1/4", icon: "✖️", detail: "1 feather, the shortest" },
+            { label: "2 1/2", icon: "✖️", detail: "2 feathers: the Xs stack up" },
+            { label: "2 3/4", icon: "✖️", detail: "1 feather" },
+            { label: "3", icon: "✖️", detail: "1 feather, the longest" },
+          ],
+        },
+        probe: {
+          type: "place",
+          prompt: "Pip measured three more feathers: 2 1/8, 2 5/8 and 2 7/8 inches. Drag each measurement to its spot on the line plot.",
+          min: 2,
+          max: 3,
+          step: 0.125,
+          tolerance: 0.06,
+          items: [
+            { label: "2 1/8 in", value: 2.125 },
+            { label: "2 5/8 in", value: 2.625 },
+            { label: "2 7/8 in", value: 2.875 },
+          ],
+          hint: "The line goes from 2 to 3, and each tick is one eighth of an inch.",
+          mistakes: [{ match: "Put 2 1/8 near 3", coach: "2 1/8 is just one eighth past 2. It goes near the start of the line." }],
+          seconds: 50,
+        },
+        think: {
+          q: "On a line plot, three Xs are stacked above 1 1/2. What does that mean?",
+          choices: ["One thing measured 4 1/2", "Three things each measured 1 1/2", "The measurement was 3"],
+          answer: 1,
+          why: "Each X is one measurement, and the spot shows its size.",
+          hints: [
+            "Xs aren't added to the number. Each X is one thing that was measured.",
+            "",
+            "The spot on the line shows the measurement. The number of Xs shows how many things.",
+          ],
+        },
+        approaches: {
+          analogy: "A line plot is like lining up kids by height on a number line: each kid stands on a spot, and kids with the same height stand in a stack.",
+          example: "Bean sprouts: 1/4, 1/2, 1/2, 3/4 inches. Put one X at 1/4, two at 1/2 and one at 3/4. Longest minus shortest: 3/4 − 1/4 = 2/4 inch.",
+          simpler: {
+            q: "What is 3 − 2 3/4?",
+            choices: ["1/4", "1 1/4", "3/4"],
+            answer: 0,
+            why: "2 3/4 is one fourth away from 3.",
+            hints: ["", "2 3/4 is only a little less than 3. Count up from 2 3/4 to 3.", "3/4 more would only get you from 2 1/4 to 3."],
+          },
+        },
+      },
+    ],
+    activity: {
+      type: "sort",
+      prompt: "Sort each problem by its answer.",
+      buckets: ["Equals 1", "Equals 3/4", "Equals 1 1/2"],
+      items: [
+        { text: "4/8 + 4/8", bucket: 0 },
+        { text: "3 × 1/3", bucket: 0 },
+        { text: "2/5 + 3/5", bucket: 0 },
+        { text: "1/4 + 2/4", bucket: 1 },
+        { text: "3 × 1/4", bucket: 1 },
+        { text: "5/8 + 1/8", bucket: 1 },
+        { text: "2 × 3/4", bucket: 2 },
+        { text: "1 1/4 + 1/4", bucket: 2 },
+        { text: "7/4 − 1/4", bucket: 2 },
+      ],
+    },
+    explain: {
+      prompt: "Explain why 3/8 + 4/8 is 7/8 and not 7/16, and how you would find 5 × 3/8.",
+      keyPoints: [
+        "The pieces are eighths and they don't change size",
+        "Add the numerators and keep the denominator",
+        "5 × 3/8 is 5 groups of 3 eighths",
+        "That is 15/8, or 1 7/8",
+      ],
+    },
+    mastery: [
+      {
+        type: "number",
+        prompt: "A trail crew builds 2/3 of a mile each day. How many miles do they build in 6 days?",
+        answer: 4,
+        unit: "miles",
+        hint: "6 × 2/3 = 12/3. How many wholes is 12 thirds?",
+        mistakes: [{ match: "12", coach: "12 is the number of thirds. 3 thirds make 1 mile, so 12 thirds is 4 miles." }],
+        seconds: 60,
+      },
+      {
+        type: "cloze",
+        text: "5 1/6 − 2 4/6 = {0} {1}/6",
+        blanks: [{ answers: ["2"] }, { answers: ["3"] }],
+        hint: "1/6 is too small to take 4/6 from, so borrow a whole: 5 1/6 = 4 7/6.",
+        mistakes: [{ match: "5", coach: "You can't take 4/6 from 1/6 by flipping them. Borrow a whole first: 4 7/6 − 2 4/6." }],
+        seconds: 70,
+      },
+      {
+        type: "match",
+        prompt: "Match each fraction to a way of breaking it apart.",
+        pairs: [
+          { left: "5/8", right: "2/8 + 3/8" },
+          { left: "7/8", right: "4/8 + 3/8" },
+          { left: "3/8", right: "1/8 + 1/8 + 1/8" },
+          { left: "1 1/8", right: "1 + 1/8" },
+        ],
+        hint: "Add up the pieces on the right and find the matching fraction.",
+        seconds: 50,
+      },
+      {
+        type: "place",
+        prompt: "Bean sprouts measured 1/4, 1/2 and 7/8 inches. Drag each to its spot on the line plot.",
+        min: 0,
+        max: 1,
+        step: 0.125,
+        tolerance: 0.06,
+        items: [
+          { label: "1/4 in", value: 0.25 },
+          { label: "1/2 in", value: 0.5 },
+          { label: "7/8 in", value: 0.875 },
+        ],
+        hint: "Each tick is one eighth. 1/4 = 2/8 and 1/2 = 4/8.",
+        seconds: 45,
+      },
+    ],
+    check: [
+      { q: "What is 2/7 + 4/7?", choices: ["6/14", "6/7", "2/7"], answer: 1, why: "2 sevenths and 4 sevenths make 6 sevenths." },
+      { q: "What is 1 3/4 + 2 2/4?", choices: ["3 5/4, which is 4 1/4", "3 5/8", "4 5/4"], answer: 0, why: "Wholes: 3. Fourths: 5/4 = 1 1/4. Total: 4 1/4." },
+      { q: "What is 4 × 3/5?", choices: ["12/20", "7/5", "12/5"], answer: 2, why: "4 groups of 3 fifths is 12 fifths." },
+      { q: "On a line plot, the shortest leaf is 1 1/8 inches and the longest is 2 3/8 inches. What is the difference?", choices: ["1 2/8 inches", "1 4/8 inches", "2/8 inch"], answer: 0, why: "2 3/8 − 1 1/8: wholes 2 − 1 = 1, eighths 3 − 1 = 2. So 1 2/8 inches." },
+    ],
+    task: {
+      kind: "lab",
+      prompt: "Measure 8 small things (leaves, pencils, crayons or twigs) to the nearest quarter inch with a ruler. Make a line plot with an X for each one. Then find the difference between the longest and shortest, and the total length of the two longest.",
+      rubric: [
+        "Measures 8 objects to the nearest quarter inch",
+        "Draws a line plot with a labeled scale and one X per object",
+        "Correctly finds the difference and the sum of two lengths",
+      ],
+    },
+  },
+
+  // 8. Tenths, hundredths and decimals
+  {
+    id: "math-4.decimals",
+    title: "Tenths, Hundredths and Decimals",
+    minutes: 30,
+    stage: "grammar",
+    standards: ["4.NF.C.5", "4.NF.C.6", "4.NF.C.7", "4.MD.A.2"],
+    read: [
+      "Money is a great way to understand tenths and hundredths. A dime is one tenth of a dollar, because 10 dimes make a dollar. A penny is one hundredth of a dollar, because 100 pennies make a dollar. One dime is worth the same as 10 pennies, so 1/10 = 10/100.",
+      "Any number of tenths can be changed to hundredths by multiplying the top and bottom by 10. So 3/10 = 30/100, just as 3 dimes are worth 30 pennies. This lets us add tenths and hundredths: 3/10 + 45/100 = 30/100 + 45/100 = 75/100.",
+      "Fractions with a denominator of 10 or 100 can be written as decimals. The decimal point separates whole numbers from parts of a whole. The first place to the right of the point is tenths. The second place is hundredths. So 7/10 = 0.7 and 62/100 = 0.62. Read 0.62 as 'sixty-two hundredths'. A mixed number works too: 3 and 5 tenths is 3.5. With money, $2.75 means 2 dollars and 75 hundredths of a dollar.",
+      "Decimals have spots on the number line, just like fractions. 0.5 is halfway between 0 and 1. 0.75 is three quarters of the way.",
+      "To compare decimals, compare the same places, starting from the left. Which is greater, 0.5 or 0.45? It might look like 45 is bigger than 5, but 0.5 is 5 tenths, which is the same as 50 hundredths. And 50 hundredths is more than 45 hundredths, so 0.5 > 0.45. Writing 0.5 as 0.50 makes this easy to see. As with fractions, comparing only works when both decimals refer to the same whole.",
+      "Decimals are everywhere: prices, race times, rainfall and measurements. Once you understand tenths and hundredths, you can read them all.",
+    ].join("\n\n"),
+    keyIdeas: [
+      "A dime is 1/10 of a dollar and a penny is 1/100, so 1/10 = 10/100.",
+      "To add tenths and hundredths, change the tenths to hundredths first.",
+      "The first place after the decimal point is tenths; the second is hundredths: 62/100 = 0.62.",
+      "Compare decimals place by place from the left: 0.5 = 0.50 > 0.45.",
+    ],
+    hook: {
+      text: "At the general store in the railroad town, a canteen costs 2 dollars and 75 cents. Pip has 2 dollars, 6 dimes and 15 pennies. Can Pip buy it? Coins are secretly fractions! A dime is one tenth of a dollar. A penny is one hundredth. Let's figure it out together!",
+    },
+    teach: [
+      {
+        title: "Tenths and Hundredths",
+        teach:
+          "Ten dimes make a dollar, so one dime is one tenth of a dollar. One hundred pennies make a dollar, so one penny is one hundredth. A dime is worth 10 pennies. That means one tenth equals ten hundredths. To change tenths to hundredths, multiply the top and bottom by 10. Three tenths is thirty hundredths, just like 3 dimes are worth 30 pennies. Now we can add! Pip's 6 dimes are sixty hundredths. Add 15 pennies, which is fifteen hundredths. That is seventy-five hundredths. With 2 dollars, Pip has exactly enough for the canteen!",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "1 dime", back: "1/10 of a dollar = 10/100 of a dollar" },
+            { front: "1 penny", back: "1/100 of a dollar" },
+            { front: "3/10", back: "= 30/100, like 3 dimes = 30 pennies" },
+            { front: "6/10 + 15/100", back: "= 60/100 + 15/100 = 75/100" },
+          ],
+        },
+        probe: {
+          type: "cloze",
+          text: "4/10 = {0}/100. So 4/10 + 25/100 = {1}/100.",
+          blanks: [{ answers: ["40"] }, { answers: ["65"] }],
+          hint: "Change tenths to hundredths by multiplying the top and bottom by 10. Then add the hundredths.",
+          mistakes: [
+            { match: "29", coach: "Change the 4 tenths to 40 hundredths first. Then 40 + 25 = 65." },
+            { match: "4", coach: "4 tenths is the same as 4 dimes, which is 40 pennies: 40/100." },
+          ],
+          seconds: 45,
+        },
+        think: {
+          q: "Which equals 7/10?",
+          choices: ["7/100", "70/100", "17/100"],
+          answer: 1,
+          why: "Multiply the top and bottom by 10: 70/100.",
+          hints: [
+            "7/100 is only 7 pennies. 7 dimes is worth 70 pennies.",
+            "",
+            "Multiply both numbers by 10. 7 × 10 = 70.",
+          ],
+        },
+        approaches: {
+          analogy: "Tenths and hundredths are like dimes and pennies. You can always trade 1 dime for 10 pennies without changing how much money you have.",
+          example: "2/10 + 35/100: 2 dimes is 20 pennies. 20/100 + 35/100 = 55/100, or 55 cents.",
+          simpler: {
+            q: "How many pennies are worth the same as 1 dime?",
+            choices: ["10", "100", "1"],
+            answer: 0,
+            why: "1 dime = 10 cents = 10 pennies.",
+            hints: ["", "100 pennies make a whole dollar, not a dime.", "A dime is worth more than one penny."],
+          },
+        },
+      },
+      {
+        title: "Writing Decimals",
+        teach:
+          "Fractions with 10 or 100 on the bottom have a shortcut: decimals. A decimal point separates the whole numbers from the parts. The first place after the point is tenths. The second place is hundredths. Seven tenths is written as zero, point, seven. Sixty-two hundredths is zero, point, six, two. Watch out for seven hundredths: it needs a zero in the tenths place, so it is zero, point, zero, seven. Prices use decimals too. Two dollars and 75 cents means 2 wholes and 75 hundredths of a dollar.",
+        visual: {
+          type: "hotspots",
+          title: "Place value with decimals",
+          center: "3.62",
+          spots: [
+            { label: "Ones", icon: "3️⃣", detail: "3 wholes" },
+            { label: "Decimal point", icon: "🔴", detail: "Separates wholes from parts of a whole" },
+            { label: "Tenths", icon: "6️⃣", detail: "6 tenths, like 6 dimes" },
+            { label: "Hundredths", icon: "2️⃣", detail: "2 hundredths, like 2 pennies" },
+          ],
+        },
+        probe: {
+          type: "match",
+          prompt: "Match each fraction to its decimal.",
+          pairs: [
+            { left: "7/10", right: "0.7" },
+            { left: "7/100", right: "0.07" },
+            { left: "17/100", right: "0.17" },
+            { left: "1 7/10", right: "1.7" },
+          ],
+          hint: "Tenths use one place after the point. Hundredths use two places.",
+          seconds: 50,
+        },
+        think: {
+          q: "How do you write 9/100 as a decimal?",
+          choices: ["0.9", "0.09", "9.0"],
+          answer: 1,
+          why: "9 hundredths: 0 tenths and 9 hundredths, so 0.09.",
+          hints: [
+            "0.9 is 9 tenths. We need hundredths, so the 9 goes in the second place.",
+            "",
+            "9.0 is nine wholes. 9/100 is much less than one.",
+          ],
+        },
+        approaches: {
+          analogy: "Writing a decimal is like writing a price. $0.62 is 62 cents, and 62 cents is 62 hundredths of a dollar.",
+          example: "45/100 = 0.45 (4 tenths and 5 hundredths). 5/10 = 0.5. 3 and 8/100 = 3.08.",
+          simpler: {
+            q: "How do you write 3/10 as a decimal?",
+            choices: ["0.3", "3.10", "0.03"],
+            answer: 0,
+            why: "3 tenths goes in the first place after the point.",
+            hints: ["", "3.10 means 3 wholes and 10 hundredths. That's much too big.", "0.03 is 3 hundredths, which is smaller than 3 tenths."],
+          },
+        },
+      },
+      {
+        title: "Decimals on a Number Line",
+        teach:
+          "Decimals live on the number line, just like fractions. Split the space from 0 to 1 into 10 equal jumps. Each jump is one tenth. Three tenths is 3 jumps from zero. Five tenths is right in the middle, the same as one half. Now split each tenth into 10 tiny jumps. Each tiny jump is one hundredth. Seventy-five hundredths is three quarters of the way to 1. Forty-eight hundredths is just a little less than one half, so it sits just before the middle.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "0.3", back: "3 tenths: 3 big jumps from 0" },
+            { front: "0.5", back: "5 tenths: right in the middle, the same as 1/2" },
+            { front: "0.48", back: "48 hundredths: just before the middle" },
+            { front: "0.75", back: "75 hundredths: three quarters of the way to 1" },
+          ],
+        },
+        probe: {
+          type: "place",
+          prompt: "Drag each decimal to its spot on the number line from 0 to 1.",
+          min: 0,
+          max: 1,
+          step: 0.01,
+          tolerance: 0.03,
+          items: [
+            { label: "0.3", value: 0.3 },
+            { label: "0.75", value: 0.75 },
+            { label: "0.48", value: 0.48 },
+            { label: "0.9", value: 0.9 },
+          ],
+          hint: "0.5 is in the middle. 0.48 is just before it. 0.9 is one tenth away from 1.",
+          mistakes: [{ match: "Put 0.9 near 0.09", coach: "0.9 is 9 tenths, almost a whole. It goes near 1." }],
+          seconds: 60,
+        },
+        think: {
+          q: "Where is 0.6 on a number line from 0 to 1?",
+          choices: ["Just past the middle", "Very close to 0", "Past 1"],
+          answer: 0,
+          why: "0.5 is the middle, and 0.6 is one tenth more.",
+          hints: [
+            "",
+            "0.6 is 6 tenths, more than half. 0.06 would be close to 0.",
+            "0.6 is less than one whole, so it is between 0 and 1.",
+          ],
+        },
+        approaches: {
+          analogy: "A number line from 0 to 1 is like a one-dollar ruler. Each tenth is a dime, and each hundredth is a penny along the way.",
+          example: "0.25 is 25 hundredths, the same as 1/4, a quarter of the way from 0 to 1. A quarter coin is $0.25.",
+          simpler: {
+            q: "Which decimal is the same as 1/2?",
+            choices: ["0.2", "0.12", "0.5"],
+            answer: 2,
+            why: "5 tenths is half of 10 tenths.",
+            hints: ["0.2 is only 2 tenths, less than half.", "0.12 is 12 hundredths, much less than half.", ""],
+          },
+        },
+      },
+      {
+        title: "Comparing Decimals",
+        teach:
+          "Which is greater: five tenths or forty-five hundredths? Many people think 45 looks bigger than 5. But look at the places! Five tenths is the same as fifty hundredths. Fifty hundredths is more than forty-five hundredths. So five tenths is greater. A smart trick is to write both with two places. Add a zero to make five tenths into fifty hundredths. Then compare like whole numbers: 50 beats 45. Always compare from the left: tenths first, then hundredths. And both decimals must be parts of the same whole.",
+        visual: {
+          type: "compare",
+          left: { title: "0.5", points: ["5 tenths", "= 0.50", "= 50 hundredths", "Greater"] },
+          right: { title: "0.45", points: ["4 tenths 5 hundredths", "= 45 hundredths", "Less"] },
+        },
+        probe: {
+          type: "sequence",
+          prompt: "Put these decimals in order from least to greatest.",
+          steps: ["0.09", "0.3", "0.45", "0.5", "0.62"],
+          hint: "Write each one with two places: 0.30, 0.50. Then compare the hundredths.",
+          mistakes: [{ match: "0.09 placed after 0.5", coach: "0.09 is only 9 hundredths, the smallest of all. It goes first." }],
+          seconds: 50,
+        },
+        think: {
+          q: "Which is true?",
+          choices: ["0.8 < 0.75", "0.8 > 0.75", "0.8 = 0.75"],
+          answer: 1,
+          why: "0.8 = 0.80, and 80 hundredths is more than 75 hundredths.",
+          hints: [
+            "Write 0.8 as 0.80. Is 80 hundredths less than 75 hundredths?",
+            "",
+            "0.80 and 0.75 are different amounts.",
+          ],
+        },
+        approaches: {
+          analogy: "Comparing decimals is like comparing prices. $0.50 is more than $0.45, even though 45 has more digits than 5. Writing both with cents makes it clear.",
+          example: "Compare 0.36 and 0.4. Write 0.4 as 0.40. 40 hundredths > 36 hundredths, so 0.4 > 0.36.",
+          simpler: {
+            q: "Which is more money: 50 cents or 45 cents?",
+            choices: ["50 cents", "45 cents", "They are the same"],
+            answer: 0,
+            why: "50 is more than 45.",
+            hints: ["", "45 cents is 5 cents less than 50 cents.", "50 cents and 45 cents are different amounts."],
+          },
+        },
+      },
+    ],
+    activity: {
+      type: "sort",
+      prompt: "Sort each decimal: less than or more than one half (0.5)?",
+      buckets: ["Less than 0.5", "More than 0.5"],
+      items: [
+        { text: "0.09", bucket: 0 },
+        { text: "0.4", bucket: 0 },
+        { text: "0.38", bucket: 0 },
+        { text: "0.49", bucket: 0 },
+        { text: "0.6", bucket: 1 },
+        { text: "0.51", bucket: 1 },
+        { text: "0.7", bucket: 1 },
+        { text: "0.92", bucket: 1 },
+      ],
+    },
+    explain: {
+      prompt: "Explain why 0.5 is greater than 0.45, even though 45 is bigger than 5.",
+      keyPoints: [
+        "The first place after the point is tenths, the second is hundredths",
+        "0.5 is 5 tenths, which equals 50 hundredths",
+        "0.45 is 45 hundredths",
+        "50 hundredths is more than 45 hundredths",
+      ],
+    },
+    mastery: [
+      {
+        type: "place",
+        prompt: "Write each fraction as a decimal in your head, then drag it to its spot on the number line from 0 to 1.",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        tolerance: 0.03,
+        items: [
+          { label: "45/100", value: 0.45 },
+          { label: "8/10", value: 0.8 },
+          { label: "15/100", value: 0.15 },
+        ],
+        hint: "45/100 = 0.45, just before the middle. 8/10 = 0.8. 15/100 = 0.15.",
+        mistakes: [{ match: "Put 15/100 past the middle", coach: "15 hundredths is much less than half (50 hundredths). It goes near 0." }],
+        seconds: 50,
+      },
+      {
+        type: "cloze",
+        text: "Write >, < or =. 0.7 {0} 0.68. 0.3 {1} 0.30. 0.19 {2} 0.2.",
+        blanks: [{ answers: [">"] }, { answers: ["="] }, { answers: ["<"] }],
+        bank: [">", "<", "="],
+        hint: "Write each decimal with two places, then compare the hundredths.",
+        seconds: 50,
+      },
+      {
+        type: "number",
+        prompt: "At the general store, a canteen costs $2.75 and a hat costs $4.50. How much do they cost together, in dollars?",
+        answer: 7.25,
+        tolerance: 0.001,
+        unit: "dollars",
+        hint: "Add the dollars: 2 + 4 = 6. Add the cents: 75 + 50 = 125 cents, which is 1 dollar and 25 cents.",
+        mistakes: [{ match: "6.125", coach: "125 cents is 1 dollar and 25 cents. Regroup: $7.25." }],
+        seconds: 60,
+      },
+      {
+        type: "cloze",
+        text: "6/10 + 34/100 = {0}/100 + 34/100 = {1}/100, which is written as the decimal {2}.",
+        blanks: [{ answers: ["60"] }, { answers: ["94"] }, { answers: ["0.94", ".94"] }],
+        hint: "Change 6 tenths into hundredths first.",
+        mistakes: [{ match: "40", coach: "Change 6/10 to 60/100 before adding. 6 + 34 mixes tenths and hundredths." }],
+        seconds: 60,
+      },
+    ],
+    check: [
+      { q: "Which is equal to 0.8?", choices: ["8/100", "80/100", "8"], answer: 1, why: "0.8 is 8 tenths, which is 80 hundredths." },
+      { q: "What is 2/10 + 53/100?", choices: ["55/100", "73/100", "55/110"], answer: 1, why: "2/10 = 20/100, and 20/100 + 53/100 = 73/100." },
+      { q: "Which decimal is greatest?", choices: ["0.39", "0.4", "0.09"], answer: 1, why: "0.4 = 0.40, and 40 hundredths beats 39 and 9 hundredths." },
+      { q: "How is 3 and 6 hundredths written?", choices: ["3.6", "3.06", "36.0"], answer: 1, why: "6 hundredths goes in the second place after the point, with a 0 in the tenths place." },
+    ],
+    task: {
+      kind: "project",
+      prompt: "Collect 5 store receipts or price tags with a parent. Write each price as dollars plus a fraction of a dollar (for example, $3.49 = 3 and 49/100). Then put the prices in order from least to greatest and find the total of the two cheapest.",
+      rubric: [
+        "Writes each price correctly as a whole number and hundredths",
+        "Orders the prices correctly",
+        "Adds two prices correctly, regrouping cents into dollars when needed",
+      ],
+    },
+  },
+
+  // 9. Measurement conversions, word problems, area and perimeter
+  {
+    id: "math-4.measure",
+    title: "Measurement, Area and Perimeter",
+    minutes: 35,
+    stage: "rhetoric",
+    standards: ["4.MD.A.1", "4.MD.A.2", "4.MD.A.3"],
+    read: [
+      "Every measurement has a number and a unit. Big units and small units measure the same thing in different sizes. In the metric system, 1 kilometer (km) = 1,000 meters (m), and 1 meter = 100 centimeters (cm). For mass, 1 kilogram (kg) = 1,000 grams (g). For liquid volume, 1 liter (L) = 1,000 milliliters (mL). In the customary system used every day in the United States, 1 pound (lb) = 16 ounces (oz), 1 foot = 12 inches and 1 yard = 3 feet. For time, 1 hour = 60 minutes and 1 minute = 60 seconds.",
+      "To change a bigger unit into a smaller one, multiply. There are more of the small units, so the number gets bigger: 3 km = 3 × 1,000 = 3,000 m, and 5 lb = 5 × 16 = 80 oz. A two-column table helps you see the pattern: 1 foot is 12 inches, 2 feet is 24 inches, 3 feet is 36 inches.",
+      "Measurement shows up in many word problems: how long a trip takes, how much water is left, how far someone walked or how much something costs. A number line can help with time. If a train leaves at 9:45 and arrives at 11:20, jump 15 minutes to 10:00, then 1 hour to 11:00, then 20 minutes to 11:20. That is 1 hour and 35 minutes, or 95 minutes.",
+      "Perimeter is the distance around a shape. For a rectangle, add all four sides, or use the formula P = 2 × l + 2 × w, where l is the length and w is the width. A corral 30 meters long and 12 meters wide needs 2 × 30 + 2 × 12 = 84 meters of fence.",
+      "Area is the amount of flat space inside a shape, measured in square units. For a rectangle, A = l × w. The same corral covers 30 × 12 = 360 square meters. If you know the area and one side, divide to find the other side: a rectangle with an area of 48 square feet and a length of 8 feet has a width of 48 ÷ 8 = 6 feet.",
+    ].join("\n\n"),
+    keyIdeas: [
+      "Know the unit sizes: 1 km = 1,000 m, 1 kg = 1,000 g, 1 L = 1,000 mL, 1 lb = 16 oz, 1 hr = 60 min.",
+      "To change a bigger unit to a smaller one, multiply.",
+      "Perimeter is the distance around: P = 2 × l + 2 × w.",
+      "Area is the space inside, in square units: A = l × w.",
+    ],
+    hook: {
+      text: "The railroad town needs a corral for its horses. The ranchers want a rectangle 30 meters long and 12 meters wide. How much fence should they buy? And how much ground will the horses have to graze? Those are two very different questions. Let's figure it out together!",
+    },
+    teach: [
+      {
+        title: "Big Units and Small Units",
+        teach:
+          "Every measurement has a number and a unit. Big units and small units can measure the same thing. One kilometer is 1,000 meters. One meter is 100 centimeters. One kilogram is 1,000 grams. One liter is 1,000 milliliters. One pound is 16 ounces. One hour is 60 minutes, and one minute is 60 seconds. To change a bigger unit into a smaller one, multiply. You need more of the small units, so the number gets bigger. 3 kilometers is 3 times 1,000, or 3,000 meters. A two-column table shows the pattern clearly.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "1 km", back: "1,000 m (about a 12-minute walk)" },
+            { front: "1 m", back: "100 cm (about one big step)" },
+            { front: "1 kg", back: "1,000 g (about a big book)" },
+            { front: "1 L", back: "1,000 mL (a large water bottle)" },
+            { front: "1 lb", back: "16 oz" },
+            { front: "1 hour", back: "60 minutes = 3,600 seconds" },
+          ],
+        },
+        probe: {
+          type: "cloze",
+          text: "3 km = {0} m. 5 lb = {1} oz. 4 hours = {2} minutes. 2 L = {3} mL.",
+          blanks: [{ answers: ["3,000", "3000"] }, { answers: ["80"] }, { answers: ["240"] }, { answers: ["2,000", "2000"] }],
+          hint: "Multiply by how many small units fit in one big unit: 1,000 m, 16 oz, 60 minutes, 1,000 mL.",
+          mistakes: [
+            { match: "50", coach: "A pound is 16 ounces, not 10. 5 × 16 = 80." },
+            { match: "400", coach: "An hour is 60 minutes, not 100. 4 × 60 = 240." },
+          ],
+          seconds: 60,
+        },
+        think: {
+          q: "How many centimeters are in 6 meters?",
+          choices: ["60", "600", "6,000"],
+          answer: 1,
+          why: "1 m = 100 cm, so 6 m = 6 × 100 = 600 cm.",
+          hints: [
+            "A meter is 100 centimeters, not 10.",
+            "",
+            "That would be millimeters, or using 1,000. A meter is 100 centimeters.",
+          ],
+        },
+        approaches: {
+          analogy: "Changing units is like changing dollars to pennies. You have the same money, but you need a lot more pennies, so the number gets bigger.",
+          example: "Make a table for feet and inches: 1 ft = 12 in, 2 ft = 24 in, 3 ft = 36 in, 4 ft = 48 in. Each row adds 12.",
+          simpler: {
+            q: "Which is longer: 1 kilometer or 1 meter?",
+            choices: ["1 kilometer", "1 meter", "They are the same"],
+            answer: 0,
+            why: "1 kilometer is 1,000 meters.",
+            hints: ["", "A meter is about one big step. A kilometer is 1,000 of those steps.", "Kilo means 1,000, so a kilometer is 1,000 meters."],
+          },
+        },
+      },
+      {
+        title: "Measurement Word Problems",
+        teach:
+          "Measurement problems use all four operations. Here's a time problem. A train leaves at 9:45 and arrives at 11:20. How long is the trip? Use a number line and make friendly jumps. From 9:45, jump 15 minutes to 10:00. Then jump 1 hour to 11:00. Then jump 20 minutes to 11:20. Add the jumps: 1 hour and 35 minutes. That is 95 minutes. Here's a liquid problem. A canteen holds 2 liters. Pip drinks 750 milliliters. 2 liters is 2,000 milliliters, so 1,250 milliliters are left. Change to the same unit first!",
+        visual: {
+          type: "hotspots",
+          title: "Elapsed time: 9:45 to 11:20",
+          center: "1 hr 35 min",
+          spots: [
+            { label: "9:45 → 10:00", icon: "⏩", detail: "15 minutes" },
+            { label: "10:00 → 11:00", icon: "🕐", detail: "1 hour" },
+            { label: "11:00 → 11:20", icon: "⏩", detail: "20 minutes" },
+            { label: "Total", icon: "➕", detail: "1 hour 35 minutes = 95 minutes" },
+          ],
+        },
+        probe: {
+          type: "number",
+          prompt: "A water jug holds 3 liters. The trail crew pours out 1,400 milliliters. How many milliliters are left?",
+          answer: 1600,
+          unit: "mL",
+          hint: "Change 3 liters to milliliters first: 3 × 1,000.",
+          mistakes: [{ match: "1397", coach: "Liters and milliliters are different units. 3 L = 3,000 mL. Then 3,000 − 1,400." }],
+          seconds: 60,
+        },
+        think: {
+          q: "A hike starts at 1:30 and ends at 3:10. How long is it?",
+          choices: ["1 hour 40 minutes", "2 hours 20 minutes", "1 hour 80 minutes"],
+          answer: 0,
+          why: "1:30 to 3:00 is 1 hour 30 minutes, plus 10 minutes is 1 hour 40 minutes.",
+          hints: [
+            "",
+            "Count it on a number line: 1:30 to 2:30 is 1 hour, then 40 more minutes to 3:10.",
+            "Time doesn't go to 80 minutes. 60 minutes make an hour.",
+          ],
+        },
+        approaches: {
+          analogy: "Solving measurement problems is like cooking with a recipe in cups when your measuring tool is in spoons. First change to the same unit, then do the math.",
+          example: "A rope is 4 meters long. 150 cm is cut off. 4 m = 400 cm. 400 − 150 = 250 cm left.",
+          simpler: {
+            q: "How many minutes is it from 2:45 to 3:00?",
+            choices: ["15", "45", "55"],
+            answer: 0,
+            why: "45 + 15 = 60, so it is 15 minutes to the hour.",
+            hints: ["", "45 is where we start. Count up from 45 to 60.", "An hour has 60 minutes, not 100. Count from 45 to 60."],
+          },
+        },
+      },
+      {
+        title: "Perimeter: Around the Edge",
+        teach:
+          "Perimeter is the distance around the outside of a shape. Picture walking all the way around the corral. For a rectangle, add all four sides. The corral is 30 meters long and 12 meters wide. Two long sides are 30 plus 30, which is 60. Two short sides are 12 plus 12, which is 24. 60 plus 24 is 84 meters of fence. The formula is P equals 2 times length plus 2 times width. If you know the perimeter, you can work backward to find a missing side.",
+        visual: {
+          type: "hotspots",
+          title: "Corral: 30 m by 12 m",
+          center: "P = 84 m",
+          spots: [
+            { label: "Top", icon: "⬆️", detail: "30 m" },
+            { label: "Bottom", icon: "⬇️", detail: "30 m" },
+            { label: "Left", icon: "⬅️", detail: "12 m" },
+            { label: "Right", icon: "➡️", detail: "12 m" },
+            { label: "Formula", icon: "📐", detail: "P = 2 × 30 + 2 × 12 = 84 m" },
+          ],
+        },
+        probe: {
+          type: "number",
+          prompt: "A garden is 15 feet long and 8 feet wide. What is its perimeter?",
+          answer: 46,
+          unit: "feet",
+          hint: "P = 2 × length + 2 × width.",
+          mistakes: [
+            { match: "23", coach: "That's only one length and one width. A rectangle has four sides: double it." },
+            { match: "120", coach: "15 × 8 is the area. Perimeter adds the sides." },
+          ],
+          seconds: 50,
+        },
+        think: {
+          q: "A square has sides of 9 inches. What is its perimeter?",
+          choices: ["18 inches", "81 inches", "36 inches"],
+          answer: 2,
+          why: "A square has 4 equal sides: 4 × 9 = 36 inches.",
+          hints: [
+            "That's only two sides. A square has four.",
+            "9 × 9 is the area, the space inside.",
+            "",
+          ],
+        },
+        approaches: {
+          analogy: "Perimeter is like the frame around a picture or the fence around a yard. It only cares about the edge, not what's inside.",
+          example: "A rectangle has a perimeter of 40 cm and a length of 12 cm. The two lengths are 24 cm. 40 − 24 = 16 cm for the two widths, so each width is 8 cm.",
+          simpler: {
+            q: "What is 5 + 3 + 5 + 3?",
+            choices: ["16", "15", "8"],
+            answer: 0,
+            why: "5 + 5 = 10 and 3 + 3 = 6. 10 + 6 = 16.",
+            hints: ["", "Add carefully: 5 + 3 = 8, and 8 + 8 = 16.", "That's only two of the four sides."],
+          },
+        },
+      },
+      {
+        title: "Area: The Space Inside",
+        teach:
+          "Area is the flat space inside a shape. We measure it in square units, like square meters or square feet. Picture covering the corral with grass squares that are each 1 meter on a side. Each row has 30 squares, and there are 12 rows. That is 30 times 12, or 360 square meters. The formula is A equals length times width. You can work backward too. A rug has an area of 48 square feet and a length of 8 feet. What is its width? 48 divided by 8 is 6 feet.",
+        visual: {
+          type: "compare",
+          left: { title: "Perimeter", points: ["Distance around", "Add the sides", "P = 2 × l + 2 × w", "Units: m, ft", "Fence, frame, border"] },
+          right: { title: "Area", points: ["Space inside", "Multiply length × width", "A = l × w", "Units: square m, square ft", "Carpet, grass, paint"] },
+        },
+        probe: {
+          type: "cloze",
+          text: "A garden is 9 feet by 7 feet. Its area is {0} square feet. Another garden has an area of 56 square feet and a length of 8 feet. Its width is {1} feet.",
+          blanks: [{ answers: ["63"] }, { answers: ["7"] }],
+          hint: "Area = length × width. To find a missing side, divide the area by the side you know.",
+          mistakes: [
+            { match: "32", coach: "32 is the perimeter of the first garden. Area multiplies: 9 × 7." },
+            { match: "48", coach: "56 − 8 = 48, but we need 56 ÷ 8 to find the width." },
+          ],
+          seconds: 60,
+        },
+        think: {
+          q: "A room is 10 feet by 12 feet. How much carpet covers the floor?",
+          choices: ["44 square feet", "120 square feet", "22 square feet"],
+          answer: 1,
+          why: "Carpet covers the area: 10 × 12 = 120 square feet.",
+          hints: [
+            "44 is the perimeter, the distance around. Carpet covers the inside.",
+            "",
+            "Adding 10 + 12 doesn't find area. Multiply.",
+          ],
+        },
+        approaches: {
+          analogy: "Area is like counting the tiles on a kitchen floor. Instead of counting every tile, count one row and multiply by the number of rows.",
+          example: "A tabletop is 6 feet by 3 feet. A = 6 × 3 = 18 square feet. The perimeter is 6 + 3 + 6 + 3 = 18 feet. Same number, different meaning!",
+          simpler: {
+            q: "A rectangle has 4 rows of 5 squares. How many squares in all?",
+            choices: ["9", "20", "18"],
+            answer: 1,
+            why: "4 × 5 = 20 squares.",
+            hints: ["That adds 4 + 5. We have 4 whole rows of 5.", "", "18 is the perimeter of a 4 by 5 rectangle. Count all the squares inside."],
+          },
+        },
+      },
+    ],
+    activity: {
+      type: "sort",
+      prompt: "Does each job need perimeter or area?",
+      buckets: ["Perimeter (around the edge)", "Area (the space inside)"],
+      items: [
+        { text: "How much fence goes around a corral", bucket: 0 },
+        { text: "How much wood frames a picture", bucket: 0 },
+        { text: "How much ribbon trims the edge of a blanket", bucket: 0 },
+        { text: "How much carpet covers a floor", bucket: 1 },
+        { text: "How much paint covers a wall", bucket: 1 },
+        { text: "How much grass seed covers a lawn", bucket: 1 },
+      ],
+    },
+    explain: {
+      prompt: "The ranchers need fence for a corral 30 m long and 12 m wide, and they want to know how much ground the horses get. Explain how to find each answer.",
+      keyPoints: [
+        "Fence goes around the edge, so it is the perimeter",
+        "Perimeter is 2 × 30 + 2 × 12 = 84 meters",
+        "Ground for grazing is the area inside",
+        "Area is 30 × 12 = 360 square meters",
+      ],
+    },
+    mastery: [
+      {
+        type: "cloze",
+        text: "Finish the table. 1 ft = 12 in. 2 ft = {0} in. 5 ft = {1} in. 1 yard (3 ft) = {2} in.",
+        blanks: [{ answers: ["24"] }, { answers: ["60"] }, { answers: ["36"] }],
+        hint: "Each foot is 12 inches. Multiply the feet by 12.",
+        seconds: 50,
+      },
+      {
+        type: "number",
+        prompt: "A rectangular patio is 14 feet long and 9 feet wide. What is its area in square feet?",
+        answer: 126,
+        unit: "square feet",
+        hint: "A = length × width. Try 10 × 9 plus 4 × 9.",
+        mistakes: [{ match: "46", coach: "46 is the perimeter. Area multiplies: 14 × 9." }],
+        seconds: 60,
+      },
+      {
+        type: "number",
+        prompt: "A rectangle has a perimeter of 50 meters. Its length is 15 meters. What is its width?",
+        answer: 10,
+        unit: "meters",
+        hint: "The two lengths use 30 meters. The two widths share what is left.",
+        mistakes: [{ match: "20", coach: "50 − 30 = 20 is for both widths together. Each width is half of that." }],
+        seconds: 70,
+      },
+      {
+        type: "match",
+        prompt: "Match each thing to the best unit for measuring it.",
+        pairs: [
+          { left: "The length of a pencil", right: "centimeters" },
+          { left: "The distance between two towns", right: "kilometers" },
+          { left: "The water in a bathtub", right: "liters" },
+          { left: "The mass of a paper clip", right: "grams" },
+        ],
+        hint: "Small things need small units. Long distances need big units.",
+        seconds: 45,
+      },
+    ],
+    check: [
+      { q: "How many grams are in 4 kilograms?", choices: ["40", "400", "4,000"], answer: 2, why: "1 kg = 1,000 g, so 4 kg = 4,000 g." },
+      { q: "A movie starts at 6:50 and ends at 8:35. How long is it?", choices: ["1 hour 45 minutes", "2 hours 15 minutes", "1 hour 85 minutes"], answer: 0, why: "6:50 to 7:00 is 10 minutes, 7:00 to 8:00 is 1 hour, 8:00 to 8:35 is 35 minutes. Total: 1 hour 45 minutes." },
+      { q: "What is the perimeter of a rectangle 7 cm by 4 cm?", choices: ["28 cm", "22 cm", "11 cm"], answer: 1, why: "2 × 7 + 2 × 4 = 14 + 8 = 22 cm." },
+      { q: "A rug has an area of 24 square feet and a length of 6 feet. How wide is it?", choices: ["18 feet", "4 feet", "144 feet"], answer: 1, why: "24 ÷ 6 = 4 feet." },
+    ],
+    task: {
+      kind: "project",
+      prompt: "Measure a room, a table and a rug (or a garden bed) at home. Find the perimeter and the area of each one. Then figure out how many feet of ribbon would go around the table and how many square feet of paper would cover it.",
+      rubric: [
+        "Measures three real rectangles with correct units",
+        "Finds each perimeter correctly",
+        "Finds each area correctly in square units",
+        "Explains which answer is the ribbon and which is the paper",
+      ],
+    },
+  },
+
+  // 10. Angles, lines, shapes and symmetry
+  {
+    id: "math-4.angles",
+    title: "Angles, Lines, Shapes and Symmetry",
+    minutes: 35,
+    stage: "rhetoric",
+    standards: ["4.MD.C.5", "4.MD.C.6", "4.MD.C.7", "4.G.A.1", "4.G.A.2", "4.G.A.3"],
+    read: [
+      "Geometry begins with a few simple ideas. A point is an exact spot. A line goes on forever in both directions. A line segment is part of a line with two endpoints. A ray has one endpoint and goes on forever in one direction. When two rays share an endpoint, they make an angle. The shared endpoint is called the vertex.",
+      "Angles are measured in degrees by how far one ray turns from the other. A full turn around a circle is 360 degrees, so a one-degree angle turns through 1/360 of a circle. A quarter turn is 90 degrees, a right angle, like the corner of a book. An angle smaller than a right angle is acute. An angle between 90 and 180 degrees is obtuse. A straight angle is 180 degrees.",
+      "A protractor measures angles. Put its center point on the vertex. Line up the zero line with one ray. Then read the number where the other ray crosses the scale, starting from the side where that ray begins at 0. You can also use a protractor to draw an angle: draw a ray, mark the degrees, and draw the second ray from the vertex through your mark.",
+      "Angle measures add up. If a right angle is split into two angles and one is 35 degrees, the other is 90 − 35 = 55 degrees. Two angles that make a straight line add to 180 degrees.",
+      "Lines can be parallel, which means they never cross and stay the same distance apart, like railroad rails. Lines can be perpendicular, which means they cross to make right angles, like the rails and the wooden ties under them. We can sort shapes by these features. A rectangle has two pairs of parallel sides and four right angles. A right triangle has one right angle.",
+      "A shape has a line of symmetry if you can fold it along a line so the two halves match exactly. A square has 4 lines of symmetry, a rectangle that is not a square has 2, and an equilateral triangle has 3. Many things in nature, like leaves and butterflies, are close to symmetric.",
+    ].join("\n\n"),
+    keyIdeas: [
+      "An angle is two rays that share an endpoint, the vertex.",
+      "Angles are measured in degrees: a full turn is 360, a right angle is 90 and a straight angle is 180.",
+      "Angle measures add up, so you can find a missing angle by adding or subtracting.",
+      "Parallel lines never meet; perpendicular lines meet at right angles; a line of symmetry folds a shape into matching halves.",
+    ],
+    hook: {
+      text: "Look down at the railroad track in the canyon town. The two steel rails run side by side and never touch. The wooden ties cross them in perfect square corners. The track is full of geometry! Today we'll learn the names of these lines and how to measure the angles between them.",
+    },
+    teach: [
+      {
+        title: "Points, Lines, Rays and Angles",
+        teach:
+          "Geometry starts with simple ideas. A point is an exact spot. A line goes on forever in both directions. A line segment is a piece of a line with two endpoints, like one steel rail. A ray has one endpoint and goes on forever one way, like a beam from a flashlight. When two rays share an endpoint, they make an angle. The shared point is the vertex. Lines that never cross are parallel, like the two rails. Lines that cross to make square corners are perpendicular, like the rails and the ties.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "Point", back: "An exact spot, shown with a dot" },
+            { front: "Line", back: "Straight and goes on forever both ways ⟷" },
+            { front: "Line segment", back: "Part of a line with two endpoints" },
+            { front: "Ray", back: "One endpoint, goes on forever one way →" },
+            { front: "Parallel", back: "Never cross, always the same distance apart: like train rails" },
+            { front: "Perpendicular", back: "Cross to make right angles: like rails and ties" },
+          ],
+        },
+        probe: {
+          type: "match",
+          prompt: "Match each word to what it means.",
+          pairs: [
+            { left: "Ray", right: "One endpoint, goes on forever one way" },
+            { left: "Line segment", right: "Two endpoints" },
+            { left: "Vertex", right: "The shared endpoint of an angle" },
+            { left: "Parallel lines", right: "Never cross" },
+            { left: "Perpendicular lines", right: "Cross to make right angles" },
+          ],
+          hint: "Think of the railroad: rails are parallel, ties are perpendicular to the rails, and a flashlight beam is a ray.",
+          seconds: 60,
+        },
+        think: {
+          q: "What makes an angle?",
+          choices: ["Two rays that share an endpoint", "Two parallel lines", "One line segment"],
+          answer: 0,
+          why: "An angle is two rays with the same endpoint, the vertex.",
+          hints: [
+            "",
+            "Parallel lines never meet, so they can't make a corner.",
+            "One segment is just a straight piece. An angle needs two rays meeting.",
+          ],
+        },
+        approaches: {
+          analogy: "A pair of scissors makes an angle: the two blades are like rays, and the screw where they meet is the vertex.",
+          example: "The letter L is made of two perpendicular segments. The letter V is an angle with its vertex at the bottom. The two lines of an equals sign (=) are parallel.",
+          simpler: {
+            q: "How many endpoints does a ray have?",
+            choices: ["0", "1", "2"],
+            answer: 1,
+            why: "A ray starts at one endpoint and goes on forever.",
+            hints: ["A line has no endpoints. A ray starts somewhere.", "", "Two endpoints is a line segment."],
+          },
+        },
+      },
+      {
+        title: "Measuring Angles in Degrees",
+        teach:
+          "Angles are measured by how far one ray turns away from the other. We use degrees. A full turn all the way around a circle is 360 degrees. So a one-degree angle is a tiny turn, one out of 360. A quarter turn is 90 degrees. That's a right angle, like the corner of a book. Smaller than a right angle is acute. Between 90 and 180 degrees is obtuse. A straight angle is 180 degrees. To measure, put the protractor's center on the vertex. Line up zero with one ray, and read where the other ray crosses.",
+        visual: {
+          type: "hotspots",
+          title: "Kinds of angles",
+          center: "Degrees",
+          spots: [
+            { label: "Acute", icon: "📐", detail: "Less than 90 degrees, like a slice of pizza tip" },
+            { label: "Right", icon: "⬛", detail: "Exactly 90 degrees, a square corner" },
+            { label: "Obtuse", icon: "📖", detail: "More than 90 but less than 180, like a book opened wide" },
+            { label: "Straight", icon: "➖", detail: "Exactly 180 degrees, a straight line" },
+            { label: "Full turn", icon: "⭕", detail: "360 degrees all the way around" },
+            { label: "Protractor", icon: "🧭", detail: "Center on the vertex, zero on one ray, read the other ray" },
+          ],
+        },
+        probe: {
+          type: "sort",
+          prompt: "Sort each angle by its size.",
+          buckets: ["Acute", "Right", "Obtuse"],
+          items: [
+            { text: "35°", bucket: 0 },
+            { text: "89°", bucket: 0 },
+            { text: "15°", bucket: 0 },
+            { text: "90°", bucket: 1 },
+            { text: "120°", bucket: 2 },
+            { text: "170°", bucket: 2 },
+            { text: "91°", bucket: 2 },
+          ],
+          hint: "Compare each angle to 90 degrees. Less is acute, exactly 90 is right, more (up to 180) is obtuse.",
+          mistakes: [{ match: "89° sorted as right", coach: "89 is close, but a right angle is exactly 90. 89 is acute." }],
+          seconds: 45,
+        },
+        think: {
+          q: "How many degrees is a quarter turn?",
+          choices: ["90", "180", "45"],
+          answer: 0,
+          why: "A full turn is 360 degrees. One quarter of 360 is 90.",
+          hints: [
+            "",
+            "180 degrees is a half turn, a straight line.",
+            "45 degrees is only half of a quarter turn.",
+          ],
+        },
+        approaches: {
+          analogy: "Think of a clock. The hands at 3:00 make a right angle, a quarter of the way around. At 6:00 they make a straight angle, half of the full 360-degree circle.",
+          example: "Measure an angle: center the protractor on the vertex, line up 0 with the bottom ray, follow that same scale up to where the other ray crosses: 60. The angle is 60 degrees, which is acute.",
+          simpler: {
+            q: "Is a 150-degree angle bigger or smaller than a right angle?",
+            choices: ["Bigger", "Smaller", "The same"],
+            answer: 0,
+            why: "150 is more than 90.",
+            hints: ["", "A right angle is 90 degrees, and 150 is more than 90.", "A right angle is exactly 90 degrees."],
+          },
+        },
+      },
+      {
+        title: "Adding Angles",
+        teach:
+          "Angle measures add up. If you split an angle into smaller angles, the parts add up to the whole. A right angle is 90 degrees. If a ray splits it into two parts and one part is 35 degrees, the other must be 90 minus 35, which is 55 degrees. Two angles that sit side by side along a straight line add up to 180 degrees. If one is 130 degrees, the other is 50. Write an equation with a letter for the missing angle, like 35 plus a equals 90, and solve it.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "Right angle split in two", back: "35° + a = 90°, so a = 55°" },
+            { front: "Straight line split in two", back: "130° + b = 180°, so b = 50°" },
+            { front: "Three angles in a straight line", back: "40° + 60° + c = 180°, so c = 80°" },
+          ],
+        },
+        probe: {
+          type: "number",
+          prompt: "A right angle is split into two angles. One is 28°. What is the other?",
+          answer: 62,
+          unit: "degrees",
+          hint: "The two parts add up to 90 degrees. Subtract: 90 − 28.",
+          mistakes: [
+            { match: "152", coach: "A right angle is 90 degrees, not 180. Subtract from 90." },
+            { match: "118", coach: "The parts must add up to 90. Subtract, don't add." },
+          ],
+          seconds: 40,
+        },
+        think: {
+          q: "Two angles make a straight line. One is 110°. What is the other?",
+          choices: ["70°", "250°", "20°"],
+          answer: 0,
+          why: "A straight line is 180°. 180 − 110 = 70.",
+          hints: [
+            "",
+            "That adds them. The two together must make 180.",
+            "That would be the missing part of a right angle (90 − 70). A straight line is 180°.",
+          ],
+        },
+        approaches: {
+          analogy: "Adding angles is like cutting a pie: the slices around the center always add up to the whole pie, 360 degrees.",
+          example: "A 180° straight angle is split into 45°, 75° and an unknown angle. 45 + 75 = 120. 180 − 120 = 60°.",
+          simpler: {
+            q: "What is 90 − 40?",
+            choices: ["50", "130", "60"],
+            answer: 0,
+            why: "90 − 40 = 50.",
+            hints: ["", "That adds. We subtract.", "Count back 40 from 90: 80, 70, 60, 50."],
+          },
+        },
+      },
+      {
+        title: "Shapes and Symmetry",
+        teach:
+          "We can sort shapes by their lines and angles. A rectangle has two pairs of parallel sides and four right angles. A square does too, with all sides equal. A trapezoid has at least one pair of parallel sides. A right triangle has exactly one right angle. Shapes can also have symmetry. A line of symmetry folds a shape into two halves that match exactly. A square has 4 lines of symmetry. A rectangle that is not a square has 2. An equilateral triangle, with three equal sides, has 3. The letter Z has none!",
+        visual: {
+          type: "hotspots",
+          title: "Lines of symmetry",
+          center: "Fold and match",
+          spots: [
+            { label: "Square", icon: "🟥", detail: "4 lines: up-down, side-to-side and both diagonals" },
+            { label: "Rectangle", icon: "▬", detail: "2 lines: up-down and side-to-side (not the diagonals)" },
+            { label: "Equilateral triangle", icon: "🔺", detail: "3 lines, one from each corner to the middle of the opposite side" },
+            { label: "Heart", icon: "❤️", detail: "1 line, straight down the middle" },
+            { label: "Letter Z", icon: "💤", detail: "0 lines: no fold makes the halves match" },
+          ],
+        },
+        probe: {
+          type: "match",
+          prompt: "Match each shape to its number of lines of symmetry.",
+          pairs: [
+            { left: "Square", right: "4" },
+            { left: "Equilateral triangle", right: "3" },
+            { left: "Rectangle (not a square)", right: "2" },
+            { left: "Capital letter A", right: "1" },
+            { left: "Capital letter Z", right: "0" },
+          ],
+          hint: "Imagine folding each shape. Count every fold where the two halves match exactly.",
+          mistakes: [{ match: "Rectangle matched to 4", coach: "Fold a rectangle along a diagonal and the halves don't line up. A rectangle has only 2 lines of symmetry." }],
+          seconds: 60,
+        },
+        think: {
+          q: "Which shape always has four right angles and two pairs of parallel sides?",
+          choices: ["Trapezoid", "Rectangle", "Right triangle"],
+          answer: 1,
+          why: "A rectangle has two pairs of parallel sides and four right angles.",
+          hints: [
+            "A trapezoid only needs one pair of parallel sides and doesn't need right angles.",
+            "",
+            "A triangle has only three sides and only one right angle.",
+          ],
+        },
+        approaches: {
+          analogy: "A line of symmetry is like a mirror. If you hold a mirror on the line, the reflection completes the shape perfectly.",
+          example: "Fold a paper heart down the middle: the halves match, so that is a line of symmetry. Fold it side to side: the top and bottom don't match, so that is not.",
+          simpler: {
+            q: "If you fold a shape and the halves match exactly, the fold is a...",
+            choices: ["Line of symmetry", "Right angle", "Ray"],
+            answer: 0,
+            why: "A line of symmetry splits a shape into matching halves.",
+            hints: ["", "A right angle is a square corner, not a fold.", "A ray is part of a line with one endpoint."],
+          },
+        },
+      },
+    ],
+    activity: {
+      type: "highlight",
+      prompt: "Tap every sentence that is true.",
+      sentences: [
+        "A rectangle has four right angles.",
+        "A square's opposite sides are parallel.",
+        "Every triangle has a right angle.",
+        "A right triangle has one 90-degree angle.",
+        "Perpendicular lines never meet.",
+        "An obtuse angle is less than 90 degrees.",
+        "A trapezoid has at least one pair of parallel sides.",
+      ],
+      correct: [0, 1, 3, 6],
+    },
+    explain: {
+      prompt: "Explain how to use a protractor to measure an angle, and how you would find a missing angle when a right angle is split into two parts.",
+      keyPoints: [
+        "Put the center of the protractor on the vertex",
+        "Line up zero with one ray and read where the other ray crosses",
+        "A right angle is 90 degrees",
+        "Subtract the known part from 90 to find the missing angle",
+      ],
+    },
+    mastery: [
+      {
+        type: "number",
+        prompt: "Two angles make a straight line. One is 125°. What is the other?",
+        answer: 55,
+        unit: "degrees",
+        hint: "A straight angle is 180 degrees. Subtract: 180 − 125.",
+        mistakes: [{ match: "35", coach: "Check your subtraction: 180 − 125 = 55." }],
+        seconds: 40,
+      },
+      {
+        type: "cloze",
+        text: "A full turn is {0} degrees. A right angle is {1} degrees. A straight angle is {2} degrees.",
+        blanks: [{ answers: ["360"] }, { answers: ["90"] }, { answers: ["180"] }],
+        hint: "A right angle is a quarter turn and a straight angle is a half turn.",
+        seconds: 40,
+      },
+      {
+        type: "sort",
+        prompt: "Sort each shape.",
+        buckets: ["Has at least one right angle", "Has no right angles"],
+        items: [
+          { text: "Square", bucket: 0 },
+          { text: "Rectangle", bucket: 0 },
+          { text: "Right triangle", bucket: 0 },
+          { text: "Equilateral triangle", bucket: 1 },
+          { text: "Regular hexagon", bucket: 1 },
+          { text: "Rhombus that is not a square", bucket: 1 },
+        ],
+        hint: "Look for a square corner of exactly 90 degrees.",
+        seconds: 50,
+      },
+      {
+        type: "match",
+        prompt: "Match each angle to its type.",
+        pairs: [
+          { left: "45°", right: "Acute" },
+          { left: "90°", right: "Right" },
+          { left: "135°", right: "Obtuse" },
+          { left: "180°", right: "Straight" },
+        ],
+        hint: "Compare each angle to 90 degrees and 180 degrees.",
+        seconds: 40,
+      },
+    ],
+    check: [
+      { q: "What do you call lines that cross to make right angles?", choices: ["Parallel", "Rays", "Perpendicular"], answer: 2, why: "Perpendicular lines meet at right angles, like rails and ties." },
+      { q: "An angle measures 100°. What kind is it?", choices: ["Obtuse", "Acute", "Right"], answer: 0, why: "100 is between 90 and 180, so it is obtuse." },
+      { q: "A right angle is split into 50° and another angle. What is the other angle?", choices: ["130°", "40°", "50°"], answer: 1, why: "90 − 50 = 40." },
+      { q: "How many lines of symmetry does a square have?", choices: ["2", "1", "4"], answer: 2, why: "Up-down, side-to-side and both diagonals: 4 lines." },
+    ],
+    task: {
+      kind: "project",
+      prompt: "With a protractor and a parent, draw angles of 30°, 90° and 145°, and label each as acute, right or obtuse. Then go on a geometry hunt at home: find two examples each of parallel lines, perpendicular lines and objects with a line of symmetry.",
+      rubric: [
+        "Draws each angle within a few degrees of the target",
+        "Labels each angle with the right type",
+        "Finds two real examples of parallel lines, perpendicular lines and line symmetry",
+      ],
+    },
+  },
+];
+
+/** math-4: Grade 4 math, Common Core. */
+export const math4 = k5Course("math", 4, lessons);

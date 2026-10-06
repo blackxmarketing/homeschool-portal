@@ -47,8 +47,8 @@ function inputFor(courseIndex = 1, lessonIndex = 0): TutorInput {
 }
 
 describe("lessons become tutoring conversations", () => {
-  it("every lesson turns into short lines with something to do every few lines", () => {
-    for (const c of COURSES)
+  for (const c of COURSES)
+    it(`${c.id}: every lesson turns into short lines with something to do every few lines`, () => {
       for (const L of c.lessons) {
         if (!L.teach?.length) continue;
         const steps = buildSteps(inputFor(COURSES.indexOf(c), c.lessons.indexOf(L)));
@@ -64,7 +64,7 @@ describe("lessons become tutoring conversations", () => {
         L.teach.forEach((_, i) => expect(steps.some((s) => s.kind === "probe" && s.seg === i), `${L.id} part ${i + 1}`).toBe(true));
         expect(steps.some((s) => s.kind === "think"), `${L.id}: multiple choice`).toBe(false);
       }
-  });
+    });
 
   it("picks up where the kid left off", () => {
     const input = inputFor();

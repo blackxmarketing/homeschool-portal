@@ -1,0 +1,87 @@
+/* Treasure Grid: the Starpeak treasure map, the cube chest and the controls. */
+
+.tg { min-width: 0; }
+
+.story { display: flex; align-items: flex-start; gap: 8px; }
+.story p { margin: 0; flex: 1; min-width: 0; font-weight: 600; }
+.rules { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; font-family: ui-monospace, Consolas, monospace; font-size: 0.85rem; }
+.rules span { padding: 1px 8px; border-radius: 6px; background: #eef2ff; border: 1px solid #c7d2fe; }
+
+.stage { display: flex; justify-content: center; min-width: 0; }
+
+.board {
+  display: block;
+  width: 100%;
+  max-width: 440px;
+  height: auto;
+  border-radius: 12px;
+  border: 3px solid #1b1530;
+  background: #f6ebcb;
+  touch-action: manipulation;
+  user-select: none;
+}
+.tappable { cursor: crosshair; }
+.gridline { stroke: #8a7a55; stroke-width: 0.8; opacity: 0.55; }
+.axis { stroke: #1b1530; stroke-width: 2; }
+.tick { font-size: 10px; font-weight: 700; fill: #3a2f1c; }
+.axisLabel { font-size: 11px; font-weight: 800; fill: #2340ff; }
+.trail { fill: none; stroke: #2340ff; stroke-width: 2; stroke-dasharray: 5 3; }
+.dot { fill: #2340ff; stroke: #1b1530; stroke-width: 1.5; }
+.dotHot { fill: #f59e0b; stroke: #1b1530; stroke-width: 1.5; }
+.halo { fill: #fff3bf; stroke: #f59e0b; stroke-width: 2; opacity: 0.85; }
+.miss line { stroke: #c0392b; stroke-width: 2.5; stroke-linecap: round; }
+.sel { fill: rgba(245, 158, 11, 0.35); stroke: #f59e0b; stroke-width: 3; }
+
+.chestView {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 8px;
+  border-radius: 12px;
+  border: 3px solid #1b1530;
+  background: linear-gradient(180deg, #1d2a55 0 70%, #e9eef8 70%);
+}
+.chestView :global(svg) { max-width: 100%; height: auto; }
+.dimTags { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.tag { padding: 3px 10px; border-radius: 8px; background: #fff8dc; border: 2px solid #1b1530; font-weight: 800; font-size: 0.85rem; color: #1b1530; }
+.tagB { background: #dbe8ff; }
+
+.ask { margin: 0; }
+
+.pad {
+  display: grid;
+  grid-template-columns: repeat(3, 56px);
+  grid-template-rows: repeat(2, 48px);
+  gap: 4px;
+  justify-content: center;
+}
+.arrow { min-height: 48px; padding: 0; font-size: 1.2rem; touch-action: manipulation; }
+.up { grid-column: 2; grid-row: 1; }
+.left { grid-column: 1; grid-row: 2; }
+.down { grid-column: 2; grid-row: 2; }
+.right { grid-column: 3; grid-row: 2; }
+
+.pairForm { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.paren { font-size: 1.8rem; font-weight: 900; }
+.num {
+  width: 72px;
+  min-height: 48px;
+  font: inherit;
+  font-size: 1.3rem;
+  font-weight: 800;
+  text-align: center;
+  border-radius: 10px;
+  border: 3px solid #1b1530;
+  background: #fff;
+  color: #1b1530;
+}
+.unit { font-weight: 700; }
+
+.steppers { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.stepper { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.stepLabel { font-weight: 800; font-size: 0.85rem; }
+.stepRow { display: flex; align-items: center; gap: 4px; }
+.stepRow :global(.kbtn) { min-width: 44px; min-height: 44px; padding: 0; font-size: 1.3rem; }
+.stepVal { min-width: 28px; text-align: center; font-size: 1.4rem; }

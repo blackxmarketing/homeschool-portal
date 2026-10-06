@@ -1,0 +1,65 @@
+import type { Standard } from "./types";
+
+/**
+ * Standards for soc-3 (Grade 3 social studies): C3 Framework indicators for
+ * grades 3-5 (a guide), plus the usual grade 3 topics coded "SS.3.<n>",
+ * which every course must teach. The "story of your town and state" topics
+ * are written so they fit any state.
+ */
+export const soc3Standards: Standard[] = [
+  // Grade 3 topics (must be taught)
+  { code: "SS.3.1", text: "Name landforms and bodies of water (mountain, hill, valley, plain, plateau, island, peninsula, river, lake, ocean) and find them on a map.", required: true },
+  { code: "SS.3.2", text: "Use a map key, a compass rose with in-between directions and a map scale to read maps and measure distance.", required: true },
+  { code: "SS.3.3", text: "Explain that a region is an area with shared features, and describe the regions of the United States.", required: true },
+  { code: "SS.3.4", text: "Explain how water, land, climate and natural resources shape where people settle and the work they do.", required: true },
+  { code: "SS.3.5", text: "Describe how people adapt to and change their surroundings, like building bridges, dams, canals and farms.", required: true },
+  { code: "SS.3.6", text: "Explain scarcity: we can't have everything we want, so every choice has a cost, the next-best thing we give up.", required: true },
+  { code: "SS.3.7", text: "Tell producers from consumers, and name the natural, human and capital resources used to make goods and services.", required: true },
+  { code: "SS.3.8", text: "Explain why people specialize and trade, and how money makes trading easier than barter.", required: true },
+  { code: "SS.3.9", text: "Tell how a town or state began and changed over time, and put its events on a timeline.", required: true },
+  { code: "SS.3.10", text: "Tell primary sources from secondary sources and use old photos, maps and letters to learn about the past.", required: true },
+  { code: "SS.3.11", text: "Find your state and its capital, and name your state's symbols and what they stand for.", required: true },
+  { code: "SS.3.12", text: "Explain why we have government and its three levels: local, state and national.", required: true },
+  { code: "SS.3.13", text: "Name the three branches of government (legislative, executive, judicial) and the leaders of each in a town and a state.", required: true },
+  { code: "SS.3.14", text: "Explain the services local and state governments give and how taxes pay for them.", required: true },
+  { code: "SS.3.15", text: "Explain the rights and responsibilities of citizens and the civic virtues of a good citizen.", required: true },
+  { code: "SS.3.16", text: "Plan how citizens can work together to solve a community problem, like volunteering or writing a respectful letter to leaders.", required: true },
+
+  // C3 Framework, grades 3-5 (a guide)
+  { code: "D2.Civ.1.3-5", text: "Tell the jobs and powers of government leaders at different levels and branches of government.", required: false },
+  { code: "D2.Civ.2.3-5", text: "Explain how a free country depends on citizens taking part responsibly.", required: false },
+  { code: "D2.Civ.3.3-5", text: "Explain where rules and laws come from and why we have them.", required: false },
+  { code: "D2.Civ.4.3-5", text: "Explain how groups make rules that give people responsibilities and protect their freedoms.", required: false },
+  { code: "D2.Civ.5.3-5", text: "Explain how our governments are set up, including by the U.S. and state constitutions.", required: false },
+  { code: "D2.Civ.6.3-5", text: "Describe how people gain from working together in government, jobs, volunteer groups and families.", required: false },
+  { code: "D2.Civ.7.3-5", text: "Practice civic virtues like honesty, respect and fairness at school and at home.", required: false },
+  { code: "D2.Civ.8.3-5", text: "Name the core civic virtues and principles that guide our government and communities.", required: false },
+  { code: "D2.Civ.9.3-5", text: "Make decisions in a group by listening, discussing and taking turns.", required: false },
+  { code: "D2.Civ.11.3-5", text: "Compare ways of making decisions in a classroom, a club and a government.", required: false },
+  { code: "D2.Civ.12.3-5", text: "Explain how laws change a community and how people can change laws.", required: false },
+  { code: "D2.Civ.13.3-5", text: "Explain how leaders make plans to solve problems everyone shares.", required: false },
+  { code: "D2.Civ.14.3-5", text: "Give examples of ways people have improved their communities, past and present.", required: false },
+  { code: "D2.Eco.1.3-5", text: "Compare the benefits and costs of choices people make.", required: false },
+  { code: "D2.Eco.2.3-5", text: "Name rewards and penalties (incentives) that change the choices people make.", required: false },
+  { code: "D2.Eco.3.3-5", text: "Name the natural, human and capital resources used to make goods and services.", required: false },
+  { code: "D2.Eco.4.3-5", text: "Explain why people and businesses specialize and trade.", required: false },
+  { code: "D2.Eco.5.3-5", text: "Explain how money makes trading easier.", required: false },
+  { code: "D2.Eco.7.3-5", text: "Explain how profit encourages sellers.", required: false },
+  { code: "D2.Eco.10.3-5", text: "Explain how government pays for the goods and services it gives.", required: false },
+  { code: "D2.Eco.14.3-5", text: "Explain how trade makes people and countries depend on each other.", required: false },
+  { code: "D2.Geo.1.3-5", text: "Make maps of familiar and new places.", required: false },
+  { code: "D2.Geo.2.3-5", text: "Use maps and photos to explain how places and regions relate to their land and climate.", required: false },
+  { code: "D2.Geo.3.3-5", text: "Use maps of different scales to find where things are.", required: false },
+  { code: "D2.Geo.4.3-5", text: "Explain how people change and adapt to their surroundings.", required: false },
+  { code: "D2.Geo.5.3-5", text: "Explain how places change over time.", required: false },
+  { code: "D2.Geo.6.3-5", text: "Describe how land, water and climate affect where people live.", required: false },
+  { code: "D2.Geo.8.3-5", text: "Explain how where people settle relates to natural resources.", required: false },
+  { code: "D2.Geo.11.3-5", text: "Explain how the things we buy connect us to faraway places.", required: false },
+  { code: "D2.Geo.12.3-5", text: "Explain why land and climate are different in different regions.", required: false },
+  { code: "D2.His.1.3-5", text: "Make and use a timeline of related events.", required: false },
+  { code: "D2.His.2.3-5", text: "Compare life in the past with life today.", required: false },
+  { code: "D2.His.3.3-5", text: "Ask questions about people who shaped important changes in history.", required: false },
+  { code: "D2.His.9.3-5", text: "Explain how different kinds of sources tell us about the past.", required: false },
+  { code: "D2.His.10.3-5", text: "Compare what different sources say about the same past event.", required: false },
+  { code: "D2.His.14.3-5", text: "Explain likely causes and effects of past events.", required: false },
+];

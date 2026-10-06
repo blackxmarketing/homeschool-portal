@@ -104,8 +104,9 @@ export type Probe = (
   | { type: "place"; prompt: string; min: number; max: number; step: number; tolerance: number; items: { label: string; value: number }[] }
   /** Match each left item to its right partner (shown shuffled). */
   | { type: "match"; prompt: string; pairs: { left: string; right: string }[] }
-  /** Build a sentence/equation/argument by tapping tiles in order. `tiles` are in the correct order; `distractors` are extra tiles that don't belong. */
-  | { type: "build"; prompt: string; tiles: string[]; distractors?: string[] }
+  /** Build a sentence/equation/argument by tapping tiles in order. `tiles` are in the correct order; `distractors` are extra tiles that don't belong.
+   *  `also`: other orders of the same tiles that are just as right (e.g. ["1", "+", "4", "=", "5"] for 4 + 1 = 5). */
+  | { type: "build"; prompt: string; tiles: string[]; distractors?: string[]; also?: string[][] }
   /** Use a simulation to hit a goal (see lib/probes.ts for each goal):
    *  lever: make the push at most `maxPush` kg with a `load` kg load;
    *  profit: set the price so profit is at least `minProfit` (cost, fixed, units given);
@@ -206,6 +207,8 @@ export interface Lesson {
   mastery?: Probe[];
   check: CheckQuestion[];
   task?: Task;
+  /** Standards this lesson teaches (K-5): codes from src/content/standards/, e.g. "K.CC.A.1", "RF.1.2", "2-LS4-1". */
+  standards?: string[];
 }
 
 export interface Course {
@@ -220,5 +223,9 @@ export interface Course {
   teacher: { name: string; avatar: string; inspiredBy: string; voice: string };
   /** Which grades it's written for: "sprout" 4-5, "adventurer" 6-8 (the default), "strategist" 9-12. */
   band?: "sprout" | "adventurer" | "strategist";
+  /** K-5 courses: the grade it's written for (0 = kindergarten). These live in the grade's explore world. */
+  grade?: number;
+  /** An elective (Spanish...): parents can switch it off per kid. */
+  elective?: boolean;
   lessons: Lesson[];
 }

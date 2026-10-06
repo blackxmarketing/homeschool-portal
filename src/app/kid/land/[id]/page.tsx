@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { requireKid } from "@/lib/auth";
 import { coinsOf, heroOf, landQuests, miniGameProgress, worldProgress } from "@/lib/gameState";
-import { gamesForLand } from "@/lib/minigames";
+import { gamesForLand, levelsForKid } from "@/lib/minigames";
 import { bandFor, landById, type LandId } from "@/lib/pixel/world";
 import LandScreen from "@/components/pixel/LandScreen";
 
@@ -18,8 +18,8 @@ export default async function LandPage({ params }: { params: Promise<{ id: strin
   const quests = landQuests(kid.id, L.id as LandId);
   const pct = Math.round((worldProgress(kid.id)[L.id] ?? 0) * 100);
   const band = bandFor(kid.grade);
-  const games = gamesForLand(L.id as LandId).map((g) => {
-    const levels = g.levels(band);
+  const games = gamesForLand(L.id as LandId).filter((g) => levelsForKid(g, kid.grade).length > 0).map((g) => {
+    const levels = levelsForKid(g, kid.grade);
     const prog = miniGameProgress(kid.id, g.id);
     return { ...g, stars: levels.reduce((t, l) => t + (prog[l.id]?.stars ?? 0), 0), max: levels.length * 3 };
   });

@@ -11,13 +11,23 @@ export interface Hero {
 }
 
 export const SKINS = ["#f6d3b3", "#eebf98", "#d9a274", "#b97f52", "#8d5a37", "#5e3b24"];
-export const HAIR_COLORS = ["#2b1d14", "#5a3a22", "#9a5b2a", "#d8a23a", "#f2d27a", "#c0392b", "#e8e2d8", "#3b3b6d"];
-export const OUTFITS = ["#2340ff", "#e0453a", "#22a35a", "#f2a516", "#8e44ad", "#16a3b8", "#ec6aa0", "#3d4a5c"];
-export const HAIRS = ["short", "spiky", "long", "bun", "curly", "bob"] as const;
+export const HAIR_COLORS = ["#2b1d14", "#5a3a22", "#9a5b2a", "#d8a23a", "#f2d27a", "#c0392b", "#e8e2d8", "#3b3b6d",
+  // Unlocked in the K-5 worlds (lib/pixel/cosmetics.ts)
+  "#ff8fab", "#38d9a9", "#ced4da"];
+export const OUTFITS = ["#2340ff", "#e0453a", "#22a35a", "#f2a516", "#8e44ad", "#16a3b8", "#ec6aa0", "#3d4a5c",
+  // Unlocked in the K-5 worlds (lib/pixel/cosmetics.ts)
+  "#ffd43b", "#ff8fab", "#2b8a3e", "#c2255c", "#0ca678", "#ff922b", "#74c0fc", "#b197fc", "#c92a2a", "#e9c46a", "#1c2541", "#63e6be"];
+/** Colors and styles everyone starts with; the rest are unlocked. */
+export const STARTER_OUTFITS = 8;
+export const STARTER_HAIR_COLORS = 8;
+export const HAIRS = ["short", "spiky", "long", "bun", "curly", "bob", "braids", "ponytail", "swoop"] as const;
+export const STARTER_HAIRS: string[] = ["short", "spiky", "long", "bun", "curly", "bob"];
 export type HairStyle = (typeof HAIRS)[number];
-export const HATS = ["none", "cap", "bandana", "beanie", "wizard", "crown", "helmet", "explorer"] as const;
+export const HATS = ["none", "cap", "bandana", "beanie", "wizard", "crown", "helmet", "explorer",
+  "flower", "sunhat", "leafcrown", "acorn", "straw", "sailor", "aviator", "propeller", "cowboy", "miner", "earmuffs", "starcrown"] as const;
 export type HatId = (typeof HATS)[number];
-export const PETS = ["none", "cat", "dog", "fox", "owl", "bunny", "dragon"] as const;
+export const PETS = ["none", "cat", "dog", "fox", "owl", "bunny", "dragon",
+  "duckling", "lamb", "hedgehog", "squirrel", "frog", "turtle", "bluebird", "cloudpup", "lizard", "eagle", "penguin", "snowfox"] as const;
 export type PetId = (typeof PETS)[number];
 
 /** Free from the start; the rest come from the shop (Phase B). */
@@ -68,6 +78,16 @@ function drawHair(g: Grid, style: HairStyle, c: string) {
     case "bob":
       g.rect(4, 2, 8, 2, c).rect(3, 4, 2, 5, c).rect(11, 4, 2, 5, c).rect(5, 4, 6, 1, c);
       break;
+    case "braids":
+      g.rect(4, 2, 8, 2, c).rect(4, 4, 1, 2, c).rect(11, 4, 1, 2, c).rect(5, 4, 6, 1, c);
+      g.rect(3, 6, 1, 6, c).rect(12, 6, 1, 6, c).set(3, 8, d).set(3, 10, d).set(12, 8, d).set(12, 10, d).set(3, 12, "#ec6aa0").set(12, 12, "#ec6aa0");
+      break;
+    case "ponytail":
+      g.rect(4, 2, 8, 2, c).rect(4, 4, 1, 2, c).rect(11, 4, 1, 2, c).rect(5, 4, 4, 1, c).rect(12, 3, 2, 2, c).rect(13, 5, 2, 4, c).set(14, 8, d).set(12, 3, "#e0453a");
+      break;
+    case "swoop":
+      g.rect(4, 2, 8, 2, c).rect(4, 4, 1, 2, c).rect(11, 4, 1, 2, c).rect(4, 4, 5, 1, c).rect(3, 3, 2, 1, c).set(5, 1, c).set(6, 1, c).set(7, 1, d);
+      break;
   }
 }
 
@@ -93,6 +113,42 @@ function drawHat(g: Grid, hat: HatId, outfit: string) {
       break;
     case "explorer":
       g.rect(2, 2, 12, 1, "#a8743a").rect(4, 0, 8, 2, "#c8915a").rect(4, 1, 8, 1, "#7a4f22");
+      break;
+    case "flower":
+      g.rect(4, 2, 8, 1, "#2f9e44").rect(4, 1, 2, 1, "#ff8fab").rect(7, 1, 2, 1, "#ffd43b").rect(10, 1, 2, 1, "#ff8fab").set(8, 0, "#ffffff");
+      break;
+    case "sunhat":
+      g.rect(2, 3, 12, 1, "#e9c46a").rect(5, 1, 6, 2, "#f4d58d").rect(5, 2, 6, 1, "#ff8fab");
+      break;
+    case "leafcrown":
+      g.rect(4, 2, 8, 1, "#2b8a3e").set(5, 1, "#51cf66").set(8, 1, "#51cf66").set(11, 1, "#51cf66").set(4, 1, "#51cf66").set(9, 0, "#51cf66");
+      break;
+    case "acorn":
+      g.rect(4, 1, 8, 3, "#8b5a2b").rect(4, 1, 8, 1, "#a47148").set(6, 2, "#a47148").set(9, 2, "#a47148").set(8, 0, "#5c3d1e");
+      break;
+    case "straw":
+      g.rect(2, 3, 12, 1, "#e0b84f").rect(4, 1, 8, 2, "#f0cf6a").rect(4, 2, 8, 1, "#c92a2a");
+      break;
+    case "sailor":
+      g.rect(4, 1, 8, 2, "#ffffff").rect(4, 3, 8, 1, "#1c2541").set(8, 1, "#1c7ed6");
+      break;
+    case "aviator":
+      g.rect(4, 1, 8, 3, "#8b5a2b").rect(4, 1, 8, 1, "#a47148").rect(5, 3, 2, 1, "#74c0fc").rect(9, 3, 2, 1, "#74c0fc").rect(7, 3, 2, 1, "#5c3d1e");
+      break;
+    case "propeller":
+      g.rect(4, 1, 8, 3, "#e03131").rect(4, 2, 8, 1, "#ffd43b").rect(5, 0, 7, 1, "#1c7ed6").set(8, 0, "#ffffff");
+      break;
+    case "cowboy":
+      g.rect(2, 3, 12, 1, "#8b5a2b").rect(5, 0, 6, 3, "#a0522d").rect(5, 2, 6, 1, "#5c3d1e").set(7, 0, "#8b5a2b").set(8, 0, "#8b5a2b");
+      break;
+    case "miner":
+      g.rect(4, 1, 8, 3, "#ffd43b").rect(4, 3, 8, 1, "#e0a800").rect(7, 1, 2, 1, "#fff3bf").set(7, 2, "#ffffff");
+      break;
+    case "earmuffs":
+      g.rect(4, 1, 8, 1, "#adb5bd").rect(3, 2, 1, 2, "#adb5bd").rect(12, 2, 1, 2, "#adb5bd").rect(2, 4, 3, 3, "#ff8fab").rect(11, 4, 3, 3, "#ff8fab");
+      break;
+    case "starcrown":
+      g.rect(5, 1, 6, 2, "#74c0fc").set(5, 0, "#ffd43b").set(8, 0, "#ffd43b").set(10, 0, "#ffd43b").set(8, 1, "#ffffff").set(6, 2, "#ffffff");
       break;
     default:
       break;
@@ -153,6 +209,51 @@ export function petGrid(pet: PetId, frame = 0): Grid | null {
     case "bunny":
       body("#f4f1ec");
       g.rect(3, 0 + bob, 1, 3, "#f4f1ec").rect(6, 0 + bob, 1, 3, "#f4f1ec").set(4, 5 + bob, "#1b1530").set(6, 5 + bob, "#1b1530").set(5, 6 + bob, "#ec6aa0");
+      break;
+    case "duckling":
+      g.rect(2, 5 + bob, 6, 3, "#ffd43b").rect(5, 2 + bob, 3, 3, "#ffd43b").rect(8, 3 + bob, 2, 1, "#ff922b").set(6, 3 + bob, "#1b1530").set(2, 4 + bob, "#ffd43b");
+      break;
+    case "lamb":
+      body("#f1f3f5");
+      g.rect(2, 3 + bob, 6, 1, "#ffffff").rect(6, 3 + bob, 3, 3, "#495057").set(7, 4 + bob, "#ffffff").rect(3, 8 + bob, 1, 1, "#495057").rect(6, 8 + bob, 1, 1, "#495057");
+      break;
+    case "hedgehog":
+      body("#8b5a2b");
+      g.rect(2, 3 + bob, 5, 1, "#5c3d1e").set(1, 4 + bob, "#5c3d1e").set(3, 2 + bob, "#5c3d1e").set(5, 2 + bob, "#5c3d1e").rect(7, 5 + bob, 2, 2, "#e9c9a0").set(9, 6 + bob, "#1b1530").set(7, 5 + bob, "#1b1530");
+      break;
+    case "squirrel":
+      body("#c87533");
+      g.rect(0, 1 + bob, 2, 6, "#e8a15d").set(1, 0 + bob, "#e8a15d").set(5, 2 + bob, "#c87533").set(6, 5 + bob, "#1b1530").rect(4, 6 + bob, 3, 1, "#f2d2a9");
+      break;
+    case "frog":
+      body("#51cf66");
+      g.rect(2, 2 + bob, 2, 2, "#51cf66").rect(6, 2 + bob, 2, 2, "#51cf66").set(3, 2 + bob, "#1b1530").set(6, 2 + bob, "#1b1530").rect(3, 6 + bob, 4, 1, "#2b8a3e");
+      break;
+    case "turtle":
+      g.disc(4.5, 5.5 + bob, 3, "#2b8a3e").set(3, 4 + bob, "#94d82d").set(5, 6 + bob, "#94d82d").rect(8, 5 + bob, 2, 2, "#94d82d").set(9, 5 + bob, "#1b1530").rect(2, 8 + bob, 1, 1, "#94d82d").rect(6, 8 + bob, 1, 1, "#94d82d");
+      break;
+    case "bluebird":
+      body("#339af0");
+      g.rect(3, 6 + bob, 4, 2, "#ffa94d").set(8, 4 + bob, "#f2a516").set(6, 4 + bob, "#1b1530").rect(0, 5 + bob, 2, 1, "#1c7ed6");
+      break;
+    case "cloudpup":
+      body("#f1f3f5");
+      g.rect(1, 3 + bob, 1, 3, "#a5d8ff").rect(8, 3 + bob, 1, 3, "#a5d8ff").set(4, 5 + bob, "#1b1530").set(6, 5 + bob, "#1b1530").set(5, 6 + bob, "#74c0fc");
+      break;
+    case "lizard":
+      g.rect(2, 6 + bob, 6, 2, "#94d82d").rect(7, 5 + bob, 3, 2, "#94d82d").rect(0, 7 + bob, 2, 1, "#94d82d").set(8, 5 + bob, "#1b1530").set(3, 8 + bob, "#5c940d").set(6, 8 + bob, "#5c940d").set(4, 6 + bob, "#c0eb75");
+      break;
+    case "eagle":
+      body("#5c3d1e");
+      g.rect(4, 2 + bob, 4, 3, "#ffffff").set(8, 4 + bob, "#f2a516").set(6, 3 + bob, "#1b1530").rect(0, 4 + bob, 2, 3, "#5c3d1e").rect(8, 6 + bob, 2, 2, "#5c3d1e");
+      break;
+    case "penguin":
+      body("#212529");
+      g.rect(3, 5 + bob, 4, 3, "#f8f9fa").set(4, 4 + bob, "#f8f9fa").set(5, 4 + bob, "#1b1530").set(5, 5 + bob, "#ff922b").rect(3, 8 + bob, 1, 1, "#ff922b").rect(6, 8 + bob, 1, 1, "#ff922b");
+      break;
+    case "snowfox":
+      body("#f8f9fa");
+      g.set(2, 2 + bob, "#f8f9fa").set(7, 2 + bob, "#f8f9fa").set(4, 5 + bob, "#1b1530").set(6, 5 + bob, "#1b1530").set(5, 6 + bob, "#1b1530").rect(8, 6 + bob, 2, 2, "#e9ecef");
       break;
     case "dragon":
       body("#22a35a");

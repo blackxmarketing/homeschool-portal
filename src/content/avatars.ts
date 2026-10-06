@@ -31,6 +31,12 @@ export const AVATARS: Record<string, AvatarLook> = {
   money: { skin: "#f0c09a", hair: "long", hairColor: "#cfc7bd", glasses: true, outfit: "#2f5d3a", collar: "#ffffff", bg: "#e2f6e8", voice: "male", photo: "money", clips: true },
   business: { skin: "#e6b38e", hair: "short", hairColor: "#3b2a20", outfit: "#2340ff", collar: "#ffffff", bg: "#fff1d6", voice: "male", photo: "business", clips: true },
   leadership: { skin: "#d8a27a", hair: "curly", hairColor: "#3a2c22", beard: "full", hat: "captain", outfit: "#16325c", collar: "#f5d76e", bg: "#e3ecff", voice: "male", photo: "leadership", clips: true },
+  // Grades K-5 teachers (courses math-k, ela-2...)
+  math: { skin: '#f0c8a0', hair: 'curly', hairColor: '#3a2416', glasses: true, outfit: '#e8692a', collar: '#ffffff', bg: '#fff1d6', voice: 'male' },
+  ela: { skin: '#e2b08a', hair: 'short', hairColor: '#e8e2d8', beard: 'full', outfit: '#6b3fd4', collar: '#ffffff', bg: '#ece5ff', voice: 'male' },
+  sci: { skin: '#8d5a37', hair: 'short', hairColor: '#2b1d14', beard: 'mustache', outfit: '#22a35a', collar: '#ffffff', bg: '#e2f6e8', voice: 'male' },
+  soc: { skin: '#e3a985', hair: 'short', hairColor: '#9a5b2a', hat: 'captain', outfit: '#2f6fb0', collar: '#f5d76e', bg: '#dde9ff', voice: 'male' },
+  span: { skin: '#e9b996', hair: 'long', hairColor: '#2b1d14', outfit: '#f2a516', collar: '#ffffff', bg: '#fff6d6', voice: 'female' },
   // Math world teachers
   forge: { skin: "#c98b62", hair: "bald", hairColor: "#2b1d14", beard: "full", hat: "cap", outfit: "#b2452f", collar: "#ffffff", bg: "#ffe3d6", voice: "male", photo: "forge", clips: true },
   hypatia: { skin: "#e9b996", hair: "bun", hairColor: "#3a2416", outfit: "#2f6fb0", collar: "#ffffff", bg: "#dcf2ff", voice: "female", photo: "hypatia", clips: true },
@@ -45,7 +51,7 @@ export const AVATARS: Record<string, AvatarLook> = {
 export function avatarFor(key: string): AvatarLook {
   if (AVATARS[key]) return AVATARS[key];
   // Grade-band versions of a course ("science-45", "science-hs") keep the same teacher.
-  const base = key.replace(/-(45|hs)$/, "");
+  const base = key.replace(/-(45|hs|k|[0-5])$/, "");
   if (AVATARS[base]) return AVATARS[base];
   const looks = Object.values(AVATARS);
   const h = [...key].reduce((a, c) => a + c.charCodeAt(0), 0);

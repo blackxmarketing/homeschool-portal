@@ -1162,10 +1162,36 @@ function statusOf(row: LessonRow | undefined, unlocked: boolean): LessonStatus {
 
 /** Every course with each lesson's status. Lessons unlock in order. */
 /** Courses written for this kid's grade band (4-5, 6-8 or 9-12). */
+/** Electives a parent switched off for a kid (K-5 course subjects like "span"). */
+export function electivesOff(kidId: number): string[] {
+  const row = getDb().prepare("SELECT electives_off FROM kids WHERE id = ?").get(kidId) as { electives_off: string | null } | undefined;
+  try {
+    const v = JSON.parse(row?.electives_off ?? "[]");
+    return Array.isArray(v) ? v.filter((x) => typeof x === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+export function setElectivesOff(kidId: number, off: string[]): void {
+  getDb().prepare("UPDATE kids SET electives_off = ? WHERE id = ?").run(JSON.stringify(off), kidId);
+}
+
+/**
+ * The courses a kid can take. Grades K-5: their grade's courses and earlier
+ * grades' (their explore worlds), minus switched-off electives, plus the
+ * grades 4-5 band courses. Grades 6-12: their grade band's courses.
+ */
 function coursesForKid(kidId: number) {
   const grade = (getDb().prepare("SELECT grade FROM kids WHERE id = ?").get(kidId) as { grade: number } | undefined)?.grade ?? 7;
   const band = bandFor(grade);
-  return allCourses().filter((c) => (c.band ?? "adventurer") === band);
+  if (grade <= 5) {
+    const off = new Set(electivesOff(kidId));
+    return allCourses().filter((c) =>
+      c.grade !== undefined ? c.grade <= grade && !off.has(c.id.replace(/-(k|[0-5])$/, "")) : grade >= 4 && c.band === "sprout",
+    );
+  }
+  return allCourses().filter((c) => c.grade === undefined && (c.band ?? "adventurer") === band);
 }
 
 export function courseOverview(kidId: number) {

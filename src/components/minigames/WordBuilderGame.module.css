@@ -1,0 +1,110 @@
+/* Word Builder: picture, slots and letter tiles. */
+
+.wb { min-width: 0; }
+
+.stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 3px solid #1b1530;
+  background: linear-gradient(180deg, #dff1ff 0 70%, #bfe3a6 70%);
+  min-width: 0;
+}
+
+.owl { flex: none; }
+.cheer { animation: hop 0.5s ease-out 2; }
+@keyframes hop { 50% { transform: translateY(-8px); } }
+
+.picture {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 110px;
+  padding: 6px 14px;
+  border-radius: 14px;
+  border: 3px solid #1b1530;
+  background: #fff;
+  box-shadow: 0 4px 0 #1b1530;
+  color: #1b1530;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.picture:active { transform: translateY(3px); box-shadow: 0 1px 0 #1b1530; }
+.emoji { font-size: 3.6rem; line-height: 1.1; }
+.ear { font-size: 0.8rem; font-weight: 800; color: #2340ff; }
+
+.slots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+
+.slot, .tile {
+  min-width: 56px;
+  height: 60px;
+  padding: 0 8px;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 1.9rem;
+  font-weight: 900;
+  line-height: 1;
+  touch-action: manipulation;
+  box-sizing: border-box;
+}
+
+.slot {
+  border: 3px dashed #8a93b2;
+  background: #f4f6fe;
+  color: #1b1530;
+  cursor: pointer;
+}
+.slot:disabled { cursor: default; opacity: 1; }
+.filled { border-style: solid; border-color: #1b1530; background: #fff3bf; }
+.wrong { border-color: #e8590c; background: #ffe3dc; animation: shake 0.3s; }
+.right { border-color: #2f9e44; background: #d3f9d8; }
+.ghost { color: #b6bdd6; }
+@keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+.rest {
+  font-size: 1.9rem;
+  font-weight: 900;
+  color: #1b1530;
+  letter-spacing: 0.06em;
+}
+
+.bank {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #c98a52;
+  border: 3px solid #1b1530;
+}
+
+.tile {
+  border: 3px solid #1b1530;
+  background: #fffaf0;
+  color: #1b1530;
+  box-shadow: 0 4px 0 #1b1530;
+  cursor: pointer;
+}
+.tile:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 #1b1530; }
+.tile:disabled { opacity: 0.25; cursor: default; box-shadow: none; }
+
+@media (max-width: 400px) {
+  .slot, .tile { min-width: 56px; height: 56px; font-size: 1.6rem; }
+  .emoji { font-size: 3rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cheer, .wrong { animation: none; }
+}

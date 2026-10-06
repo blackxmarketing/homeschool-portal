@@ -1,0 +1,2128 @@
+import { k5Course } from "./base";
+
+/**
+ * math-k: Kindergarten math (Common Core), taught by Professor Pascal in
+ * Sunny Meadow. Everything is read aloud, so sentences are short and the
+ * pictures (emoji) do the work. See docs/WORLDS.md and ../types.ts.
+ */
+export const mathK = k5Course("math", 0, [
+  // 1. Counting objects: one number for each thing, the last number tells how many, sorting and counting
+  {
+    id: "math-k.how-many",
+    title: "How Many? Counting Things",
+    minutes: 15,
+    stage: "grammar",
+    standards: ["K.CC.B.4", "K.CC.B.5", "K.CC.A.3", "K.MD.B.3"],
+    read: [
+      "Hi, I am Professor Pascal. Let's count together! 🐥",
+      "When we count, we say one number for each thing. We touch each thing one time. We never skip one. We never count one twice.",
+      "The last number we say tells how many. Count three ducks: one, two, three. The last number is three, so there are 3 ducks. If the ducks move around, there are still 3.",
+      "Each new number is one more. 4 is one more than 3. 5 is one more than 4.",
+      "We can write numbers too. The numeral 5 means five things. The numeral 0 means none at all.",
+      "We can sort things into groups. Put the apples in one group and the bananas in another. Then count each group. Now we know which group has more!",
+    ].join("\n\n"),
+    keyIdeas: [
+      "Say one number for each thing you touch.",
+      "The last number you say tells how many.",
+      "Sort things into groups, then count each group.",
+    ],
+    hook: {
+      text: "Pip the firefly found a nest in Sunny Meadow. 🪺 There are eggs inside! How many eggs are there? Let's figure it out together!",
+    },
+    teach: [
+      {
+        title: "One Number for Each Thing",
+        teach:
+          "When we count, we touch each thing one time. We say one number for each touch. Look at these apples. 🍎🍎🍎🍎 Touch the first apple and say one. Touch the next one and say two. Then three. Then four. Do not skip an apple. Do not count an apple twice. Each new number is one more. Four is one more than three.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "🍎", back: "1" },
+            { front: "🍎🍎", back: "2" },
+            { front: "🍎🍎🍎", back: "3" },
+            { front: "🍎🍎🍎🍎", back: "4" },
+            { front: "🍎🍎🍎🍎🍎", back: "5" },
+          ],
+        },
+        probe: {
+          type: "number",
+          prompt: "Touch each duck and count. How many ducks? 🦆🦆🦆🦆🦆🦆",
+          answer: 6,
+          hint: "Touch each duck one time. Say one number for each duck.",
+          mistakes: [
+            { match: "5", coach: "So close! Did you skip one? Touch each duck as you count." },
+            { match: "7", coach: "Oops, one duck got counted twice. Touch each duck just one time." },
+          ],
+          seconds: 20,
+        },
+        think: {
+          q: "You count 🐸🐸🐸. What do you say?",
+          choices: ["1, 2, 3", "1, 3, 5", "1, 2, 3, 4"],
+          answer: 0,
+          why: "There are three frogs, so we say one number for each: 1, 2, 3.",
+          hints: [
+            "",
+            "That skips numbers. Say every number in order: 1, 2, 3.",
+            "That is one number too many. There are only 3 frogs to touch.",
+          ],
+        },
+        approaches: {
+          analogy: "Counting is like giving each thing a sticker. Every thing gets one sticker, never two, and nobody gets left out.",
+          example: "Count 🐞🐞🐞. Touch the first bug: one. Touch the next bug: two. Touch the last bug: three. There are 3 bugs.",
+          simpler: {
+            q: "How many suns? ☀️",
+            choices: ["1", "2"],
+            answer: 0,
+            why: "There is just one sun to touch.",
+            hints: ["", "Look again. There is only one sun to touch."],
+          },
+        },
+      },
+      {
+        title: "The Last Number Tells How Many",
+        teach:
+          "Count these chicks. 🐥🐥🐥🐥🐥 One, two, three, four, five. The last number you say is five. So there are 5 chicks! What if the chicks run around? There are still 5. Moving does not change how many. We can write the number, too. The numeral 5 means five things. The numeral 0 means none at all.",
+        visual: {
+          type: "sort",
+          prompt: "Count each group. Does it have 3 or 5?",
+          buckets: ["3", "5"],
+          items: [
+            { text: "🐥🐥🐥", bucket: 0 },
+            { text: "🌼🌼🌼🌼🌼", bucket: 1 },
+            { text: "🐞🐞🐞", bucket: 0 },
+            { text: "🍓🍓🍓🍓🍓", bucket: 1 },
+            { text: "🐮🐮🐮", bucket: 0 },
+            { text: "⭐⭐⭐⭐⭐", bucket: 1 },
+          ],
+        },
+        probe: {
+          type: "match",
+          prompt: "Count each group of pigs. Match it to its number.",
+          pairs: [
+            { left: "🐷🐷", right: "2" },
+            { left: "🐷🐷🐷🐷", right: "4" },
+            { left: "🐷🐷🐷🐷🐷🐷🐷", right: "7" },
+            { left: "🐷🐷🐷🐷🐷🐷🐷🐷🐷🐷", right: "10" },
+          ],
+          hint: "Count each group. The last number you say tells how many.",
+          seconds: 50,
+        },
+        think: {
+          q: "You count 🐑🐑🐑🐑: one, two, three, four. How many sheep?",
+          choices: ["1", "3", "4"],
+          answer: 2,
+          why: "The last number you said was four, so there are 4 sheep.",
+          hints: [
+            "One is the first number you said. The last number tells how many.",
+            "Three is not the last number you said. Count all the way to the end.",
+            "",
+          ],
+        },
+        approaches: {
+          analogy: "Counting is like climbing stairs. The step you stop on tells how high you went. The last number tells how many.",
+          example: "Count 🌸🌸🌸🌸🌸🌸: 1, 2, 3, 4, 5, 6. The last number is 6. So there are 6 flowers, and we write 6.",
+          simpler: {
+            q: "Count 🐶🐶. How many dogs?",
+            choices: ["2", "1"],
+            answer: 0,
+            why: "One, two. The last number is two.",
+            hints: ["", "Count them both: one, two. The last number is two."],
+          },
+        },
+      },
+      {
+        title: "Sort and Count",
+        teach:
+          "We can sort things into groups. Look at the fruit. 🍎🍌🍎🍌🍎 Put the apples in one group. Put the bananas in another group. Now count each group. There are 3 apples. There are 2 bananas. Three is more than two. So there are more apples! Sorting helps us count. It helps us see which group has the most.",
+        visual: {
+          type: "sort",
+          prompt: "Sort the things by color.",
+          buckets: ["Red 🔴", "Yellow 🟡"],
+          items: [
+            { text: "🍎", bucket: 0 },
+            { text: "🍌", bucket: 1 },
+            { text: "🍓", bucket: 0 },
+            { text: "🌽", bucket: 1 },
+            { text: "🍒", bucket: 0 },
+            { text: "🐥", bucket: 1 },
+          ],
+        },
+        probe: {
+          type: "sort",
+          prompt: "Sort the animals. Do they live on the farm or in the pond?",
+          buckets: ["Farm 🚜", "Pond 💧"],
+          items: [
+            { text: "🐮 cow", bucket: 0 },
+            { text: "🐷 pig", bucket: 0 },
+            { text: "🐔 hen", bucket: 0 },
+            { text: "🐴 horse", bucket: 0 },
+            { text: "🐸 frog", bucket: 1 },
+            { text: "🐟 fish", bucket: 1 },
+            { text: "🐢 turtle", bucket: 1 },
+          ],
+          hint: "Ask: does this animal live on the farm or in the water?",
+          mistakes: [{ match: "fish on the farm", coach: "A fish needs water to swim. It lives in the pond." }],
+          seconds: 45,
+        },
+        think: {
+          q: "There are 🍎🍎🍎 and 🍌🍌. Which group has more?",
+          choices: ["The bananas", "The apples", "They are the same"],
+          answer: 1,
+          why: "There are 3 apples and 2 bananas. Three is more than two.",
+          hints: [
+            "There are only 2 bananas. Count the apples too.",
+            "",
+            "Count each group. 3 and 2 are not the same.",
+          ],
+        },
+        approaches: {
+          analogy: "Sorting is like putting away toys. Blocks go in the block bin. Cars go in the car bin. Then it is easy to count each bin.",
+          example: "Sort 🔵🔴🔵🔵🔴. Blues go in one group: 3. Reds go in another group: 2. Three is more than two, so blue has more.",
+          simpler: {
+            q: "Which one is a fruit?",
+            choices: ["🚗 car", "🍌 banana", "🐶 dog"],
+            answer: 1,
+            why: "A banana is a fruit you can eat.",
+            hints: ["A car is not food. Look for something you can eat.", "", "A dog is a pet, not a fruit."],
+          },
+        },
+      },
+    ],
+    activity: {
+      type: "sequence",
+      prompt: "Put the groups in order, from fewest to most.",
+      steps: ["🐞", "🐞🐞", "🐞🐞🐞", "🐞🐞🐞🐞", "🐞🐞🐞🐞🐞"],
+    },
+    explain: {
+      prompt: "Tell me how you count to find how many. What does the last number tell you?",
+      keyPoints: ["Touch each thing one time", "Say one number for each thing", "The last number tells how many"],
+    },
+    mastery: [
+      {
+        type: "number",
+        prompt: "How many stars? ⭐⭐⭐⭐⭐⭐⭐⭐",
+        answer: 8,
+        hint: "Touch each star one time and count. The last number tells how many.",
+        mistakes: [
+          { match: "7", coach: "One star got skipped. Touch each one as you count." },
+          { match: "9", coach: "One star got counted twice. Touch each star just once." },
+        ],
+        seconds: 20,
+      },
+      {
+        type: "cloze",
+        text: "I count 🐸🐸🐸: one, two, {0}. There are {1} frogs.",
+        blanks: [{ answers: ["three"] }, { answers: ["3"] }],
+        bank: ["three", "four", "3", "5"],
+        hint: "Say one number for each frog. The last number tells how many.",
+        mistakes: [{ match: "four", coach: "There are only three frogs. Touch each one: one, two, three." }],
+        seconds: 30,
+      },
+      {
+        type: "sort",
+        prompt: "Count each group. Does it have 4 or 6?",
+        buckets: ["4", "6"],
+        items: [
+          { text: "🐝🐝🐝🐝", bucket: 0 },
+          { text: "🍐🍐🍐🍐🍐🍐", bucket: 1 },
+          { text: "🐌🐌🐌🐌", bucket: 0 },
+          { text: "🎈🎈🎈🎈🎈🎈", bucket: 1 },
+          { text: "🌻🌻🌻🌻", bucket: 0 },
+          { text: "🐣🐣🐣🐣🐣🐣", bucket: 1 },
+        ],
+        hint: "Count each group carefully. Touch each thing one time.",
+        seconds: 50,
+      },
+      {
+        type: "place",
+        prompt: "Put each number on the number line.",
+        min: 0,
+        max: 10,
+        step: 1,
+        tolerance: 0,
+        items: [
+          { label: "0 (none at all)", value: 0 },
+          { label: "3", value: 3 },
+          { label: "7", value: 7 },
+        ],
+        hint: "Start at 0 and count along the line: 0, 1, 2, 3...",
+        seconds: 40,
+      },
+    ],
+    check: [
+      {
+        q: "You count 🐱🐱🐱🐱🐱. How many cats?",
+        choices: ["4", "5", "6"],
+        answer: 1,
+        why: "One, two, three, four, five. The last number is five, so there are 5 cats.",
+      },
+      {
+        q: "What does the number 0 mean?",
+        choices: ["One thing", "Ten things", "None at all"],
+        answer: 2,
+        why: "Zero means there is nothing there at all.",
+      },
+      {
+        q: "When you count, how many times do you touch each thing?",
+        choices: ["One time", "Two times", "Zero times"],
+        answer: 0,
+        why: "We touch each thing one time and say one number for it.",
+      },
+      {
+        q: "What is one more than 4?",
+        choices: ["3", "5", "6"],
+        answer: 1,
+        why: "After 4 comes 5. Each new number is one more.",
+      },
+    ],
+    task: {
+      kind: "project",
+      prompt: "With a grown-up, count the spoons in your kitchen drawer. Touch each one as you count. Then sort them into big spoons and little spoons, and count each group.",
+      rubric: [
+        "Touched each spoon one time while counting",
+        "Said the last number to tell how many",
+        "Sorted the spoons into two groups and counted each one",
+        "Told which group had more",
+      ],
+    },
+  },
+
+  // 2. Comparing groups, numbers, length and weight
+  {
+    id: "math-k.compare",
+    title: "More, Less or the Same?",
+    minutes: 15,
+    stage: "logic",
+    standards: ["K.CC.C.6", "K.CC.C.7", "K.MD.A.1", "K.MD.A.2"],
+    read: [
+      "Let's compare! To compare means to look at two things and see how they are different.",
+      "We can compare groups. Line them up, one next to one. If one group has extras left over, that group has more. The other group has fewer, or less. If nothing is left over, the groups are the same. Same means equal.",
+      "We can compare numbers too. When we count, bigger numbers come later. 7 comes after 4, so 7 is more than 4.",
+      "We can compare how long or how heavy things are. A pencil is longer than a crayon. Stand them side by side, with the ends lined up. A watermelon is heavier than a grape. Hold one in each hand, and you can feel which is heavier. Length and weight are things we can measure.",
+    ].join("\n\n"),
+    keyIdeas: [
+      "Line up two groups to see which has more, less or the same.",
+      "Numbers that come later when we count are bigger.",
+      "We can compare how long, tall or heavy things are.",
+    ],
+    hook: {
+      text: "Two bunnies found carrots in the garden. 🐰🥕 One bunny has 3 carrots. The other bunny has 5. Who has more? Let's figure it out together!",
+    },
+    teach: [
+      {
+        title: "More, Fewer or the Same",
+        teach:
+          "Here are 🐰🐰🐰 and 🥕🥕🥕🥕🥕. Let's give each bunny one carrot. Line them up, one next to one. Look! Two carrots are left over. So there are more carrots than bunnies. There are fewer bunnies than carrots. If nothing is left over, the groups are the same. Same means equal. You can count each group, too. Five is more than three.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "More", back: "The group with extras left over. 🥕🥕" },
+            { front: "Fewer", back: "The group that runs out first." },
+            { front: "Same", back: "Nothing is left over. The groups are equal. 🟰" },
+          ],
+        },
+        probe: {
+          type: "sort",
+          prompt: "Look at each pair. Is it the same, or not the same?",
+          buckets: ["Same 🟰", "Not the same"],
+          items: [
+            { text: "🐶🐶 and 🦴🦴", bucket: 0 },
+            { text: "🐱🐱🐱 and 🐟🐟", bucket: 1 },
+            { text: "🐝🐝🐝🐝 and 🌻🌻🌻🌻", bucket: 0 },
+            { text: "🐵 and 🍌🍌🍌", bucket: 1 },
+            { text: "🐮🐮🐮 and 🪣🪣🪣", bucket: 0 },
+            { text: "🐔🐔🐔🐔🐔 and 🥚🥚🥚", bucket: 1 },
+          ],
+          hint: "Count each side. If the numbers match, they are the same.",
+          seconds: 50,
+        },
+        think: {
+          q: "🐸🐸🐸🐸 and 🍃🍃. Which group has more?",
+          choices: ["The leaves", "They are the same", "The frogs"],
+          answer: 2,
+          why: "There are 4 frogs and only 2 leaves. Two frogs have no leaf.",
+          hints: [
+            "There are only 2 leaves. Count the frogs too.",
+            "Count both groups. 4 and 2 are not the same.",
+            "",
+          ],
+        },
+        approaches: {
+          analogy: "Comparing groups is like musical chairs. Everyone grabs one chair. If kids are left standing, there are more kids than chairs.",
+          example: "🧁🧁🧁 and 🧒🧒. Give each child one cupcake. One cupcake is left over. So there are more cupcakes than children.",
+          simpler: {
+            q: "Which plate has more: 🍪🍪 or 🍪?",
+            choices: ["🍪", "🍪🍪"],
+            answer: 1,
+            why: "Two cookies is more than one cookie.",
+            hints: ["That plate has just one cookie. The other plate has two.", ""],
+          },
+        },
+      },
+      {
+        title: "Which Number Is Bigger?",
+        teach:
+          "We can compare numbers without any things. Just think about counting. 1, 2, 3, 4, 5, 6, 7, 8, 9, 10. Numbers that come later are bigger. 7 comes after 4. So 7 is more than 4. And 4 is less than 7. Look at a number line. Bigger numbers sit farther along. Smaller numbers sit closer to zero.",
+        visual: {
+          type: "sequence",
+          prompt: "Put the numbers in counting order.",
+          steps: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+        },
+        probe: {
+          type: "sort",
+          prompt: "Sort the numbers. Are they more than 5 or less than 5?",
+          buckets: ["More than 5", "Less than 5"],
+          items: [
+            { text: "7", bucket: 0 },
+            { text: "2", bucket: 1 },
+            { text: "9", bucket: 0 },
+            { text: "4", bucket: 1 },
+            { text: "1", bucket: 1 },
+            { text: "8", bucket: 0 },
+          ],
+          hint: "Count up from 1. Numbers you say before 5 are less. Numbers after 5 are more.",
+          seconds: 45,
+        },
+        think: {
+          q: "Which number is more?",
+          choices: ["3", "8", "6"],
+          answer: 1,
+          why: "When we count, 8 comes after 3 and after 6, so 8 is the most.",
+          hints: [
+            "3 comes early when we count. Look for a number that comes later.",
+            "",
+            "6 is more than 3, but 8 comes even later.",
+          ],
+        },
+        approaches: {
+          analogy: "Counting numbers are like stairs. Each step up is one more. The higher step is the bigger number.",
+          example: "Which is more, 6 or 9? Count: 6, 7, 8, 9. We reach 9 after 6. So 9 is more than 6.",
+          simpler: {
+            q: "Which comes later when we count: 2 or 5?",
+            choices: ["5", "2"],
+            answer: 0,
+            why: "We say 2 first, then 3, 4, 5. So 5 comes later.",
+            hints: ["", "2 comes right after 1. Keep counting: 3, 4, 5."],
+          },
+        },
+      },
+      {
+        title: "Longer, Taller, Heavier",
+        teach:
+          "We can compare things by how long they are. Put a pencil next to a crayon. Line up the ends. The pencil sticks out farther. So the pencil is longer. The crayon is shorter. We can compare how tall things are, too. A giraffe is taller than a pig. We can compare how heavy things are. Hold a rock and a feather. The rock is heavier. The feather is lighter.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "✏️ and 🖍️", back: "The pencil is longer. The crayon is shorter." },
+            { front: "🦒 and 🐷", back: "The giraffe is taller. The pig is shorter." },
+            { front: "🪨 and 🪶", back: "The rock is heavier. The feather is lighter." },
+          ],
+        },
+        probe: {
+          type: "match",
+          prompt: "Match each pair to the right word.",
+          pairs: [
+            { left: "✏️ next to 🖍️: the pencil is...", right: "longer" },
+            { left: "🦒 next to 🐷: the giraffe is...", right: "taller" },
+            { left: "🪨 next to 🪶: the rock is...", right: "heavier" },
+          ],
+          hint: "Longer is about length, taller is about height, and heavier is about weight.",
+          seconds: 40,
+        },
+        think: {
+          q: "A pencil and a crayon sit side by side. The ends are lined up. The pencil sticks out farther. Which is longer?",
+          choices: ["The crayon", "The pencil", "Neither one"],
+          answer: 1,
+          why: "The one that sticks out farther is longer.",
+          hints: [
+            "The crayon stops sooner, so it is shorter.",
+            "",
+            "One sticks out farther, so they are not the same length.",
+          ],
+        },
+        approaches: {
+          analogy: "Lining up the ends is like starting a race at the same line. The one that reaches farthest is the longest.",
+          example: "Put a spoon and a fork side by side. Line up the bottoms. If the fork reaches higher, the fork is longer and the spoon is shorter.",
+          simpler: {
+            q: "Which is heavier?",
+            choices: ["🪶 a feather", "🐘 an elephant"],
+            answer: 1,
+            why: "An elephant is very, very heavy.",
+            hints: ["A feather floats in the air. It is very light.", ""],
+          },
+        },
+      },
+    ],
+    activity: {
+      type: "sort",
+      prompt: "Look at each pair. Which side has more?",
+      buckets: ["Left side has more", "Right side has more"],
+      items: [
+        { text: "🍎🍎🍎 | 🍎", bucket: 0 },
+        { text: "🐟 | 🐟🐟🐟🐟", bucket: 1 },
+        { text: "⭐⭐⭐⭐⭐ | ⭐⭐", bucket: 0 },
+        { text: "🌸🌸 | 🌸🌸🌸", bucket: 1 },
+        { text: "7 | 3", bucket: 0 },
+        { text: "2 | 9", bucket: 1 },
+      ],
+    },
+    explain: {
+      prompt: "How can you tell which group has more? How can you tell which thing is longer?",
+      keyPoints: ["Line up the groups one to one", "The group with extras left over has more", "Line up the ends to see which is longer"],
+    },
+    mastery: [
+      {
+        type: "cloze",
+        text: "9 is {0} than 4. 2 is {1} than 6.",
+        blanks: [{ answers: ["more", "bigger", "greater"] }, { answers: ["less", "smaller"] }],
+        bank: ["more", "less", "longer"],
+        hint: "Count up. Numbers that come later are more. Numbers that come earlier are less.",
+        mistakes: [{ match: "longer", coach: "Longer is for things like pencils. For numbers, say more or less." }],
+        seconds: 35,
+      },
+      {
+        type: "sort",
+        prompt: "Sort them: heavy or light?",
+        buckets: ["Heavy 🏋️", "Light 🪶"],
+        items: [
+          { text: "🐘 elephant", bucket: 0 },
+          { text: "🚗 car", bucket: 0 },
+          { text: "🪨 big rock", bucket: 0 },
+          { text: "🪶 feather", bucket: 1 },
+          { text: "🍃 leaf", bucket: 1 },
+          { text: "🎈 balloon", bucket: 1 },
+        ],
+        hint: "Think: could you lift it with one finger? Then it is light.",
+        seconds: 40,
+      },
+      {
+        type: "number",
+        prompt: "Count each group: 🐞🐞🐞🐞🐞🐞🐞 and 🐜🐜🐜🐜. Type the bigger number.",
+        answer: 7,
+        hint: "Count the ladybugs. Count the ants. Which number comes later?",
+        mistakes: [{ match: "4", coach: "4 is how many ants. The ladybugs have more. Count them." }],
+        seconds: 30,
+      },
+      {
+        type: "sequence",
+        prompt: "Put the numbers in order from least to most.",
+        steps: ["2", "5", "8", "10"],
+        hint: "Count up from 1. The first number you say is the least.",
+        seconds: 30,
+      },
+    ],
+    check: [
+      {
+        q: "Which is more: 6 or 2?",
+        choices: ["2", "6", "They are the same"],
+        answer: 1,
+        why: "6 comes after 2 when we count, so 6 is more.",
+      },
+      {
+        q: "🐱🐱🐱 and 🐟🐟🐟. Each cat gets one fish. Nothing is left over. What are the groups?",
+        choices: ["The same", "Different", "Empty"],
+        answer: 0,
+        why: "Nothing is left over, so the groups are the same, or equal.",
+      },
+      {
+        q: "Which is heaviest?",
+        choices: ["A leaf", "A feather", "A bowling ball"],
+        answer: 2,
+        why: "A bowling ball is much heavier than a leaf or a feather.",
+      },
+      {
+        q: "Which is less: 8 or 5?",
+        choices: ["8", "They are equal", "5"],
+        answer: 2,
+        why: "5 comes before 8 when we count, so 5 is less.",
+      },
+    ],
+    task: {
+      kind: "project",
+      prompt: "With a grown-up, find two things in your home. Line up their ends. Which is longer? Then hold one in each hand. Which is heavier?",
+      rubric: [
+        "Lined up the ends to compare length",
+        "Said which thing is longer and which is shorter",
+        "Held both things to compare weight",
+        "Said which thing is heavier and which is lighter",
+      ],
+    },
+  },
+
+  // 3. Shapes: naming, positions, flat and solid, sides and corners, building shapes
+  {
+    id: "math-k.shapes",
+    title: "Shapes All Around",
+    minutes: 20,
+    stage: "grammar",
+    standards: ["K.G.A.1", "K.G.A.2", "K.G.A.3", "K.G.B.4", "K.G.B.5", "K.G.B.6"],
+    read: [
+      "Shapes are all around us. A clock can be a circle. A window can be a square. A slice of pizza can look like a triangle. A door is a rectangle. A honeycomb cell is a hexagon.",
+      "Flat shapes lie flat, like a drawing on paper. Solid shapes are not flat. You can hold them. A ball is a sphere. A block is a cube. A can is a cylinder. An ice cream cone is a cone.",
+      "A shape keeps its name when it turns or grows. A big triangle and a tiny triangle are both triangles. A triangle upside down is still a triangle.",
+      "We can count sides and corners. A triangle has 3 sides and 3 corners. A square has 4 sides that are all the same length.",
+      "We can say where things are, too. We use words like above, below, beside, in front of, behind and next to.",
+      "We can build shapes with sticks or clay. We can put shapes together to make new shapes. Two squares side by side make a rectangle!",
+    ].join("\n\n"),
+    keyIdeas: [
+      "Flat shapes: circle, square, triangle, rectangle and hexagon.",
+      "Solid shapes: sphere, cube, cylinder and cone.",
+      "A shape keeps its name when it turns or changes size.",
+      "Shapes can be put together to make new shapes.",
+    ],
+    hook: {
+      text: "Pip is flying over Sunny Meadow. 🌞 The sun looks like a circle! The barn door looks like a rectangle. What shapes can you find?",
+    },
+    teach: [
+      {
+        title: "Flat Shapes and Where They Are",
+        teach:
+          "Let's name some flat shapes. A circle is round, like a cookie. A square has 4 sides, all the same. A rectangle has 4 sides too. Two are long and two are short. A triangle has 3 sides. A hexagon has 6 sides, like a honeycomb cell. We can say where things are, too. The sun is above the barn. The dog is beside the door. The cat is behind the tree.",
+        visual: {
+          type: "hotspots",
+          title: "Flat shapes",
+          center: "Shapes",
+          spots: [
+            { label: "Circle", icon: "⚪", detail: "Round all the way around. No sides and no corners." },
+            { label: "Square", icon: "🟦", detail: "4 sides, all the same length. 4 corners." },
+            { label: "Rectangle", icon: "🚪", detail: "4 sides: 2 long and 2 short. 4 corners. A door is a rectangle." },
+            { label: "Triangle", icon: "🔺", detail: "3 sides and 3 corners." },
+            { label: "Hexagon", icon: "🐝", detail: "6 sides and 6 corners, like a honeycomb cell." },
+          ],
+        },
+        probe: {
+          type: "match",
+          prompt: "Match each shape to its name.",
+          pairs: [
+            { left: "⚪", right: "circle" },
+            { left: "🔺", right: "triangle" },
+            { left: "🟦", right: "square" },
+            { left: "🚪 a door", right: "rectangle" },
+          ],
+          hint: "Count the sides. A triangle has 3. A square has 4 the same. A rectangle has 2 long and 2 short. A circle has none.",
+          seconds: 40,
+        },
+        think: {
+          q: "How many sides does a triangle have?",
+          choices: ["4", "3", "6"],
+          answer: 1,
+          why: "A triangle has 3 sides and 3 corners.",
+          hints: [
+            "4 sides is a square or a rectangle. Count a triangle's sides.",
+            "",
+            "6 sides is a hexagon. A triangle has fewer.",
+          ],
+        },
+        approaches: {
+          analogy: "Learning shapes is like learning your friends' faces. Once you know a circle, you can spot one anywhere: a clock, a plate or a wheel.",
+          example: "Look at a door. Count its sides: 1, 2, 3, 4. Two sides are long and two are short. So a door is a rectangle.",
+          simpler: {
+            q: "Which shape is round?",
+            choices: ["🔺 triangle", "⚪ circle"],
+            answer: 1,
+            why: "A circle is round all the way around.",
+            hints: ["A triangle has 3 pointy corners. Look for the round one.", ""],
+          },
+        },
+      },
+      {
+        title: "Flat or Solid?",
+        teach:
+          "Some shapes are flat. You can draw them on paper. Some shapes are solid. You can hold them in your hand. A ball is a sphere. A block is a cube. A can of soup is a cylinder. An ice cream cone is a cone. Here is a secret. A shape keeps its name when it turns or grows. A big cube and a small cube are both cubes.",
+        visual: {
+          type: "sort",
+          prompt: "Is it flat or solid?",
+          buckets: ["Flat 📄", "Solid 📦"],
+          items: [
+            { text: "⚪ a circle drawn on paper", bucket: 0 },
+            { text: "⚽ a ball", bucket: 1 },
+            { text: "🔺 a triangle drawn on paper", bucket: 0 },
+            { text: "🎲 a block", bucket: 1 },
+            { text: "🥫 a can", bucket: 1 },
+            { text: "🟦 a square drawn on paper", bucket: 0 },
+          ],
+        },
+        probe: {
+          type: "match",
+          prompt: "Match each thing to its solid shape name.",
+          pairs: [
+            { left: "⚽ a ball", right: "sphere" },
+            { left: "🎲 a block", right: "cube" },
+            { left: "🥫 a can", right: "cylinder" },
+            { left: "🍦 an ice cream cone", right: "cone" },
+          ],
+          hint: "A ball is a sphere. A block is a cube. A can is a cylinder. A cone has a point.",
+          seconds: 40,
+        },
+        think: {
+          q: "A ball is which solid shape?",
+          choices: ["Cube", "Cone", "Sphere"],
+          answer: 2,
+          why: "A ball is round all over, so it is a sphere.",
+          hints: [
+            "A cube has flat faces and corners, like a block. A ball has none.",
+            "A cone has a point on top, like an ice cream cone.",
+            "",
+          ],
+        },
+        approaches: {
+          analogy: "Flat shapes are like pictures in a book. Solid shapes are like toys you can pick up and turn around.",
+          example: "Hold a can of soup. It is round on the top and the bottom, and you can roll it. It is a solid shape called a cylinder.",
+          simpler: {
+            q: "Can you hold a ball in your hand?",
+            choices: ["Yes, it is solid", "No, it is flat"],
+            answer: 0,
+            why: "A ball is a solid shape you can pick up.",
+            hints: ["", "A ball is not a drawing. You can pick it up and throw it."],
+          },
+        },
+      },
+      {
+        title: "Sides, Corners and Building Shapes",
+        teach:
+          "Let's count sides and corners. A triangle has 3 sides and 3 corners. A square has 4 sides and 4 corners. A hexagon has 6 of each. Now let's build! Put two squares side by side. They make a rectangle. Cut a square sandwich from corner to corner. Now you have two triangles! Push them back together. You have a square again. You can build shapes with sticks or clay, too.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "🔺 Triangle", back: "3 sides and 3 corners" },
+            { front: "🟦 Square", back: "4 sides and 4 corners" },
+            { front: "🚪 Rectangle", back: "4 sides and 4 corners" },
+            { front: "🐝 Hexagon", back: "6 sides and 6 corners" },
+            { front: "⚪ Circle", back: "No sides and no corners" },
+          ],
+        },
+        probe: {
+          type: "number",
+          prompt: "Count the corners on a triangle. 🔺 How many corners?",
+          answer: 3,
+          hint: "Touch each pointy corner of the triangle and count.",
+          mistakes: [
+            { match: "4", coach: "4 corners is a square. A triangle has one fewer." },
+            { match: "2", coach: "Look again. There is one corner on top and two at the bottom." },
+          ],
+          seconds: 20,
+        },
+        think: {
+          q: "You put two squares side by side. What new shape do you make?",
+          choices: ["A rectangle", "A circle", "A triangle"],
+          answer: 0,
+          why: "Two squares side by side make a longer shape with 4 sides: a rectangle.",
+          hints: [
+            "",
+            "A circle is round with no corners. Two squares have straight sides.",
+            "A triangle has only 3 sides. Two squares make a longer shape with 4 sides.",
+          ],
+        },
+        approaches: {
+          analogy: "Building shapes is like doing a puzzle. Little pieces fit together to make a bigger picture.",
+          example: "Take a square sandwich. Cut it from corner to corner. Now you have two triangles. Push them back together, and you have a square again.",
+          simpler: {
+            q: "How many corners does a square have? 🟦",
+            choices: ["4", "2"],
+            answer: 0,
+            why: "A square has 4 corners.",
+            hints: ["", "Touch each corner of the square: 1, 2, 3, 4."],
+          },
+        },
+      },
+    ],
+    activity: {
+      type: "sort",
+      prompt: "What shape does each thing look like?",
+      buckets: ["Circle ⚪", "Rectangle 🚪", "Triangle 🔺"],
+      items: [
+        { text: "🕐 a clock", bucket: 0 },
+        { text: "🍕 a pizza slice", bucket: 2 },
+        { text: "🚪 a door", bucket: 1 },
+        { text: "🍪 a cookie", bucket: 0 },
+        { text: "📖 a book", bucket: 1 },
+        { text: "⛺ a tent, from the front", bucket: 2 },
+      ],
+    },
+    explain: {
+      prompt: "Tell me about shapes. How are flat shapes and solid shapes different? How can you make a new shape?",
+      keyPoints: [
+        "Flat shapes can be drawn on paper",
+        "Solid shapes can be held",
+        "Count the sides and corners",
+        "Put shapes together to make new shapes",
+      ],
+    },
+    mastery: [
+      {
+        type: "cloze",
+        text: "The sun is up high in the sky. The sun is {0} the house. The worm digs down in the dirt. The worm is {1} the grass.",
+        blanks: [{ answers: ["above", "over"] }, { answers: ["below", "under"] }],
+        bank: ["above", "below", "beside"],
+        hint: "Up high is above. Down low is below.",
+        mistakes: [{ match: "beside", coach: "Beside means right next to. Is the sun next to the house, or up high?" }],
+        seconds: 35,
+      },
+      {
+        type: "sort",
+        prompt: "Is it flat or solid?",
+        buckets: ["Flat 📄", "Solid 📦"],
+        items: [
+          { text: "🏀 a basketball", bucket: 1 },
+          { text: "🔺 a triangle drawn on paper", bucket: 0 },
+          { text: "🧊 an ice cube", bucket: 1 },
+          { text: "⭕ a circle drawn on a card", bucket: 0 },
+          { text: "🥫 a soup can", bucket: 1 },
+          { text: "🟥 a square drawn on paper", bucket: 0 },
+        ],
+        hint: "Can you pick it up and turn it all around? Then it is solid. A drawing is flat.",
+        seconds: 45,
+      },
+      {
+        type: "match",
+        prompt: "Match each shape to its number of sides.",
+        pairs: [
+          { left: "🔺 triangle", right: "3 sides" },
+          { left: "🟦 square", right: "4 sides" },
+          { left: "🐝 hexagon", right: "6 sides" },
+          { left: "⚪ circle", right: "no sides" },
+        ],
+        hint: "Count the straight sides. A circle is round, so it has none.",
+        seconds: 45,
+      },
+      {
+        type: "number",
+        prompt: "Put two squares side by side. 🟦🟦 They make a rectangle. How many sides does the rectangle have?",
+        answer: 4,
+        hint: "Every rectangle has the same number of sides as a square.",
+        mistakes: [{ match: "8", coach: "The sides in the middle touch and join. Count around the outside of the new shape." }],
+        seconds: 30,
+      },
+    ],
+    check: [
+      {
+        q: "A tiny triangle and a giant triangle. Are they both triangles?",
+        choices: ["No, only the big one", "Yes, size does not change the name", "No, only the small one"],
+        answer: 1,
+        why: "A shape keeps its name when it gets bigger or smaller.",
+      },
+      {
+        q: "Which shape is solid?",
+        choices: ["A circle drawn on paper", "A square drawn on paper", "A cube block"],
+        answer: 2,
+        why: "A cube is a solid shape you can hold.",
+      },
+      {
+        q: "How many sides does a square have?",
+        choices: ["4", "3", "6"],
+        answer: 0,
+        why: "A square has 4 sides, all the same length.",
+      },
+      {
+        q: "A bird flies up high over the tree. Where is the bird?",
+        choices: ["Below the tree", "Above the tree", "Inside the tree"],
+        answer: 1,
+        why: "Up high over something means above it.",
+      },
+    ],
+    task: {
+      kind: "project",
+      prompt: "With a grown-up, go on a shape hunt at home. Find a circle, a square, a rectangle and a triangle. Then build a shape with toothpicks, straws or clay.",
+      rubric: [
+        "Found at least three flat shapes",
+        "Named each shape",
+        "Found one solid shape, like a ball or a can",
+        "Built a shape and counted its sides",
+      ],
+    },
+  },
+
+  // 4. Addition within 10
+  {
+    id: "math-k.add",
+    title: "Putting Together: Adding",
+    minutes: 20,
+    stage: "logic",
+    standards: ["K.OA.A.1", "K.OA.A.2", "K.OA.A.5"],
+    read: [
+      "Adding means putting groups together. When we add, we find how many in all.",
+      "Three ducks swim in the pond. Two more ducks come. Now count them all: one, two, three, four, five. There are 5 ducks in all.",
+      "We can show adding many ways. We can use fingers. We can use blocks or pennies. We can draw dots. We can act it out with friends.",
+      "We can write adding with a number sentence: 3 + 2 = 5. The plus sign means put together. The equal sign means is the same as. We read it like this: three plus two equals five.",
+      "Little adding facts, up to 5, are good to know by heart. 1 + 1 = 2. 2 + 2 = 4. 4 + 1 = 5. Practice them, and they get fast and easy!",
+    ].join("\n\n"),
+    keyIdeas: [
+      "Adding means putting groups together to find how many in all.",
+      "The plus sign means put together. The equal sign means is the same as.",
+      "We can add with fingers, objects or drawings.",
+    ],
+    hook: {
+      text: "Three ducks swim in the pond. 🦆🦆🦆 Two more ducks fly in! 🦆🦆 How many ducks are there now? Let's figure it out together!",
+    },
+    teach: [
+      {
+        title: "Put Them Together",
+        teach:
+          "Adding means putting groups together. Here are 2 red apples. 🍎🍎 Here is 1 more apple. 🍎 Push them together. Now count them all. One, two, three. There are 3 apples in all. When we add, the group gets bigger. You can add with your fingers, too. Hold up 2 fingers. Now hold up 1 more. Count all your fingers. You have 3!",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "🍎🍎 and 🍎", back: "3 in all" },
+            { front: "🐥 and 🐥🐥🐥", back: "4 in all" },
+            { front: "🌼🌼 and 🌼🌼🌼", back: "5 in all" },
+          ],
+        },
+        probe: {
+          type: "number",
+          prompt: "🐞🐞 land on a leaf. 🐞🐞🐞 more land too. How many ladybugs in all?",
+          answer: 5,
+          hint: "Count the first group. Then keep counting the new ones.",
+          mistakes: [
+            { match: "3", coach: "That is just the new group. Count all the ladybugs together." },
+            { match: "2", coach: "That is just the first group. Add the new ones too." },
+          ],
+          seconds: 25,
+        },
+        think: {
+          q: "You have 🍪🍪. Mom gives you 🍪🍪 more. How many cookies in all?",
+          choices: ["2", "4", "3"],
+          answer: 1,
+          why: "Two and two more make four: 1, 2, 3, 4.",
+          hints: ["That is only your first two. Add the new ones too.", "", "Count every cookie: 1, 2, 3, 4."],
+        },
+        approaches: {
+          analogy: "Adding is like friends joining a game. Every time more friends come, the group gets bigger.",
+          example: "There are 🐸🐸 on a log. 🐸 hops up too. Count them all: 1, 2, 3. So 2 and 1 more is 3.",
+          simpler: {
+            q: "You have 🎈. You get 🎈 more. How many balloons?",
+            choices: ["1", "2"],
+            answer: 1,
+            why: "One and one more is two.",
+            hints: ["You had one, then got one more. Count both balloons.", ""],
+          },
+        },
+      },
+      {
+        title: "Plus and Equals",
+        teach:
+          "We can write adding with a number sentence. Look: 3 + 2 = 5. This sign is plus. It means put together. This sign is equals. It means is the same as. We read it like this. Three plus two equals five. So 3 ducks plus 2 ducks is the same as 5 ducks. Draw dots to check. Three dots and two dots make five dots.",
+        visual: {
+          type: "hotspots",
+          title: "A number sentence",
+          center: "3 + 2 = 5",
+          spots: [
+            { label: "3", icon: "🦆", detail: "The first group: 3 ducks." },
+            { label: "+", icon: "➕", detail: "Plus: put together." },
+            { label: "2", icon: "🦆", detail: "The group that joins: 2 more ducks." },
+            { label: "=", icon: "🟰", detail: "Equals: is the same as." },
+            { label: "5", icon: "✋", detail: "How many in all: 5 ducks." },
+          ],
+        },
+        probe: {
+          type: "build",
+          prompt: "Build the number sentence. First 4 pigs 🐷🐷🐷🐷, plus 1 more pig 🐷, make 5 pigs.",
+          tiles: ["4", "+", "1", "=", "5"],
+          also: [["1", "+", "4", "=", "5"]],
+          distractors: ["−", "3"],
+          hint: "Start with the first group, 4. Then plus, then the 1 more, then equals, then how many in all.",
+          seconds: 40,
+        },
+        think: {
+          q: "What does the + sign mean?",
+          choices: ["Take away", "Put together", "Stop"],
+          answer: 1,
+          why: "Plus means put the groups together.",
+          hints: [
+            "Take away is the minus sign. Plus is the opposite.",
+            "",
+            "Plus is not a stop sign. It tells us to add.",
+          ],
+        },
+        approaches: {
+          analogy: "A number sentence is a little story told in numbers. 3 + 2 = 5 says: 3 came, 2 more joined, now there are 5.",
+          example: "Two cats and two more cats. Write 2 + 2 = 4. Read it: two plus two equals four. Count the cats to check: 1, 2, 3, 4.",
+          simpler: {
+            q: "In 1 + 1 = 2, how many in all?",
+            choices: ["2", "1"],
+            answer: 0,
+            why: "The number after the equal sign, 2, tells how many in all.",
+            hints: ["", "1 is just one group. The number after the equal sign tells how many in all."],
+          },
+        },
+      },
+      {
+        title: "Adding Stories",
+        teach:
+          "Let's solve adding stories. Listen. Four bees buzz by the flowers. One more bee comes. How many bees now? First, show the 4 bees with fingers. Then add 1 more finger. Count them all. There are 5 bees! Little facts like 4 + 1 = 5 get faster with practice. Soon you will just know them, like your own name.",
+        visual: {
+          type: "sequence",
+          prompt: "Put the adding story in order.",
+          steps: ["🐝🐝🐝🐝 Four bees buzz by.", "🐝 One more bee comes.", "✋ Count them all: 5 bees!"],
+        },
+        probe: {
+          type: "cloze",
+          text: "2 + 3 = {0}. 1 + 3 = {1}.",
+          blanks: [{ answers: ["5"] }, { answers: ["4"] }],
+          bank: ["3", "4", "5", "6"],
+          hint: "Hold up the first number on your fingers. Add the second number. Count them all.",
+          mistakes: [{ match: "6", coach: "That is one too many. Count your fingers again carefully." }],
+          seconds: 30,
+        },
+        think: {
+          q: "Two birds sit in a tree. Three more birds come. How many birds now?",
+          choices: ["4", "6", "5"],
+          answer: 2,
+          why: "2 and 3 more make 5.",
+          hints: [
+            "Count again: 2 birds, then 3 more is more than 4.",
+            "That is one too many. Count with your fingers: 2, then 3 more.",
+            "",
+          ],
+        },
+        approaches: {
+          analogy: "An adding story is like a little movie. Some friends are there at the start. More arrive. At the end we count everyone.",
+          example: "Three fish swim. One more fish swims in. Hold up 3 fingers, then 1 more. Count: 1, 2, 3, 4. There are 4 fish.",
+          simpler: {
+            q: "What is 1 + 1?",
+            choices: ["2", "3"],
+            answer: 0,
+            why: "One and one more is two.",
+            hints: ["", "Hold up one finger, then one more. Count them: just 2."],
+          },
+        },
+      },
+    ],
+    activity: {
+      type: "sort",
+      prompt: "Sort each adding problem by its answer.",
+      buckets: ["4", "5"],
+      items: [
+        { text: "2 + 2", bucket: 0 },
+        { text: "3 + 1", bucket: 0 },
+        { text: "4 + 1", bucket: 1 },
+        { text: "2 + 3", bucket: 1 },
+        { text: "1 + 3", bucket: 0 },
+        { text: "5 + 0", bucket: 1 },
+      ],
+    },
+    explain: {
+      prompt: "Tell me how to add 3 and 2. What do you do?",
+      keyPoints: ["Put the groups together", "Count them all", "3 plus 2 equals 5"],
+    },
+    mastery: [
+      {
+        type: "number",
+        prompt: "4 sheep eat grass. 🐑🐑🐑🐑 3 more sheep come. 🐑🐑🐑 How many sheep in all?",
+        answer: 7,
+        hint: "Start with 4. Count on 3 more: 5, 6, 7.",
+        mistakes: [
+          { match: "6", coach: "Count again. Start at 4 and count on three: 5, 6, 7." },
+          { match: "1", coach: "That is taking away. More sheep came, so we add." },
+        ],
+        seconds: 30,
+      },
+      {
+        type: "match",
+        prompt: "Match each problem to its answer.",
+        pairs: [
+          { left: "1 + 1", right: "2" },
+          { left: "2 + 1", right: "3" },
+          { left: "2 + 2", right: "4" },
+          { left: "3 + 2", right: "5" },
+        ],
+        hint: "Use your fingers. Show the first number, add the second, and count them all.",
+        seconds: 40,
+      },
+      {
+        type: "build",
+        prompt: "Build the number sentence. First 5 frogs 🐸🐸🐸🐸🐸, plus 2 more frogs 🐸🐸, make 7 frogs.",
+        tiles: ["5", "+", "2", "=", "7"],
+        also: [["2", "+", "5", "=", "7"]],
+        distractors: ["8", "−"],
+        hint: "Start with 5. Then plus, then 2, then equals, then how many in all.",
+        seconds: 40,
+      },
+      {
+        type: "place",
+        prompt: "Solve each one. Put the answer on the number line.",
+        min: 0,
+        max: 10,
+        step: 1,
+        tolerance: 0,
+        items: [
+          { label: "1 + 2", value: 3 },
+          { label: "4 + 4", value: 8 },
+          { label: "5 + 4", value: 9 },
+        ],
+        hint: "Start at the first number on the line. Hop forward the second number.",
+        seconds: 50,
+      },
+    ],
+    check: [
+      {
+        q: "What is 2 + 1?",
+        choices: ["3", "2", "4"],
+        answer: 0,
+        why: "Two and one more is three.",
+      },
+      {
+        q: "Which sign means put together?",
+        choices: ["=", "−", "+"],
+        answer: 2,
+        why: "The plus sign means put together, or add.",
+      },
+      {
+        q: "Five kids play tag. Two more kids join. How many kids now?",
+        choices: ["6", "7", "3"],
+        answer: 1,
+        why: "5 and 2 more: 6, 7. There are 7 kids.",
+      },
+      {
+        q: "What is 4 + 0?",
+        choices: ["0", "5", "4"],
+        answer: 2,
+        why: "Adding zero adds nothing, so 4 stays 4.",
+      },
+    ],
+    task: {
+      kind: "project",
+      prompt: "With a grown-up, make adding stories with snacks or toys. Put 2 in one pile and 3 in another. Push them together and count. Make three different stories.",
+      rubric: [
+        "Made two groups",
+        "Put them together and counted them all",
+        "Said the number sentence out loud, like 2 plus 3 equals 5",
+        "Made three different stories",
+      ],
+    },
+  },
+
+  // 5. Subtraction within 10
+  {
+    id: "math-k.subtract",
+    title: "Taking Away: Subtracting",
+    minutes: 20,
+    stage: "logic",
+    standards: ["K.OA.A.1", "K.OA.A.2", "K.OA.A.5"],
+    read: [
+      "Subtracting means taking away. When we subtract, we find how many are left.",
+      "Five apples hang on a tree. Two fall down. Now count the apples still on the tree: one, two, three. There are 3 apples left.",
+      "We can show taking away many ways. Hold up 5 fingers and fold down 2. Draw 5 dots and cross out 2. Line up 5 blocks and take 2 away.",
+      "We write subtracting with a number sentence: 5 − 2 = 3. The minus sign means take away. We read it like this: five minus two equals three.",
+      "When we take away, the group gets smaller. If you take away 0, nothing changes. If you take away all of them, 0 are left.",
+      "Little take-away facts, up to 5, are great to know by heart. 5 − 1 = 4. 3 − 2 = 1. 4 − 2 = 2.",
+    ].join("\n\n"),
+    keyIdeas: [
+      "Subtracting means taking away to find how many are left.",
+      "The minus sign means take away.",
+      "Taking away makes a group smaller.",
+    ],
+    hook: {
+      text: "Five apples hang on the tree. 🍎🍎🍎🍎🍎 Two fall down for the horse! 🐴 How many are left on the tree? Let's figure it out together!",
+    },
+    teach: [
+      {
+        title: "Take Some Away",
+        teach:
+          "Subtracting means taking away. Here are 4 cupcakes. 🧁🧁🧁🧁 Two friends each eat one. Take 2 away. How many are left? Count the cupcakes still on the plate. One, two. There are 2 left. When we take away, the group gets smaller. You can use fingers, too. Hold up 4 fingers. Fold down 2. You have 2 fingers up.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "🍎🍎🍎🍎🍎, 2 fall", back: "3 left" },
+            { front: "🐥🐥🐥, 1 walks away", back: "2 left" },
+            { front: "🎈🎈🎈🎈, 3 pop", back: "1 left" },
+          ],
+        },
+        probe: {
+          type: "number",
+          prompt: "6 frogs sit on a log. 🐸🐸🐸🐸🐸🐸 2 frogs hop away. How many frogs are left?",
+          answer: 4,
+          hint: "Hold up 6 fingers. Fold down 2. Count the fingers still up.",
+          mistakes: [
+            { match: "8", coach: "That is adding! The frogs hopped away, so we take them away." },
+            { match: "2", coach: "That is how many hopped away. Count the frogs still on the log." },
+          ],
+          seconds: 30,
+        },
+        think: {
+          q: "You have 🎈🎈🎈. One balloon pops! How many are left?",
+          choices: ["4", "2", "3"],
+          answer: 1,
+          why: "3 take away 1 is 2.",
+          hints: [
+            "4 would mean you got one more. A pop takes one away.",
+            "",
+            "3 is how many you started with. One popped, so now there are fewer.",
+          ],
+        },
+        approaches: {
+          analogy: "Subtracting is like eating crackers from your plate. Each one you eat is taken away, and fewer are left.",
+          example: "There are 🍓🍓🍓 on a plate. You eat 1. Count what is left: 1, 2. So 3 take away 1 is 2.",
+          simpler: {
+            q: "You have 🍪🍪. You eat one. How many are left?",
+            choices: ["1", "3"],
+            answer: 0,
+            why: "2 take away 1 leaves 1.",
+            hints: ["", "Eating a cookie makes fewer, not more. Count what is left."],
+          },
+        },
+      },
+      {
+        title: "The Minus Sign",
+        teach:
+          "We can write taking away with a number sentence. Look: 5 − 2 = 3. This sign is minus. It means take away. We read it like this. Five minus two equals three. Five is how many we start with. Two is how many go away. Three is how many are left. Draw 5 dots. Cross out 2. Count the dots that are left. Three!",
+        visual: {
+          type: "hotspots",
+          title: "A take-away sentence",
+          center: "5 − 2 = 3",
+          spots: [
+            { label: "5", icon: "🍎", detail: "Start with 5 apples." },
+            { label: "−", icon: "➖", detail: "Minus: take away." },
+            { label: "2", icon: "⬇️", detail: "2 apples fall off the tree." },
+            { label: "=", icon: "🟰", detail: "Equals: is the same as." },
+            { label: "3", icon: "🌳", detail: "3 apples are left on the tree." },
+          ],
+        },
+        probe: {
+          type: "build",
+          prompt: "Build the number sentence. Start with 4 ducks. 1 duck swims away. 3 ducks are left.",
+          tiles: ["4", "−", "1", "=", "3"],
+          distractors: ["+", "5"],
+          hint: "Start with how many there were, 4. Then minus, then how many went away, then equals, then how many are left.",
+          seconds: 40,
+        },
+        think: {
+          q: "In 5 − 2 = 3, what does the − sign mean?",
+          choices: ["Take away", "Put together", "Is the same as"],
+          answer: 0,
+          why: "The minus sign means take away.",
+          hints: [
+            "",
+            "Put together is the plus sign. This sign is one short line.",
+            "Is the same as is the equal sign, with two lines.",
+          ],
+        },
+        approaches: {
+          analogy: "Minus is like a little eraser. It rubs out some of the group, and we count what is left.",
+          example: "Write 3 − 1. Draw 3 stars. Cross out 1 star. Count the stars left: 1, 2. So 3 − 1 = 2.",
+          simpler: {
+            q: "Which sign is minus: + or −?",
+            choices: ["+", "−"],
+            answer: 1,
+            why: "Minus is one short line: −.",
+            hints: ["That is plus. It has two lines that cross. Minus is just one line.", ""],
+          },
+        },
+      },
+      {
+        title: "Take-Away Stories",
+        teach:
+          "Let's solve take-away stories. Listen. Seven sheep eat grass. Three sheep walk to the barn. How many sheep are still eating? Hold up 7 fingers. Fold down 3. Count the fingers still up. There are 4! So 7 − 3 = 4. If no sheep walk away, all 7 are still there. If all 7 walk away, 0 are left.",
+        visual: {
+          type: "sequence",
+          prompt: "Put the take-away story in order.",
+          steps: [
+            "🐑 Seven sheep eat grass.",
+            "🏠 Three sheep walk to the barn.",
+            "✋ Hold up 7 fingers and fold down 3.",
+            "🐑 Four sheep are still eating!",
+          ],
+        },
+        probe: {
+          type: "cloze",
+          text: "5 − 1 = {0}. 4 − 2 = {1}. 3 − 3 = {2}.",
+          blanks: [{ answers: ["4"] }, { answers: ["2"] }, { answers: ["0"] }],
+          bank: ["0", "1", "2", "4", "5"],
+          hint: "Hold up the first number. Fold down the second. Count what is still up.",
+          mistakes: [{ match: "5", coach: "Taking away makes fewer. The answer is less than the number you start with." }],
+          seconds: 40,
+        },
+        think: {
+          q: "There are 6 bunnies. 2 hop away. How many are left?",
+          choices: ["8", "3", "4"],
+          answer: 2,
+          why: "6 take away 2 is 4.",
+          hints: [
+            "8 is adding. The bunnies hopped away, so take them away.",
+            "Count again: hold up 6 fingers and fold down 2. More than 3 are up.",
+            "",
+          ],
+        },
+        approaches: {
+          analogy: "A take-away story is like a bus. Some riders get off at the stop. We count who is still on the bus.",
+          example: "Five birds sit on a fence. One flies off. Hold up 5 fingers and fold down 1. Count: 1, 2, 3, 4. So 5 − 1 = 4.",
+          simpler: {
+            q: "You have 2 crackers and eat 0. How many are left?",
+            choices: ["2", "0"],
+            answer: 0,
+            why: "Taking away 0 means nothing changes.",
+            hints: ["", "You did not eat any! Taking away 0 means nothing changes."],
+          },
+        },
+      },
+    ],
+    activity: {
+      type: "sort",
+      prompt: "Sort each take-away problem by its answer.",
+      buckets: ["1", "2", "3"],
+      items: [
+        { text: "3 − 2", bucket: 0 },
+        { text: "5 − 4", bucket: 0 },
+        { text: "4 − 2", bucket: 1 },
+        { text: "5 − 3", bucket: 1 },
+        { text: "4 − 1", bucket: 2 },
+        { text: "5 − 2", bucket: 2 },
+      ],
+    },
+    explain: {
+      prompt: "Tell me how to solve 5 minus 2. What do you do with your fingers?",
+      keyPoints: ["Start with 5", "Take away 2", "Count how many are left", "5 minus 2 equals 3"],
+    },
+    mastery: [
+      {
+        type: "number",
+        prompt: "There are 9 carrots. 🥕🥕🥕🥕🥕🥕🥕🥕🥕 A bunny eats 4. How many carrots are left?",
+        answer: 5,
+        hint: "Hold up 9 fingers. Fold down 4. Count the fingers still up.",
+        mistakes: [
+          { match: "13", coach: "That is adding. The bunny ate them, so we take them away." },
+          { match: "4", coach: "4 is how many the bunny ate. Count the carrots still left." },
+        ],
+        seconds: 35,
+      },
+      {
+        type: "match",
+        prompt: "Match each problem to its answer.",
+        pairs: [
+          { left: "5 − 1", right: "4" },
+          { left: "4 − 1", right: "3" },
+          { left: "3 − 1", right: "2" },
+          { left: "2 − 1", right: "1" },
+        ],
+        hint: "Take away 1 means one less. Count back one from the first number.",
+        seconds: 40,
+      },
+      {
+        type: "sort",
+        prompt: "Is each story adding or taking away?",
+        buckets: ["Adding ➕", "Taking away ➖"],
+        items: [
+          { text: "🐦 2 more birds come to the feeder", bucket: 0 },
+          { text: "🎈 A balloon pops", bucket: 1 },
+          { text: "🍪 You eat a cookie", bucket: 1 },
+          { text: "🐟 3 more fish swim in", bucket: 0 },
+          { text: "🐑 Sheep walk away to the barn", bucket: 1 },
+          { text: "🌼 You pick 2 more flowers", bucket: 0 },
+        ],
+        hint: "Does the group get bigger? That is adding. Does it get smaller? That is taking away.",
+        seconds: 45,
+      },
+      {
+        type: "place",
+        prompt: "Solve each one. Put the answer on the number line.",
+        min: 0,
+        max: 10,
+        step: 1,
+        tolerance: 0,
+        items: [
+          { label: "5 − 5", value: 0 },
+          { label: "6 − 2", value: 4 },
+          { label: "10 − 3", value: 7 },
+        ],
+        hint: "Start at the first number on the line. Hop back the second number.",
+        seconds: 50,
+      },
+    ],
+    check: [
+      {
+        q: "What is 4 − 1?",
+        choices: ["5", "3", "2"],
+        answer: 1,
+        why: "4 take away 1 is 3.",
+      },
+      {
+        q: "Which sign means take away?",
+        choices: ["−", "+", "="],
+        answer: 0,
+        why: "The minus sign means take away.",
+      },
+      {
+        q: "You have 3 grapes. You eat all 3. How many are left?",
+        choices: ["3", "1", "0"],
+        answer: 2,
+        why: "If you take away all of them, 0 are left.",
+      },
+      {
+        q: "Eight ducks swim. Two fly away. How many are still swimming?",
+        choices: ["6", "10", "5"],
+        answer: 0,
+        why: "8 take away 2 is 6.",
+      },
+    ],
+    task: {
+      kind: "project",
+      prompt: "With a grown-up, line up 5 small toys. Take some away and hide them. Count how many are left, and say the number sentence. Then let your grown-up try!",
+      rubric: [
+        "Started with 5 toys",
+        "Took some away",
+        "Counted how many were left",
+        "Said the number sentence, like 5 minus 2 equals 3",
+      ],
+    },
+  },
+
+  // 6. Number partners (decomposing numbers) and making 10
+  {
+    id: "math-k.make-ten",
+    title: "Number Partners and Making 10",
+    minutes: 20,
+    stage: "logic",
+    standards: ["K.OA.A.3", "K.OA.A.4"],
+    read: [
+      "Numbers can be broken into two parts. We call them number partners.",
+      "Five can be 4 and 1. Five can be 3 and 2. Five can be 5 and 0. All of these make 5! We can write them: 5 = 4 + 1 and 5 = 3 + 2.",
+      "A ten frame is a box with 10 spaces, in two rows of five. It helps us see numbers. When all 10 spaces are full, we have 10.",
+      "Ten is a very special number. If you have 7, you need 3 more to make 10. If you have 6, you need 4 more. Look at your ten fingers! Fold some down. The ones still up and the ones folded down always make 10.",
+      "Practice the ten partners: 9 and 1, 8 and 2, 7 and 3, 6 and 4, 5 and 5.",
+    ].join("\n\n"),
+    keyIdeas: [
+      "A number can be split into two parts in more than one way.",
+      "A ten frame has 10 spaces in two rows of five.",
+      "Ten partners: 9 and 1, 8 and 2, 7 and 3, 6 and 4, 5 and 5.",
+    ],
+    hook: {
+      text: "Pip has 5 glowing friends. ✨ Some fly on one side of the pond. Some fly on the other side. How can 5 friends split up? There are lots of ways!",
+    },
+    teach: [
+      {
+        title: "Number Partners",
+        teach:
+          "A number can split into two parts. Look at 5 flowers. 🌼🌼🌼🌼🌼 Put 4 in one vase and 1 in another vase. That is 4 and 1. Now try 3 and 2. That makes 5, too! There is more than one way to split a number. We can write 5 = 3 + 2. Five is the same as three plus two.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "🌼🌼🌼🌼 | 🌼", back: "4 and 1 make 5" },
+            { front: "🌼🌼🌼 | 🌼🌼", back: "3 and 2 make 5" },
+            { front: "🌼🌼🌼🌼🌼 | (none)", back: "5 and 0 make 5" },
+          ],
+        },
+        probe: {
+          type: "sort",
+          prompt: "Which partners make 5?",
+          buckets: ["Makes 5", "Does not make 5"],
+          items: [
+            { text: "4 and 1", bucket: 0 },
+            { text: "2 and 3", bucket: 0 },
+            { text: "2 and 2", bucket: 1 },
+            { text: "5 and 0", bucket: 0 },
+            { text: "3 and 3", bucket: 1 },
+            { text: "1 and 1", bucket: 1 },
+          ],
+          hint: "Hold up the first number on your fingers. Add the second. Do you have 5?",
+          seconds: 45,
+        },
+        think: {
+          q: "Which pair makes 4?",
+          choices: ["2 and 2", "3 and 3", "4 and 1"],
+          answer: 0,
+          why: "2 and 2 make 4.",
+          hints: ["", "3 and 3 make 6. That is too many.", "4 and 1 make 5. That is one too many."],
+        },
+        approaches: {
+          analogy: "Splitting a number is like sharing toys between two boxes. You can move toys from one box to the other, but you still have the same number of toys.",
+          example: "Take 6 blocks. Put 4 in one pile and 2 in the other. Count them all: 6. Now try 5 and 1. Still 6!",
+          simpler: {
+            q: "1 and 1 make what?",
+            choices: ["3", "2"],
+            answer: 1,
+            why: "One and one more is two.",
+            hints: ["Count: one, then one more. That is not 3.", ""],
+          },
+        },
+      },
+      {
+        title: "The Ten Frame",
+        teach:
+          "This is a ten frame. It has 10 boxes. There are two rows of five. We put one counter in each box. Fill the top row first. Then the bottom row. Look at 7 in a ten frame. The top row is full with 5. The bottom row has 2. How many boxes are empty? Three! So 7 and 3 make 10.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "🔴🔴🔴🔴🔴 🔴🔴⚪⚪⚪", back: "7 full, 3 empty. 7 and 3 make 10." },
+            { front: "🔴🔴🔴🔴🔴 🔴⚪⚪⚪⚪", back: "6 full, 4 empty. 6 and 4 make 10." },
+            { front: "🔴🔴🔴🔴🔴 🔴🔴🔴🔴⚪", back: "9 full, 1 empty. 9 and 1 make 10." },
+          ],
+        },
+        probe: {
+          type: "number",
+          prompt: "A ten frame has 8 counters. 🔴🔴🔴🔴🔴 🔴🔴🔴⚪⚪ How many more make 10?",
+          answer: 2,
+          hint: "Count the empty boxes. Each one needs one more counter.",
+          mistakes: [
+            { match: "10", coach: "10 is the whole frame. Count only the empty boxes." },
+            { match: "8", coach: "8 is how many are already full. Count the empty boxes." },
+          ],
+          seconds: 25,
+        },
+        think: {
+          q: "You have 9. How many more make 10?",
+          choices: ["2", "1", "0"],
+          answer: 1,
+          why: "9 and 1 make 10.",
+          hints: ["9 and 2 make 11. That is one too many.", "", "9 is not 10 yet. You need a little more."],
+        },
+        approaches: {
+          analogy: "A ten frame is like an egg carton with 10 cups. Count the empty cups to see how many more eggs will fill it.",
+          example: "Put 6 counters in a ten frame. The top row is full. One more is in the bottom row. Count the empty boxes: 1, 2, 3, 4. So 6 and 4 make 10.",
+          simpler: {
+            q: "A ten frame is full. How many counters are in it?",
+            choices: ["5", "10"],
+            answer: 1,
+            why: "A full ten frame has 10 counters.",
+            hints: ["5 fills only one row. A full frame has two rows.", ""],
+          },
+        },
+      },
+      {
+        title: "Ten Fingers, Ten Partners",
+        teach:
+          "Your hands are a ten frame! You have 10 fingers. Hold them all up. Now fold down 3. Seven are up and 3 are down. 7 and 3 make 10. Try folding down 4. Six are up. 6 and 4 make 10. Ten partners are super helpful. Say them with me. 9 and 1. 8 and 2. 7 and 3. 6 and 4. 5 and 5.",
+        visual: {
+          type: "sequence",
+          prompt: "Put the ten partners in order.",
+          steps: ["9 and 1", "8 and 2", "7 and 3", "6 and 4", "5 and 5"],
+        },
+        probe: {
+          type: "match",
+          prompt: "Match each number to its ten partner.",
+          pairs: [
+            { left: "9", right: "1" },
+            { left: "8", right: "2" },
+            { left: "7", right: "3" },
+            { left: "6", right: "4" },
+          ],
+          hint: "Hold up 10 fingers. Fold down the partner until the number left up matches.",
+          seconds: 40,
+        },
+        think: {
+          q: "What goes with 5 to make 10?",
+          choices: ["4", "6", "5"],
+          answer: 2,
+          why: "5 and 5 make 10. That is one whole hand and another whole hand.",
+          hints: ["5 and 4 make 9. One short!", "5 and 6 make 11. One too many.", ""],
+        },
+        approaches: {
+          analogy: "Ten partners are like a seesaw. When one side goes down by one, the other side goes up by one. Together they always make 10.",
+          example: "Hold up 10 fingers. Fold down 2. Count the ones still up: 8. So 8 and 2 make 10.",
+          simpler: {
+            q: "You have 10 fingers. You fold down 0. How many are up?",
+            choices: ["10", "0"],
+            answer: 0,
+            why: "Folding down 0 means all 10 are still up.",
+            hints: ["", "Folding down 0 means none go down. All your fingers are still up."],
+          },
+        },
+      },
+    ],
+    activity: {
+      type: "sort",
+      prompt: "Does each pair make 10?",
+      buckets: ["Makes 10 🔟", "Not 10"],
+      items: [
+        { text: "6 and 4", bucket: 0 },
+        { text: "5 and 5", bucket: 0 },
+        { text: "7 and 2", bucket: 1 },
+        { text: "8 and 2", bucket: 0 },
+        { text: "9 and 0", bucket: 1 },
+        { text: "4 and 5", bucket: 1 },
+        { text: "3 and 7", bucket: 0 },
+      ],
+    },
+    explain: {
+      prompt: "Tell me how you find the partner that makes 10. Use your fingers or a ten frame.",
+      keyPoints: ["Start with the number", "Count the empty boxes or the folded fingers", "The two parts make 10"],
+    },
+    mastery: [
+      {
+        type: "cloze",
+        text: "6 = 4 + {0}. 6 = 5 + {1}.",
+        blanks: [{ answers: ["2"] }, { answers: ["1"] }],
+        bank: ["1", "2", "3", "6"],
+        hint: "Start at the number you have. Count up to 6. How many did you count?",
+        mistakes: [{ match: "6", coach: "6 is the whole thing. We need just the missing part." }],
+        seconds: 35,
+      },
+      {
+        type: "number",
+        prompt: "You have 3 stars. ⭐⭐⭐ How many more stars make 10?",
+        answer: 7,
+        hint: "Hold up 10 fingers. Fold down 3. Count the fingers still up.",
+        mistakes: [
+          { match: "13", coach: "That is 10 and 3 more. We want 3 and how many more to make 10." },
+          { match: "6", coach: "So close! 3 and 6 make 9. One more!" },
+        ],
+        seconds: 30,
+      },
+      {
+        type: "match",
+        prompt: "Match each number to its ten partner.",
+        pairs: [
+          { left: "1", right: "9" },
+          { left: "2", right: "8" },
+          { left: "3", right: "7" },
+          { left: "5", right: "5" },
+        ],
+        hint: "Two partners always make 10. Use your fingers to check.",
+        seconds: 40,
+      },
+      {
+        type: "place",
+        prompt: "Find the ten partner. Put it on the number line.",
+        min: 0,
+        max: 10,
+        step: 1,
+        tolerance: 0,
+        items: [
+          { label: "4 and ? make 10", value: 6 },
+          { label: "9 and ? make 10", value: 1 },
+          { label: "2 and ? make 10", value: 8 },
+        ],
+        hint: "Start at the number on the line. Count the hops up to 10.",
+        seconds: 50,
+      },
+    ],
+    check: [
+      {
+        q: "Which pair makes 10?",
+        choices: ["6 and 3", "8 and 2", "5 and 4"],
+        answer: 1,
+        why: "8 and 2 make 10.",
+      },
+      {
+        q: "How many boxes are in a ten frame?",
+        choices: ["5", "8", "10"],
+        answer: 2,
+        why: "A ten frame has 10 boxes, in two rows of five.",
+      },
+      {
+        q: "You have 5 flowers. You put 3 in one vase. How many go in the other vase?",
+        choices: ["2", "3", "1"],
+        answer: 0,
+        why: "3 and 2 make 5.",
+      },
+      {
+        q: "Which is another way to make 5?",
+        choices: ["2 and 2", "4 and 1", "3 and 3"],
+        answer: 1,
+        why: "4 and 1 make 5.",
+      },
+    ],
+    task: {
+      kind: "project",
+      prompt: "With a grown-up, play Ten Partners. Your grown-up holds up some fingers, and you say how many more make 10. Then split 5 pennies or buttons into two piles in two different ways.",
+      rubric: [
+        "Found the ten partner for at least four numbers",
+        "Used fingers or a ten frame to check",
+        "Split 5 into two parts in two different ways",
+        "Said the partners out loud, like 7 and 3 make 10",
+      ],
+    },
+  },
+
+  // 7. Teen numbers as ten ones and some more; writing numbers to 20
+  {
+    id: "math-k.teens",
+    title: "Teen Numbers: Ten and Some More",
+    minutes: 20,
+    stage: "logic",
+    standards: ["K.NBT.A.1", "K.CC.A.3"],
+    read: [
+      "Numbers from 11 to 19 are called teen numbers. Every teen number is made of ten ones and some more ones.",
+      "Take 13 acorns. Count out ten and put them in a group. You have 3 left over. So 13 is ten and 3 more. We can write 13 = 10 + 3.",
+      "Look at the number 13. The 1 stands for the group of ten. The 3 stands for the 3 extra ones.",
+      "Here are more: 15 is ten and 5. 18 is ten and 8. 11 is ten and 1. 19 is ten and 9. And 20 is two full tens.",
+      "Two ten frames help us see teen numbers. Fill one ten frame all the way. Put the extra ones in the second frame.",
+      "Write teen numbers carefully. Write the 1 first, then the other digit. 16 starts with a 1 and ends with a 6.",
+    ].join("\n\n"),
+    keyIdeas: [
+      "Teen numbers are ten and some more ones.",
+      "13 is ten and 3 more: 13 = 10 + 3.",
+      "Two ten frames help us see teen numbers.",
+    ],
+    hook: {
+      text: "Pip found a big pile of acorns. 🌰 There are too many to count fast! Pip has a trick. Make a group of ten first!",
+    },
+    teach: [
+      {
+        title: "Make a Ten",
+        teach:
+          "Let's count lots of acorns. 🌰 Counting a big pile is tricky. So first we make a group of ten. Count out ten acorns and push them together. That fills one ten frame. Now count the extra acorns. There are 4 more. So we have ten and 4 more. That is 14! Groups of ten make big counting easy.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "🔟 + 🌰", back: "11: ten and 1" },
+            { front: "🔟 + 🌰🌰🌰🌰", back: "14: ten and 4" },
+            { front: "🔟 + 🌰🌰🌰🌰🌰🌰🌰", back: "17: ten and 7" },
+          ],
+        },
+        probe: {
+          type: "number",
+          prompt: "Here is a full ten frame and 6 more acorns. 🔟 + 🌰🌰🌰🌰🌰🌰 How many in all?",
+          answer: 16,
+          hint: "Start at 10 for the full frame. Count on the extras: 11, 12, 13...",
+          mistakes: [
+            { match: "6", coach: "That is just the extras. Don't forget the full ten!" },
+            { match: "10", coach: "That is just the ten. Count on the 6 extras too." },
+            { match: "60", coach: "Close! Ten and 6 is written 16, with a 1 first." },
+          ],
+          seconds: 30,
+        },
+        think: {
+          q: "Ten and 2 more is what number?",
+          choices: ["12", "2", "20"],
+          answer: 0,
+          why: "Ten and 2 more is 12.",
+          hints: ["", "2 is only the extras. Don't forget the ten.", "20 is two whole tens. Here there is one ten and 2 more."],
+        },
+        approaches: {
+          analogy: "Making a ten is like packing a lunch box that holds exactly ten crackers. Fill one box, then count the crackers left outside.",
+          example: "Count 12 crayons. Put ten in the box. Two are left outside. Ten and 2 more is 12.",
+          simpler: {
+            q: "How many fit in a full ten frame?",
+            choices: ["10", "5"],
+            answer: 0,
+            why: "A ten frame holds 10.",
+            hints: ["", "5 is only one row. Count both rows."],
+          },
+        },
+      },
+      {
+        title: "Reading Teen Numbers",
+        teach:
+          "Look at the number 13. It has two digits. The 1 tells us there is one group of ten. The 3 tells us there are 3 more ones. So 13 is ten and 3. Look at 17. That is ten and 7. Look at 19. That is ten and 9! And 20 is two full tens. Every teen number starts with a 1 for the ten.",
+        visual: {
+          type: "hotspots",
+          title: "The number 15",
+          center: "15",
+          spots: [
+            { label: "1", icon: "🔟", detail: "One group of ten." },
+            { label: "5", icon: "🖐️", detail: "Five more ones." },
+            { label: "Ten frames", icon: "🟥", detail: "Fill one ten frame. Then put 5 in the next frame." },
+          ],
+        },
+        probe: {
+          type: "match",
+          prompt: "Match each teen number to its parts.",
+          pairs: [
+            { left: "12", right: "ten and 2" },
+            { left: "15", right: "ten and 5" },
+            { left: "18", right: "ten and 8" },
+            { left: "11", right: "ten and 1" },
+          ],
+          hint: "The 1 is the ten. Look at the second digit to see how many more.",
+          seconds: 40,
+        },
+        think: {
+          q: "What is 16 made of?",
+          choices: ["ten and 1", "ten and 6", "six and 1"],
+          answer: 1,
+          why: "16 is one ten and 6 more ones.",
+          hints: [
+            "Ten and 1 is 11. Look at the second digit of 16.",
+            "",
+            "Six and 1 is only 7. The 1 in front stands for a whole ten.",
+          ],
+        },
+        approaches: {
+          analogy: "A teen number is like a full bag of ten marbles plus a few loose marbles in your hand.",
+          example: "Look at 14. The 1 means one ten. The 4 means 4 more. Show it with a full ten frame and 4 counters in a second frame.",
+          simpler: {
+            q: "In 13, how many extra ones are there after the ten?",
+            choices: ["1", "3"],
+            answer: 1,
+            why: "The 3 in 13 means 3 extra ones.",
+            hints: ["The 1 stands for the group of ten. Look at the other digit.", ""],
+          },
+        },
+      },
+      {
+        title: "Writing Numbers to 20",
+        teach:
+          "Let's write numbers! A written number shows how many. Zero means none. Write 0 like a round egg. To write a teen number, write 1 first. Then write the second digit right beside it. For 14, write 1, then 4. For 20, write 2, then 0. Count your toys and write how many. Numbers tell how many!",
+        visual: {
+          type: "sequence",
+          prompt: "Put the numbers in counting order.",
+          steps: ["11", "12", "13", "14", "15", "16", "17", "18", "19", "20"],
+        },
+        probe: {
+          type: "place",
+          prompt: "Put each number on the number line.",
+          min: 0,
+          max: 20,
+          step: 1,
+          tolerance: 0,
+          items: [
+            { label: "12", value: 12 },
+            { label: "15", value: 15 },
+            { label: "19", value: 19 },
+          ],
+          hint: "Find 10 in the middle of the line. Then count on from 10.",
+          seconds: 45,
+        },
+        think: {
+          q: "Which number is ten and 9?",
+          choices: ["91", "19", "10"],
+          answer: 1,
+          why: "Ten and 9 is written 19: a 1 for the ten, then a 9.",
+          hints: ["91 has the digits flipped. Write the 1 for the ten first.", "", "10 is just the ten. Add 9 more."],
+        },
+        approaches: {
+          analogy: "Writing a teen number is like spelling a word. The letters must go in the right order, or it says something else.",
+          example: "We have ten and 5 more. Write 1 for the ten. Then write 5 right next to it. That makes 15.",
+          simpler: {
+            q: "Which number means none at all?",
+            choices: ["0", "8"],
+            answer: 0,
+            why: "Zero means none.",
+            hints: ["", "8 means eight things. Zero is one round loop and means none."],
+          },
+        },
+      },
+    ],
+    activity: {
+      type: "sort",
+      prompt: "Is it ten and 3, or ten and 7?",
+      buckets: ["Ten and 3", "Ten and 7"],
+      items: [
+        { text: "13", bucket: 0 },
+        { text: "17", bucket: 1 },
+        { text: "🔟 + 🌰🌰🌰", bucket: 0 },
+        { text: "🔟 + 🌰🌰🌰🌰🌰🌰🌰", bucket: 1 },
+        { text: "10 + 3", bucket: 0 },
+        { text: "10 + 7", bucket: 1 },
+      ],
+    },
+    explain: {
+      prompt: "Tell me what the number 14 is made of. How would you show it?",
+      keyPoints: ["14 is ten and 4 more", "Fill one ten frame", "Put 4 more ones in the next frame"],
+    },
+    mastery: [
+      {
+        type: "number",
+        prompt: "One full ten frame and 8 more strawberries. 🔟 + 🍓🍓🍓🍓🍓🍓🍓🍓 How many in all?",
+        answer: 18,
+        hint: "Start at 10. Count on 8 more: 11, 12, 13...",
+        mistakes: [
+          { match: "8", coach: "That is just the extras. Add the full ten too." },
+          { match: "80", coach: "Ten and 8 is written 18. Write the 1 for the ten first." },
+        ],
+        seconds: 30,
+      },
+      {
+        type: "cloze",
+        text: "17 = 10 + {0}. 12 = 10 + {1}.",
+        blanks: [{ answers: ["7"] }, { answers: ["2"] }],
+        bank: ["1", "2", "7", "10"],
+        hint: "The 1 is the ten. The second digit tells how many more.",
+        mistakes: [{ match: "1", coach: "The 1 is already the ten. Look at the second digit." }],
+        seconds: 30,
+      },
+      {
+        type: "build",
+        prompt: "Build the number sentence for ten and 5 more.",
+        tiles: ["10", "+", "5", "=", "15"],
+        also: [["5", "+", "10", "=", "15"]],
+        distractors: ["50", "6"],
+        hint: "Start with 10. Then plus 5. Then equals. Ten and 5 more is fifteen.",
+        seconds: 40,
+      },
+      {
+        type: "place",
+        prompt: "Put each one on the number line.",
+        min: 0,
+        max: 20,
+        step: 1,
+        tolerance: 0,
+        items: [
+          { label: "ten and 1", value: 11 },
+          { label: "ten and 6", value: 16 },
+          { label: "two full tens", value: 20 },
+        ],
+        hint: "Find 10 first. Then count on the extra ones.",
+        seconds: 50,
+      },
+    ],
+    check: [
+      {
+        q: "What is ten and 4 more?",
+        choices: ["14", "41", "4"],
+        answer: 0,
+        why: "Ten and 4 more is 14.",
+      },
+      {
+        q: "What is 18 made of?",
+        choices: ["Eight tens", "Ten and 1", "Ten and 8 more"],
+        answer: 2,
+        why: "The 1 is one ten and the 8 is 8 more ones.",
+      },
+      {
+        q: "How many full ten frames make 20?",
+        choices: ["1", "2", "20"],
+        answer: 1,
+        why: "20 is two full tens.",
+      },
+      {
+        q: "Which number is ten and 1 more?",
+        choices: ["10", "12", "11"],
+        answer: 2,
+        why: "Ten and 1 more is 11.",
+      },
+    ],
+    task: {
+      kind: "project",
+      prompt: "With a grown-up, grab a handful of beans, buttons or cereal. Make a group of ten, then count the extras. Write the number you made, like ten and 6 is 16.",
+      rubric: [
+        "Made a group of exactly ten",
+        "Counted the extra ones",
+        "Said the teen number as ten and some more",
+        "Wrote the number with the digits in the right order",
+      ],
+    },
+  },
+
+  // 8. Counting to 100 by ones and tens; counting on from any number
+  {
+    id: "math-k.count-100",
+    title: "Counting to 100",
+    minutes: 15,
+    stage: "grammar",
+    standards: ["K.CC.A.1", "K.CC.A.2"],
+    read: [
+      "Counting is like climbing. Each number is one step higher.",
+      "We can count by ones: 1, 2, 3, 4, 5. When we get to 10, we keep going: 11, 12, 13. After 19 comes 20. After 29 comes 30. Each time we get to a 9, a new ten starts next.",
+      "We can count by tens, too: 10, 20, 30, 40, 50, 60, 70, 80, 90, 100. Counting by tens is fast! It is like jumping big steps.",
+      "We do not always have to start at 1. We can start at any number and count on. Start at 5: 6, 7, 8. Start at 47: 48, 49, 50.",
+      "100 is a big number. It is ten tens! Can you count all the way to 100?",
+    ].join("\n\n"),
+    keyIdeas: [
+      "Count by ones: each number is one more.",
+      "Count by tens: 10, 20, 30, all the way to 100.",
+      "You can start at any number and count on.",
+    ],
+    hook: {
+      text: "Pip wants to count the stars in the sky! ⭐ That is a lot of stars. Can we count all the way to 100? Let's figure it out together!",
+    },
+    teach: [
+      {
+        title: "Count by Ones",
+        teach:
+          "Let's count by ones. Each number is one more. 1, 2, 3, 4, 5, 6, 7, 8, 9, 10. Keep going! 11, 12, 13, all the way to 19. Then comes 20. Here is a secret. After a number that ends in 9, a new ten starts. After 29 comes 30. After 39 comes 40. After 99 comes 100!",
+        visual: {
+          type: "sequence",
+          prompt: "Put these numbers in counting order.",
+          steps: ["27", "28", "29", "30", "31"],
+        },
+        probe: {
+          type: "cloze",
+          text: "28, 29, {0}. 58, 59, {1}.",
+          blanks: [{ answers: ["30"] }, { answers: ["60"] }],
+          bank: ["30", "40", "60", "20"],
+          hint: "After a number that ends in 9, a new ten starts.",
+          mistakes: [
+            { match: "20", coach: "20 comes before 28. Count up to the next ten." },
+            { match: "40", coach: "That skips a ten. After 29 comes 30." },
+          ],
+          seconds: 30,
+        },
+        think: {
+          q: "What comes after 39?",
+          choices: ["30", "40", "310"],
+          answer: 1,
+          why: "After 39, a new ten starts: 40.",
+          hints: ["30 comes before 39. Count up, not down.", "", "After 39, a new ten starts. It is still a number with two digits."],
+        },
+        approaches: {
+          analogy: "Counting by ones is like walking up stairs one step at a time. You never skip a step.",
+          example: "Count from 17: 17, 18, 19. A new ten starts! 20, 21, 22.",
+          simpler: {
+            q: "What comes after 5?",
+            choices: ["6", "4"],
+            answer: 0,
+            why: "One more than 5 is 6.",
+            hints: ["", "4 comes before 5. Count up: 5, then 6."],
+          },
+        },
+      },
+      {
+        title: "Count by Tens",
+        teach:
+          "Counting by ones takes a long time. So let's count by tens! Each jump is ten more. 10, 20, 30, 40, 50. Keep going! 60, 70, 80, 90, 100. We made it to 100 with just ten jumps! Think of ten bundles of ten sticks. Count the bundles by tens. 10, 20, 30, all the way to 100.",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "🔟", back: "10" },
+            { front: "🔟🔟", back: "20" },
+            { front: "🔟🔟🔟", back: "30" },
+            { front: "🔟🔟🔟🔟🔟", back: "50" },
+            { front: "🔟🔟🔟🔟🔟🔟🔟🔟🔟🔟", back: "100" },
+          ],
+        },
+        probe: {
+          type: "place",
+          prompt: "Put the tens on the number line.",
+          min: 0,
+          max: 100,
+          step: 10,
+          tolerance: 0,
+          items: [
+            { label: "10", value: 10 },
+            { label: "40", value: 40 },
+            { label: "70", value: 70 },
+            { label: "100", value: 100 },
+          ],
+          hint: "Each mark is ten more. Count the jumps: 10, 20, 30...",
+          seconds: 45,
+        },
+        think: {
+          q: "Count by tens: 10, 20, 30. What comes next?",
+          choices: ["31", "40", "50"],
+          answer: 1,
+          why: "Ten more than 30 is 40.",
+          hints: ["31 is counting by ones. Jump a whole ten.", "", "50 skips a ten. Jump just one ten from 30."],
+        },
+        approaches: {
+          analogy: "Counting by tens is like a kangaroo hop. Instead of tiny steps, you take big jumps of ten.",
+          example: "You have 3 bundles of ten sticks. Count the bundles: 10, 20, 30. You have 30 sticks.",
+          simpler: {
+            q: "What comes after 10 when we count by tens?",
+            choices: ["20", "11"],
+            answer: 0,
+            why: "Ten more than 10 is 20.",
+            hints: ["", "11 is counting by ones. A ten jump takes you to 20."],
+          },
+        },
+      },
+      {
+        title: "Start Anywhere and Count On",
+        teach:
+          "We don't always start at 1. We can start at any number and count on. Start at 6. Say it in your head. Then count on. 7, 8, 9. Start at 23. Count on. 24, 25, 26. This helps when you already know part of a group. Six eggs are in the bowl. Three more come. Say six. Then count 7, 8, 9!",
+        visual: {
+          type: "flip",
+          cards: [
+            { front: "Start at 4", back: "5, 6, 7" },
+            { front: "Start at 12", back: "13, 14, 15" },
+            { front: "Start at 45", back: "46, 47, 48" },
+          ],
+        },
+        probe: {
+          type: "build",
+          prompt: "Start at 16 and count on. Tap the next three numbers in order.",
+          tiles: ["17", "18", "19"],
+          distractors: ["15", "20"],
+          hint: "Say 16 in your head. What number comes right after it?",
+          seconds: 30,
+        },
+        think: {
+          q: "Start at 8 and count on. What comes next?",
+          choices: ["7", "9", "10"],
+          answer: 1,
+          why: "One more than 8 is 9.",
+          hints: ["7 comes before 8. Count up, not down.", "", "10 skips a number. What comes right after 8?"],
+        },
+        approaches: {
+          analogy: "Counting on is like getting on a train that is already moving. You do not go back to the first stop. You start right where you are.",
+          example: "Start at 34. Count on: 35, 36, 37. We did not have to count from 1!",
+          simpler: {
+            q: "Start at 2. What comes next?",
+            choices: ["3", "1"],
+            answer: 0,
+            why: "One more than 2 is 3.",
+            hints: ["", "1 comes before 2. Count up!"],
+          },
+        },
+      },
+    ],
+    activity: {
+      type: "sequence",
+      prompt: "Count by tens. Put the numbers in order.",
+      steps: ["10", "20", "30", "40", "50", "60", "70", "80", "90", "100"],
+    },
+    explain: {
+      prompt: "Tell me how to count to 100 fast. Then show me how to count on from 7.",
+      keyPoints: ["Count by tens", "10, 20, 30 all the way to 100", "Start at 7 and count on: 8, 9, 10"],
+    },
+    mastery: [
+      {
+        type: "cloze",
+        text: "10, 20, 30, {0}, 50. 70, 80, {1}, 100.",
+        blanks: [{ answers: ["40"] }, { answers: ["90"] }],
+        bank: ["40", "90", "31", "60"],
+        hint: "Counting by tens, each number is ten more.",
+        mistakes: [{ match: "31", coach: "31 is counting by ones. Jump a whole ten." }],
+        seconds: 30,
+      },
+      {
+        type: "number",
+        prompt: "Start at 14 and count on 3 numbers. What number do you land on?",
+        answer: 17,
+        hint: "Say 14 in your head. Then count on three: 15, 16...",
+        mistakes: [
+          { match: "16", coach: "Count on three numbers: 15, 16, 17." },
+          { match: "3", coach: "Start at 14, not at 1. Count on from 14." },
+        ],
+        seconds: 30,
+      },
+      {
+        type: "sort",
+        prompt: "Does each number come before 50 or after 50?",
+        buckets: ["Before 50", "After 50"],
+        items: [
+          { text: "49", bucket: 0 },
+          { text: "51", bucket: 1 },
+          { text: "30", bucket: 0 },
+          { text: "70", bucket: 1 },
+          { text: "12", bucket: 0 },
+          { text: "99", bucket: 1 },
+        ],
+        hint: "Count by tens: 10, 20, 30, 40, 50. Numbers with a first digit smaller than 5 come before 50.",
+        seconds: 45,
+      },
+      {
+        type: "sequence",
+        prompt: "Put the numbers in counting order.",
+        steps: ["67", "68", "69", "70", "71"],
+        hint: "After a number that ends in 9, a new ten starts.",
+        seconds: 30,
+      },
+    ],
+    check: [
+      {
+        q: "What comes after 19?",
+        choices: ["20", "10", "91"],
+        answer: 0,
+        why: "After 19, a new ten starts: 20.",
+      },
+      {
+        q: "Count by tens: 50, 60. What comes next?",
+        choices: ["61", "70", "80"],
+        answer: 1,
+        why: "Ten more than 60 is 70.",
+      },
+      {
+        q: "Start at 9 and count on. What comes next?",
+        choices: ["8", "11", "10"],
+        answer: 2,
+        why: "One more than 9 is 10.",
+      },
+      {
+        q: "How many tens make 100?",
+        choices: ["10", "100", "1"],
+        answer: 0,
+        why: "Ten tens make 100.",
+      },
+    ],
+    task: {
+      kind: "speak",
+      prompt: "With a grown-up, count to 100 out loud. Then count to 100 by tens while you do ten jumping jacks. Last, your grown-up says a number, and you count on from there.",
+      rubric: [
+        "Counted toward 100 by ones",
+        "Counted by tens all the way to 100",
+        "Counted on from a number the grown-up said",
+        "Kept going when a new ten started",
+      ],
+    },
+  },
+]);

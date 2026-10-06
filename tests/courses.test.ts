@@ -29,7 +29,8 @@ describe("course content", () => {
       for (const lesson of course.lessons) {
         it(`${lesson.id} is complete and gradeable`, () => {
           const n = words(lesson.read);
-          expect(n, "reading length").toBeGreaterThanOrEqual(180);
+          // Grades K-2 read shorter lessons.
+          expect(n, "reading length").toBeGreaterThanOrEqual(course.grade !== undefined && course.grade <= 2 ? 80 : 180);
           expect(n, "reading length").toBeLessThanOrEqual(450);
           expect(lesson.read).not.toMatch(/[#*]{2,}|^\s*[-•]\s/m); // plain paragraphs, no markdown
           expect(lesson.keyIdeas.length).toBeGreaterThanOrEqual(2);

@@ -34,14 +34,17 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export default async function KidHome({ searchParams }: { searchParams: Promise<{ more?: string }> }) {
+export default async function KidHome({ searchParams }: { searchParams: Promise<{ more?: string; home?: string }> }) {
   const { kid } = await requireKid();
   const hero = heroOf(kid.id);
   if (!hero) redirect("/kid/hero?first=1");
+  const sp = await searchParams;
+  // Grades K-5 live in their explore world (docs/WORLDS.md); "home=1" shows this page from there.
+  if (kid.grade <= 5 && !sp.home) redirect("/kid/explore");
   const band = bandFor(kid.grade);
   const coins = coinsOf(kid.id);
   const progress = worldProgress(kid.id);
-  if ((await searchParams).more) extendPlan(kid.id);
+  if (sp.more) extendPlan(kid.id);
 
   const FEATURES = features();
   const DRILL = drillSettings();

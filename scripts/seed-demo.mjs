@@ -5,7 +5,7 @@
 //   2. node scripts/seed-demo.mjs
 //
 // Demo logins (local only): parent demo@example.test / demo1234,
-// kids Ava (PIN 1111) and Leo (PIN 2222).
+// kids Ava (PIN 1111), Leo (PIN 2222) and Mia (grade 1, PIN 3333).
 // Signed sessions are also written to <DATA_DIR>/demo-sessions.json so an AI
 // assistant can open kid pages directly (cookie name: lp_session).
 //
@@ -43,7 +43,7 @@ if (families.some((f) => f.name !== "Demo Family") && !process.argv.includes("--
 const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Denver" }).format(new Date());
 db.exec(
   [
-    "learning_events", "lesson_progress", "block_log", "goals", "drill_results", "test_scores", "tutor_messages", "issued_questions",
+    "explore_state", "minigame_progress", "learning_events", "lesson_progress", "block_log", "goals", "drill_results", "test_scores", "tutor_messages", "issued_questions",
     "activity_log", "quest_log", "sprint_log", "attempts", "kid_skills", "daily_plans", "kids", "parents", "families",
   ]
     .map((t) => `DELETE FROM ${t};`)
@@ -62,6 +62,9 @@ const addKid = db.prepare(
 );
 const ava = addKid.run(fam, "Ava", "🚀", 7, bcrypt.hashSync("1111", 10), 1840, focusYes).lastInsertRowid;
 const leo = addKid.run(fam, "Leo", "🐉", 6, bcrypt.hashSync("2222", 10), 320, focusNo).lastInsertRowid;
+// A younger kid for the K-5 explore worlds (docs/WORLDS.md). Change her grade (0 = K) to visit other worlds.
+const mia = addKid.run(fam, "Mia", "🦋", 1, bcrypt.hashSync("3333", 10), 60, focusNo).lastInsertRowid;
+db.prepare("UPDATE kids SET hero = ? WHERE id = ?").run(JSON.stringify({ skin: 2, hair: "curly", hairColor: 3, outfit: 6, hat: "none", pet: "cat" }), mia);
 
 // Mastered skills: everything through grade 5 plus a few grade 6 ones for Ava.
 const mastered = [
@@ -97,10 +100,11 @@ fs.writeFileSync(
       parent: session({ role: "parent", parentId: Number(parent), familyId: Number(fam) }),
       ava: session({ role: "kid", kidId: Number(ava), familyId: Number(fam) }),
       leo: session({ role: "kid", kidId: Number(leo), familyId: Number(fam) }),
+      mia: session({ role: "kid", kidId: Number(mia), familyId: Number(fam) }),
     },
     null,
     2,
   ),
 );
-console.log("Demo family ready: parent demo@example.test / demo1234, Ava PIN 1111, Leo PIN 2222.");
+console.log("Demo family ready: parent demo@example.test / demo1234, Ava PIN 1111, Leo PIN 2222, Mia (grade 1) PIN 3333.");
 console.log(`Sessions (12 hours) in ${path.join(dataDir, "demo-sessions.json")}`);

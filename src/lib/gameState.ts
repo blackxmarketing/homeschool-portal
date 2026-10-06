@@ -1,5 +1,6 @@
 import { getDb } from "./db";
-import { cleanHero, type Hero } from "./pixel/hero";
+import { cleanHero, DEFAULT_HERO, type Hero } from "./pixel/hero";
+import { isUnlockId, onlyOwned } from "./pixel/cosmetics";
 import { LANDS, type LandId } from "./pixel/world";
 import { awardXp, courseOverview, skillTable, teachProgress } from "./store";
 import { STRANDS } from "./curriculum/skills";
@@ -20,8 +21,29 @@ export function heroOf(kidId: number): Hero | null {
   }
 }
 
+/** Hero styles a kid has unlocked (docs/WORLDS.md), e.g. "pet:duckling". */
+export function unlocksOf(kidId: number): Set<string> {
+  const row = getDb().prepare("SELECT unlocks FROM kids WHERE id = ?").get(kidId) as { unlocks: string | null } | undefined;
+  try {
+    const v = JSON.parse(row?.unlocks ?? "[]");
+    return new Set(Array.isArray(v) ? v.filter((x) => typeof x === "string" && isUnlockId(x)) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+/** Adds unlocks; returns the ones that are new. */
+export function grantUnlocks(kidId: number, ids: string[]): string[] {
+  const have = unlocksOf(kidId);
+  const fresh = ids.filter((id) => isUnlockId(id) && !have.has(id));
+  if (!fresh.length) return [];
+  getDb().prepare("UPDATE kids SET unlocks = ? WHERE id = ?").run(JSON.stringify([...have, ...fresh]), kidId);
+  return fresh;
+}
+
+/** Saves the hero; anything not unlocked yet is swapped back for what they had. */
 export function saveHero(kidId: number, hero: unknown): Hero {
-  const clean = cleanHero(hero);
+  const clean = onlyOwned(cleanHero(hero), unlocksOf(kidId), heroOf(kidId) ?? DEFAULT_HERO);
   getDb().prepare("UPDATE kids SET hero = ? WHERE id = ?").run(JSON.stringify(clean), kidId);
   return clean;
 }

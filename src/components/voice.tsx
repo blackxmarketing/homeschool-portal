@@ -159,7 +159,8 @@ export function pickVoice(voices: SpeechSynthesisVoice[], kind: VoiceKind): { vo
 /** Splits text into sentences with their character ranges. */
 export function sentences(text: string): [number, number][] {
   const out: [number, number][] = [];
-  const re = /[^.!?]+(?:[.!?]+["')\]]*|$)\s*/g;
+  // A period inside a number (0.62), after a title (Dr. Carver) or inside U.S. doesn't end a sentence.
+  const re = /(?:[^.!?]|\.(?=\d)|(?<=\b(?:Dr|Mr|Mrs|Ms|Mt|St|Jr|Sr))\.|(?<=\b[A-Za-z])\.(?=[A-Za-z]\.)|(?<=\b[A-Z]\.[A-Z])\.(?=\s+[a-z]))+(?:[.!?]+["')\]]*|$)\s*/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(text))) {
     if (!m[0]) {

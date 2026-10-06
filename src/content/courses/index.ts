@@ -17,6 +17,7 @@ import { business45 } from "./business-45";
 import { businessHs } from "./business-hs";
 import { leadership45 } from "./leadership-45";
 import { leadershipHs } from "./leadership-hs";
+import { K5_COURSES } from "./k5";
 import { withMedia } from "../media";
 
 /** Default courses. Parents can edit these on the Content page. */
@@ -27,6 +28,8 @@ export const COURSES: Course[] = [
   science45, history45, writing45, money45, business45, leadership45,
   // Grades 9-12
   scienceHs, historyHs, writingHs, moneyHs, businessHs, leadershipHs,
+  // Grades K-5 (explore worlds)
+  ...K5_COURSES,
 ].map(withMedia);
 
 export type { Course, Lesson, CheckQuestion, Task, TaskKind, Stage } from "./types";

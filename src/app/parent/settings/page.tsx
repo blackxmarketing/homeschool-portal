@@ -3,7 +3,10 @@ import { addKidAction, focusAction, resetPlacementAction, schoolYearAction, upda
 import { requireParent } from "@/lib/auth";
 import { LIMITS } from "@/lib/focus";
 import { focusPresets } from "@/lib/content";
-import { AVATARS, getFamily, getFocus, listKids } from "@/lib/store";
+import { AVATARS, electivesOff, getFamily, getFocus, listKids } from "@/lib/store";
+
+/** Kindergarten is grade 0. */
+const GRADES = Array.from({ length: 13 }, (_, i) => i);
 
 const ATTENTION_OPTIONS = [
   { value: "no", label: "No" },
@@ -45,7 +48,13 @@ export default async function Settings({
             </div>
             <div>
               <label htmlFor="grade">Grade (for records)</label>
-              <input id="grade" name="grade" type="number" min={1} max={12} required />
+              <select id="grade" name="grade" required defaultValue="6">
+                {GRADES.map((g) => (
+                  <option key={g} value={g}>
+                    {g === 0 ? "Kindergarten" : `Grade ${g}`}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label htmlFor="pin">4-digit PIN</label>
@@ -96,7 +105,13 @@ export default async function Settings({
             <div className="row">
               <div>
                 <label>Grade</label>
-                <input name="grade" type="number" min={1} max={12} defaultValue={kid.grade} required />
+                <select name="grade" defaultValue={kid.grade} required>
+                  {GRADES.map((g) => (
+                  <option key={g} value={g}>
+                    {g === 0 ? "Kindergarten" : `Grade ${g}`}
+                  </option>
+                ))}
+                </select>
               </div>
               <div>
                 <label>Daily math goal (min)</label>
@@ -107,6 +122,13 @@ export default async function Settings({
                 <input name="pin" inputMode="numeric" pattern="\d{4}" maxLength={4} />
               </div>
             </div>
+            {kid.grade <= 5 && (
+              <label className="small" style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 10 }}>
+                <input type="checkbox" name="elective_span" defaultChecked={!electivesOff(kid.id).includes("span")} />
+                Spanish elective (grades K-5). When it&apos;s off, the Spanish zone in {kid.name}&apos;s world is closed.
+              </label>
+            )}
+            <input type="hidden" name="electives" value="1" />
             <p />
             <button className="btn">Save</button>
           </form>

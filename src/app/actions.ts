@@ -27,8 +27,7 @@ import {
   today,
   updateKid,
   verifyKidPin,
-  verifyParent,
-} from "@/lib/store";
+  verifyParent, setElectivesOff } from "@/lib/store";
 
 function str(form: FormData, key: string): string {
   return String(form.get(key) ?? "").trim();
@@ -79,7 +78,7 @@ function parseKidFields(form: FormData, path: string) {
   const grade = Number(form.get("grade"));
   const dailyGoal = Number(form.get("dailyGoal"));
   const pin = str(form, "pin");
-  if (!Number.isInteger(grade) || grade < 1 || grade > 12) back(path, "Pick a grade from 1 to 12.");
+  if (!Number.isInteger(grade) || grade < 0 || grade > 12) back(path, "Pick a grade from K to 12.");
   if (!Number.isInteger(dailyGoal) || dailyGoal < 10 || dailyGoal > 180) back(path, "Daily goal should be 10-180 minutes.");
   if (pin && !/^\d{4}$/.test(pin)) back(path, "PINs are exactly 4 digits.");
   return { grade, dailyGoal, pin };
@@ -108,6 +107,8 @@ export async function updateKidAction(form: FormData) {
   const kid = await ownKid(Number(form.get("kidId")));
   const fields = parseKidFields(form, "/parent/settings");
   updateKid(kid.id, { grade: fields.grade, dailyGoal: fields.dailyGoal, pin: fields.pin || undefined });
+  // Electives (grades K-5): a checked box means on.
+  if (form.get("electives") && fields.grade <= 5) setElectivesOff(kid.id, form.get("elective_span") ? [] : ["span"]);
   revalidatePath("/parent/settings");
   redirect("/parent/settings?saved=1");
 }

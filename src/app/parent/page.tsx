@@ -172,7 +172,7 @@ export default async function ParentHome({ searchParams }: { searchParams: Promi
           return (
             <div className="card" key={kid.id}>
               <h2>
-                {kid.avatar} {kid.name} <span className="muted small">· grade {kid.grade}</span>
+                {kid.avatar} {kid.name} <span className="muted small">· {kid.grade === 0 ? "kindergarten" : `grade ${kid.grade}`}</span>
               </h2>
               {!kid.placement_done ? (
                 <p className="muted">

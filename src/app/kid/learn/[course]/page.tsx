@@ -19,6 +19,9 @@ export default async function CoursePage({ params }: { params: Promise<{ course:
   // In the game world, a course is a land.
   const land = LANDS.find((l) => l.courses.includes(courseId));
   if (land && heroOf(kid.id)) redirect(`/kid/land/${land.id}`);
+  // Grades K-5 courses live in their explore world.
+  const k5 = /-(k|[0-5])$/.exec(courseId);
+  if (k5 && kid.grade <= 5) redirect(`/kid/explore/${k5[1]}`);
   const c = courseOverview(kid.id).find((x) => x.course.id === courseId);
   if (!c) notFound();
 

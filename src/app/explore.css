@@ -1,0 +1,76 @@
+/* Grades K-5 explore worlds (docs/WORLDS.md). */
+
+.explore-page { padding-top: 8px; }
+.explore { display: flex; flex-direction: column; gap: 8px; }
+.ex-hud { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; justify-content: space-between; }
+.ex-title { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ex-title .pixel-title { font-size: 1rem; margin: 0; }
+.ex-chapter { font-weight: 800; color: var(--k-muted); font-size: .85rem; }
+.ex-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.ex-chips .chip { border: 2px solid #1b1530; border-radius: 8px; box-shadow: 0 3px 0 #1b1530; }
+.ex-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.ex-stage { position: relative; height: min(66vh, 600px); min-height: 340px; border: 4px solid #1b1530; border-radius: 14px; overflow: hidden; box-shadow: 0 6px 0 #1b1530; background: #1b1530; touch-action: none; user-select: none; }
+.ex-canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; cursor: pointer; }
+.ex-goal { position: absolute; left: 8px; top: 8px; max-width: min(60%, 420px); padding: 4px 10px; border-radius: 8px; background: rgba(255, 255, 255, .88); border: 2px solid #1b1530; font-weight: 800; font-size: .8rem; color: #1b1530; pointer-events: none; }
+
+/* Touch pad: only on touch screens */
+.ex-pad { position: absolute; left: 10px; bottom: 10px; width: 150px; height: 150px; display: none; }
+.ex-pad-btn { position: absolute; width: 52px; height: 52px; border-radius: 12px; border: 3px solid #1b1530; background: rgba(255, 255, 255, .85); font-size: 1.2rem; color: #1b1530; touch-action: none; }
+.ex-pad-btn:active { background: #ffd43b; }
+.ex-pad-btn.up { left: 49px; top: 0; }
+.ex-pad-btn.down { left: 49px; bottom: 0; }
+.ex-pad-btn.left { left: 0; top: 49px; }
+.ex-pad-btn.right { right: 0; top: 49px; }
+@media (pointer: coarse) { .ex-pad { display: block; } }
+
+/* Talking to things */
+.ex-dialog { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); width: min(640px, calc(100% - 20px)); max-height: 70%; overflow: auto; padding: 12px 14px; border-radius: 12px; background: #fffdf5; border: 4px solid #1b1530; box-shadow: 0 5px 0 #1b1530; color: #1b1530; z-index: 3; }
+.ex-dialog-head { display: flex; align-items: center; gap: 8px; }
+.ex-dialog-head strong { font-family: var(--font-pixel), monospace; font-size: .7rem; flex: 1; }
+.ex-x { border: none; background: none; font-size: 1.1rem; cursor: pointer; color: #1b1530; min-width: 40px; min-height: 40px; }
+.ex-dialog-text { font-size: 1.1rem; font-weight: 700; margin: 8px 0; line-height: 1.45; }
+.explore.young .ex-dialog-text { font-size: 1.3rem; }
+.ex-dialog-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ex-games { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; width: 100%; }
+.ex-game { display: flex; flex-direction: column; gap: 2px; padding: 10px; border-radius: 10px; border: 3px solid #1b1530; background: #fff; box-shadow: 0 3px 0 #1b1530; color: #1b1530 !important; text-decoration: none; font-weight: 800; }
+.ex-game:hover { transform: translateY(-1px); }
+.ex-game.locked { opacity: .55; }
+.ex-game.here { background: #fff3bf; }
+.ex-game-icon { font-size: 1.6rem; }
+.ex-game-stars { font-size: .8rem; color: #b45309; }
+
+.ex-toasts { position: absolute; right: 10px; top: 10px; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; z-index: 4; pointer-events: none; }
+.ex-toast { display: flex; align-items: center; gap: 8px; max-width: 320px; padding: 8px 12px; border-radius: 10px; background: #fff3bf; border: 3px solid #1b1530; box-shadow: 0 3px 0 #1b1530; font-weight: 800; color: #1b1530; animation: ex-pop .3s ease-out both; }
+@keyframes ex-pop { from { transform: translateY(-8px) scale(.9); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Pip's story cards */
+.ex-story { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; background: rgba(20, 18, 48, .72); }
+.ex-story-card { width: min(560px, 100%); padding: 22px 20px 18px; border-radius: 16px; background: #fffdf5; border: 4px solid #1b1530; box-shadow: 0 8px 0 #1b1530; text-align: center; color: #1b1530; }
+.ex-story-pip { display: flex; justify-content: center; margin-top: -4px; }
+.ex-story-title { font-family: var(--font-pixel), monospace; font-size: .7rem; color: #6b3fd4; margin: 8px 0; }
+.ex-story-line { font-size: 1.25rem; font-weight: 700; line-height: 1.5; min-height: 4.5em; margin: 6px 0 10px; }
+.ex-story-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 12px; }
+.ex-story-dots span { width: 9px; height: 9px; border-radius: 50%; background: #dee2e6; }
+.ex-story-dots span.on { background: #f59f00; }
+.ex-story-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; align-items: center; }
+
+@media (max-width: 600px) {
+  .ex-stage { height: 58vh; min-height: 300px; }
+  .ex-goal { display: none; }
+  .ex-dialog-text { font-size: 1rem; }
+  .ex-story-line { font-size: 1.1rem; }
+  .ex-title .pixel-title { font-size: .8rem; }
+}
+@media (prefers-reduced-motion: reduce) { .ex-toast { animation: none; } }
+
+/* Locked styles in the hero creator */
+.swatch.locked { position: relative; opacity: .5; cursor: not-allowed; }
+.swatch .hc-lock { position: absolute; inset: 0; display: grid; place-items: center; font-size: .7rem; }
+
+/* The whole map */
+.ex-map-card { width: min(900px, 100%); padding: 12px; border-radius: 14px; background: #fffdf5; border: 4px solid #1b1530; box-shadow: 0 8px 0 #1b1530; color: #1b1530; }
+.ex-map-wrap { position: relative; margin-top: 6px; }
+.ex-map { display: block; width: 100%; height: auto; image-rendering: pixelated; border: 3px solid #1b1530; border-radius: 8px; cursor: pointer; }
+.ex-map-label { position: absolute; transform: translateX(-50%); padding: 1px 6px; border-radius: 6px; background: rgba(255, 255, 255, .9); border: 2px solid #1b1530; font-size: .7rem; font-weight: 800; white-space: nowrap; pointer-events: none; }
+@media (max-width: 600px) { .ex-map-label { font-size: .55rem; padding: 0 3px; } }

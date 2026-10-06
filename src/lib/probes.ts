@@ -105,7 +105,11 @@ export function publicProbe(p: Probe, seed: string): PublicProbe {
 const norm = (s: unknown) =>
   String(s ?? "")
     .toLowerCase()
+    // Punctuation doesn't matter, except a decimal point (2.5 is not 25). 1,000 is 1000.
+    .replace(/(\d),(?=\d{3}\b)/g, "$1")
+    .replace(/(\d)\.(?=\d)/g, "$1\u0000")
     .replace(/[“”"'’.,!?;:]/g, "")
+    .replace(/\u0000/g, ".")
     .replace(/\s+/g, " ")
     .trim();
 
@@ -169,8 +173,13 @@ export function gradeProbe(p: Probe, answer: unknown): Graded {
     }
     case "build": {
       const ids = arr.map(Number);
-      const parts = p.tiles.map((_, i) => ids[i] === i);
       const extra = ids.length !== p.tiles.length;
+      // Another right order (or the same words from duplicate tiles) counts too.
+      const all = [...p.tiles, ...(p.distractors ?? [])];
+      const built = ids.map((i) => all[i]);
+      const same = (want: string[]) => !extra && want.every((t, i) => built[i] === t);
+      if (same(p.tiles) || (p.also ?? []).some(same)) return out(p.tiles.map(() => true));
+      const parts = p.tiles.map((_, i) => ids[i] === i);
       const g = out(parts);
       return extra ? { ...g, correct: false } : g;
     }

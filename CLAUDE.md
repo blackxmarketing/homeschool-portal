@@ -1,6 +1,6 @@
 # Homeschool Learning Portal — notes for Claude
 
-A family homeschool portal for two kids in grades 6–8, built by their parents
+A family homeschool portal for kids in grades K–12 (the family's two are in grades 6–8), built by their parents
 (Jake and his wife) with Claude Code. Live at https://137-184-200-44.sslip.io.
 The look and feel follow 2 Hour Learning / Alpha School: bright royal blue and
 white, big friendly buttons, one screen at a time.
@@ -67,10 +67,16 @@ Write scripts to a file with the Write tool and run them with node instead.
   (teacher + captions + controls), `TeacherFace.tsx` (photo teacher with
   looping clips), `voice.tsx` (read-aloud and mic), `StoryBoard.tsx` (slides),
   `Probes.tsx` (interactive questions).
-- The kid side is a pixel-art game, Lumina: design in `docs/GAME.md`; art and
-  maps in `src/lib/pixel/` (drawn in code), game data in `src/lib/gameState.ts`,
-  screens in `src/components/pixel/`, pages `/kid` (world), `/kid/land/[id]`,
-  `/kid/hero`.
+- The kid side is a pixel-art game. Grades 6–12: Lumina, design in `docs/GAME.md`;
+  art and maps in `src/lib/pixel/` (drawn in code), game data in
+  `src/lib/gameState.ts`, screens in `src/components/pixel/`, pages `/kid`
+  (world), `/kid/land/[id]`, `/kid/hero`. Grades K–5: one walkable world per
+  grade (`docs/WORLDS.md`): `src/lib/explore/` (worlds and story, map
+  generator, tiles, saved state), `src/components/explore/ExploreWorld.tsx`,
+  pages `/kid/explore/[world]`. K–5 courses are `src/content/courses/k5/`
+  (ids like `math-k`, `ela-3`), with standards in `src/content/standards/`.
+- Story mini-games: `src/lib/minigames/` (logic, scored on the server) and
+  `src/components/minigames/` (screens); levels per grade band or per grade.
 - `src/app/kid/` — kid pages (home is `page.tsx`), `src/app/parent/` — parent
   pages, `src/app/api/` — routes (`coach` runs lesson coaching).
 - Styles: `src/app/kid-theme.css` (current kid look; tokens on `.kidworld`),

@@ -238,6 +238,15 @@ CREATE TABLE IF NOT EXISTS minigame_progress (
   PRIMARY KEY (kid_id, game, level)
 );
 
+-- Grades K-5 explore worlds (docs/WORLDS.md): where the hero stands and what they found, per world (JSON).
+CREATE TABLE IF NOT EXISTS explore_state (
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  world TEXT NOT NULL,
+  data TEXT NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (kid_id, world)
+);
+
 -- Finished focus sprints (Pomodoro-style work blocks).
 CREATE TABLE IF NOT EXISTS sprint_log (
   id INTEGER PRIMARY KEY,
@@ -259,6 +268,9 @@ const ADDED_COLUMNS: { table: string; column: string; ddl: string }[] = [
   // The game (docs/GAME.md): each kid's pixel hero (JSON) and coins.
   { table: "kids", column: "hero", ddl: "ALTER TABLE kids ADD COLUMN hero TEXT" },
   { table: "kids", column: "coins", ddl: "ALTER TABLE kids ADD COLUMN coins INTEGER NOT NULL DEFAULT 0" },
+  // Grades K-5 (docs/WORLDS.md): electives switched off (JSON list like ["span"]) and unlocked hero styles (JSON list of ids).
+  { table: "kids", column: "electives_off", ddl: "ALTER TABLE kids ADD COLUMN electives_off TEXT" },
+  { table: "kids", column: "unlocks", ddl: "ALTER TABLE kids ADD COLUMN unlocks TEXT" },
 ];
 
 function migrate(conn: Database.Database): void {

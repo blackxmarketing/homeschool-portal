@@ -52,6 +52,7 @@ function sanitizeLesson(raw: unknown, courseSubject: Subject, seen: Set<string>)
       ? { task: { kind: TASK_KINDS.includes(t.kind as TaskKind) ? (t.kind as TaskKind) : "write", prompt, rubric: strList(t.rubric, 8) } }
       : {}),
     ...sanitizeTeaching(raw),
+    ...(Array.isArray(raw.standards) ? { standards: strList(raw.standards, 20, 40) } : {}),
   };
 }
 
@@ -107,6 +108,8 @@ export function sanitizeCourses(raw: unknown, defaults: Course[]): Course[] {
       subject,
       blurb: str(c.blurb, 300),
       ...(c.band === "sprout" || c.band === "strategist" ? { band: c.band } : {}),
+      ...(Number.isInteger(c.grade) && (c.grade as number) >= 0 && (c.grade as number) <= 12 ? { grade: c.grade as number } : {}),
+      ...(c.elective === true ? { elective: true } : {}),
       teacher: {
         name: str(teacher.name, 60) || "Your teacher",
         avatar: str(teacher.avatar, 8) || "🎓",
@@ -374,7 +377,20 @@ export function sanitizeProbe(raw: unknown): Probe | null {
     case "build": {
       const tiles = strList(raw.tiles, 12, 120);
       if (tiles.length >= 2)
-        core = { type: "build", prompt: str(raw.prompt, 1000), tiles, ...(Array.isArray(raw.distractors) ? { distractors: strList(raw.distractors, 6, 120) } : {}) };
+        core = {
+          type: "build",
+          prompt: str(raw.prompt, 1000),
+          tiles,
+          ...(Array.isArray(raw.distractors) ? { distractors: strList(raw.distractors, 6, 120) } : {}),
+          // Other right orders must use exactly the same tiles.
+          ...(Array.isArray(raw.also)
+            ? (() => {
+                const key = [...tiles].sort().join("\u0001");
+                const also = raw.also.map((a: unknown) => strList(a, 20, 120)).filter((a: string[]) => a.length === tiles.length && [...a].sort().join("\u0001") === key).slice(0, 6);
+                return also.length ? { also } : {};
+              })()
+            : {}),
+        };
       break;
     }
     case "target": {

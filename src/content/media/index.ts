@@ -18,6 +18,7 @@ import { business45Media } from "./business-45";
 import { businessHsMedia } from "./business-hs";
 import { leadership45Media } from "./leadership-45";
 import { leadershipHsMedia } from "./leadership-hs";
+import { K5_MEDIA } from "./k5";
 
 export const MEDIA: Record<string, CourseMedia> = {
   science: scienceMedia,
@@ -38,6 +39,7 @@ export const MEDIA: Record<string, CourseMedia> = {
   "business-hs": businessHsMedia,
   "leadership-45": leadership45Media,
   "leadership-hs": leadershipHsMedia,
+  ...K5_MEDIA,
 };
 
 /** Adds the slides and videos to a course's lessons. */
