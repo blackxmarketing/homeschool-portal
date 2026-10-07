@@ -5,7 +5,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 make g+
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
-ENV NEXT_TELEMETRY_DISABLED=1
+# The Droplet has ~1 GB of RAM and 2 GB of swap. Without a ceiling Node stops
+# at its own default and dies rather than using the swap, which is what broke
+# every deploy once the app grew. Slower, but it finishes.
+ENV NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS=--max-old-space-size=1536
 RUN npm run build
 
 FROM node:22-slim

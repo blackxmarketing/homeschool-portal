@@ -2,3 +2,8 @@ node_modules
 .next
 data
 .env
+# Not needed to build or run the server, and the build box is small.
+tests
+docs
+deploy
+.git
