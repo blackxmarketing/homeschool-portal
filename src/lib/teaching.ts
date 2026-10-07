@@ -42,6 +42,11 @@ export interface TeachState {
   /** The current round of the interactive mastery check. */
   masteryItems?: { tries: number; credit: number; done: boolean; ms: number }[];
   masteryRounds?: number;
+  /** Which version of the lesson they are on (see lib/variants.ts). */
+  variant?: number;
+  /** Set when a kid has had plenty of goes and the mastery meter is not moving:
+   *  they are let through and the parents are told, rather than grinding on. */
+  stuck?: boolean;
 }
 
 export function emptySegment(): SegmentState {
@@ -63,6 +68,8 @@ export function parseState(raw: string | null | undefined, segments: number): Te
     masteryTries: s.masteryTries ?? 0,
     masteryItems: s.masteryItems,
     masteryRounds: s.masteryRounds ?? 0,
+    variant: s.variant ?? 0,
+    stuck: s.stuck ?? false,
   };
 }
 

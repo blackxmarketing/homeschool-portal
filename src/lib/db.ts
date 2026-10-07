@@ -247,6 +247,21 @@ CREATE TABLE IF NOT EXISTS explore_state (
   PRIMARY KEY (kid_id, world)
 );
 
+-- The hidden mastery meter (lib/masteryMeter.ts): one row per idea a kid has met.
+-- The angles column is a JSON list of the angles they have answered it from correctly.
+CREATE TABLE IF NOT EXISTS concept_mastery (
+  id INTEGER PRIMARY KEY,
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  subject TEXT NOT NULL,
+  concept TEXT NOT NULL,
+  p REAL NOT NULL DEFAULT 0.3,
+  angles TEXT NOT NULL DEFAULT '[]',
+  taught INTEGER NOT NULL DEFAULT 0,
+  last_seen INTEGER NOT NULL DEFAULT 0,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE (kid_id, concept)
+);
+
 -- Finished focus sprints (Pomodoro-style work blocks).
 CREATE TABLE IF NOT EXISTS sprint_log (
   id INTEGER PRIMARY KEY,

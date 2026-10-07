@@ -328,6 +328,8 @@ export function sanitizeProbe(raw: unknown): Probe | null {
         }
       : {}),
     ...(raw.seconds !== undefined ? { seconds: int(raw.seconds, 5, 600, 45) } : {}),
+    ...(str(raw.tests) ? { tests: slug(str(raw.tests, 60)) } : {}),
+    ...(str(raw.angle) ? { angle: slug(str(raw.angle, 60)) } : {}),
   };
   const num = (v: unknown, d: number) => (Number.isFinite(Number(v)) ? Number(v) : d);
   let core: Probe | null = null;

@@ -26,6 +26,8 @@ import type { Visual } from "./curriculum/answers";
 import { checkActivity, coachingFor, interactiveDone, LADDER, parseState, supportSummary, type SegmentState, type TeachState } from "./teaching";
 import { expectedSeconds, gradeProbe, probeSolution } from "./probes";
 import { adapt, buildProfile, conceptMastery, whatHelps, type Adaptation, type LearningEvent, type Profile } from "./learner";
+import { angleOf, applyEvidence, blockers, conceptOf, emptyMeter, legacyConcept, lessonMastered, type Evidence, type Meter } from "./masteryMeter";
+import type { Lesson, Probe } from "@/content/courses/types";
 
 export type Mode = "learn" | "review" | "placement";
 
@@ -1124,6 +1126,13 @@ export function strugglingSkills(kidId: number): string[] {
 /** Share of check questions needed to pass a lesson's check. */
 export const CHECK_PASS = 0.8;
 
+/**
+ * Rounds of the mastery check a kid may have before we stop asking. Past this
+ * the lesson is not landing, so they move on and it is flagged for a parent to
+ * sit down with them, rather than leaving them to grind on one idea.
+ */
+export const STUCK_AFTER_ROUNDS = 4;
+
 interface LessonRow {
   id: number;
   kid_id: number;
@@ -1243,13 +1252,30 @@ function maybeCompleteLesson(kidId: number, courseId: string, lessonId: string):
   const lesson = course?.lessons.find((l) => l.id === lessonId);
   const row = lessonRow(kidId, courseId, lessonId);
   if (!course || !lesson || !row || row.completed_day) return false;
-  const checkOk = lesson.check.length === 0 || !!row.check_passed;
   if (lesson.teach?.length) {
     const support = (getDb().prepare("SELECT support FROM lesson_progress WHERE id = ?").get(row.id) as { support: string | null }).support;
-    if (!interactiveDone(lesson, parseState(support, lesson.teach.length))) return false;
+    const state = parseState(support, lesson.teach.length);
+    if (!interactiveDone(lesson, state)) return false;
+    // The real gate for a taught lesson: every idea has to be mastered - shown
+    // from several angles, unaided, and taught back. The meter replaces the old
+    // "80% on the check questions" pass mark rather than sitting alongside it.
+    //
+    // A kid who has had plenty of goes without the meter moving is let through
+    // instead of grinding on one idea, and it is flagged for the parents
+    // (teachProgress().stuck, and lessonBlockers for the detail).
+    const meters = lessonMeters(kidId, courseId, lesson, lessonId);
+    if (meters.length && !lessonMastered(meters)) {
+      if ((state.masteryRounds ?? 0) < STUCK_AFTER_ROUNDS) return false;
+      if (!state.stuck) {
+        state.stuck = true;
+        saveTeachState(row.id, state);
+      }
+    }
+  } else if (lesson.check.length && !row.check_passed) {
+    // Older lessons with no teaching parts still go by the check questions.
+    return false;
   }
-  const taskOk = !lesson.task || row.task_status === "done" || row.task_status === "approved";
-  if (!checkOk || !taskOk) return false;
+  if (lesson.task && row.task_status !== "done" && row.task_status !== "approved") return false;
   const day = today();
   const db = getDb();
   db.transaction(() => {
@@ -1468,7 +1494,12 @@ export function recordExplain(kidId: number, courseId: string, lessonId: string,
   e.feedback = feedback.slice(0, 2000);
   if (understood || e.tries >= 3) e.done = true;
   saveTeachState(ctx.rowId, ctx.state);
-  if (understood) addXp(kidId, 20);
+  if (understood) {
+    addXp(kidId, 20);
+    // Explaining it back is what satisfies the meter's teach-back. Running out
+    // of tries is not: that is why e.done and understood are kept apart.
+    markTaught(kidId, courseId, lessonConcepts(ctx.lesson, lessonId));
+  }
   maybeCompleteLesson(kidId, courseId, lessonId);
   return { ...e };
 }
@@ -1543,6 +1574,132 @@ export function logLearningEvent(
       "INSERT INTO learning_events (kid_id, subject, concept, first_try, score, ms, expected_ms, helped, source, day, at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     )
     .run(kidId, e.subject, e.concept, e.firstTry ? 1 : 0, e.score, clampMs(e.ms), Math.round(e.expectedMs), e.helped ? 1 : 0, e.source, today(), Date.now());
+}
+
+// ---------------- The hidden mastery meter ----------------
+
+interface MeterRow {
+  p: number;
+  angles: string;
+  taught: number;
+  last_seen: number;
+}
+
+const rowToMeter = (r: MeterRow | undefined): Meter => {
+  if (!r) return emptyMeter();
+  let angles: string[] = [];
+  try {
+    const parsed = JSON.parse(r.angles);
+    if (Array.isArray(parsed)) angles = parsed.filter((a): a is string => typeof a === "string");
+  } catch {
+    angles = [];
+  }
+  return { p: r.p, angles, taught: !!r.taught, lastSeen: r.last_seen };
+};
+
+function saveMeter(kidId: number, subject: string, concept: string, m: Meter): void {
+  getDb()
+    .prepare(
+      `INSERT INTO concept_mastery (kid_id, subject, concept, p, angles, taught, last_seen) VALUES (?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT (kid_id, concept) DO UPDATE SET subject = excluded.subject, p = excluded.p, angles = excluded.angles,
+         taught = excluded.taught, last_seen = excluded.last_seen, updated_at = datetime('now')`,
+    )
+    .run(kidId, subject, concept, m.p, JSON.stringify(m.angles), m.taught ? 1 : 0, m.lastSeen);
+}
+
+/**
+ * How to rebuild a meter from answers a kid gave before the meter existed:
+ * which old learning_events rows belong to this idea, and what angle each was.
+ */
+interface MeterSeed {
+  /** Old concept ids for this idea, mapped to the angle of the probe that sits there. */
+  angleByLegacy: Map<string, string>;
+}
+
+/**
+ * The meter for one idea. A kid part-way through a lesson before the meter
+ * existed keeps their progress: the first read rebuilds it from the answers
+ * already on record.
+ */
+export function meterFor(kidId: number, subject: string, concept: string, seed?: MeterSeed): Meter {
+  const row = getDb().prepare("SELECT p, angles, taught, last_seen FROM concept_mastery WHERE kid_id = ? AND concept = ?").get(kidId, concept) as
+    | MeterRow
+    | undefined;
+  if (row) return rowToMeter(row);
+  if (!seed?.angleByLegacy.size) return emptyMeter();
+  const ids = [...seed.angleByLegacy.keys()];
+  const past = getDb()
+    .prepare(
+      `SELECT concept, first_try, score, ms, expected_ms, helped, at FROM learning_events
+       WHERE kid_id = ? AND concept IN (${ids.map(() => "?").join(", ")}) ORDER BY at`,
+    )
+    .all(kidId, ...ids) as { concept: string; first_try: number; score: number; ms: number; expected_ms: number; helped: number; at: number }[];
+  if (!past.length) return emptyMeter();
+  const seeded = past.reduce(
+    (m, r) =>
+      applyEvidence(m, {
+        concept,
+        angle: seed.angleByLegacy.get(r.concept) ?? "other",
+        correct: r.score >= 1,
+        firstTry: !!r.first_try,
+        // The old rows only recorded whether any help was used, so take the
+        // middle of the ladder rather than crediting or penalising too much.
+        rung: r.helped ? LADDER.analogy : 0,
+        ms: r.ms,
+        expectedMs: r.expected_ms,
+        at: r.at,
+      }),
+    emptyMeter(),
+  );
+  saveMeter(kidId, subject, concept, seeded);
+  return seeded;
+}
+
+/**
+ * Folds one answer into the meter for its idea and saves it.
+ * Call this *before* logging the learning event, so that rebuilding a meter
+ * from history can never count the same answer twice.
+ */
+export function recordEvidence(kidId: number, subject: string, e: Evidence, seed?: MeterSeed): Meter {
+  const next = applyEvidence(meterFor(kidId, subject, e.concept, seed), e);
+  saveMeter(kidId, subject, e.concept, next);
+  return next;
+}
+
+/** Marks an idea as taught back (the kid showed they can explain it). */
+export function markTaught(kidId: number, subject: string, concepts: string[]): void {
+  for (const c of concepts) {
+    const m = meterFor(kidId, subject, c);
+    if (!m.taught) saveMeter(kidId, subject, c, { ...m, taught: true });
+  }
+}
+
+/** Every idea a lesson teaches, with the old event ids and angles that feed each one. */
+export function lessonIdeas(lesson: Lesson, lessonId: string): Map<string, MeterSeed> {
+  const out = new Map<string, MeterSeed>();
+  const add = (probe: Probe, slot: string) => {
+    const concept = conceptOf(lessonId, probe);
+    const seed = out.get(concept) ?? { angleByLegacy: new Map<string, string>() };
+    seed.angleByLegacy.set(legacyConcept(lessonId, slot), angleOf(probe));
+    out.set(concept, seed);
+  };
+  (lesson.teach ?? []).forEach((s, i) => s.probe && add(s.probe, String(i)));
+  (lesson.mastery ?? []).forEach((p, i) => add(p, `m${i}`));
+  return out;
+}
+
+export const lessonConcepts = (lesson: Lesson, lessonId: string): string[] => [...lessonIdeas(lesson, lessonId).keys()];
+
+/** The meters for every idea in a lesson. */
+export function lessonMeters(kidId: number, courseId: string, lesson: Lesson, lessonId: string): Meter[] {
+  return [...lessonIdeas(lesson, lessonId)].map(([concept, seed]) => meterFor(kidId, courseId, concept, seed));
+}
+
+/** What is still standing between a kid and finishing a lesson, idea by idea. */
+export function lessonBlockers(kidId: number, courseId: string, lesson: Lesson, lessonId: string): { concept: string; blockers: string[] }[] {
+  return [...lessonIdeas(lesson, lessonId)]
+    .map(([concept, seed]) => ({ concept, blockers: blockers(meterFor(kidId, courseId, concept, seed)) }))
+    .filter((x) => x.blockers.length);
 }
 
 function courseEvents(kidId: number, subject: string): LearningEvent[] {
@@ -1646,21 +1803,40 @@ export function answerProbe(kidId: number, courseId: string, lessonId: string, s
   if (st.done) return { correct: true, graded: null, state: st, coaching: null, needsAi: false, solution: null };
   const graded = gradeProbe(probe, answer);
   st.ms = (st.ms ?? 0) + clampMs(ms);
-  const resolve = (finalScore: number) =>
+  const resolve = (finalScore: number, correct: boolean) => {
+    const firstTry = st.misses === 0 && st.lost === 0 && graded.correct;
+    const expectedMs = expectedSeconds(probe) * 1000;
+    recordEvidence(
+      kidId,
+      courseId,
+      {
+        concept: conceptOf(lessonId, probe),
+        angle: angleOf(probe),
+        correct,
+        firstTry,
+        // "I'm lost" costs the same as a hint: they still needed rescuing.
+        rung: Math.max(st.rung, st.lost > 0 ? LADDER.hint : 0),
+        ms: st.ms ?? 0,
+        expectedMs,
+        at: Date.now(),
+      },
+      lessonIdeas(ctx.lesson, lessonId).get(conceptOf(lessonId, probe)),
+    );
     logLearningEvent(kidId, {
       subject: courseId,
       concept: `${lessonId}#${segIndex}`,
-      firstTry: st.misses === 0 && st.lost === 0 && graded.correct,
+      firstTry,
       score: finalScore,
       ms: st.ms ?? 0,
-      expectedMs: expectedSeconds(probe) * 1000,
+      expectedMs,
       helped: st.rung > 0 || st.lost > 0,
       source: "probe",
     });
+  };
   if (graded.correct) {
     st.done = "passed";
     saveTeachState(ctx.rowId, ctx.state);
-    resolve(1);
+    resolve(1, true);
     addXp(kidId, st.misses === 0 ? 10 : 5);
     return { correct: true, graded, state: st, coaching: null, needsAi: false, solution: null };
   }
@@ -1673,7 +1849,7 @@ export function answerProbe(kidId: number, courseId: string, lessonId: string, s
   if (st.rung >= LADDER.reveal) {
     st.done = "supported";
     solution = probeSolution(probe);
-    resolve(graded.score);
+    resolve(graded.score, false);
   }
   saveTeachState(ctx.rowId, ctx.state);
   const c = coachingFor(seg, st, -1);
@@ -1724,13 +1900,30 @@ export function answerMasteryItem(
     item.done = true;
     item.credit = g.score * (item.tries === 1 ? 1 : 0.6);
     if (!g.correct) solution = probeSolution(p);
+    const expectedMs = expectedSeconds(p) * 1000;
+    recordEvidence(
+      kidId,
+      courseId,
+      {
+        concept: conceptOf(lessonId, p),
+        angle: angleOf(p),
+        correct: g.correct,
+        firstTry: g.correct && item.tries === 1,
+        // Right second time is a small cost; wrong twice means the answer was shown.
+        rung: g.correct ? (item.tries === 1 ? 0 : LADDER.hint) : LADDER.reveal,
+        ms: item.ms,
+        expectedMs,
+        at: Date.now(),
+      },
+      lessonIdeas(ctx.lesson, lessonId).get(conceptOf(lessonId, p)),
+    );
     logLearningEvent(kidId, {
       subject: courseId,
       concept: `${lessonId}#m${index}`,
       firstTry: g.correct && item.tries === 1,
       score: g.score,
       ms: item.ms,
-      expectedMs: expectedSeconds(p) * 1000,
+      expectedMs,
       helped: item.tries > 1 || (st.masteryRounds ?? 0) > 0,
       source: testOut ? "test-out" : "mastery",
     });
@@ -1746,13 +1939,17 @@ export function answerMasteryItem(
       st.activity.done = true;
       st.explain.done = true;
       st.explain.understood = true;
+      // Testing out at 90% is itself a demonstration, so it satisfies the teach-back.
+      markTaught(kidId, courseId, lessonConcepts(ctx.lesson, lessonId));
     }
     saveTeachState(ctx.rowId, st);
     getDb()
       .prepare("UPDATE lesson_progress SET check_best = MAX(check_best, ?), check_total = ?, check_passed = MAX(check_passed, ?), updated_at = datetime('now') WHERE id = ?")
       .run(Math.round(score * probes.length), probes.length, passed ? 1 : 0, row.id);
     addXp(kidId, Math.round(score * 25));
-    if (passed) completed = maybeCompleteLesson(kidId, courseId, lessonId);
+    // Tried on every finished round, not just a passing one: the meter decides,
+    // and a kid who has run out of road needs to be let through.
+    completed = maybeCompleteLesson(kidId, courseId, lessonId);
   } else {
     saveTeachState(ctx.rowId, st);
   }
@@ -1804,6 +2001,24 @@ export function answerReview(kidId: number, courseId: string, lessonId: string, 
   if (!seg?.probe) throw new PortalError("Unknown review question.");
   const graded = gradeProbe(seg.probe, answer);
   if (graded.correct || attempt >= 2) {
+    // Review is how a faded idea gets confirmed again, so it feeds the meter
+    // for the lesson the question came from, not the one being worked now.
+    const lesson = courseById(courseId)?.lessons.find((l) => l.id === lessonId);
+    recordEvidence(
+      kidId,
+      courseId,
+      {
+        concept: conceptOf(lessonId, seg.probe),
+        angle: angleOf(seg.probe),
+        correct: graded.correct,
+        firstTry: graded.correct && attempt <= 1,
+        rung: graded.correct ? (attempt <= 1 ? 0 : LADDER.hint) : LADDER.reveal,
+        ms,
+        expectedMs: expectedSeconds(seg.probe) * 1000,
+        at: Date.now(),
+      },
+      lesson ? lessonIdeas(lesson, lessonId).get(conceptOf(lessonId, seg.probe)) : undefined,
+    );
     logLearningEvent(kidId, {
       subject: courseId,
       concept: `${lessonId}#${segIndex}`,

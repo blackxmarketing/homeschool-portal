@@ -4,6 +4,7 @@ import type { Probe } from "@/content/courses/types";
 import { gradeProbe, leverPush, northernSeason, probeSolution, probeSolvable, publicProbe, yearsToReach } from "@/lib/probes";
 import { adapt, buildProfile, conceptMastery, whatHelps, type LearningEvent } from "@/lib/learner";
 import { sanitizeProbe } from "@/lib/courseContent";
+import { MIN_ANGLES, angleOf } from "@/lib/masteryMeter";
 
 describe("probe grading", () => {
   it("grades fill-in-the-blank with synonyms, case and spacing forgiven", () => {
@@ -68,7 +69,9 @@ describe("course probes", () => {
         ];
         expect(lesson.teach?.every((s) => !!s.probe), "every part has a probe").toBe(true);
         expect(lesson.mastery?.length, "mastery set").toBeGreaterThanOrEqual(3);
-        expect(new Set(lesson.mastery?.map((m) => m.type)).size, "mastery variety").toBeGreaterThanOrEqual(3);
+        // The meter will not call an idea mastered until a kid has shown it
+        // from MIN_ANGLES different angles, so every set has to offer that many.
+        expect(new Set(lesson.mastery?.map((m) => angleOf(m))).size, "mastery angles").toBeGreaterThanOrEqual(MIN_ANGLES);
         for (const [where, p] of all) {
           expect(probeSolvable(p), `${where} (${p.type}) is solvable`).toBe(true);
           expect(sanitizeProbe(p), `${where} survives editing`).toEqual(p);

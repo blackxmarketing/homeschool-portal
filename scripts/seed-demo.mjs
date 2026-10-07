@@ -43,7 +43,7 @@ if (families.some((f) => f.name !== "Demo Family") && !process.argv.includes("--
 const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Denver" }).format(new Date());
 db.exec(
   [
-    "explore_state", "minigame_progress", "learning_events", "lesson_progress", "block_log", "goals", "drill_results", "test_scores", "tutor_messages", "issued_questions",
+    "explore_state", "minigame_progress", "concept_mastery", "learning_events", "lesson_progress", "block_log", "goals", "drill_results", "test_scores", "tutor_messages", "issued_questions",
     "activity_log", "quest_log", "sprint_log", "attempts", "kid_skills", "daily_plans", "kids", "parents", "families",
   ]
     .map((t) => `DELETE FROM ${t};`)

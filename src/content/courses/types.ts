@@ -126,6 +126,13 @@ export type Probe = (
   mistakes?: Mistake[];
   /** Expected seconds for a kid who knows it (used to measure speed of knowledge). */
   seconds?: number;
+  /** Which idea this question is about, so the same idea asked several ways counts as one.
+   *  Short name like "hourly-rate". Without it, the question's place in the lesson is used. */
+  tests?: string;
+  /** The angle this question comes from, so a kid has to show an idea several ways rather
+   *  than the same way over and over: "symbolic", "visual", "real-world", "estimate"...
+   *  Without it, the shape of the question (number, place, build...) stands in. */
+  angle?: string;
 };
 
 /**
