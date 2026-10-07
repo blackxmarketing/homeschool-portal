@@ -153,6 +153,17 @@ export interface Beat {
   emoji?: string;
   /** A big number or word to show, e.g. "1668". */
   big?: string;
+  /**
+   * An animated pixel scene, drawn in the game's own art and built up as the
+   * teacher talks: a name from src/lib/pixel/lessonArt.ts, e.g. "redi-jars".
+   */
+  art?: string;
+  /**
+   * Key words that land on the picture as the teacher says them, instead of a
+   * paragraph of caption. `at` is the words they are said at; `x`/`y` are
+   * percentages across the picture (defaults spread them along the bottom).
+   */
+  words?: { text: string; at?: string; x?: number; y?: number }[];
 }
 
 /** A short video to watch after the teacher explains. Shown only after the kid presses play. */

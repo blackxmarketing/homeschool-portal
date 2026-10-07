@@ -2,10 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { beatAt, slidePositions, type PublicBeat, type PublicShow } from "@/lib/storyboard";
+import LessonScene from "./pixel/LessonScene";
 import { stopSpeaking, useSpeech } from "./voice";
 
-/** One slide: a real photo, a big emoji picture, or a big word or number. */
-function Slide({ b }: { b: PublicBeat }) {
+/** One slide: an animated pixel scene, a real photo, a big emoji picture, or a big word. */
+function Slide({ b, progress, charIndex, text }: { b: PublicBeat; progress: number; charIndex: number; text: string }) {
+  if (b.art) return <LessonScene beat={b} progress={progress} charIndex={charIndex} text={text} />;
   if (b.photo) {
     return (
       <div className="sb-slide sb-photo">
@@ -55,6 +57,11 @@ export function StoryBoard({ id, text, show }: { id: string; text: string; show:
   if (!beats.length) return null;
   const b = beats[Math.min(index, beats.length - 1)];
   const next = beats[index + 1];
+  // How far through this picture's own stretch of the words we are, so an
+  // animated scene builds itself in step with what is being said.
+  const from = positions[index] ?? 0;
+  const to = positions[index + 1] ?? text.length;
+  const progress = pos < 0 ? 1 : Math.max(0, Math.min(1, (pos - from) / Math.max(1, to - from)));
   const go = (i: number) => {
     if (active) stopSpeaking();
     setPicked((i + beats.length) % beats.length);
@@ -64,9 +71,10 @@ export function StoryBoard({ id, text, show }: { id: string; text: string; show:
     <figure className="sb" aria-roledescription="slideshow">
       <div className="sb-screen">
         <div key={index} className="sb-frame">
-          <Slide b={b} />
+          <Slide b={b} progress={progress} charIndex={pos} text={text} />
         </div>
-        <figcaption className="sb-caption">{b.caption}</figcaption>
+        {/* An animated scene says it with key words instead of a caption bar. */}
+        {!(b.art && b.words?.length) && <figcaption className="sb-caption">{b.caption}</figcaption>}
         {b.photo && (
           <a className="sb-credit" href={b.photo.link} target="_blank" rel="noreferrer noopener">
             📷 {b.photo.credit} · {b.photo.license}

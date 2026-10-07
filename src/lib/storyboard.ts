@@ -62,6 +62,8 @@ export interface PublicBeat {
   caption: string;
   emoji?: string;
   big?: string;
+  art?: string;
+  words?: { text: string; at?: string; x?: number; y?: number }[];
   photo?: { src: string; width: number; height: number; credit: string; license: string; link: string };
 }
 
@@ -81,7 +83,17 @@ export function publicShow(
     return {
       ...(b.at ? { at: b.at } : {}),
       caption: b.caption,
-      ...(photo ? { photo: { ...photo, credit: cleanCredit(photo.credit) } } : b.emoji ? { emoji: b.emoji } : b.big ? { big: b.big } : {}),
+      ...(b.words?.length ? { words: b.words } : {}),
+      // An animated scene wins over a photo: it is the one drawn for this moment.
+      ...(b.art
+        ? { art: b.art }
+        : photo
+          ? { photo: { ...photo, credit: cleanCredit(photo.credit) } }
+          : b.emoji
+            ? { emoji: b.emoji }
+            : b.big
+              ? { big: b.big }
+              : {}),
     };
   });
   if (!beats.length && !watch) return undefined;

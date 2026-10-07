@@ -1,6 +1,7 @@
 import type { Beat, CheckQuestion, Course, Lesson, Probe, Scene, Segment, Stage, TaskKind, Term, ThinkQuestion, Video, Widget } from "@/content/courses/types";
 import { isYoutubeId } from "./storyboard";
 import { SUBJECTS, type Subject } from "./compliance";
+import { hasScene } from "./pixel/lessonArt";
 
 /**
  * Validation and plain-text formats for course content, so parents can edit
@@ -244,9 +245,27 @@ export function sanitizeShow(raw: unknown): Beat[] | null {
       const photo = str(b.photo, 200);
       const emoji = str(b.emoji, 40);
       const big = str(b.big, 60);
-      if (!caption || !(photo || emoji || big)) return null;
+      // Only a scene that actually exists in the art; a typo falls back to the
+      // other kinds rather than leaving a blank board.
+      const art = hasScene(str(b.art, 60)) ? str(b.art, 60) : "";
+      if (!caption || !(art || photo || emoji || big)) return null;
       const at = str(b.at, 120);
-      return { ...(at ? { at } : {}), caption, ...(photo ? { photo } : emoji ? { emoji } : { big }) };
+      const words = (Array.isArray(b.words) ? b.words : [])
+        .filter(isObj)
+        .map((w) => ({
+          text: str(w.text, 40),
+          ...(str(w.at) ? { at: str(w.at, 120) } : {}),
+          ...(Number.isFinite(Number(w.x)) ? { x: int(w.x, 0, 100, 50) } : {}),
+          ...(Number.isFinite(Number(w.y)) ? { y: int(w.y, 0, 100, 78) } : {}),
+        }))
+        .filter((w) => w.text)
+        .slice(0, 5);
+      return {
+        ...(at ? { at } : {}),
+        caption,
+        ...(words.length ? { words } : {}),
+        ...(art ? { art } : photo ? { photo } : emoji ? { emoji } : { big }),
+      };
     })
     .filter((b): b is Beat => !!b)
     .slice(0, 8);

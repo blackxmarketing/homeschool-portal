@@ -25,22 +25,34 @@ export const scienceMedia: CourseMedia = {
         scenes: [
           {
             show: [
-              { emoji: "❓🔬", caption: "Science starts with a question an experiment can answer" },
-              { at: "Is chocolate ice cream", emoji: "🍫🍦", caption: "Best flavour? Nothing in the world measures best" },
-              { at: "Does warm water dissolve", photo: "Sugar", caption: "Does warm water dissolve sugar faster? Now you can test it" },
-              { at: "names something you can change", emoji: "🎛️📏", caption: "A good question: one thing to change, one thing to measure" },
+              {
+                art: "testable-or-not",
+                caption: "A question science can answer, and one it cannot",
+                words: [
+                  { text: "no way to measure", at: "There is no instrument", x: 26, y: 86 },
+                  { text: "a glass and a stopwatch", at: "You could answer that", x: 72, y: 86 },
+                ],
+              },
+              { at: "names something you can change", art: "three-variables", caption: "One thing to change, one thing to measure", words: [{ text: "change one · measure one", at: "names something you can change", x: 50, y: 88 }] },
             ],
           },
           {
             show: [
-              { big: "Hypothesis", caption: "A prediction you make before you test" },
-              { at: "if, then, because", big: "if · then · because", caption: "The three parts of every hypothesis" },
-              { at: "If I stir sugar", emoji: "☕🥄⏱️", caption: "If warm water, then faster, because the molecules move faster" },
+              {
+                art: "if-then-because",
+                caption: "The three parts of every hypothesis",
+                words: [
+                  { text: "if", at: "if, then, because", x: 20, y: 86 },
+                  { text: "then", at: "then it will dissolve", x: 50, y: 86 },
+                  { text: "because", at: "because warmer water", x: 80, y: 86 },
+                ],
+              },
+              { at: "The if names what you change", art: "warm-vs-cold", caption: "If warm water, then faster, because the molecules move faster", words: [{ text: "warm wins", at: "The then names what", x: 28, y: 14 }] },
             ],
           },
           {
             show: [
-              { emoji: "🎯🤷", caption: "Not a wild guess, and not a fact you already know" },
+              { big: "Hypothesis", caption: "Not a wild guess, and not a fact you already know" },
               { at: "could knock it down", big: "Could it be proven wrong?", caption: "If no result could knock it down, it is not a hypothesis" },
               { at: "being wrong is not failure", emoji: "❌➡️💡", caption: "A hypothesis that gets knocked down still teaches you something true" },
             ],
@@ -89,18 +101,33 @@ export const scienceMedia: CourseMedia = {
         scenes: [
           {
             show: [
-              { photo: "Paper towel", caption: "Which towel soaks up more water?" },
-              { at: "a big sheet of Brand A", emoji: "🟦⬛", caption: "A big sheet of Brand A, a small sheet of Brand B" },
-              { at: "The brand changed", emoji: "⚠️2️⃣", caption: "Two things changed at once: the brand AND the size" },
-              { at: "You cannot tell", big: "You cannot tell", caption: "When two things move together, the result cannot separate them" },
+              {
+                art: "unfair-towels",
+                caption: "Two things changed at once, so the result proves nothing",
+                words: [
+                  { text: "different brand", at: "The brand changed", x: 26, y: 88 },
+                  { text: "different size too", at: "But the size changed too", x: 72, y: 88 },
+                  { text: "you cannot tell", at: "You cannot tell", x: 50, y: 12 },
+                ],
+              },
             ],
           },
           {
             show: [
+              // Redi and the housefly are worth a real photograph: they are a
+              // real person and a real specimen, not an idea.
               { photo: "Francesco Redi", caption: "Redi held everything still but one thing" },
-              { at: "Same meat in every jar", emoji: "🫙🥩🫙", caption: "Same meat, same jars, same room, same days" },
-              { at: "gauze cover", photo: "Housefly", caption: "One difference: gauze or no gauze. So the cover had to be the answer" },
-              { at: "nowhere to hide", big: "Change one thing", caption: "Hold everything still but one, and the result has nowhere to hide" },
+              {
+                at: "Same meat in every jar",
+                art: "redi-jars",
+                caption: "Same meat, same jars, same room. One difference: the cover",
+                words: [
+                  { text: "open", at: "some jars had a gauze", x: 16, y: 90 },
+                  { text: "sealed", at: "and some did not", x: 50, y: 90 },
+                  { text: "gauze", at: "maggots turned up only", x: 84, y: 90 },
+                ],
+              },
+              { at: "gauze cover", photo: "Housefly", caption: "Maggots come from fly eggs, not from the meat" },
             ],
           },
         ],
@@ -116,9 +143,16 @@ export const scienceMedia: CourseMedia = {
         scenes: [
           {
             show: [
-              { emoji: "🔁🔁🔁", caption: "One trial could be a fluke, so run it again" },
-              { at: "take the average", big: "(9 + 10 + 11) ÷ 3 = 10", caption: "Average: add the results, divide by how many" },
-              { at: "wins all three times", emoji: "🥇🥇🥇", caption: "Three wins out of three? Now you have something" },
+              {
+                art: "three-trials",
+                caption: "Run it three times, then take the average",
+                words: [
+                  { text: "trial 1", at: "Maybe that sheet had a tear", x: 18, y: 88 },
+                  { text: "trial 2", at: "Maybe your hand slipped", x: 40, y: 88 },
+                  { text: "trial 3", at: "usually three at minimum", x: 62, y: 88 },
+                  { text: "average", at: "take the average", x: 86, y: 30 },
+                ],
+              },
             ],
           },
           {

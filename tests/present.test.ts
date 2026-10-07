@@ -106,12 +106,27 @@ describe.each(presented)("$course / $lesson.id", ({ lesson }) => {
     }
   });
 
-  it("changes the slide often enough that nothing sits still for long", () => {
+  it("never leaves a still picture up for long", () => {
     for (const seg of lesson.teach ?? []) {
       for (const [j, sc] of (seg.present ?? []).entries()) {
-        const perSlide = words(sc.say) / (sc.show?.length ?? 1);
-        // ~140 words a minute, so 60 words is roughly 25 seconds on one picture.
-        expect(perSlide, `${seg.title} scene ${j + 1} words per slide`).toBeLessThanOrEqual(60);
+        // An animated scene builds the whole way through its stretch of the
+        // words, so it is allowed to cover more of them. A still picture is
+        // not: ~140 words a minute means 60 words is about 25 seconds of
+        // staring at the same thing.
+        const still = (sc.show ?? []).filter((b) => !b.art).length;
+        if (!still) continue;
+        const animated = (sc.show ?? []).length - still;
+        const perStill = words(sc.say) / (still + animated * 2);
+        expect(perStill, `${seg.title} scene ${j + 1} words per still picture`).toBeLessThanOrEqual(60);
+      }
+    }
+  });
+
+  it("uses an animated scene wherever one picture has to carry a whole scene", () => {
+    for (const seg of lesson.teach ?? []) {
+      for (const [j, sc] of (seg.present ?? []).entries()) {
+        if ((sc.show?.length ?? 0) !== 1) continue;
+        expect(sc.show![0].art, `${seg.title} scene ${j + 1} is one picture, so it should move`).toBeTruthy();
       }
     }
   });

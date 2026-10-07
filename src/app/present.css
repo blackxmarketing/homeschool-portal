@@ -160,3 +160,25 @@
 @media (prefers-reduced-motion: reduce) {
   .pres-brief, .pres-recap { animation: none; }
 }
+
+/* ---- Animated pixel scenes on the board --------------------------------- */
+/* The picture is drawn in the game's own art and builds as the teacher talks,
+   with the key words landing on it as they are said. */
+.sb-art { position: relative; width: 100%; aspect-ratio: 96 / 54; background: #dfe7ff; }
+.sb-art-canvas { width: 100% !important; height: 100% !important; display: block; image-rendering: pixelated; }
+.sb-word {
+  position: absolute; transform: translate(-50%, -50%) scale(.7);
+  font-family: var(--font-pixel), monospace; font-size: .62rem; line-height: 1;
+  color: #1b1530; background: #fff3bf;
+  border: 2px solid #1b1530; border-radius: 6px; box-shadow: 0 3px 0 #1b1530;
+  padding: 5px 8px; white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: opacity .18s ease, transform .18s cubic-bezier(.2, 1.6, .4, 1);
+}
+.sb-word.in { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+@media (max-width: 560px) {
+  .sb-word { font-size: .48rem; padding: 3px 5px; border-width: 2px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sb-word { transition: none; }
+}
