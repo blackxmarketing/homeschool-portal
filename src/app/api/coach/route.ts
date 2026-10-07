@@ -11,6 +11,7 @@ import {
   retryMastery,
   answerProbe,
   answerReview,
+  answerCheckin,
   answerSimpler,
   answerThink,
   checkSegmentVisual,
@@ -28,6 +29,7 @@ import {
  *  { action: "think",    courseId, lessonId, seg, choice }   quick-think answer -> coaching ladder
  *  { action: "simpler",  courseId, lessonId, seg, choice }   the smaller first-step question
  *  { action: "lost",     courseId, lessonId, seg }           "I'm lost" -> next kind of help
+ *  { action: "checkin",  courseId, lessonId, seg, scene, answer }  a quick check during the teacher's talk
  *  { action: "activity", courseId, lessonId, answer }        hands-on activity
  *  { action: "explain",  courseId, lessonId, text }          explain it back in your own words
  *  { action: "ask",      courseId, lessonId, seg, text }     the kid asks the teacher a question (spoken or typed)
@@ -50,6 +52,7 @@ export async function POST(req: Request) {
     testOut?: boolean;
     attempt?: number;
     index?: number;
+    scene?: number;
   };
   if (!b.courseId || !b.lessonId) return NextResponse.json({ error: "Bad request." }, { status: 400 });
   const { courseId, lessonId } = b;
@@ -124,6 +127,10 @@ export async function POST(req: Request) {
 
     if (b.action === "visual" && Array.isArray(b.answer)) {
       return NextResponse.json(checkSegmentVisual(kid.id, courseId, lessonId, seg, b.answer.map((x) => Number(x))));
+    }
+
+    if (b.action === "checkin") {
+      return NextResponse.json(answerCheckin(kid.id, courseId, lessonId, seg, Number(b.scene) || 0, b.answer, Number(b.ms) || 0));
     }
 
     if (b.action === "simpler") return NextResponse.json(answerSimpler(kid.id, courseId, lessonId, seg, Number(b.choice)));

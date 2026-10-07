@@ -54,11 +54,19 @@ describe("lessons become tutoring conversations", () => {
         const steps = buildSteps(inputFor(COURSES.indexOf(c), c.lessons.indexOf(L)));
         let run = 0;
         let longest = 0;
+        let scenes = 0;
+        let longestScenes = 0;
         for (const s of steps) {
-          run = s.kind === "say" ? run + 1 : 0;
+          // Presented scenes are the teacher talking too, so they count here.
+          run = s.kind === "say" || s.kind === "present" ? run + 1 : 0;
           longest = Math.max(longest, run);
+          scenes = s.kind === "present" ? scenes + 1 : 0;
+          longestScenes = Math.max(longestScenes, scenes);
         }
         expect(longest, `${L.id}: too many lines in a row`).toBeLessThanOrEqual(6);
+        // A scene is half a minute of talking, so two back to back is the limit
+        // before the kid needs something to do.
+        expect(longestScenes, `${L.id}: too many scenes in a row`).toBeLessThanOrEqual(2);
         expect(steps.filter((s) => s.kind !== "say").length, L.id).toBeGreaterThanOrEqual(L.teach.length);
         // Every teaching part ends with a hands-on problem, and nothing is multiple choice.
         L.teach.forEach((_, i) => expect(steps.some((s) => s.kind === "probe" && s.seg === i), `${L.id} part ${i + 1}`).toBe(true));

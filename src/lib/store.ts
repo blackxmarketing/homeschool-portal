@@ -1965,6 +1965,47 @@ export function answerMasteryItem(
   };
 }
 
+/**
+ * A quick check during the teacher's presentation. Graded on the server like
+ * everything else, and it feeds the mastery meter as another angle on the
+ * lesson's idea - but it does not consume the part's own problem.
+ */
+export function answerCheckin(kidId: number, courseId: string, lessonId: string, segIndex: number, sceneIndex: number, answer: unknown, ms: number) {
+  const ctx = teachContext(kidId, courseId, lessonId);
+  const scene = ctx.lesson.teach?.[segIndex]?.present?.[sceneIndex];
+  if (!scene?.check) throw new PortalError("Nothing to check here.");
+  const p = scene.check;
+  const graded = gradeProbe(p, answer);
+  const expectedMs = expectedSeconds(p) * 1000;
+  recordEvidence(
+    kidId,
+    courseId,
+    {
+      concept: conceptOf(lessonId, p),
+      angle: angleOf(p),
+      correct: graded.correct,
+      firstTry: graded.correct,
+      rung: 0,
+      ms: clampMs(ms),
+      expectedMs,
+      at: Date.now(),
+    },
+    lessonIdeas(ctx.lesson, lessonId).get(conceptOf(lessonId, p)),
+  );
+  logLearningEvent(kidId, {
+    subject: courseId,
+    concept: `${lessonId}#${segIndex}.${sceneIndex}`,
+    firstTry: graded.correct,
+    score: graded.score,
+    ms: clampMs(ms),
+    expectedMs,
+    helped: false,
+    source: "checkin",
+  });
+  if (graded.correct) addXp(kidId, 5);
+  return { correct: graded.correct, parts: graded.parts, coach: graded.correct ? null : (graded.coach ?? p.hint ?? null), detail: graded.detail };
+}
+
 /** Starts a fresh round of the mastery check after a kid didn't pass. */
 export function retryMastery(kidId: number, courseId: string, lessonId: string) {
   const ctx = teachContext(kidId, courseId, lessonId);

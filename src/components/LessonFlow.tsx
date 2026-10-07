@@ -11,6 +11,7 @@ import type { GameInfo } from "./pixel/QuestScene";
 import type { PublicWidget } from "@/lib/teaching";
 import type { PublicProbe } from "@/lib/probes";
 import type { PublicShow } from "@/lib/storyboard";
+import type { PlanItem } from "@/lib/lessonPlan";
 
 type PlayerProps = React.ComponentProps<typeof LessonPlayer>;
 
@@ -36,6 +37,12 @@ export default function LessonFlow({
     adaptation?: AdaptView;
     review?: { lessonId: string; seg: number; title: string; probe: PublicProbe }[];
     mastery?: PublicProbe[];
+    lessonTitle?: string;
+    objectives?: string[];
+    keyIdeas?: string[];
+    plan?: PlanItem[];
+    hasMastery?: boolean;
+    hasTask?: boolean;
   };
   interactiveDone: boolean;
   tutorMode?: boolean;
@@ -62,6 +69,12 @@ export default function LessonFlow({
         adaptation={teach.adaptation}
         review={teach.review}
         mastery={teach.mastery}
+        lessonTitle={teach.lessonTitle}
+        objectives={teach.objectives}
+        keyIdeas={teach.keyIdeas}
+        plan={teach.plan}
+        hasMastery={teach.hasMastery}
+        hasTask={teach.hasTask}
         onFinished={(how) => {
           setTeachingDone(true);
           if (how === "tested-out") setCheckPassed(true);

@@ -16,7 +16,13 @@ import type { PublicWidget } from "@/lib/teaching";
 import type { PublicProbe } from "@/lib/probes";
 import type { PublicShow } from "@/lib/storyboard";
 import { buildSteps, compress, partNames, type TutorStep } from "@/lib/tutorFlow";
+import LessonBrief from "./present/LessonBrief";
+import PlanRail from "./present/PlanRail";
+import SceneView from "./present/SceneView";
+import CheckinView from "./present/CheckinView";
+import Recap from "./present/Recap";
 import { inFlow, isFastGuess, nextMove, priorRiskFor, type Move, type Signals } from "@/lib/struggle";
+import type { PlanItem } from "@/lib/lessonPlan";
 
 /**
  * The tutor: one screen, Synthesis-style. The teacher says a line or two at a
@@ -50,6 +56,13 @@ interface Props {
   mastery?: PublicProbe[];
   /** The game world: challenges become quest scenes in this land. */
   game?: GameInfo;
+  /** What the lesson promises, and the plan for getting there. */
+  lessonTitle?: string;
+  objectives?: string[];
+  keyIdeas?: string[];
+  plan?: PlanItem[];
+  hasMastery?: boolean;
+  hasTask?: boolean;
 }
 
 async function coach<T>(body: Record<string, unknown>): Promise<T> {
@@ -172,7 +185,7 @@ export default function TutorSession(props: Props) {
   // Get the next couple of lines ready so the teacher never pauses to load.
   useEffect(() => {
     if (!started) return;
-    for (const n of steps.slice(idx, idx + 3)) if (n.kind === "say") prefetchVoice(n.text, voiceKind);
+    for (const n of steps.slice(idx, idx + 3)) if (n.kind === "say" || n.kind === "present") prefetchVoice(n.text, voiceKind);
   }, [started, idx, steps, voiceKind]);
 
   const setLine = useCallback((text: string, tone?: string) => {
@@ -193,6 +206,9 @@ export default function TutorSession(props: Props) {
     if (!started || !step) return;
     setReplays(0);
     if (step.kind === "say") setLine(step.text);
+    else if (step.kind === "present") setLine(step.text);
+    else if (step.kind === "checkin") setLine(`${step.text} ${probeSpeech(step.probe)}`.trim());
+    else if (step.kind === "recap") setLine(`Here's what you can do now. ${step.objectives.join(". ")}.`, "good");
     else if (step.kind === "think") setLine(step.optional ? `Quick check: ${step.q}` : step.q);
     else if (step.kind === "probe") setLine(`${step.text} ${probeSpeech(step.probe)}`.trim());
     else if (step.kind === "explore" || step.kind === "activity") setLine(`${step.text} ${step.widget.type === "sort" || step.widget.type === "sequence" || step.widget.type === "highlight" ? step.widget.prompt : ""}`.trim());
@@ -200,9 +216,10 @@ export default function TutorSession(props: Props) {
     else if (step.kind === "review") setLine("Let's warm up with a couple of things you learned before.");
   }, [started, step, setLine]);
 
-  // Lines move on by themselves when the teacher finishes saying them.
+  // Lines and scenes move on by themselves when the teacher finishes saying them.
   useEffect(() => {
-    if (step?.kind !== "say" || step.video || !p.autoRead || s.lastDone !== line.id) return;
+    const auto = step?.kind === "say" ? !step.video : step?.kind === "present";
+    if (!auto || !p.autoRead || s.lastDone !== line.id) return;
     const t = setTimeout(() => setIdx((i) => i + 1), 600);
     return () => clearTimeout(t);
   }, [s.lastDone, line.id, step, p.autoRead]);
@@ -211,6 +228,21 @@ export default function TutorSession(props: Props) {
     stopSpeaking();
     setIdx((i) => i + 1);
   }, []);
+
+  /**
+   * Jump past the rest of this part's talk, straight to the problem. Logged as
+   * a skip so the parents can see whether the scenes are running long.
+   */
+  const skipTalk = useCallback(
+    (segIndex: number) => {
+      stopSpeaking();
+      setIdx((i) => {
+        const to = steps.findIndex((st, j) => j > i && st.part === segIndex + 1 && (st.kind === "probe" || st.kind === "think"));
+        return to >= 0 ? to : i + 1;
+      });
+    },
+    [steps],
+  );
 
   const solved = useCallback(
     (firstTry: boolean, ratio: number, why?: string | null) => {
@@ -241,6 +273,28 @@ export default function TutorSession(props: Props) {
   }
 
   if (!started) {
+    // A lesson that states its goals opens with the brief instead of a hello.
+    const brief = steps[0]?.kind === "brief" ? steps[0] : null;
+    if (brief) {
+      return (
+        <LessonBrief
+          title={brief.title}
+          teacherName={teacher.name}
+          look={lookOf(teacher)}
+          objectives={brief.objectives}
+          plan={brief.plan}
+          teaching={brief.teaching}
+          doing={brief.doing}
+          speakingId={line.id}
+          text={line.text}
+          onStart={() => {
+            setStarted(true);
+            setIdx(1);
+          }}
+          onTestOut={adaptation?.offerTestOut && mastery?.length ? () => setTestOut(true) : undefined}
+        />
+      );
+    }
     return (
       <div className="tutor-start pop">
         <div className="tutor-start-face">
@@ -306,6 +360,13 @@ export default function TutorSession(props: Props) {
           <div className="tutor-work-head">
             <span className="eyebrow">{parts[partIndex]}</span>
           </div>
+          {!!props.plan?.length && (
+            <PlanRail
+              plan={props.plan}
+              done={new Set(props.plan.filter((pl) => pl.key.startsWith("part:") && Number(pl.key.slice(5)) < partIndex - 1).map((pl) => pl.key))}
+              currentKey={partIndex >= 1 && partIndex <= segments.length ? `part:${partIndex - 1}` : step.kind === "activity" ? "practice" : step.kind === "explain" ? "explain" : null}
+            />
+          )}
           {step.kind === "say" ? (
             <>
               <SayView step={step} id={line.id} title={parts[partIndex]} />
@@ -315,6 +376,28 @@ export default function TutorSession(props: Props) {
                 </button>
               </div>
             </>
+          ) : step.kind === "present" ? (
+            <SceneView
+              step={step}
+              id={line.id}
+              onNext={next}
+              nextLabel={p.autoRead ? "Next ▶" : "Got it ▶"}
+              onSkip={step.scene < step.of - 1 ? () => skipTalk(step.seg) : undefined}
+            />
+          ) : step.kind === "checkin" ? (
+            <CheckinView step={step} courseId={courseId} lessonId={lessonId} setLine={setLine} onNext={next} />
+          ) : step.kind === "recap" ? (
+            <Recap
+              look={lookOf(teacher)}
+              objectives={step.objectives}
+              keyIdeas={step.keyIdeas}
+              stars={stars}
+              xp={xp}
+              next={step.next}
+              speakingId={line.id}
+              text={line.text}
+              onNext={next}
+            />
           ) : step.kind === "review" ? (
             <ReviewWarmup courseId={courseId} items={step.items} onDone={next} />
           ) : (

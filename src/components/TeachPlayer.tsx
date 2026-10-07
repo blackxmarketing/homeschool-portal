@@ -5,14 +5,27 @@ import WidgetView, { type CheckFn } from "./Widgets";
 import type { PublicWidget } from "@/lib/teaching";
 import type { PublicProbe } from "@/lib/probes";
 import type { PublicShow } from "@/lib/storyboard";
+import type { Term } from "@/content/courses/types";
 import ProbeView, { type ProbeResult } from "./Probes";
 import { MasteryCheck, ReviewWarmup } from "./Assess";
 import { AskTeacher, CoachLine, TeacherStage, type StageTeacher } from "./TeacherStage";
 import { appendSpoken, MicButton, SayButton } from "./voice";
 
+/** One scene of a presented part, as the browser sees it (answers stay on the server). */
+export interface PublicScene {
+  heading: string;
+  say: string;
+  show?: PublicShow;
+  visual?: PublicWidget;
+  check?: PublicProbe;
+  terms?: Term[];
+}
+
 export interface PublicSegment {
   title: string;
   teach: string;
+  /** The presented version of this part. Without it the summary is read out in short lines. */
+  present?: PublicScene[];
   /** Slides and a video that go with the teacher's words. */
   show?: PublicShow;
   visual?: PublicWidget;

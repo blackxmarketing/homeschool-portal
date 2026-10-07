@@ -35,6 +35,12 @@ export const science: Course = {
         "Change one independent variable, measure the dependent variable, and keep everything else controlled.",
         "Repeat trials and record data so your conclusion rests on evidence.",
       ],
+      objectives: [
+        "Write a hypothesis as an if-then-because sentence you could actually test",
+        "Name the independent, dependent and controlled variables in an experiment",
+        "Spot an unfair test, and say what would make it fair",
+        "Draw a conclusion from data, even when it proves you wrong",
+      ],
       hook: {
         text: "In 1668, almost everyone was sure that rotting meat simply turned into flies. One doctor, Francesco Redi, refused to just believe it and set up a few jars to find out. A simple fair test overturned an idea people had trusted for thousands of years.",
       },
@@ -43,6 +49,32 @@ export const science: Course = {
           title: "Questions and Hypotheses",
           teach:
             "Science starts with a question you can actually test, like: does warm water dissolve sugar faster than cold water? A hypothesis is your best testable prediction about the answer, usually written as an if-then sentence: if I stir sugar into warm water, then it will dissolve faster than in cold water, because warm water molecules move faster. A hypothesis is not a wild guess. It is based on something you already know, and an experiment must be able to prove it wrong. 'Sugar is delicious' is an opinion, not a hypothesis, because no measurement could test it.",
+          present: [
+            {
+              heading: "Not every question is a science question",
+              say:
+                "Science starts with a question, but not just any question. It has to be one an experiment could actually answer. Watch the difference. 'Is chocolate ice cream the best flavour?' There is no instrument in the world that measures best. That is a matter of taste, and no experiment settles it. Now try this one: 'Does warm water dissolve sugar faster than cold water?' You could answer that this afternoon with two glasses, a spoon and a stopwatch. Same curiosity, but only the second one gives science something to grip. A good question names something you can change, and something you can measure.",
+              terms: [{ word: "testable", meaning: "an experiment could prove it right or wrong" }],
+            },
+            {
+              heading: "A hypothesis calls your shot",
+              say:
+                "Once you have a real question, you predict the answer before you test it. That prediction is your hypothesis, and scientists write it in a particular shape: if, then, because. If I stir sugar into warm water, then it will dissolve faster than in cold water, because warmer water molecules move faster and knock the sugar apart more quickly. Notice all three pieces. The if names what you change. The then names what you will measure. The because gives your reason, which is what makes it a hypothesis rather than a shrug.",
+              terms: [{ word: "hypothesis", meaning: "a testable prediction, written if-then-because" }],
+              check: {
+                type: "number",
+                prompt: "How many parts does a hypothesis have in the shape we just used: if, then, because?",
+                answer: 3,
+                hint: "Count the words the teacher put on the board.",
+                seconds: 20,
+              },
+            },
+            {
+              heading: "Predicting is not the same as guessing",
+              say:
+                "Here is the part people get wrong. A hypothesis is not a wild guess, and it is not a fact you already know. It sits in between. It rests on something you have seen before, and it sticks its neck out far enough that the experiment could knock it down. That last bit matters most. If there is no possible result that would prove you wrong, you have not written a hypothesis. And being wrong is not failure. A hypothesis that gets knocked down has still taught you something true about the world, which is the whole point.",
+            },
+          ],
           visual: {
             type: "flip",
             cards: [
@@ -104,6 +136,39 @@ export const science: Course = {
           title: "Three Kinds of Variables",
           teach:
             "A variable is anything in an experiment that can change. The independent variable is the one thing you change on purpose. The dependent variable is what you measure, because it depends on what you changed. Controlled variables are all the things you keep the same so they cannot affect the result. Suppose you test whether water temperature changes how fast sugar dissolves. Water temperature is independent. The time it takes to dissolve is dependent. The amount of water, amount of sugar, cup, and stirring are all controlled. A memory trick: I change the Independent; the Dependent is the Data I collect.",
+          present: [
+            {
+              heading: "Three jobs, not three names",
+              say:
+                "A variable is anything in your experiment that could change. Every variable has one of three jobs, and once you can spot which job each one is doing, designing an experiment gets a lot easier. There is the one thing you change on purpose. There is the thing you measure to see what happened. And there is everything else, which you hold still so it cannot interfere. One changed, one measured, the rest frozen. That is the whole idea.",
+            },
+            {
+              heading: "Naming them in a real test",
+              say:
+                "Let's put the sugar experiment on the board and label it. The thing I change on purpose is the water temperature, so temperature is my independent variable. The thing I measure is how many seconds the sugar takes to vanish, so time is my dependent variable, because it depends on what I changed. Everything else gets held still: the same two hundred millilitres of water, one level teaspoon of sugar, the same cup, and exactly ten stirs. Those are my controlled variables.",
+              terms: [
+                { word: "independent", meaning: "the one thing I change on purpose" },
+                { word: "dependent", meaning: "what I measure; it depends on the change" },
+                { word: "controlled", meaning: "everything I hold still" },
+              ],
+              check: {
+                type: "match",
+                prompt: "Match each variable to its job in the sugar test.",
+                pairs: [
+                  { left: "Water temperature", right: "Independent: I change it" },
+                  { left: "Seconds to dissolve", right: "Dependent: I measure it" },
+                  { left: "Ten stirs every time", right: "Controlled: I keep it the same" },
+                ],
+                hint: "Ask yourself: did I change it, measure it, or hold it still?",
+                seconds: 30,
+              },
+            },
+            {
+              heading: "A trick for remembering which is which",
+              say:
+                "People mix up independent and dependent constantly, so here is a trick worth keeping. I change the Independent. The Dependent is the Data I collect. Both D words go together: dependent, data. And if you are ever stuck, say the sentence out loud in order. I changed the temperature, so I measured the time. The thing you changed always comes first, and the thing you measured always depends on it. Get that sentence right and the labels sort themselves out.",
+            },
+          ],
           visual: {
             type: "sort",
             prompt: "Sugar test: does water temperature change how fast sugar dissolves? Sort each variable.",
@@ -168,6 +233,31 @@ export const science: Course = {
           title: "Why Change Only One Thing?",
           teach:
             "A fair test changes only one variable at a time. Imagine testing two paper towel brands, but you use a big sheet of Brand A and a small sheet of Brand B. Brand A soaks up more water. Was it the brand or the size? You cannot tell, because two things changed at once. A hidden difference like this muddies the result. Redi's experiment worked because the only difference between his jars was the cover. Everything else matched: the same kind of meat, the same jars, the same room. So when maggots appeared only in the open jars, the cover was the only possible explanation.",
+          present: [
+            {
+              heading: "Two things changed, so you learned nothing",
+              say:
+                "Here is an experiment that looks fine and is actually useless. You want to know which paper towel is more absorbent, so you soak a big sheet of Brand A and a small sheet of Brand B. Brand A holds far more water. Brand A wins, right? Think about what changed between those two towels. The brand changed, yes. But the size changed too. So when Brand A held more water, was that the brand, or was it just that there was more towel? You cannot tell. Two things moved at once, and the result cannot separate them.",
+              check: {
+                type: "highlight",
+                prompt: "Tap the sentence that explains why this test was unfair.",
+                sentences: [
+                  "Brand A held more water than Brand B.",
+                  "The two towels were different sizes as well as different brands.",
+                  "Paper towels are used to clean up spills.",
+                ],
+                correct: [1],
+                hint: "An unfair test is one where more than one thing changed.",
+                seconds: 25,
+              },
+            },
+            {
+              heading: "Redi's jars got it right",
+              say:
+                "Now look back at Redi and his jars, because this is exactly why his experiment worked. Same meat in every jar. Same jars. Same room, same shelf, same days. One single difference: some jars had a gauze cover and some did not. So when maggots turned up only in the open jars, there was nothing else it could have been. The cover was the only thing that differed, so the cover had to be the explanation. That is the quiet power of a fair test. Hold everything still but one thing, and the result has nowhere to hide.",
+              terms: [{ word: "fair test", meaning: "only one variable changes; everything else is held still" }],
+            },
+          ],
           visual: {
             type: "compare",
             left: {
@@ -248,6 +338,31 @@ export const science: Course = {
           title: "Trials, Data, and Conclusions",
           teach:
             "One trial can be a fluke. A towel might tear, or you might spill a little water. That is why scientists repeat each test, often three times or more, and find the average: add the results and divide by how many there are. Record everything in a data table as you go, not from memory later. Then write a conclusion: did the data support your hypothesis? If not, that is still a real result. A wrong hypothesis teaches you something true, and it often leads to a better question. Changing your data to fit your prediction is never acceptable.",
+          present: [
+            {
+              heading: "One result proves nothing",
+              say:
+                "Suppose you run your towel test once and Brand B wins. Should you believe it? Not yet. Maybe that sheet had a tear in it. Maybe your hand slipped and you poured a little extra. One trial can always be a fluke. So scientists run the same test several times, usually three at minimum, and then take the average: add the results up and divide by how many you ran. If Brand B wins all three times, now you have something. If it wins once and loses twice, your single result was the fluke, and repeating is what caught it.",
+              terms: [{ word: "average", meaning: "add the results, divide by how many" }],
+              check: {
+                type: "number",
+                prompt: "Three trials give 12, 14 and 16 millilitres. What is the average, in millilitres?",
+                answer: 14,
+                hint: "Add the three numbers, then divide by three.",
+                seconds: 30,
+              },
+            },
+            {
+              heading: "Write it down as it happens",
+              say:
+                "Record your measurements the moment you take them, in a table, with units. Not later from memory, because memory quietly rearranges things to match what you expected. The table is your evidence, and the whole argument rests on it. Which brings us to the one rule that is never bent: you do not change your data to fit your prediction. Not a little, not to tidy it up. The moment the numbers bend to the hypothesis, the experiment has told you nothing at all.",
+            },
+            {
+              heading: "Being wrong is a real result",
+              say:
+                "Last step: the conclusion. Look at your data and answer honestly. Did it support the hypothesis or not? And here is the part that surprises people. If the data says you were wrong, that is not a failed experiment. You predicted something, you tested it properly, and the world told you no. You now know something true that you did not know this morning, and you almost always end up with a better question than the one you started with. Redi did not prove what everyone expected. That is exactly why we still talk about him.",
+            },
+          ],
           visual: {
             type: "sequence",
             prompt: "Put the steps of the scientific method in order.",

@@ -6,6 +6,8 @@ import { sanitizeScene, sanitizeTeaching } from "@/lib/courseContent";
 import { slidePositions, beatAt } from "@/lib/storyboard";
 
 const lesson = COURSES.find((c) => c.id === "science")!.lessons[0];
+/** A lesson nobody has written scenes or objectives for yet, for the fallback cases. */
+const plain = COURSES.flatMap((c) => c.lessons).find((l) => l.teach?.length && !l.objectives && !l.teach.some((s) => s.present?.length))!;
 
 const scene = (over: Partial<Scene> = {}): Scene => ({
   heading: "Two forces, one book",
@@ -32,7 +34,7 @@ describe("the lesson plan a kid can see", () => {
   });
 
   it("counts a presented part by what is actually said, not by the summary", () => {
-    const seg = lesson.teach![0];
+    const seg = plain.teach![0];
     // A real scene is 40-140 words, and a part has several - so a presented
     // part is minutes of teaching where the summary alone was seconds.
     const full = scene({ say: Array.from({ length: 110 }, (_, i) => `word${i}`).join(" ") });
@@ -72,7 +74,8 @@ describe("stating what a kid will be able to do", () => {
   });
 
   it("falls back to the key ideas, so every lesson states its goals today", () => {
-    expect(lessonObjectives(lesson)).toEqual(lesson.keyIdeas);
+    expect(plain.objectives).toBeUndefined();
+    expect(lessonObjectives(plain)).toEqual(plain.keyIdeas);
     for (const course of COURSES) {
       for (const l of course.lessons) expect(lessonObjectives(l).length, l.id).toBeGreaterThan(0);
     }

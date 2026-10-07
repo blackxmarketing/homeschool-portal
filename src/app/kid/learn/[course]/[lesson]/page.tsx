@@ -6,6 +6,7 @@ import { requireKid } from "@/lib/auth";
 import { features, hiddenVideos } from "@/lib/content";
 import { interactiveDone, publicThink, publicWidget } from "@/lib/teaching";
 import { adaptationFor, lessonView, reviewItems, teachProgress } from "@/lib/store";
+import { lessonObjectives, lessonPlan } from "@/lib/lessonPlan";
 import { publicProbe } from "@/lib/probes";
 import { avatarFor } from "@/content/avatars";
 import { TeacherVoice } from "@/components/voice";
@@ -52,7 +53,15 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
   const hero = heroOf(kid.id);
   const game = hero && landFor ? { land: landFor.id as LandId, band: bandFor(kid.grade), hero } : undefined;
   const photos = f.lessonSlides
-    ? await photosFor([...(L.hook?.show ?? []), ...(L.teach ?? []).flatMap((s) => s.show ?? [])].map((b) => b.photo ?? "").filter(Boolean))
+    ? await photosFor(
+        [
+          ...(L.hook?.show ?? []),
+          // A presented part's slides hang off its scenes, not the part.
+          ...(L.teach ?? []).flatMap((s) => [...(s.show ?? []), ...(s.present ?? []).flatMap((sc) => sc.show ?? [])]),
+        ]
+          .map((b) => b.photo ?? "")
+          .filter(Boolean),
+      )
     : {};
   const hidden = hiddenVideos();
   const slides = (show: Beat[] | undefined, watch: Video | undefined) =>
@@ -92,6 +101,18 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
             segments: L.teach.map((s, i) => ({
               title: s.title,
               teach: s.teach,
+              ...(s.present?.length
+                ? {
+                    present: s.present.map((sc, j) => ({
+                      heading: sc.heading,
+                      say: sc.say,
+                      show: slides(sc.show, sc.watch),
+                      visual: sc.visual ? publicWidget(sc.visual, `${seed}:v${i}.${j}`) : undefined,
+                      check: sc.check ? publicProbe(sc.check, `${seed}:c${i}.${j}`) : undefined,
+                      terms: sc.terms,
+                    })),
+                  }
+                : {}),
               show: slides(s.show, s.watch),
               visual: s.visual ? publicWidget(s.visual, `${seed}:${i}`) : undefined,
               think: publicThink(s.think),
@@ -108,6 +129,15 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
               activityDone: state.activity.done,
               explainDone: state.explain.done,
             },
+            // What the lesson promises, and the plan for getting there. Every
+            // lesson has both: objectives fall back to the key ideas, and the
+            // plan is worked out from the lesson itself.
+            lessonTitle: L.title,
+            objectives: lessonObjectives(L),
+            keyIdeas: L.keyIdeas,
+            plan: lessonPlan(L),
+            hasMastery: !!L.mastery?.length,
+            hasTask: !!L.task,
           }}
         />
       ) : (
