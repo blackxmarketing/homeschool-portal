@@ -1,4 +1,5 @@
 import type { Lesson, Segment, ThinkQuestion, Widget } from "@/content/courses/types";
+import { seededOrder } from "./variants";
 
 /**
  * The teaching model's rules, kept pure so they're easy to test:
@@ -100,20 +101,6 @@ export function supportSummary(lesson: Lesson, state: TeachState) {
 
 export function publicThink(q: ThinkQuestion): { q: string; choices: string[] } {
   return { q: q.q, choices: q.choices };
-}
-
-/** A small seeded shuffle so a widget looks the same on every reload. */
-function seededOrder(n: number, seed: string): number[] {
-  let h = [...seed].reduce((a, c) => (Math.imul(a, 31) + c.charCodeAt(0)) >>> 0, 2166136261);
-  const idx = Array.from({ length: n }, (_, i) => i);
-  for (let i = n - 1; i > 0; i--) {
-    h = (Math.imul(h, 1103515245) + 12345) >>> 0;
-    const j = h % (i + 1);
-    [idx[i], idx[j]] = [idx[j], idx[i]];
-  }
-  // Never show a sequence already in order.
-  if (n > 1 && idx.every((v, i) => v === i)) [idx[0], idx[1]] = [idx[1], idx[0]];
-  return idx;
 }
 
 export type PublicWidget =

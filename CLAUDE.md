@@ -44,8 +44,13 @@ white, big friendly buttons, one screen at a time.
    `git -c user.name="Jake" -c user.email="jake@blackxmarketing.com" commit ...`.
    End commit messages with the Co-Authored-By line Claude Code adds.
 
-Windows tip: in Git Bash, heredocs containing apostrophes or backticks break.
-Write scripts to a file with the Write tool and run them with node instead.
+Windows tips (Jake's laptop):
+
+- Install packages with `npm install --ignore-scripts`. A plain `npm install`
+  tries to build `better-sqlite3` from source and fails here; with scripts
+  skipped it uses its bundled prebuilt binary, which works.
+- In Git Bash, heredocs containing apostrophes or backticks break. Write
+  scripts to a file with the Write tool and run them with node instead.
 
 ## Where things are
 
@@ -101,3 +106,13 @@ Write scripts to a file with the Write tool and run them with node instead.
   built-in speech. The mic uses the browser's speech-to-text.
 - No multiple choice in lessons: kids solve hands-on problems (probes and
   widgets). Teachers are a voice by default ("Teacher faces" switch).
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

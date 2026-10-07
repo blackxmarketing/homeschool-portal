@@ -7,6 +7,7 @@ import { BREAKS, PRESETS, type AttentionAnswer, type FocusProfile } from "./focu
 import { SUBJECTS, type Subject } from "./compliance";
 import { STRANDS, type Strand } from "./curriculum/skills";
 import { COURSES, type Course } from "@/content/courses";
+import { VARIANT_CONTENT, VARIANT_THEMES, type CastPool, type VariantContent } from "@/content/variants";
 import { sanitizeCourses, withDefaultMedia } from "./courseContent";
 import { isYoutubeId } from "./storyboard";
 
@@ -36,6 +37,8 @@ export interface ContentMap {
   courses: Course[];
   /** Lesson videos a parent chose to hide (YouTube ids). */
   hiddenVideos: string[];
+  /** The people, places and props that lesson and game variations draw from. */
+  variants: VariantContent;
 }
 
 export type ContentKey = keyof ContentMap;
@@ -52,6 +55,7 @@ export const DEFAULTS: ContentMap = {
   breaks: BREAKS,
   courses: COURSES,
   hiddenVideos: [],
+  variants: VARIANT_CONTENT,
 };
 
 export const CONTENT_KEYS = Object.keys(DEFAULTS) as ContentKey[];
@@ -201,6 +205,39 @@ export function sanitize<K extends ContentKey>(key: K, raw: unknown): ContentMap
     }
     case "hiddenVideos":
       return (Array.isArray(raw) ? [...new Set(raw.filter((v): v is string => typeof v === "string" && isYoutubeId(v)))].slice(0, 500) : []) as ContentMap[K];
+    case "variants": {
+      const src = isObj(raw) ? raw : {};
+      const def = d as VariantContent;
+      // A generator picking from an empty pool would break a lesson, so an
+      // emptied list falls back to the default one.
+      const pool = (v: unknown, fallback: string[]) => {
+        const list = Array.isArray(v) ? [...new Set(v.map((x) => str(x, 60)).filter(Boolean))].slice(0, 200) : [];
+        return list.length ? list : fallback;
+      };
+      const cast = (v: unknown, fallback: CastPool): CastPool => {
+        const s = isObj(v) ? v : {};
+        return {
+          people: pool(s.people, fallback.people),
+          creatures: pool(s.creatures, fallback.creatures),
+          places: pool(s.places, fallback.places),
+          things: pool(s.things, fallback.things),
+        };
+      };
+      // Theme pools only add to the base, so emptying one is allowed. A theme
+      // the parent didn't touch keeps its defaults rather than being wiped.
+      const extras = (v: unknown, fallback: Partial<CastPool>): Partial<CastPool> => {
+        if (!isObj(v)) return fallback;
+        const some = (x: unknown) => [...new Set((Array.isArray(x) ? x : []).map((i) => str(i, 60)).filter(Boolean))].slice(0, 200);
+        const out: Partial<CastPool> = {};
+        for (const k of ["people", "creatures", "places", "things"] as const) if (k in v) out[k] = some(v[k]);
+        return out;
+      };
+      const byThemeSrc = isObj(src.byTheme) ? src.byTheme : {};
+      return {
+        base: cast(src.base, def.base),
+        byTheme: Object.fromEntries(VARIANT_THEMES.map((t) => [t, extras(byThemeSrc[t], def.byTheme[t])])) as VariantContent["byTheme"],
+      } as ContentMap[K];
+    }
   }
   return d;
 }
