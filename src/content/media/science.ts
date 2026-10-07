@@ -13,12 +13,38 @@ export const scienceMedia: CourseMedia = {
     },
     teach: [
       {
+        // The part-level slides stay as the fallback: they are what plays if the
+        // scenes below are ever removed, or presented lessons are switched off.
         show: [
           { emoji: "❓🔬", caption: "Good science begins with a question you can actually test" },
           { at: "warm water dissolve sugar", photo: "Sugar", caption: "Sugar crystals: will they disappear faster in warm water?" },
           { at: "A hypothesis is your", big: "Hypothesis", caption: "A testable prediction, often written as an if-then sentence" },
           { at: "if I stir sugar", emoji: "☕🥄⏱️", caption: "If warm water, then faster dissolving, because the molecules move faster" },
           { at: "is an opinion", emoji: "😋🚫📏", caption: "No ruler or stopwatch can measure 'delicious', so it's not testable" },
+        ],
+        scenes: [
+          {
+            show: [
+              { emoji: "❓🔬", caption: "Science starts with a question an experiment can answer" },
+              { at: "Is chocolate ice cream", emoji: "🍫🍦", caption: "Best flavour? Nothing in the world measures best" },
+              { at: "Does warm water dissolve", photo: "Sugar", caption: "Does warm water dissolve sugar faster? Now you can test it" },
+              { at: "names something you can change", emoji: "🎛️📏", caption: "A good question: one thing to change, one thing to measure" },
+            ],
+          },
+          {
+            show: [
+              { big: "Hypothesis", caption: "A prediction you make before you test" },
+              { at: "if, then, because", big: "if · then · because", caption: "The three parts of every hypothesis" },
+              { at: "If I stir sugar", emoji: "☕🥄⏱️", caption: "If warm water, then faster, because the molecules move faster" },
+            ],
+          },
+          {
+            show: [
+              { emoji: "🎯🤷", caption: "Not a wild guess, and not a fact you already know" },
+              { at: "could knock it down", big: "Could it be proven wrong?", caption: "If no result could knock it down, it is not a hypothesis" },
+              { at: "being wrong is not failure", emoji: "❌➡️💡", caption: "A hypothesis that gets knocked down still teaches you something true" },
+            ],
+          },
         ],
       },
       {
@@ -29,6 +55,29 @@ export const scienceMedia: CourseMedia = {
           { at: "Controlled variables are", emoji: "🔒🔒🔒", caption: "Controlled: everything else stays locked the same" },
           { at: "Water temperature is independent", photo: "Thermometer", caption: "In the sugar test, water temperature is the knob you turn" },
         ],
+        scenes: [
+          {
+            show: [
+              { big: "Variable", caption: "Anything in an experiment that could change" },
+              { at: "one thing you change on purpose", emoji: "🎛️👆", caption: "Independent: the one knob you turn" },
+              { at: "thing you measure", photo: "Stopwatch", caption: "Dependent: the thing you measure" },
+              { at: "everything else", emoji: "🔒🔒🔒", caption: "Controlled: everything else, held still" },
+            ],
+          },
+          {
+            show: [
+              { photo: "Thermometer", caption: "Water temperature: the knob I turn on purpose" },
+              { at: "how many seconds", photo: "Stopwatch", caption: "Seconds to dissolve: the thing I measure" },
+              { at: "Everything else gets held still", emoji: "🥤🥄🔟", caption: "Same cup, same spoonful, same ten stirs, every single time" },
+            ],
+          },
+          {
+            show: [
+              { big: "D · D", caption: "Dependent = Data. Both D words go together" },
+              { at: "say the sentence out loud", emoji: "🗣️➡️", caption: "I changed the temperature, so I measured the time" },
+            ],
+          },
+        ],
       },
       {
         show: [
@@ -36,6 +85,24 @@ export const scienceMedia: CourseMedia = {
           { at: "paper towel brands", photo: "Paper towel", caption: "Which towel soaks up more? Only a fair test can tell" },
           { at: "Was it the brand or the size?", emoji: "🤔❓", caption: "Two changes at once, so you can't tell which one mattered" },
           { at: "Redi's experiment worked", photo: "Francesco Redi", caption: "Redi kept everything the same except the cover on each jar" },
+        ],
+        scenes: [
+          {
+            show: [
+              { photo: "Paper towel", caption: "Which towel soaks up more water?" },
+              { at: "a big sheet of Brand A", emoji: "🟦⬛", caption: "A big sheet of Brand A, a small sheet of Brand B" },
+              { at: "The brand changed", emoji: "⚠️2️⃣", caption: "Two things changed at once: the brand AND the size" },
+              { at: "You cannot tell", big: "You cannot tell", caption: "When two things move together, the result cannot separate them" },
+            ],
+          },
+          {
+            show: [
+              { photo: "Francesco Redi", caption: "Redi held everything still but one thing" },
+              { at: "Same meat in every jar", emoji: "🫙🥩🫙", caption: "Same meat, same jars, same room, same days" },
+              { at: "gauze cover", photo: "Housefly", caption: "One difference: gauze or no gauze. So the cover had to be the answer" },
+              { at: "nowhere to hide", big: "Change one thing", caption: "Hold everything still but one, and the result has nowhere to hide" },
+            ],
+          },
         ],
       },
       {
@@ -45,6 +112,29 @@ export const scienceMedia: CourseMedia = {
           { at: "data table", emoji: "📋✏️", caption: "Write each result in a table right away, not from memory later" },
           { at: "write a conclusion", emoji: "✅❓❌", caption: "Did the data support your hypothesis? Either answer is real science" },
           { at: "never acceptable", big: "Never fake data", caption: "Honest data is the heart of science" },
+        ],
+        scenes: [
+          {
+            show: [
+              { emoji: "🔁🔁🔁", caption: "One trial could be a fluke, so run it again" },
+              { at: "take the average", big: "(9 + 10 + 11) ÷ 3 = 10", caption: "Average: add the results, divide by how many" },
+              { at: "wins all three times", emoji: "🥇🥇🥇", caption: "Three wins out of three? Now you have something" },
+            ],
+          },
+          {
+            show: [
+              { emoji: "📋✏️", caption: "Write each measurement down the moment you take it" },
+              { at: "memory quietly rearranges", emoji: "🧠🌀", caption: "Memory quietly rearranges things to match what you expected" },
+              { at: "never bent", big: "Never change your data", caption: "The moment the numbers bend to the prediction, it has told you nothing" },
+            ],
+          },
+          {
+            show: [
+              { emoji: "✅❓❌", caption: "Did the data support your hypothesis? Either answer is real science" },
+              { at: "the world told you no", emoji: "🌍🙅", caption: "You tested it properly and the world told you no. That is a result" },
+              { at: "Redi did not prove", photo: "Francesco Redi", caption: "Redi did not prove what everyone expected, which is why we remember him" },
+            ],
+          },
         ],
       },
     ],

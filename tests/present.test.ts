@@ -6,6 +6,7 @@ import { probeSolvable } from "@/lib/probes";
 import { buildSteps } from "@/lib/tutorFlow";
 import { lessonObjectives, lessonPlan } from "@/lib/lessonPlan";
 import { MIN_ANGLES, angleOf } from "@/lib/masteryMeter";
+import { cuesFound } from "@/lib/storyboard";
 
 /**
  * Rules for a lesson the teacher presents. A scene is about half a minute of
@@ -84,6 +85,35 @@ describe.each(presented)("$course / $lesson.id", ({ lesson }) => {
 
   it("still offers enough angles for the meter", () => {
     expect(new Set((lesson.mastery ?? []).map(angleOf)).size).toBeGreaterThanOrEqual(MIN_ANGLES);
+  });
+
+  it("has slides on its scenes, so the board is not bare while the teacher talks", () => {
+    for (const seg of lesson.teach ?? []) {
+      for (const [j, sc] of (seg.present ?? []).entries()) {
+        expect(sc.show?.length ?? 0, `${seg.title} scene ${j + 1} has slides`).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("cues every slide to words the teacher actually says", () => {
+    for (const seg of lesson.teach ?? []) {
+      for (const [j, sc] of (seg.present ?? []).entries()) {
+        // A cue that isn't in the narration silently collapses onto the slide
+        // before it, so the slide never appears. Catch it here instead.
+        const { ok, missing } = cuesFound(sc.say, sc.show ?? []);
+        expect(ok, `${seg.title} scene ${j + 1}: cue not in the narration -> ${missing.join(" | ")}`).toBe(true);
+      }
+    }
+  });
+
+  it("changes the slide often enough that nothing sits still for long", () => {
+    for (const seg of lesson.teach ?? []) {
+      for (const [j, sc] of (seg.present ?? []).entries()) {
+        const perSlide = words(sc.say) / (sc.show?.length ?? 1);
+        // ~140 words a minute, so 60 words is roughly 25 seconds on one picture.
+        expect(perSlide, `${seg.title} scene ${j + 1} words per slide`).toBeLessThanOrEqual(60);
+      }
+    }
   });
 
   it("survives a parent saving the lesson editor", () => {

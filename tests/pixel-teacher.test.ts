@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { AVATARS, type AvatarLook } from "@/content/avatars";
-import { BUST_SIZE, bustFrames, teacherBustGrid, visemeAt, visemeAtTime, type Viseme } from "@/lib/pixel/teacher";
+import { BUST_SIZE, SPRITE_SIZE, bustFrames, teacherBustGrid, teacherSprite, visemeAt, visemeAtTime, type Viseme } from "@/lib/pixel/teacher";
+import { heroGrid } from "@/lib/pixel/hero";
 import type { Grid } from "@/lib/pixel/grid";
 
 const OUTLINE = "#1b1530";
@@ -120,6 +121,59 @@ describe("the frames the renderer picks between", () => {
       expect(frames[key as keyof typeof frames], key).toBeDefined();
     }
     expect(new Set(Object.values(frames).map(pixels)).size).toBe(6);
+  });
+});
+
+describe("the teacher is one of the game's own characters", () => {
+  const hero = heroGrid({ skin: 1, hair: "short", hairColor: 1, outfit: 0, hat: "none", pet: "none" });
+
+  it("is the same sprite size as every other character", () => {
+    const g = teacherSprite(AVATARS.science, { mouth: "closed" });
+    expect([g.w, g.h]).toEqual([hero.w, hero.h]);
+    expect([g.w, g.h]).toEqual([SPRITE_SIZE.w, SPRITE_SIZE.h]);
+  });
+
+  it("draws every teacher without falling off the sprite", () => {
+    for (const id of ids) {
+      const g = teacherSprite(AVATARS[id], { mouth: "open", arm: "point" });
+      expect([g.w, g.h], id).toEqual([SPRITE_SIZE.w, SPRITE_SIZE.h]);
+      expect(filled(g), id).toBeGreaterThan(80);
+    }
+  });
+
+  it("keeps the teacher's own colours, so a white lab coat stays white", () => {
+    // The game's palette has no white; snapping to it turned the coat lavender.
+    const g = teacherSprite(AVATARS.science, { mouth: "closed" });
+    expect(g.runs().some((r) => r.c === AVATARS.science.outfit)).toBe(true);
+    expect(g.runs().some((r) => r.c === AVATARS.science.skin)).toBe(true);
+  });
+
+  it("still moves its mouth, even at this size", () => {
+    for (const id of ids) {
+      const shapes = (["closed", "open", "wide"] as Viseme[]).map((mouth) => pixels(teacherSprite(AVATARS[id], { mouth })));
+      expect(new Set(shapes).size, `${id} mouth shapes differ`).toBe(3);
+    }
+  });
+
+  it("blinks, points and walks", () => {
+    const look = AVATARS.science;
+    const base = pixels(teacherSprite(look, { mouth: "closed" }));
+    expect(pixels(teacherSprite(look, { mouth: "closed", blink: true }))).not.toBe(base);
+    expect(pixels(teacherSprite(look, { mouth: "closed", arm: "point" }))).not.toBe(base);
+    expect(pixels(teacherSprite(look, { mouth: "closed" }, 1))).not.toBe(base);
+  });
+
+  it("points to whichever side it is facing", () => {
+    const look = AVATARS.science;
+    const right = pixels(teacherSprite(look, { mouth: "closed", arm: "point", facing: "right" }));
+    const left = pixels(teacherSprite(look, { mouth: "closed", arm: "point", facing: "left" }));
+    expect(right).not.toBe(left);
+  });
+
+  it("gives the writing teacher a top hat rather than a wizard hat", () => {
+    const g = teacherSprite(AVATARS.writing, { mouth: "closed" });
+    // Drawn on afterwards, because the game's hat list has no top hat.
+    expect(g.runs().some((r) => r.c === "#241f33" && r.y <= 2)).toBe(true);
   });
 });
 

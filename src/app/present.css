@@ -72,15 +72,37 @@
 
 /* ---- A scene of the teacher's talk --------------------------------------- */
 .pres-scene { display: flex; flex-direction: column; gap: 10px; }
-.pres-scene-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.pres-heading { font-family: var(--font-display), serif; font-size: 1.4rem; margin: 0; }
+.pres-heading { font-family: var(--font-display), serif; font-size: 1.3rem; margin: 0; }
 .pres-counter { font-family: var(--font-pixel), monospace; font-size: .55rem; color: var(--k-muted); white-space: nowrap; }
-.pres-board {
-  background: linear-gradient(135deg, #f1f4ff, #e7edff);
-  border: 3px solid #1b1530; border-radius: 14px; box-shadow: 0 4px 0 #1b1530;
-  padding: 18px 20px; min-height: 180px; display: flex; align-items: center;
+
+/* ---- The stage: the slide, with the teacher standing on it --------------- */
+/* The teacher is on the slide rather than beside it, so a kid watches someone
+   teach instead of reading a page with a face attached. They cross to the
+   other corner when the picture changes, which carries the eye with them. */
+.pres-stage {
+  position: relative;
+  border: 3px solid #1b1530; border-radius: 16px; box-shadow: 0 5px 0 #1b1530;
+  background: #fffdf5;
+  padding: 10px 12px 0;
+  overflow: hidden;
 }
-.pres-board p { font-family: var(--font-display), serif; font-size: 1.35rem; line-height: 1.5; margin: 0; }
+.pres-stage-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+.pres-stage-slide { position: relative; z-index: 1; padding-bottom: 14px; }
+.pres-stage-slide .sb { width: 100%; margin: 0; }
+.pres-board-text { min-height: 200px; display: flex; align-items: center; }
+.pres-board-text p { font-family: var(--font-display), serif; font-size: 1.3rem; line-height: 1.5; margin: 0; }
+
+/* Standing on the slide, in a corner. The steps() timing makes the walk read
+   as pixel-art footfalls rather than a smooth glide - same trick the quest
+   scenes use for the hero. */
+.pres-stage-teacher {
+  position: absolute; bottom: 0; z-index: 3;
+  width: clamp(70px, 13%, 118px);
+  transition: left .9s steps(9);
+}
+.pres-stage-teacher.at-left { left: 2%; }
+.pres-stage-teacher.at-right { left: calc(98% - clamp(70px, 13%, 118px)); }
+.pres-stage-teacher .pixel-teacher { width: 100%; height: auto; display: block; }
 .pres-terms { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; }
 .pres-terms li {
   background: #fff3bf; border: 2px solid #1b1530; border-radius: 8px; padding: 4px 10px; font-size: .9rem;
@@ -123,8 +145,14 @@
 @media (max-width: 560px) {
   .pres-brief, .pres-recap { padding: 14px; border-width: 3px; }
   .pres-brief-top, .pres-recap-top { flex-direction: column; text-align: center; align-items: center; gap: 10px; }
-  .pres-board { min-height: 140px; padding: 14px; }
-  .pres-board p { font-size: 1.15rem; }
+  /* On a phone the teacher tucks into the bottom corner so the board keeps
+     the width; they still talk and point, just smaller. */
+  .pres-stage { grid-template-columns: 1fr; padding: 10px 10px 0; }
+  .pres-stage-board { grid-column: 1; margin-bottom: 44px; min-height: 180px; padding: 8px 10px 12px; }
+  .pres-stage-teacher { position: absolute; left: 8px; bottom: 0; width: 74px; padding-bottom: 16px; justify-self: start; }
+  .pres-stage-floor { height: 26px; }
+  .pres-heading { font-size: 1.1rem; }
+  .pres-board-text p { font-size: 1.1rem; }
   .pres-plan li { grid-template-columns: 22px 1fr; }
   .pres-plan-min { grid-column: 2; color: var(--k-muted); font-size: .8rem; }
   .pres-rail > summary { font-size: .52rem; }

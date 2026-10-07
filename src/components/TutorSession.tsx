@@ -380,6 +380,8 @@ export default function TutorSession(props: Props) {
             <SceneView
               step={step}
               id={line.id}
+              look={lookOf(teacher)}
+              teacherName={teacher.name}
               onNext={next}
               nextLabel={p.autoRead ? "Next ▶" : "Got it ▶"}
               onSkip={step.scene < step.of - 1 ? () => skipTalk(step.seg) : undefined}
