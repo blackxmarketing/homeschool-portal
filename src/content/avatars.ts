@@ -1,7 +1,10 @@
 /**
- * How each teacher looks. Friendly illustrated characters drawn in code
- * (components/TeacherAvatar.tsx). Keys are a course id (science, history...)
- * or a math teacher id (forge, hypatia...). Edit freely.
+ * How each teacher looks. Drawn in code as pixel characters
+ * (lib/pixel/teacher.ts), to match the rest of the program. Keys are a course
+ * id (science, history...) or a math teacher id (forge, hypatia...).
+ *
+ * `photo` is only used when the "Teacher faces" switch is on, which swaps in
+ * the photo-real portraits in public/teachers/ instead.
  */
 
 export interface AvatarLook {

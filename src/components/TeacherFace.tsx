@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import TeacherAvatar from "./TeacherAvatar";
+import PixelTeacher from "./pixel/PixelTeacher";
 import type { AvatarLook } from "@/content/avatars";
+import { BUST_SIZE } from "@/lib/pixel/teacher";
 import { useVoiceSettings } from "./voice";
 
 /** The teacher's voice, shown as a softly glowing circle with sound bars that move while they talk. */
@@ -17,12 +18,34 @@ export function VoiceOrb({ talking = false, size = 64 }: { talking?: boolean; si
 }
 
 /**
- * The teacher's face. Teachers with a photo-real portrait (public/teachers/)
- * show short looping clips: a quiet "listening" loop, and a talking loop while
- * the teacher reads aloud. Small faces and reduced-motion use the still photo.
- * Teachers without a portrait use the drawn character.
+ * The teacher's face.
+ *
+ * By default this is the pixel character, so the teacher belongs to the same
+ * world as everything else the kid sees. Turning on "Teacher faces" swaps in
+ * the photo-real portraits in public/teachers/ instead, with a quiet
+ * "listening" loop and a talking loop while the teacher reads aloud; small
+ * faces and reduced-motion use the still photo.
+ *
+ * Pass `speakingId` and `text` where they are known and the pixel teacher's
+ * mouth follows the actual audio rather than just flapping.
  */
-export default function TeacherFace({ look, talking = false, size = 150, still = false }: { look: AvatarLook; talking?: boolean; size?: number; still?: boolean }) {
+export default function TeacherFace({
+  look,
+  talking = false,
+  size = 150,
+  still = false,
+  speakingId,
+  text,
+  pointing,
+}: {
+  look: AvatarLook;
+  talking?: boolean;
+  size?: number;
+  still?: boolean;
+  speakingId?: string | null;
+  text?: string;
+  pointing?: boolean;
+}) {
   const { faces } = useVoiceSettings();
   const [reduced, setReduced] = useState(false);
   // If the photo can't load, fall back to the drawn teacher.
@@ -40,8 +63,20 @@ export default function TeacherFace({ look, talking = false, size = 150, still =
     } else v.pause();
   }, [talking]);
 
-  if (!faces) return <VoiceOrb talking={talking} size={size} />;
-  if (!look.photo || broken) return <TeacherAvatar look={look} talking={talking} size={size} />;
+  // The pixel teacher is the default. The photo-real portraits stay available
+  // behind the "Teacher faces" switch for anyone who prefers them.
+  if (!faces || !look.photo || broken) {
+    return (
+      <PixelTeacher
+        look={look}
+        talking={talking}
+        speakingId={speakingId}
+        text={text}
+        pointing={pointing}
+        scale={Math.max(2, Math.round(size / BUST_SIZE.h))}
+      />
+    );
+  }
   const base = `/teachers/${look.photo}`;
   const moving = look.clips && !still && !reduced;
   return (

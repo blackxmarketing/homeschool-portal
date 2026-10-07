@@ -549,3 +549,23 @@ a.tile:focus-visible { outline: 4px solid #ffe58f; outline-offset: 3px; }
 .tutor-work .sb, .tutor-work .video-card.playing { width: min(100%, max(320px, calc((100vh - 450px) * 1.78))); align-self: center; }
 .tutor-work .say-card { min-height: 0; }
 @media (max-width: 860px) { .tutor-work .sb, .tutor-work .video-card.playing { width: 100%; } }
+
+/* ---- The pixel teacher ------------------------------------------------
+   The old round frames were cut for photo portraits; a pixel bust has
+   shoulders, so it sits in a square panel instead of being cropped to a
+   circle. Scaled with nearest-neighbour so it stays crisp. */
+.pixel-teacher { image-rendering: pixelated; display: block; margin: 0 auto; height: 100%; width: auto; }
+.tutor-start-face:has(.pixel-teacher),
+.tutor-face:has(.pixel-teacher) {
+  border-radius: 16px;
+  overflow: visible;
+  background: linear-gradient(180deg, #f1f4ff, #e2e9ff);
+  border: 3px solid #1b1530;
+  box-shadow: 0 5px 0 #1b1530;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.tutor-start-face:has(.pixel-teacher) { padding-top: 8px; }
+.tutor-face.talking:has(.pixel-teacher) { box-shadow: 0 5px 0 #1b1530, 0 0 0 4px rgba(35, 64, 255, .35); }
+.tutor-voice .tutor-face:has(.pixel-teacher) { border-radius: 12px; }
