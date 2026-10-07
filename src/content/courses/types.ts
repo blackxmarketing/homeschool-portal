@@ -184,8 +184,13 @@ export interface Term {
 }
 
 /**
- * One beat of the teacher's presentation: about half a minute of talking, with
- * its own slides, and usually something for the kid to do straight after.
+ * One beat of the teacher's presentation: one idea, with its own slides, and
+ * usually something for the kid to do straight after.
+ *
+ * It runs for exactly as long as the idea takes to say - the lesson moves on
+ * the moment the teacher stops talking - so write what the idea needs rather
+ * than writing to a length. A short idea makes a short scene; one that needs
+ * longer gets longer.
  *
  * A part's scenes are the *presented* version of its `teach` summary. Where a
  * part has scenes the teacher gives a proper talk; where it doesn't, the

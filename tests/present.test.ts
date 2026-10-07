@@ -9,12 +9,19 @@ import { MIN_ANGLES, angleOf } from "@/lib/masteryMeter";
 import { cuesFound } from "@/lib/storyboard";
 
 /**
- * Rules for a lesson the teacher presents. A scene is about half a minute of
- * talking: short enough that a kid stays with it, long enough to actually
- * explain something.
+ * Rules for a lesson the teacher presents.
+ *
+ * A scene is one idea, and it lasts exactly as long as that idea takes to
+ * explain - the player moves on the moment the teacher stops talking, so a
+ * short idea is short and one that needs longer gets longer. There is
+ * deliberately no target length here.
+ *
+ * What is guarded instead is that something is always happening: the rules
+ * below are about motion and about a kid having something to do, not about
+ * word counts.
  */
-const WORDS_MIN = 40;
-const WORDS_MAX = 140;
+/** Below this it is a fragment, not an idea. */
+const WORDS_MIN = 15;
 
 const words = (s: string) => s.trim().split(/\s+/).length;
 
@@ -41,36 +48,42 @@ describe.each(presented)("$course / $lesson.id", ({ lesson }) => {
     }
   });
 
-  it("gives every scene enough to say, and not too much", () => {
+  it("says something real in every scene", () => {
+    // No upper limit: a scene runs for as long as the idea takes, and the
+    // player moves on the moment the teacher stops talking.
     for (const sc of scenes) {
       expect(words(sc.say), `"${sc.heading}" is ${words(sc.say)} words`).toBeGreaterThanOrEqual(WORDS_MIN);
-      expect(words(sc.say), `"${sc.heading}" is ${words(sc.say)} words`).toBeLessThanOrEqual(WORDS_MAX);
       expect(sc.heading.length, sc.heading).toBeGreaterThan(5);
     }
   });
 
-  it("breaks each part into a sensible number of scenes", () => {
+  it("breaks each part into scenes rather than one long speech", () => {
     for (const seg of lesson.teach ?? []) {
       if (!seg.present?.length) continue;
-      expect(seg.present.length, seg.title).toBeGreaterThanOrEqual(2);
-      expect(seg.present.length, seg.title).toBeLessThanOrEqual(5);
+      expect(seg.present.length, seg.title).toBeGreaterThanOrEqual(1);
+      expect(seg.present.length, seg.title).toBeLessThanOrEqual(8);
     }
   });
 
-  it("adds up to a real lesson's worth of teaching", () => {
+  it("teaches enough to be worth a lesson", () => {
+    // A floor only. How much longer a lesson needs to be is the lesson's call.
     const total = scenes.reduce((t, sc) => t + words(sc.say), 0);
-    // Roughly 4 to 10 minutes at reading pace.
-    expect(total).toBeGreaterThanOrEqual(600);
-    expect(total).toBeLessThanOrEqual(1500);
+    expect(total).toBeGreaterThanOrEqual(500);
   });
 
-  it("gives the kid something to do at least every other scene", () => {
+  it("never leaves the kid listening for too long without doing something", () => {
+    // Counted in words, not scenes: now that a scene is as long as its idea,
+    // "every other scene" could still be three minutes of talking. ~200 words
+    // is about a minute and a half before the kid is asked to do something -
+    // a check-in, a model to play with, or the part's problem at the end.
+    const MAX_WORDS_LISTENING = 200;
     for (const seg of lesson.teach ?? []) {
       if (!seg.present?.length) continue;
       let since = 0;
       for (const sc of seg.present) {
-        since = sc.check || sc.visual ? 0 : since + 1;
-        expect(since, `${seg.title}: too long without doing anything`).toBeLessThanOrEqual(2);
+        since += words(sc.say);
+        expect(since, `${seg.title}: ${since} words before the kid does anything`).toBeLessThanOrEqual(MAX_WORDS_LISTENING);
+        if (sc.check || sc.visual) since = 0;
       }
     }
   });

@@ -64,9 +64,10 @@ describe("lessons become tutoring conversations", () => {
           longestScenes = Math.max(longestScenes, scenes);
         }
         expect(longest, `${L.id}: too many lines in a row`).toBeLessThanOrEqual(6);
-        // A scene is half a minute of talking, so two back to back is the limit
-        // before the kid needs something to do.
-        expect(longestScenes, `${L.id}: too many scenes in a row`).toBeLessThanOrEqual(2);
+        // Scenes run as long as their idea takes, so the real limit on talking
+        // without a break is counted in words, in tests/present.test.ts. This
+        // just catches a part built as nothing but a stack of scenes.
+        expect(longestScenes, `${L.id}: too many scenes in a row`).toBeLessThanOrEqual(4);
         expect(steps.filter((s) => s.kind !== "say").length, L.id).toBeGreaterThanOrEqual(L.teach.length);
         // Every teaching part ends with a hands-on problem, and nothing is multiple choice.
         L.teach.forEach((_, i) => expect(steps.some((s) => s.kind === "probe" && s.seg === i), `${L.id} part ${i + 1}`).toBe(true));
