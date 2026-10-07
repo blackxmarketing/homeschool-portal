@@ -118,6 +118,10 @@ export async function saveLessonAction(form: FormData) {
     ...(s(form, "subject") ? { subject: s(form, "subject") as Lesson["subject"] } : {}),
     read: s(form, "read"),
     keyIdeas: lines(form, "keyIdeas"),
+    // The form has no field for these, so carry them over. Without this the
+    // lesson is rebuilt without them and the Colorado standards tagging is lost
+    // the first time a parent saves.
+    ...(course.lessons[i].standards?.length ? { standards: course.lessons[i].standards } : {}),
     check: parseQuestions(s(form, "check")),
     ...(taskKind && s(form, "taskPrompt")
       ? { task: { kind: taskKind as NonNullable<Lesson["task"]>["kind"], prompt: s(form, "taskPrompt"), rubric: lines(form, "taskRubric") } }

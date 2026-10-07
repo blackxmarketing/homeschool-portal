@@ -22,7 +22,16 @@ export default async function EditLesson({
   const lesson = course?.lessons.find((l) => l.id === decodeURIComponent(lessonParam));
   if (!course || !lesson) notFound();
   const { saved, error } = await searchParams;
-  const teaching = { hook: lesson.hook, teach: lesson.teach, activity: lesson.activity, explain: lesson.explain, mastery: lesson.mastery };
+  // Everything sanitizeTeaching understands, so what you see in the box is what
+  // gets saved back. Anything missing here is dropped on save.
+  const teaching = {
+    objectives: lesson.objectives,
+    hook: lesson.hook,
+    teach: lesson.teach,
+    activity: lesson.activity,
+    explain: lesson.explain,
+    mastery: lesson.mastery,
+  };
 
   return (
     <main className="wrap">

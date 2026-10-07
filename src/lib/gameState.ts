@@ -5,6 +5,7 @@ import { LANDS, type LandId } from "./pixel/world";
 import { awardXp, courseOverview, skillTable, teachProgress } from "./store";
 import { STRANDS } from "./curriculum/skills";
 import { WORLDS } from "./game";
+import { lessonPlan, tickedPlan } from "./lessonPlan";
 
 /**
  * The game layer over learning (see docs/GAME.md): heroes, coins, how lit
@@ -82,11 +83,17 @@ function courseQuests(kidId: number, courseIds: string[]): Quest[] {
         title: lesson.title,
         status: status === "done" ? "done" : status === "locked" ? "locked" : status === "waiting" ? "waiting" : "open",
         href: status === "locked" ? null : `/kid/learn/${c.course.id}/${lesson.id}`,
-        objectives: [
-          ...parts.map((p, k) => ({ label: `Learn: ${p.title}`, done: partsDone[k] ?? false })),
-          ...(lesson.mastery?.length ? [{ label: "Boss challenge: show what you know", done }] : []),
-          ...(lesson.task ? [{ label: "Field mission: " + (lesson.task.kind === "write" ? "write it" : "do it for real"), done }] : []),
-        ],
+        // The same list the kid sees inside the lesson, so the map and the
+        // lesson can never say different things (see lib/lessonPlan.ts).
+        objectives: tickedPlan(lessonPlan(lesson), {
+          partsDone,
+          activityDone: done,
+          explainDone: done,
+          masteryPassed: done,
+          taskDone: done,
+        })
+          .filter((x) => x.item.kind !== "try" && x.item.key !== "explain")
+          .map(({ item, done: ok }) => ({ label: item.kind === "learn" ? `Learn: ${item.label}` : item.label, done: ok })),
         kind: `${c.course.icon} ${c.course.title} · Lesson ${i + 1}`,
         icon: c.course.icon,
       });

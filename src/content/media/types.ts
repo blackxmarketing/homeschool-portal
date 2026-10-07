@@ -4,7 +4,12 @@ import type { Beat, Video } from "../courses/types";
 export interface LessonMedia {
   hook?: { show?: Beat[]; watch?: Video };
   /** One entry per teaching part, in the same order as the lesson's `teach`. */
-  teach?: ({ show?: Beat[]; watch?: Video } | null)[];
+  teach?: ({
+    show?: Beat[];
+    watch?: Video;
+    /** One entry per scene, in the same order as that part's `present`. */
+    scenes?: ({ show?: Beat[]; watch?: Video } | null)[];
+  } | null)[];
 }
 
 export type CourseMedia = Record<string, LessonMedia>;

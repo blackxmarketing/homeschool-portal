@@ -1,4 +1,4 @@
-import type { Beat, CheckQuestion, Course, Lesson, Probe, Segment, Stage, TaskKind, ThinkQuestion, Video, Widget } from "@/content/courses/types";
+import type { Beat, CheckQuestion, Course, Lesson, Probe, Scene, Segment, Stage, TaskKind, Term, ThinkQuestion, Video, Widget } from "@/content/courses/types";
 import { isYoutubeId } from "./storyboard";
 import { SUBJECTS, type Subject } from "./compliance";
 
@@ -76,8 +76,18 @@ export function withDefaultMedia(courses: Course[], defaults: Course[]): Course[
             : l.hook;
         const teach = l.teach?.map((s, i) => {
           const ds = dl.teach?.[i];
-          if (!ds || ds.teach !== s.teach) return s;
-          return { ...s, ...(s.show === undefined && ds.show ? { show: ds.show } : {}), ...(!s.watch && ds.watch ? { watch: ds.watch } : {}) };
+          if (!ds) return s;
+          const base =
+            ds.teach !== s.teach
+              ? s
+              : { ...s, ...(s.show === undefined && ds.show ? { show: ds.show } : {}), ...(!s.watch && ds.watch ? { watch: ds.watch } : {}) };
+          // Same per scene: a scene the parent reworded keeps their slides.
+          const present = s.present?.map((sc, j) => {
+            const dsc = ds.present?.[j];
+            if (!dsc || dsc.say !== sc.say) return sc;
+            return { ...sc, ...(sc.show === undefined && dsc.show ? { show: dsc.show } : {}), ...(!sc.watch && dsc.watch ? { watch: dsc.watch } : {}) };
+          });
+          return present ? { ...base, present } : base;
         });
         return { ...l, ...(hook ? { hook } : {}), ...(teach ? { teach } : {}) };
       }),
@@ -267,6 +277,40 @@ export function sanitizeVideo(raw: unknown): Video | null {
   };
 }
 
+function sanitizeTerms(raw: unknown): Term[] {
+  return (Array.isArray(raw) ? raw : [])
+    .filter(isObj)
+    .map((t) => ({ word: str(t.word, 40), meaning: str(t.meaning, 200) }))
+    .filter((t) => t.word && t.meaning)
+    .slice(0, 6);
+}
+
+/**
+ * One scene of a presented part. Broken pieces are dropped but the scene
+ * survives as long as it has a heading and something to say, so a bad edit
+ * can never leave a kid staring at a blank board.
+ */
+export function sanitizeScene(raw: unknown): Scene | null {
+  if (!isObj(raw)) return null;
+  const heading = str(raw.heading, 90);
+  const say = str(raw.say, 1500);
+  if (!heading || !say) return null;
+  const show = sanitizeShow(raw.show);
+  const watch = sanitizeVideo(raw.watch);
+  const visual = raw.visual ? sanitizeWidget(raw.visual) : null;
+  const check = raw.check ? sanitizeProbe(raw.check) : null;
+  const terms = sanitizeTerms(raw.terms);
+  return {
+    heading,
+    say,
+    ...(show ? { show: show.slice(0, 4) } : {}),
+    ...(watch ? { watch } : {}),
+    ...(visual ? { visual } : {}),
+    ...(check ? { check } : {}),
+    ...(terms.length ? { terms } : {}),
+  };
+}
+
 function sanitizeSegment(raw: unknown): Segment | null {
   if (!isObj(raw)) return null;
   const title = str(raw.title, 120);
@@ -279,9 +323,13 @@ function sanitizeSegment(raw: unknown): Segment | null {
   const probe = raw.probe ? sanitizeProbe(raw.probe) : null;
   const show = sanitizeShow(raw.show);
   const watch = sanitizeVideo(raw.watch);
+  // No usable scenes means the field goes away entirely, and the part is read
+  // out from its summary as before.
+  const present = (Array.isArray(raw.present) ? raw.present : []).map(sanitizeScene).filter((s): s is Scene => !!s).slice(0, 6);
   return {
     title,
     teach,
+    ...(present.length ? { present } : {}),
     ...(show ? { show } : {}),
     ...(watch ? { watch } : {}),
     ...(visual ? { visual } : {}),
@@ -292,8 +340,13 @@ function sanitizeSegment(raw: unknown): Segment | null {
 }
 
 /** The interactive parts of a lesson; anything invalid is dropped rather than breaking the lesson. */
-export function sanitizeTeaching(raw: Record<string, unknown>): Pick<Lesson, "hook" | "teach" | "activity" | "explain" | "mastery"> {
-  const out: Pick<Lesson, "hook" | "teach" | "activity" | "explain" | "mastery"> = {};
+export function sanitizeTeaching(raw: Record<string, unknown>): Pick<Lesson, "hook" | "teach" | "activity" | "explain" | "mastery" | "objectives"> {
+  const out: Pick<Lesson, "hook" | "teach" | "activity" | "explain" | "mastery" | "objectives"> = {};
+  // Objectives live in this group on purpose: it is what saveLessonAction spreads
+  // over a lesson it rebuilds from the form, so anything outside it is wiped on
+  // the next parent save.
+  const objectives = strList(raw.objectives, 4, 120);
+  if (objectives.length) out.objectives = objectives;
   if (isObj(raw.hook) && str(raw.hook.text)) {
     const visual = raw.hook.visual ? sanitizeWidget(raw.hook.visual) : null;
     const show = sanitizeShow(raw.hook.show);

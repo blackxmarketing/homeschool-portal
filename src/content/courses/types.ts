@@ -166,11 +166,45 @@ export interface Video {
   end?: number;
 }
 
+/** A word the teacher puts on the board and leaves up. */
+export interface Term {
+  word: string;
+  meaning: string;
+}
+
+/**
+ * One beat of the teacher's presentation: about half a minute of talking, with
+ * its own slides, and usually something for the kid to do straight after.
+ *
+ * A part's scenes are the *presented* version of its `teach` summary. Where a
+ * part has scenes the teacher gives a proper talk; where it doesn't, the
+ * summary is read out in short lines as before.
+ */
+export interface Scene {
+  /** The heading on the board while this scene plays. */
+  heading: string;
+  /** 40-140 words, plain text, said as one continuous block. */
+  say: string;
+  /** Slides for this scene. Without `at` cues they are spread evenly through the words. */
+  show?: Beat[];
+  /** A short video, played after the narration. */
+  watch?: Video;
+  /** A model to play with straight after this scene. */
+  visual?: Widget;
+  /** A quick check before moving on. It does NOT replace the part's main probe. */
+  check?: Probe;
+  /** Words to put on the board and leave up. */
+  terms?: Term[];
+}
+
 /** One small chunk of teaching: explain, show, then a quick think. */
 export interface Segment {
   title: string;
-  /** 60-130 words, plain text. */
+  /** 60-130 words, plain text. The summary of this part: what the coach is given
+   *  as context, what "read it all" shows, and the script when there are no scenes. */
   teach: string;
+  /** The presented version of this part, scene by scene. */
+  present?: Scene[];
   /** Slides that go along with the teacher's words. */
   show?: Beat[];
   /** A short video for this part. */
@@ -203,6 +237,9 @@ export interface Lesson {
   read: string;
   /** 2-4 short takeaways shown after the reading. */
   keyIdeas: string[];
+  /** 2-4 "you'll be able to..." goals in kid words, said at the start and ticked at the end.
+   *  Without them the key ideas stand in, so every lesson can state its goals. */
+  objectives?: string[];
   /** Interactive teaching model. Lessons without it fall back to read-then-check. */
   hook?: { text: string; visual?: Widget; show?: Beat[]; watch?: Video };
   teach?: Segment[];

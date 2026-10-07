@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { beatAt, cuePositions, type PublicBeat, type PublicShow } from "@/lib/storyboard";
+import { beatAt, slidePositions, type PublicBeat, type PublicShow } from "@/lib/storyboard";
 import { stopSpeaking, useSpeech } from "./voice";
 
 /** One slide: a real photo, a big emoji picture, or a big word or number. */
@@ -36,7 +36,7 @@ function Slide({ b }: { b: PublicBeat }) {
  */
 export function StoryBoard({ id, text, show }: { id: string; text: string; show: PublicShow }) {
   const beats = show.beats;
-  const positions = useMemo(() => cuePositions(text, beats), [text, beats]);
+  const positions = useMemo(() => slidePositions(text, beats), [text, beats]);
   const s = useSpeech();
   const active = s.id === id;
   // Word-level position when the voice reports it; otherwise the end of the sentence being read.

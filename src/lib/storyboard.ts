@@ -18,6 +18,18 @@ export function cuePositions(text: string, beats: Pick<Beat, "at">[]): number[] 
   });
 }
 
+/**
+ * Where each slide starts, for a scene that owns its slides. Exact `at` cues are
+ * used when the author gave them; otherwise the slides are spread evenly through
+ * the narration so they change at a steady pace. A scene's words can then be
+ * reworded without silently collapsing its slides onto each other.
+ */
+export function slidePositions(text: string, beats: Pick<Beat, "at">[]): number[] {
+  if (!beats.length) return [];
+  if (beats.some((b, i) => i > 0 && b.at)) return cuePositions(text, beats);
+  return beats.map((_, i) => Math.floor((i / beats.length) * text.length));
+}
+
 /** True when every slide's cue words appear in the text, in order. */
 export function cuesFound(text: string, beats: Pick<Beat, "at">[]): { ok: boolean; missing: string[] } {
   const lower = text.toLowerCase();
