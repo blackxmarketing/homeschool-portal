@@ -15,7 +15,7 @@ import type { AdaptView, PublicSegment, TeachInitial } from "./TeachPlayer";
 import type { PublicWidget } from "@/lib/teaching";
 import type { PublicProbe } from "@/lib/probes";
 import type { PublicShow } from "@/lib/storyboard";
-import { buildSteps, compress, partNames, type TutorStep } from "@/lib/tutorFlow";
+import { buildSteps, compress, methodSteps, partNames, type TutorStep } from "@/lib/tutorFlow";
 import LessonBrief from "./present/LessonBrief";
 import PlanRail from "./present/PlanRail";
 import SceneView from "./present/SceneView";
@@ -244,6 +244,30 @@ export default function TutorSession(props: Props) {
     [steps],
   );
 
+  /**
+   * The practice for this way of teaching it did not land, and the part has
+   * another route. Drop in that method's teaching and its own question right
+   * here, so the kid is shown a different way while it is still fresh.
+   */
+  const anotherWay = useCallback(
+    (segIndex: number, method: number) => {
+      stopSpeaking();
+      const seg = segments[segIndex];
+      const m = seg?.methods?.[method];
+      if (!m) return;
+      const fresh = methodSteps(segIndex, segIndex + 1, m, method, adaptation?.mode ?? "standard");
+      setSteps((st) => {
+        // Replace the rest of this part with the new way in; everything after
+        // the part is untouched.
+        const after = st.findIndex((s, j) => j > idx && s.part !== segIndex + 1);
+        const tail = after >= 0 ? st.slice(after) : [];
+        return [...st.slice(0, idx + 1), ...fresh, ...tail];
+      });
+      setIdx((i) => i + 1);
+    },
+    [segments, adaptation?.mode, idx],
+  );
+
   const solved = useCallback(
     (firstTry: boolean, ratio: number, why?: string | null) => {
       history.current.push({ firstTry, ratio });
@@ -415,6 +439,7 @@ export default function TutorSession(props: Props) {
               onSolved={solved}
               onStars={(n) => setStars((t) => t + n)}
               onNext={next}
+              onAnotherWay={anotherWay}
               teacherName={teacher.name}
             />
           )}
@@ -436,6 +461,7 @@ function InteractiveStep({
   onSolved,
   onStars,
   onNext,
+  onAnotherWay,
   teacherName,
   game,
 }: {
@@ -449,6 +475,8 @@ function InteractiveStep({
   onSolved: (firstTry: boolean, ratio: number, why?: string | null) => void;
   onStars: (n: number) => void;
   onNext: () => void;
+  /** The practice did not land; teach the next way in from here. */
+  onAnotherWay: (seg: number, method: number) => void;
   teacherName: string;
   game?: GameInfo;
 }) {
@@ -617,7 +645,14 @@ function InteractiveStep({
     if (step.kind !== "probe") return { correct: false, parts: [] };
     setError(null);
     try {
-      const d = await coach<{ correct: boolean; graded: { parts: boolean[]; detail?: string } | null; coaching: Coaching | null; rescue: Rescue; solution: unknown }>({
+      const d = await coach<{
+        correct: boolean;
+        graded: { parts: boolean[]; detail?: string } | null;
+        coaching: Coaching | null;
+        rescue: Rescue;
+        solution: unknown;
+        nextMethod?: number | null;
+      }>({
         action: "probe",
         courseId,
         lessonId,
@@ -626,7 +661,11 @@ function InteractiveStep({
         ms,
       });
       if (d.correct) finish(wrong === 0);
-      else {
+      else if (d.nextMethod != null) {
+        // This way of teaching it did not land, and the part has another.
+        // Teach that one now, right here, rather than ending on a miss.
+        onAnotherWay(step.seg, d.nextMethod);
+      } else {
         miss(d.coaching, d.rescue);
         if (d.solution !== null && d.solution !== undefined) {
           setDone(true);

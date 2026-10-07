@@ -240,9 +240,76 @@ export const math5 = k5Course("math", 5, [
     hook: {
       text: "The astronomer at the Starpeak observatory measured a tiny crystal of ice: 0.004 meters wide. Then she wrote down how far light travels in one second: about 300,000 kilometers! How can one number system handle both tiny and huge? The secret is the number 10.",
     },
+    objectives: [
+      "Say what each digit in a number is worth, by its place",
+      "Explain why each place is ten times the one on its right",
+    ],
     teach: [
       {
         title: "Ten Times, One Tenth",
+        // Two ways in. A kid who does not master the first is shown the second,
+        // which gets to the same answer by a different route.
+        methods: [
+          {
+            name: "Read the column",
+            expect: "I will give you a number and point at one digit. You tell me what that digit is worth.",
+            scenes: [
+              {
+                heading: "Same digit, different worth",
+                say: "Here is 555. Three fives, and not one of them means the same thing. Read which column each one sits in. This five is in the hundreds, so it is worth five hundred. This one is in the tens: fifty. And this one is in the ones: just five.",
+                show: [{ art: "place-value", caption: "The column tells you what a digit is worth", words: [{ text: "500", at: "worth five hundred", x: 16, y: 86 }, { text: "50", at: "it is worth fifty", x: 48, y: 86 }, { text: "5", at: "just five", x: 80, y: 86 }] }],
+              },
+              {
+                heading: "Each column is ten of the next",
+                say: "Look at what happens between the columns. Five hundred is ten times fifty. Fifty is ten times five. Every column is worth ten of the column on its right. That is the whole rule.",
+                show: [{ art: "ten-of-these", caption: "Ten of one column makes one of the next" }],
+                check: {
+                  type: "number",
+                  prompt: "In 333, what is the 3 in the tens column worth?",
+                  answer: 30,
+                  hint: "Three tens.",
+                  seconds: 20,
+                },
+              },
+            ],
+            probe: {
+              type: "cloze",
+              text: "In 333, the 3 in the hundreds place is worth {0}. That is {1} times as much as the 3 in the tens place.",
+              blanks: [{ answers: ["300"] }, { answers: ["10", "ten"] }],
+              bank: ["300", "30", "10", "100", "3"],
+              hint: "The hundreds 3 means 3 hundreds. The tens 3 means 3 tens. How many times bigger?",
+              mistakes: [{ match: "100", coach: "Each place is worth 10 times the place just to its right, not 100 times." }],
+              seconds: 35,
+            },
+          },
+          {
+            name: "Count it out in ones",
+            expect: "I will give you a digit in a column, and you tell me how many ones it is worth altogether.",
+            scenes: [
+              {
+                heading: "Build it out of ones",
+                say: "Forget the columns for a second and just count. One ten is ten ones, stacked up. Ten of those stacks is a hundred. So a three in the tens column is thirty ones, and a three in the hundreds column is three hundred ones. Same digit, a very different pile.",
+                show: [{ art: "ten-of-these", caption: "Ten ones make a ten; ten tens make a hundred" }],
+                visual: {
+                  type: "flip",
+                  cards: [
+                    { front: "3 in the ones", back: "3 ones" },
+                    { front: "3 in the tens", back: "30 ones" },
+                    { front: "3 in the hundreds", back: "300 ones" },
+                  ],
+                },
+              },
+            ],
+            probe: {
+              type: "number",
+              prompt: "In 747, how many ones is the 7 on the left worth altogether?",
+              answer: 700,
+              hint: "It sits in the hundreds column. Seven hundreds is how many ones?",
+              mistakes: [{ match: "7", coach: "That is the digit, not what it is worth. It is seven hundreds." }],
+              seconds: 30,
+            },
+          },
+        ],
         teach:
           "Look at the number 555. Every digit is a 5, but each one means something different. The first 5 is in the hundreds place, so it means 500. The next means 50. The last means 5. Notice that 500 is 10 times 50, and 50 is 10 times 5. Each place is worth 10 times the place to its right. Now go the other way. 50 is 1/10 of 500, and 5 is 1/10 of 50. Each place is worth 1/10 of the place to its left. The pattern keeps going after the decimal point: tenths, hundredths, thousandths.",
         visual: {

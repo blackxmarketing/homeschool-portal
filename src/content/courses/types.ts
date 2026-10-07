@@ -184,17 +184,12 @@ export interface Term {
 }
 
 /**
- * One beat of the teacher's presentation: one idea, with its own slides, and
- * usually something for the kid to do straight after.
+ * One beat of the teacher showing how to do something: a short step, with its
+ * own picture, and often something for the kid to try straight after.
  *
- * It runs for exactly as long as the idea takes to say - the lesson moves on
- * the moment the teacher stops talking - so write what the idea needs rather
- * than writing to a length. A short idea makes a short scene; one that needs
- * longer gets longer.
- *
- * A part's scenes are the *presented* version of its `teach` summary. Where a
- * part has scenes the teacher gives a proper talk; where it doesn't, the
- * summary is read out in short lines as before.
+ * It runs for exactly as long as the step takes to say - the lesson moves on
+ * the moment the teacher stops talking - so write what the step needs rather
+ * than writing to a length.
  */
 export interface Scene {
   /** The heading on the board while this scene plays. */
@@ -213,14 +208,35 @@ export interface Scene {
   terms?: Term[];
 }
 
+/**
+ * One way of teaching a part: show how to do it, say what the practice
+ * expects, then let the kid try that exact thing.
+ *
+ * A part can hold more than one. The first is what a kid meets; if they don't
+ * master the practice, the teacher says "let me show you another way" and
+ * teaches the next one instead - a genuinely different route to the same
+ * answer, not the same explanation again. Some kids only ever click with the
+ * second one.
+ */
+export interface Method {
+  /** Named for the kid: "Move the digits", "Hop the decimal point". */
+  name: string;
+  /** Showing how, in short steps. About a minute in total. */
+  scenes: Scene[];
+  /** What the practice is going to ask, said plainly before they try it. */
+  expect: string;
+  /** The practice for this way in. Each method asks its own, so a retry is never the same question. */
+  probe: Probe;
+}
+
 /** One small chunk of teaching: explain, show, then a quick think. */
 export interface Segment {
   title: string;
   /** 60-130 words, plain text. The summary of this part: what the coach is given
-   *  as context, what "read it all" shows, and the script when there are no scenes. */
+   *  as context, what "read it all" shows, and the script when there is no method. */
   teach: string;
-  /** The presented version of this part, scene by scene. */
-  present?: Scene[];
+  /** Ways to teach this part, tried in order as a kid needs them. */
+  methods?: Method[];
   /** Slides that go along with the teacher's words. */
   show?: Beat[];
   /** A short video for this part. */

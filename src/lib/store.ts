@@ -1790,8 +1790,13 @@ export function adaptationFor(kidId: number, courseId: string): Adaptation {
 function probeContext(kidId: number, courseId: string, lessonId: string, segIndex: number) {
   const ctx = teachContext(kidId, courseId, lessonId);
   const seg = ctx.lesson.teach?.[segIndex];
-  if (!seg?.probe) throw new PortalError("Unknown part of the lesson.");
-  return { ctx, seg, probe: seg.probe, st: ctx.state.segments[segIndex] };
+  const st = ctx.state.segments[segIndex];
+  // A part taught by methods practises whichever one the kid is on; each
+  // method asks its own question, so a retry is never the same one.
+  const method = seg?.methods?.[Math.min(st?.method ?? 0, seg.methods.length - 1)];
+  const probe = method?.probe ?? seg?.probe;
+  if (!seg || !probe) throw new PortalError("Unknown part of the lesson.");
+  return { ctx, seg, probe, st, method };
 }
 
 /**
@@ -1846,15 +1851,31 @@ export function answerProbe(kidId: number, courseId: string, lessonId: string, s
   const floor = lead === "analogy" ? LADDER.analogy : lead === "example" ? LADDER.example : 0;
   st.rung = Math.max(st.rung, Math.min(LADDER.reveal, st.misses), st.misses === 1 ? floor : 0);
   let solution: unknown = null;
+  let nextMethod: number | null = null;
   if (st.rung >= LADDER.reveal) {
-    st.done = "supported";
-    solution = probeSolution(probe);
-    resolve(graded.score, false);
+    // This way of teaching it did not land. If the part has another route,
+    // move them onto it and let them have a fresh go rather than marking the
+    // part finished on a miss.
+    const more = seg.methods && (st.method ?? 0) + 1 < seg.methods.length;
+    if (more) {
+      st.method = (st.method ?? 0) + 1;
+      nextMethod = st.method;
+      // A clean slate for the new method: it asks its own question.
+      st.misses = 0;
+      st.rung = 0;
+      st.lost = 0;
+      resolve(graded.score, false);
+    } else {
+      st.done = "supported";
+      solution = probeSolution(probe);
+      resolve(graded.score, false);
+    }
   }
   saveTeachState(ctx.rowId, ctx.state);
   const c = coachingFor(seg, st, -1);
   return {
     correct: false,
+    nextMethod,
     graded: { ...graded, coach: graded.coach ?? probe.hint ?? null },
     state: st,
     coaching: { ...c, hint: graded.coach ?? probe.hint ?? "Not quite. Look again at what you just learned.", reveal: null },
@@ -1972,7 +1993,10 @@ export function answerMasteryItem(
  */
 export function answerCheckin(kidId: number, courseId: string, lessonId: string, segIndex: number, sceneIndex: number, answer: unknown, ms: number) {
   const ctx = teachContext(kidId, courseId, lessonId);
-  const scene = ctx.lesson.teach?.[segIndex]?.present?.[sceneIndex];
+  const seg = ctx.lesson.teach?.[segIndex];
+  // The check belongs to the way of teaching the kid is actually on.
+  const method = seg?.methods?.[ctx.state.segments[segIndex]?.method ?? 0];
+  const scene = method?.scenes[sceneIndex];
   if (!scene?.check) throw new PortalError("Nothing to check here.");
   const p = scene.check;
   const graded = gradeProbe(p, answer);

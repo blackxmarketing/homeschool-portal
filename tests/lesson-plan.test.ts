@@ -7,7 +7,7 @@ import { slidePositions, beatAt } from "@/lib/storyboard";
 
 const lesson = COURSES.find((c) => c.id === "science")!.lessons[0];
 /** A lesson nobody has written scenes or objectives for yet, for the fallback cases. */
-const plain = COURSES.flatMap((c) => c.lessons).find((l) => l.teach?.length && !l.objectives && !l.teach.some((s) => s.present?.length))!;
+const plain = COURSES.flatMap((c) => c.lessons).find((l) => l.teach?.length && !l.objectives && !l.teach.some((s) => s.methods?.length))!;
 
 const scene = (over: Partial<Scene> = {}): Scene => ({
   heading: "Two forces, one book",
@@ -33,13 +33,27 @@ describe("the lesson plan a kid can see", () => {
     expect(total).toBe(teaching + doing);
   });
 
-  it("counts a presented part by what is actually said, not by the summary", () => {
+  it("counts a taught part by what is actually said, not by the summary", () => {
     const seg = plain.teach![0];
-    // A real scene is 40-140 words, and a part has several - so a presented
-    // part is minutes of teaching where the summary alone was seconds.
-    const full = scene({ say: Array.from({ length: 110 }, (_, i) => `word${i}`).join(" ") });
-    const long = { ...seg, present: [full, full, full, full] };
+    const long = {
+      ...seg,
+      methods: [
+        {
+          name: "A way in",
+          expect: "You will be asked to do the thing we just did.",
+          scenes: [1, 2, 3].map(() => scene({ say: Array.from({ length: 110 }, (_, i) => `word${i}`).join(" ") })),
+          probe: { type: "number" as const, prompt: "x", answer: 1 },
+        },
+      ],
+    };
     expect(partMinutes(long)).toBeGreaterThan(partMinutes(seg) + 1);
+  });
+
+  it("estimates from the first way in only, since that is what a kid who gets it sits through", () => {
+    const seg = plain.teach![0];
+    const short = { name: "First", expect: "A short expectation line for the practice.", scenes: [scene({ say: "Ten words here just to make a small scene okay." })], probe: { type: "number" as const, prompt: "x", answer: 1 } };
+    const long = { ...short, name: "Second", scenes: [scene({ say: Array.from({ length: 200 }, (_, i) => `word${i}`).join(" ") })] };
+    expect(partMinutes({ ...seg, methods: [short, long] })).toBe(partMinutes({ ...seg, methods: [short] }));
   });
 
   it("ticks items off from real progress", () => {
@@ -110,7 +124,10 @@ describe("a parent saving the lesson editor", () => {
       {
         title: "Fair tests",
         teach: "A fair test changes one thing and keeps everything else the same, so you know what caused the difference.",
-        present: [scene(), scene({ heading: "One change" })],
+        methods: [
+          { name: "One change", expect: "You will be shown a test and asked whether it is fair.", scenes: [scene()], probe: { type: "number", prompt: "How many things should change?", answer: 1, seconds: 20 } },
+          { name: "Spot the extra change", expect: "You will be asked which second thing changed.", scenes: [scene({ heading: "Two changes" })], probe: { type: "number", prompt: "How many changed here?", answer: 2, seconds: 20 } },
+        ],
         think: { q: "What is a fair test?", choices: ["One change", "Many changes"], answer: 0, why: "Only one thing changes.", hints: ["", "Think about what you change."] },
         approaches: {
           analogy: "It is like racing two bikes but only swapping the tyres on one of them.",
@@ -121,25 +138,25 @@ describe("a parent saving the lesson editor", () => {
     ],
   };
 
-  it("keeps the objectives and the scenes", () => {
+  it("keeps the objectives and the methods", () => {
     const out = sanitizeTeaching(presented);
     expect(out.objectives).toEqual(presented.objectives);
-    expect(out.teach![0].present).toHaveLength(2);
-    expect(out.teach![0].present![0].say).toBe(scene().say);
+    expect(out.teach![0].methods).toHaveLength(2);
+    expect(out.teach![0].methods![0].scenes[0].say).toBe(scene().say);
   });
 
   it("survives a full round trip, which is how the pilot content gets destroyed otherwise", () => {
     const once = sanitizeTeaching(presented);
     const twice = sanitizeTeaching(once as unknown as Record<string, unknown>);
     expect(twice).toEqual(once);
-    expect(twice.teach![0].present).toHaveLength(2);
+    expect(twice.teach![0].methods).toHaveLength(2);
     expect(twice.objectives).toEqual(presented.objectives);
   });
 
-  it("falls back to reading the summary when the scenes are all unusable", () => {
-    const broken = { ...presented, teach: [{ ...presented.teach[0], present: [{ heading: "" }, "junk"] }] };
+  it("falls back to reading the summary when the methods are all unusable", () => {
+    const broken = { ...presented, teach: [{ ...presented.teach[0], methods: [{ name: "" }, "junk"] }] };
     const out = sanitizeTeaching(broken);
-    expect(out.teach![0].present).toBeUndefined();
+    expect(out.teach![0].methods).toBeUndefined();
     expect(out.teach![0].teach).toBe(presented.teach[0].teach);
   });
 });

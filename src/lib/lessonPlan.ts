@@ -32,9 +32,17 @@ const words = (s: string) => (s.trim() ? s.trim().split(/\s+/).length : 0);
 const roundUp = (minutes: number) => Math.max(1, Math.round(minutes));
 
 /** How long a teaching part takes: the talking plus its hands-on bits. */
-export function partMinutes(seg: { teach: string; present?: { say: string }[]; probe?: unknown; visual?: unknown }): number {
-  const said = seg.present?.length ? seg.present.reduce((t, sc) => t + words(sc.say), 0) : words(seg.teach);
-  const extras = (seg.probe ? PROBE_SECONDS : 0) + (seg.visual ? 45 : 0);
+export function partMinutes(seg: {
+  teach: string;
+  methods?: { expect: string; scenes: { say: string }[] }[];
+  probe?: unknown;
+  visual?: unknown;
+}): number {
+  // Only the first way of teaching it counts towards the estimate: that is
+  // what a kid who gets it will actually sit through.
+  const first = seg.methods?.[0];
+  const said = first ? first.scenes.reduce((t, sc) => t + words(sc.say), 0) + words(first.expect) : words(seg.teach);
+  const extras = (seg.probe || first ? PROBE_SECONDS : 0) + (seg.visual ? 45 : 0);
   return roundUp(said / WORDS_PER_MINUTE + extras / 60);
 }
 

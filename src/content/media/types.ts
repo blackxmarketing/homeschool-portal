@@ -7,8 +7,8 @@ export interface LessonMedia {
   teach?: ({
     show?: Beat[];
     watch?: Video;
-    /** One entry per scene, in the same order as that part's `present`. */
-    scenes?: ({ show?: Beat[]; watch?: Video } | null)[];
+    /** Slides per scene, per method: `methods[methodIndex][sceneIndex]`. */
+    methods?: (({ show?: Beat[]; watch?: Video } | null)[] | null)[];
   } | null)[];
 }
 

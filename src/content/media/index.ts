@@ -57,11 +57,17 @@ export function withMedia(course: Course): Course {
         teach: l.teach?.map((s, i) => {
           const part = m.teach?.[i];
           if (!part) return s;
-          const { scenes, ...partMedia } = part;
+          const { methods, ...partMedia } = part;
           const merged = { ...s, ...partMedia };
-          // A presented part's slides hang off each scene, not the part.
-          return scenes && merged.present
-            ? { ...merged, present: merged.present.map((sc, j) => (scenes[j] ? { ...sc, ...scenes[j] } : sc)) }
+          // A taught part's slides hang off each scene of each method.
+          return methods && merged.methods
+            ? {
+                ...merged,
+                methods: merged.methods.map((mm, mi) => {
+                  const ms = methods[mi];
+                  return ms ? { ...mm, scenes: mm.scenes.map((sc, j) => (ms[j] ? { ...sc, ...ms[j] } : sc)) } : mm;
+                }),
+              }
             : merged;
         }),
       };

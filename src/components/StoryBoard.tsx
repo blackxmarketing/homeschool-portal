@@ -6,8 +6,20 @@ import LessonScene from "./pixel/LessonScene";
 import { stopSpeaking, useSpeech } from "./voice";
 
 /** One slide: an animated pixel scene, a real photo, a big emoji picture, or a big word. */
-function Slide({ b, progress, charIndex, text }: { b: PublicBeat; progress: number; charIndex: number; text: string }) {
-  if (b.art) return <LessonScene beat={b} progress={progress} charIndex={charIndex} text={text} />;
+function Slide({
+  b,
+  voiceProgress,
+  expectedMs,
+  charIndex,
+  text,
+}: {
+  b: PublicBeat;
+  voiceProgress: number | null;
+  expectedMs: number;
+  charIndex: number;
+  text: string;
+}) {
+  if (b.art) return <LessonScene beat={b} voiceProgress={voiceProgress} expectedMs={expectedMs} charIndex={charIndex} text={text} />;
   if (b.photo) {
     return (
       <div className="sb-slide sb-photo">
@@ -58,10 +70,13 @@ export function StoryBoard({ id, text, show }: { id: string; text: string; show:
   const b = beats[Math.min(index, beats.length - 1)];
   const next = beats[index + 1];
   // How far through this picture's own stretch of the words we are, so an
-  // animated scene builds itself in step with what is being said.
+  // animated scene builds in step with what is being said. Null when the voice
+  // is not reading: the scene then paces itself instead of jumping to the end.
   const from = positions[index] ?? 0;
   const to = positions[index + 1] ?? text.length;
-  const progress = pos < 0 ? 1 : Math.max(0, Math.min(1, (pos - from) / Math.max(1, to - from)));
+  const voiceProgress = pos < 0 ? null : Math.max(0, Math.min(1, (pos - from) / Math.max(1, to - from)));
+  // ~14 characters a second is about 140 words a minute.
+  const expectedMs = ((to - from) / 14) * 1000;
   const go = (i: number) => {
     if (active) stopSpeaking();
     setPicked((i + beats.length) % beats.length);
@@ -71,7 +86,7 @@ export function StoryBoard({ id, text, show }: { id: string; text: string; show:
     <figure className="sb" aria-roledescription="slideshow">
       <div className="sb-screen">
         <div key={index} className="sb-frame">
-          <Slide b={b} progress={progress} charIndex={pos} text={text} />
+          <Slide b={b} voiceProgress={voiceProgress} expectedMs={expectedMs} charIndex={pos} text={text} />
         </div>
         {/* An animated scene says it with key words instead of a caption bar. */}
         {!(b.art && b.words?.length) && <figcaption className="sb-caption">{b.caption}</figcaption>}

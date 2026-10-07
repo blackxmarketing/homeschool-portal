@@ -56,8 +56,11 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
     ? await photosFor(
         [
           ...(L.hook?.show ?? []),
-          // A presented part's slides hang off its scenes, not the part.
-          ...(L.teach ?? []).flatMap((s) => [...(s.show ?? []), ...(s.present ?? []).flatMap((sc) => sc.show ?? [])]),
+          // A taught part's slides hang off the scenes of each method.
+          ...(L.teach ?? []).flatMap((s) => [
+            ...(s.show ?? []),
+            ...(s.methods ?? []).flatMap((m) => m.scenes.flatMap((sc) => sc.show ?? [])),
+          ]),
         ]
           .map((b) => b.photo ?? "")
           .filter(Boolean),
@@ -101,15 +104,24 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
             segments: L.teach.map((s, i) => ({
               title: s.title,
               teach: s.teach,
-              ...(s.present?.length
+              // Every way of teaching this part goes down, not just the one
+              // they are on: the teaching is not secret, and it means the
+              // switch to another method after a miss is instant. Answers are
+              // stripped by publicProbe exactly as everywhere else.
+              ...(s.methods?.length
                 ? {
-                    present: s.present.map((sc, j) => ({
-                      heading: sc.heading,
-                      say: sc.say,
-                      show: slides(sc.show, sc.watch),
-                      visual: sc.visual ? publicWidget(sc.visual, `${seed}:v${i}.${j}`) : undefined,
-                      check: sc.check ? publicProbe(sc.check, `${seed}:c${i}.${j}`) : undefined,
-                      terms: sc.terms,
+                    methods: s.methods.map((m, mi) => ({
+                      name: m.name,
+                      expect: m.expect,
+                      probe: publicProbe(m.probe, `${seed}:mp${i}.${mi}`),
+                      scenes: m.scenes.map((sc, j) => ({
+                        heading: sc.heading,
+                        say: sc.say,
+                        show: slides(sc.show, sc.watch),
+                        visual: sc.visual ? publicWidget(sc.visual, `${seed}:v${i}.${mi}.${j}`) : undefined,
+                        check: sc.check ? publicProbe(sc.check, `${seed}:c${i}.${mi}.${j}`) : undefined,
+                        terms: sc.terms,
+                      })),
                     })),
                   }
                 : {}),
@@ -126,6 +138,7 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
             mastery: L.mastery?.length ? L.mastery.map((m, i) => publicProbe(m, `${seed}:m${i}`)) : undefined,
             initial: {
               segmentsDone: state.segments.map((s) => !!s.done),
+              segmentMethod: state.segments.map((s) => s.method ?? 0),
               activityDone: state.activity.done,
               explainDone: state.explain.done,
             },

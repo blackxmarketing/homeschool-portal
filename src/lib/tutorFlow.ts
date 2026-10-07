@@ -1,4 +1,4 @@
-import type { PublicSegment, PublicScene, AdaptView, TeachInitial } from "@/components/TeachPlayer";
+import type { PublicSegment, PublicMethod, AdaptView, TeachInitial } from "@/components/TeachPlayer";
 import type { PublicWidget } from "./teaching";
 import type { PublicProbe } from "./probes";
 import { beatAt, cuePositions, type PublicBeat, type PublicShow } from "./storyboard";
@@ -107,28 +107,35 @@ function watchStep(key: string, part: number, watch: NonNullable<PublicShow["wat
  * scene at a time, with that scene's slides under the words, and usually
  * something to do straight after.
  */
-function presentSteps(i: number, part: number, scenes: PublicScene[], mode: AdaptView["mode"]): TutorStep[] {
+export function methodSteps(i: number, part: number, m: PublicMethod, mi: number, mode: AdaptView["mode"]): TutorStep[] {
   const out: TutorStep[] = [];
-  scenes.forEach((sc, j) => {
+  // Another way in, after a first go that didn't land: say so, so it reads as
+  // help rather than the same thing again.
+  if (mi > 0) {
+    out.push({ kind: "say", key: `s${i}:m${mi}:intro`, part, text: `Let me show you another way. This one is called ${m.name}.`, label: "Another way" });
+  }
+  m.scenes.forEach((sc, j) => {
     out.push({
       kind: "present",
-      key: `s${i}:sc${j}`,
+      key: `s${i}:m${mi}:sc${j}`,
       part,
       seg: i,
       scene: j,
-      of: scenes.length,
+      of: m.scenes.length,
       heading: sc.heading,
       text: sc.say,
       show: sc.show,
       ...(sc.terms?.length ? { terms: sc.terms } : {}),
     });
-    if (sc.show?.watch) out.push(watchStep(`s${i}:sc${j}:video`, part, sc.show.watch));
-    if (sc.visual) out.push({ kind: "explore", key: `s${i}:sc${j}:visual`, part, seg: i, widget: sc.visual, text: "Your turn. Play with this until it makes sense." });
-    // A kid who is flying does not need stopping every half minute.
+    if (sc.show?.watch) out.push(watchStep(`s${i}:m${mi}:sc${j}:video`, part, sc.show.watch));
+    if (sc.visual) out.push({ kind: "explore", key: `s${i}:m${mi}:sc${j}:visual`, part, seg: i, widget: sc.visual, text: "Your turn. Play with this until it makes sense." });
     if (sc.check && mode !== "challenge") {
-      out.push({ kind: "checkin", key: `s${i}:sc${j}:check`, part, seg: i, scene: j, probe: sc.check, text: "Quick check before we move on." });
+      out.push({ kind: "checkin", key: `s${i}:m${mi}:sc${j}:check`, part, seg: i, scene: j, probe: sc.check, text: "Quick check before we move on." });
     }
   });
+  // What the practice is about to ask, then the practice itself.
+  out.push({ kind: "say", key: `s${i}:m${mi}:expect`, part, text: m.expect, label: "Now you try" });
+  out.push({ kind: "probe", key: `s${i}:m${mi}:probe`, part, seg: i, probe: m.probe, text: "Your turn. Show me what you've got." });
   return out;
 }
 
@@ -165,14 +172,13 @@ export function buildSteps(input: TutorInput): TutorStep[] {
   input.segments.forEach((seg, i) => {
     if (input.initial.segmentsDone[i]) return;
     const part = i + 1;
-    // A presented part replaces the read-it-out-in-short-lines path. The choice
-    // is per part, so a lesson can be half written and still play.
-    if (seg.present?.length) {
-      steps.push(...presentSteps(i, part, seg.present, mode));
-      if (seg.show?.watch) steps.push(watchStep(`s${i}:video`, part, seg.show.watch));
-      if (seg.example) steps.push({ kind: "say", key: `s${i}:example`, part, text: seg.example, label: "Watch me do one first" });
-      if (seg.probe) steps.push({ kind: "probe", key: `s${i}:probe`, part, seg: i, probe: seg.probe, text: "Your turn. Show me what you've got." });
-      else steps.push({ kind: "think", key: `s${i}:think`, part, seg: i, q: seg.think.q, choices: seg.think.choices });
+    // A taught part replaces the read-it-out-in-short-lines path. The choice is
+    // per part, so a lesson can be half written and still play. Only the method
+    // the kid is on is built now; if they miss its practice the player splices
+    // in the next one.
+    if (seg.methods?.length) {
+      const mi = Math.min(input.initial.segmentMethod?.[i] ?? 0, seg.methods.length - 1);
+      steps.push(...methodSteps(i, part, seg.methods[mi], mi, mode));
       return;
     }
     const lines = sayLines(`s${i}`, part, seg.teach, seg.show, mode, seg.title);

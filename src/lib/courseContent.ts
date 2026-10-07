@@ -1,4 +1,4 @@
-import type { Beat, CheckQuestion, Course, Lesson, Probe, Scene, Segment, Stage, TaskKind, Term, ThinkQuestion, Video, Widget } from "@/content/courses/types";
+import type { Beat, CheckQuestion, Course, Lesson, Method, Probe, Scene, Segment, Stage, TaskKind, Term, ThinkQuestion, Video, Widget } from "@/content/courses/types";
 import { isYoutubeId } from "./storyboard";
 import { SUBJECTS, type Subject } from "./compliance";
 import { hasScene } from "./pixel/lessonArt";
@@ -82,13 +82,20 @@ export function withDefaultMedia(courses: Course[], defaults: Course[]): Course[
             ds.teach !== s.teach
               ? s
               : { ...s, ...(s.show === undefined && ds.show ? { show: ds.show } : {}), ...(!s.watch && ds.watch ? { watch: ds.watch } : {}) };
-          // Same per scene: a scene the parent reworded keeps their slides.
-          const present = s.present?.map((sc, j) => {
-            const dsc = ds.present?.[j];
-            if (!dsc || dsc.say !== sc.say) return sc;
-            return { ...sc, ...(sc.show === undefined && dsc.show ? { show: dsc.show } : {}), ...(!sc.watch && dsc.watch ? { watch: dsc.watch } : {}) };
+          // Same per scene: a scene the parent reworded keeps their own slides.
+          const methods = s.methods?.map((m, mi) => {
+            const dm = ds.methods?.[mi];
+            if (!dm) return m;
+            return {
+              ...m,
+              scenes: m.scenes.map((sc, j) => {
+                const dsc = dm.scenes[j];
+                if (!dsc || dsc.say !== sc.say) return sc;
+                return { ...sc, ...(sc.show === undefined && dsc.show ? { show: dsc.show } : {}), ...(!sc.watch && dsc.watch ? { watch: dsc.watch } : {}) };
+              }),
+            };
           });
-          return present ? { ...base, present } : base;
+          return methods ? { ...base, methods } : base;
         });
         return { ...l, ...(hook ? { hook } : {}), ...(teach ? { teach } : {}) };
       }),
@@ -330,6 +337,21 @@ export function sanitizeScene(raw: unknown): Scene | null {
   };
 }
 
+/**
+ * One way of teaching a part. It needs a name, something to show, what the
+ * practice expects and a practice question - without all four it is not a
+ * usable route, so it is dropped and the part falls back to the one before it.
+ */
+export function sanitizeMethod(raw: unknown): Method | null {
+  if (!isObj(raw)) return null;
+  const name = str(raw.name, 60);
+  const expect = str(raw.expect, 300);
+  const probe = raw.probe ? sanitizeProbe(raw.probe) : null;
+  const scenes = (Array.isArray(raw.scenes) ? raw.scenes : []).map(sanitizeScene).filter((s): s is Scene => !!s).slice(0, 6);
+  if (!name || !expect || !probe || !scenes.length) return null;
+  return { name, expect, scenes, probe };
+}
+
 function sanitizeSegment(raw: unknown): Segment | null {
   if (!isObj(raw)) return null;
   const title = str(raw.title, 120);
@@ -342,13 +364,13 @@ function sanitizeSegment(raw: unknown): Segment | null {
   const probe = raw.probe ? sanitizeProbe(raw.probe) : null;
   const show = sanitizeShow(raw.show);
   const watch = sanitizeVideo(raw.watch);
-  // No usable scenes means the field goes away entirely, and the part is read
+  // No usable method means the field goes away entirely, and the part is read
   // out from its summary as before.
-  const present = (Array.isArray(raw.present) ? raw.present : []).map(sanitizeScene).filter((s): s is Scene => !!s).slice(0, 6);
+  const methods = (Array.isArray(raw.methods) ? raw.methods : []).map(sanitizeMethod).filter((m): m is Method => !!m).slice(0, 4);
   return {
     title,
     teach,
-    ...(present.length ? { present } : {}),
+    ...(methods.length ? { methods } : {}),
     ...(show ? { show } : {}),
     ...(watch ? { watch } : {}),
     ...(visual ? { visual } : {}),

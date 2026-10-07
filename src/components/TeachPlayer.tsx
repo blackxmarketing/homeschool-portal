@@ -21,11 +21,19 @@ export interface PublicScene {
   terms?: Term[];
 }
 
+/** One way of teaching a part, as the browser sees it. */
+export interface PublicMethod {
+  name: string;
+  expect: string;
+  scenes: PublicScene[];
+  probe: PublicProbe;
+}
+
 export interface PublicSegment {
   title: string;
   teach: string;
-  /** The presented version of this part. Without it the summary is read out in short lines. */
-  present?: PublicScene[];
+  /** Ways to teach this part. Without any, the summary is read out in short lines. */
+  methods?: PublicMethod[];
   /** Slides and a video that go with the teacher's words. */
   show?: PublicShow;
   visual?: PublicWidget;
@@ -44,6 +52,8 @@ export interface AdaptView {
 
 export interface TeachInitial {
   segmentsDone: boolean[];
+  /** Which way of teaching each part the kid is on, so a retry resumes on it. */
+  segmentMethod?: number[];
   activityDone: boolean;
   explainDone: boolean;
 }

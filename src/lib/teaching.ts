@@ -30,6 +30,9 @@ export interface SegmentState {
   /** "passed" on their own (or with light help); "supported" after the answer was shown. */
   done: "" | "passed" | "supported";
   aiRescues: number;
+  /** Which way of teaching this part the kid is on. They move to the next one
+   *  when they don't master the practice, so a retry is a different method. */
+  method?: number;
   /** Total time spent answering (ms). */
   ms?: number;
 }
@@ -50,7 +53,7 @@ export interface TeachState {
 }
 
 export function emptySegment(): SegmentState {
-  return { misses: 0, rung: 0, lost: 0, simplerDone: false, done: "", aiRescues: 0 };
+  return { misses: 0, rung: 0, lost: 0, simplerDone: false, done: "", aiRescues: 0, method: 0 };
 }
 
 export function parseState(raw: string | null | undefined, segments: number): TeachState {
