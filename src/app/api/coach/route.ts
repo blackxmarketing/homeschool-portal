@@ -178,10 +178,13 @@ export async function POST(req: Request) {
             memory,
           })
         : null;
-      logTutor(kid.id, { ...base, role: "kid", content: `Asked in "${ctx.lesson.title}": ${question}` });
+      // Off-topic questions are marked in the transcript so a parent sees them on the
+      // kid's page, instead of the flag being computed and thrown away.
+      const flag = reply && !reply.onTopic ? "[off topic] " : "";
+      logTutor(kid.id, { ...base, role: "kid", content: `${flag}Asked in "${ctx.lesson.title}": ${question}` });
       if (reply) {
         logTutor(kid.id, { ...base, role: "teacher", content: reply.answer });
-        return NextResponse.json({ answer: reply.answer, ai: true });
+        return NextResponse.json({ answer: reply.answer, ai: true, onTopic: reply.onTopic });
       }
       // Without AI the teacher offers another way in from the lesson itself, and the question is saved for a parent.
       const fallback = s

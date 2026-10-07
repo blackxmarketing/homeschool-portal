@@ -64,7 +64,7 @@ Windows tips (Jake's laptop):
   `courseContent.ts` (lesson validation), `teaching.ts` / `probes.ts` (the
   coaching ladder and interactive questions, graded on the server),
   `learner.ts` (learner model and early warnings), `ai.ts` (Claude:
-  `claude-opus-5-5` via `@anthropic-ai/sdk`), `media.ts` / `mediaFetch.ts`
+  `claude-opus-5` via `@anthropic-ai/sdk`), `media.ts` / `mediaFetch.ts`
   (Wikimedia photos, cached).
 - `src/components/` — `TutorSession.tsx` (lessons as a tutor conversation;
   uses `src/lib/tutorFlow.ts` to build the steps and `src/lib/struggle.ts`

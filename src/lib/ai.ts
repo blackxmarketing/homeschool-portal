@@ -12,7 +12,7 @@ import { teachingMethod } from "./content";
  * by code; Claude only writes hints and parent summaries.
  */
 
-const MODEL = "claude-opus-5-5";
+const MODEL = "claude-opus-5";
 
 let client: Anthropic | null | undefined;
 
