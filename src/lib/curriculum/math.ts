@@ -69,3 +69,22 @@ export function dec(x: number, maxPlaces = 6): string {
 export function fmt(n: number): string {
   return n.toLocaleString("en-US");
 }
+
+/** Every factor pair of n (small factor first). */
+export function factorPairs(n: number): [number, number][] {
+  const out: [number, number][] = [];
+  for (let a = 1; a * a <= n; a++) if (n % a === 0) out.push([a, n / a]);
+  return out;
+}
+
+/** Every factor of n, smallest first. */
+export function divisors(n: number): number[] {
+  const out = new Set<number>();
+  for (const [a, b] of factorPairs(n)) {
+    out.add(a);
+    out.add(b);
+  }
+  return [...out].sort((x, y) => x - y);
+}
+
+export const isPrime = (n: number) => n > 1 && factorPairs(n).length === 1;

@@ -1,5 +1,6 @@
 import type { MiniGame, MiniLevel } from "./index";
 import { Grid } from "../pixel/grid";
+import { factorPairs, isPrime } from "../curriculum/math";
 
 /**
  * Array Garden (K-5 math, grades 2, 3, 4). A pixel garden grid: the kid
@@ -155,13 +156,9 @@ export const splitOk = (r: GardenRound, s: unknown): s is number => needsSplit(r
 /** The "smart" split for an area model: tens and ones. */
 export const tensSplit = (cols: number) => cols - (cols % 10);
 
-/** Every factor pair of n (small factor first). */
-export function factorPairs(n: number): [number, number][] {
-  const out: [number, number][] = [];
-  for (let a = 1; a * a <= n; a++) if (n % a === 0) out.push([a, n / a]);
-  return out;
-}
-export const isPrime = (n: number) => n > 1 && factorPairs(n).length === 1;
+// Factors live in the curriculum helpers now, so the lessons, Array Garden and
+// Number Chompers all count factors the same way. Re-exported for the screens.
+export { factorPairs, isPrime };
 const pairKey = (a: number, b: number) => `${Math.min(a, b)}x${Math.max(a, b)}`;
 
 export interface Ask {

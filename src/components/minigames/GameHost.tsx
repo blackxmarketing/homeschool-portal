@@ -15,7 +15,7 @@ export default function GameHost({ game, levels, progress }: { game: string; lev
     const d = await res.json();
     if (!res.ok) throw new Error(d.error ?? "Couldn't save the game.");
     setStars((s) => ({ ...s, [levelId]: { stars: d.stars, best: d.best, plays: (s[levelId]?.plays ?? 0) + 1 } }));
-    return { stars: d.earned as number, xp: d.xp as number };
+    return { stars: d.earned as number, xp: d.xp as number, score: d.score as number | undefined };
   }
 
   if (playing) {

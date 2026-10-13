@@ -88,6 +88,12 @@ export interface Evidence {
   ms: number;
   expectedMs: number;
   at: number;
+  /**
+   * How much this answer is worth, 0-1. Left out it is a full 1: a question
+   * answered in a lesson. Practice from a game comes in lower, so fluency
+   * earned in an arcade nudges the estimate rather than settling it.
+   */
+  weight?: number;
 }
 
 export interface Meter {
@@ -138,16 +144,17 @@ export function decayed(p: number, lastSeen: number, now: number): number {
 export function applyEvidence(meter: Meter, e: Evidence): Meter {
   const p0 = decayed(meter.p, meter.lastSeen, e.at);
   const shown = e.rung >= 4;
+  const w = Math.min(1, Math.max(0, e.weight ?? 1));
   let p = p0;
 
   if (!e.correct) {
-    p = p0 * 0.6;
+    p = p0 * (1 - 0.4 * w);
   } else if (shown) {
     // They saw the answer. Not evidence either way, so the estimate holds.
     p = p0;
   } else {
     const base = e.firstTry ? 0.45 : 0.18;
-    p = p0 + (1 - p0) * base * helpCredit(e.rung) * speedCredit(e.ms, e.expectedMs);
+    p = p0 + (1 - p0) * base * helpCredit(e.rung) * speedCredit(e.ms, e.expectedMs) * w;
   }
 
   // An angle counts once they get it right without being handed the answer.

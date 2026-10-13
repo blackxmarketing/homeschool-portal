@@ -1,0 +1,165 @@
+/* Number Chompers: a 6 x 5 board of numbers with actors walking over it. */
+
+.ch {
+  --ink: #1b1530;
+  --cell: #fffdf5;
+  gap: 10px;
+}
+
+.rule {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.rule h2 {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+/* The board and the actors are two grids with the same shape, stacked.
+   Sized off the window height as well as its width, so the whole game - rule,
+   board, pad and Munch button - is on screen at once without scrolling. */
+.boardWrap {
+  position: relative;
+  width: min(100%, 440px, (100svh - 330px) * 1.2);
+  margin-inline: auto;
+}
+.board,
+.actors {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap: 4px;
+  aspect-ratio: 6 / 5;
+}
+.actors {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  background: var(--cell);
+  box-shadow: 0 3px 0 var(--ink);
+  color: var(--ink);
+  font-family: var(--font-kid), system-ui, sans-serif;
+  font-weight: 700;
+  /* Shrinks with the board so "4 + 2 x 8" still fits at phone width. */
+  font-size: clamp(0.62rem, 2.4vw, 1.1rem);
+  line-height: 1.1;
+  text-align: center;
+  padding: 2px;
+  overflow: hidden;
+}
+.gone {
+  background: #e9ecf5;
+  border-style: dashed;
+  box-shadow: none;
+  opacity: 0.55;
+}
+.badCell {
+  background: #ffe3e0;
+  animation: shake 0.3s;
+}
+@keyframes shake {
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+.actor {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s steps(2);
+}
+.sprite {
+  width: 78%;
+  height: auto;
+}
+
+.lives {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.life svg,
+.lifeGone svg {
+  width: 16px;
+  height: 16px;
+}
+.lifeGone {
+  opacity: 0.25;
+  filter: grayscale(1);
+}
+
+.note {
+  margin: 0;
+  min-height: 2.6em;
+  font-size: 0.9rem;
+  color: var(--k-muted, #5a6489);
+}
+.noteBad {
+  color: var(--k-bad-ink, #b42318);
+  font-weight: 600;
+}
+
+/* The pad sits beside the Munch button, thumbs on both at phone width. */
+.pad {
+  display: grid;
+  grid-template-columns: repeat(3, 44px);
+  grid-template-rows: repeat(3, 44px);
+  gap: 4px;
+}
+.arrow {
+  padding: 0 !important;
+  border-radius: 8px !important;
+  font-size: 1rem;
+  min-width: 0;
+}
+.up { grid-area: 1 / 2; }
+.leftB { grid-area: 2 / 1; }
+.rightB { grid-area: 2 / 3; }
+.down { grid-area: 3 / 2; }
+
+.munch {
+  flex: 1;
+  min-width: 120px;
+}
+
+.big {
+  font-family: var(--font-pixel), monospace;
+  font-size: 1rem;
+  margin: 6px 0;
+}
+
+.ch :global(.mg-controls) {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 420px) {
+  .boardWrap {
+    width: min(100%, (100svh - 290px) * 1.2);
+  }
+  .pad {
+    grid-template-columns: repeat(3, 38px);
+    grid-template-rows: repeat(3, 38px);
+  }
+  .munch {
+    min-width: 96px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .actor { transition: none; }
+  .badCell { animation: none; }
+}

@@ -1,4 +1,5 @@
 import { bandFor, type Band, type LandId } from "../pixel/world";
+import type { Evidence } from "../masteryMeter";
 import { LEMONADE_LEVELS, levelById as lemonLevel, replay as lemonReplay } from "./lemonade";
 import { pizzaParty } from "./pizza";
 import { rocketLaunch } from "./rocket";
@@ -7,6 +8,7 @@ import { bugHunt } from "./bughunt";
 import { expedition } from "./expedition";
 import { critters } from "./critters";
 import { numberHop } from "./numberhop";
+import { chompers } from "./chompers";
 import { coinShop } from "./coinshop";
 import { arrayGarden } from "./arraygarden";
 import { treasureGrid } from "./treasuregrid";
@@ -45,6 +47,18 @@ export interface MiniGame {
   levelsForGrade?: (grade: number) => MiniLevel[];
   /** Checks a finished game: the stars earned and a score to keep as "best". */
   score: (levelId: string, moves: unknown) => { stars: number; best: number } | null;
+  /**
+   * What the game saw the kid show, for the mastery meter. Optional: a game
+   * that only earns stars leaves it out. Read on the server from the replayed
+   * moves, never from anything the browser claims.
+   */
+  evidence?: (levelId: string, moves: unknown) => GameEvidence[];
+}
+
+/** One thing a game saw a kid do, named in the same words the lessons use. */
+export interface GameEvidence extends Evidence {
+  /** The course the skill belongs to, e.g. "math". */
+  subject: string;
 }
 
 const asArray = (v: unknown) => (Array.isArray(v) ? v : []);
@@ -72,14 +86,15 @@ const LEMONADE: MiniGame = {
 export const GAMES: MiniGame[] = [
   LEMONADE, pizzaParty, rocketLaunch, voyage, bugHunt, expedition,
   // Grades K-5
-  critters, numberHop, coinShop, arrayGarden, treasureGrid, wordBuilder, sentenceSmith, habitatRescue, weatherWatch, sproutLab, circuitBuilder, mapQuest, palabras,
+  critters, numberHop, chompers, coinShop, arrayGarden, treasureGrid, wordBuilder, sentenceSmith, habitatRescue, weatherWatch, sproutLab, circuitBuilder, mapQuest, palabras,
 ].filter((g): g is MiniGame => !!g);
 
 /** The levels a kid plays: their own grade's levels when the game has them, otherwise their grade band's. */
 export function levelsForKid(game: MiniGame, grade: number): MiniLevel[] {
   if (game.levelsForGrade && game.grades?.includes(grade)) return game.levelsForGrade(grade);
-  // Band games start at grade 4 (their easiest band is grades 4-5).
-  return game.grades || grade < 4 ? [] : game.levels(bandFor(grade));
+  // Band levels start at grade 4 (the easiest band is grades 4-5). A game may
+  // have both: its own grade levels for K-5 and band levels for 6-12.
+  return grade < 4 ? [] : game.levels(bandFor(grade));
 }
 
 /** Every level a kid may score: their own, plus (in grades K-5) the levels of earlier worlds they can revisit. */
