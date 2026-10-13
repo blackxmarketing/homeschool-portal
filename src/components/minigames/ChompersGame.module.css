@@ -163,3 +163,13 @@
   .actor { transition: none; }
   .badCell { animation: none; }
 }
+
+/* Drawn cells - dots to count, coins to add up - fill the square the way the
+   text does, and keep their pixel edges crisp at any size. */
+.cellArt {
+  width: auto;
+  height: auto;
+  max-width: 94%;
+  max-height: 88%;
+  image-rendering: pixelated;
+}

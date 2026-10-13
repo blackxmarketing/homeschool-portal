@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { gameById, levelsForKid, levelsKidMayPlay, GAMES } from "@/lib/minigames";
 import { GAME_UI } from "@/components/minigames/registry";
 import { SKILL_BY_ID } from "@/lib/curriculum/skills";
+import { COURSES } from "@/content/courses";
 import { applyEvidence, blockers, emptyMeter, isMastered } from "@/lib/masteryMeter";
 import {
   ALL_CHOMPER_LEVELS,
@@ -13,6 +14,7 @@ import {
   CORRECT_PER_BOARD,
   LIVES,
   MAX_PER_BOARD,
+  MOST_COINS,
   maxFor,
   maxForLevel,
   ROWS,
@@ -20,6 +22,9 @@ import {
   chomperGrid,
   chompers,
   cleanMoves,
+  coinWords,
+  coinsGrid,
+  dotsGrid,
   evidenceFor,
   fits,
   grumbleAt,
@@ -32,6 +37,7 @@ import {
   rightOn,
   ruleLabel,
   safeRoute,
+  placeName,
   starsFor,
   startState,
   step,
@@ -49,8 +55,12 @@ const everyBoard = (fn: (level: ChomperLevel, boardIndex: number, seed: number) 
 };
 
 describe("the levels", () => {
-  it("covers grades 3, 4 and 5", () => {
-    expect(chompers.grades).toEqual([3, 4, 5]);
+  it("covers every grade from kindergarten to 5", () => {
+    expect(chompers.grades).toEqual([0, 1, 2, 3, 4, 5]);
+    for (const g of [0, 1, 2]) {
+      expect(CHOMPER_LEVELS[g].length, `grade ${g}`).toBeGreaterThanOrEqual(2);
+      expect(levelsForKid(chompers, g).map((l) => l.id)).toEqual(CHOMPER_LEVELS[g].map((l) => l.id));
+    }
     for (const g of [3, 4, 5]) {
       expect(CHOMPER_LEVELS[g].length, `grade ${g}`).toBeGreaterThanOrEqual(4);
       expect(levelsForKid(chompers, g).map((l) => l.id)).toEqual(CHOMPER_LEVELS[g].map((l) => l.id));
@@ -82,7 +92,12 @@ describe("the levels", () => {
   });
 
   it("names a real curriculum skill on every level, so the game can't drift from the lessons", () => {
-    for (const l of ALL_CHOMPER_LEVELS) expect(SKILL_BY_ID.has(l.skill), `${l.id} -> ${l.skill}`).toBe(true);
+    // Grades 3-8 name a skill from the practice curriculum; K-2, which has
+    // none, names the lesson in its own course that teaches the same thing.
+    const lessons = new Set(COURSES.flatMap((c) => c.lessons.map((l) => l.id)));
+    for (const l of ALL_CHOMPER_LEVELS) {
+      expect(SKILL_BY_ID.has(l.skill) || lessons.has(l.skill), `${l.id} -> ${l.skill} is not a real skill or lesson`).toBe(true);
+    }
   });
 
   it("has levels for all six kinds of board", () => {
@@ -90,6 +105,51 @@ describe("the levels", () => {
     for (const k of ["multiples", "factors", "primes", "composites", "equals", "less", "greater"]) {
       expect(kinds.has(k as never), `no level uses "${k}"`).toBe(true);
     }
+  });
+
+  it("gives the youngest kids something they can play before they read numerals", () => {
+    const k = CHOMPER_LEVELS[0].flatMap((l) => l.boards);
+    expect(k.every((b) => b.style === "dots")).toBe(true);
+    // Dots and numerals share the board, which is the whole point: a kid has
+    // to match a drawn 14 against a written 9.
+    const b = buildBoard(k[0], 0, 1);
+    const drawn = b.cells.filter((c) => c.art);
+    expect(drawn.length).toBeGreaterThan(5);
+    expect(b.cells.length - drawn.length).toBeGreaterThan(5);
+    for (const c of drawn) {
+      expect(c.art!.kind).toBe("dots");
+      expect(c.art!.parts[0]).toBe(c.value);
+      expect(c.text).toBe(`${c.value} dots`);
+    }
+    // And the coin boards add up to what they say they do.
+    const coins = ALL_CHOMPER_LEVELS.flatMap((l) => l.boards).filter((bd) => bd.style === "coins");
+    expect(coins.length).toBeGreaterThan(0);
+    for (const spec of coins) {
+      const cb = buildBoard(spec, 0, 2);
+      for (const c of cb.cells) {
+        expect(c.art?.kind).toBe("coins");
+        expect(c.art!.parts.reduce((t, n) => t + n, 0), c.text).toBe(c.value);
+        expect(c.art!.parts.length).toBeLessThanOrEqual(MOST_COINS);
+      }
+    }
+  });
+
+  it("knows even from odd and which column a digit is in", () => {
+    for (const n of [2, 10, 48, 100]) expect(fits({ kind: "even", target: 0 }, n), `${n}`).toBe(true);
+    for (const n of [1, 7, 49, 101]) expect(fits({ kind: "even", target: 0 }, n), `${n}`).toBe(false);
+    for (const n of [1, 7, 49, 101]) expect(fits({ kind: "odd", target: 0 }, n), `${n}`).toBe(true);
+    const tens = { kind: "digitIs" as const, target: 4, of: 10 };
+    for (const n of [40, 47, 142]) expect(fits(tens, n), `${n}`).toBe(true);
+    for (const n of [4, 54, 104]) expect(fits(tens, n), `${n}`).toBe(false);
+    expect(ruleLabel({ kind: "digitIs", target: 3, of: 100 })).toBe("Has 3 hundreds");
+    expect(placeName(1)).toBe("ones");
+  });
+
+  it("says a handful of coins the way a kid would", () => {
+    expect(coinWords([25])).toBe("a quarter");
+    expect(coinWords([25, 10, 10])).toBe("a quarter and 2 dimes");
+    expect(coinWords([10, 5, 1, 1])).toBe("a dime, a nickel and 2 pennies");
+    expect(coinWords([1])).toBe("a penny");
   });
 
   it("teaches fractions, decimals and percents too", () => {
@@ -269,7 +329,9 @@ describe("building a board", () => {
         expect(Number.isFinite(c.value)).toBe(true);
         expect(c.ok, `${level.id}: "${c.text}"`).toBe(fits(b.rule, c));
         // The text is either the number or a sum that comes to it.
-        expect(evalCell(c.text, b.rule.of ?? 0), `${level.id}: "${c.text}" should be ${c.value}`).toBeCloseTo(c.value, 9);
+        // A picture cell is checked by its picture, not by reading its words.
+        if (c.art) expect(c.art.parts.reduce((t, n) => t + n, 0), `${level.id}: "${c.text}"`).toBe(c.value);
+        else expect(evalCell(c.text, b.rule.of ?? 0), `${level.id}: "${c.text}" should be ${c.value}`).toBeCloseTo(c.value, 9);
       }
     });
   });
@@ -538,7 +600,7 @@ describe("what the game tells the mastery meter", () => {
     for (const e of ev) {
       expect(e.subject).toBe("math");
       expect(e.concept).toBe(level.skill);
-      expect(SKILL_BY_ID.has(e.concept)).toBe(true);
+      expect(SKILL_BY_ID.has(e.concept) || COURSES.some((c) => c.lessons.some((l) => l.id === e.concept))).toBe(true);
       expect(e.angle).toBe("fluency");
       expect(e.correct).toBe(true);
       expect(e.firstTry).toBe(true);
@@ -605,7 +667,7 @@ describe("what the game tells the mastery meter", () => {
 
 describe("the art", () => {
   it("draws a Chomper and a Grumble", () => {
-    for (const g of [chomperGrid(0), chomperGrid(1), chomperGrid(2), grumbleGrid("plodder", 0), grumbleGrid("pacer", 1)]) {
+    for (const g of [chomperGrid(0), chomperGrid(1), chomperGrid(2), grumbleGrid("plodder", 0), grumbleGrid("pacer", 1), dotsGrid(1), dotsGrid(7), dotsGrid(20), coinsGrid([25]), coinsGrid([25, 10, 5, 1])]) {
       expect(g.px.some(Boolean)).toBe(true);
     }
     // The bite frame really does take a bite out of it.

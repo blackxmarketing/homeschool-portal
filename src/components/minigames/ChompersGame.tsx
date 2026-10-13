@@ -10,6 +10,8 @@ import {
   maxForLevel,
   buildBoard,
   chomperGrid,
+  coinsGrid,
+  dotsGrid,
   grumbleAt,
   grumbleGrid,
   levelById,
@@ -18,6 +20,7 @@ import {
   teachFor,
   type Act,
   type Board,
+  type CellArt,
   type BoardMove,
   type ChomperLevel,
   type ChomperState,
@@ -31,6 +34,24 @@ const GRUMBLE = {
   plodder: [grumbleGrid("plodder", 0), grumbleGrid("plodder", 1)],
   pacer: [grumbleGrid("pacer", 0), grumbleGrid("pacer", 1)],
 };
+
+/**
+ * A cell drawn rather than written. Built as it is needed rather than up
+ * front - there are hundreds of possible handfuls of coins - but memoised,
+ * because the board redraws on every turn.
+ */
+const artCache = new Map<string, ReturnType<typeof dotsGrid>>();
+function CellPicture({ art }: { art: CellArt }) {
+  const key = `${art.kind}:${art.parts.join(",")}`;
+  let grid = artCache.get(key);
+  if (!grid) {
+    grid = art.kind === "dots" ? dotsGrid(art.parts[0]) : coinsGrid(art.parts);
+    artCache.set(key, grid);
+  }
+  // Drawn big and scaled down by the stylesheet, so the dots stay countable in
+  // a square that is only sixty pixels across on a phone.
+  return <PixelSprite grid={grid} scale={4} className={css.cellArt} />;
+}
 
 const KEYS: Record<string, Act> = {
   ArrowUp: "up",
@@ -264,7 +285,7 @@ function Chompers({ level, onFinish }: { level: ChomperLevel; onFinish: MiniGame
               className={`${css.cell} ${st.eaten[i] ? css.gone : ""} ${st.last?.cell === i && st.last.kind === "wrong" ? css.badCell : ""}`}
               aria-label={st.eaten[i] ? "eaten" : c.text}
             >
-              {!st.eaten[i] && <span>{c.text}</span>}
+              {!st.eaten[i] && (c.art ? <CellPicture art={c.art} /> : <span>{c.text}</span>)}
             </div>
           ))}
         </div>

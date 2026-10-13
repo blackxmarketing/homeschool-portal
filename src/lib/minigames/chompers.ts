@@ -42,7 +42,7 @@ export const chompersInfo = {
   icon: "👾",
   land: "math" as const,
   subject: "math" as const,
-  grades: [3, 4, 5],
+  grades: [0, 1, 2, 3, 4, 5],
   blurb: "Eat every number that fits the rule, and don't let the Grumbles catch you.",
 };
 
@@ -83,7 +83,13 @@ export type RuleKind =
   /** A factor of both `target` and `of`. */
   | "commonFactors"
   /** Worth `target` once x is `of`: "With x = 5, equals 20". */
-  | "evaluates";
+  | "evaluates"
+  /** Splits into two equal piles. */
+  | "even"
+  /** Does not. */
+  | "odd"
+  /** Has `target` in the `of` place: "Has 4 tens" is target 4, of 10. */
+  | "digitIs";
 
 export interface Rule {
   kind: RuleKind;
@@ -125,7 +131,11 @@ export type CellStyle =
   /** Powers: 2^5, 4^3. Two cells can be the same number written two ways. */
   | "power"
   /** Expressions in x, worked out with the x the rule gives: "4x", "x + 15". */
-  | "variable";
+  | "variable"
+  /** A group of dots to count, for kids who do not read numerals yet. */
+  | "dots"
+  /** A handful of coins to add up. */
+  | "coins";
 
 export interface BoardSpec {
   rule: Rule;
@@ -139,9 +149,22 @@ export interface BoardSpec {
 }
 
 /** One square of the board. */
+/**
+ * A cell drawn rather than written, for kids who are still learning numerals.
+ * The picture is what a sighted kid counts; `Cell.text` is the same thing in
+ * words, which is all a screen reader can offer.
+ */
+export interface CellArt {
+  kind: "dots" | "coins";
+  /** Dots: how many. Coins: the coins in it, biggest first, in cents. */
+  parts: number[];
+}
+
 export interface Cell {
-  /** What the kid reads. */
+  /** What the kid reads, and what a screen reader is told. */
   text: string;
+  /** Drawn instead of the text, when the board is a picture board. */
+  art?: CellArt;
   /** What the rule judges. */
   value: number;
   /** The fraction behind it, when the cell is one. Simplest form needs it. */
@@ -206,6 +229,12 @@ export function fits(rule: Rule, cell: number | { value: number; frac?: Frac }):
       return Number.isInteger(value) && value > 0 && rule.target % value === 0 && (rule.of ?? 0) % value === 0;
     case "evaluates":
       return q(value) === q(rule.target);
+    case "even":
+      return Number.isInteger(value) && value % 2 === 0;
+    case "odd":
+      return Number.isInteger(value) && Math.abs(value % 2) === 1;
+    case "digitIs":
+      return Number.isInteger(value) && value >= 0 && Math.floor(value / (rule.of ?? 1)) % 10 === rule.target;
   }
 }
 
@@ -240,8 +269,17 @@ export function ruleLabel(rule: Rule): string {
       return `Factors of both ${rule.target} and ${rule.of}`;
     case "evaluates":
       return `With x = ${rule.of}, equals ${rule.target}`;
+    case "even":
+      return "Even numbers";
+    case "odd":
+      return "Odd numbers";
+    case "digitIs":
+      return `Has ${rule.target} ${placeName(rule.of ?? 1)}`;
   }
 }
+
+/** "ones", "tens", "hundreds" - what a place is called. */
+export const placeName = (place: number) => (place >= 100 ? "hundreds" : place >= 10 ? "tens" : "ones");
 
 /** The one line a kid gets when they eat something that does not fit. */
 export function teachFor(rule: Rule, cell: Cell): string {
@@ -304,6 +342,15 @@ export function teachFor(rule: Rule, cell: Cell): string {
     }
     case "evaluates":
       return `${cell.text} comes to ${dec(cell.value, 3)} when x is ${rule.of}, not ${t}. Put ${rule.of} where the x is and work it out.`;
+    case "even":
+      return `${shown} is odd. Share ${cell.value} into two piles and one is left over.`;
+    case "odd":
+      return `${shown} is even. ${cell.value} shares into two piles of ${cell.value / 2} with nothing left over.`;
+    case "digitIs": {
+      const place = rule.of ?? 1;
+      const has = Math.floor(cell.value / place) % 10;
+      return `${shown} has ${has} ${placeName(place)}, not ${t}.`;
+    }
   }
 }
 
@@ -392,6 +439,8 @@ interface Cand {
   frac?: Frac;
   /** Already-written forms (fractions, decimals, percents). Worked out otherwise. */
   text?: string;
+  /** A picture to draw instead of the text. */
+  art?: CellArt;
 }
 
 /** Every fraction up to a denominator, both reduced and not. */
@@ -408,6 +457,74 @@ function fractionPool(maxDen: number): Cand[] {
 /** The same fractions written the other way round: 3:4 rather than 3/4. */
 function ratioPool(maxDen: number): Cand[] {
   return fractionPool(maxDen).map((c) => ({ ...c, text: `${c.frac!.n}:${c.frac!.d}` }));
+}
+
+/** Two ten frames is as many dots as a kid can take in at a glance. */
+const MOST_DOTS = 20;
+
+/**
+ * Dots to count, and the numerals for the same numbers. Mixing them is the
+ * point: a kid matching a drawn 14 against the numeral 9 is doing the thing
+ * kindergarten is for, and it gives the board enough squares to fill.
+ */
+function dotsPool(lo: number, hi: number): Cand[] {
+  const out: Cand[] = [];
+  for (let n = Math.max(1, lo); n <= hi; n++) {
+    out.push({ value: n, text: String(n) });
+    if (n <= MOST_DOTS) out.push({ value: n, text: `${n} dots`, art: { kind: "dots", parts: [n] } });
+  }
+  return out;
+}
+
+/** The coins, by what they are worth in cents. */
+export const COINS: { cents: number; one: string; many: string }[] = [
+  { cents: 25, one: "a quarter", many: "quarters" },
+  { cents: 10, one: "a dime", many: "dimes" },
+  { cents: 5, one: "a nickel", many: "nickels" },
+  { cents: 1, one: "a penny", many: "pennies" },
+];
+
+/** Names a handful of coins the way a kid would say it: "a quarter and 2 dimes". */
+export function coinWords(parts: number[]): string {
+  const bits = COINS.filter((c) => parts.includes(c.cents)).map((c) => {
+    const n = parts.filter((p) => p === c.cents).length;
+    return n === 1 ? c.one : `${n} ${c.many}`;
+  });
+  if (bits.length === 1) return bits[0];
+  return `${bits.slice(0, -1).join(", ")} and ${bits[bits.length - 1]}`;
+}
+
+/**
+ * Handfuls of coins. Enumerated as handfuls rather than as totals, so one
+ * board can hold a quarter, two dimes and a nickel, and five nickels, and ask
+ * which of them is worth more than 25 cents.
+ *
+ * Five at most: a sixth coin in a square sixty pixels across is too small to
+ * tell a dime from a nickel, and a picture a kid cannot read is not a
+ * question. That is also why these boards compare rather than match exactly -
+ * there are only four ways to make 25 cents out of five coins, which is not
+ * enough right answers for a board.
+ */
+export const MOST_COINS = 5;
+
+function coinPool(maxCents: number): Cand[] {
+  const out: Cand[] = [];
+  const seen = new Set<string>();
+  for (let q = 0; q <= 4; q++)
+    for (let d = 0; d <= 5; d++)
+      for (let n = 0; n <= 5; n++)
+        for (let pn = 0; pn <= 5; pn++) {
+          const coins = q + d + n + pn;
+          if (coins < 1 || coins > MOST_COINS) continue;
+          const cents = q * 25 + d * 10 + n * 5 + pn;
+          if (cents < 1 || cents > maxCents) continue;
+          const parts = [...Array(q).fill(25), ...Array(d).fill(10), ...Array(n).fill(5), ...Array(pn).fill(1)];
+          const text = coinWords(parts);
+          if (seen.has(text)) continue;
+          seen.add(text);
+          out.push({ value: cents, text, art: { kind: "coins", parts } });
+        }
+  return out;
 }
 
 /** Every power in range, both ways round where there are two: 16 is 2^4 and 4^2. */
@@ -453,7 +570,11 @@ function split(spec: BoardSpec): { yes: Cand[]; no: Cand[] } {
           ? ratioPool(spec.hi)
           : spec.style === "power"
             ? powerPool(spec.lo, spec.hi)
-            : Array.from({ length: spec.hi - spec.lo + 1 }, (_, i) => ({ value: spec.lo + i }));
+            : spec.style === "dots"
+              ? dotsPool(spec.lo, spec.hi)
+              : spec.style === "coins"
+                ? coinPool(spec.hi)
+                : Array.from({ length: spec.hi - spec.lo + 1 }, (_, i) => ({ value: spec.lo + i }));
   const yes: Cand[] = [];
   const no: Cand[] = [];
   for (const c of pool) (fits(spec.rule, c) ? yes : no).push(c);
@@ -511,7 +632,7 @@ export function buildBoard(spec: BoardSpec, boardIndex: number, seed: number): B
   const cells: Cell[] = picked.map((c) => {
     const text = c.text ?? cellText(r, c.value, spec, used);
     used.add(text);
-    return { text, value: c.value, frac: c.frac, ok: fits(spec.rule, c) };
+    return { text, value: c.value, frac: c.frac, ...(c.art && { art: c.art }), ok: fits(spec.rule, c) };
   });
   return { rule: spec.rule, label: ruleLabel(spec.rule), cells, grumbles: buildGrumbles(r, boardIndex + 1) };
 }
@@ -641,7 +762,8 @@ export interface ChomperLevel extends MiniLevel {
   grade: number;
   /**
    * The curriculum skill this drills: a Skill.id from lib/curriculum/skills.ts
-   * for grades 3-8, or a K-5 lesson id. Checked by the tests, so the game can
+   * for grades 3-8, or a lesson id from a K-5 course for the younger grades,
+   * which have no entries in skills.ts. Checked by the tests, so the game can
    * never drift away from what the lessons teach.
    */
   skill: string;
@@ -662,6 +784,52 @@ const board = (kind: RuleKind, target: number, style: CellStyle, lo: number, hi:
 const lvl = (grade: number, id: string, title: string, skill: string, intro: string, boards: BoardSpec[]): ChomperLevel => ({ grade, id, title, skill, intro, boards });
 
 export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
+  0: [
+    lvl(0, "k-1", "Count the Dots", "math-k.how-many", "Skill: counting a group and matching it to its number. The dots sit in a ten frame, so a full row is five and a full frame is ten.", [
+      board("greater", 11, "dots", 1, 24),
+      board("less", 11, "dots", 1, 22),
+      board("greater", 14, "dots", 1, 26),
+    ]),
+    lvl(0, "k-2", "More or Fewer", "math-k.compare", "Skill: saying which of two numbers is more. Count the dots, read the numbers, and eat the ones that fit.", [
+      board("less", 10, "dots", 1, 22),
+      board("greater", 12, "dots", 1, 24),
+      board("less", 13, "dots", 1, 26),
+    ]),
+  ],
+  1: [
+    lvl(1, "g1-1", "Even and Odd", "math-2.skip-odd-even", "Skill: even and odd. An even number shares into two equal piles; an odd one always has one left over.", [
+      board("even", 0, "plain", 1, 40),
+      board("odd", 0, "plain", 1, 40),
+      board("even", 0, "plain", 1, 99),
+    ]),
+    lvl(1, "g1-2", "Add and Take Away", "math-1.add20", "Skill: adding and subtracting within 20. Work out each one, then eat the ones that match the number at the top.", [
+      board("equals", 12, "fact", 1, 20),
+      board("equals", 15, "fact", 1, 20),
+      board("equals", 18, "fact", 1, 20),
+    ]),
+    lvl(1, "g1-3", "Coin Counting", "math-2.time-money", "Skill: adding coins up. The big one with a cross is a quarter (25), the one with a bar is a nickel (5), the little plain one is a dime (10), and the copper one is a penny (1).", [
+      board("greater", 25, "coins", 1, 60),
+      board("less", 20, "coins", 1, 50),
+      board("greater", 40, "coins", 1, 80),
+    ]),
+  ],
+  2: [
+    lvl(2, "g2-1", "Skip Counting", "math-2.skip-odd-even", "Skill: counting by 2s, 5s and 10s. Every number you land on while skip counting is a multiple.", [
+      board("multiples", 2, "plain", 1, 60),
+      board("multiples", 5, "plain", 1, 100),
+      board("multiples", 10, "plain", 1, 200),
+    ]),
+    lvl(2, "g2-2", "Tens and Ones", "math-2.place-value", "Skill: place value. In 47 the 4 is four tens and the 7 is seven ones.", [
+      board("digitIs", 4, "plain", 10, 99, { of: 10 }),
+      board("digitIs", 7, "plain", 10, 99, { of: 1 }),
+      board("digitIs", 3, "plain", 100, 999, { of: 100 }),
+    ]),
+    lvl(2, "g2-3", "Fill the Purse", "math-2.time-money", "Skill: adding coins and comparing the totals. Quarter is the big one with a cross, nickel has a bar, the little plain one is a dime, copper is a penny - and five coins can be worth less than two.", [
+      board("less", 50, "coins", 1, 95),
+      board("greater", 60, "coins", 1, 99),
+      board("greater", 35, "coins", 1, 99),
+    ]),
+  ],
   3: [
     lvl(3, "g3-1", "Times Table Trail", "g3.mult-facts", "Skill: knowing your times tables by heart. Every square is a multiplication to work out. Eat the ones worth the number at the top.", [
       board("equals", 24, "fact", 2, 60),
@@ -1028,6 +1196,83 @@ export function chomperGrid(frame = 0): Grid {
   const lid = frame === 2 ? 1 : 0;
   g.disc(5.5, 6, 2, EYE_W).disc(9.5, 6, 2, EYE_W);
   g.set(5, 6 + lid, PUPIL).set(6, 6 + lid, PUPIL).set(9, 6 + lid, PUPIL).set(10, 6 + lid, PUPIL);
+  return g.outline(OUT);
+}
+
+const DOT = "#2340ff";
+const FRAME = "#9aa7d6";
+const SILVER = "#c9ced9";
+const SILVER_D = "#8e94a3";
+const COPPER = "#c87a3c";
+const COPPER_D = "#96572a";
+
+/**
+ * A ten frame of dots, the way an infant classroom draws them: two rows of
+ * five, filled left to right, so a kid learns to see 7 as "a full five and
+ * two more" instead of counting one at a time. Over ten it uses two frames.
+ */
+export function dotsGrid(n: number): Grid {
+  const frames = Math.min(2, Math.ceil(Math.max(1, n) / 10));
+  const g = new Grid(27, frames === 1 ? 13 : 27);
+  for (let f = 0; f < frames; f++) {
+    const top = f * 14;
+    g.rect(0, top, 27, 13, null);
+    for (let i = 0; i < 10; i++) {
+      const cx = 2 + (i % 5) * 5;
+      const cy = top + 2 + Math.floor(i / 5) * 5;
+      g.rect(cx, cy, 4, 4, FRAME);
+      g.rect(cx + 1, cy + 1, 2, 2, null);
+      if (f * 10 + i < n) g.disc(cx + 1.5, cy + 1.5, 1.6, DOT);
+    }
+  }
+  return g.outline(OUT);
+}
+
+/**
+ * One coin, drawn at the size it really is next to the others, with a mark on
+ * the face so a quarter is not just a bigger circle: the sizes alone are a
+ * pixel or two apart, which is not a difference a kid can see.
+ */
+function coinGrid(cents: number): Grid {
+  const r = cents === 25 ? 7 : cents === 5 ? 5.5 : cents === 1 ? 4.5 : 3.5;
+  const face = cents === 1 ? COPPER : SILVER;
+  const edge = cents === 1 ? COPPER_D : SILVER_D;
+  const w = Math.ceil(r * 2) + 2;
+  const g = new Grid(w, w);
+  const c = (w - 1) / 2;
+  g.disc(c, c, r, edge).disc(c, c, r - 1.2, face);
+  // A mark per coin: a quarter has a cross, a nickel a bar, a dime a dot, a
+  // penny a ring. Four shapes a kid learns in one go.
+  const m = Math.round(c);
+  if (cents === 25) g.rect(m - 2, m, 5, 1, edge).rect(m, m - 2, 1, 5, edge);
+  else if (cents === 5) g.rect(m - 2, m, 5, 1, edge);
+  else if (cents === 10) g.set(m, m, edge);
+  else g.disc(c, c, 2, edge).disc(c, c, 1, face);
+  return g;
+}
+
+/**
+ * A handful of coins, biggest first, in up to two rows so five of them still
+ * read at the size of a board square. All of them are drawn: a picture that
+ * left one out would be worth less than the cell says it is.
+ */
+export function coinsGrid(parts: number[]): Grid {
+  const coins = [...parts].sort((a, b) => b - a).map(coinGrid);
+  const perRow = coins.length > 3 ? Math.ceil(coins.length / 2) : coins.length;
+  const rows: Grid[][] = [];
+  for (let i = 0; i < coins.length; i += perRow) rows.push(coins.slice(i, i + perRow));
+  const rowW = rows.map((r) => r.reduce((t, c) => t + c.w + 1, -1));
+  const rowH = rows.map((r) => Math.max(...r.map((c) => c.h)));
+  const g = new Grid(Math.max(1, Math.max(...rowW)), Math.max(1, rowH.reduce((t, h) => t + h + 1, -1)));
+  let y = 0;
+  rows.forEach((row, ri) => {
+    let x = 0;
+    for (const c of row) {
+      g.draw(c, x, y + rowH[ri] - c.h);
+      x += c.w + 1;
+    }
+    y += rowH[ri] + 1;
+  });
   return g.outline(OUT);
 }
 
