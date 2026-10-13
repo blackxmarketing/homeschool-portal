@@ -39,7 +39,7 @@ export default function GameHost({ game, levels, progress }: { game: string; lev
         <p className="game-intro">{levels[idx]?.intro}</p>
         {GAME_UI[game] && (() => {
           const Screen = GAME_UI[game];
-          return <Screen key={`${playing}-${round}`} levelId={playing} onFinish={(m) => finish(playing, m)} />;
+          return <Screen key={`${playing}-${round}`} levelId={playing} stars={stars[playing]?.stars ?? 0} onFinish={(m) => finish(playing, m)} />;
         })()}
       </div>
     );

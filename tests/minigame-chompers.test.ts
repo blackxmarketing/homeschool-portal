@@ -32,6 +32,8 @@ import {
   grumbleGrid,
   levelById,
   perfectMoves,
+  playBoard,
+  QUICK_TICK_MS,
   percentValue,
   replay,
   rightOn,
@@ -42,6 +44,7 @@ import {
   startState,
   step,
   survivable,
+  tick,
   teachFor,
   type Act,
   type ChomperLevel,
@@ -557,6 +560,99 @@ describe("scoring a level", () => {
 });
 
 describe("nothing the browser sends can break it", () => {
+describe("Quick mode, where the Grumbles run on a clock", () => {
+  const level = levelById("g3-2")!;
+  const board = buildBoard(level.boards[0], 0, 1);
+
+  /** Plays the moves the way the screen does: catch the clock up, then move. */
+  function asThePlayerSaw(mv: { seed: number; acts: Act[]; times: number[]; endMs: number }) {
+    let st = startState();
+    let base = 0;
+    const catchUp = (to: number) => {
+      while (!st.over && !st.cleared) {
+        const next = base + (st.phase + 1) * QUICK_TICK_MS;
+        if (next > to) return;
+        const lives0 = st.lives;
+        st = tick(board, st);
+        if (st.lives < lives0) base = next;
+      }
+    };
+    mv.acts.forEach((a, i) => {
+      if (st.over || st.cleared) return;
+      catchUp(mv.times[i]);
+      if (st.over || st.cleared) return;
+      const lives0 = st.lives;
+      st = step(board, st, a, false);
+      if (st.lives < lives0) base = mv.times[i];
+    });
+    catchUp(mv.endMs);
+    return st;
+  }
+
+  it("moves the Grumbles while the kid stands still", () => {
+    const st = playBoard(board, { seed: 1, acts: [], times: [], endMs: QUICK_TICK_MS * 4 }, LIVES);
+    expect(st.phase, "the Grumbles should have walked on their own").toBeGreaterThan(0);
+  });
+
+  it("does not move them in Steady mode until the Chomper does", () => {
+    const st = playBoard(board, { seed: 1, acts: [] }, LIVES);
+    expect(st.phase).toBe(0);
+    expect(st.caught).toBe(0);
+  });
+
+  it("re-scores on the server exactly as the kid played it", () => {
+    // A life lost restarts the clock, and it has to restart at the same
+    // instant in both places - the tick it happened on, never the moment a
+    // browser or a server happened to look.
+    const acts: Act[] = ["right", "down", "munch", "left", "up", "up", "munch", "right", "munch", "down"];
+    for (const gap of [40, QUICK_TICK_MS - 1, QUICK_TICK_MS, QUICK_TICK_MS * 2 + 7, QUICK_TICK_MS * 5]) {
+      const times = acts.map((_a, i) => i * gap);
+      const mv = { seed: 3, acts, times, endMs: acts.length * gap + 500 };
+      const mine = asThePlayerSaw(mv);
+      const theirs = playBoard(board, mv, LIVES);
+      expect({ ...theirs, last: null }, "gap " + gap).toEqual({ ...mine, last: null });
+    }
+  });
+
+  it("survives a whole level through JSON, the way it reaches the server", () => {
+    const quickRun = perfectMoves(level).map((m) => ({ ...m, times: m.acts.map((_a, i) => i * 400), endMs: m.acts.length * 400 }));
+    const once = replay(level, quickRun);
+    expect(replay(level, JSON.parse(JSON.stringify(quickRun)))).toEqual(once);
+    // Quick is harder, not worth more: the same board clears for the same points.
+    expect(once.max).toBe(maxForLevel(level));
+  });
+
+  it("throws away times that do not line up with the moves, or run backwards", () => {
+    expect(cleanMoves([{ seed: 1, acts: ["up", "munch"], times: [100] }])[0].times).toBeUndefined();
+    expect(cleanMoves([{ seed: 1, acts: ["up", "munch"], times: ["x", {}] }])[0].times).toEqual([0, 0]);
+    expect(cleanMoves([{ seed: 1, acts: ["up", "munch"], times: [900, 100] }])[0].times).toEqual([900, 900]);
+    expect(cleanMoves([{ seed: 1, acts: ["up"], times: [-5e9] }])[0].times).toEqual([0]);
+    // endMs can never be before the last move.
+    expect(cleanMoves([{ seed: 1, acts: ["up"], times: [5000], endMs: 10 }])[0].endMs).toBe(5000);
+  });
+
+  it("cannot be rushed past the Grumbles by claiming no time went by", () => {
+    // Every move at t=0 means the clock never ticks, so the Grumbles never
+    // move - but then they never catch anyone either, and the board is still
+    // only cleared by eating the right squares, which is the whole game.
+    const all = board.cells.map((c, i) => (c.ok ? i : -1)).filter((i) => i >= 0);
+    const acts: Act[] = [];
+    let at = { x: 2, y: 2 };
+    for (const t of all) {
+      const tx = t % COLS;
+      const ty = Math.floor(t / COLS);
+      for (let n = 0; n < Math.abs(tx - at.x); n++) acts.push(tx > at.x ? "right" : "left");
+      for (let n = 0; n < Math.abs(ty - at.y); n++) acts.push(ty > at.y ? "down" : "up");
+      acts.push("munch");
+      at = { x: tx, y: ty };
+    }
+    const st = playBoard(board, { seed: 1, acts, times: acts.map(() => 0), endMs: 0 }, LIVES);
+    expect(st.cleared).toBe(true);
+    // And it scores no more than clearing it the slow way would.
+    expect(st.points).toBe(maxFor(level.boards[0]));
+  });
+});
+
   const junk: unknown[] = [
     null,
     undefined,

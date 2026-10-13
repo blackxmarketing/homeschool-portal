@@ -173,3 +173,16 @@
   max-height: 88%;
   image-rendering: pixelated;
 }
+
+/* The speed switch, which only appears once a level has been three-starred. */
+.speed {
+  cursor: pointer;
+  border-color: var(--ink);
+}
+.speed:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.speedOn {
+  background: #fff3cd;
+}

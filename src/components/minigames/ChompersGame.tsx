@@ -8,6 +8,7 @@ import {
   CORRECT_PER_BOARD,
   LIVES,
   maxForLevel,
+  QUICK_TICK_MS,
   buildBoard,
   chomperGrid,
   coinsGrid,
@@ -18,6 +19,7 @@ import {
   startState,
   step,
   teachFor,
+  tick,
   type Act,
   type Board,
   type CellArt,
@@ -68,14 +70,22 @@ const KEYS: Record<string, Act> = {
 
 const newSeed = () => Math.floor(Math.random() * 2147483647);
 
-export default function ChompersGame({ levelId, onFinish }: MiniGameUIProps) {
+export default function ChompersGame({ levelId, onFinish, stars }: MiniGameUIProps) {
   const level = levelById(levelId);
-  return level ? <Chompers level={level} onFinish={onFinish} /> : null;
+  return level ? <Chompers level={level} onFinish={onFinish} earned={stars ?? 0} /> : null;
 }
 
-function Chompers({ level, onFinish }: { level: ChomperLevel; onFinish: MiniGameUIProps["onFinish"] }) {
+function Chompers({ level, onFinish, earned }: { level: ChomperLevel; onFinish: MiniGameUIProps["onFinish"]; earned: number }) {
+  /** Quick mode is the reward for having shown you know this one. */
+  const mayGoQuick = earned >= 3;
+  const [quick, setQuick] = useState(false);
   const [bi, setBi] = useState(0);
   const [seed, setSeed] = useState(newSeed);
+  /** Quick mode only: when this board started, and when each move happened. */
+  const started = useRef(0);
+  const times = useRef<number[]>([]);
+  /** Where the clock had got to when the last life was lost. */
+  const base = useRef(0);
   const [st, setSt] = useState<ChomperState>(() => startState());
   const [done, setDone] = useState<BoardMove[]>([]);
   /** Points from the boards already finished. */
@@ -105,10 +115,21 @@ function Chompers({ level, onFinish }: { level: ChomperLevel; onFinish: MiniGame
   /** Plays one turn, and moves on when the board is finished with. */
   const act = useCallback(
     (a: Act) => {
-      const cur = live.current;
+      let cur = live.current;
       if (cur.over || cur.cleared) return;
-      const next = step(board, cur, a);
+      let at = 0;
+      if (quick) {
+        at = Math.round(performance.now() - started.current);
+        cur = catchUp(at);
+        if (cur.over || cur.cleared) return;
+      }
+      const lives0 = cur.lives;
+      const next = step(board, cur, a, !quick);
       if (next === cur) return;
+      if (quick) {
+        if (next.lives < lives0) base.current = at;
+        times.current = [...times.current, at];
+      }
       live.current = next;
       setSt(next);
       setActs((xs) => [...xs, a]);
@@ -128,7 +149,8 @@ function Chompers({ level, onFinish }: { level: ChomperLevel; onFinish: MiniGame
       }
       if (next.cleared) chime("streak");
     },
-    [board],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [board, quick],
   );
 
   /**
@@ -144,6 +166,79 @@ function Chompers({ level, onFinish }: { level: ChomperLevel; onFinish: MiniGame
     if (box.bottom <= window.innerHeight) return;
     el.scrollIntoView({ block: "start", behavior: "auto" });
   }, []);
+
+  /**
+   * Quick mode: walk the Grumbles forward to where the clock says they are.
+   * Exactly the loop the server runs when it re-scores the game, including
+   * how a lost life restarts the clock - at the tick it happened on, not at
+   * the moment this browser happened to notice.
+   */
+  const catchUp = useCallback(
+    (to: number) => {
+      let cur = live.current;
+      while (!cur.over && !cur.cleared) {
+        const next = base.current + (cur.phase + 1) * QUICK_TICK_MS;
+        if (next > to) break;
+        const lives0 = cur.lives;
+        const after = tick(board, cur);
+        if (after.lives < lives0) {
+          base.current = next;
+          chime("oops");
+        }
+        cur = after;
+      }
+      if (cur !== live.current) {
+        live.current = cur;
+        setSt(cur);
+        if (cur.last?.kind === "caught") {
+          setFace(2);
+          setNote("A Grumble got you! Back to the middle.");
+        }
+      }
+      return cur;
+    },
+    [board],
+  );
+
+  /**
+   * Switching speed restarts this board's clock. Only offered before the
+   * first move of a board: half a board played at one speed and half at the
+   * other would not replay, because the server is told one speed per board.
+   */
+  function goQuick(on: boolean) {
+    if (acts.length) return;
+    times.current = [];
+    base.current = 0;
+    started.current = performance.now();
+    setQuick(on);
+  }
+
+  /**
+   * A kid who switches tab should not come back dead. The clock is pushed
+   * forward by however long the page was hidden, so the time that went by
+   * never happened as far as this board is concerned - and because every
+   * move is timed against the same origin, the server sees the same game.
+   */
+  useEffect(() => {
+    if (!quick) return;
+    let hiddenAt = 0;
+    const onVis = () => {
+      if (document.hidden) hiddenAt = performance.now();
+      else if (hiddenAt) {
+        started.current += performance.now() - hiddenAt;
+        hiddenAt = 0;
+      }
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [quick]);
+
+  // Quick mode: the Grumbles keep walking whether or not the kid does.
+  useEffect(() => {
+    if (!quick || over) return;
+    const id = setInterval(() => catchUp(Math.round(performance.now() - started.current)), 120);
+    return () => clearInterval(id);
+  }, [quick, over, catchUp, bi]);
 
   // The face goes back to normal a moment after a bite.
   useEffect(() => {
@@ -168,7 +263,7 @@ function Chompers({ level, onFinish }: { level: ChomperLevel; onFinish: MiniGame
   // Board over: bank it, then either set up the next one or send the lot off.
   useEffect(() => {
     if (!st.cleared && !st.over) return;
-    const move: BoardMove = { seed, acts };
+    const move: BoardMove = quick ? { seed, acts, times: times.current, endMs: Math.round(performance.now() - started.current) } : { seed, acts };
     const all = [...done, move];
     const pts = [...banked, st.points];
     const cleared = clears + (st.cleared ? 1 : 0);
@@ -188,6 +283,9 @@ function Chompers({ level, onFinish }: { level: ChomperLevel; onFinish: MiniGame
       setSeed(newSeed());
       setActs([]);
       setNote(null);
+      times.current = [];
+      base.current = 0;
+      started.current = performance.now();
       const fresh = startState(st.lives);
       live.current = fresh;
       setSt(fresh);
@@ -242,6 +340,7 @@ function Chompers({ level, onFinish }: { level: ChomperLevel; onFinish: MiniGame
               </div>
               {result.xp > 0 && <p className="kmuted">+{result.xp} XP for new stars!</p>}
               {result.stars < 3 && <p className="kmuted small">Tip: clear every right answer on a board for a {CLEAR_BONUS}-point bonus. Walk into the edge to wait while a Grumble goes past.</p>}
+              {result.stars >= 3 && <p className="kmuted small">⚡ Quick mode is open on this level now: the Grumbles keep moving whether you do or not.</p>}
             </>
           )}
           {error && <p className="kmuted small">{error}</p>}
@@ -269,6 +368,18 @@ function Chompers({ level, onFinish }: { level: ChomperLevel; onFinish: MiniGame
       <div className={css.rule}>
         <h2 className="pixel-title small">{board.label}</h2>
         <SayButton id={`chomp-${level.id}-${bi}`} text={`Eat every square that fits: ${board.label}`} />
+        {mayGoQuick && (
+          <button
+            type="button"
+            className={`chip ${css.speed} ${quick ? css.speedOn : ""}`}
+            onClick={() => goQuick(!quick)}
+            disabled={acts.length > 0}
+            aria-pressed={quick}
+            title={acts.length > 0 ? "Finish this board first" : "The Grumbles keep moving whether you do or not"}
+          >
+            {quick ? "⚡ Quick" : "🐢 Steady"}
+          </button>
+        )}
         <span className="kmuted small">{left} left</span>
       </div>
 

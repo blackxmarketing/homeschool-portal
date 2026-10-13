@@ -688,14 +688,52 @@ function respawn(s: ChomperState): void {
 }
 
 /**
+ * Moves the Grumbles on one step and sees whether one of them walked into the
+ * Chomper - either onto its square, or straight past it the other way.
+ */
+function advance(board: Board, s: ChomperState, fromX: number, fromY: number): void {
+  s.phase++;
+  for (const g of board.grumbles) {
+    const now = grumbleAt(g, s.phase);
+    const was = grumbleAt(g, s.phase - 1);
+    const walkedInto = now.x === s.x && now.y === s.y;
+    const passedThrough = was.x === s.x && was.y === s.y && now.x === fromX && now.y === fromY;
+    if (walkedInto || passedThrough) {
+      s.caught++;
+      s.last = { kind: "caught" };
+      respawn(s);
+      return;
+    }
+  }
+}
+
+/**
+ * A step the Grumbles take on their own, while the kid is still thinking.
+ * Only Quick mode uses it; in Steady mode they move when the Chomper moves.
+ */
+export function tick(board: Board, st: ChomperState): ChomperState {
+  if (st.over || st.cleared) return st;
+  const s: ChomperState = { ...st, eaten: [...st.eaten], last: null };
+  advance(board, s, s.x, s.y);
+  if (s.lives <= 0) {
+    s.lives = 0;
+    s.over = true;
+  }
+  return s;
+}
+
+/**
  * One turn. The screen calls this to play and the server calls it to score, so
  * the two can never disagree about what happened.
+ *
+ * `moveGrumbles` is how the two speeds differ, and the only way they differ:
+ * in Steady mode the Grumbles step when the Chomper steps, so it waits for the
+ * kid; in Quick mode a clock steps them and this only applies the move.
  */
-export function step(board: Board, st: ChomperState, act: Act): ChomperState {
+export function step(board: Board, st: ChomperState, act: Act, moveGrumbles = true): ChomperState {
   if (st.over || st.cleared) return st;
   const s: ChomperState = { ...st, eaten: [...st.eaten], last: null };
   s.turn++;
-  s.phase++;
   const from = { x: st.x, y: st.y };
   let lostLife = false;
 
@@ -734,20 +772,7 @@ export function step(board: Board, st: ChomperState, act: Act): ChomperState {
   }
 
   // The Grumbles move with the Chomper. Just respawned means a turn's grace.
-  if (!lostLife && s.lives > 0) {
-    for (const g of board.grumbles) {
-      const now = grumbleAt(g, s.phase);
-      const was = grumbleAt(g, s.phase - 1);
-      const walkedInto = now.x === s.x && now.y === s.y;
-      const passedThrough = was.x === s.x && was.y === s.y && now.x === from.x && now.y === from.y;
-      if (walkedInto || passedThrough) {
-        s.caught++;
-        s.last = { kind: "caught" };
-        respawn(s);
-        break;
-      }
-    }
-  }
+  if (moveGrumbles && !lostLife && s.lives > 0) advance(board, s, from.x, from.y);
 
   if (s.lives <= 0) {
     s.lives = 0;
@@ -978,11 +1003,75 @@ const BAND_LEVELS: ChomperLevel[] = [
 
 // ---------------- Scoring ----------------
 
+/**
+ * How often the Grumbles step in Quick mode, whether or not the kid moves.
+ * Slow enough to read the board, fast enough to feel like being chased.
+ */
+export const QUICK_TICK_MS = 850;
+
+/** Nobody plays one board for a quarter of an hour; anything past this is junk. */
+const LONGEST_BOARD_MS = 15 * 60 * 1000;
+
 /** One board's worth of what the kid did. The seed is what the board was built from. */
 export interface BoardMove {
   seed: number;
   acts: Act[];
+  /**
+   * Quick mode: when each act happened, in milliseconds since the board
+   * started. Present means the Grumbles were running on a clock, and the
+   * server works out where they had got to from these rather than from the
+   * number of moves.
+   */
+  times?: number[];
+  /** Quick mode: when the board ended, so a kid caught while standing still counts. */
+  endMs?: number;
 }
+
+/**
+ * Plays one board through, in whichever mode the moves say.
+ *
+ * The clock in Quick mode is restarted by a life lost, and it restarts at the
+ * exact moment the life was lost - which is a tick boundary worked out from
+ * the numbers, never from when the browser happened to notice. That is what
+ * lets the screen and the server, which see the game at completely different
+ * moments, land on the same answer.
+ */
+export function playBoard(board: Board, mv: BoardMove, lives: number): ChomperState {
+  let st = startState(lives);
+  const quick = !!mv.times && mv.times.length === mv.acts.length;
+  if (!quick) {
+    for (const a of mv.acts) {
+      st = step(board, st, a);
+      if (st.over || st.cleared) break;
+    }
+    return st;
+  }
+
+  let base = 0;
+  const catchUp = (to: number) => {
+    while (!st.over && !st.cleared) {
+      const next = base + (st.phase + 1) * QUICK_TICK_MS;
+      if (next > to) return;
+      const lives0 = st.lives;
+      st = tick(board, st);
+      if (st.lives < lives0) base = next;
+    }
+  };
+
+  mv.acts.forEach((a, i) => {
+    if (st.over || st.cleared) return;
+    const at = mv.times![i];
+    catchUp(at);
+    if (st.over || st.cleared) return;
+    const lives0 = st.lives;
+    st = step(board, st, a, false);
+    if (st.lives < lives0) base = at;
+  });
+  catchUp(mv.endMs ?? 0);
+  return st;
+}
+
+const clampMs = (v: unknown) => Math.min(LONGEST_BOARD_MS, Math.max(0, Math.round(Number(v)) || 0));
 
 /** Cleans untrusted moves from the browser. Never throws. */
 export function cleanMoves(raw: unknown): BoardMove[] {
@@ -992,7 +1081,15 @@ export function cleanMoves(raw: unknown): BoardMove[] {
     const n = Number(o.seed);
     const seed = Number.isFinite(n) ? Math.abs(Math.trunc(n)) % 2147483647 : 0;
     const acts = Array.isArray(o.acts) ? (o.acts.slice(0, MAX_ACTS).filter((a): a is Act => typeof a === "string" && (ACTS as string[]).includes(a))) : [];
-    return { seed, acts };
+    const out: BoardMove = { seed, acts };
+    if (!Array.isArray(o.times)) return out;
+    // Times only count when there is one per move, and time only runs forwards.
+    const times = o.times.slice(0, acts.length).map(clampMs);
+    if (times.length !== acts.length) return out;
+    for (let i = 1; i < times.length; i++) times[i] = Math.max(times[i], times[i - 1]);
+    out.times = times;
+    out.endMs = Math.max(clampMs(o.endMs), times[times.length - 1] ?? 0);
+    return out;
   });
 }
 
@@ -1035,11 +1132,7 @@ export function replay(level: ChomperLevel, raw: unknown): { boards: BoardResult
     const mv = moves[i];
     if (lives <= 0 || !mv) return { points: 0, max: maxFor(spec), cleared: false, wrong: 0, caught: 0, eaten: 0 };
     const b = buildBoard(spec, i, mv.seed);
-    let st = startState(lives);
-    for (const a of mv.acts) {
-      st = step(b, st, a);
-      if (st.over || st.cleared) break;
-    }
+    const st = playBoard(b, mv, lives);
     lives = st.lives;
     return { points: st.points, max: maxFor(spec), cleared: st.cleared, wrong: st.wrong, caught: st.caught, eaten: st.eaten.filter(Boolean).length };
   });
