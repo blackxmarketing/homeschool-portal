@@ -5,6 +5,7 @@ import { SKILL_BY_ID } from "@/lib/curriculum/skills";
 import { applyEvidence, blockers, emptyMeter, isMastered } from "@/lib/masteryMeter";
 import {
   ALL_CHOMPER_LEVELS,
+  BAND_ONLY_LEVELS,
   CELLS,
   CHOMPER_LEVELS,
   CLEAR_BONUS,
@@ -56,13 +57,28 @@ describe("the levels", () => {
     }
   });
 
-  it("gives grades 6-8 something to play rather than an empty arcade", () => {
-    for (const grade of [6, 7, 8]) {
+  it("gives grades 6-12 levels of their own, not the little kids' turned up", () => {
+    for (const grade of [6, 7, 8, 10]) {
       const levels = levelsForKid(chompers, grade);
       expect(levels.length, `grade ${grade}`).toBeGreaterThan(0);
+      // Most of what they play is written for them.
+      const own = levels.filter((l) => BAND_ONLY_LEVELS.some((b) => b.id === l.id));
+      expect(own.length, `grade ${grade} mostly plays younger levels`).toBeGreaterThanOrEqual(levels.length - 2);
       // And the server will let them score what it shows them.
       expect(levelsKidMayPlay(chompers, grade).map((l) => l.id)).toEqual(expect.arrayContaining(levels.map((l) => l.id)));
     }
+    // Nothing written for grades 6+ leaks into a K-5 arcade.
+    for (const grade of [3, 4, 5]) {
+      const ids = levelsForKid(chompers, grade).map((l) => l.id);
+      expect(ids.filter((id) => BAND_ONLY_LEVELS.some((b) => b.id === id)), `grade ${grade}`).toEqual([]);
+    }
+  });
+
+  it("covers the grade 6-8 ground too", () => {
+    const kinds = new Set(BAND_ONLY_LEVELS.flatMap((l) => l.boards.map((b) => b.rule.kind)));
+    for (const k of ["squares", "commonMultiples", "commonFactors", "evaluates"]) expect(kinds.has(k as never), `no band level uses "${k}"`).toBe(true);
+    const styles = new Set(BAND_ONLY_LEVELS.flatMap((l) => l.boards.map((b) => b.style)));
+    for (const st of ["signed", "ratio", "power", "variable"]) expect(styles.has(st as never), `no band level uses "${st}"`).toBe(true);
   });
 
   it("names a real curriculum skill on every level, so the game can't drift from the lessons", () => {
@@ -159,10 +175,40 @@ describe("the rules", () => {
     expect(fits({ kind: "greater", target: 50 }, 50)).toBe(false);
   });
 
+  it("knows squares, common multiples and common factors", () => {
+    for (const n of [0, 1, 4, 9, 100, 144, 961]) expect(fits({ kind: "squares", target: 0 }, n), `${n}`).toBe(true);
+    for (const n of [2, 3, 8, 99, 127, 300]) expect(fits({ kind: "squares", target: 0 }, n), `${n}`).toBe(false);
+    const cm = { kind: "commonMultiples" as const, target: 4, of: 6 };
+    for (const n of [12, 24, 36, 120]) expect(fits(cm, n), `${n}`).toBe(true);
+    for (const n of [4, 6, 8, 18, 0]) expect(fits(cm, n), `${n}`).toBe(false);
+    const cf = { kind: "commonFactors" as const, target: 48, of: 72 };
+    for (const n of [1, 2, 3, 4, 6, 8, 12, 24]) expect(fits(cf, n), `${n}`).toBe(true);
+    for (const n of [5, 16, 48, 72]) expect(fits(cf, n), `${n}`).toBe(false);
+  });
+
+  it("works out a percent of a number", () => {
+    expect(percentValue({ kind: "percentOf", target: 25, of: 80 })).toBe(20);
+    expect(percentValue({ kind: "percentOf", target: 12.5, of: 64 })).toBe(8);
+    expect(fits({ kind: "percentOf", target: 15, of: 240 }, 36)).toBe(true);
+    expect(fits({ kind: "percentOf", target: 15, of: 240 }, 35)).toBe(false);
+  });
+
+  it("handles numbers below zero", () => {
+    expect(fits({ kind: "greater", target: -5 }, -4)).toBe(true);
+    expect(fits({ kind: "greater", target: -5 }, -12)).toBe(false);
+    expect(fits({ kind: "less", target: 0 }, -1)).toBe(true);
+    expect(fits({ kind: "less", target: 0 }, 0)).toBe(false);
+    expect(fits({ kind: "equals", target: -12 }, -12)).toBe(true);
+  });
+
   it("reads as a rule a kid understands", () => {
     expect(ruleLabel({ kind: "multiples", target: 7 })).toBe("Multiples of 7");
     expect(ruleLabel({ kind: "primes", target: 0 })).toBe("Prime numbers");
     expect(ruleLabel({ kind: "less", target: 60 })).toBe("Less than 60");
+    expect(ruleLabel({ kind: "squares", target: 0 })).toBe("Square numbers");
+    expect(ruleLabel({ kind: "commonMultiples", target: 4, of: 6 })).toBe("Multiples of both 4 and 6");
+    expect(ruleLabel({ kind: "evaluates", target: 20, of: 5 })).toBe("With x = 5, equals 20");
+    expect(ruleLabel({ kind: "equivalent", target: 0.75, frac: { n: 3, d: 4 } })).toBe("Worth the same as 3/4");
   });
 
   it("explains a wrong munch without giving the board away", () => {
@@ -223,7 +269,7 @@ describe("building a board", () => {
         expect(Number.isFinite(c.value)).toBe(true);
         expect(c.ok, `${level.id}: "${c.text}"`).toBe(fits(b.rule, c));
         // The text is either the number or a sum that comes to it.
-        expect(evalCell(c.text), `${level.id}: "${c.text}" should be ${c.value}`).toBeCloseTo(c.value, 9);
+        expect(evalCell(c.text, b.rule.of ?? 0), `${level.id}: "${c.text}" should be ${c.value}`).toBeCloseTo(c.value, 9);
       }
     });
   });
@@ -252,18 +298,34 @@ describe("building a board", () => {
   });
 });
 
-/** Works out what a cell says, the way a kid would. Only used to check the boards. */
-function evalCell(text: string): number {
+/**
+ * Works out what a cell says, the way a kid would. Only used to check the
+ * boards: if this disagrees with the value the game stored, the cell is
+ * lying about itself. `x` is the value the rule gives a variable board.
+ */
+function evalCell(text: string, x = 0): number {
   const round = (v: number) => Math.round(v * 1e9) / 1e9;
   if (text.endsWith("%")) return round(Number(text.slice(0, -1)) / 100);
-  const slash = text.split("/");
-  if (slash.length === 2 && slash.every((x) => x !== "" && Number.isFinite(Number(x)))) return round(Number(slash[0]) / Number(slash[1]));
-  if (text !== "" && Number.isFinite(Number(text))) return round(Number(text));
-  const t = text.replace(/−/g, "-").replace(/×/g, "*").replace(/÷/g, "/");
-  const parts = t.split(/\s+/);
+  for (const sep of ["/", ":"]) {
+    const two = text.split(sep);
+    if (two.length === 2 && two.every((p) => p !== "" && Number.isFinite(Number(p)))) return round(Number(two[0]) / Number(two[1]));
+  }
+  const power = text.split("^");
+  if (power.length === 2 && power.every((p) => Number.isFinite(Number(p)))) return Number(power[0]) ** Number(power[1]);
+
+  /** One side of a sum: 7, (-4), 3x, or x. */
+  const term = (raw: string): number => {
+    const t = raw.replace(/[()]/g, "").replace(/−/g, "-");
+    if (!t.includes("x")) return Number(t);
+    const k = t.slice(0, t.indexOf("x"));
+    return (k === "" || k === "-" ? Number(k + "1") : Number(k)) * x;
+  };
+
+  if (!text.includes(" ")) return round(term(text));
+  const parts = text.replace(/×/g, "*").replace(/÷/g, "/").split(/\s+/);
   const nums: number[] = [];
   const ops: string[] = [];
-  parts.forEach((p, i) => (i % 2 === 0 ? nums.push(Number(p)) : ops.push(p)));
+  parts.forEach((p, i) => (i % 2 === 0 ? nums.push(term(p)) : ops.push(p)));
   // Multiply and divide first.
   for (let i = 0; i < ops.length; ) {
     if (ops[i] === "*" || ops[i] === "/") {

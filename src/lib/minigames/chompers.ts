@@ -75,7 +75,15 @@ export type RuleKind =
   /** A fraction that cannot be written with smaller numbers. */
   | "simplest"
   /** Worth `target` percent of `of`: "Equals 25% of 80". */
-  | "percentOf";
+  | "percentOf"
+  /** A number something times itself makes: 1, 4, 9, 16. */
+  | "squares"
+  /** A multiple of both `target` and `of`. */
+  | "commonMultiples"
+  /** A factor of both `target` and `of`. */
+  | "commonFactors"
+  /** Worth `target` once x is `of`: "With x = 5, equals 20". */
+  | "evaluates";
 
 export interface Rule {
   kind: RuleKind;
@@ -109,7 +117,15 @@ export type CellStyle =
   | "fraction"
   /** The same numbers written every which way: 3/4, 0.75, 75%. This is the one
    *  that teaches converting, because all three forms sit on one board. */
-  | "mixed";
+  | "mixed"
+  /** Ratios: 3:4, 6:8. The same numbers as a fraction, said the other way. */
+  | "ratio"
+  /** Arithmetic that crosses zero: "-8 + 3", "5 - 12", "3 x (-4)". */
+  | "signed"
+  /** Powers: 2^5, 4^3. Two cells can be the same number written two ways. */
+  | "power"
+  /** Expressions in x, worked out with the x the rule gives: "4x", "x + 15". */
+  | "variable";
 
 export interface BoardSpec {
   rule: Rule;
@@ -182,6 +198,14 @@ export function fits(rule: Rule, cell: number | { value: number; frac?: Frac }):
       return !!c.frac && c.frac.d > 1 && gcd(c.frac.n, c.frac.d) === 1;
     case "percentOf":
       return q(value) === percentValue(rule);
+    case "squares":
+      return Number.isInteger(value) && value >= 0 && Number.isInteger(Math.round(Math.sqrt(value))) && Math.round(Math.sqrt(value)) ** 2 === value;
+    case "commonMultiples":
+      return Number.isInteger(value) && value > 0 && value % rule.target === 0 && value % (rule.of ?? 1) === 0;
+    case "commonFactors":
+      return Number.isInteger(value) && value > 0 && rule.target % value === 0 && (rule.of ?? 0) % value === 0;
+    case "evaluates":
+      return q(value) === q(rule.target);
   }
 }
 
@@ -208,6 +232,14 @@ export function ruleLabel(rule: Rule): string {
       return "Already in simplest form";
     case "percentOf":
       return `Equals ${rule.target}% of ${rule.of}`;
+    case "squares":
+      return "Square numbers";
+    case "commonMultiples":
+      return `Multiples of both ${rule.target} and ${rule.of}`;
+    case "commonFactors":
+      return `Factors of both ${rule.target} and ${rule.of}`;
+    case "evaluates":
+      return `With x = ${rule.of}, equals ${rule.target}`;
   }
 }
 
@@ -255,6 +287,23 @@ export function teachFor(rule: Rule, cell: Cell): string {
     }
     case "percentOf":
       return `${shown} is not ${t}% of ${rule.of}. Find 1% first: ${rule.of} ÷ 100 = ${dec((rule.of ?? 0) / 100)}, then take ${t} of those, which is ${dec(percentValue(rule))}.`;
+    case "squares": {
+      const root = Math.floor(Math.sqrt(Math.max(0, cell.value)));
+      return `${shown} is not a square number: ${root} × ${root} = ${root * root} and ${root + 1} × ${root + 1} = ${(root + 1) ** 2}, so nothing times itself lands on ${cell.value}.`;
+    }
+    case "commonMultiples": {
+      const other = rule.of ?? 1;
+      const missesFirst = cell.value % t !== 0;
+      const bad = missesFirst ? t : other;
+      return `${shown} is not a multiple of ${bad}. A number has to be a multiple of both - the first one that is, is ${lcm(t, other)}.`;
+    }
+    case "commonFactors": {
+      const other = rule.of ?? 0;
+      const bad = t % cell.value !== 0 ? t : other;
+      return `${shown} does not divide ${bad} evenly. The factors they share are ${divisors(gcd(t, other)).join(", ")}.`;
+    }
+    case "evaluates":
+      return `${cell.text} comes to ${dec(cell.value, 3)} when x is ${rule.of}, not ${t}. Put ${rule.of} where the x is and work it out.`;
   }
 }
 
@@ -272,6 +321,36 @@ function factWays(v: number, hi: number): string[] {
     if (v + b <= hi + 60) ways.push(`${v + b} − ${b}`);
   }
   return ways.length ? ways : [`${v} + 0`];
+}
+
+/** How a number reads inside a sum: 4, or (-4) when it is negative. */
+const signed = (n: number) => (n < 0 ? `(−${Math.abs(n)})` : String(n));
+
+/** Every way of writing `v` as one operation when the numbers can go below zero. */
+function signedWays(v: number): string[] {
+  const ways: string[] = [];
+  for (let b = 1; b <= 15; b++) {
+    ways.push(`${signed(v - b)} + ${b}`);
+    ways.push(`${signed(v + b)} − ${b}`);
+  }
+  if (v !== 0) for (const d of divisors(Math.abs(v)).filter((d) => d > 1 && d <= 12 && Math.abs(v) / d <= 12)) ways.push(`${signed(-d)} × ${signed(-v / d)}`);
+  for (const d of divisors(Math.abs(v)).filter((d) => d > 1 && d <= 12 && Math.abs(v) / d <= 12)) ways.push(`${d} × ${signed(v / d)}`);
+  return ways.length ? ways : [`${signed(v)} + 0`];
+}
+
+/** Every way of writing `v` as an expression in x, for the x the rule gives. */
+function variableWays(v: number, x: number): string[] {
+  const ways: string[] = [];
+  if (x !== 0 && v % x === 0 && Math.abs(v / x) <= 12 && v / x !== 1) ways.push(`${v / x}x`);
+  for (let k = 1; k <= 6; k++) {
+    const term = k === 1 ? "x" : `${k}x`;
+    // "3x + 5" and "3x - 5", skipping the ones that would read "3x + 0".
+    if (v - k * x > 0) ways.push(`${term} + ${v - k * x}`);
+    if (k * x - v > 0) ways.push(`${term} − ${k * x - v}`);
+    // "40 - 2x", the other way round.
+    if (v + k * x > 0) ways.push(`${v + k * x} − ${term}`);
+  }
+  return ways.length ? ways : [String(v)];
 }
 
 /** Every way of writing `v` as two operations, so the order decides it: "4 + 2 x 8". */
@@ -295,9 +374,10 @@ function twoStepWays(v: number): string[] {
  * squares all worth 42 read as ten different questions rather than the same
  * one twice.
  */
-function cellText(r: Rng, v: number, style: CellStyle, lo: number, hi: number, used: Set<string>): string {
-  if (style === "plain") return String(v);
-  const ways = style === "twostep" ? twoStepWays(v) : factWays(v, hi);
+function cellText(r: Rng, v: number, spec: BoardSpec, used: Set<string>): string {
+  if (spec.style === "plain") return v < 0 ? `−${Math.abs(v)}` : String(v);
+  const ways =
+    spec.style === "twostep" ? twoStepWays(v) : spec.style === "signed" ? signedWays(v) : spec.style === "variable" ? variableWays(v, spec.rule.of ?? 1) : factWays(v, spec.hi);
   for (const w of shuffle(r, ways)) if (!used.has(w)) return w;
   return ways[0];
 }
@@ -325,6 +405,23 @@ function fractionPool(maxDen: number): Cand[] {
   return out;
 }
 
+/** The same fractions written the other way round: 3:4 rather than 3/4. */
+function ratioPool(maxDen: number): Cand[] {
+  return fractionPool(maxDen).map((c) => ({ ...c, text: `${c.frac!.n}:${c.frac!.d}` }));
+}
+
+/** Every power in range, both ways round where there are two: 16 is 2^4 and 4^2. */
+function powerPool(lo: number, hi: number): Cand[] {
+  const out: Cand[] = [];
+  for (let a = 2; a <= 31; a++)
+    for (let b = 2; b <= 6; b++) {
+      const v = a ** b;
+      if (v < lo || v > hi) continue;
+      out.push({ value: v, text: `${a}^${b}` });
+    }
+  return out;
+}
+
 /** The same fractions, plus the ones that also write neatly as a decimal or a percent. */
 function mixedPool(maxDen: number): Cand[] {
   const out = fractionPool(maxDen);
@@ -348,7 +445,15 @@ function mixedPool(maxDen: number): Cand[] {
 /** Everything a board could show, split into the ones that fit and the ones that do not. */
 function split(spec: BoardSpec): { yes: Cand[]; no: Cand[] } {
   const pool: Cand[] =
-    spec.style === "fraction" ? fractionPool(spec.hi) : spec.style === "mixed" ? mixedPool(spec.hi) : Array.from({ length: spec.hi - spec.lo + 1 }, (_, i) => ({ value: spec.lo + i }));
+    spec.style === "fraction"
+      ? fractionPool(spec.hi)
+      : spec.style === "mixed"
+        ? mixedPool(spec.hi)
+        : spec.style === "ratio"
+          ? ratioPool(spec.hi)
+          : spec.style === "power"
+            ? powerPool(spec.lo, spec.hi)
+            : Array.from({ length: spec.hi - spec.lo + 1 }, (_, i) => ({ value: spec.lo + i }));
   const yes: Cand[] = [];
   const no: Cand[] = [];
   for (const c of pool) (fits(spec.rule, c) ? yes : no).push(c);
@@ -384,7 +489,7 @@ function buildGrumbles(r: Rng, count: number): Grumble[] {
  * two cells reading "12" is not a question, so those boards hold as many right
  * answers as there genuinely are.
  */
-const WRITES_ITSELF: CellStyle[] = ["fact", "twostep"];
+const WRITES_ITSELF: CellStyle[] = ["fact", "twostep", "signed", "variable"];
 
 /** How many right answers a board holds. The same for every seed, by design. */
 export function rightOn(spec: BoardSpec): number {
@@ -404,7 +509,7 @@ export function buildBoard(spec: BoardSpec, boardIndex: number, seed: number): B
   const used = new Set<string>();
   const picked = shuffle(r, [...right, ...wrong]);
   const cells: Cell[] = picked.map((c) => {
-    const text = c.text ?? cellText(r, c.value, spec.style, spec.lo, spec.hi, used);
+    const text = c.text ?? cellText(r, c.value, spec, used);
     used.add(text);
     return { text, value: c.value, frac: c.frac, ok: fits(spec.rule, c) };
   });
@@ -652,14 +757,56 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
 
 
 /**
- * Grades 6-12 play the hardest of these for now. Their own levels - integers,
- * ratios, exponents, equations - land with the rest of the 6-8 content; until
- * then the older kids get a game rather than an empty arcade.
+ * Grades 6-12. Their own levels, not the younger ones turned up: integers that
+ * cross zero, ratios, powers, common multiples and factors, expressions with
+ * an x in them, and percents of awkward numbers.
  */
-const BAND_LEVELS: ChomperLevel[] = [...CHOMPER_LEVELS[4].slice(1), ...CHOMPER_LEVELS[5]];
-export const ALL_CHOMPER_LEVELS: ChomperLevel[] = Object.values(CHOMPER_LEVELS).flat();
+export const BAND_ONLY_LEVELS: ChomperLevel[] = [
+  lvl(6, "b-integers", "Integer Island", "g7.integer-add-sub", "Skill: adding, subtracting and comparing numbers below zero. On the number line, -12 sits further left than -5, so it is the smaller one.", [
+    board("greater", -5, "signed", -40, 40),
+    board("less", 0, "signed", -40, 40),
+    board("equals", -12, "signed", -60, 60),
+  ]),
+  lvl(6, "b-ratios", "Ratio Road", "g6.ratios", "Skill: equal ratios. 3:4 and 6:8 are the same mix - double both sides and nothing changes.", [
+    board("equivalent", 0.5, "ratio", 2, 20, { frac: { n: 1, d: 2 } }),
+    board("equivalent", 2 / 3, "ratio", 3, 24, { frac: { n: 2, d: 3 } }),
+    board("equivalent", 0.75, "ratio", 4, 28, { frac: { n: 3, d: 4 } }),
+  ]),
+  lvl(6, "b-powers", "Power Peaks", "g6.exponents", "Skill: squares and powers. 4^3 means 4 × 4 × 4, which is 64 - not 4 × 3.", [
+    board("squares", 0, "plain", 1, 150),
+    board("squares", 0, "plain", 1, 400),
+    board("less", 100, "power", 4, 1000),
+  ]),
+  lvl(6, "b-common", "Common Ground", "g6.gcf-lcm", "Skill: common multiples and common factors. A number has to work for both, not just one of them.", [
+    board("commonMultiples", 4, "plain", 1, 130, { of: 6 }),
+    board("commonFactors", 48, "plain", 1, 50, { of: 72 }),
+    board("commonMultiples", 6, "plain", 1, 250, { of: 8 }),
+  ]),
+  lvl(7, "b-xmarks", "X Marks the Spot", "g6.evaluate-expressions", "Skill: working out an expression once you know what x is. Put the number where the x is, then do the sum.", [
+    board("evaluates", 20, "variable", 1, 60, { of: 5 }),
+    board("evaluates", 24, "variable", 1, 80, { of: 3 }),
+    board("evaluates", 36, "variable", 1, 90, { of: 6 }),
+  ]),
+  lvl(7, "b-percent", "Percent Problems", "g7.percent-problems", "Skill: percents of harder numbers. 15% is 10% plus half of it again, which beats reaching for a calculator.", [
+    board("percentOf", 15, "fact", 1, 120, { of: 240 }),
+    board("percentOf", 80, "fact", 1, 200, { of: 45 }),
+    board("percentOf", 12.5, "fact", 1, 100, { of: 64 }),
+  ]),
+];
+
+export const ALL_CHOMPER_LEVELS: ChomperLevel[] = [...Object.values(CHOMPER_LEVELS).flat(), ...BAND_ONLY_LEVELS];
 
 export const levelById = (id: string): ChomperLevel | undefined => ALL_CHOMPER_LEVELS.find((l) => l.id === id);
+
+/**
+ * What grades 6-12 play: two of the grade 5 boards as a warm-up, then their
+ * own. Order of operations and primes are worth revisiting at any age.
+ */
+const BAND_LEVELS: ChomperLevel[] = [
+  CHOMPER_LEVELS[5].find((l) => l.id === "g5-3")!,
+  CHOMPER_LEVELS[5].find((l) => l.id === "g5-4")!,
+  ...BAND_ONLY_LEVELS,
+];
 
 // ---------------- Scoring ----------------
 
