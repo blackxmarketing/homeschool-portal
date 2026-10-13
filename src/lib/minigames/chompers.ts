@@ -1,6 +1,6 @@
 import type { GameEvidence, MiniGame, MiniLevel } from "./index";
 import { Grid } from "../pixel/grid";
-import { divisors, int, isPrime, lcm, pick, seededRng, shuffle, type Rng } from "../curriculum/math";
+import { dec, divisors, fracToString, gcd, int, isPrime, lcm, pick, seededRng, shuffle, simplify, type Frac, type Rng } from "../curriculum/math";
 
 /**
  * Number Chompers (math, grades 3-5 so far). A 6 x 5 board of numbers with a
@@ -62,13 +62,40 @@ export const MAX_ACTS = 400;
 /** Where the Chomper starts, and goes back to after losing a life. */
 export const START = { x: 2, y: 2 };
 
-export type RuleKind = "multiples" | "factors" | "primes" | "composites" | "equals" | "less" | "greater";
+export type RuleKind =
+  | "multiples"
+  | "factors"
+  | "primes"
+  | "composites"
+  | "equals"
+  | "less"
+  | "greater"
+  /** Worth the same as the target, however it is written: 3/4, 0.75, 75%, 6/8. */
+  | "equivalent"
+  /** A fraction that cannot be written with smaller numbers. */
+  | "simplest"
+  /** Worth `target` percent of `of`: "Equals 25% of 80". */
+  | "percentOf";
 
 export interface Rule {
   kind: RuleKind;
   /** What the rule is about: 7 in "Multiples of 7", 42 in "Equals 42". Ignored by primes. */
   target: number;
+  /** The whole a percent is taken of: 80 in "25% of 80". */
+  of?: number;
+  /** The target written as a fraction, when it is one. Gives the rule its
+   *  name ("Worth the same as 3/4") and lets a wrong munch be explained by
+   *  cross-multiplying rather than by comparing long decimals. */
+  frac?: Frac;
+  /** How to write the target when a decimal would read badly: "1/2" for 0.5. */
+  show?: string;
 }
+
+/** Rounds off floating-point dust, so 3/6 and 0.5 really do match. */
+const q = (v: number) => Math.round(v * 1e9) / 1e9;
+
+/** What a percent rule comes to. */
+export const percentValue = (rule: Rule) => q((rule.target / 100) * (rule.of ?? 0));
 
 /** How the numbers on a board are written. */
 export type CellStyle =
@@ -77,14 +104,22 @@ export type CellStyle =
   /** One operation to work out first: "9 x 4". */
   | "fact"
   /** Two operations, so the order matters: "4 + 2 x 8". */
-  | "twostep";
+  | "twostep"
+  /** Fractions: 3/4, 6/8, 5/3. */
+  | "fraction"
+  /** The same numbers written every which way: 3/4, 0.75, 75%. This is the one
+   *  that teaches converting, because all three forms sit on one board. */
+  | "mixed";
 
 export interface BoardSpec {
   rule: Rule;
   style: CellStyle;
-  /** The range the numbers on the board come from. */
+  /** The range the numbers come from; for fractions, the biggest denominator. */
   lo: number;
   hi: number;
+  /** Right answers on this board. Only drops below the usual ten when there
+   *  genuinely are not ten ways to write the same number. */
+  right?: number;
 }
 
 /** One square of the board. */
@@ -93,6 +128,8 @@ export interface Cell {
   text: string;
   /** What the rule judges. */
   value: number;
+  /** The fraction behind it, when the cell is one. Simplest form needs it. */
+  frac?: Frac;
   /** Whether it fits the rule. Worked out on the server when the board is built. */
   ok: boolean;
 }
@@ -119,7 +156,9 @@ export interface Board {
 // ---------------- The rules ----------------
 
 /** Whether a value fits the rule. The one place "right answer" is decided. */
-export function fits(rule: Rule, value: number): boolean {
+export function fits(rule: Rule, cell: number | { value: number; frac?: Frac }): boolean {
+  const c = typeof cell === "number" ? { value: cell, frac: undefined } : cell;
+  const value = c.value;
   switch (rule.kind) {
     case "multiples":
       return Number.isInteger(value) && value > 0 && value % rule.target === 0;
@@ -130,11 +169,19 @@ export function fits(rule: Rule, value: number): boolean {
     case "composites":
       return Number.isInteger(value) && value > 1 && !isPrime(value);
     case "equals":
-      return value === rule.target;
+      return q(value) === q(rule.target);
     case "less":
-      return value < rule.target;
+      return q(value) < q(rule.target);
     case "greater":
-      return value > rule.target;
+      return q(value) > q(rule.target);
+    case "equivalent":
+      return q(value) === q(rule.target);
+    case "simplest":
+      // A whole number is not a fraction in its simplest form, it is a whole
+      // number - so 4/2 and 6/3 are out whichever way you write them.
+      return !!c.frac && c.frac.d > 1 && gcd(c.frac.n, c.frac.d) === 1;
+    case "percentOf":
+      return q(value) === percentValue(rule);
   }
 }
 
@@ -152,15 +199,24 @@ export function ruleLabel(rule: Rule): string {
     case "equals":
       return `Equals ${rule.target}`;
     case "less":
-      return `Less than ${rule.target}`;
+      return `Less than ${rule.show ?? rule.target}`;
     case "greater":
-      return `Greater than ${rule.target}`;
+      return `Greater than ${rule.show ?? rule.target}`;
+    case "equivalent":
+      return `Worth the same as ${rule.show ?? (rule.frac ? fracToString(rule.frac) : rule.target)}`;
+    case "simplest":
+      return "Already in simplest form";
+    case "percentOf":
+      return `Equals ${rule.target}% of ${rule.of}`;
   }
 }
 
 /** The one line a kid gets when they eat something that does not fit. */
 export function teachFor(rule: Rule, cell: Cell): string {
-  const shown = cell.text === String(cell.value) ? `${cell.value}` : `${cell.text} is ${cell.value}, and it`;
+  // Say what it is worth, unless the cell already says so. Three places is
+  // plenty: a kid does not need 2/13 to nine decimals.
+  const worth = dec(cell.value, 3);
+  const shown = cell.text === worth ? worth : `${cell.text} is ${worth}, and it`;
   const t = rule.target;
   switch (rule.kind) {
     case "multiples": {
@@ -179,57 +235,123 @@ export function teachFor(rule: Rule, cell: Cell): string {
     case "equals":
       return `${cell.text} is ${cell.value}, not ${t}.`;
     case "less":
-      return `${shown} is not less than ${t}.`;
+      return `${shown} is not less than ${rule.show ?? t}.`;
     case "greater":
-      return `${shown} is not greater than ${t}.`;
+      return `${shown} is not greater than ${rule.show ?? t}.`;
+    case "equivalent": {
+      const want = rule.show ?? (rule.frac ? fracToString(rule.frac) : dec(t, 3));
+      if (rule.frac && cell.frac) {
+        const a = cell.frac.n * rule.frac.d;
+        const b = rule.frac.n * cell.frac.d;
+        return `${cell.text} is not the same as ${want}. Cross-multiply to check: ${cell.frac.n} × ${rule.frac.d} = ${a}, and ${rule.frac.n} × ${cell.frac.d} = ${b}. They would have to match.`;
+      }
+      return `${cell.text} is worth ${dec(cell.value, 3)}, and ${want} is worth ${dec(t, 3)}.`;
+    }
+    case "simplest": {
+      if (!cell.frac) return `${cell.text} is not a fraction in its simplest form.`;
+      const g = gcd(cell.frac.n, cell.frac.d);
+      if (cell.frac.d === 1) return `${cell.text} is a whole number, not a fraction in simplest form.`;
+      return `${cell.text} can still be made smaller: ${cell.frac.n} and ${cell.frac.d} both divide by ${g}, so it is really ${fracToString(cell.frac)}.`;
+    }
+    case "percentOf":
+      return `${shown} is not ${t}% of ${rule.of}. Find 1% first: ${rule.of} ÷ 100 = ${dec((rule.of ?? 0) / 100)}, then take ${t} of those, which is ${dec(percentValue(rule))}.`;
   }
 }
 
 // ---------------- Writing a number as a problem ----------------
 
-/** Writes `v` as something to work out: "9 x 4", "50 - 8", "84 ÷ 2". */
-function factText(r: Rng, v: number, lo: number, hi: number): string {
+/** Every way of writing `v` as one operation: "9 x 4", "50 - 8", "84 / 2". */
+function factWays(v: number, hi: number): string[] {
   const ways: string[] = [];
   if (v > 1) {
-    const pairs = divisors(v).filter((d) => d > 1 && d <= 12 && v / d <= 12);
-    for (const d of pairs) ways.push(`${d} × ${v / d}`);
+    for (const d of divisors(v).filter((d) => d > 1 && d <= 12 && v / d <= 12)) ways.push(`${d} × ${v / d}`);
     for (const d of divisors(v).filter((d) => d > 1 && d <= 12)) ways.push(`${v * d} ÷ ${d}`);
   }
-  const b = int(r, 1, Math.max(1, Math.min(20, hi - v)));
-  ways.push(`${v - b} + ${b}`);
-  if (v + b <= hi + 40) ways.push(`${v + b} − ${b}`);
-  return pick(r, ways.length ? ways : [`${v} + 0`]);
-}
-
-/** Writes `v` as two operations, so the order of operations decides it: "4 + 2 x 8". */
-function twoStepText(r: Rng, v: number): string {
-  // v = a + b x c, or v = a x b - c, both of which go wrong if you work left to right.
-  if (r() < 0.5) {
-    const b = int(r, 2, 9);
-    const c = int(r, 2, 9);
-    const a = v - b * c;
-    if (a >= 0) return `${a} + ${b} × ${c}`;
+  for (let b = 1; b <= 20; b++) {
+    if (v - b >= 0) ways.push(`${v - b} + ${b}`);
+    if (v + b <= hi + 60) ways.push(`${v + b} − ${b}`);
   }
-  const b = int(r, 2, 9);
-  const a = Math.ceil((v + 1) / b);
-  return `${a} × ${b} − ${a * b - v}`;
+  return ways.length ? ways : [`${v} + 0`];
 }
 
-function cellText(r: Rng, v: number, style: CellStyle, lo: number, hi: number): string {
+/** Every way of writing `v` as two operations, so the order decides it: "4 + 2 x 8". */
+function twoStepWays(v: number): string[] {
+  const ways: string[] = [];
+  for (let b = 2; b <= 9; b++)
+    for (let c = 2; c <= 9; c++) {
+      const a = v - b * c;
+      if (a >= 0 && a <= 40) ways.push(`${a} + ${b} × ${c}`);
+    }
+  for (let b = 2; b <= 9; b++) {
+    const a = Math.ceil((v + 1) / b);
+    const back = a * b - v;
+    if (back > 0 && back <= 40) ways.push(`${a} × ${b} − ${back}`);
+  }
+  return ways.length ? ways : [`${v} + 0`];
+}
+
+/**
+ * How this cell is written. Picks a way the board has not used yet, so ten
+ * squares all worth 42 read as ten different questions rather than the same
+ * one twice.
+ */
+function cellText(r: Rng, v: number, style: CellStyle, lo: number, hi: number, used: Set<string>): string {
   if (style === "plain") return String(v);
-  if (style === "twostep") return twoStepText(r, v);
-  return factText(r, v, lo, hi);
+  const ways = style === "twostep" ? twoStepWays(v) : factWays(v, hi);
+  for (const w of shuffle(r, ways)) if (!used.has(w)) return w;
+  return ways[0];
 }
 
 // ---------------- Building a board ----------------
 
 const mod = (n: number, m: number) => ((n % m) + m) % m;
 
-/** Every value in the range that fits, and every value that does not. */
-function split(spec: BoardSpec): { yes: number[]; no: number[] } {
-  const yes: number[] = [];
-  const no: number[] = [];
-  for (let v = spec.lo; v <= spec.hi; v++) (fits(spec.rule, v) ? yes : no).push(v);
+/** One number a board could show, and how it would be written. */
+interface Cand {
+  value: number;
+  frac?: Frac;
+  /** Already-written forms (fractions, decimals, percents). Worked out otherwise. */
+  text?: string;
+}
+
+/** Every fraction up to a denominator, both reduced and not. */
+function fractionPool(maxDen: number): Cand[] {
+  const out: Cand[] = [];
+  for (let d = 2; d <= maxDen; d++)
+    for (let n = 1; n <= d * 2; n++) {
+      if (n === d) continue; // 1 written as a fraction is a distraction, not a lesson
+      out.push({ value: q(n / d), frac: { n, d }, text: `${n}/${d}` });
+    }
+  return out;
+}
+
+/** The same fractions, plus the ones that also write neatly as a decimal or a percent. */
+function mixedPool(maxDen: number): Cand[] {
+  const out = fractionPool(maxDen);
+  const seen = new Set(out.map((c) => c.text));
+  for (const c of [...out]) {
+    const asDec = dec(c.value, 4);
+    if (asDec.replace(/[^0-9]/g, "").length <= 4 && q(Number(asDec)) === c.value && !seen.has(asDec)) {
+      seen.add(asDec);
+      out.push({ value: c.value, frac: c.frac, text: asDec });
+    }
+    const pct = q(c.value * 100);
+    const asPct = `${dec(pct)}%`;
+    if (Number.isInteger(pct) && !seen.has(asPct)) {
+      seen.add(asPct);
+      out.push({ value: c.value, frac: c.frac, text: asPct });
+    }
+  }
+  return out;
+}
+
+/** Everything a board could show, split into the ones that fit and the ones that do not. */
+function split(spec: BoardSpec): { yes: Cand[]; no: Cand[] } {
+  const pool: Cand[] =
+    spec.style === "fraction" ? fractionPool(spec.hi) : spec.style === "mixed" ? mixedPool(spec.hi) : Array.from({ length: spec.hi - spec.lo + 1 }, (_, i) => ({ value: spec.lo + i }));
+  const yes: Cand[] = [];
+  const no: Cand[] = [];
+  for (const c of pool) (fits(spec.rule, c) ? yes : no).push(c);
   return { yes, no };
 }
 
@@ -255,18 +377,37 @@ function buildGrumbles(r: Rng, count: number): Grumble[] {
  * Builds a board. Pure: the same spec, board number and seed always give the
  * same board, which is how the server can re-score what the kid played.
  */
+/**
+ * Styles where the cell writes itself a different way each time. An "Equals
+ * 42" board is ten cells all worth 42 - 6 x 7, 50 - 8, 84 / 2 - so one value
+ * is enough to fill it. A board of plain numbers or fractions cannot do that:
+ * two cells reading "12" is not a question, so those boards hold as many right
+ * answers as there genuinely are.
+ */
+const WRITES_ITSELF: CellStyle[] = ["fact", "twostep"];
+
+/** How many right answers a board holds. The same for every seed, by design. */
+export function rightOn(spec: BoardSpec): number {
+  const want = spec.right ?? CORRECT_PER_BOARD;
+  return WRITES_ITSELF.includes(spec.style) ? want : Math.min(want, split(spec).yes.length);
+}
+
 export function buildBoard(spec: BoardSpec, boardIndex: number, seed: number): Board {
   const r = seededRng((seed >>> 0) * 31 + boardIndex * 7919 + 1);
   const { yes, no } = split(spec);
-  const right = shuffle(r, yes).slice(0, CORRECT_PER_BOARD);
-  // If the range is thin on right answers, top up by repeating - the board must
-  // always hold the same number of them.
-  while (right.length < CORRECT_PER_BOARD && yes.length) right.push(yes[right.length % yes.length]);
+  const want = rightOn(spec);
+  const right = shuffle(r, yes).slice(0, want);
+  while (right.length < want && yes.length) right.push(yes[right.length % yes.length]);
   const wrong = shuffle(r, no).slice(0, CELLS - right.length);
   while (wrong.length < CELLS - right.length && no.length) wrong.push(no[wrong.length % no.length]);
 
-  const values = shuffle(r, [...right, ...wrong]);
-  const cells = values.map((v) => ({ text: cellText(r, v, spec.style, spec.lo, spec.hi), value: v, ok: fits(spec.rule, v) }));
+  const used = new Set<string>();
+  const picked = shuffle(r, [...right, ...wrong]);
+  const cells: Cell[] = picked.map((c) => {
+    const text = c.text ?? cellText(r, c.value, spec.style, spec.lo, spec.hi, used);
+    used.add(text);
+    return { text, value: c.value, frac: c.frac, ok: fits(spec.rule, c) };
+  });
   return { rule: spec.rule, label: ruleLabel(spec.rule), cells, grumbles: buildGrumbles(r, boardIndex + 1) };
 }
 
@@ -402,7 +543,16 @@ export interface ChomperLevel extends MiniLevel {
   boards: BoardSpec[];
 }
 
-const board = (kind: RuleKind, target: number, style: CellStyle, lo: number, hi: number): BoardSpec => ({ rule: { kind, target }, style, lo, hi });
+const board = (kind: RuleKind, target: number, style: CellStyle, lo: number, hi: number, extra: Partial<BoardSpec> & Partial<Rule> = {}): BoardSpec => {
+  const { of, show, frac, right } = extra;
+  return {
+    rule: { kind, target, ...(of !== undefined && { of }), ...(show !== undefined && { show }), ...(frac !== undefined && { frac }) },
+    style,
+    lo,
+    hi,
+    ...(right !== undefined && { right }),
+  };
+};
 
 const lvl = (grade: number, id: string, title: string, skill: string, intro: string, boards: BoardSpec[]): ChomperLevel => ({ grade, id, title, skill, intro, boards });
 
@@ -423,6 +573,11 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("equals", 8, "fact", 2, 40),
       board("equals", 9, "fact", 2, 45),
     ]),
+    lvl(3, "g3-5", "Fraction Fields", "g3.equiv-fractions", "Skill: equal fractions. 1/2 and 2/4 are the same amount of pie, just cut into different numbers of slices.", [
+      board("equivalent", 0.5, "fraction", 2, 20, { frac: { n: 1, d: 2 } }),
+      board("equivalent", 0.25, "fraction", 2, 24, { frac: { n: 1, d: 4 } }),
+      board("equivalent", 1 / 3, "fraction", 2, 24, { frac: { n: 1, d: 3 } }),
+    ]),
     lvl(3, "g3-4", "More or Less", "g3.add-sub-1000", "Skill: adding, subtracting and comparing. Work out each sum first, then decide whether it is small enough to eat.", [
       board("less", 50, "fact", 10, 99),
       board("greater", 120, "fact", 60, 200),
@@ -430,6 +585,16 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
     ]),
   ],
   4: [
+    lvl(4, "g4-5", "Three Ways to Say It", "g4.decimal-fractions", "Skill: the same number written as a fraction, a decimal and a percent. 3/4, 0.75 and 75% are all the same amount.", [
+      board("equivalent", 0.5, "mixed", 2, 20, { frac: { n: 1, d: 2 } }),
+      board("equivalent", 0.75, "mixed", 2, 24, { frac: { n: 3, d: 4 } }),
+      board("equivalent", 0.2, "mixed", 2, 20, { frac: { n: 1, d: 5 } }),
+    ]),
+    lvl(4, "g4-6", "Bigger or Smaller Than a Half", "g4.compare-fractions", "Skill: comparing fractions, decimals and percents. If the top is more than half the bottom, the fraction is more than a half.", [
+      board("greater", 0.5, "mixed", 2, 16, { show: "1/2" }),
+      board("less", 0.25, "mixed", 2, 16, { show: "1/4" }),
+      board("greater", 1, "fraction", 2, 16),
+    ]),
     lvl(4, "g4-1", "Factor Forest", "g4.factors-primes", "Skill: finding factors. A factor divides the number at the top with nothing left over. 6 is a factor of 24 because 24 ÷ 6 = 4.", [
       board("factors", 24, "plain", 1, 30),
       board("factors", 36, "plain", 1, 40),
@@ -441,9 +606,9 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("primes", 0, "plain", 2, 80),
     ]),
     lvl(4, "g4-3", "Composite Cavern", "g4.factors-primes", "Skill: telling composite from prime. A composite number can be split into a rectangle: 12 is 3 × 4, so it is composite.", [
-      board("composites", 0, "plain", 2, 30),
-      board("composites", 0, "plain", 2, 45),
-      board("composites", 0, "plain", 2, 60),
+      board("composites", 0, "plain", 2, 80),
+      board("composites", 0, "plain", 2, 100),
+      board("composites", 0, "plain", 2, 120),
     ]),
     lvl(4, "g4-4", "Product Pass", "g4.mult-multidigit", "Skill: multiplying bigger numbers. Work out each product, then eat the ones that match the number at the top.", [
       board("equals", 60, "fact", 10, 120),
@@ -462,6 +627,16 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("factors", 72, "plain", 1, 76),
       board("factors", 84, "plain", 1, 88),
     ]),
+    lvl(5, "g5-5", "Simplest Form", "g4.equiv-fractions", "Skill: simplest form. A fraction is in simplest form when nothing but 1 divides into both numbers - 6/8 is not, because both halve to 3/4.", [
+      board("simplest", 0, "fraction", 2, 12),
+      board("simplest", 0, "fraction", 2, 16),
+      board("simplest", 0, "fraction", 2, 20),
+    ]),
+    lvl(5, "g5-6", "Percent Pursuit", "g6.percent", "Skill: finding a percent of a number. To find 25% of 80, find 1% first - that is 80 ÷ 100 - then take 25 of them.", [
+      board("percentOf", 25, "fact", 1, 60, { of: 80 }),
+      board("percentOf", 10, "fact", 1, 90, { of: 300 }),
+      board("percentOf", 50, "fact", 1, 90, { of: 90 }),
+    ]),
     lvl(5, "g5-3", "Order of Operations", "g5.order-of-operations", "Skill: the order of operations. Multiply and divide before you add and subtract, so 4 + 2 × 8 is 20, not 48.", [
       board("equals", 20, "twostep", 5, 60),
       board("equals", 30, "twostep", 5, 80),
@@ -469,7 +644,7 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
     ]),
     lvl(5, "g5-4", "Prime Hunt", "g4.factors-primes", "Skill: primes up to 100. The sneaky ones are 51, 57, 87 and 91 - they look prime but they are not.", [
       board("primes", 0, "plain", 2, 100),
-      board("composites", 0, "plain", 40, 100),
+      board("composites", 0, "plain", 20, 160),
       board("primes", 0, "plain", 20, 120),
     ]),
   ],
@@ -515,7 +690,19 @@ export interface BoardResult {
   eaten: number;
 }
 
+/** The most a full board is worth. Thinner boards are worth less - see maxFor. */
 export const MAX_PER_BOARD = CORRECT_PER_BOARD + CLEAR_BONUS;
+
+/**
+ * The most this board can score: a point for each right answer on it, plus the
+ * bonus for clearing. Boards where there are honestly only seven ways to write
+ * the same number are worth seven and five, not ten and five - otherwise three
+ * stars would be out of reach however well it was played.
+ */
+export const maxFor = (spec: BoardSpec) => rightOn(spec) + CLEAR_BONUS;
+
+/** The most a whole level can score. */
+export const maxForLevel = (level: ChomperLevel) => level.boards.reduce((t, b) => t + maxFor(b), 0);
 
 /** What a board is worth to the mastery meter next to a question in a lesson. */
 export const GAME_WEIGHT = 0.35;
@@ -531,7 +718,7 @@ export function replay(level: ChomperLevel, raw: unknown): { boards: BoardResult
   let lives = LIVES;
   const boards = level.boards.map((spec, i) => {
     const mv = moves[i];
-    if (lives <= 0 || !mv) return { points: 0, max: MAX_PER_BOARD, cleared: false, wrong: 0, caught: 0, eaten: 0 };
+    if (lives <= 0 || !mv) return { points: 0, max: maxFor(spec), cleared: false, wrong: 0, caught: 0, eaten: 0 };
     const b = buildBoard(spec, i, mv.seed);
     let st = startState(lives);
     for (const a of mv.acts) {
@@ -539,10 +726,10 @@ export function replay(level: ChomperLevel, raw: unknown): { boards: BoardResult
       if (st.over || st.cleared) break;
     }
     lives = st.lives;
-    return { points: st.points, max: MAX_PER_BOARD, cleared: st.cleared, wrong: st.wrong, caught: st.caught, eaten: st.eaten.filter(Boolean).length };
+    return { points: st.points, max: maxFor(spec), cleared: st.cleared, wrong: st.wrong, caught: st.caught, eaten: st.eaten.filter(Boolean).length };
   });
   const points = boards.reduce((t, b) => t + b.points, 0);
-  const max = level.boards.length * MAX_PER_BOARD;
+  const max = maxForLevel(level);
   return { boards, points, max, stars: starsFor(points, max), lives };
 }
 

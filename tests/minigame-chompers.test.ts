@@ -12,6 +12,8 @@ import {
   CORRECT_PER_BOARD,
   LIVES,
   MAX_PER_BOARD,
+  maxFor,
+  maxForLevel,
   ROWS,
   buildBoard,
   chomperGrid,
@@ -24,7 +26,9 @@ import {
   grumbleGrid,
   levelById,
   perfectMoves,
+  percentValue,
   replay,
+  rightOn,
   ruleLabel,
   safeRoute,
   starsFor,
@@ -44,13 +48,12 @@ const everyBoard = (fn: (level: ChomperLevel, boardIndex: number, seed: number) 
 };
 
 describe("the levels", () => {
-  it("covers grades 3, 4 and 5, with four levels each", () => {
+  it("covers grades 3, 4 and 5", () => {
     expect(chompers.grades).toEqual([3, 4, 5]);
     for (const g of [3, 4, 5]) {
-      expect(CHOMPER_LEVELS[g], `grade ${g}`).toHaveLength(4);
+      expect(CHOMPER_LEVELS[g].length, `grade ${g}`).toBeGreaterThanOrEqual(4);
       expect(levelsForKid(chompers, g).map((l) => l.id)).toEqual(CHOMPER_LEVELS[g].map((l) => l.id));
     }
-    expect(ALL_CHOMPER_LEVELS).toHaveLength(12);
   });
 
   it("gives grades 6-8 something to play rather than an empty arcade", () => {
@@ -73,10 +76,19 @@ describe("the levels", () => {
     }
   });
 
+  it("teaches fractions, decimals and percents too", () => {
+    const kinds = new Set(ALL_CHOMPER_LEVELS.flatMap((l) => l.boards.map((b) => b.rule.kind)));
+    for (const k of ["equivalent", "simplest", "percentOf"]) expect(kinds.has(k as never), `no level uses "${k}"`).toBe(true);
+    // And at least one board puts all three forms of a number side by side.
+    expect(ALL_CHOMPER_LEVELS.some((l) => l.boards.some((b) => b.style === "mixed"))).toBe(true);
+  });
+
   it("makes the kid work out arithmetic, not just read numbers", () => {
     const styles = new Set(ALL_CHOMPER_LEVELS.flatMap((l) => l.boards.map((b) => b.style)));
     expect(styles.has("fact")).toBe(true);
     expect(styles.has("twostep")).toBe(true);
+    expect(styles.has("fraction")).toBe(true);
+    expect(styles.has("mixed")).toBe(true);
   });
 
   it("has unique ids, three boards a level, and an intro that says the skill", () => {
@@ -181,8 +193,26 @@ describe("building a board", () => {
         for (let seed = 0; seed <= 200; seed++) {
           const b = buildBoard(level.boards[i], i, seed);
           expect(b.cells, `${level.id} board ${i} seed ${seed}`).toHaveLength(CELLS);
-          expect(b.cells.filter((c) => c.ok).length, `${level.id} board ${i} seed ${seed}`).toBe(CORRECT_PER_BOARD);
+          expect(b.cells.filter((c) => c.ok).length, `${level.id} board ${i} seed ${seed}`).toBe(rightOn(level.boards[i]));
         }
+  });
+
+  it("holds enough right answers to be worth playing", () => {
+    for (const level of ALL_CHOMPER_LEVELS)
+      for (const spec of level.boards) {
+        expect(rightOn(spec), `${level.id} / ${spec.rule.kind}`).toBeGreaterThanOrEqual(6);
+        expect(rightOn(spec)).toBeLessThanOrEqual(CORRECT_PER_BOARD);
+      }
+  });
+
+  it("never shows the same thing on two squares, which would waste one", () => {
+    // This is what caught the composite boards: too narrow a range left too few
+    // primes to fill the wrong squares, so the board repeated itself.
+    everyBoard((level, i, seed) => {
+      const b = buildBoard(level.boards[i], i, seed);
+      const texts = b.cells.map((c) => c.text);
+      expect(new Set(texts).size, `${level.id} board ${i} seed ${seed} repeats a square`).toBe(CELLS);
+    }, [0, 1, 2, 3, 7, 42, 99]);
   });
 
   it("writes every cell as something worth what it says", () => {
@@ -191,9 +221,9 @@ describe("building a board", () => {
       for (const c of b.cells) {
         expect(c.text.trim().length, `${level.id}: empty cell`).toBeGreaterThan(0);
         expect(Number.isFinite(c.value)).toBe(true);
-        expect(c.ok).toBe(fits(b.rule, c.value));
+        expect(c.ok, `${level.id}: "${c.text}"`).toBe(fits(b.rule, c));
         // The text is either the number or a sum that comes to it.
-        expect(evalCell(c.text), `${level.id}: "${c.text}" should be ${c.value}`).toBe(c.value);
+        expect(evalCell(c.text), `${level.id}: "${c.text}" should be ${c.value}`).toBeCloseTo(c.value, 9);
       }
     });
   });
@@ -224,6 +254,11 @@ describe("building a board", () => {
 
 /** Works out what a cell says, the way a kid would. Only used to check the boards. */
 function evalCell(text: string): number {
+  const round = (v: number) => Math.round(v * 1e9) / 1e9;
+  if (text.endsWith("%")) return round(Number(text.slice(0, -1)) / 100);
+  const slash = text.split("/");
+  if (slash.length === 2 && slash.every((x) => x !== "" && Number.isFinite(Number(x)))) return round(Number(slash[0]) / Number(slash[1]));
+  if (text !== "" && Number.isFinite(Number(text))) return round(Number(text));
   const t = text.replace(/−/g, "-").replace(/×/g, "*").replace(/÷/g, "/");
   const parts = t.split(/\s+/);
   const nums: number[] = [];
@@ -236,7 +271,7 @@ function evalCell(text: string): number {
       ops.splice(i, 1);
     } else i++;
   }
-  return ops.reduce((acc, op, i) => (op === "+" ? acc + nums[i + 1] : acc - nums[i + 1]), nums[0]);
+  return round(ops.reduce((acc, op, i) => (op === "+" ? acc + nums[i + 1] : acc - nums[i + 1]), nums[0]));
 }
 
 describe("playing a board", () => {
@@ -297,7 +332,7 @@ describe("playing a board", () => {
     }
     expect(st.cleared).toBe(true);
     expect(st.points).toBe(CORRECT_PER_BOARD + CLEAR_BONUS);
-    expect(st.points).toBe(MAX_PER_BOARD);
+    expect(st.points).toBe(maxFor(level.boards[0]));
   });
 
   it("counts the board as cleared even if a Grumble arrives on the very last munch", () => {
@@ -309,7 +344,7 @@ describe("playing a board", () => {
     }
     expect(st.cleared).toBe(true);
     expect(st.over).toBe(false);
-    expect(st.points).toBe(MAX_PER_BOARD);
+    expect(st.points).toBe(maxFor(level.boards[0]));
   });
 
   it("can be caught by a Grumble", () => {
@@ -360,8 +395,17 @@ describe("scoring a level", () => {
     const moves = perfectMoves(level);
     const half = [moves[0], { seed: moves[1].seed, acts: [] }, { seed: moves[2].seed, acts: [] }];
     const r = replay(level, half);
-    expect(r.points).toBe(MAX_PER_BOARD);
+    expect(r.points).toBe(maxFor(level.boards[0]));
     expect(r.stars).toBe(1);
+  });
+
+  it("asks for a share of what the board can give, not a flat ten", () => {
+    // A board with only seven ways to write the same number is worth twelve,
+    // not fifteen - otherwise three stars would be unreachable on it.
+    for (const level of ALL_CHOMPER_LEVELS) {
+      expect(maxForLevel(level)).toBe(level.boards.reduce((t, b) => t + rightOn(b) + CLEAR_BONUS, 0));
+      expect(replay(level, perfectMoves(level)).max).toBe(maxForLevel(level));
+    }
   });
 
   it("stops scoring once the lives are gone", () => {
@@ -410,7 +454,7 @@ describe("nothing the browser sends can break it", () => {
         const s = chompers.score(level.id, m);
         expect(s, `${level.id} / ${JSON.stringify(m)?.slice(0, 40)}`).not.toBeNull();
         expect(s!.stars).toBe(0);
-        expect(s!.best).toBeLessThanOrEqual(level.boards.length * MAX_PER_BOARD);
+        expect(s!.best).toBeLessThanOrEqual(maxForLevel(level));
       }
     expect(chompers.score("nope", perfectMoves(ALL_CHOMPER_LEVELS[0]))).toBeNull();
   });

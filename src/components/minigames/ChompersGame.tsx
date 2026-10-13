@@ -7,7 +7,7 @@ import {
   CLEAR_BONUS,
   CORRECT_PER_BOARD,
   LIVES,
-  MAX_PER_BOARD,
+  maxForLevel,
   buildBoard,
   chomperGrid,
   grumbleAt,
@@ -59,6 +59,8 @@ function Chompers({ level, onFinish }: { level: ChomperLevel; onFinish: MiniGame
   const [done, setDone] = useState<BoardMove[]>([]);
   /** Points from the boards already finished. */
   const [banked, setBanked] = useState<number[]>([]);
+  /** How many of those were cleared outright. */
+  const [clears, setClears] = useState(0);
   const [acts, setActs] = useState<Act[]>([]);
   /**
    * The board state as the game knows it, not as React has got round to
@@ -148,16 +150,19 @@ function Chompers({ level, onFinish }: { level: ChomperLevel; onFinish: MiniGame
     const move: BoardMove = { seed, acts };
     const all = [...done, move];
     const pts = [...banked, st.points];
+    const cleared = clears + (st.cleared ? 1 : 0);
     const last = bi + 1 >= level.boards.length;
     if (st.over || last) {
       setDone(all);
       setBanked(pts);
+      setClears(cleared);
       setOver(true);
       return;
     }
     const t = setTimeout(() => {
       setDone(all);
       setBanked(pts);
+      setClears(cleared);
       setBi(bi + 1);
       setSeed(newSeed());
       setActs([]);
@@ -186,10 +191,10 @@ function Chompers({ level, onFinish }: { level: ChomperLevel; onFinish: MiniGame
 
   const left = board.cells.filter((c, i) => c.ok && !st.eaten[i]).length;
   const total = bankedTotal + st.points;
-  const max = level.boards.length * MAX_PER_BOARD;
+  const max = maxForLevel(level);
 
   if (over) {
-    const cleared = banked.filter((n) => n >= MAX_PER_BOARD).length;
+    const cleared = clears;
     // Every board is banked by the time this screen shows, the last one
     // included - so the running total must not add it on a second time. Once
     // the server has replayed the game, show its number instead of ours.
