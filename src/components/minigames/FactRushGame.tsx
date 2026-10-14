@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PixelSprite } from "../pixel/PixelArt";
-import { chime, speak, TeacherVoice } from "../voice";
+import { chime, speak, TeacherVoice, useVoiceSettings } from "../voice";
 import { avatarFor } from "@/content/avatars";
 import { teacherFor } from "@/content/teachers";
 import { GAME_COACH, grumbleGrid } from "@/lib/minigames/chompers";
@@ -274,6 +274,8 @@ function FactRush({
   const pet = useMemo(() => petGrid(who.pet, 0), [who.pet]);
   const coach = teacherFor(GAME_COACH);
   const coachLook = avatarFor(coach.id);
+  /** Read-aloud can be turned off for the family, and that holds here too. */
+  const { speakOn } = useVoiceSettings();
 
   const [seed] = useState(newSeed);
   const [ready, setReady] = useState(false);
@@ -297,9 +299,13 @@ function FactRush({
   function begin(p: Pace) {
     setPace(p);
     setPicking(false);
-    // Sweep back from the cage to the start, then count them in.
+    // Sweep back from the cage to the start, then count them in - out loud,
+    // in the voice that read them the directions, the same as the dragon.
     setShot("start");
-    window.setTimeout(() => setCount(3), 1200);
+    window.setTimeout(() => {
+      setCount(3);
+      if (speakOn) speak("fr-count", "Three. Two. One. Go!", { kind: coachLook.voice });
+    }, 1200);
   }
   /** Where this level happens. Fixed per level, so it is always theirs. */
   const biome = useMemo(() => biomeFor(level), [level]);
@@ -390,6 +396,15 @@ function FactRush({
   const run = useMemo(() => play(level, { seed, answers, pace, thrown, beat: dragonDown }, saved), [level, seed, answers, pace, saved, thrown, dragonDown]);
   const fightLives = Math.max(0, run.lives - burns);
   const fightLost = run.atDragon && !dragonDown && burns > 0 && fightLives <= 0;
+  /**
+   * Whether the dragon pit is what they are looking at.
+   *
+   * The level is hidden while this is true and shown whenever it is not, so
+   * there is always exactly one of the two on screen: beat the dragon, or
+   * stop to make more fire, and the level comes straight back with them
+   * standing in it.
+   */
+  const fighting = ready && level.dungeon && run.atDragon && !dragonDown && !reloading;
   const card = run.head === null ? null : level.cards[run.head];
   /**
    * Where it has got to this instant.
@@ -402,7 +417,7 @@ function FactRush({
     run.chase === null ? null : pace === "hard" ? run.chase - (CREEP_PER_SEC * Math.max(0, now - asked.current)) / 1000 : run.chase;
   // Out of cards, out of lives, burned to nothing by the dragon, or out of
   // patience.
-  const done = run.inPile === 0 || run.over || fightLost || gaveUp || answers.length >= MAX_ASKS;
+  const done = run.finished || run.inPile === 0 || run.over || fightLost || gaveUp || answers.length >= MAX_ASKS;
 
   /**
    * The ref is what is typed; the state only draws it.
@@ -690,7 +705,7 @@ function FactRush({
             you get right is another block closer to them. */}
         {/* Once they are at the dragon the run is over and the pit takes the
             screen, so a kid is not looking at two scenes at once. */}
-        {!(level.dungeon && run.atDragon) && (
+        {!fighting && (
         <div className={css.sceneWrap}>
         {picking && (
           <div className={css.fightBrief}>
@@ -891,7 +906,7 @@ function FactRush({
         </div>
         )}
 
-        {ready && level.dungeon && run.atDragon && !dragonDown && !reloading && (
+        {fighting && (
           <div className={css.fightWrap}>
             <DragonFight
               pace={pace}
@@ -965,7 +980,7 @@ function FactRush({
           </div>
         )}
 
-        {ready && card && (!level.dungeon || !run.atDragon || reloading) && (
+        {ready && card && !fighting && !done && (
           <>
             <div className={css.cardRow}>
               <strong className={css.card}>{card.text}</strong>

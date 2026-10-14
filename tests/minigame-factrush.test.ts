@@ -1323,3 +1323,19 @@ describe("moving on", () => {
     expect(r.stars).toBeGreaterThanOrEqual(MOVE_ON_STARS);
   });
 });
+
+describe("the end of a dungeon", () => {
+  it("is the dragon going down, not the cards running out", () => {
+    // A dungeon keeps dealing so a kid who runs dry of fireballs can make
+    // more, so its pile is never empty. Anything watching for an empty pile
+    // to call the level over would wait forever - and show them nothing.
+    const level = ALL_FACT_LEVELS.find((l) => l.dungeon)!;
+    const base = perfectMoves(level, 3, "easy");
+    const won = replay(level, { ...base, thrown: DRAGON_HITS.easy, beat: true });
+    expect(won.finished, "beating the dragon ends the level").toBe(true);
+    expect(won.inPile, "and there are still cards in the pile when it does").toBeGreaterThan(0);
+    const notYet = replay(level, base);
+    expect(notYet.finished).toBe(false);
+    expect(notYet.atDragon).toBe(true);
+  });
+});
