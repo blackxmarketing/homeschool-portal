@@ -15,6 +15,8 @@ import {
   buildBoard,
   chomperGrid,
   COINS,
+  DOLLAR,
+  money,
   coinGrid,
   coinsGrid,
   angleGrid,
@@ -105,6 +107,7 @@ function CellPicture({ art }: { art: CellArt }) {
 
 /** One of each coin, built once, for the key above a money board. */
 const COIN_KEY = COINS.map((c) => ({ ...c, grid: coinGrid(c.cents, true) }));
+const MONEY_KEY = [{ ...DOLLAR, grid: coinGrid(DOLLAR.cents, true) }, ...COIN_KEY];
 
 /**
  * What each coin is worth, over the top of a money board.
@@ -114,14 +117,14 @@ const COIN_KEY = COINS.map((c) => ({ ...c, grid: coinGrid(c.cents, true) }));
  * across fifteen pixels - unreadable. So the board says it once, up here,
  * big enough to read and close enough to check against.
  */
-function CoinKey() {
+function CoinKey({ dollars }: { dollars: boolean }) {
   return (
     <div className={css.coinKey}>
       <span className="kmuted small">Worth:</span>
-      {COIN_KEY.map((c) => (
+      {(dollars ? MONEY_KEY : COIN_KEY).map((c) => (
         <span key={c.cents} className={css.coinKeyItem}>
           <PixelSprite grid={c.grid} scale={3} />
-          <span>{c.cents}¢</span>
+          <span>{money(c.cents)}</span>
         </span>
       ))}
     </div>
@@ -549,7 +552,7 @@ function Chompers({
         <span className="kmuted small">{left} left</span>
       </div>
 
-      {board.cells.some((c) => c.art?.kind === "coins") && <CoinKey />}
+      {board.cells.some((c) => c.art?.kind === "coins") && <CoinKey dollars={board.cells.some((c) => c.art?.parts.includes(100))} />}
 
       <div className="mg-goalbar" aria-hidden>
         <span style={{ width: `${((CORRECT_PER_BOARD - left) / CORRECT_PER_BOARD) * 100}%` }} />

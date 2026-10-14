@@ -190,6 +190,7 @@ export type CellStyle =
   | "dots"
   /** A handful of coins to add up. */
   | "coins"
+  | "money"
   /** The same number four ways: as a numeral, as dots, as tallies, as dice. */
   | "count"
   /** Drawn shapes. The value is how many straight sides it has. */
@@ -208,6 +209,12 @@ export type Op = "+" | "-" | "x" | "/";
 export const ALL_OPS: Op[] = ["+", "-", "x", "/"];
 
 export interface BoardSpec {
+  /**
+   * This board is allowed to show the same square twice. Only money boards
+   * set it: there are at most six different ways to make an amount out of six
+   * coins, and a board wants ten right answers.
+   */
+  dupes?: boolean;
   rule: Rule;
   style: CellStyle;
   /**
@@ -352,7 +359,7 @@ export function ruleLabel(rule: Rule): string {
     case "composites":
       return "Composite numbers";
     case "equals":
-      return `Equals ${rule.target}`;
+      return `Equals ${rule.show ?? rule.target}`;
     case "less":
       return `Less than ${rule.show ?? rule.target}`;
     case "greater":
@@ -412,8 +419,11 @@ export function teachFor(rule: Rule, cell: Cell): string {
     }
     case "composites":
       return `${shown} is not composite. ${cell.value} is prime - the only way to make it is 1 × ${cell.value}.`;
-    case "equals":
-      return `${cell.text} is ${cell.value}, not ${t}.`;
+    case "equals": {
+      // On a money board both sides of that sentence are money.
+      const got = cell.art?.kind === "coins" ? money(cell.value) : String(cell.value);
+      return `${cell.text} is ${got}, not ${rule.show ?? t}.`;
+    }
     case "less":
       return `${shown} is not less than ${rule.show ?? t}.`;
     case "greater":
@@ -671,6 +681,12 @@ function linePool(): Cand[] {
 const COIN_CANVAS = 16;
 
 /** The coins, by what they are worth in cents. */
+/** Written the way a kid says it: 45 cents, or $1.25 once it is over a dollar. */
+export const money = (cents: number) => (cents >= 100 ? `$${(cents / 100).toFixed(2)}` : `${cents}¢`);
+
+/** A dollar bill. Only the boards that say so deal in them. */
+export const DOLLAR = { cents: 100, one: "a dollar bill", many: "dollar bills" };
+
 export const COINS: { cents: number; one: string; many: string }[] = [
   { cents: 25, one: "a quarter", many: "quarters" },
   { cents: 10, one: "a dime", many: "dimes" },
@@ -680,7 +696,7 @@ export const COINS: { cents: number; one: string; many: string }[] = [
 
 /** Names a handful of coins the way a kid would say it: "a quarter and 2 dimes". */
 export function coinWords(parts: number[]): string {
-  const bits = COINS.filter((c) => parts.includes(c.cents)).map((c) => {
+  const bits = [DOLLAR, ...COINS].filter((c) => parts.includes(c.cents)).map((c) => {
     const n = parts.filter((p) => p === c.cents).length;
     return n === 1 ? c.one : `${n} ${c.many}`;
   });
@@ -693,31 +709,37 @@ export function coinWords(parts: number[]): string {
  * board can hold a quarter, two dimes and a nickel, and five nickels, and ask
  * which of them is worth more than 25 cents.
  *
- * Five at most: a sixth coin in a square sixty pixels across is too small to
- * tell a dime from a nickel, and a picture a kid cannot read is not a
- * question. That is also why these boards compare rather than match exactly -
- * there are only four ways to make 25 cents out of five coins, which is not
- * enough right answers for a board.
+ * Six at most. A seventh in a square sixty pixels across is too small to tell
+ * a dime from a nickel, and a picture a kid cannot read is not a question.
+ * Six also draws better than five: two rows of three rather than a row of
+ * three and a row of two.
+ *
+ * This is the lever on how many different ways there are to make an amount,
+ * and there are never many. At five coins no amount under a dollar had more
+ * than four; at six, the best have six. A board wants ten right answers, so a
+ * money board shows some handfuls twice - which is the point of it, really:
+ * the same amount, made more than one way.
  */
-export const MOST_COINS = 5;
+export const MOST_COINS = 6;
 
-function coinPool(maxCents: number): Cand[] {
+function coinPool(maxCents: number, bills = false): Cand[] {
   const out: Cand[] = [];
   const seen = new Set<string>();
-  for (let q = 0; q <= 4; q++)
-    for (let d = 0; d <= 5; d++)
-      for (let n = 0; n <= 5; n++)
-        for (let pn = 0; pn <= 5; pn++) {
-          const coins = q + d + n + pn;
-          if (coins < 1 || coins > MOST_COINS) continue;
-          const cents = q * 25 + d * 10 + n * 5 + pn;
-          if (cents < 1 || cents > maxCents) continue;
-          const parts = [...Array(q).fill(25), ...Array(d).fill(10), ...Array(n).fill(5), ...Array(pn).fill(1)];
-          const text = coinWords(parts);
-          if (seen.has(text)) continue;
-          seen.add(text);
-          out.push({ value: cents, text, art: { kind: "coins", parts } });
-        }
+  for (let b = 0; b <= (bills ? 2 : 0); b++)
+    for (let q = 0; q <= 6; q++)
+      for (let d = 0; d <= 6; d++)
+        for (let n = 0; n <= 6; n++)
+          for (let pn = 0; pn <= 6; pn++) {
+            const coins = b + q + d + n + pn;
+            if (coins < 1 || coins > MOST_COINS) continue;
+            const cents = b * 100 + q * 25 + d * 10 + n * 5 + pn;
+            if (cents < 1 || cents > maxCents) continue;
+            const parts = [...Array(b).fill(100), ...Array(q).fill(25), ...Array(d).fill(10), ...Array(n).fill(5), ...Array(pn).fill(1)];
+            const text = coinWords(parts);
+            if (seen.has(text)) continue;
+            seen.add(text);
+            out.push({ value: cents, text, art: { kind: "coins", parts } });
+          }
   return out;
 }
 
@@ -781,8 +803,8 @@ function split(spec: BoardSpec): { yes: Cand[]; no: Cand[] } {
                     ? countPool(spec.lo, spec.hi)
                     : spec.style === "dots"
                       ? dotsPool(spec.lo, spec.hi)
-                      : spec.style === "coins"
-                        ? coinPool(spec.hi)
+                      : spec.style === "coins" || spec.style === "money"
+                        ? coinPool(spec.hi, spec.style === "money")
                         : // A board allowed only to multiply can only show numbers that
                   // two factors can make: there is no way to write 37 as a
                   // product, so it must not turn up on one.
@@ -908,7 +930,10 @@ const WRITES_ITSELF: CellStyle[] = ["fact", "twostep", "signed", "variable"];
 /** How many right answers a board holds. The same for every seed, by design. */
 export function rightOn(spec: BoardSpec): number {
   const want = spec.right ?? CORRECT_PER_BOARD;
-  return WRITES_ITSELF.includes(spec.style) ? want : Math.min(want, split(spec).yes.length);
+  // A money board is allowed to repeat a handful, so it holds the full ten
+  // however few ways there are to make the amount.
+  if (WRITES_ITSELF.includes(spec.style) || spec.dupes) return want;
+  return Math.min(want, split(spec).yes.length);
 }
 
 export function buildBoard(spec: BoardSpec, boardIndex: number, seed: number): Board {
@@ -1144,7 +1169,7 @@ export interface ChomperLevel extends MiniLevel {
 }
 
 const board = (kind: RuleKind, target: number, style: CellStyle, lo: number, hi: number, extra: Partial<BoardSpec> & Partial<Rule> = {}): BoardSpec => {
-  const { of, show, frac, right, ops } = extra;
+  const { of, show, frac, right, ops, dupes } = extra;
   return {
     rule: { kind, target, ...(of !== undefined && { of }), ...(show !== undefined && { show }), ...(frac !== undefined && { frac }) },
     style,
@@ -1152,6 +1177,7 @@ const board = (kind: RuleKind, target: number, style: CellStyle, lo: number, hi:
     hi,
     ...(right !== undefined && { right }),
     ...(ops !== undefined && { ops }),
+    ...(dupes !== undefined && { dupes }),
   };
 };
 
@@ -1196,10 +1222,10 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("sides", 4, "shapes", 0, 0),
       board("squareCorners", 1, "corners", 0, 0),
     ]),
-    lvl(1, "g1-3", "Coin Counting", "math-2.time-money", "Skill: adding coins up. The big one with a cross is a quarter (25), the one with a bar is a nickel (5), the little plain one is a dime (10), and the copper one is a penny (1).", [
-      board("less", 9, "coins", 1, 50),
-      board("greater", 25, "coins", 1, 60),
-      board("greater", 40, "coins", 1, 80),
+    lvl(1, "g1-3", "Coin Counting", "math-2.time-money", "Skill: making an exact amount out of coins, more than one way. Every right square is worth the same - a quarter is the big one with a cross, a nickel has a bar, the little plain one is a dime, and the copper one is a penny.", [
+      board("equals", 30, "coins", 1, 99, { show: "30¢", dupes: true }),
+      board("equals", 40, "coins", 1, 99, { show: "40¢", dupes: true }),
+      board("equals", 50, "coins", 1, 99, { show: "50¢", dupes: true }),
     ]),
   ],
   2: [
@@ -1218,10 +1244,10 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("digitIs", 7, "plain", 10, 99, { of: 1 }),
       board("digitIs", 3, "plain", 100, 999, { of: 100 }),
     ]),
-    lvl(2, "g2-3", "Fill the Purse", "math-2.time-money", "Skill: adding coins and comparing the totals. Quarter is the big one with a cross, nickel has a bar, the little plain one is a dime, copper is a penny - and five coins can be worth less than two.", [
-      board("less", 9, "coins", 1, 90),
-      board("less", 50, "coins", 1, 95),
-      board("greater", 60, "coins", 1, 99),
+    lvl(2, "g2-3", "Fill the Purse", "math-2.time-money", "Skill: making an exact amount out of dollars and coins, more than one way. Every amount here is over a dollar, so a dollar bill and a quarter is the same as five quarters.", [
+      board("equals", 125, "money", 1, 200, { show: "$1.25", dupes: true }),
+      board("equals", 135, "money", 1, 200, { show: "$1.35", dupes: true }),
+      board("equals", 150, "money", 1, 250, { show: "$1.50", dupes: true }),
     ]),
   ],
   3: [
@@ -1451,7 +1477,11 @@ function example(b: Board, yes: Cell, no: Cell): WorkedExample {
   // Only a counting picture is "worth" a number. A shape is worth its sides
   // and an angle its degrees, which saying out loud helps nobody.
   const COUNTS = ["dots", "coins", "tally", "dice"];
-  const worth = (c: Cell) => (c.art && COUNTS.includes(c.art.kind) ? ` (worth ${dec(c.value, 3)})` : "");
+  const worth = (c: Cell) => {
+    if (!c.art || !COUNTS.includes(c.art.kind)) return "";
+    // Money is said as money: 30 cents, not 30.
+    return ` (worth ${c.art.kind === "coins" ? money(c.value) : dec(c.value, 3)})`;
+  };
   const sentence = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
   const say = [
     `The rule is: ${b.label}.`,
@@ -1845,7 +1875,32 @@ export function dotsGrid(n: number): Grid {
  * gets the same canvas as every other coin, so they can all be scaled to one
  * height and a quarter still looks bigger than a dime.
  */
+const PAPER = "#73b38a";
+const PAPER_D = "#2f6b41";
+
+/**
+ * A dollar bill. Rectangular and green against four round silver-and-copper
+ * coins, so which one is the dollar is never the question being asked.
+ */
+export function billGrid(uniform = false): Grid {
+  const w = 15;
+  const h = 9;
+  const g = new Grid(uniform ? COIN_CANVAS : w, uniform ? COIN_CANVAS : h);
+  const ox = Math.floor((g.w - w) / 2);
+  const oy = Math.floor((g.h - h) / 2);
+  g.rect(ox, oy, w, h, PAPER_D);
+  g.rect(ox + 1, oy + 1, w - 2, h - 2, PAPER);
+  // An inner rule round the note, the way a bill is printed.
+  g.rect(ox + 2, oy + 2, w - 4, 1, PAPER_D).rect(ox + 2, oy + h - 3, w - 4, 1, PAPER_D);
+  g.rect(ox + 2, oy + 3, 1, h - 6, PAPER_D).rect(ox + w - 3, oy + 3, 1, h - 6, PAPER_D);
+  // A 1 in the middle of it.
+  const cx = ox + Math.floor(w / 2);
+  g.rect(cx, oy + 3, 1, 4, PAPER_D).set(cx - 1, oy + 4, PAPER_D).rect(cx - 1, oy + 6, 3, 1, PAPER_D);
+  return g;
+}
+
 export function coinGrid(cents: number, uniform = false): Grid {
+  if (cents === 100) return billGrid(uniform);
   const r = cents === 25 ? 7 : cents === 5 ? 5.5 : cents === 1 ? 4.5 : 3.5;
   const face = cents === 1 ? COPPER : SILVER;
   const edge = cents === 1 ? COPPER_D : SILVER_D;
@@ -1867,7 +1922,7 @@ export function coinGrid(cents: number, uniform = false): Grid {
 }
 
 /**
- * A handful of coins, biggest first, in up to two rows so five of them still
+ * A handful of money, biggest first, in up to two rows so six of them still
  * read at the size of a board square. All of them are drawn: a picture that
  * left one out would be worth less than the cell says it is.
  */

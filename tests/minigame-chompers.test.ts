@@ -18,6 +18,7 @@ import {
   maxFor,
   maxForLevel,
   ROWS,
+  money,
   SHAPES,
   buildBoard,
   chomperGrid,
@@ -365,6 +366,16 @@ describe("building a board", () => {
         }
   });
 
+  it("writes money the way a kid says it", () => {
+    // The dollar sign went missing once already and nothing failed: the rule
+    // banner reads off its own label, so only the coach noticed.
+    expect(money(5)).toBe("5¢");
+    expect(money(99)).toBe("99¢");
+    expect(money(100)).toBe("$1.00");
+    expect(money(125)).toBe("$1.25");
+    expect(money(250)).toBe("$2.50");
+  });
+
   it("holds enough right answers to be worth playing", () => {
     for (const level of ALL_CHOMPER_LEVELS)
       for (const spec of level.boards) {
@@ -377,9 +388,27 @@ describe("building a board", () => {
     // This is what caught the composite boards: too narrow a range left too few
     // primes to fill the wrong squares, so the board repeated itself.
     everyBoard((level, i, seed) => {
+      // Money boards are the exception, and say so. There are at most six
+      // ways to make an amount out of six coins, and a board wants ten right
+      // answers - showing a handful twice is the lesser of the two evils.
+      if (level.boards[i].dupes) return;
       const b = buildBoard(level.boards[i], i, seed);
       const texts = b.cells.map((c) => c.text);
       expect(new Set(texts).size, `${level.id} board ${i} seed ${seed} repeats a square`).toBe(CELLS);
+    }, [0, 1, 2, 3, 7, 42, 99]);
+  });
+
+  it("still gives a money board several different ways to make its amount", () => {
+    // The whole point of these two levels: the same amount, made more than one
+    // way. A board whose ten right squares were all the same handful would be
+    // a matching exercise, not a counting one.
+    everyBoard((level, i, seed) => {
+      if (!level.boards[i].dupes) return;
+      const b = buildBoard(level.boards[i], i, seed);
+      const ways = new Set(b.cells.filter((c) => c.ok).map((c) => c.text));
+      expect(ways.size, `${level.id} board ${i} seed ${seed} only has ${ways.size} way(s) to make it`).toBeGreaterThanOrEqual(3);
+      // And every right square really is worth the amount asked for.
+      for (const c of b.cells.filter((x) => x.ok)) expect(c.value).toBe(level.boards[i].rule.target);
     }, [0, 1, 2, 3, 7, 42, 99]);
   });
 
