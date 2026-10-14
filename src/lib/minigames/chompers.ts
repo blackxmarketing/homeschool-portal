@@ -43,6 +43,9 @@ export const chompersInfo = {
   land: "math" as const,
   subject: "math" as const,
   grades: [0, 1, 2, 3, 4, 5],
+  // Drill: three stars on a level before the next one opens. Knowing the
+  // facts is the point, so running ahead of them is not allowed.
+  unlockAt: 3,
   blurb: "Eat every number that fits the rule, and don't let the Grumbles catch you.",
 };
 
@@ -53,12 +56,42 @@ export const ROWS = 5;
 export const CELLS = COLS * ROWS;
 /** Right answers on every board, so no seed is easier than another. */
 export const CORRECT_PER_BOARD = 10;
-/** Lives for a whole level (three boards). */
+/**
+ * Three tries at every board.
+ *
+ * Three stars opens the next rung of the ladder, so a level that can be lost
+ * to bad luck two boards ago is a locked door, not a challenge. Each board is
+ * its own go, and the clock is what applies the pressure.
+ */
 export const LIVES = 3;
+
+/**
+ * Strikes a try is worth. A wrong answer and being caught both cost one, in
+ * any mix: three of them between them and the try is over - back to the
+ * start of the board with one fewer left.
+ */
+export const STRIKES = 3;
+
+/**
+ * Lives on a third go at a level a kid has not got yet. Same idea as the
+ * clock turning into a stopwatch: after two honest attempts the game stops
+ * being the obstacle, because what is in the way by then is the maths.
+ */
+export const EASY_LIVES = 5;
 /** Points for clearing a board of its right answers. */
 export const CLEAR_BONUS = 5;
 /** Most moves replayed per board, so a junk move list can't tie up the server. */
 export const MAX_ACTS = 400;
+/**
+ * How long a board gets. The clock is what turns this from a puzzle into
+ * drill: a kid who has to work out 7 x 8 on their fingers runs out of time,
+ * and a kid who knows it does not.
+ *
+ * It is pacing, not scoring. The board stops when it runs out and the points
+ * already earned are kept - nobody loses a life to the clock.
+ */
+export const BOARD_SECONDS = 90;
+
 /** Where the Chomper starts, and goes back to after losing a life. */
 export const START = { x: 2, y: 2 };
 
@@ -173,6 +206,24 @@ export interface Cell {
   ok: boolean;
 }
 
+/**
+ * The three kinds of Grumble.
+ *
+ *   plodder - walks a straight line and turns when it hits the edge, so it
+ *             works its way around the whole board rather than one row.
+ *   rover   - the same, but changes its mind now and then.
+ *   chaser  - comes straight after the Chomper, every other turn.
+ *
+ * There is never more than one chaser, and it moves at half pace. A hunter
+ * that matched the Chomper step for step was tried and measured: on a board
+ * six squares wide it always runs you into a wall in the end, so every board
+ * carrying one was unclearable however well it was played - not hard,
+ * impossible. At half pace it still hunts you down if you dawdle, and you can
+ * still get away by keeping moving, which is the difference between tense and
+ * unfair.
+ */
+export type GrumbleKind = "plodder" | "rover" | "chaser";
+
 export interface Grumble {
   kind: GrumbleKind;
   x: number;
@@ -181,15 +232,15 @@ export interface Grumble {
   dy: number;
 }
 
-/** Grumbles walk in straight lines and come back on the far side. */
-export type GrumbleKind = "plodder" | "pacer";
-
 export interface Board {
   rule: Rule;
   /** The rule, written for a kid. */
   label: string;
   cells: Cell[];
+  /** Where the Grumbles start. Where they are now lives in the play state. */
   grumbles: Grumble[];
+  /** The board's seed, which is also what decides a rover's turns. */
+  seed: number;
 }
 
 // ---------------- The rules ----------------
@@ -581,22 +632,87 @@ function split(spec: BoardSpec): { yes: Cand[]; no: Cand[] } {
   return { yes, no };
 }
 
-/** The Grumbles for a board: one more on each board of the level. */
+/** The four ways a Grumble can face, in turning order. */
+const FACES: [number, number][] = [
+  [1, 0],
+  [0, 1],
+  [-1, 0],
+  [0, -1],
+];
+
+/**
+ * The Grumbles a board starts with: one more on each board of the level, and
+ * from the second board on, one of them hunts. They come in at the corners,
+ * as far from the middle as the board allows.
+ */
 function buildGrumbles(r: Rng, count: number): Grumble[] {
-  const out: Grumble[] = [];
-  for (let i = 0; i < count; i++) {
-    // Alternate walkers across and down, so they cross each other's paths.
-    const across = i % 2 === 0;
-    out.push({
-      kind: across ? "plodder" : "pacer",
-      x: across ? int(r, 0, COLS - 1) : i % 4 === 1 ? 0 : COLS - 1,
-      y: across ? (i % 4 === 0 ? 0 : ROWS - 1) : int(r, 0, ROWS - 1),
-      dx: across ? 0 : i % 4 === 1 ? 1 : -1,
-      dy: across ? (i % 4 === 0 ? 1 : -1) : 0,
-    });
+  const corners: [number, number][] = [
+    [0, 0],
+    [COLS - 1, ROWS - 1],
+    [COLS - 1, 0],
+    [0, ROWS - 1],
+  ];
+  return Array.from({ length: count }, (_, i) => {
+    const [x, y] = corners[i % corners.length];
+    const [dx, dy] = FACES[int(r, 0, 3)];
+    // The hunter arrives on the second board, and there is only ever one.
+    const kind: GrumbleKind = i === 1 ? "chaser" : i % 2 === 0 ? "plodder" : "rover";
+    return { kind, x, y, dx, dy };
+  });
+}
+
+/** Whether a square is on the board at all. */
+const onBoard = (x: number, y: number) => x >= 0 && x < COLS && y >= 0 && y < ROWS;
+
+/**
+ * Where a Grumble goes next. Pure: the same Grumble, the same step and the
+ * same Chomper always give the same answer, which is the whole reason the
+ * server can replay a game it never watched.
+ */
+/** The hunter's rhythm: HUNT steps after you, then WANDER steps minding its own business. */
+const HUNT = 8;
+const WANDER = 6;
+
+/** Whether the hunter is hunting right now, or taking a breather. */
+export const hunting = (step: number) => step % (HUNT + WANDER) < HUNT;
+
+export function grumbleStep(g: Grumble, board: Board, step: number, i: number, to: { x: number; y: number }): Grumble {
+  if (g.kind === "chaser") {
+    // Half pace: it gathers itself on the odd steps.
+    if (step % 2 === 1) return g;
+    if (hunting(step)) {
+      // Straight at the Chomper, closing the bigger gap first.
+      const gx = to.x - g.x;
+      const gy = to.y - g.y;
+      const [dx, dy] = Math.abs(gx) >= Math.abs(gy) ? [Math.sign(gx), 0] : [0, Math.sign(gy)];
+      if (dx !== 0 || dy !== 0) return { ...g, dx, dy, x: g.x + dx, y: g.y + dy };
+      return g;
+    }
+    // Off the scent for a while, which is what gives a kid room to work the
+    // far side of the board. Without it the hunter camps the last few
+    // squares and the board cannot be finished at all.
   }
-  // Never start on top of the Chomper.
-  return out.map((g) => (g.x === START.x && g.y === START.y ? { ...g, x: mod(g.x + 1, COLS) } : g));
+
+  let [dx, dy] = [g.dx, g.dy];
+  // A rover changes its mind about one step in five. Which steps is decided by
+  // the board's seed, so it is the same wander every time this board is played.
+  const whim = g.kind === "rover" && seededRng(board.seed * 7919 + i * 131 + step)() < 0.2;
+  if (whim || !onBoard(g.x + dx, g.y + dy)) {
+    // Turn: both quarter turns before doubling back. Trying the reverse
+    // second is what kept a Grumble bouncing up and down one column for
+    // ever - at the left-hand edge, turning left is always into the wall.
+    const from = FACES.findIndex(([fx, fy]) => fx === dx && fy === dy);
+    const order = whim ? [1, 3, 2, 0][int(seededRng(board.seed * 104729 + i * 31 + step), 0, 2)] : 0;
+    const tries = order === 0 ? [1, 3, 2, 0] : [3, 1, 2, 0];
+    for (const t of tries) {
+      const [tx, ty] = FACES[(from + t) % 4];
+      if (onBoard(g.x + tx, g.y + ty)) {
+        [dx, dy] = [tx, ty];
+        break;
+      }
+    }
+  }
+  return onBoard(g.x + dx, g.y + dy) ? { ...g, dx, dy, x: g.x + dx, y: g.y + dy } : { ...g, dx, dy };
 }
 
 /**
@@ -634,12 +750,9 @@ export function buildBoard(spec: BoardSpec, boardIndex: number, seed: number): B
     used.add(text);
     return { text, value: c.value, frac: c.frac, ...(c.art && { art: c.art }), ok: fits(spec.rule, c) };
   });
-  return { rule: spec.rule, label: ruleLabel(spec.rule), cells, grumbles: buildGrumbles(r, boardIndex + 1) };
-}
-
-/** Where a Grumble stands after `phase` turns. Walks straight and reappears on the far side. */
-export function grumbleAt(g: Grumble, phase: number): { x: number; y: number } {
-  return { x: mod(g.x + g.dx * phase, COLS), y: mod(g.y + g.dy * phase, ROWS) };
+  // Two Grumbles at most, and the hunter only from the second board. Three
+  // of them on a board six squares wide leaves nowhere to stand.
+  return { rule: spec.rule, label: ruleLabel(spec.rule), cells, grumbles: buildGrumbles(r, Math.min(2, boardIndex + 1)), seed: (seed >>> 0) * 31 + boardIndex * 7919 + 1 };
 }
 
 // ---------------- Playing ----------------
@@ -657,10 +770,16 @@ export const DIRS: Record<Exclude<Act, "munch">, [number, number]> = {
 export interface ChomperState {
   x: number;
   y: number;
-  /** Turns taken on this board. */
+  /** Turns taken on this try. */
   turn: number;
-  /** Turns since the Chomper last went back to the middle - what the Grumbles walk by. */
+  /** Wrong answers and catches on this try, in any mix. STRIKES of them ends it. */
+  strikes: number;
+  /** The best this board has been played across the tries so far. */
+  best: number;
+  /** Steps the Grumbles have taken since the Chomper last went back to the middle. */
   phase: number;
+  /** Where the Grumbles are right now. */
+  foes: Grumble[];
   eaten: boolean[];
   lives: number;
   points: number;
@@ -673,18 +792,50 @@ export interface ChomperState {
   last: { kind: "right" | "wrong" | "caught"; cell?: number } | null;
 }
 
-export function startState(lives = LIVES): ChomperState {
-  return { x: START.x, y: START.y, turn: 0, phase: 0, eaten: Array(CELLS).fill(false), lives, points: 0, wrong: 0, caught: 0, cleared: false, over: false, last: null };
+export function startState(board: Board, lives = LIVES): ChomperState {
+  return {
+    x: START.x,
+    y: START.y,
+    turn: 0,
+    strikes: 0,
+    best: 0,
+    phase: 0,
+    foes: board.grumbles.map((g) => ({ ...g })),
+    eaten: Array(CELLS).fill(false),
+    lives,
+    points: 0,
+    wrong: 0,
+    caught: 0,
+    cleared: false,
+    over: false,
+    last: null,
+  };
 }
 
 /** Whether every right answer has been eaten. */
 const allEaten = (board: Board, eaten: boolean[]) => board.cells.every((c, i) => !c.ok || eaten[i]);
 
-function respawn(s: ChomperState): void {
-  s.lives--;
+/**
+ * A wrong answer or a Grumble. Back to the middle, and the Grumbles go back
+ * to their corners so the next move is made on a board you can read rather
+ * than wherever the chase had got to. Three of these and the try is over.
+ */
+function strike(board: Board, s: ChomperState): void {
+  s.strikes++;
   s.x = START.x;
   s.y = START.y;
   s.phase = 0;
+  s.foes = board.grumbles.map((g) => ({ ...g }));
+  if (s.strikes < STRIKES) return;
+
+  // Out of strikes: that try is spent, and the board starts again. The score
+  // from the try is kept as the best so far, so nobody is worse off for
+  // having another go.
+  s.lives--;
+  s.strikes = 0;
+  s.best = Math.max(s.best, s.points);
+  s.points = 0;
+  s.eaten = Array(CELLS).fill(false);
 }
 
 /**
@@ -692,16 +843,18 @@ function respawn(s: ChomperState): void {
  * Chomper - either onto its square, or straight past it the other way.
  */
 function advance(board: Board, s: ChomperState, fromX: number, fromY: number): void {
+  const was = s.foes;
+  s.foes = was.map((g, i) => grumbleStep(g, board, s.phase, i, { x: s.x, y: s.y }));
   s.phase++;
-  for (const g of board.grumbles) {
-    const now = grumbleAt(g, s.phase);
-    const was = grumbleAt(g, s.phase - 1);
+  for (let i = 0; i < s.foes.length; i++) {
+    const now = s.foes[i];
     const walkedInto = now.x === s.x && now.y === s.y;
-    const passedThrough = was.x === s.x && was.y === s.y && now.x === fromX && now.y === fromY;
+    // Swapping places counts too, or you could walk straight through one.
+    const passedThrough = was[i].x === s.x && was[i].y === s.y && now.x === fromX && now.y === fromY;
     if (walkedInto || passedThrough) {
       s.caught++;
       s.last = { kind: "caught" };
-      respawn(s);
+      strike(board, s);
       return;
     }
   }
@@ -747,7 +900,7 @@ export function step(board: Board, st: ChomperState, act: Act, moveGrumbles = tr
       } else {
         s.wrong++;
         s.last = { kind: "wrong", cell: i };
-        respawn(s);
+        strike(board, s);
         lostLife = true;
       }
     }
@@ -768,6 +921,7 @@ export function step(board: Board, st: ChomperState, act: Act, moveGrumbles = tr
   if (!lostLife && allEaten(board, s.eaten)) {
     s.cleared = true;
     s.points += CLEAR_BONUS;
+    s.best = Math.max(s.best, s.points);
     return s;
   }
 
@@ -987,19 +1141,23 @@ export const BAND_ONLY_LEVELS: ChomperLevel[] = [
   ]),
 ];
 
-export const ALL_CHOMPER_LEVELS: ChomperLevel[] = [...Object.values(CHOMPER_LEVELS).flat(), ...BAND_ONLY_LEVELS];
+/**
+ * The ladder: every level there is, easiest first, kindergarten counting
+ * through to expressions with an x in them.
+ *
+ * Everybody climbs the same ladder from the bottom, whatever grade they are
+ * in. A kid who knows their facts goes through the early rungs in a couple of
+ * minutes each and gets a refresher on the way; a kid who does not finds out
+ * exactly where the gap is, which is the point of drill. Three stars on a
+ * rung opens the next one.
+ */
+export const ALL_CHOMPER_LEVELS: ChomperLevel[] = [
+  ...[0, 1, 2, 3, 4, 5].flatMap((g) => CHOMPER_LEVELS[g] ?? []),
+  ...BAND_ONLY_LEVELS,
+].sort((a, b) => a.grade - b.grade);
 
 export const levelById = (id: string): ChomperLevel | undefined => ALL_CHOMPER_LEVELS.find((l) => l.id === id);
 
-/**
- * What grades 6-12 play: two of the grade 5 boards as a warm-up, then their
- * own. Order of operations and primes are worth revisiting at any age.
- */
-const BAND_LEVELS: ChomperLevel[] = [
-  CHOMPER_LEVELS[5].find((l) => l.id === "g5-3")!,
-  CHOMPER_LEVELS[5].find((l) => l.id === "g5-4")!,
-  ...BAND_ONLY_LEVELS,
-];
 
 // ---------------- Scoring ----------------
 
@@ -1025,6 +1183,8 @@ export interface BoardMove {
   times?: number[];
   /** Quick mode: when the board ended, so a kid caught while standing still counts. */
   endMs?: number;
+  /** A third go at a level they have not got yet: more lives, no cut-off. */
+  easy?: boolean;
 }
 
 /**
@@ -1037,7 +1197,7 @@ export interface BoardMove {
  * moments, land on the same answer.
  */
 export function playBoard(board: Board, mv: BoardMove, lives: number): ChomperState {
-  let st = startState(lives);
+  let st = startState(board, lives);
   const quick = !!mv.times && mv.times.length === mv.acts.length;
   if (!quick) {
     for (const a of mv.acts) {
@@ -1082,6 +1242,7 @@ export function cleanMoves(raw: unknown): BoardMove[] {
     const seed = Number.isFinite(n) ? Math.abs(Math.trunc(n)) % 2147483647 : 0;
     const acts = Array.isArray(o.acts) ? (o.acts.slice(0, MAX_ACTS).filter((a): a is Act => typeof a === "string" && (ACTS as string[]).includes(a))) : [];
     const out: BoardMove = { seed, acts };
+    if (o.easy === true) out.easy = true;
     if (!Array.isArray(o.times)) return out;
     // Times only count when there is one per move, and time only runs forwards.
     const times = o.times.slice(0, acts.length).map(clampMs);
@@ -1130,123 +1291,111 @@ export function replay(level: ChomperLevel, raw: unknown): { boards: BoardResult
   let lives = LIVES;
   const boards = level.boards.map((spec, i) => {
     const mv = moves[i];
-    if (lives <= 0 || !mv) return { points: 0, max: maxFor(spec), cleared: false, wrong: 0, caught: 0, eaten: 0 };
+    if (!mv) return { points: 0, max: maxFor(spec), cleared: false, wrong: 0, caught: 0, eaten: 0 };
     const b = buildBoard(spec, i, mv.seed);
-    const st = playBoard(b, mv, lives);
+    // A fresh set of lives for every board.
+    const st = playBoard(b, mv, mv.easy ? EASY_LIVES : LIVES);
     lives = st.lives;
-    return { points: st.points, max: maxFor(spec), cleared: st.cleared, wrong: st.wrong, caught: st.caught, eaten: st.eaten.filter(Boolean).length };
+    // The best of the tries, so an earlier good run is never thrown away by
+    // a worse one afterwards.
+    return { points: Math.max(st.points, st.best), max: maxFor(spec), cleared: st.cleared, wrong: st.wrong, caught: st.caught, eaten: st.eaten.filter(Boolean).length };
   });
   const points = boards.reduce((t, b) => t + b.points, 0);
   const max = maxForLevel(level);
   return { boards, points, max, stars: starsFor(points, max), lives };
 }
 
-// ---------------- Finding a safe route (for tests, and the "show me" hint) ----------------
-
-/** How often the Grumbles' whole pattern repeats: a plodder walks ROWS cells, a pacer COLS. */
-const PERIOD = lcm(COLS, ROWS);
-
-const hitsGrumble = (board: Board, x: number, y: number, phase: number, fromX: number, fromY: number): boolean =>
-  board.grumbles.some((g) => {
-    const now = grumbleAt(g, phase);
-    const was = grumbleAt(g, phase - 1);
-    return (now.x === x && now.y === y) || (was.x === x && was.y === y && now.x === fromX && now.y === fromY);
-  });
-
-/** Where the Chomper is and where the Grumbles are in their walk, as one number. */
-const stateKey = (x: number, y: number, phase: number) => (y * COLS + x) * PERIOD + mod(phase, PERIOD);
-
-/** The cells the Chomper can step to from here, edges included (walking into the edge waits). */
-function nextCells(x: number, y: number): { x: number; y: number; act: Act }[] {
-  return (["up", "down", "left", "right"] as const).map((act) => {
-    const [dx, dy] = DIRS[act];
-    const nx = x + dx;
-    const ny = y + dy;
-    return { x: nx >= 0 && nx < COLS ? nx : x, y: ny >= 0 && ny < ROWS ? ny : y, act };
-  });
-}
+// ---------------- Playing it well (the worked example the tests measure against) ----------------
 
 /**
- * The positions the Chomper can stand in and still have somewhere safe to go
- * next turn, and the turn after, for ever. Worked out by starting with every
- * position a Grumble is not standing on and throwing away the dead ends until
- * nothing changes.
+ * How a sensible player would move next.
  *
- * Without this a route can walk into a corner the Grumbles close off two moves
- * later - which is exactly the trap a kid would call unfair, and which made the
- * worked-example route lose a life it did not deserve.
+ * Grumbles that hunt cannot be planned around exactly the way straight-line
+ * ones could - where they go depends on where the Chomper goes, so there is
+ * no fixed pattern to search. This looks a few steps ahead instead: it works
+ * out where every Grumble would be if it carried on, throws away any move
+ * that walks into one, and of what is left takes the move that gets closest
+ * to the nearest square still worth eating.
+ *
+ * It is the stand-in for a competent kid, and it is what the tests use to
+ * check a board can actually be cleared.
  */
-export function survivable(board: Board): Set<number> {
-  const alive = new Set<number>();
-  for (let y = 0; y < ROWS; y++)
-    for (let x = 0; x < COLS; x++)
-      for (let ph = 0; ph < PERIOD; ph++) if (!board.grumbles.some((g) => { const at = grumbleAt(g, ph); return at.x === x && at.y === y; })) alive.add(stateKey(x, y, ph));
+export function bestMove(board: Board, st: ChomperState): Act | null {
+  const left = board.cells.map((c, i) => (c.ok && !st.eaten[i] ? i : -1)).filter((i) => i >= 0);
+  if (!left.length) return null;
+  const here = st.y * COLS + st.x;
+  if (left.includes(here) && !threatened(board, st, st.x, st.y, LOOK_AHEAD_MUNCH)) return "munch";
 
-  for (let pass = 0; pass < PERIOD * ROWS * COLS; pass++) {
-    let dropped = false;
-    for (const key of [...alive]) {
-      const ph = key % PERIOD;
-      const cell = Math.floor(key / PERIOD);
-      const x = cell % COLS;
-      const y = Math.floor(cell / COLS);
-      const ok = nextCells(x, y).some((n) => !hitsGrumble(board, n.x, n.y, ph + 1, x, y) && alive.has(stateKey(n.x, n.y, ph + 1)));
-      if (!ok) {
-        alive.delete(key);
-        dropped = true;
-      }
-    }
-    if (!dropped) break;
-  }
-  return alive;
+  const near = left
+    .map((i) => ({ x: i % COLS, y: Math.floor(i / COLS) }))
+    .reduce((a, b) => (dist(a, st) <= dist(b, st) ? a : b));
+
+  const tries = (["up", "down", "left", "right"] as const).map((act) => {
+    const [dx, dy] = DIRS[act];
+    const nx = st.x + dx;
+    const ny = st.y + dy;
+    const ok = onBoard(nx, ny);
+    const to = { x: ok ? nx : st.x, y: ok ? ny : st.y };
+    return { act, to, wall: !ok, danger: threatened(board, st, to.x, to.y, LOOK_AHEAD), gap: dist(to, near) };
+  });
+
+  // Somewhere safe that gets us closer; failing that, anywhere safe; failing
+  // that, whatever keeps the most Grumbles at arm's length.
+  // Closest to the next thing worth eating, with elbow room from the
+  // Grumbles worth something too - a step nearer the answer is not worth
+  // taking if it walks into a corner with a Grumble in it.
+  const score = (t: (typeof tries)[number]) => t.gap * 2 - Math.min(roomAround(st, t.to), 4);
+  const better = (a: (typeof tries)[number], b: (typeof tries)[number]) => (score(a) <= score(b) ? a : b);
+  const safe = tries.filter((t) => !t.danger && !t.wall);
+  if (safe.length) return safe.reduce(better).act;
+  const anySafe = tries.filter((t) => !t.danger);
+  if (anySafe.length) return anySafe.reduce(better).act;
+  return tries.reduce((a, b) => (roomAround(st, a.to) >= roomAround(st, b.to) ? a : b)).act;
 }
+
+/** How far apart two squares are, counting only sideways and up-and-down steps. */
+const dist = (a: { x: number; y: number }, b: { x: number; y: number }) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+
+/** The nearest Grumble, for choosing between two bad options. */
+const roomAround = (st: ChomperState, at: { x: number; y: number }) => Math.min(...st.foes.map((g) => dist(g, at)), 99);
 
 /**
- * The shortest run of moves that gets the Chomper safely onto one of `targets`,
- * is still safe on the turn it munches, and leaves it somewhere it can go on
- * surviving. Searches over where it is and where the Grumbles are in their
- * walk, so it is exact rather than a guess.
+ * How far ahead to look before stepping somewhere. Two steps: far enough to
+ * see the square a Grumble is about to arrive on, close enough that it still
+ * commits to a move. One step walks into obvious traps; three has it hiding
+ * in a corner, because a hunter is near you most of the time and a player
+ * who waits for it to be far away never eats anything.
  */
-export function safeRoute(board: Board, from: { x: number; y: number; phase: number }, targets: number[], alive = survivable(board)): Act[] | null {
-  const want = new Set(targets);
-  const canMunch = (x: number, y: number, phase: number) => !hitsGrumble(board, x, y, phase + 1, x, y) && alive.has(stateKey(x, y, phase + 1));
-  if (want.has(from.y * COLS + from.x) && canMunch(from.x, from.y, from.phase)) return [];
+const LOOK_AHEAD = 2;
+/** Munching is a turn spent standing still, so it needs the same clearance. */
+const LOOK_AHEAD_MUNCH = 2;
 
-  const seen = new Set([stateKey(from.x, from.y, from.phase)]);
-  const queue: { x: number; y: number; phase: number; path: Act[] }[] = [{ ...from, path: [] }];
-  while (queue.length) {
-    const cur = queue.shift()!;
-    if (cur.path.length > PERIOD * 4) break;
-    for (const n of nextCells(cur.x, cur.y)) {
-      const phase = cur.phase + 1;
-      if (hitsGrumble(board, n.x, n.y, phase, cur.x, cur.y)) continue;
-      if (!alive.has(stateKey(n.x, n.y, phase))) continue;
-      const key = stateKey(n.x, n.y, phase);
-      if (seen.has(key)) continue;
-      seen.add(key);
-      const path = [...cur.path, n.act];
-      if (want.has(n.y * COLS + n.x) && canMunch(n.x, n.y, phase)) return path;
-      queue.push({ x: n.x, y: n.y, phase, path });
-    }
+/**
+ * Whether standing on a square is about to go wrong: a Grumble there now, or
+ * one that reaches it within the next few of its steps if the Chomper stays
+ * put. A chaser is assumed to keep coming, which is exactly what it does.
+ */
+function threatened(board: Board, st: ChomperState, x: number, y: number, ahead: number): boolean {
+  let foes = st.foes;
+  for (let n = 0; n < ahead; n++) {
+    foes = foes.map((g, i) => grumbleStep(g, board, st.phase + n, i, { x, y }));
+    if (foes.some((g) => g.x === x && g.y === y)) return true;
   }
-  return null;
+  return false;
 }
 
-/** A clean run of a level: clears every board without a wrong munch or a scratch. */
+/** A good run of a level: what a kid who knows the facts and keeps moving gets. */
 export function perfectMoves(level: ChomperLevel): BoardMove[] {
   return level.boards.map((spec, i) => {
     const seed = i + 1;
     const b = buildBoard(spec, i, seed);
-    const alive = survivable(b);
     const acts: Act[] = [];
-    let st = startState();
+    let st = startState(b);
     while (!st.cleared && !st.over && acts.length < MAX_ACTS - 1) {
-      const left = b.cells.map((c, idx) => (c.ok && !st.eaten[idx] ? idx : -1)).filter((idx) => idx >= 0);
-      const route = safeRoute(b, { x: st.x, y: st.y, phase: st.phase }, left, alive);
-      if (!route) break;
-      for (const a of [...route, "munch" as Act]) {
-        acts.push(a);
-        st = step(b, st, a);
-      }
+      const a = bestMove(b, st);
+      if (!a) break;
+      acts.push(a);
+      st = step(b, st, a);
     }
     return { seed, acts };
   });
@@ -1369,7 +1518,7 @@ export function coinsGrid(parts: number[]): Grid {
   return g.outline(OUT);
 }
 
-const GRUMBLE_SKIN: Record<GrumbleKind, string> = { plodder: "#b14bd8", pacer: "#f0803c" };
+const GRUMBLE_SKIN: Record<GrumbleKind, string> = { plodder: "#b14bd8", rover: "#f0803c", chaser: "#e03131" };
 
 /** A Grumble: a lumpy little patroller. Frame 1 lifts its feet. */
 export function grumbleGrid(kind: GrumbleKind = "plodder", frame = 0): Grid {
@@ -1425,10 +1574,15 @@ export function evidenceFor(levelId: string, raw: unknown): GameEvidence[] {
     }));
 }
 
+/** The ladder, as the game host wants it. */
+const ladder = () => ALL_CHOMPER_LEVELS.map(({ id, title, intro }) => ({ id, title, intro }));
+
 export const chompers: MiniGame = {
   ...chompersInfo,
-  levels: (band) => (band === "sprout" ? [] : BAND_LEVELS).map(({ id, title, intro }) => ({ id, title, intro })),
-  levelsForGrade: (grade) => (CHOMPER_LEVELS[grade] ?? []).map(({ id, title, intro }) => ({ id, title, intro })),
+  // The same ladder for everybody, in both worlds: this is drill, and drill
+  // starts at the bottom whatever it says on your birth certificate.
+  levels: () => ladder(),
+  levelsForGrade: () => ladder(),
   score: (levelId, moves) => {
     const level = levelById(levelId);
     if (!level) return null;

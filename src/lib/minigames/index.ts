@@ -42,6 +42,12 @@ export interface MiniGame {
   levels: (band: Band) => MiniLevel[];
   /** K-5 games: the grades it has levels for (0 = kindergarten), and those levels. Without these, levels go by grade band. */
   grades?: number[];
+  /**
+   * Stars needed on a level before the next one opens. One by default: have a
+   * go and move on. A drill game sets it to three, so nobody runs ahead of
+   * facts they do not know yet.
+   */
+  unlockAt?: number;
   /** K-5 games: which subject zone of the world they sit in. */
   subject?: "math" | "ela" | "sci" | "soc" | "span";
   levelsForGrade?: (grade: number) => MiniLevel[];

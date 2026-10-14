@@ -6,14 +6,16 @@ import { chime, SayButton } from "../voice";
 import {
   CLEAR_BONUS,
   CORRECT_PER_BOARD,
+  BOARD_SECONDS,
+  EASY_LIVES,
   LIVES,
+  STRIKES,
   maxForLevel,
   QUICK_TICK_MS,
   buildBoard,
   chomperGrid,
   coinsGrid,
   dotsGrid,
-  grumbleAt,
   grumbleGrid,
   levelById,
   startState,
@@ -32,9 +34,10 @@ import css from "./ChompersGame.module.css";
 
 /** Built once: the same three faces and two monsters on every board. */
 const CHOMPER = [chomperGrid(0), chomperGrid(1), chomperGrid(2)];
-const GRUMBLE = {
+const GRUMBLE: Record<string, ReturnType<typeof grumbleGrid>[]> = {
   plodder: [grumbleGrid("plodder", 0), grumbleGrid("plodder", 1)],
-  pacer: [grumbleGrid("pacer", 0), grumbleGrid("pacer", 1)],
+  rover: [grumbleGrid("rover", 0), grumbleGrid("rover", 1)],
+  chaser: [grumbleGrid("chaser", 0), grumbleGrid("chaser", 1)],
 };
 
 /**
@@ -70,15 +73,23 @@ const KEYS: Record<string, Act> = {
 
 const newSeed = () => Math.floor(Math.random() * 2147483647);
 
-export default function ChompersGame({ levelId, onFinish, stars }: MiniGameUIProps) {
+export default function ChompersGame({ levelId, onFinish, stars, plays }: MiniGameUIProps) {
   const level = levelById(levelId);
-  return level ? <Chompers level={level} onFinish={onFinish} earned={stars ?? 0} /> : null;
+  return level ? <Chompers level={level} onFinish={onFinish} earned={stars ?? 0} plays={plays ?? 0} /> : null;
 }
 
-function Chompers({ level, onFinish, earned }: { level: ChomperLevel; onFinish: MiniGameUIProps["onFinish"]; earned: number }) {
+function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onFinish: MiniGameUIProps["onFinish"]; earned: number; plays: number }) {
   /** Quick mode is the reward for having shown you know this one. */
   const mayGoQuick = earned >= 3;
   const [quick, setQuick] = useState(false);
+  /**
+   * The clock stops cutting them off once they have had two goes at a level
+   * without getting it. A kid stuck on a skill needs more time with it, not
+   * less - the countdown is there to push fluency, not to lock a door.
+   */
+  const untimed = plays >= 2 && earned < 3;
+  /** The same third-go rule gives more lives, not just more time. */
+  const lives = untimed ? EASY_LIVES : LIVES;
   const [bi, setBi] = useState(0);
   const [seed, setSeed] = useState(newSeed);
   /** Quick mode only: when this board started, and when each move happened. */
@@ -86,7 +97,7 @@ function Chompers({ level, onFinish, earned }: { level: ChomperLevel; onFinish: 
   const times = useRef<number[]>([]);
   /** Where the clock had got to when the last life was lost. */
   const base = useRef(0);
-  const [st, setSt] = useState<ChomperState>(() => startState());
+  const [st, setSt] = useState<ChomperState>(() => startState(buildBoard(level.boards[0], 0, seed), lives));
   const [done, setDone] = useState<BoardMove[]>([]);
   /** Points from the boards already finished. */
   const [banked, setBanked] = useState<number[]>([]);
@@ -104,6 +115,8 @@ function Chompers({ level, onFinish, earned }: { level: ChomperLevel; onFinish: 
   const [error, setError] = useState<string | null>(null);
   const [face, setFace] = useState(0);
   const [over, setOver] = useState(false);
+  /** Seconds left on this board, or null when the clock is only counting up. */
+  const [clock, setClock] = useState(untimed ? 0 : BOARD_SECONDS);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ stars: number; xp: number; score?: number } | null>(null);
   const sent = useRef(false);
@@ -144,7 +157,7 @@ function Chompers({ level, onFinish, earned }: { level: ChomperLevel; onFinish: 
         chime("oops");
       } else if (what?.kind === "caught") {
         setFace(2);
-        setNote("A Grumble got you! Back to the middle.");
+        setNote(next.strikes === 0 ? "A Grumble got you - that's three. The board starts again." : "A Grumble got you! Back to the middle.");
         chime("oops");
       }
       if (next.cleared) chime("streak");
@@ -240,6 +253,36 @@ function Chompers({ level, onFinish, earned }: { level: ChomperLevel; onFinish: 
     return () => clearInterval(id);
   }, [quick, over, catchUp, bi]);
 
+  /**
+   * The board's clock. It counts down and stops the board at zero, unless
+   * this is a third go at a level the kid has not got yet - then it counts
+   * up instead and never stops them.
+   */
+  useEffect(() => {
+    if (over || st.over || st.cleared) return;
+    const id = setInterval(() => {
+      setClock((c) => {
+        if (untimed) return c + 1;
+        if (c > 1) return c - 1;
+        // Out of time: bank the board exactly as it stands.
+        const cur = live.current;
+        if (!cur.over && !cur.cleared) {
+          const stopped = { ...cur, over: true as const };
+          live.current = stopped;
+          setSt(stopped);
+          setNote("Time! Let's see how you did.");
+        }
+        return 0;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [over, st.over, st.cleared, untimed, bi]);
+
+  // A fresh board gets a fresh clock.
+  useEffect(() => {
+    setClock(untimed ? 0 : BOARD_SECONDS);
+  }, [bi, untimed]);
+
   // The face goes back to normal a moment after a bite.
   useEffect(() => {
     if (face === 0) return;
@@ -263,7 +306,7 @@ function Chompers({ level, onFinish, earned }: { level: ChomperLevel; onFinish: 
   // Board over: bank it, then either set up the next one or send the lot off.
   useEffect(() => {
     if (!st.cleared && !st.over) return;
-    const move: BoardMove = quick ? { seed, acts, times: times.current, endMs: Math.round(performance.now() - started.current) } : { seed, acts };
+    const move: BoardMove = quick ? { seed, acts, times: times.current, endMs: Math.round(performance.now() - started.current), ...(untimed && { easy: true }) } : { seed, acts, ...(untimed && { easy: true }) };
     const all = [...done, move];
     const pts = [...banked, st.points];
     const cleared = clears + (st.cleared ? 1 : 0);
@@ -279,14 +322,15 @@ function Chompers({ level, onFinish, earned }: { level: ChomperLevel; onFinish: 
       setDone(all);
       setBanked(pts);
       setClears(cleared);
+      const nextSeed = newSeed();
       setBi(bi + 1);
-      setSeed(newSeed());
+      setSeed(nextSeed);
       setActs([]);
       setNote(null);
       times.current = [];
       base.current = 0;
       started.current = performance.now();
-      const fresh = startState(st.lives);
+      const fresh = startState(buildBoard(level.boards[bi + 1], bi + 1, nextSeed), lives);
       live.current = fresh;
       setSt(fresh);
     }, 1400);
@@ -356,10 +400,20 @@ function Chompers({ level, onFinish, earned }: { level: ChomperLevel; onFinish: 
           Board {bi + 1} of {level.boards.length}
         </span>
         <span className="chip">👾 {total}</span>
-        <span className={`chip ${css.lives}`} aria-label={`${st.lives} lives left`}>
-          {Array.from({ length: LIVES }, (_, i) => (
+        <span className={`chip ${css.clock} ${!untimed && clock <= 15 ? css.clockLow : ""}`} aria-label={untimed ? `${clock} seconds so far` : `${clock} seconds left`}>
+          {untimed ? "⏱" : "⏳"} {Math.floor(clock / 60)}:{String(clock % 60).padStart(2, "0")}
+        </span>
+        <span className={`chip ${css.lives}`} aria-label={`${st.lives} tries left`}>
+          {Array.from({ length: lives }, (_, i) => (
             <span key={i} className={i < st.lives ? css.life : css.lifeGone} aria-hidden>
               <PixelSprite grid={CHOMPER[0]} scale={1} />
+            </span>
+          ))}
+        </span>
+        <span className={`chip ${css.strikes}`} aria-label={`${STRIKES - st.strikes} mistakes left on this try`}>
+          {Array.from({ length: STRIKES }, (_, i) => (
+            <span key={i} className={i < st.strikes ? css.strikeOn : css.strikeOff} aria-hidden>
+              ✗
             </span>
           ))}
         </span>
@@ -402,14 +456,11 @@ function Chompers({ level, onFinish, earned }: { level: ChomperLevel; onFinish: 
         </div>
 
         <div className={css.actors} aria-hidden>
-          {board.grumbles.map((g, i) => {
-            const p = grumbleAt(g, st.phase);
-            return (
-              <div key={i} className={css.actor} style={{ gridColumn: p.x + 1, gridRow: p.y + 1 }}>
-                <PixelSprite grid={GRUMBLE[g.kind][st.phase % 2]} scale={1} className={css.sprite} />
-              </div>
-            );
-          })}
+          {st.foes.map((g, i) => (
+            <div key={i} className={css.actor} style={{ gridColumn: g.x + 1, gridRow: g.y + 1 }}>
+              <PixelSprite grid={GRUMBLE[g.kind][st.phase % 2]} scale={1} className={css.sprite} />
+            </div>
+          ))}
           <div className={css.actor} style={{ gridColumn: st.x + 1, gridRow: st.y + 1 }}>
             <PixelSprite grid={CHOMPER[face]} scale={1} className={css.sprite} />
           </div>

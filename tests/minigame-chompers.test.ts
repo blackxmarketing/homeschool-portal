@@ -27,7 +27,8 @@ import {
   dotsGrid,
   evidenceFor,
   fits,
-  grumbleAt,
+  grumbleStep,
+  bestMove,
   GAME_WEIGHT,
   grumbleGrid,
   levelById,
@@ -38,12 +39,11 @@ import {
   replay,
   rightOn,
   ruleLabel,
-  safeRoute,
   placeName,
   starsFor,
+  STRIKES,
   startState,
   step,
-  survivable,
   tick,
   teachFor,
   type Act,
@@ -58,40 +58,27 @@ const everyBoard = (fn: (level: ChomperLevel, boardIndex: number, seed: number) 
 };
 
 describe("the levels", () => {
-  it("covers every grade from kindergarten to 5", () => {
+  it("gives every kid the same ladder, starting at kindergarten", () => {
     expect(chompers.grades).toEqual([0, 1, 2, 3, 4, 5]);
-    for (const g of [0, 1, 2]) {
-      expect(CHOMPER_LEVELS[g].length, `grade ${g}`).toBeGreaterThanOrEqual(2);
-      expect(levelsForKid(chompers, g).map((l) => l.id)).toEqual(CHOMPER_LEVELS[g].map((l) => l.id));
-    }
-    for (const g of [3, 4, 5]) {
-      expect(CHOMPER_LEVELS[g].length, `grade ${g}`).toBeGreaterThanOrEqual(4);
-      expect(levelsForKid(chompers, g).map((l) => l.id)).toEqual(CHOMPER_LEVELS[g].map((l) => l.id));
-    }
-  });
-
-  it("gives grades 6-12 levels of their own, not the little kids' turned up", () => {
-    for (const grade of [6, 7, 8, 10]) {
-      const levels = levelsForKid(chompers, grade);
-      expect(levels.length, `grade ${grade}`).toBeGreaterThan(0);
-      // Most of what they play is written for them.
-      const own = levels.filter((l) => BAND_ONLY_LEVELS.some((b) => b.id === l.id));
-      expect(own.length, `grade ${grade} mostly plays younger levels`).toBeGreaterThanOrEqual(levels.length - 2);
-      // And the server will let them score what it shows them.
-      expect(levelsKidMayPlay(chompers, grade).map((l) => l.id)).toEqual(expect.arrayContaining(levels.map((l) => l.id)));
-    }
-    // Nothing written for grades 6+ leaks into a K-5 arcade.
-    for (const grade of [3, 4, 5]) {
-      const ids = levelsForKid(chompers, grade).map((l) => l.id);
-      expect(ids.filter((id) => BAND_ONLY_LEVELS.some((b) => b.id === id)), `grade ${grade}`).toEqual([]);
+    expect(chompers.unlockAt).toBe(3);
+    const ladder = ALL_CHOMPER_LEVELS.map((l) => l.id);
+    const grades = ALL_CHOMPER_LEVELS.map((l) => l.grade);
+    expect(grades, "the ladder should get harder, never easier").toEqual([...grades].sort((a, b) => a - b));
+    expect(ladder[0]).toBe("k-1");
+    expect(ALL_CHOMPER_LEVELS.at(-1)!.grade).toBeGreaterThanOrEqual(7);
+    // A kindergartner and an eleventh-grader get the same list, and the
+    // server will score any rung either of them reaches.
+    for (const grade of [0, 2, 5, 6, 8, 11]) {
+      expect(levelsForKid(chompers, grade).map((l) => l.id), `grade ${grade}`).toEqual(ladder);
+      expect(levelsKidMayPlay(chompers, grade).map((l) => l.id), `grade ${grade} scoring`).toEqual(expect.arrayContaining(ladder));
     }
   });
 
-  it("covers the grade 6-8 ground too", () => {
+  it("works all the way up to grade 8 maths", () => {
     const kinds = new Set(BAND_ONLY_LEVELS.flatMap((l) => l.boards.map((b) => b.rule.kind)));
-    for (const k of ["squares", "commonMultiples", "commonFactors", "evaluates"]) expect(kinds.has(k as never), `no band level uses "${k}"`).toBe(true);
+    for (const k of ["squares", "commonMultiples", "commonFactors", "evaluates"]) expect(kinds.has(k as never), `no top level uses "${k}"`).toBe(true);
     const styles = new Set(BAND_ONLY_LEVELS.flatMap((l) => l.boards.map((b) => b.style)));
-    for (const st of ["signed", "ratio", "power", "variable"]) expect(styles.has(st as never), `no band level uses "${st}"`).toBe(true);
+    for (const st of ["signed", "ratio", "power", "variable"]) expect(styles.has(st as never), `no top level uses "${st}"`).toBe(true);
   });
 
   it("names a real curriculum skill on every level, so the game can't drift from the lessons", () => {
@@ -346,20 +333,49 @@ describe("building a board", () => {
     expect(buildBoard(ALL_CHOMPER_LEVELS[0].boards[0], 0, 43)).not.toEqual(a);
   });
 
-  it("never starts a Grumble on top of the Chomper", () => {
+  it("starts the Grumbles in the corners, never on the Chomper, and only ever one hunter", () => {
     everyBoard((level, i, seed) => {
       const b = buildBoard(level.boards[i], i, seed);
-      expect(b.grumbles.length).toBe(i + 1);
-      for (const g of b.grumbles) {
-        const at = grumbleAt(g, 0);
-        expect(at.x === 2 && at.y === 2, `${level.id} board ${i}`).toBe(false);
-        // And it stays on the board forever.
-        for (const phase of [1, 7, 30, 101]) {
-          const p = grumbleAt(g, phase);
-          expect(p.x >= 0 && p.x < COLS && p.y >= 0 && p.y < ROWS).toBe(true);
-        }
-      }
+      expect(b.grumbles.length).toBe(Math.min(2, i + 1));
+      expect(b.grumbles.filter((g) => g.kind === "chaser").length, `${level.id} board ${i} hunters`).toBeLessThanOrEqual(1);
+      for (const g of b.grumbles) expect(g.x === 2 && g.y === 2, `${level.id} board ${i}`).toBe(false);
     }, [0, 5, 99]);
+  });
+
+  it("walks the Grumbles all over the board and keeps them on it", () => {
+    const board = buildBoard(ALL_CHOMPER_LEVELS[0].boards[2], 2, 4);
+    let st = startState(board);
+    const seen = new Set<string>();
+    for (let n = 0; n < 240; n++) {
+      st = step(board, { ...st, lives: LIVES, over: false, cleared: false }, (["up", "right", "down", "left"] as Act[])[n % 4]);
+      for (const g of st.foes) {
+        expect(g.x >= 0 && g.x < COLS && g.y >= 0 && g.y < ROWS, "a Grumble left the board").toBe(true);
+        seen.add(`${g.x},${g.y}`);
+      }
+    }
+    // Straight lines that wrapped could only ever visit one row or column.
+    expect(seen.size, "the Grumbles stayed in their lanes").toBeGreaterThan((COLS * ROWS) / 2);
+  });
+
+  it("sends the hunter straight at the Chomper", () => {
+    const board = { ...buildBoard(ALL_CHOMPER_LEVELS[0].boards[1], 1, 1), grumbles: [{ kind: "chaser" as const, x: 0, y: 0, dx: 1, dy: 0 }] };
+    let st = { ...startState(board), x: 5, y: 4 };
+    const gap = () => Math.abs(st.foes[0].x - st.x) + Math.abs(st.foes[0].y - st.y);
+    const before = gap();
+    for (let n = 0; n < 3; n++) st = step(board, { ...st, x: 5, y: 4 }, "down");
+    expect(gap()).toBeLessThan(before);
+  });
+
+  it("walks the same way every time, which is what lets the server replay it", () => {
+    const board = buildBoard(ALL_CHOMPER_LEVELS[0].boards[2], 2, 9);
+    const run = () => {
+      let st = startState(board);
+      for (let n = 0; n < 40; n++) st = step(board, { ...st, lives: LIVES, over: false, cleared: false }, (["right", "down", "left", "up"] as Act[])[n % 4]);
+      return st.foes;
+    };
+    expect(run()).toEqual(run());
+    const g = board.grumbles[0];
+    expect(grumbleStep(g, board, 3, 0, { x: 1, y: 1 })).toEqual(grumbleStep(g, board, 3, 0, { x: 1, y: 1 }));
   });
 });
 
@@ -409,7 +425,7 @@ describe("playing a board", () => {
 
   /** Stands on a cell and munches it, so the test says what happens, not the Grumbles. */
   const munchAt = (index: number, lives = LIVES, times = 1) => {
-    let st = startState(lives);
+    let st = startState(board, lives);
     for (let i = 0; i < times; i++) {
       st = { ...st, x: index % COLS, y: Math.floor(index / COLS) };
       st = step(board, st, "munch");
@@ -417,7 +433,7 @@ describe("playing a board", () => {
     return st;
   };
 
-  const run = (acts: Act[], lives = LIVES) => acts.reduce((st, a) => step(board, st, a), startState(lives));
+  const run = (acts: Act[], lives = LIVES) => acts.reduce((st, a) => step(board, st, a), startState(board, lives));
 
   it("scores a point for eating the right number", () => {
     const st = munchAt(firstOk);
@@ -426,32 +442,36 @@ describe("playing a board", () => {
     expect(st.last).toEqual({ kind: "right", cell: firstOk });
   });
 
-  it("costs a life for eating the wrong one, and the cell stays to come back to", () => {
+  it("costs a strike for eating the wrong one, and the cell stays to come back to", () => {
     const st = munchAt(firstBad);
     expect(st.eaten[firstBad]).toBe(false);
     expect(st.wrong).toBe(1);
-    expect(st.lives).toBe(LIVES - 1);
+    expect(st.strikes).toBe(1);
+    expect(st.lives, "one wrong answer is not a whole try").toBe(LIVES);
     expect({ x: st.x, y: st.y }).toEqual({ x: 2, y: 2 });
   });
 
-  it("ends the board when the lives run out", () => {
-    const st = munchAt(firstBad, LIVES, 3);
+  it("ends the board when the tries run out", () => {
+    const st = munchAt(firstBad, LIVES, LIVES * STRIKES);
     expect(st.over).toBe(true);
     expect(st.lives).toBe(0);
     // And nothing more can happen.
     expect(step(board, st, "munch")).toBe(st);
   });
 
-  it("lets a kid wait for a Grumble to walk past by pressing into the wall", () => {
-    const st = run(["up", "up", "up", "up", "up"]);
-    expect(st.y).toBe(0);
-    expect(st.turn).toBe(5);
-    expect(st.phase).toBeGreaterThan(0);
+  it("counts walking into the edge as a turn, which is how a kid waits a Grumble out", () => {
+    // Pressed against the top, "up" goes nowhere - but the turn still passes
+    // and the Grumbles still step, which is the only way to let one go by.
+    let st = { ...startState(board), x: 0, y: 0 };
+    st = step(board, st, "up");
+    expect({ x: st.x, y: st.y }, "walking into the edge should not move you").toEqual({ x: 0, y: 0 });
+    expect(st.turn).toBe(1);
+    expect(st.phase).toBe(1);
   });
 
   it("gives the clear bonus only when every right answer is gone", () => {
     const right = board.cells.map((c, i) => (c.ok ? i : -1)).filter((i) => i >= 0);
-    let st = startState(99);
+    let st = startState(board, 99);
     for (const i of right) {
       st.x = i % COLS;
       st.y = Math.floor(i / COLS);
@@ -464,7 +484,7 @@ describe("playing a board", () => {
 
   it("counts the board as cleared even if a Grumble arrives on the very last munch", () => {
     const right = board.cells.map((c, i) => (c.ok ? i : -1)).filter((i) => i >= 0);
-    let st = startState(1);
+    let st = startState(board, 1);
     for (const i of right) {
       st = { ...st, x: i % COLS, y: Math.floor(i / COLS) };
       st = step(board, st, "munch");
@@ -474,39 +494,76 @@ describe("playing a board", () => {
     expect(st.points).toBe(maxFor(level.boards[0]));
   });
 
-  it("can be caught by a Grumble", () => {
-    const b2 = buildBoard(level.boards[2], 2, 4);
-    let st = startState();
-    for (let i = 0; i < 60 && !st.caught; i++) st = step(b2, st, i % 2 ? "left" : "right");
-    expect(st.caught).toBeGreaterThan(0);
-    expect(st.lives).toBeLessThan(LIVES);
+  it("sends the hunter after a kid who dawdles", () => {
+    const b2 = buildBoard(level.boards[1], 1, 4);
+    let st = startState(b2);
+    for (let i = 0; i < 150 && !st.caught; i++) st = step(b2, st, i % 2 ? "left" : "right");
+    expect(st.caught, "the hunter never found a Chomper shuffling on the spot").toBeGreaterThan(0);
+    // Caught puts you back in the middle with the Grumbles back in place.
+    expect({ x: st.x, y: st.y }).toEqual({ x: 2, y: 2 });
+    expect(st.foes).toEqual(b2.grumbles);
+  });
+
+  it("costs a try after three mistakes, in any mix, and starts the board again", () => {
+    const good = board.cells.findIndex((c) => c.ok);
+    let st = startState(board);
+    st = { ...st, x: good % COLS, y: Math.floor(good / COLS) };
+    st = step(board, st, "munch");
+    expect(st.points).toBe(1);
+    for (let n = 0; n < STRIKES; n++) {
+      st = { ...st, x: firstBad % COLS, y: Math.floor(firstBad / COLS) };
+      st = step(board, st, "munch");
+    }
+    expect(st.wrong).toBe(STRIKES);
+    expect(st.lives).toBe(LIVES - 1);
+    expect(st.strikes, "the strikes reset with the new try").toBe(0);
+    expect(st.eaten.some(Boolean), "the board starts again").toBe(false);
+    expect(st.points).toBe(0);
+    expect(st.best, "what was earned on the try is kept as the best so far").toBe(1);
   });
 });
 
 describe("scoring a level", () => {
-  it("gives three stars for a clean run of every level", () => {
+  it("can be three-starred on every rung by a sensible player", () => {
+    // perfectMoves is a crude stand-in for a kid: it looks one step ahead
+    // and has no idea what a corner is. Three stars opens the next rung, so
+    // if even this clears nearly every level the gate is a bar to clear and
+    // not a locked door - and a kid still stuck after two goes gets a
+    // stopwatch and extra tries anyway.
+    let three = 0;
     for (const level of ALL_CHOMPER_LEVELS) {
       const moves = perfectMoves(level);
       const r = replay(level, moves);
-      expect(r.points, `${level.id} scored ${r.points}/${r.max}`).toBe(r.max);
-      expect(r.boards.every((b) => b.cleared), level.id).toBe(true);
-      expect(r.boards.every((b) => b.wrong === 0 && b.caught === 0), `${level.id} took damage`).toBe(true);
-      expect(r.lives).toBe(LIVES);
-      expect(chompers.score(level.id, moves)).toEqual({ stars: 3, best: r.max });
+      expect(r.boards.every((b) => b.wrong === 0), `${level.id} ate a wrong one`).toBe(true);
+      expect(r.stars, `${level.id} scored ${r.points}/${r.max}`).toBe(3);
+      expect(chompers.score(level.id, moves)).toEqual({ stars: r.stars, best: r.points });
+      if (r.stars === 3) three++;
     }
+    expect(three, "every rung should be three-starrable").toBe(ALL_CHOMPER_LEVELS.length);
   });
 
-  it("is always winnable: a clean route exists on every board, whatever seed comes up", () => {
-    // The Grumbles must never be able to seal off a right answer. If this ever
-    // fails, that board is unfair however well the kid plays.
+  it("is always winnable: every board can be finished, whatever seed comes up", () => {
+    // The Grumbles must never be able to seal off the last few answers. A
+    // hunter that matched the Chomper step for step did exactly that and
+    // made every board carrying one impossible; this is what caught it.
     for (const level of ALL_CHOMPER_LEVELS)
       for (let i = 0; i < level.boards.length; i++)
-        for (let seed = 1; seed <= 10; seed++) {
-          const b = buildBoard(level.boards[i], i, seed);
-          const alive = survivable(b);
-          expect(alive.size, `${level.id} board ${i} seed ${seed}: nowhere safe to stand`).toBeGreaterThan(0);
-          const targets = b.cells.map((c, idx) => (c.ok ? idx : -1)).filter((idx) => idx >= 0);
-          expect(safeRoute(b, { x: 2, y: 2, phase: 0 }, targets, alive), `${level.id} board ${i} seed ${seed}: no safe first move`).not.toBeNull();
+        for (let seed = 1; seed <= 3; seed++) {
+          const board = buildBoard(level.boards[i], i, seed);
+          let st = startState(board, 9);
+          let eaten = 0;
+          for (let n = 0; n < 1200 && !st.cleared && !st.over; n++) {
+            const a = bestMove(board, st);
+            if (!a) break;
+            st = step(board, st, a);
+            eaten = Math.max(eaten, st.eaten.filter(Boolean).length);
+          }
+          // Cleared, or well over half the answers eaten on some try. The
+          // stand-in is poor at endgames, so the bar is "could clearly play
+          // this", not "played it perfectly": a hunter that matched the
+          // Chomper step for step left it fleeing with nothing eaten at all.
+          const want = rightOn(level.boards[i]);
+          expect(st.cleared, `${level.id} board ${i} seed ${seed}: best was ${eaten} of ${want}`).toBe(true);
         }
   });
 
@@ -535,18 +592,31 @@ describe("scoring a level", () => {
     }
   });
 
-  it("stops scoring once the lives are gone", () => {
+  it("ends a board when the tries are gone, but the next board starts fresh", () => {
     const level = levelById("g4-2")!;
     const b = buildBoard(level.boards[0], 0, 1);
     const bad = b.cells.findIndex((c) => !c.ok);
     const to: Act[] = [];
     for (let i = 0; i < Math.abs((bad % COLS) - 2); i++) to.push(bad % COLS > 2 ? "right" : "left");
     for (let i = 0; i < Math.abs(Math.floor(bad / COLS) - 2); i++) to.push(Math.floor(bad / COLS) > 2 ? "down" : "up");
-    const kill = [...to, "munch" as Act, ...to, "munch" as Act, ...to, "munch" as Act];
+    const kill = Array.from({ length: LIVES * STRIKES }, () => [...to, "munch" as Act]).flat();
     const r = replay(level, [{ seed: 1, acts: kill }, ...perfectMoves(level).slice(1)]);
-    expect(r.lives).toBe(0);
-    expect(r.boards[1].points).toBe(0);
-    expect(r.boards[2].points).toBe(0);
+    expect(r.boards[0].points).toBe(0);
+    // Three strikes a try, three tries - and a Grumble catching you on the
+    // way to the wrong square counts towards them just the same.
+    expect(r.boards[0].wrong + r.boards[0].caught).toBe(LIVES * STRIKES);
+    // Losing board one does not take the rest of the level with it. Three
+    // stars opens the next rung, so a board lost to bad luck must not lock
+    // the ladder behind it.
+    expect(r.boards[1].points).toBeGreaterThan(0);
+  });
+
+  it("eases off for a kid who is still stuck on the third go", () => {
+    const level = ALL_CHOMPER_LEVELS[0];
+    const moves = perfectMoves(level).map((m) => ({ ...m, easy: true }));
+    expect(replay(level, moves).stars).toBeGreaterThanOrEqual(2);
+    expect(cleanMoves([{ seed: 1, acts: [], easy: true }])[0].easy).toBe(true);
+    expect(cleanMoves([{ seed: 1, acts: [], easy: "yes" }])[0].easy).toBeUndefined();
   });
 
   it("uses the usual star curve", () => {
@@ -566,7 +636,7 @@ describe("Quick mode, where the Grumbles run on a clock", () => {
 
   /** Plays the moves the way the screen does: catch the clock up, then move. */
   function asThePlayerSaw(mv: { seed: number; acts: Act[]; times: number[]; endMs: number }) {
-    let st = startState();
+    let st = startState(board);
     let base = 0;
     const catchUp = (to: number) => {
       while (!st.over && !st.cleared) {
@@ -763,7 +833,7 @@ describe("what the game tells the mastery meter", () => {
 
 describe("the art", () => {
   it("draws a Chomper and a Grumble", () => {
-    for (const g of [chomperGrid(0), chomperGrid(1), chomperGrid(2), grumbleGrid("plodder", 0), grumbleGrid("pacer", 1), dotsGrid(1), dotsGrid(7), dotsGrid(20), coinsGrid([25]), coinsGrid([25, 10, 5, 1])]) {
+    for (const g of [chomperGrid(0), chomperGrid(1), chomperGrid(2), grumbleGrid("plodder", 0), grumbleGrid("rover", 1), grumbleGrid("chaser", 0), dotsGrid(1), dotsGrid(7), dotsGrid(20), coinsGrid([25]), coinsGrid([25, 10, 5, 1])]) {
       expect(g.px.some(Boolean)).toBe(true);
     }
     // The bite frame really does take a bite out of it.

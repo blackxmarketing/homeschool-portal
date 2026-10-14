@@ -5,7 +5,18 @@ import { GAME_UI } from "./registry";
 import type { MiniLevel } from "@/lib/minigames";
 
 /** Picks a level, runs the game, and sends the result to the server to be scored. */
-export default function GameHost({ game, levels, progress }: { game: string; levels: MiniLevel[]; progress: Record<string, { stars: number; best: number | null; plays: number }> }) {
+export default function GameHost({
+  game,
+  levels,
+  progress,
+  unlockAt = 1,
+}: {
+  game: string;
+  levels: MiniLevel[];
+  progress: Record<string, { stars: number; best: number | null; plays: number }>;
+  /** Stars needed on a level before the next one opens. */
+  unlockAt?: number;
+}) {
   const [stars, setStars] = useState(progress);
   const [playing, setPlaying] = useState<string | null>(null);
   const [round, setRound] = useState(0);
@@ -39,7 +50,7 @@ export default function GameHost({ game, levels, progress }: { game: string; lev
         <p className="game-intro">{levels[idx]?.intro}</p>
         {GAME_UI[game] && (() => {
           const Screen = GAME_UI[game];
-          return <Screen key={`${playing}-${round}`} levelId={playing} stars={stars[playing]?.stars ?? 0} onFinish={(m) => finish(playing, m)} />;
+          return <Screen key={`${playing}-${round}`} levelId={playing} stars={stars[playing]?.stars ?? 0} plays={stars[playing]?.plays ?? 0} onFinish={(m) => finish(playing, m)} />;
         })()}
       </div>
     );
@@ -49,7 +60,7 @@ export default function GameHost({ game, levels, progress }: { game: string; lev
     <div className="level-grid">
       {levels.map((l, i) => {
         const s = stars[l.id]?.stars ?? 0;
-        const open = i === 0 || (stars[levels[i - 1].id]?.stars ?? 0) > 0;
+        const open = i === 0 || (stars[levels[i - 1].id]?.stars ?? 0) >= unlockAt;
         return (
           <button key={l.id} type="button" className={`level-card ${open ? "" : "locked"}`} disabled={!open} onClick={() => setPlaying(l.id)}>
             <span className="level-num">Level {i + 1}</span>
@@ -61,7 +72,7 @@ export default function GameHost({ game, levels, progress }: { game: string; lev
                 </span>
               ))}
             </span>
-            {!open && <span className="kmuted small">🔒 Earn a star on the level before</span>}
+            {!open && <span className="kmuted small">🔒 {unlockAt > 1 ? `Earn ${unlockAt} stars on the level before` : "Earn a star on the level before"}</span>}
           </button>
         );
       })}

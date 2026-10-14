@@ -39,7 +39,7 @@ export default async function PlayPage({ params, searchParams }: { params: Promi
           <div className="kmuted small">{game.blurb}</div>
         </div>
       </div>
-      <GameHost game={game.id} levels={levels.map(({ id, title, intro }) => ({ id, title, intro }))} progress={miniGameProgress(kid.id, game.id)} />
+      <GameHost game={game.id} levels={levels.map(({ id, title, intro }) => ({ id, title, intro }))} progress={miniGameProgress(kid.id, game.id)} unlockAt={game.unlockAt} />
     </main>
   );
 }

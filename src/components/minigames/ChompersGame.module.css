@@ -186,3 +186,12 @@
 .speedOn {
   background: #fff3cd;
 }
+
+/* The board clock. Turns red in the last fifteen seconds. */
+.clock {
+  font-variant-numeric: tabular-nums;
+}
+.clockLow {
+  background: #ffe3e0;
+  color: var(--k-bad-ink, #b42318);
+}

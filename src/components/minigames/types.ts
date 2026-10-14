@@ -9,4 +9,6 @@ export interface MiniGameUIProps {
   onFinish: (moves: unknown) => Promise<{ stars: number; xp: number; score?: number }>;
   /** Stars already earned on this level, for games that unlock something at three. */
   stars?: number;
+  /** How many times this level has been played, for games that ease off after a few goes. */
+  plays?: number;
 }
