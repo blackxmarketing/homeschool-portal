@@ -938,6 +938,74 @@ export function propGrid(kind: PropKind, a: string, b: string): Grid {
   return g;
 }
 
+/**
+ * The dragon that keeps the cage at the end of a dungeon.
+ *
+ * Deliberately bigger than the cage it is sitting over: a kid should look at
+ * the far end of a dungeon and understand that the thing between them and
+ * their pet is not another one of the little hunters.
+ *
+ * It faces left, towards whoever is coming, and its wing beats between the
+ * two frames.
+ */
+export function dragonGrid(frame = 0): Grid {
+  const g = new Grid(30, 28);
+  const hide = "#8f2230";
+  const belly = "#c4453f";
+  const web = "#c4453f";
+  const rib = "#5e1522";
+  const bone = "#e8dcc0";
+  const beat = frame % 2;
+
+  // The wing first, so the body covers where the two meet. It stands well
+  // above the back, which is what makes the shape read as a dragon and not
+  // as a large angry pig.
+  const wy = beat ? 0 : 3;
+  g.tri(22, wy, 15, 8, web);
+  g.rect(21, wy + 1, 1, 14 - wy, rib);
+  g.rect(25, wy + 5, 1, 9 - wy, rib);
+
+  // Tail, out to the right and up, with a fin on the end.
+  g.rect(21, 18, 8, 3, hide);
+  g.rect(27, 13, 3, 6, hide);
+  g.tri(28, 9, 14, 2, hide);
+
+  // The body: one solid mass, low and heavy.
+  g.disc(17, 19, 7, hide);
+  g.disc(12, 19, 6, hide);
+  g.rect(9, 20, 11, 5, belly);
+
+  // Neck, rising left out of it.
+  g.rect(7, 12, 6, 8, hide);
+
+  // Head, with a snout jutting left towards whoever is coming.
+  g.disc(6, 11, 4.6, hide);
+  g.rect(0, 11, 7, 5, hide);
+  g.rect(0, 14, 7, 1, belly);
+  for (const x of [1, 3, 5]) g.set(x, 15, bone);
+
+  // Two horns, swept back over the neck.
+  g.tri(7, 3, 8, 1, bone);
+  g.tri(10, 5, 9, 1, bone);
+
+  // Eye, looking straight down the track.
+  g.rect(2, 9, 3, 3, "#f2d24a");
+  g.rect(3, 10, 1, 2, INK);
+
+  // Smoke from the nostril on one frame.
+  if (beat) {
+    g.set(0, 9, "#ffd8a8");
+    g.set(1, 8, "#ffd8a8");
+  }
+
+  // Legs, and claws on the floor.
+  g.rect(11, 24, 4, 4, hide);
+  g.rect(18, 24, 4, 4, hide);
+  for (const x of [10, 12, 14, 17, 19, 21]) g.set(x, 27, bone);
+
+  return g;
+}
+
 /** Food to run into: an apple, which makes them big. */
 export function tokenGrid(frame = 0): Grid {
   const g = new Grid(11, 11);

@@ -21,6 +21,7 @@ import {
   DUNGEON_PRICE,
   coinOn,
   coinPieceGrid,
+  dragonGrid,
   hazardAt,
   hillGrid,
   holeGrid,
@@ -55,6 +56,8 @@ import css from "./FactRushGame.module.css";
 const CLOUD = [cloudGrid(false), cloudGrid(true)];
 const HILL = hillGrid();
 const BEAST = [grumbleGrid("chaser", 0), grumbleGrid("chaser", 1)];
+/** The dragon over the cage at the end of a dungeon, bigger than the cage. */
+const DRAGON = [dragonGrid(0), dragonGrid(1)];
 const CAGE = [cageGrid(false), cageGrid(true)];
 const TORCH = [torchGrid(0), torchGrid(1)];
 const STONE = stoneGrid();
@@ -452,7 +455,7 @@ function FactRush({
             className={`${css.world} ${shot === "cage" ? css.sweeping : ""}`}
             style={{
               width: `${(posts + 3) * BLOCK}px`,
-              left: shot === "cage" ? `calc(58% - ${posts * BLOCK}px)` : `calc(${CAMERA_AT * 100}% - ${standing(run.at) * BLOCK}px)`,
+              left: shot === "cage" ? `calc(66% - ${posts * BLOCK}px)` : `calc(${CAMERA_AT * 100}% - ${standing(run.at) * BLOCK}px)`,
               // On a level that climbs, the camera has to climb with it -
               // and during the opening shot it is looking at the cage, which
               // is at the top.
@@ -534,9 +537,9 @@ function FactRush({
               <PixelSprite grid={cagedPetGrid(pet, run.finished)} scale={5} />
             </span>
             {level.dungeon && !run.finished && (
-              <span className={css.keeper} style={{ left: `${posts * BLOCK - 92}px`, bottom: `${(biome.rise ?? 0) * posts + 43}px` }}>
+              <span className={css.keeper} style={{ left: `${posts * BLOCK - 126}px`, bottom: `${(biome.rise ?? 0) * posts + 43}px` }}>
                 <span className={css.price}>🪙 {DUNGEON_PRICE}</span>
-                <PixelSprite grid={BEAST[Math.floor(now / 420) % 2]} scale={5} />
+                <PixelSprite grid={DRAGON[Math.floor(now / 620) % 2]} scale={4} />
               </span>
             )}
 
