@@ -22,6 +22,7 @@ import {
   CREEP_PER_SEC,
   DUNGEON_PRICE,
   HUNTS,
+  HUNT_GAP,
   LIVES,
   PACES,
   TROT_MS,
@@ -859,7 +860,9 @@ describe("medium meets them early", () => {
   it("still comes in more than once, and not all at the same moment", () => {
     const blocks = huntBlocks(levelById("fr-x6")!, 42, "medium");
     expect(blocks.length).toBeGreaterThan(1);
-    for (let i = 1; i < blocks.length; i++) expect(blocks[i] - blocks[i - 1]).toBeGreaterThanOrEqual(CHASE_LEN);
+    // They may overlap now - running into a spot while it is already after
+    // them keeps it there longer - but two never start on the same block.
+    for (let i = 1; i < blocks.length; i++) expect(blocks[i] - blocks[i - 1]).toBeGreaterThanOrEqual(HUNT_GAP);
   });
 });
 
@@ -960,5 +963,57 @@ describe("one pile, not two", () => {
     expect(before.at, "they should have made ground before dying").toBeGreaterThan(0);
     expect(after.at, "a death should put them back on the start line").toBe(0);
     expect(after.inPile, "a death should deal them a whole new hand").toBe(level.cards.length);
+  });
+});
+
+describe("how often medium sends it in", () => {
+  const level = levelById("fr-a1")!;
+
+  it("finds all the hunting spots it asks for, not two of them", () => {
+    // The spacing rule used to throw away a rejected spot, so most levels
+    // ended up with fewer hunts than HUNTS and something behind them less
+    // than half the time.
+    for (const seed of [1, 7, 42, 99, 777, 31337]) {
+      const blocks = huntBlocks(level, seed, "medium");
+      expect(blocks.length, `seed ${seed} only found ${blocks.length} spots`).toBeGreaterThanOrEqual(HUNTS - 1);
+      for (let i = 1; i < blocks.length; i++) {
+        expect(blocks[i] - blocks[i - 1], "two hunts on top of each other").toBeGreaterThanOrEqual(HUNT_GAP);
+      }
+    }
+  });
+
+  it("keeps something behind them for most of a level, but not all of it", () => {
+    let on = 0;
+    let all = 0;
+    for (const seed of [1, 7, 42, 99, 777]) {
+      const answers: { a: number | null; ms: number }[] = [];
+      for (let i = 0; i < 80; i++) {
+        const r = play(level, { seed, pace: "medium", answers }, 0);
+        if (r.head === null || r.over) break;
+        const want = level.cards[r.head].answer;
+        answers.push({ a: i % 7 === 6 ? want + 1 : want, ms: 1200 });
+        all++;
+        if (play(level, { seed, pace: "medium", answers }, 0).chase !== null) on++;
+      }
+    }
+    const share = on / all;
+    expect(share, `it is only on screen ${Math.round(share * 100)}% of the time`).toBeGreaterThan(0.6);
+    expect(share, `it is on screen ${Math.round(share * 100)}% of the time - that is hard's job`).toBeLessThan(0.95);
+  });
+
+  it("extends the visit rather than starting a second one on top of it", () => {
+    const blocks = huntBlocks(level, 1, "medium");
+    expect(blocks.length).toBeGreaterThan(1);
+    // Two spots within a hunt's length of each other means the second has to
+    // land while the first is still running.
+    expect(Math.min(...blocks.slice(1).map((b, i) => b - blocks[i]))).toBeLessThan(CHASE_LEN);
+  });
+});
+
+describe("the coach stops when they say they are ready", () => {
+  it("cuts the reading off rather than talking over the count-in", () => {
+    const brief = fs.readFileSync(path.join(process.cwd(), "src/components/minigames/TeacherBrief.tsx"), "utf8");
+    const ready = brief.slice(brief.indexOf("I&apos;m ready") - 500, brief.indexOf("I&apos;m ready"));
+    expect(ready, "the ready button does not stop him reading").toContain("stopSpeaking()");
   });
 });

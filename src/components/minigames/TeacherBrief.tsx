@@ -175,7 +175,16 @@ export default function TeacherBrief({
         <div className={css.btns}>
           {stage === "brief" && !open && (
             <>
-              <button type="button" className="kbtn small-btn" onClick={onReady}>
+              <button
+                type="button"
+                className="kbtn small-btn"
+                onClick={() => {
+                  // They have heard enough. Cut him off rather than reading on
+                  // over the top of the count-in.
+                  stopSpeaking();
+                  onReady();
+                }}
+              >
                 I&apos;m ready
               </button>
               <button type="button" className="kbtn ghost small-btn" onClick={onExample}>

@@ -358,8 +358,25 @@ export const CHASE_FROM: Record<Pace, number> = { easy: 0, medium: 5, hard: 6 };
 export const CREEP_PER_SEC = 0.25;
 /** How many cards it keeps after you before it gives up. */
 export const CHASE_LEN = 7;
-/** How many times it comes in over a level. */
-export const HUNTS = 3;
+/**
+ * How many times it comes in over a level on medium.
+ *
+ * Four, with a hunt extended when they run into another hunting spot while it
+ * is still after them, keeps something behind them for about three quarters
+ * of a level - which is often, without being the whole time. The whole time
+ * is what hard is for.
+ */
+export const HUNTS = 4;
+
+/**
+ * How far apart two hunts have to start.
+ *
+ * It used to be the length of a hunt, which meant they could never overlap -
+ * and because a rejected spot was simply thrown away, most levels ended up
+ * with two hunts rather than the three asked for, and something behind them
+ * less than half the time. Closer together, and tried for properly.
+ */
+export const HUNT_GAP = 4;
 
 /**
  * The blocks where something starts chasing them, off the level's own seed -
@@ -377,9 +394,9 @@ export function huntBlocks(level: FactLevel, seed: number, pace: Pace): number[]
   // card or two, not find out halfway through that the level had a monster
   // in it.
   out.add(1 + Math.floor(r() * 2));
-  for (let i = 0; i < HUNTS * 3 && out.size < HUNTS; i++) {
+  for (let i = 0; i < HUNTS * 12 && out.size < HUNTS; i++) {
     const at = 3 + Math.floor(r() * Math.max(1, total - 5));
-    if (![...out].some((x) => Math.abs(x - at) < CHASE_LEN)) out.add(at);
+    if (![...out].some((x) => Math.abs(x - at) < HUNT_GAP)) out.add(at);
   }
   return [...out].sort((a, b) => a - b);
 }
@@ -556,8 +573,10 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
 
     // Something starts after them at certain blocks - or, on hard, is simply
     // there from the off and stays there.
-    if (chase === null && from > 0 && hunts.includes(posts)) {
-      chase = from;
+    if (from > 0 && hunts.includes(posts)) {
+      // Reaching a hunting spot while it is already after them does not start a
+      // second one - it keeps the one they have got for longer.
+      if (chase === null) chase = from;
       chaseLeft = CHASE_LEN;
     }
 
