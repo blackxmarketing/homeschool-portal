@@ -189,10 +189,13 @@ describe("the levels", () => {
     // And a level where all four turn up, once the four are behind them.
     const mixed = ALL_CHOMPER_LEVELS.filter((l) => l.boards.every((b) => b.ops?.length === 4));
     expect(mixed.length, "nothing puts all four together").toBeGreaterThan(0);
-    // The mixed one comes after every single-operation section.
+    // The mix comes after all four have been met. Later levels may go back to
+    // one operation - Product Pass is nothing but multiplication, and harder
+    // than the mix - so this is about where each one is introduced, not where
+    // it was last used.
     const at = (l: (typeof ALL_CHOMPER_LEVELS)[number]) => ALL_CHOMPER_LEVELS.indexOf(l);
-    const lastSingle = Math.max(...["+", "-", "x", "/"].flatMap((op) => only(op).map(at)));
-    expect(Math.max(...mixed.map(at)), "the mix should come after the four").toBeGreaterThan(lastSingle);
+    const introduced = ["+", "-", "x", "/"].map((op) => Math.min(...only(op).map(at)));
+    expect(Math.min(...mixed.map(at)), "the mix should come after all four are met").toBeGreaterThan(Math.max(...introduced));
   });
 
   it("makes the kid work out arithmetic, not just read numbers", () => {

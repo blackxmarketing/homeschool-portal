@@ -1158,9 +1158,9 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("equivalent", 1 / 3, "fraction", 2, 24, { frac: { n: 1, d: 3 } }),
     ]),
     lvl(3, "g3-4", "More or Less", "g3.add-sub-1000", "Skill: adding, subtracting and comparing. Work out each sum first, then decide whether it is small enough to eat.", [
-      board("less", 9, "fact", 1, 60),
-      board("greater", 50, "fact", 10, 120),
-      board("less", 100, "fact", 40, 220),
+      board("less", 9, "fact", 1, 60, { ops: ["+", "-"] }),
+      board("greater", 50, "fact", 10, 120, { ops: ["+", "-"] }),
+      board("less", 100, "fact", 40, 220, { ops: ["+", "-"] }),
     ]),
   ],
   4: [
@@ -1189,10 +1189,10 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("composites", 0, "plain", 2, 100),
       board("composites", 0, "plain", 2, 120),
     ]),
-    lvl(4, "g4-4", "Product Pass", "g4.mult-multidigit", "Skill: multiplying bigger numbers. Work out each product, then eat the ones that match the number at the top.", [
-      board("equals", 9, "fact", 5, 90),
-      board("equals", 60, "fact", 10, 140),
-      board("equals", 84, "fact", 10, 180),
+    lvl(4, "g4-4", "Product Pass", "g4.mult-multidigit", "Skill: the harder times tables - nines, elevens and twelves. Every square is a multiplication. Work it out, then decide whether it fits.", [
+      board("multiples", 9, "fact", 9, 144, { ops: ["x"] }),
+      board("multiples", 11, "fact", 11, 144, { ops: ["x"] }),
+      board("multiples", 12, "fact", 12, 144, { ops: ["x"] }),
     ]),
   ],
   5: [
