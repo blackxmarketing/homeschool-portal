@@ -618,3 +618,32 @@
   color: #fffdf5;
   text-shadow: 0 4px 0 var(--ink);
 }
+
+/* Nothing left to throw, and what they can do about it. */
+.outOfFire {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 300px;
+  padding: 12px;
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+  background: #fffdf5;
+  box-shadow: 0 4px 0 var(--ink);
+}
+.outTitle {
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.7rem;
+  color: var(--k-bad-ink, #b42318);
+}
+.outSay {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.outButtons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}

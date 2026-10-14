@@ -302,8 +302,9 @@ export const tokenOn = (post: number) => post > 0 && post % TOKEN_EVERY === 0;
 export const fireballOn = (post: number) => post > 0 && post % 3 === 0 && !tokenOn(post);
 
 /**
- * How many fireballs have to land on the dragon before it gives the pet up,
- * and how hard it fights back - all by the pace the kid chose.
+ * Five fireballs put the dragon down, whatever the pace. What the pace
+ * changes is how hard it is to land them: how often it breathes, how fast the
+ * fire comes and how much it moves about.
  *
  * The fight itself runs in the browser, because it is a real-time scrap and
  * nothing else in this game is. What the browser cannot invent is the
@@ -311,7 +312,7 @@ export const fireballOn = (post: number) => post > 0 && post % 3 === 0 && !token
  * out by replaying the answers. A kid may claim every throw hit, but they
  * cannot claim a throw they never earned.
  */
-export const DRAGON_HITS: Record<Pace, number> = { easy: 5, medium: 8, hard: 12 };
+export const DRAGON_HITS: Record<Pace, number> = { easy: 5, medium: 5, hard: 5 };
 
 /** How often it breathes fire, in milliseconds. */
 export const DRAGON_BREATH_MS: Record<Pace, number> = { easy: 2300, medium: 1600, hard: 1050 };

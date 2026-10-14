@@ -137,6 +137,10 @@ function FactRush({
   const [dragonDown, setDragonDown] = useState(false);
   /** True while they are back on the cards because they ran out of fire. */
   const [reloading, setReloading] = useState(false);
+  /** The dragon is still up and they have nothing left to throw at it. */
+  const [outOfFire, setOutOfFire] = useState(false);
+  /** They chose to stop and go and collect more fire somewhere else. */
+  const [gaveUp, setGaveUp] = useState(false);
   /** The coach explains the fight before it starts, over the top of it. */
   const [fightOn, setFightOn] = useState(false);
   const [fightCount, setFightCount] = useState<number | null>(null);
@@ -183,6 +187,16 @@ function FactRush({
   const posts = postsOn(level);
   /** Which block they are standing on: how far along, in blocks. */
   const standing = (at: number) => at * posts;
+  /**
+   * How far short of the cage the running stops.
+   *
+   * In a dungeon the dragon is stood in front of the cage, and the finish
+   * line used to be the cage itself - so a kid ran straight through the
+   * dragon and only then found the fight starting. They pull up in front of
+   * it now.
+   */
+  const SHORT = level.dungeon ? 210 : 0;
+  const runnerX = (at: number) => standing(at) * BLOCK - SHORT * at;
   const run = useMemo(() => play(level, { seed, answers, pace, thrown, beat: dragonDown }, saved), [level, seed, answers, pace, saved, thrown, dragonDown]);
   const fightLives = Math.max(0, run.lives - burns);
   const fightLost = run.atDragon && !dragonDown && burns > 0 && fightLives <= 0;
@@ -198,7 +212,7 @@ function FactRush({
     run.chase === null ? null : pace === "hard" ? run.chase - (CREEP_PER_SEC * Math.max(0, now - asked.current)) / 1000 : run.chase;
   // Out of cards, out of lives, burned to nothing by the dragon, or out of
   // patience.
-  const done = run.inPile === 0 || run.over || fightLost || answers.length >= MAX_ASKS;
+  const done = run.inPile === 0 || run.over || fightLost || gaveUp || answers.length >= MAX_ASKS;
 
   /**
    * The ref is what is typed; the state only draws it.
@@ -355,7 +369,10 @@ function FactRush({
 
   // Enough fire to go back at it.
   useEffect(() => {
-    if (reloading && saved + run.fireballs - thrown > 0) setReloading(false);
+    if (reloading && saved + run.fireballs - thrown > 0) {
+      setReloading(false);
+      setOutOfFire(false);
+    }
   }, [reloading, saved, run.fireballs, thrown]);
 
   // The reaction clears itself so the scene does not keep shouting.
@@ -376,7 +393,7 @@ function FactRush({
       <div className={`mg ${css.fr}`}>
         <div className="mg-result">
           <h3 className="pixel-title">
-            {run.finished ? "You got them out!" : run.over ? "Out of lives" : fightLost ? "The dragon won" : "Out of cards"}
+            {run.finished ? "You got them out!" : run.over ? "Out of lives" : fightLost ? "The dragon won" : gaveUp ? "Out of fireballs" : "Out of cards"}
           </h3>
           <div className={css.rescued}>
             <PixelSprite grid={cagedPetGrid(pet, true)} scale={3} className={css.freed} />
@@ -391,6 +408,7 @@ function FactRush({
           <p className="kmuted">
             {run.posts} blocks run, {run.wrong} missed. {result.score ?? run.points} points.
             {run.over || fightLost ? " Your pet is still in there - have another go." : ""}
+            {gaveUp ? " Beat a level you have not three-starred yet, or come back and answer more cards here." : ""}
           </p>
           {result.xp > 0 ? (
             <p className="kmuted">+{result.xp} XP for new stars!</p>
@@ -502,7 +520,7 @@ function FactRush({
             className={`${css.world} ${shot === "cage" ? css.sweeping : ""}`}
             style={{
               width: `${(posts + 3) * BLOCK}px`,
-              left: shot === "cage" ? `calc(66% - ${posts * BLOCK}px)` : `calc(${CAMERA_AT * 100}% - ${standing(run.at) * BLOCK}px)`,
+              left: shot === "cage" ? `calc(66% - ${posts * BLOCK}px)` : `calc(${CAMERA_AT * 100}% - ${runnerX(run.at)}px)`,
               // On a level that climbs, the camera has to climb with it -
               // and during the opening shot it is looking at the cage, which
               // is at the top.
@@ -594,7 +612,7 @@ function FactRush({
               className={`${css.runner} ${biome.swim ? css.swimming : ""} ${run.big ? css.grown : ""} ${beat?.kind === "trip" ? css.trip : ""} ${
                 beat?.kind === "grabbed" ? css.grabbed : ""
               } ${beat?.kind === "died" ? css.died : ""} ${stepping ? css.step : ""} ${beat?.kind === "sprint" ? css.sprint : ""}`}
-              style={{ left: `${standing(run.at) * BLOCK}px`, bottom: `${(biome.rise ?? 0) * standing(run.at) + 43}px` }}
+              style={{ left: `${runnerX(run.at)}px`, bottom: `${(biome.rise ?? 0) * standing(run.at) + 43}px` }}
             >
               <PixelSprite grid={runner[stepping ? 1 : 0]} scale={run.big ? 7 : 5} />
             </span>
@@ -642,13 +660,40 @@ function FactRush({
               pet={pet}
               onThrow={() => setThrown((t) => t + 1)}
               onHurt={() => setBurns((b) => b + 1)}
-              onOutOfFire={() => setReloading(true)}
+              onOutOfFire={() => setOutOfFire(true)}
               onWon={(t) => {
                 setThrown(t);
                 setDragonDown(true);
               }}
             />
-            {!fightOn && (
+            {outOfFire && (
+              <div className={css.fightBrief}>
+                <div className={css.outOfFire}>
+                  <strong className={css.outTitle}>Out of fireballs!</strong>
+                  <p className={css.outSay}>
+                    The dragon is still standing and you have nothing left to throw. Every card you get right is another fireball - so you can
+                    make more here, or go back and stock up on the levels you have already beaten.
+                  </p>
+                  <div className={css.outButtons}>
+                    <button
+                      type="button"
+                      className="kbtn small-btn"
+                      onClick={() => {
+                        setOutOfFire(false);
+                        setReloading(true);
+                      }}
+                    >
+                      Answer more cards here
+                    </button>
+                    <button type="button" className="kbtn ghost small-btn" onClick={() => setGaveUp(true)}>
+                      Go back and collect more
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {!fightOn && !outOfFire && (
               <div className={css.fightBrief}>
                 {fightCount === null ? (
                   <TeacherBrief

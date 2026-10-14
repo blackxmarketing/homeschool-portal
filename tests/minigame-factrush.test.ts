@@ -985,10 +985,12 @@ describe("the dragon fight, and what the browser may claim about it", () => {
     expect(replay(dun, { ...base, thrown: DRAGON_HITS[pace], beat: true }).finished).toBe(true);
   });
 
-  it("is harder to beat on a harder pace", () => {
-    expect(DRAGON_HITS.easy).toBeLessThan(DRAGON_HITS.medium);
-    expect(DRAGON_HITS.medium).toBeLessThan(DRAGON_HITS.hard);
-    // And it fights back faster and quicker off the mark.
+  it("takes the same five hits whatever the pace, but is harder to land them", () => {
+    // Five, always - what changes is how much it moves and how hard it is
+    // to get near it, not how much punishment it soaks up.
+    expect(new Set(Object.values(DRAGON_HITS)).size, "the hits should not vary by pace").toBe(1);
+    expect(DRAGON_HITS.medium).toBe(5);
+    // It fights back faster and moves more the harder the pace.
     expect(DRAGON_BREATH_MS.easy).toBeGreaterThan(DRAGON_BREATH_MS.hard);
     expect(DRAGON_FIRE_SPEED.easy).toBeLessThan(DRAGON_FIRE_SPEED.hard);
     expect(DRAGON_PACE.easy).toBeLessThan(DRAGON_PACE.hard);
