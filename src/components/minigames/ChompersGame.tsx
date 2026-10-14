@@ -27,7 +27,6 @@ import {
   startState,
   step,
   trySeed,
-  hunting,
   teachFor,
   type Act,
   type Board,
@@ -36,16 +35,36 @@ import {
   type ChomperLevel,
   type ChomperState,
 } from "@/lib/minigames/chompers";
+import { petGrid, type PetId } from "@/lib/pixel/hero";
 import type { MiniGameUIProps } from "./types";
 import css from "./ChompersGame.module.css";
 
 /** Built once: the same three faces and two monsters on every board. */
 const CHOMPER = [chomperGrid(0), chomperGrid(1), chomperGrid(2)];
+
+/**
+ * Who the kid plays as: their own pet from the hero creator, so changing it
+ * there changes it here. A kid with no pet yet plays as the Chomper.
+ *
+ * A pet has two frames and no face for biting or for getting it wrong, so the
+ * squash and the shake in the stylesheet do that job instead.
+ */
+const petCache = new Map<string, ReturnType<typeof chomperGrid>[]>();
+function heroFrames(pet: PetId | undefined): ReturnType<typeof chomperGrid>[] {
+  if (!pet || pet === "none") return CHOMPER;
+  const had = petCache.get(pet);
+  if (had) return had;
+  const a = petGrid(pet, 0);
+  const b = petGrid(pet, 1);
+  if (!a || !b) return CHOMPER;
+  const frames = [a, b, a];
+  petCache.set(pet, frames);
+  return frames;
+}
 const GRUMBLE: Record<string, ReturnType<typeof grumbleGrid>[]> = {
   plodder: [grumbleGrid("plodder", 0), grumbleGrid("plodder", 1)],
   rover: [grumbleGrid("rover", 0), grumbleGrid("rover", 1)],
   chaser: [grumbleGrid("chaser", 0), grumbleGrid("chaser", 1)],
-  calm: [grumbleGrid("chaser", 0, true), grumbleGrid("chaser", 1, true)],
 };
 
 /**
@@ -119,9 +138,9 @@ const KEYS: Record<string, Act> = {
 
 const newSeed = () => Math.floor(Math.random() * 2147483647);
 
-export default function ChompersGame({ levelId, onFinish, stars, plays }: MiniGameUIProps) {
+export default function ChompersGame({ levelId, onFinish, stars, plays, pet }: MiniGameUIProps) {
   const level = levelById(levelId);
-  return level ? <Chompers level={level} onFinish={onFinish} earned={stars ?? 0} plays={plays ?? 0} /> : null;
+  return level ? <Chompers level={level} onFinish={onFinish} earned={stars ?? 0} plays={plays ?? 0} pet={pet} /> : null;
 }
 
 /** What to say when something catches you. Only mention the square if one really went back. */
@@ -131,7 +150,9 @@ function caughtLine(strikes: number, gaveBack: boolean, walkedInto: boolean): st
   return gaveBack ? `${how} That square goes back on the board.` : `${how} Back to the middle.`;
 }
 
-function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onFinish: MiniGameUIProps["onFinish"]; earned: number; plays: number }) {
+function Chompers({ level, onFinish, earned, plays, pet }: { level: ChomperLevel; onFinish: MiniGameUIProps["onFinish"]; earned: number; plays: number; pet?: PetId }) {
+  /** The kid's own pet, or the Chomper if they have not chosen one. */
+  const hero = heroFrames(pet);
   /** Quick mode is the reward for having shown you know this one. */
   const mayGoQuick = earned >= 3;
   const [quick, setQuick] = useState(false);
@@ -393,7 +414,7 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
         <span className={`chip ${css.lives}`} aria-label={`${st.lives} tries left`}>
           {Array.from({ length: lives }, (_, i) => (
             <span key={i} className={i < st.lives ? css.life : css.lifeGone} aria-hidden>
-              <PixelSprite grid={CHOMPER[0]} scale={1} />
+              <PixelSprite grid={hero[0]} scale={1} />
             </span>
           ))}
         </span>
@@ -446,18 +467,15 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
 
         <div className={css.actors} aria-hidden>
           {st.foes.map((g, i) => {
-            // A hunter off the scent is drawn calm, so the rhythm of it
-            // coming after you and then losing interest is something a kid
-            // can see rather than something that just happens to them.
-            const keen = g.kind !== "chaser" || hunting(st.phase);
+            // The hunter is always hunting, so it always looks like it.
             return (
-              <div key={i} className={`${css.actor} ${g.kind === "chaser" && keen ? css.keen : ""}`} style={{ gridColumn: g.x + 1, gridRow: g.y + 1 }}>
-                <PixelSprite grid={GRUMBLE[keen ? g.kind : "calm"][st.phase % 2]} scale={1} className={css.sprite} />
+              <div key={i} className={`${css.actor} ${g.kind === "chaser" ? css.keen : ""}`} style={{ gridColumn: g.x + 1, gridRow: g.y + 1 }}>
+                <PixelSprite grid={GRUMBLE[g.kind][st.phase % 2]} scale={1} className={css.sprite} />
               </div>
             );
           })}
-          <div className={css.actor} style={{ gridColumn: st.x + 1, gridRow: st.y + 1 }}>
-            <PixelSprite grid={CHOMPER[face]} scale={1} className={css.sprite} />
+          <div className={`${css.actor} ${face === 1 ? css.munching : ""} ${face === 2 ? css.hurt : ""}`} style={{ gridColumn: st.x + 1, gridRow: st.y + 1 }}>
+            <PixelSprite grid={hero[face]} scale={1} className={css.sprite} />
           </div>
         </div>
       </div>

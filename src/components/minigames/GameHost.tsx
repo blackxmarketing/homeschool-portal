@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { GAME_UI } from "./registry";
 import type { MiniLevel } from "@/lib/minigames";
+import type { PetId } from "@/lib/pixel/hero";
 
 /** Picks a level, runs the game, and sends the result to the server to be scored. */
 export default function GameHost({
@@ -11,6 +12,7 @@ export default function GameHost({
   progress,
   unlockAt = 1,
   openTo = 0,
+  pet,
 }: {
   game: string;
   levels: MiniLevel[];
@@ -19,6 +21,8 @@ export default function GameHost({
   unlockAt?: number;
   /** Levels up to here are open already, because an assessment said so. */
   openTo?: number;
+  /** The kid's pet, for games that let them play as it. */
+  pet?: PetId;
 }) {
   const [stars, setStars] = useState(progress);
   const [playing, setPlaying] = useState<string | null>(null);
@@ -53,7 +57,7 @@ export default function GameHost({
         <p className="game-intro">{levels[idx]?.intro}</p>
         {GAME_UI[game] && (() => {
           const Screen = GAME_UI[game];
-          return <Screen key={`${playing}-${round}`} levelId={playing} stars={stars[playing]?.stars ?? 0} plays={stars[playing]?.plays ?? 0} onFinish={(m) => finish(playing, m)} />;
+          return <Screen key={`${playing}-${round}`} levelId={playing} stars={stars[playing]?.stars ?? 0} plays={stars[playing]?.plays ?? 0} pet={pet} onFinish={(m) => finish(playing, m)} />;
         })()}
       </div>
     );

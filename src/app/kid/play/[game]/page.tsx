@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireKid } from "@/lib/auth";
 import { gameById, levelsForKid } from "@/lib/minigames";
-import { gamePlacement, miniGameProgress } from "@/lib/gameState";
+import { gamePlacement, heroOf, miniGameProgress } from "@/lib/gameState";
 import { placementQuestions, publicPlacement } from "@/lib/minigames/chompers";
 import { bandFor, landById } from "@/lib/pixel/world";
 import { canVisit } from "@/lib/explore/state";
@@ -36,6 +36,9 @@ export default async function PlayPage({ params, searchParams }: { params: Promi
   const placedAt = sits ? gamePlacement(kid.id, game.id) : 0;
   const seed = Math.floor(Math.random() * 2147483647);
   const placement = sits && placedAt === null ? { seed, questions: publicPlacement(placementQuestions(seed)) } : null;
+  // The kid steers their own pet, so changing it in the hero creator changes
+  // what they are playing as here.
+  const pet = heroOf(kid.id)?.pet ?? "none";
   return (
     <main className={`wrap game-page band-${band}`} style={{ maxWidth: 1000 }}>
       <div className="game-title-row">
@@ -56,6 +59,7 @@ export default async function PlayPage({ params, searchParams }: { params: Promi
         unlockAt={game.unlockAt}
         placedAt={placedAt}
         placement={placement}
+        pet={pet}
       />
     </main>
   );

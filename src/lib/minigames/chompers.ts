@@ -3,8 +3,11 @@ import { Grid, shade } from "../pixel/grid";
 import { dec, divisors, fracToString, gcd, int, isPrime, lcm, pick, seededRng, shuffle, simplify, type Frac, type Rng } from "../curriculum/math";
 
 /**
- * Number Chompers (math, grades 3-5 so far). A 6 x 5 board of numbers with a
- * rule across the top - "Multiples of 7", "Equals 42", "Less than 60". The kid
+ * XP Rush: Math. A ladder of short drill boards running from counting in
+ * kindergarten to expressions with an x in them.
+ *
+ * One board is 6 x 5 squares with a rule across the top - "Multiples of 7",
+ * "Equals 42", "Less than 60", "Shows 5". The kid
  * steers a Chomper around the board with the arrow keys (or the on-screen pad)
  * and eats the cells that fit the rule, while Grumbles patrol.
  *
@@ -38,7 +41,7 @@ import { dec, divisors, fracToString, gcd, int, isPrime, lcm, pick, seededRng, s
 
 export const chompersInfo = {
   id: "chompers",
-  title: "Number Chompers",
+  title: "XP Rush: Math",
   icon: "👾",
   land: "math" as const,
   subject: "math" as const,
@@ -821,9 +824,6 @@ const onBoard = (x: number, y: number) => x >= 0 && x < COLS && y >= 0 && y < RO
  * same Chomper always give the same answer, which is the whole reason the
  * server can replay a game it never watched.
  */
-/** The hunter's rhythm: HUNT steps after you, then WANDER steps minding its own business. */
-const HUNT = 8;
-const WANDER = 6;
 
 /**
  * The hunter moves on one in this many of the Grumble steps, so it is always
@@ -832,14 +832,23 @@ const WANDER = 6;
  */
 export const CHASER_PACE = 2;
 
-/** Whether the hunter is hunting right now, or taking a breather. */
-export const hunting = (step: number) => step % (HUNT + WANDER) < HUNT;
+/**
+ * The hunter never takes a breather. It comes after you from the first move
+ * until the last right answer is eaten.
+ *
+ * It used to lose the scent for six steps at a time, from back when it moved
+ * on its own clock and had to look away or a board could not be finished.
+ * It moves on your turns now - one stride to every six of yours - which is
+ * slow enough to stay ahead of without the game having to pretend not to see
+ * you. Kept as a function so the screen has one place to ask.
+ */
+export const hunting = () => true;
 
 export function grumbleStep(g: Grumble, board: Board, step: number, i: number, to: { x: number; y: number }): Grumble {
   if (g.kind === "chaser") {
     // It gathers itself between strides.
     if (step % CHASER_PACE !== 0) return g;
-    if (hunting(step)) {
+    if (hunting()) {
       // Straight at the Chomper, closing the bigger gap first.
       const gx = to.x - g.x;
       const gy = to.y - g.y;
@@ -847,9 +856,8 @@ export function grumbleStep(g: Grumble, board: Board, step: number, i: number, t
       if (dx !== 0 || dy !== 0) return { ...g, dx, dy, x: g.x + dx, y: g.y + dy };
       return g;
     }
-    // Off the scent for a while, which is what gives a kid room to work the
-    // far side of the board. Without it the hunter camps the last few
-    // squares and the board cannot be finished at all.
+    // Nowhere to close: it is already standing on you.
+    return g;
   }
 
   let [dx, dy] = [g.dx, g.dy];

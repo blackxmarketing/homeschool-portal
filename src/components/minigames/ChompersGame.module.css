@@ -3,19 +3,44 @@
 .ch {
   --ink: #1b1530;
   --cell: #fffdf5;
+  /* The dark floor the squares sit on, and the border it needs. */
+  --floor: #2a2150;
+  --pad: 8px;
   gap: 10px;
 }
 
+/* Everything written on the chrome - the chips, the rule, the buttons - is in
+   the school's pixel face, so the game reads as part of the same world as the
+   map and the lands rather than a web form with sprites on it. */
+.ch :global(.chip) {
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0;
+  padding: 7px 9px;
+  border-radius: 4px;
+  border: 2px solid var(--ink);
+  background: var(--cell);
+  box-shadow: 0 3px 0 var(--ink);
+}
+
+/* The rule is the one thing on screen a kid has to keep in their head, so it
+   gets a sign of its own: cream board, ink keyline, hard shadow. */
 .rule {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+  padding: 8px 10px;
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+  background: var(--cell);
+  box-shadow: 0 4px 0 var(--ink);
 }
 .rule h2 {
   margin: 0;
   flex: 1;
   min-width: 0;
+  color: #2340ff;
 }
 
 /* The board and the actors are two grids with the same shape, stacked.
@@ -23,8 +48,24 @@
    board, pad and Munch button - is on screen at once without scrolling. */
 .boardWrap {
   position: relative;
+  box-sizing: border-box;
   width: min(100%, 440px, (100svh - 330px) * 1.2);
   margin-inline: auto;
+  /* An arcade cabinet screen: the squares are tiles laid on a dark floor, and
+     the gaps between them are the floor showing through. */
+  padding: var(--pad);
+  border: 4px solid var(--ink);
+  border-radius: 4px;
+  background-color: var(--floor);
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.055) 25%,
+    transparent 25%,
+    transparent 75%,
+    rgba(255, 255, 255, 0.055) 75%
+  );
+  background-size: 14px 14px;
+  box-shadow: 0 6px 0 var(--ink);
 }
 .board,
 .actors {
@@ -36,7 +77,7 @@
 }
 .actors {
   position: absolute;
-  inset: 0;
+  inset: var(--pad);
   pointer-events: none;
 }
 
@@ -45,7 +86,7 @@
   align-items: center;
   justify-content: center;
   border: 3px solid var(--ink);
-  border-radius: 8px;
+  border-radius: 3px;
   background: var(--cell);
   box-shadow: 0 3px 0 var(--ink);
   color: var(--ink);
@@ -58,11 +99,11 @@
   padding: 2px;
   overflow: hidden;
 }
+/* An eaten square is a hole in the floor, not a faded tile. */
 .gone {
-  background: #e9ecf5;
-  border-style: dashed;
+  background: rgba(0, 0, 0, 0.28);
+  border-color: rgba(255, 255, 255, 0.16);
   box-shadow: none;
-  opacity: 0.55;
 }
 .badCell {
   background: #ffe3e0;
@@ -99,6 +140,20 @@
   filter: grayscale(1);
 }
 
+/* Three crosses: the mistakes left on this try. A used one goes red and
+   stays put, so the count is something a kid can see at a glance. These had
+   no styles at all, which made a used strike look exactly like a spare one. */
+.strikes {
+  gap: 5px;
+  font-family: var(--font-pixel), monospace;
+}
+.strikeOn {
+  color: var(--k-bad-ink, #b42318);
+}
+.strikeOff {
+  color: #c3c9db;
+}
+
 .note {
   margin: 0;
   min-height: 2.6em;
@@ -119,7 +174,7 @@
 }
 .arrow {
   padding: 0 !important;
-  border-radius: 8px !important;
+  border-radius: 4px !important;
   font-size: 1rem;
   min-width: 0;
 }
@@ -147,6 +202,9 @@
 }
 
 @media (max-width: 420px) {
+  .ch {
+    --pad: 5px;
+  }
   .boardWrap {
     width: min(100%, (100svh - 290px) * 1.2);
   }
@@ -208,6 +266,7 @@
   aspect-ratio: 1;
   cursor: pointer;
   font-family: var(--font-kid), system-ui, sans-serif;
+  border-radius: 3px;
 }
 .placeCell:hover {
   transform: translateY(-2px);
@@ -237,8 +296,9 @@
   flex-wrap: wrap;
   padding: 5px 8px;
   border: 2px solid var(--ink);
-  border-radius: 10px;
+  border-radius: 4px;
   background: var(--cell);
+  box-shadow: 0 3px 0 var(--ink);
 }
 .coinKeyItem {
   display: inline-flex;
@@ -270,4 +330,23 @@
   .coinKeyItem svg {
     height: 24px;
   }
+}
+
+/* A pet has no biting face and no glum one, so the movement does that job:
+   a squash as it eats, a shake when it gets one wrong. */
+.munching {
+  transform: scale(1.18, 0.86);
+}
+.hurt {
+  animation: wobble 0.45s;
+}
+@keyframes wobble {
+  20% { transform: rotate(-12deg); }
+  50% { transform: rotate(10deg); }
+  80% { transform: rotate(-6deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .munching { transform: none; }
+  .hurt { animation: none; }
 }

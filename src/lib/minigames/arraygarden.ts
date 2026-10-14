@@ -157,7 +157,7 @@ export const splitOk = (r: GardenRound, s: unknown): s is number => needsSplit(r
 export const tensSplit = (cols: number) => cols - (cols % 10);
 
 // Factors live in the curriculum helpers now, so the lessons, Array Garden and
-// Number Chompers all count factors the same way. Re-exported for the screens.
+// XP Rush: Math all count factors the same way. Re-exported for the screens.
 export { factorPairs, isPrime };
 const pairKey = (a: number, b: number) => `${Math.min(a, b)}x${Math.max(a, b)}`;
 

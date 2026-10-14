@@ -1,3 +1,5 @@
+import type { PetId } from "@/lib/pixel/hero";
+
 /** Every mini-game screen gets the level to play and reports the kid's moves when the game ends. */
 export interface MiniGameUIProps {
   levelId: string;
@@ -11,4 +13,6 @@ export interface MiniGameUIProps {
   stars?: number;
   /** How many times this level has been played, for games that ease off after a few goes. */
   plays?: number;
+  /** The kid's pet, so a game can use it as the character they steer. */
+  pet?: PetId;
 }
