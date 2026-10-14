@@ -676,12 +676,11 @@ const HUNT = 8;
 const WANDER = 6;
 
 /**
- * One step in this many. At every other step it was still too much on a
- * board six squares across - it is on top of you before you have read the
- * question, which is the opposite of what the clock is for. One in three
- * leaves room to think and it still arrives if you dawdle.
+ * The hunter moves on one in this many of the Grumble steps, so it is always
+ * the slower of the two things on the board - a roamer you can see coming,
+ * and a hunter that gets there eventually.
  */
-export const CHASER_PACE = 3;
+export const CHASER_PACE = 2;
 
 /** Whether the hunter is hunting right now, or taking a breather. */
 export const hunting = (step: number) => step % (HUNT + WANDER) < HUNT;
@@ -790,8 +789,6 @@ export interface ChomperState {
   phase: number;
   /** Where the Grumbles are right now. */
   foes: Grumble[];
-  /** Milliseconds into the board when the Grumbles next step. */
-  dueAt: number;
   /** Squares eaten on this try, oldest first - a catch gives the last one back. */
   ate: number[];
   eaten: boolean[];
@@ -806,7 +803,7 @@ export interface ChomperState {
   last: { kind: "right" | "wrong" | "caught"; cell?: number } | null;
 }
 
-export function startState(board: Board, lives = LIVES, quick = false): ChomperState {
+export function startState(board: Board, lives = LIVES): ChomperState {
   return {
     x: START.x,
     y: START.y,
@@ -815,7 +812,6 @@ export function startState(board: Board, lives = LIVES, quick = false): ChomperS
     best: 0,
     phase: 0,
     foes: board.grumbles.map((g) => ({ ...g })),
-    dueAt: stepGapMs(board, 0, quick),
     ate: [],
     eaten: Array(CELLS).fill(false),
     lives,
@@ -836,14 +832,12 @@ const allEaten = (board: Board, eaten: boolean[]) => board.cells.every((c, i) =>
  * to their corners so the next move is made on a board you can read rather
  * than wherever the chase had got to. Three of these and the try is over.
  */
-function strike(board: Board, s: ChomperState, atMs: number, quick: boolean, giveBack: boolean): void {
+function strike(board: Board, s: ChomperState, giveBack: boolean): void {
   s.strikes++;
   s.x = START.x;
   s.y = START.y;
   s.phase = 0;
   s.foes = board.grumbles.map((g) => ({ ...g }));
-  // The Grumbles' clock restarts with them, from the moment it happened.
-  s.dueAt = atMs + stepGapMs(board, 0, quick);
 
   // Caught: the last square you ate goes back on the board. Knowing the
   // answer is half of it; getting away with it is the other half.
@@ -872,30 +866,24 @@ function strike(board: Board, s: ChomperState, atMs: number, quick: boolean, giv
  * Moves the Grumbles on one step and sees whether one of them walked into the
  * Chomper - either onto its square, or straight past it the other way.
  */
-function advance(board: Board, s: ChomperState, atMs: number, quick: boolean): void {
-  const was = s.foes;
-  s.foes = was.map((g, i) => grumbleStep(g, board, s.phase, i, { x: s.x, y: s.y }));
+function advance(board: Board, s: ChomperState): void {
+  s.foes = s.foes.map((g, i) => grumbleStep(g, board, s.phase, i, { x: s.x, y: s.y }));
   s.phase++;
   for (const now of s.foes) {
     if (now.x === s.x && now.y === s.y) {
       s.caught++;
       s.last = { kind: "caught" };
-      strike(board, s, atMs, quick, true);
+      strike(board, s, true);
       return;
     }
   }
-  s.dueAt = atMs + stepGapMs(board, s.phase, quick);
 }
 
-/**
- * The step the Grumbles take when their clock says so, whatever the kid is
- * doing. This is the whole of their movement now: nothing they do is tied to
- * the Chomper moving, which is why standing still is no longer safe.
- */
-export function tick(board: Board, st: ChomperState, quick = false): ChomperState {
+/** One Grumble step on its own, for the tests. In a game, step() does this. */
+export function tick(board: Board, st: ChomperState): ChomperState {
   if (st.over || st.cleared) return st;
   const s: ChomperState = { ...st, eaten: [...st.eaten], ate: [...st.ate], last: null };
-  advance(board, s, st.dueAt, quick);
+  advance(board, s);
   if (s.lives <= 0) {
     s.lives = 0;
     s.over = true;
@@ -907,11 +895,11 @@ export function tick(board: Board, st: ChomperState, quick = false): ChomperStat
  * One turn. The screen calls this to play and the server calls it to score, so
  * the two can never disagree about what happened.
  *
- * It only moves the Chomper. The Grumbles keep their own clock - see tick -
- * so a kid who sits and thinks is not safe, and a kid who hammers the arrow
- * keys gains nothing.
+ * The Grumbles move with it, one step of theirs to every MONSTER_EVERY of
+ * the Chomper's - so nothing happens while a kid is working an answer out,
+ * and the board is the same whether they take two seconds or twenty.
  */
-export function step(board: Board, st: ChomperState, act: Act, atMs = 0, quick = false): ChomperState {
+export function step(board: Board, st: ChomperState, act: Act, quick = false): ChomperState {
   if (st.over || st.cleared) return st;
   const s: ChomperState = { ...st, eaten: [...st.eaten], ate: [...st.ate], last: null };
   s.turn++;
@@ -930,7 +918,7 @@ export function step(board: Board, st: ChomperState, act: Act, atMs = 0, quick =
         s.wrong++;
         s.last = { kind: "wrong", cell: i };
         // A wrong answer costs a strike but not a square: you never had it.
-        strike(board, s, atMs, quick, false);
+        strike(board, s, false);
         lostLife = true;
       }
     }
@@ -959,8 +947,12 @@ export function step(board: Board, st: ChomperState, act: Act, atMs = 0, quick =
   if (!lostLife && s.lives > 0 && s.foes.some((g) => g.x === s.x && g.y === s.y)) {
     s.caught++;
     s.last = { kind: "caught" };
-    strike(board, s, atMs, quick, true);
+    strike(board, s, true);
+    lostLife = true;
   }
+
+  // Their turn comes round every few of the Chomper's.
+  if (!lostLife && s.lives > 0 && s.turn % monsterEvery(quick) === 0) advance(board, s);
 
   if (s.lives <= 0) {
     s.lives = 0;
@@ -1196,37 +1188,24 @@ export const levelById = (id: string): ChomperLevel | undefined => ALL_CHOMPER_L
 // ---------------- Scoring ----------------
 
 /**
- * How long between Grumble steps - picked fresh each step from this range,
- * so they do not march to a beat a kid can count on. The Chomper has nothing
- * to do with it: they keep their own time whether it moves or not.
+ * Moves the Chomper makes for every one the Grumbles make. They move with the
+ * board, not against a clock: three steps of yours to one of theirs, so you
+ * can always see them coming and nothing happens while you are thinking.
+ *
+ * The clock on the board is what does the hurrying. The Grumbles are what
+ * punishes a careless route.
  */
-export const STEP_MS = { min: 620, max: 1250 };
+export const MONSTER_EVERY = 3;
 /** The same, for a kid who has three-starred the rung and wants it harder. */
-export const QUICK_STEP_MS = { min: 380, max: 780 };
+export const QUICK_MONSTER_EVERY = 2;
 
-/** How long until the Grumbles take their next step. Pure, from the board's seed. */
-export function stepGapMs(board: Board, phase: number, quick = false): number {
-  const r = seededRng(board.seed * 2654435761 + phase * 40503 + (quick ? 7 : 0));
-  const { min, max } = quick ? QUICK_STEP_MS : STEP_MS;
-  return int(r, min, max);
-}
-
-/** Nobody plays one board for a quarter of an hour; anything past this is junk. */
-const LONGEST_BOARD_MS = 15 * 60 * 1000;
+export const monsterEvery = (quick: boolean) => (quick ? QUICK_MONSTER_EVERY : MONSTER_EVERY);
 
 /** One board's worth of what the kid did. The seed is what the board was built from. */
 export interface BoardMove {
   seed: number;
   acts: Act[];
-  /**
-   * When each move happened, in milliseconds since the board started. The
-   * Grumbles keep their own clock, so this is how the server works out where
-   * they had got to when each move was made.
-   */
-  times?: number[];
-  /** When the board ended, so a kid caught while standing still still counts. */
-  endMs?: number;
-  /** Quick mode: the Grumbles step oftener. Earned by three-starring the rung. */
+  /** Quick mode: the Grumbles move oftener. Earned by three-starring the rung. */
   quick?: boolean;
   /** A third go at a level they have not got yet: more lives, no cut-off. */
   easy?: boolean;
@@ -1243,29 +1222,13 @@ export interface BoardMove {
  */
 export function playBoard(board: Board, mv: BoardMove, lives: number): ChomperState {
   const quick = !!mv.quick;
-  let st = startState(board, lives, quick);
-  const times = mv.times ?? [];
-
-  /** Walk the Grumbles forward to where their clock says they are. */
-  const catchUp = (to: number) => {
-    while (!st.over && !st.cleared && st.dueAt <= to) st = tick(board, st, quick);
-  };
-
-  mv.acts.forEach((a, i) => {
-    if (st.over || st.cleared) return;
-    // Without a time, a move is treated as happening the instant the one
-    // before it did - harmless, and it cannot buy extra moves, because the
-    // Grumbles have still taken every step their clock called for.
-    const at = times[i] ?? times[i - 1] ?? 0;
-    catchUp(at);
-    if (st.over || st.cleared) return;
-    st = step(board, st, a, at, quick);
-  });
-  catchUp(mv.endMs ?? times[times.length - 1] ?? 0);
+  let st = startState(board, lives);
+  for (const a of mv.acts) {
+    st = step(board, st, a, quick);
+    if (st.over || st.cleared) break;
+  }
   return st;
 }
-
-const clampMs = (v: unknown) => Math.min(LONGEST_BOARD_MS, Math.max(0, Math.round(Number(v)) || 0));
 
 /** Cleans untrusted moves from the browser. Never throws. */
 export function cleanMoves(raw: unknown): BoardMove[] {
@@ -1278,13 +1241,6 @@ export function cleanMoves(raw: unknown): BoardMove[] {
     const out: BoardMove = { seed, acts };
     if (o.easy === true) out.easy = true;
     if (o.quick === true) out.quick = true;
-    if (!Array.isArray(o.times)) return out;
-    // Times only count when there is one per move, and time only runs forwards.
-    const times = o.times.slice(0, acts.length).map(clampMs);
-    if (times.length !== acts.length) return out;
-    for (let i = 1; i < times.length; i++) times[i] = Math.max(times[i], times[i - 1]);
-    out.times = times;
-    out.endMs = Math.max(clampMs(o.endMs), times[times.length - 1] ?? 0);
     return out;
   });
 }
@@ -1502,33 +1458,20 @@ function threatened(board: Board, st: ChomperState, x: number, y: number, ahead:
   return false;
 }
 
-/** How long a kid takes over each move, for the worked example. */
-export const THINKING_MS = 320;
-
-/**
- * A good run of a level: what a kid who knows the facts and keeps moving
- * gets. It plays in time now, because the Grumbles do - a move is made every
- * THINKING_MS, and their clock runs underneath it whatever the player does.
- */
+/** A good run of a level: what a kid who knows the facts and keeps moving gets. */
 export function perfectMoves(level: ChomperLevel): BoardMove[] {
   return level.boards.map((spec, i) => {
     const seed = i + 1;
     const b = buildBoard(spec, i, seed);
     const acts: Act[] = [];
-    const times: number[] = [];
     let st = startState(b);
-    let at = 0;
     while (!st.cleared && !st.over && acts.length < MAX_ACTS - 1) {
-      at += THINKING_MS;
-      while (!st.over && !st.cleared && st.dueAt <= at) st = tick(b, st);
-      if (st.over || st.cleared) break;
       const a = bestMove(b, st);
       if (!a) break;
       acts.push(a);
-      times.push(at);
-      st = step(b, st, a, at);
+      st = step(b, st, a);
     }
-    return { seed, acts, times, endMs: at };
+    return { seed, acts };
   });
 }
 

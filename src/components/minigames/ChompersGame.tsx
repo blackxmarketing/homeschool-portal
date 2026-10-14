@@ -21,7 +21,6 @@ import {
   step,
   hunting,
   teachFor,
-  tick,
   type Act,
   type Board,
   type CellArt,
@@ -100,10 +99,7 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
   const lives = untimed ? EASY_LIVES : LIVES;
   const [bi, setBi] = useState(0);
   const [seed, setSeed] = useState(newSeed);
-  /** When this board started, and when each move happened, in milliseconds. */
-  const started = useRef(performance.now());
-  const times = useRef<number[]>([]);
-  const [st, setSt] = useState<ChomperState>(() => startState(buildBoard(level.boards[0], 0, seed), lives, false));
+  const [st, setSt] = useState<ChomperState>(() => startState(buildBoard(level.boards[0], 0, seed), lives));
   const [done, setDone] = useState<BoardMove[]>([]);
   /** Points from the boards already finished. */
   const [banked, setBanked] = useState<number[]>([]);
@@ -134,16 +130,10 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
   /** Plays one turn, and moves on when the board is finished with. */
   const act = useCallback(
     (a: Act) => {
-      let cur = live.current;
+      const cur = live.current;
       if (cur.over || cur.cleared) return;
-      // Bring the Grumbles up to now first, then move - the same order the
-      // server replays in, or the two would see different boards.
-      const at = Math.round(performance.now() - started.current);
-      cur = catchUp(at);
-      if (cur.over || cur.cleared) return;
-      const next = step(board, cur, a, at, quick);
+      const next = step(board, cur, a, quick);
       if (next === cur) return;
-      times.current = [...times.current, at];
       live.current = next;
       setSt(next);
       setActs((xs) => [...xs, a]);
@@ -182,85 +172,14 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
   }, []);
 
   /**
-   * Walk the Grumbles forward to wherever their own clock has got to. This is
-   * the identical loop the server runs when it re-scores the game, which is
-   * what lets a browser and a server that see the board at completely
-   * different moments agree on what happened.
-   */
-  const catchUp = useCallback(
-    (to: number) => {
-      let cur = live.current;
-      while (!cur.over && !cur.cleared && cur.dueAt <= to) {
-        const after = tick(board, cur, quick);
-        if (after.caught > cur.caught) {
-          chime("caught");
-          setFace(2);
-          setNote(caughtLine(after.strikes, after.last?.cell != null, false));
-        }
-        cur = after;
-      }
-      if (cur !== live.current) {
-        live.current = cur;
-        setSt(cur);
-      }
-      return cur;
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [board, quick],
-  );
-
-  /**
-   * The Grumbles keep their own time, so something has to drive it even when
-   * the kid is sitting still working the answer out. That is the point: this
-   * is what makes standing and staring unsafe.
-   */
-  useEffect(() => {
-    if (over) return;
-    const id = setInterval(() => catchUp(Math.round(performance.now() - started.current)), 100);
-    return () => clearInterval(id);
-  }, [over, catchUp, bi]);
-
-  /**
-   * Switching speed restarts this board's clock. Only offered before the
-   * first move of a board: half a board played at one speed and half at the
-   * other would not replay, because the server is told one speed per board.
+   * Only offered before the first move of a board: half a board played at one
+   * speed and half at the other would not replay, because the server is told
+   * one speed per board.
    */
   function goQuick(on: boolean) {
     if (acts.length) return;
-    times.current = [];
-    started.current = performance.now();
-    const fresh = startState(board, st.lives, on);
-    live.current = fresh;
-    setSt(fresh);
     setQuick(on);
   }
-
-  /**
-   * A kid who switches tab should not come back dead. The clock is pushed
-   * forward by however long the page was hidden, so the time that went by
-   * never happened as far as this board is concerned - and because every
-   * move is timed against the same origin, the server sees the same game.
-   */
-  useEffect(() => {
-    if (!quick) return;
-    let hiddenAt = 0;
-    const onVis = () => {
-      if (document.hidden) hiddenAt = performance.now();
-      else if (hiddenAt) {
-        started.current += performance.now() - hiddenAt;
-        hiddenAt = 0;
-      }
-    };
-    document.addEventListener("visibilitychange", onVis);
-    return () => document.removeEventListener("visibilitychange", onVis);
-  }, [quick]);
-
-  // Quick mode: the Grumbles keep walking whether or not the kid does.
-  useEffect(() => {
-    if (!quick || over) return;
-    const id = setInterval(() => catchUp(Math.round(performance.now() - started.current)), 120);
-    return () => clearInterval(id);
-  }, [quick, over, catchUp, bi]);
 
   /**
    * The board's clock. It counts down and stops the board at zero, unless
@@ -315,14 +234,7 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
   // Board over: bank it, then either set up the next one or send the lot off.
   useEffect(() => {
     if (!st.cleared && !st.over) return;
-    const move: BoardMove = {
-      seed,
-      acts,
-      times: times.current,
-      endMs: Math.round(performance.now() - started.current),
-      ...(untimed && { easy: true }),
-      ...(quick && { quick: true }),
-    };
+    const move: BoardMove = { seed, acts, ...(untimed && { easy: true }), ...(quick && { quick: true }) };
     const all = [...done, move];
     const pts = [...banked, st.points];
     const cleared = clears + (st.cleared ? 1 : 0);
@@ -343,9 +255,7 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
       setSeed(nextSeed);
       setActs([]);
       setNote(null);
-      times.current = [];
-      started.current = performance.now();
-      const fresh = startState(buildBoard(level.boards[bi + 1], bi + 1, nextSeed), lives, quick);
+      const fresh = startState(buildBoard(level.boards[bi + 1], bi + 1, nextSeed), lives);
       live.current = fresh;
       setSt(fresh);
     }, 1400);

@@ -40,9 +40,7 @@ import {
   PLACEMENT_RIGHT,
   publicPlacement,
   playBoard,
-  STEP_MS,
-  stepGapMs,
-  THINKING_MS,
+  MONSTER_EVERY,
   percentValue,
   replay,
   rightOn,
@@ -449,7 +447,7 @@ describe("playing a board", () => {
     return st;
   };
 
-  const run = (acts: Act[], lives = LIVES) => acts.reduce((st, a) => step(board, st, a, 1), alone(startState(board, lives)));
+  const run = (acts: Act[], lives = LIVES) => acts.reduce((st, a) => step(board, st, a), alone(startState(board, lives)));
 
   it("scores a point for eating the right number", () => {
     const st = munchAt(firstOk);
@@ -475,17 +473,11 @@ describe("playing a board", () => {
     expect(step(board, st, "munch")).toBe(st);
   });
 
-  it("does not move the Grumbles when the Chomper moves", () => {
-    // They keep their own time. Walking about, or walking into the edge,
-    // does nothing to them at all - which is why standing still is no
-    // longer a way of waiting one out.
+  it("counts walking into the edge as a turn without moving you", () => {
     let st = { ...startState(board), x: 0, y: 3 };
-    const where = st.foes;
-    st = step(board, st, "left", 10);
+    st = step(board, st, "left");
     expect({ x: st.x, y: st.y }, "walking into the edge should not move you").toEqual({ x: 0, y: 3 });
     expect(st.turn).toBe(1);
-    expect(st.phase).toBe(0);
-    expect(st.foes).toEqual(where);
   });
 
   it("gives the clear bonus only when every right answer is gone", () => {
@@ -493,7 +485,7 @@ describe("playing a board", () => {
     let st = alone(startState(board, 99));
     for (const i of right) {
       st = { ...st, x: i % COLS, y: Math.floor(i / COLS) };
-      st = step(board, st, "munch", 1);
+      st = step(board, st, "munch");
     }
     expect(st.cleared).toBe(true);
     expect(st.points).toBe(CORRECT_PER_BOARD + CLEAR_BONUS);
@@ -505,19 +497,18 @@ describe("playing a board", () => {
     let st = alone(startState(board, 1));
     for (const i of right) {
       st = { ...st, x: i % COLS, y: Math.floor(i / COLS) };
-      st = step(board, st, "munch", 1);
+      st = step(board, st, "munch");
     }
     expect(st.cleared).toBe(true);
     expect(st.over).toBe(false);
     expect(st.points).toBe(maxFor(level.boards[0]));
   });
 
-  it("sends the hunter after a kid who sits still", () => {
+  it("sends the hunter after a kid shuffling on the spot", () => {
     const b2 = buildBoard(level.boards[1], 1, 4);
     let st = startState(b2);
-    // No moves at all: it comes to you, which is the whole point of the clock.
-    for (let i = 0; i < 200 && !st.caught; i++) st = tick(b2, st);
-    expect(st.caught, "the hunter never found a Chomper standing still").toBeGreaterThan(0);
+    for (let i = 0; i < 200 && !st.caught; i++) st = step(b2, st, i % 2 ? "left" : "right");
+    expect(st.caught, "the hunter never found a Chomper going nowhere").toBeGreaterThan(0);
     expect({ x: st.x, y: st.y }).toEqual({ x: 2, y: 2 });
     expect(st.foes).toEqual(b2.grumbles);
   });
@@ -528,10 +519,10 @@ describe("playing a board", () => {
     let st = startState(b2);
     for (const i of good) {
       st = { ...st, x: i % COLS, y: Math.floor(i / COLS) };
-      st = step(b2, st, "munch", 1);
+      st = step(b2, st, "munch");
     }
     expect(st.points).toBe(2);
-    for (let i = 0; i < 200 && !st.caught; i++) st = tick(b2, st);
+    for (let i = 0; i < 200 && !st.caught; i++) st = step(b2, st, i % 2 ? "left" : "right");
     expect(st.caught).toBe(1);
     // The one eaten most recently goes back on the board, and the point with it.
     expect(st.points).toBe(1);
@@ -544,9 +535,9 @@ describe("playing a board", () => {
     const good = board.cells.findIndex((c) => c.ok);
     let st = alone(startState(board));
     st = { ...st, x: good % COLS, y: Math.floor(good / COLS) };
-    st = step(board, st, "munch", 1);
+    st = step(board, st, "munch");
     st = { ...st, x: firstBad % COLS, y: Math.floor(firstBad / COLS) };
-    st = step(board, st, "munch", 2);
+    st = step(board, st, "munch");
     expect(st.wrong).toBe(1);
     expect(st.strikes).toBe(1);
     expect(st.points, "the right answer is still eaten").toBe(1);
@@ -556,11 +547,11 @@ describe("playing a board", () => {
     const good = board.cells.findIndex((c) => c.ok);
     let st = alone(startState(board));
     st = { ...st, x: good % COLS, y: Math.floor(good / COLS) };
-    st = step(board, st, "munch", 1);
+    st = step(board, st, "munch");
     expect(st.points).toBe(1);
     for (let n = 0; n < STRIKES; n++) {
       st = { ...st, x: firstBad % COLS, y: Math.floor(firstBad / COLS) };
-      st = step(board, st, "munch", 1);
+      st = step(board, st, "munch");
     }
     expect(st.wrong).toBe(STRIKES);
     expect(st.lives).toBe(LIVES - 1);
@@ -600,15 +591,10 @@ describe("scoring a level", () => {
           const board = buildBoard(level.boards[i], i, seed);
           let st = startState(board, 9);
           let eaten = 0;
-          let at = 0;
           for (let n = 0; n < 1200 && !st.cleared && !st.over; n++) {
-            // Played in time, because the Grumbles keep their own.
-            at += THINKING_MS;
-            while (!st.over && !st.cleared && st.dueAt <= at) st = tick(board, st);
-            if (st.over || st.cleared) break;
             const a = bestMove(board, st);
             if (!a) break;
-            st = step(board, st, a, at);
+            st = step(board, st, a);
             eaten = Math.max(eaten, st.eaten.filter(Boolean).length);
           }
           // Cleared, or well over half the answers eaten on some try. The
@@ -687,101 +673,48 @@ describe("scoring a level", () => {
   });
 });
 
-describe("the clock the Grumbles keep", () => {
+describe("when the Grumbles get their turn", () => {
   const level = levelById("g3-2")!;
   const board = buildBoard(level.boards[1], 1, 1);
 
-  /** Plays the moves the way the screen does: clock first, then move. */
-  function asThePlayerSaw(mv: { seed: number; acts: Act[]; times: number[]; endMs: number }) {
+  it("moves them once for every few moves the Chomper makes", () => {
     let st = startState(board);
-    const catchUp = (to: number) => {
-      while (!st.over && !st.cleared && st.dueAt <= to) st = tick(board, st);
-    };
-    mv.acts.forEach((a, i) => {
-      if (st.over || st.cleared) return;
-      catchUp(mv.times[i]);
-      if (st.over || st.cleared) return;
-      st = step(board, st, a, mv.times[i]);
-    });
-    catchUp(mv.endMs);
-    return st;
-  }
-
-  it("moves them while the kid stands perfectly still", () => {
-    const idle = { seed: 1, acts: [] as Act[], times: [] as number[], endMs: STEP_MS.max * 6 };
-    const st = playBoard(board, idle, LIVES);
-    expect(st.phase, "nothing moved while the kid did nothing").toBeGreaterThan(3);
-  });
-
-  it("does not step them any faster for a kid hammering the arrow keys", () => {
-    // Twenty moves inside a single gap must not buy twenty Grumble steps.
-    const acts = Array<Act>(20).fill("left");
-    const mashed = playBoard(board, { seed: 1, acts, times: acts.map(() => 1), endMs: 1 }, LIVES);
-    expect(mashed.phase).toBe(0);
-  });
-
-  it("takes a different gap each step, from the board's own seed", () => {
-    const gaps = Array.from({ length: 12 }, (_, n) => stepGapMs(board, n));
-    for (const g of gaps) {
-      expect(g).toBeGreaterThanOrEqual(STEP_MS.min);
-      expect(g).toBeLessThanOrEqual(STEP_MS.max);
+    const where = JSON.stringify(st.foes);
+    for (let n = 1; n < MONSTER_EVERY; n++) {
+      st = step(board, st, "left");
+      expect(JSON.stringify(st.foes), "they moved too soon").toBe(where);
+      expect(st.phase).toBe(0);
     }
-    expect(new Set(gaps).size, "every gap the same is a drumbeat, not a monster").toBeGreaterThan(4);
-    expect(stepGapMs(board, 3)).toBe(stepGapMs(board, 3));
-    expect(stepGapMs(board, 3, true)).toBeLessThan(STEP_MS.min);
+    st = step(board, st, "left");
+    expect(st.phase, "their turn should have come round").toBe(1);
   });
 
-  it("re-scores on the server exactly as the kid played it", () => {
-    const acts: Act[] = ["right", "down", "munch", "left", "up", "up", "munch", "right", "munch", "down"];
-    for (const pace of [40, 300, STEP_MS.min, 900, STEP_MS.max + 11, 2400]) {
-      const times = acts.map((_a, i) => (i + 1) * pace);
-      const mv = { seed: 3, acts, times, endMs: acts.length * pace + 400 };
-      const mine = asThePlayerSaw(mv);
-      const theirs = playBoard(board, mv, LIVES);
-      expect({ ...theirs, last: null }, "pace " + pace).toEqual({ ...mine, last: null });
-    }
+  it("gives them nothing at all while the kid sits and thinks", () => {
+    // They move with the board, not against a clock. Working an answer out
+    // costs nothing, which is what the clock on the board is for.
+    const st = playBoard(board, { seed: 1, acts: [] }, LIVES);
+    expect(st.phase).toBe(0);
+    expect(st.foes).toEqual(board.grumbles);
   });
 
-  it("survives a whole level through JSON, the way it reaches the server", () => {
-    const moves = perfectMoves(level);
-    expect(replay(level, JSON.parse(JSON.stringify(moves)))).toEqual(replay(level, moves));
+  it("counts a munch and a step into the wall as turns, the same as a move", () => {
+    // Standing in a corner pressing into it is still a way to let one go
+    // past - it costs you turns, which is the price.
+    let st = { ...startState(board), x: 0, y: 3 };
+    for (let n = 0; n < MONSTER_EVERY; n++) st = step(board, st, "left");
+    expect({ x: st.x, y: st.y }).toEqual({ x: 0, y: 3 });
+    expect(st.turn).toBe(MONSTER_EVERY);
+    expect(st.phase).toBe(1);
   });
 
-  it("steps them oftener in Quick mode, which is the only thing it changes", () => {
-    const quick = playBoard(board, { seed: 1, acts: [], times: [], endMs: 6000, quick: true }, LIVES);
-    const steady = playBoard(board, { seed: 1, acts: [], times: [], endMs: 6000 }, LIVES);
+  it("moves them oftener in Quick mode, which is all it changes", () => {
+    // Board one has a roamer and no hunter, so nothing resets the count.
+    const calm = buildBoard(level.boards[0], 0, 1);
+    const acts = Array<Act>(12).fill("left");
+    const quick = playBoard(calm, { seed: 1, acts, quick: true }, LIVES);
+    const steady = playBoard(calm, { seed: 1, acts }, LIVES);
+    expect(steady.phase).toBe(Math.floor(acts.length / MONSTER_EVERY));
     expect(quick.phase).toBeGreaterThan(steady.phase);
-  });
-
-  it("throws away times that run backwards or claim a quarter of an hour", () => {
-    expect(cleanMoves([{ seed: 1, acts: ["up", "munch"], times: [900, 100] }])[0].times).toEqual([900, 900]);
-    expect(cleanMoves([{ seed: 1, acts: ["up"], times: [-5e9] }])[0].times).toEqual([0]);
-    expect(cleanMoves([{ seed: 1, acts: ["up"], times: [5000], endMs: 10 }])[0].endMs).toBe(5000);
-    expect(cleanMoves([{ seed: 1, acts: [], quick: true }])[0].quick).toBe(true);
-    expect(cleanMoves([{ seed: 1, acts: [], quick: "yes" }])[0].quick).toBeUndefined();
-  });
-
-  it("gives no advantage to claiming no time went by", () => {
-    // Every move at nought stops the Grumbles stepping - and leaves them
-    // standing on the board for ever, squares you then cannot have. It is
-    // not a way round them, it is a way of being stuck behind them.
-    const b0 = buildBoard(level.boards[0], 0, 1);
-    const right = b0.cells.map((c, i) => (c.ok ? i : -1)).filter((i) => i >= 0);
-    const acts: Act[] = [];
-    let at = { x: 2, y: 2 };
-    for (const t of right) {
-      const tx = t % COLS;
-      const ty = Math.floor(t / COLS);
-      for (let n = 0; n < Math.abs(tx - at.x); n++) acts.push(tx > at.x ? "right" : "left");
-      for (let n = 0; n < Math.abs(ty - at.y); n++) acts.push(ty > at.y ? "down" : "up");
-      acts.push("munch");
-      at = { x: tx, y: ty };
-    }
-    const frozen = playBoard(b0, { seed: 1, acts, times: acts.map(() => 0), endMs: 0 }, LIVES);
-    expect(Math.max(frozen.points, frozen.best), "a frozen clock must not score more than the board is worth").toBeLessThanOrEqual(maxFor(level.boards[0]));
-    // And they are all still standing exactly where they started, in the way.
-    expect(frozen.phase).toBe(0);
-    expect(frozen.foes).toEqual(b0.grumbles);
   });
 });
 
@@ -847,7 +780,8 @@ describe("what the game tells the mastery meter", () => {
 
   it("marks a board cleared the hard way as right, but not first try", () => {
     const b = buildBoard(level.boards[0], 0, 1);
-    const bad = b.cells.findIndex((c) => !c.ok);
+    const near = (i: number) => Math.abs((i % COLS) - 2) + Math.abs(Math.floor(i / COLS) - 2);
+    const bad = b.cells.map((c, i) => (c.ok ? -1 : i)).filter((i) => i >= 0).reduce((a, c) => (near(a) <= near(c) ? a : c));
     const right = b.cells.map((c, i) => (c.ok ? i : -1)).filter((i) => i >= 0);
     // One wrong munch, then clear the board.
     const acts: Act[] = [];
