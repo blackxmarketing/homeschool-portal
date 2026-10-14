@@ -238,6 +238,16 @@ CREATE TABLE IF NOT EXISTS minigame_progress (
   PRIMARY KEY (kid_id, game, level)
 );
 
+-- Where a kid was placed on a drill game's ladder by its sit-down assessment,
+-- so an older kid skips the facts they already have instead of counting dots.
+CREATE TABLE IF NOT EXISTS game_placement (
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  game TEXT NOT NULL,
+  rung INTEGER NOT NULL,
+  at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (kid_id, game)
+);
+
 -- Grades K-5 explore worlds (docs/WORLDS.md): where the hero stands and what they found, per world (JSON).
 CREATE TABLE IF NOT EXISTS explore_state (
   kid_id INTEGER NOT NULL REFERENCES kids(id),

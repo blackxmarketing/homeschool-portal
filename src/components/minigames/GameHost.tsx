@@ -10,12 +10,15 @@ export default function GameHost({
   levels,
   progress,
   unlockAt = 1,
+  openTo = 0,
 }: {
   game: string;
   levels: MiniLevel[];
   progress: Record<string, { stars: number; best: number | null; plays: number }>;
   /** Stars needed on a level before the next one opens. */
   unlockAt?: number;
+  /** Levels up to here are open already, because an assessment said so. */
+  openTo?: number;
 }) {
   const [stars, setStars] = useState(progress);
   const [playing, setPlaying] = useState<string | null>(null);
@@ -60,7 +63,8 @@ export default function GameHost({
     <div className="level-grid">
       {levels.map((l, i) => {
         const s = stars[l.id]?.stars ?? 0;
-        const open = i === 0 || (stars[levels[i - 1].id]?.stars ?? 0) >= unlockAt;
+        // Open because they earned it, or because the assessment put them here.
+        const open = i === 0 || i <= openTo || (stars[levels[i - 1].id]?.stars ?? 0) >= unlockAt;
         return (
           <button key={l.id} type="button" className={`level-card ${open ? "" : "locked"}`} disabled={!open} onClick={() => setPlaying(l.id)}>
             <span className="level-num">Level {i + 1}</span>
@@ -73,6 +77,7 @@ export default function GameHost({
               ))}
             </span>
             {!open && <span className="kmuted small">🔒 {unlockAt > 1 ? `Earn ${unlockAt} stars on the level before` : "Earn a star on the level before"}</span>}
+            {open && i === openTo && openTo > 0 && s === 0 && <span className="kmuted small">⭐ Start here</span>}
           </button>
         );
       })}

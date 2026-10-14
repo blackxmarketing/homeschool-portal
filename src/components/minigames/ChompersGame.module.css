@@ -195,3 +195,28 @@
   background: #ffe3e0;
   color: var(--k-bad-ink, #b42318);
 }
+
+/* The placement assessment: one row of squares to tap, no walking. */
+.placeRow {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  width: min(100%, 520px);
+  margin-inline: auto;
+}
+.placeCell {
+  aspect-ratio: 1;
+  cursor: pointer;
+  font-family: var(--font-kid), system-ui, sans-serif;
+}
+.placeCell:hover {
+  transform: translateY(-2px);
+}
+.picked {
+  background: #dbe6ff;
+  box-shadow: 0 2px 0 var(--ink);
+  transform: translateY(2px);
+}
+.picked:hover {
+  transform: translateY(2px);
+}

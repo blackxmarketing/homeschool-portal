@@ -188,3 +188,20 @@ export function recordMiniGame(kidId: number, game: string, level: string, stars
   if (xp) awardXp(kidId, xp);
   return { stars: Math.max(stars, prev?.stars ?? 0), best: newBest ? best : (prev?.best ?? best), xp, newBest };
 }
+
+/**
+ * Where a kid was placed on a game's ladder, or null if they have not sat its
+ * assessment. The ladder starts at the very beginning for everybody; this is
+ * how an older kid skips past the facts they already have.
+ */
+export function gamePlacement(kidId: number, game: string): number | null {
+  const row = getDb().prepare("SELECT rung FROM game_placement WHERE kid_id = ? AND game = ?").get(kidId, game) as { rung: number } | undefined;
+  return row ? row.rung : null;
+}
+
+/** Saves where the assessment placed them. Taking it again replaces the old answer. */
+export function saveGamePlacement(kidId: number, game: string, rung: number): void {
+  getDb()
+    .prepare("INSERT INTO game_placement (kid_id, game, rung) VALUES (?, ?, ?) ON CONFLICT (kid_id, game) DO UPDATE SET rung = excluded.rung, at = datetime('now')")
+    .run(kidId, game, Math.max(0, Math.round(rung)));
+}

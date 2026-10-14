@@ -673,13 +673,21 @@ const onBoard = (x: number, y: number) => x >= 0 && x < COLS && y >= 0 && y < RO
 const HUNT = 8;
 const WANDER = 6;
 
+/**
+ * One step in this many. At every other step it was still too much on a
+ * board six squares across - it is on top of you before you have read the
+ * question, which is the opposite of what the clock is for. One in three
+ * leaves room to think and it still arrives if you dawdle.
+ */
+export const CHASER_PACE = 3;
+
 /** Whether the hunter is hunting right now, or taking a breather. */
 export const hunting = (step: number) => step % (HUNT + WANDER) < HUNT;
 
 export function grumbleStep(g: Grumble, board: Board, step: number, i: number, to: { x: number; y: number }): Grumble {
   if (g.kind === "chaser") {
-    // Half pace: it gathers itself on the odd steps.
-    if (step % 2 === 1) return g;
+    // It gathers itself between strides.
+    if (step % CHASER_PACE !== 0) return g;
     if (hunting(step)) {
       // Straight at the Chomper, closing the bigger gap first.
       const gx = to.x - g.x;
@@ -1115,9 +1123,9 @@ export const BAND_ONLY_LEVELS: ChomperLevel[] = [
     board("equals", -12, "signed", -60, 60),
   ]),
   lvl(6, "b-ratios", "Ratio Road", "g6.ratios", "Skill: equal ratios. 3:4 and 6:8 are the same mix - double both sides and nothing changes.", [
-    board("equivalent", 0.5, "ratio", 2, 20, { frac: { n: 1, d: 2 } }),
-    board("equivalent", 2 / 3, "ratio", 3, 24, { frac: { n: 2, d: 3 } }),
-    board("equivalent", 0.75, "ratio", 4, 28, { frac: { n: 3, d: 4 } }),
+    board("equivalent", 0.5, "ratio", 2, 20, { frac: { n: 1, d: 2 }, show: "1:2" }),
+    board("equivalent", 2 / 3, "ratio", 3, 24, { frac: { n: 2, d: 3 }, show: "2:3" }),
+    board("equivalent", 0.75, "ratio", 4, 28, { frac: { n: 3, d: 4 }, show: "3:4" }),
   ]),
   lvl(6, "b-powers", "Power Peaks", "g6.exponents", "Skill: squares and powers. 4^3 means 4 × 4 × 4, which is 64 - not 4 × 3.", [
     board("squares", 0, "plain", 1, 150),
@@ -1304,6 +1312,88 @@ export function replay(level: ChomperLevel, raw: unknown): { boards: BoardResult
   const max = maxForLevel(level);
   return { boards, points, max, stars: starsFor(points, max), lives };
 }
+
+// ---------------- Finding out where to start ----------------
+
+/** Questions in the sit-down assessment. Short: it is a placement, not a test. */
+export const PLACEMENT_QUESTIONS = 8;
+/** Squares in each one, and how many of them fit the rule. */
+export const PLACEMENT_CELLS = 6;
+export const PLACEMENT_RIGHT = 2;
+
+export interface PlacementQuestion {
+  /** The rung this question came from, as an index into the ladder. */
+  rung: number;
+  /** What that rung is called, so the result can say what they are starting on. */
+  title: string;
+  label: string;
+  cells: Cell[];
+}
+
+/** The rungs the assessment samples: evenly up the ladder, always ending at the top. */
+export function placementRungs(total = ALL_CHOMPER_LEVELS.length): number[] {
+  const n = Math.min(PLACEMENT_QUESTIONS, total);
+  const out = Array.from({ length: n }, (_, i) => Math.round((i * (total - 1)) / (n - 1)));
+  return [...new Set(out)];
+}
+
+/**
+ * The assessment: a handful of one-row boards taken from up and down the
+ * ladder, easiest first.
+ *
+ * It exists because everybody starts at the bottom of the ladder, which is
+ * right for a six-year-old and insulting for a thirteen-year-old. Six squares
+ * and a rule is the game in miniature, so it measures the thing the game
+ * measures rather than something adjacent to it.
+ */
+export function placementQuestions(seed: number): PlacementQuestion[] {
+  return placementRungs().map((rung) => {
+    const level = ALL_CHOMPER_LEVELS[rung];
+    const spec = { ...level.boards[0], right: PLACEMENT_RIGHT };
+    const r = seededRng((seed >>> 0) * 7919 + rung * 31 + 1);
+    const { yes, no } = split(spec);
+    // An "Equals 42" rung has one value written a dozen ways, so a row of six
+    // squares has to draw on it more than once, exactly as a full board does.
+    const take = (from: Cand[], n: number) => {
+      const out = shuffle(r, from).slice(0, n);
+      while (out.length < n && from.length) out.push(from[out.length % from.length]);
+      return out;
+    };
+    const picked = shuffle(r, [...take(yes, PLACEMENT_RIGHT), ...take(no, PLACEMENT_CELLS - PLACEMENT_RIGHT)]);
+    const used = new Set<string>();
+    const cells: Cell[] = picked.map((c) => {
+      const text = c.text ?? cellText(r, c.value, spec, used);
+      used.add(text);
+      return { text, value: c.value, frac: c.frac, ...(c.art && { art: c.art }), ok: fits(spec.rule, c) };
+    });
+    return { rung, title: level.title, label: ruleLabel(spec.rule), cells };
+  });
+}
+
+/**
+ * Where the assessment puts them: the first rung they got wrong.
+ *
+ * Everything below it is theirs already and opens up, so they can go back and
+ * refresh whenever they like; the rung they tripped on is where the work is.
+ * Getting the lot right opens the whole ladder.
+ */
+export function placeFrom(seed: number, picks: number[][]): { rung: number; title: string; right: number; asked: number } {
+  const qs = placementQuestions(seed);
+  let right = 0;
+  for (let i = 0; i < qs.length; i++) {
+    const want = new Set(qs[i].cells.map((c, n) => (c.ok ? n : -1)).filter((n) => n >= 0));
+    const got = new Set((picks[i] ?? []).filter((n) => Number.isInteger(n) && n >= 0 && n < PLACEMENT_CELLS));
+    const correct = got.size === want.size && [...want].every((n) => got.has(n));
+    if (!correct) return { rung: qs[i].rung, title: qs[i].title, right, asked: qs.length };
+    right++;
+  }
+  const last = ALL_CHOMPER_LEVELS.length - 1;
+  return { rung: last, title: ALL_CHOMPER_LEVELS[last].title, right, asked: qs.length };
+}
+
+/** The questions with the answers taken out, which is all the browser ever sees. */
+export const publicPlacement = (qs: PlacementQuestion[]) =>
+  qs.map((q) => ({ rung: q.rung, title: q.title, label: q.label, cells: q.cells.map(({ text, art }) => ({ text, ...(art && { art }) })) }));
 
 // ---------------- Playing it well (the worked example the tests measure against) ----------------
 
