@@ -570,3 +570,28 @@
   font-weight: 800;
   color: var(--ink);
 }
+
+/* The one who has the pet, at the end of a dungeon, and what it wants for
+   handing them back. */
+.keeper {
+  position: absolute;
+  line-height: 0;
+  z-index: 3;
+}
+.price {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  line-height: 1;
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.5rem;
+  color: var(--ink);
+  background: #f2d24a;
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  padding: 4px 5px;
+  box-shadow: 0 2px 0 var(--ink);
+}

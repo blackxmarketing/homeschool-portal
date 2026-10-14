@@ -343,7 +343,11 @@ function FactRush({
           <p className="kmuted">
             {run.posts} blocks run, {run.wrong} missed. {result.score ?? run.points} points.{run.over ? " Your pet is still in there - have another go." : ""}
           </p>
-          {result.xp > 0 && <p className="kmuted">+{result.xp} XP for new stars!</p>}
+          {result.xp > 0 ? (
+            <p className="kmuted">+{result.xp} XP for new stars!</p>
+          ) : (
+            <p className="kmuted small">No XP this time - you already had these stars. New stars on a level you have not beaten yet are what pay.</p>
+          )}
           {result.level && (
             <p className={css.levelUp}>
               Level {result.level} - you are {/^[AEIOU]/.test(result.rank ?? "") ? "an" : "a"} {result.rank}!
@@ -524,10 +528,17 @@ function FactRush({
               );
             })}
 
-            {/* The cage, at the last block. */}
+            {/* The cage, at the last block - and in a dungeon, the one who
+                has the pet, standing over it with a price. */}
             <span className={css.cage} style={{ left: `${posts * BLOCK}px`, bottom: `${(biome.rise ?? 0) * posts + 43}px` }}>
               <PixelSprite grid={cagedPetGrid(pet, run.finished)} scale={5} />
             </span>
+            {level.dungeon && !run.finished && (
+              <span className={css.keeper} style={{ left: `${posts * BLOCK - 92}px`, bottom: `${(biome.rise ?? 0) * posts + 43}px` }}>
+                <span className={css.price}>🪙 {DUNGEON_PRICE}</span>
+                <PixelSprite grid={BEAST[Math.floor(now / 420) % 2]} scale={5} />
+              </span>
+            )}
 
             <span
               className={`${css.runner} ${biome.swim ? css.swimming : ""} ${run.big ? css.grown : ""} ${beat?.kind === "trip" ? css.trip : ""} ${
