@@ -1,4 +1,4 @@
-import type { PetId } from "@/lib/pixel/hero";
+import type { Hero, PetId } from "@/lib/pixel/hero";
 
 /** Every mini-game screen gets the level to play and reports the kid's moves when the game ends. */
 export interface MiniGameUIProps {
@@ -15,6 +15,8 @@ export interface MiniGameUIProps {
   plays?: number;
   /** The kid's pet, so a game can use it as the character they steer. */
   pet?: PetId;
+  /** The kid's whole character, for games they run around in themselves. */
+  hero?: Hero;
   /** Whether the AI coach can take questions, for games that let a kid ask. */
   canAsk?: boolean;
 }

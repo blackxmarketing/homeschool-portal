@@ -59,6 +59,7 @@ export const chompersInfo = {
   // facts is the point, so running ahead of them is not allowed.
   unlockAt: 3,
   ownIntro: true,
+  placement: true,
   blurb: "Eat every number that fits the rule, and don't let the Grumbles catch you.",
 };
 

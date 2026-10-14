@@ -1,0 +1,307 @@
+/* XP Rush: Facts. A side-on run across a pixel landscape to the cage at the
+   far end, drawn in the same ink keyline and hard shadows as the rest. */
+
+.fr {
+  --ink: #1b1530;
+  --sky: #8fd0ff;
+  --turf: #3f9d5a;
+  gap: 10px;
+}
+
+.fr :global(.chip) {
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0;
+  padding: 7px 9px;
+  border-radius: 4px;
+  border: 2px solid var(--ink);
+  background: #fffdf5;
+  box-shadow: 0 3px 0 var(--ink);
+}
+
+/* ---- the level ---- */
+
+.scene {
+  position: relative;
+  height: 186px;
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+  background: linear-gradient(180deg, var(--sky) 0%, #bfe6ff 72%);
+  box-shadow: 0 5px 0 var(--ink);
+  overflow: hidden;
+}
+
+.ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 28px;
+  background: var(--turf);
+  border-top: 3px solid var(--ink);
+  background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.1) 2px, transparent 2px);
+  background-size: 10px 100%;
+}
+
+.cloudA,
+.cloudB,
+.hill,
+.pipe,
+.block,
+.cage,
+.runner {
+  position: absolute;
+  line-height: 0;
+}
+
+.cloudA {
+  top: 10px;
+  left: 16%;
+  animation: drift 26s linear infinite;
+}
+.cloudB {
+  top: 26px;
+  left: 58%;
+  animation: drift 38s linear infinite;
+}
+@keyframes drift {
+  from {
+    transform: translateX(14px);
+  }
+  50% {
+    transform: translateX(-14px);
+  }
+  to {
+    transform: translateX(14px);
+  }
+}
+
+.hill {
+  bottom: 25px;
+  left: 8%;
+}
+.pipe {
+  bottom: 25px;
+  left: 46%;
+}
+.block {
+  bottom: 96px;
+}
+
+/* The cage, at the end of the run with the pet inside it. */
+.cage {
+  bottom: 25px;
+  right: 6px;
+}
+.caged {
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  transform: translateX(-50%);
+  line-height: 0;
+  transition: transform 0.5s steps(4);
+}
+.out {
+  transform: translate(-50%, -26px);
+}
+
+/* The runner: your own hero, stepping forward a block at a time. */
+.runner {
+  bottom: 25px;
+  transition: left 0.42s steps(6);
+  z-index: 2;
+}
+.step {
+  animation: hop 0.42s;
+}
+.sprint {
+  animation: hop 0.26s;
+}
+@keyframes hop {
+  40% {
+    transform: translateY(-13px);
+  }
+  70% {
+    transform: translateY(-4px);
+  }
+}
+.trip {
+  animation: trip 0.5s;
+}
+@keyframes trip {
+  25% {
+    transform: translateX(-5px) rotate(-14deg);
+  }
+  60% {
+    transform: translateX(2px) rotate(9deg);
+  }
+}
+
+.shout {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.6rem;
+  color: #fffdf5;
+  background: #e0453a;
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  padding: 4px 6px;
+  box-shadow: 0 2px 0 var(--ink);
+  animation: pop 0.56s;
+}
+@keyframes pop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+.countOver {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(27, 21, 48, 0.5);
+  z-index: 3;
+}
+.countOver strong {
+  font-family: var(--font-pixel), monospace;
+  font-size: clamp(2rem, 11vw, 4rem);
+  color: #fffdf5;
+  text-shadow: 0 4px 0 var(--ink);
+}
+
+/* ---- the card ---- */
+
+.cardRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px;
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+  background: #fffdf5;
+  box-shadow: 0 4px 0 var(--ink);
+}
+.card,
+.equals,
+.slot {
+  font-family: var(--font-pixel), monospace;
+  font-size: clamp(0.8rem, 4.2vw, 1.3rem);
+  color: var(--ink);
+  line-height: 1.3;
+}
+.equals {
+  opacity: 0.5;
+}
+.slot {
+  min-width: 3.2em;
+  text-align: center;
+  padding: 6px 8px;
+  border: 2px dashed #9aa3bf;
+  border-radius: 3px;
+  color: #2340ff;
+}
+.slotBad {
+  border-style: solid;
+  border-color: var(--k-bad-ink, #b42318);
+  background: #ffe3e0;
+  color: var(--k-bad-ink, #b42318);
+}
+
+/* Kept in the layout whether or not it says anything, so the keypad does not
+   jump up and down under the kid's thumb mid-run. */
+.teach {
+  margin: 0;
+  min-height: 1.4em;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: transparent;
+}
+.teachOn {
+  color: var(--k-bad-ink, #b42318);
+}
+
+/* ---- the keypad ---- */
+
+.pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  width: min(100%, 320px);
+  margin-inline: auto;
+}
+.key {
+  padding: 12px 0 !important;
+  border-radius: 4px !important;
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.8rem !important;
+  min-width: 0;
+}
+.go {
+  background: #22a35a !important;
+  box-shadow: 0 5px 0 #16703d !important;
+}
+
+/* ---- the coach's example ---- */
+
+.example {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0 2px;
+}
+.exampleCard {
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.8rem;
+  color: #2340ff;
+}
+.exampleSay {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+/* ---- the end ---- */
+
+.rescued {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  line-height: 0;
+}
+.freed {
+  animation: hop 0.6s infinite;
+}
+
+@media (max-width: 420px) {
+  .scene {
+    height: 166px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cloudA,
+  .cloudB,
+  .step,
+  .sprint,
+  .trip,
+  .shout,
+  .freed {
+    animation: none;
+  }
+  .runner {
+    transition: none;
+  }
+}

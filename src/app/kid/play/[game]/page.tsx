@@ -34,13 +34,15 @@ export default async function PlayPage({ params, searchParams }: { params: Promi
   if (!levels.length) notFound();
   const land = landById(game.land)!;
   // Only the drill ladder has an assessment, and only for the older kids.
-  const sits = game.unlockAt === 3 && kid.grade >= 6;
+  // Only the game whose questions these are may sit a kid down with them.
+  const sits = game.placement === true && kid.grade >= 6;
   const placedAt = sits ? gamePlacement(kid.id, game.id) : 0;
   const seed = Math.floor(Math.random() * 2147483647);
   const placement = sits && placedAt === null ? { seed, questions: publicPlacement(placementQuestions(seed)) } : null;
   // The kid steers their own pet, so changing it in the hero creator changes
   // what they are playing as here.
-  const pet = heroOf(kid.id)?.pet ?? "none";
+  const hero = heroOf(kid.id) ?? undefined;
+  const pet = hero?.pet ?? "none";
   // The coach only takes questions when the AI teachers are switched on and
   // the server has a key, so the question box stays hidden rather than
   // offering something that cannot answer.
@@ -66,6 +68,7 @@ export default async function PlayPage({ params, searchParams }: { params: Promi
         placedAt={placedAt}
         placement={placement}
         pet={pet}
+        hero={hero}
         canAsk={canAsk}
       />
     </main>

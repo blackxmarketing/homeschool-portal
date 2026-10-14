@@ -9,6 +9,7 @@ import { expedition } from "./expedition";
 import { critters } from "./critters";
 import { numberHop } from "./numberhop";
 import { chompers } from "./chompers";
+import { factRush } from "./factrush";
 import { coinShop } from "./coinshop";
 import { arrayGarden } from "./arraygarden";
 import { treasureGrid } from "./treasuregrid";
@@ -53,6 +54,11 @@ export interface MiniGame {
    * so the chrome above the game should not print it a second time.
    */
   ownIntro?: boolean;
+  /**
+   * This game has a sit-down assessment to place older kids part way up its
+   * ladder. Only the game that owns the questions may ask them.
+   */
+  placement?: boolean;
   /** K-5 games: which subject zone of the world they sit in. */
   subject?: "math" | "ela" | "sci" | "soc" | "span";
   levelsForGrade?: (grade: number) => MiniLevel[];
@@ -97,7 +103,7 @@ const LEMONADE: MiniGame = {
 export const GAMES: MiniGame[] = [
   LEMONADE, pizzaParty, rocketLaunch, voyage, bugHunt, expedition,
   // Grades K-5
-  critters, numberHop, chompers, coinShop, arrayGarden, treasureGrid, wordBuilder, sentenceSmith, habitatRescue, weatherWatch, sproutLab, circuitBuilder, mapQuest, palabras,
+  critters, numberHop, chompers, factRush, coinShop, arrayGarden, treasureGrid, wordBuilder, sentenceSmith, habitatRescue, weatherWatch, sproutLab, circuitBuilder, mapQuest, palabras,
 ].filter((g): g is MiniGame => !!g);
 
 /** The levels a kid plays: their own grade's levels when the game has them, otherwise their grade band's. */

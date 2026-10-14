@@ -4,7 +4,7 @@ import { useState } from "react";
 import GameHost from "./GameHost";
 import Placement, { type PublicQuestion } from "./Placement";
 import type { MiniLevel } from "@/lib/minigames";
-import type { PetId } from "@/lib/pixel/hero";
+import type { Hero, PetId } from "@/lib/pixel/hero";
 
 /**
  * A game's levels, with the sit-down assessment in front of them when the kid
@@ -23,6 +23,7 @@ export default function PlayArea({
   placedAt,
   placement,
   pet,
+  hero,
   canAsk,
 }: {
   game: string;
@@ -35,6 +36,8 @@ export default function PlayArea({
   placement: { seed: number; questions: PublicQuestion[] } | null;
   /** The kid's pet, which is who they play as. */
   pet?: PetId;
+  /** The kid's whole character, for games they run around in themselves. */
+  hero?: Hero;
   /** Whether the AI coach can take questions. */
   canAsk?: boolean;
 }) {
@@ -69,7 +72,7 @@ export default function PlayArea({
           Starting you on <strong>{just.title}</strong>. Everything before it is open too, so you can go back over anything you want to brush up.
         </p>
       )}
-      <GameHost game={game} levels={levels} progress={progress} unlockAt={unlockAt} openTo={placed ?? 0} pet={pet} canAsk={canAsk} />
+      <GameHost game={game} levels={levels} progress={progress} unlockAt={unlockAt} openTo={placed ?? 0} pet={pet} hero={hero} canAsk={canAsk} />
     </div>
   );
 }

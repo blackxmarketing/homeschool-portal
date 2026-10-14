@@ -10,6 +10,7 @@ import ExpeditionGame from "./ExpeditionGame";
 import CrittersGame from "./CrittersGame";
 import NumberHopGame from "./NumberHopGame";
 import ChompersGame from "./ChompersGame";
+import FactRushGame from "./FactRushGame";
 import CoinShopGame from "./CoinShopGame";
 import ArrayGardenGame from "./ArrayGardenGame";
 import TreasureGridGame from "./TreasureGridGame";
@@ -33,6 +34,7 @@ export const GAME_UI: Record<string, ComponentType<MiniGameUIProps>> = {
   critters: CrittersGame,
   numberhop: NumberHopGame,
   chompers: ChompersGame,
+  factrush: FactRushGame,
   coinshop: CoinShopGame,
   arraygarden: ArrayGardenGame,
   treasuregrid: TreasureGridGame,
