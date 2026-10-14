@@ -1386,6 +1386,43 @@ export const ALL_CHOMPER_LEVELS: ChomperLevel[] = [
   ...BAND_ONLY_LEVELS,
 ].sort((a, b) => a.grade - b.grade);
 
+export interface WorkedExample {
+  /** The rule, written for a kid - the same words the board uses. */
+  rule: string;
+  /** One square that fits it, and one that does not. */
+  yes: Cell;
+  no: Cell;
+  /** What the coach says about them, in order. */
+  say: string;
+}
+
+/**
+ * Two squares to talk a kid through before they start: one to eat, one to
+ * leave, and why.
+ *
+ * They come from a board built on a seed nowhere near the kid's own, so the
+ * example can never be a preview of the squares they are about to play. The
+ * reason it does not fit is the same line the game gives when a kid eats the
+ * wrong thing, so the explaining is written in one place.
+ */
+export function workedExample(spec: BoardSpec, boardIndex: number, seed: number): WorkedExample | null {
+  const b = buildBoard(spec, boardIndex, ((seed >>> 0) * 104729 + 31) % 2147483647);
+  const yes = b.cells.find((c) => c.ok);
+  const no = b.cells.find((c) => !c.ok);
+  if (!yes || !no) return null;
+  // Only a counting picture is "worth" a number. A shape is worth its sides
+  // and an angle its degrees, which saying out loud helps nobody.
+  const COUNTS = ["dots", "coins", "tally", "dice"];
+  const worth = (c: Cell) => (c.art && COUNTS.includes(c.art.kind) ? ` (worth ${dec(c.value, 3)})` : "");
+  const sentence = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+  const say = [
+    `The rule is: ${b.label}.`,
+    sentence(`${yes.text}${worth(yes)} fits, so you would eat that one.`),
+    `${teachFor(b.rule, no)} So you leave it.`,
+  ].join(" ");
+  return { rule: b.label, yes, no, say };
+}
+
 export const levelById = (id: string): ChomperLevel | undefined => ALL_CHOMPER_LEVELS.find((l) => l.id === id);
 
 

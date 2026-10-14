@@ -377,3 +377,44 @@
 @media (prefers-reduced-motion: reduce) {
   .countOver strong { animation: none; }
 }
+
+/* The two squares the coach talks through before the level starts. Drawn with
+   the board's own cell, so an example of a coin board looks like a coin
+   board. */
+.example {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 8px 0 2px;
+}
+/* What the coach says about the two squares, written down as well as read
+   out: a kid with the sound off still gets the reason. */
+.exampleSay {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.exampleOne {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.exampleCell {
+  width: 62px;
+  height: 52px;
+}
+.eatIt,
+.leaveIt {
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.45rem;
+}
+.eatIt {
+  color: #1a7f45;
+}
+.leaveIt {
+  color: var(--k-bad-ink, #b42318);
+}

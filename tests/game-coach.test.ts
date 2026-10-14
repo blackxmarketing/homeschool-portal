@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { avatarFor } from "@/content/avatars";
 import { teacherFor, TEACHERS } from "@/content/teachers";
-import { ALL_CHOMPER_LEVELS, GAME_COACH, chompersInfo } from "@/lib/minigames/chompers";
+import { ALL_CHOMPER_LEVELS, GAME_COACH, chompersInfo, workedExample } from "@/lib/minigames/chompers";
 
 /**
  * The coach in XP Rush: Math reads the skill out before a level and answers
@@ -59,6 +59,20 @@ describe("the coach speaks in one voice", () => {
     // by another, which is exactly what it sounded like.
     expect(gameSource).toContain("<TeacherVoice kind={coachLook.voice}>");
     expect(gameSource).toContain("</TeacherVoice>");
+  });
+
+  it("hands a voice to every speak(), which is the only way they come out right", () => {
+    // speak() is a plain function: it cannot read the provider, and with no
+    // kind it talks in the default voice, which is female. That is how the
+    // count-in ended up sounding like a different person to the directions.
+    for (const [name, src] of [
+      ["ChompersGame.tsx", gameSource],
+      ["TeacherBrief.tsx", briefSource],
+    ] as const) {
+      for (const call of src.match(/\bspeak\([^;]*?\);/gs) ?? []) {
+        expect(call, `${name}: this speak() has no voice on it - ${call}`).toContain("kind");
+      }
+    }
   });
 
   it("never names a voice by hand, which is how they drift apart", () => {
@@ -124,5 +138,56 @@ describe("what the coach is allowed to know", () => {
     expect(routeSource).toMatch(/slice\(0, 300\)/);
     expect(routeSource).toMatch(/tutorMessagesToday\(kid\.id\) >= aiLimits\(\)\.messagesPerKidPerDay/);
     expect(routeSource).toMatch(/logTutor/);
+  });
+});
+
+describe("the worked example", () => {
+  it("gives every level one, on any seed", () => {
+    for (const l of ALL_CHOMPER_LEVELS) {
+      for (let i = 0; i < l.boards.length; i++) {
+        for (const seed of [1, 7, 12345, 2 ** 31 - 2]) {
+          const ex = workedExample(l.boards[i], i, seed);
+          expect(ex, `${l.id} board ${i} seed ${seed} has no example to show`).toBeTruthy();
+        }
+      }
+    }
+  });
+
+  it("shows one square that fits and one that does not", () => {
+    for (const l of ALL_CHOMPER_LEVELS) {
+      const ex = workedExample(l.boards[0], 0, 99)!;
+      expect(ex.yes.ok, `${l.id}: the "eat it" square does not fit the rule`).toBe(true);
+      expect(ex.no.ok, `${l.id}: the "leave it" square fits the rule`).toBe(false);
+    }
+  });
+
+  it("is built off a seed nowhere near the kid's, so it is never a peek at their board", () => {
+    // Same spec, same board index, their seed - and the example must not be
+    // reading the board they are about to play.
+    const src = fs.readFileSync(path.join(process.cwd(), "src/lib/minigames/chompers.ts"), "utf8");
+    const fn = src.slice(src.indexOf("export function workedExample"));
+    expect(fn.slice(0, 400)).toMatch(/buildBoard\(spec, boardIndex, \(\(seed >>> 0\) \* 104729 \+ 31\)/);
+  });
+
+  it("says something a kid can follow, with nothing missing from it", () => {
+    for (const l of ALL_CHOMPER_LEVELS) {
+      const ex = workedExample(l.boards[0], 0, 4242)!;
+      expect(ex.say).toContain(ex.rule);
+      expect(ex.say).toContain("eat that one");
+      expect(ex.say).toContain("leave it");
+      // A gap in the wording shows up as one of these rather than as a crash.
+      expect(ex.say, `${l.id}: "${ex.say}"`).not.toMatch(/undefined|NaN|\[object/);
+      // It is read out loud, so it starts like a sentence.
+      expect(ex.say[0]).toBe(ex.say[0].toUpperCase());
+    }
+  });
+
+  it("keeps the family rule, same as every other word in the game", () => {
+    const BANNED = /\b(gender|identity|politic|election|president|democrat|republican)\b/i;
+    for (const l of ALL_CHOMPER_LEVELS) {
+      for (const seed of [1, 500, 9999]) {
+        expect(workedExample(l.boards[0], 0, seed)!.say).not.toMatch(BANNED);
+      }
+    }
   });
 });

@@ -25,6 +25,7 @@ import {
   tallyGrid,
   grumbleGrid,
   levelById,
+  workedExample,
   startState,
   step,
   trySeed,
@@ -331,9 +332,21 @@ function Chompers({
     return () => clearInterval(id);
   }, [over, st.over, st.cleared, untimed, bi, frozen]);
 
+  /**
+   * Two squares the coach talks through before they start - one to eat, one
+   * to leave. They come off a board built on a seed nowhere near this one, so
+   * it is a worked example and not a peek at what they are about to play.
+   */
+  const [example, setExample] = useState<ReturnType<typeof workedExample>>(null);
+  function showExample() {
+    const ex = workedExample(level.boards[bi], bi, seed);
+    setExample(ex);
+    if (ex) speak("coach-example", ex.say, { kind: coachLook.voice });
+  }
+
   /** Three, two, one - in the coach's voice, over the board. */
   function countIn() {
-    speak("coach-count", "Three. Two. One. Go!");
+    speak("coach-count", "Three. Two. One. Go!", { kind: coachLook.voice });
     setCount(3);
   }
 
@@ -499,6 +512,23 @@ function Chompers({
         stage={ready ? "play" : "brief"}
         onReady={countIn}
         onAsking={setAsking}
+        onExample={showExample}
+        example={
+          example && (
+            <div className={css.example}>
+              {[
+                { c: example.yes, eat: true },
+                { c: example.no, eat: false },
+              ].map(({ c, eat }) => (
+                <div key={eat ? "yes" : "no"} className={css.exampleOne}>
+                  <div className={`${css.cell} ${css.exampleCell}`}>{c.art ? <CellPicture art={c.art} /> : <span>{c.text}</span>}</div>
+                  <span className={eat ? css.eatIt : css.leaveIt}>{eat ? "✓ eat it" : "✗ leave it"}</span>
+                </div>
+              ))}
+              <p className={css.exampleSay}>{example.say}</p>
+            </div>
+          )
+        }
       />
 
       <div className={css.rule}>

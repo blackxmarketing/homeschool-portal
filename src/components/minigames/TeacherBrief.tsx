@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import TeacherFace from "../TeacherFace";
 import { avatarFor } from "@/content/avatars";
-import { MicButton, speak, stopSpeaking, useAutoRead, useSpeech, useStopOnUnmount, useVoiceSettings } from "../voice";
+import { MicButton, speak, stopSpeaking, useAutoRead, useSpeech, useStopOnUnmount, useTeacherVoice, useVoiceSettings } from "../voice";
 import css from "./TeacherBrief.module.css";
 
 export interface BriefTeacher {
@@ -34,6 +34,8 @@ export default function TeacherBrief({
   stage,
   onReady,
   onAsking,
+  onExample,
+  example,
 }: {
   teacher: BriefTeacher;
   /** The level's skill in plain words - what he reads out. */
@@ -50,9 +52,19 @@ export default function TeacherBrief({
   onReady: () => void;
   /** Tells the game to hold the clock while the coach has a question open. */
   onAsking: (open: boolean) => void;
+  /** Asks the game for a worked example, which the coach then talks through. */
+  onExample: () => void;
+  /** The two squares to talk through, drawn by the game itself. */
+  example?: React.ReactNode;
 }) {
   const look = avatarFor(teacher.id);
   const { speakOn } = useVoiceSettings();
+  /**
+   * speak() is a plain function, so it cannot read the voice provider the way
+   * the read-aloud hook does - leave the kind off and it talks in the default
+   * voice, which is not his. Every speak() in here passes this.
+   */
+  const kind = useTeacherVoice();
   const speech = useSpeech();
   const readId = `coach-${levelId}`;
   const [open, setOpen] = useState(false);
@@ -96,14 +108,14 @@ export default function TeacherBrief({
           return;
         }
         setTurns((t) => [...t, { q, a: d.answer as string }]);
-        if (speakOn) speak(`coach-a-${turns.length}`, d.answer);
+        if (speakOn) speak(`coach-a-${turns.length}`, d.answer, { kind });
       } catch {
         setErr("The coach could not be reached. Check you are online.");
       } finally {
         setBusy(false);
       }
     },
-    [busy, levelId, board, seed, speakOn, turns.length],
+    [busy, levelId, board, seed, speakOn, turns.length, kind],
   );
 
   return (
@@ -124,6 +136,8 @@ export default function TeacherBrief({
             <p className={css.a}>{t.a}</p>
           </div>
         ))}
+
+        {example}
 
         {open && (
           <>
@@ -156,9 +170,14 @@ export default function TeacherBrief({
 
         <div className={css.btns}>
           {stage === "brief" && !open && (
-            <button type="button" className="kbtn small-btn" onClick={onReady}>
-              I&apos;m ready
-            </button>
+            <>
+              <button type="button" className="kbtn small-btn" onClick={onReady}>
+                I&apos;m ready
+              </button>
+              <button type="button" className="kbtn ghost small-btn" onClick={onExample}>
+                🔎 Show me an example
+              </button>
+            </>
           )}
           {canAsk && (
             <button type="button" className="kbtn ghost small-btn" onClick={() => toggle(!open)} disabled={busy}>
