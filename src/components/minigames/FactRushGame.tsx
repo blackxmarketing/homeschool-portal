@@ -19,6 +19,8 @@ import {
   beastGrid,
   biomeFor,
   cloudGrid,
+  coinOn,
+  coinPieceGrid,
   hazardAt,
   hillGrid,
   holeGrid,
@@ -54,12 +56,13 @@ const CAGE = [cageGrid(false), cageGrid(true)];
 const TORCH = [torchGrid(0), torchGrid(1)];
 const STONE = stoneGrid();
 const TOKEN = [tokenGrid(0), tokenGrid(1)];
+const COIN = [coinPieceGrid(0), coinPieceGrid(1)];
 const MOUNTAIN = mountainGrid();
 const RIVER = riverGrid();
 const HOLE = holeGrid();
 
 /** How wide one block of the world is on screen. */
-const BLOCK = 58;
+const BLOCK = 86;
 /** How far from the left edge the camera keeps the runner. */
 const CAMERA_AT = 0.3;
 
@@ -130,6 +133,8 @@ function FactRush({
   live.current = { pile, answers };
 
   const posts = postsOn(level);
+  /** Which block they are standing on: how far along, in blocks. */
+  const standing = (at: number) => at * posts;
   const card = pile[0] ? level.cards[pile[0].i] : null;
   const run = useMemo(() => play(level, { seed, answers, pace }), [level, seed, answers, pace]);
   // Out of cards, out of lives, or out of patience.
@@ -270,8 +275,8 @@ function FactRush({
       <div className={`mg ${css.fr}`}>
         <div className="mg-hud">
           <span className="chip">⚡ {run.points}</span>
-          <span className="chip">
-            {run.posts} / {posts}
+          <span className="chip" aria-label={`${Math.round(run.at * posts)} of ${posts} blocks`}>
+            {Math.round(run.at * posts)} / {posts}
           </span>
           <span className={`chip ${css.lives}`} aria-label={`${run.lives} lives left`}>
             {Array.from({ length: LIVES }, (_, i) => (
@@ -283,7 +288,10 @@ function FactRush({
           <span className="chip" aria-label={`${STRIKES - run.strikes} mistakes before a life goes`}>
             ✗ {run.strikes} / {STRIKES}
           </span>
-          {run.big && <span className="chip">⭐ Big!</span>}
+          <span className="chip" aria-label={`${run.coins} coins`}>
+            🪙 {run.coins}
+          </span>
+          {run.big && <span className="chip">🍎 Big!</span>}
         </div>
 
         <TeacherBrief
@@ -347,11 +355,11 @@ function FactRush({
             className={`${css.world} ${shot === "cage" ? css.sweeping : ""}`}
             style={{
               width: `${(posts + 3) * BLOCK}px`,
-              left: shot === "cage" ? `calc(58% - ${posts * BLOCK}px)` : `calc(${CAMERA_AT * 100}% - ${run.posts * BLOCK}px)`,
+              left: shot === "cage" ? `calc(58% - ${posts * BLOCK}px)` : `calc(${CAMERA_AT * 100}% - ${standing(run.at) * BLOCK}px)`,
               // On a level that climbs, the camera has to climb with it -
               // and during the opening shot it is looking at the cage, which
               // is at the top.
-              bottom: biome.rise ? `${-(shot === "cage" ? posts : run.posts) * biome.rise}px` : undefined,
+              bottom: biome.rise ? `${-(shot === "cage" ? posts : standing(run.at)) * biome.rise}px` : undefined,
             }}
           >
             {/* The floor, which climbs on a level that climbs. Under the sea
@@ -373,8 +381,8 @@ function FactRush({
 
             {/* The ridge along the back. */}
             {[1, 7, 13, 19, 25].map((i) => (
-              <span key={i} className={css.ridge} style={{ left: `${i * BLOCK}px`, bottom: `${(biome.rise ?? 0) * i + 30}px` }}>
-                <PixelSprite grid={ridgeGrid(biome.far, !!biome.rise)} scale={2} />
+              <span key={i} className={css.ridge} style={{ left: `${i * BLOCK}px`, bottom: `${(biome.rise ?? 0) * i + 40}px` }}>
+                <PixelSprite grid={ridgeGrid(biome.far, !!biome.rise)} scale={3} />
               </span>
             ))}
 
@@ -382,8 +390,8 @@ function FactRush({
             {Array.from({ length: posts + 2 }, (_, i) => {
               if (i % 3 !== 1) return null;
               return (
-                <span key={`p${i}`} className={css.prop} style={{ left: `${i * BLOCK + 10}px`, bottom: `${(biome.rise ?? 0) * i + 34}px` }}>
-                  <PixelSprite grid={propGrid(biome.prop, biome.propInk[0], biome.propInk[1])} scale={2} />
+                <span key={`p${i}`} className={css.prop} style={{ left: `${i * BLOCK + 10}px`, bottom: `${(biome.rise ?? 0) * i + 44}px` }}>
+                  <PixelSprite grid={propGrid(biome.prop, biome.propInk[0], biome.propInk[1])} scale={3} />
                 </span>
               );
             })}
@@ -391,25 +399,32 @@ function FactRush({
             {biome.clouds &&
               [2, 9, 17, 24].map((i) => (
                 <span key={`c${i}`} className={i % 2 ? css.cloudA : css.cloudB} style={{ left: `${i * BLOCK}px` }}>
-                  <PixelSprite grid={CLOUD[i % 2]} scale={2} />
+                  <PixelSprite grid={CLOUD[i % 2]} scale={3} />
                 </span>
               ))}
 
             {/* What is in the way, and what is worth picking up. */}
             {Array.from({ length: posts + 1 }, (_, i) => {
               const h = biome.swim ? null : hazardAt(i);
-              const token = tokenOn(i) && run.posts < i;
-              if (!h && !token) return null;
+              const ahead = standing(run.at) < i;
+              const token = tokenOn(i) && ahead;
+              const coin = coinOn(i) && ahead;
+              if (!h && !token && !coin) return null;
               return (
-                <span key={`h${i}`} className={css.at} style={{ left: `${i * BLOCK}px`, bottom: `${(biome.rise ?? 0) * i + 36}px` }}>
+                <span key={`h${i}`} className={css.at} style={{ left: `${i * BLOCK}px`, bottom: `${(biome.rise ?? 0) * i + 46}px` }}>
                   {h && (
                     <span className={h === "hole" ? css.hole : h === "river" ? css.river : css.mountain}>
-                      <PixelSprite grid={HAZARD_ART[h]} scale={2} />
+                      <PixelSprite grid={HAZARD_ART[h]} scale={3} />
                     </span>
                   )}
                   {token && (
                     <span className={css.token}>
-                      <PixelSprite grid={TOKEN[beat ? 1 : 0]} scale={2} />
+                      <PixelSprite grid={TOKEN[beat ? 1 : 0]} scale={3} />
+                    </span>
+                  )}
+                  {coin && (
+                    <span className={css.coin}>
+                      <PixelSprite grid={COIN[beat ? 1 : 0]} scale={3} />
                     </span>
                   )}
                 </span>
@@ -417,17 +432,20 @@ function FactRush({
             })}
 
             {/* The cage, at the last block. */}
-            <span className={css.cage} style={{ left: `${posts * BLOCK}px`, bottom: `${(biome.rise ?? 0) * posts + 33}px` }}>
-              <PixelSprite grid={cagedPetGrid(pet, run.finished)} scale={3} />
+            <span className={css.cage} style={{ left: `${posts * BLOCK}px`, bottom: `${(biome.rise ?? 0) * posts + 43}px` }}>
+              <PixelSprite grid={cagedPetGrid(pet, run.finished)} scale={5} />
             </span>
 
             {/* Whatever is after them, however far back it still is. */}
             {run.chase !== null && (
               <span
                 className={`${css.beast} ${run.chase <= 2 ? css.close : ""}`}
-                style={{ left: `${(run.posts - run.chase) * BLOCK}px`, bottom: `${(biome.rise ?? 0) * Math.max(0, run.posts - run.chase) + 33}px` }}
+                style={{
+                  left: `${(standing(run.at) - run.chase) * BLOCK}px`,
+                  bottom: `${(biome.rise ?? 0) * Math.max(0, standing(run.at) - run.chase) + 43}px`,
+                }}
               >
-                <PixelSprite grid={BEAST[stepping ? 1 : 0]} scale={3} />
+                <PixelSprite grid={BEAST[stepping ? 1 : 0]} scale={5} />
               </span>
             )}
 
@@ -435,9 +453,9 @@ function FactRush({
               className={`${css.runner} ${biome.swim ? css.swimming : ""} ${run.big ? css.grown : ""} ${beat?.kind === "trip" ? css.trip : ""} ${
                 stepping ? css.step : ""
               } ${beat?.kind === "sprint" ? css.sprint : ""}`}
-              style={{ left: `${run.posts * BLOCK}px`, bottom: `${(biome.rise ?? 0) * run.posts + 33}px` }}
+              style={{ left: `${standing(run.at) * BLOCK}px`, bottom: `${(biome.rise ?? 0) * standing(run.at) + 43}px` }}
             >
-              <PixelSprite grid={runner[stepping ? 1 : 0]} scale={run.big ? 4 : 3} />
+              <PixelSprite grid={runner[stepping ? 1 : 0]} scale={run.big ? 7 : 5} />
             </span>
           </div>
 

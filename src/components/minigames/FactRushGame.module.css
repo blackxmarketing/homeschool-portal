@@ -23,7 +23,7 @@
 
 .scene {
   position: relative;
-  height: 228px;
+  height: 300px;
   border: 3px solid var(--ink);
   border-radius: 4px;
   background: linear-gradient(180deg, var(--sky) 0%, #bfe6ff 72%);
@@ -267,7 +267,7 @@
 
 @media (max-width: 420px) {
   .scene {
-    height: 196px;
+    height: 260px;
   }
 }
 
@@ -356,7 +356,7 @@
 }
 
 .at {
-  bottom: 36px;
+  bottom: 46px;
 }
 .hole {
   position: absolute;
@@ -429,10 +429,10 @@
 /* One slab of floor per block, so a level that climbs really climbs. */
 .sod {
   position: absolute;
-  width: 59px;
-  height: 36px;
+  width: 87px;
+  height: 46px;
   bottom: 0;
-  border-top: 3px solid var(--ink);
+  border-top: 4px solid var(--ink);
 }
 .ridge,
 .prop,
@@ -482,4 +482,16 @@
 
 @media (prefers-reduced-motion: reduce) {
   .beast, .swimming { animation: none; }
+}
+
+/* A coin on the track, turning over as it waits to be picked up. */
+.coin {
+  position: absolute;
+  bottom: 54px;
+  left: 26px;
+  line-height: 0;
+  animation: bob 1.3s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .coin { animation: none; }
 }

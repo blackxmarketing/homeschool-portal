@@ -50,6 +50,7 @@ import {
   replay,
   starsFor,
   workedCard,
+  workLeft,
   type FactLevel,
 } from "@/lib/minigames/factrush";
 
@@ -575,5 +576,58 @@ describe("where a level happens", () => {
       expect(b.name.length).toBeGreaterThan(3);
       expect(b.name).not.toMatch(BANNED);
     }
+  });
+});
+
+describe("arriving at the pet", () => {
+  const level = levelById("fr-x6")!;
+
+  it("stops at the cage rather than walking past it", () => {
+    // A messy run: every card missed once before it is answered right. That
+    // takes far more right answers than the track is long, which is what used
+    // to walk them past the pet.
+    const answers: { a: number; ms: number }[] = [];
+    let pile = openingPile(level, 11);
+    let guard = 0;
+    while (pile.length && guard++ < MAX_ASKS - 1) {
+      const card = level.cards[pile[0].i];
+      // Miss it once, then get it right, for as long as the lives hold out.
+      if (guard % 4 === 0) {
+        answers.push({ a: card.answer + 1, ms: 600 });
+        pile = afterAnswer(pile, false, needOf(level));
+      } else {
+        answers.push({ a: card.answer, ms: 600 });
+        pile = afterAnswer(pile, true, needOf(level));
+      }
+    }
+    const r = play(level, { seed: 11, pace: "easy", answers });
+    expect(r.at, "walked past the cage").toBeLessThanOrEqual(1);
+    expect(r.posts, "this run should need more right answers than the track is long").toBeGreaterThan(postsOn(level));
+    if (r.finished) expect(r.at, "finished the cards but did not reach the pet").toBe(1);
+  });
+
+  it("arrives exactly as the last card falls on a clean run", () => {
+    const r = replay(level, perfectMoves(level, 4, "easy"));
+    expect(r.finished).toBe(true);
+    expect(r.at).toBe(1);
+  });
+
+  it("never walks backwards when they miss one", () => {
+    const seed = 5;
+    const good = perfectMoves(level, seed, "easy").answers.slice(0, 6);
+    const before = play(level, { seed, pace: "easy", answers: good }).at;
+    const after = play(level, { seed, pace: "easy", answers: [...good, { a: -1, ms: 500 }] }).at;
+    expect(after, "a miss moved them backwards").toBe(before);
+  });
+
+  it("takes smaller steps when cards keep coming back round", () => {
+    const seed = 8;
+    // Six right answers straight off...
+    const clean = play(level, { seed, pace: "easy", answers: perfectMoves(level, seed, "easy").answers.slice(0, 6) }).at;
+    // ...against six right answers with misses mixed through them.
+    const messy = perfectMoves(level, seed, "easy").answers.slice(0, 6);
+    const mixed = messy.flatMap((a, i) => (i % 2 === 0 ? [{ a: -1, ms: 500 }, a] : [a]));
+    const slow = play(level, { seed, pace: "easy", answers: mixed }).at;
+    expect(slow, "a messy run should not be as far along as a clean one").toBeLessThan(clean);
   });
 });

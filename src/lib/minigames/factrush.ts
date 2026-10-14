@@ -286,11 +286,19 @@ export const FINISH_BONUS = 6;
 export const LIVES = 3;
 export const STRIKES = 3;
 
-/** A token every so many blocks. Pick one up and you grow. */
+/** Food every so many blocks. Eat it and you grow. */
 export const TOKEN_EVERY = 7;
 
-/** Whether the block you have just reached has a token standing on it. */
+/** Whether the block you have just reached has food on it. */
 export const tokenOn = (post: number) => post > 0 && post % TOKEN_EVERY === 0;
+
+/**
+ * Coins lie on every third block that has no food on it.
+ *
+ * They are worth nothing to the running. They are for the monster at the end
+ * of the set, who has the pet and wants paying.
+ */
+export const coinOn = (post: number) => post > 0 && post % 3 === 0 && !tokenOn(post);
 
 export type Hazard = "hole" | "river" | "mountain";
 
@@ -363,6 +371,17 @@ export const paceOf = (ms: number): "sprint" | "run" | "trot" => (ms <= SPRINT_M
 
 const pointsFor = (ms: number) => RIGHT + (ms <= SPRINT_MS ? SPRINT_BONUS : ms <= TROT_MS ? TROT_BONUS : 0);
 
+/**
+ * Right answers still owed: every card's remaining goes, added up.
+ *
+ * This is what the walk is measured against rather than a count of right
+ * answers, because the two are not the same. A card answered right once and
+ * then missed loses what it banked and wants two more, so a kid who misses
+ * things needs more right answers than the track is long. Measured this way
+ * they take smaller steps instead, and arrive exactly as the last card falls.
+ */
+export const workLeft = (pile: Seat[], need: number) => pile.reduce((t, c) => t + Math.max(0, need - c.got), 0);
+
 /** Every post on the track: one per right answer the level needs. */
 export const postsOn = (level: FactLevel) => drawOf(level) * needOf(level);
 
@@ -381,10 +400,17 @@ export interface Run {
   big: boolean;
   /** True when the lives ran out before the cards did. */
   over: boolean;
+  /**
+   * How far along the track they are, from 0 to 1. Never goes backwards and
+   * never goes past the cage - the level is over the moment it reaches 1.
+   */
+  at: number;
   /** How far back the thing chasing them is, or null when nothing is. */
   chase: number | null;
   /** How many times it has had them. */
   caught: number;
+  /** Coins picked up along the way. */
+  coins: number;
   pace: Pace;
 }
 
@@ -408,6 +434,11 @@ export function play(level: FactLevel, move: FactMove): Run {
   let chase: number | null = null;
   let chaseLeft = 0;
   let caught = 0;
+  let coins = 0;
+  const total = postsOn(level);
+  let at = 0;
+  /** The last block they stood on, for working out what they have run past. */
+  let block = 0;
 
   /** One life gone - unless they are big, in which case the size goes. */
   const knock = () => {
@@ -424,8 +455,6 @@ export function play(level: FactLevel, move: FactMove): Run {
     if (right) {
       posts++;
       points += pointsFor(ans.ms);
-      // A token on this block: grow, and keep the next knock for free.
-      if (tokenOn(posts)) big = true;
     } else {
       wrong++;
       strikes++;
@@ -460,10 +489,23 @@ export function play(level: FactLevel, move: FactMove): Run {
     }
 
     pile = afterAnswer(pile, right, needOf(level));
+
+    // How far along they are: the work done, never backwards. A miss costs a
+    // card its banked go, so the walk stalls rather than reversing.
+    const left = workLeft(pile, needOf(level));
+    at = Math.max(at, total > 0 ? Math.min(1, (total - left) / total) : 1);
+
+    // Anything run over on the way: food makes them big, coins go in the purse.
+    const now = Math.floor(at * total);
+    for (let b = block + 1; b <= now; b++) {
+      if (tokenOn(b)) big = true;
+      else if (coinOn(b)) coins++;
+    }
+    block = now;
   }
   const finished = pile.length === 0 && !over;
   if (finished) points += FINISH_BONUS;
-  return { posts, wrong, points, finished, lives: Math.max(0, lives), strikes, big, over, chase, caught, pace };
+  return { posts, wrong, points, finished, lives: Math.max(0, lives), strikes, big, over, chase, caught, coins, pace, at: finished ? 1 : at };
 }
 
 /** The best a level can be worth: every card right twice, every one a sprint. */
@@ -757,13 +799,26 @@ export function beastGrid(frame = 0): Grid {
   return g;
 }
 
-/** A token to run into: a spinning coin-ish star that makes you big. */
+/** Food to run into: an apple, which makes them big. */
 export function tokenGrid(frame = 0): Grid {
+  const g = new Grid(11, 11);
+  const lift = frame % 2;
+  g.disc(5, 6 - lift, 4.4, "#d8382f");
+  g.disc(3.5, 5 - lift, 1.6, "#f2756a");
+  g.rect(5, 1 - lift, 1, 3, "#6b4a2a");
+  g.rect(6, 1 - lift, 3, 1, "#3f9d5a");
+  return g;
+}
+
+/** A coin to pick up. It is for paying the monster at the end of the set. */
+export function coinPieceGrid(frame = 0): Grid {
   const g = new Grid(10, 10);
-  const w = frame % 2 === 0 ? 4 : 2;
-  g.disc(4.5, 4.5, 4.6, "#b8860b");
-  g.disc(4.5, 4.5, 3.4, "#f2d24a");
-  g.rect(5 - Math.ceil(w / 2), 2, w, 6, "#fff3bf");
+  // Turning edge-on and back, which is what makes a row of them read as coins.
+  const w = frame % 2 === 0 ? 9 : 5;
+  const x = Math.round((10 - w) / 2);
+  g.rect(x, 1, w, 8, "#b8860b");
+  g.rect(x + 1, 2, w - 2, 6, "#f2d24a");
+  g.rect(x + Math.floor(w / 2), 3, 1, 4, "#fff3bf");
   return g;
 }
 
