@@ -25,6 +25,7 @@ import {
   hillGrid,
   holeGrid,
   CHASE_FROM,
+  CREEP_PER_SEC,
   LIVES,
   mountainGrid,
   levelById,
@@ -117,7 +118,7 @@ function FactRush({
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [typed, setTyped] = useState("");
   /** What just happened, for the hero to react to. */
-  const [beat, setBeat] = useState<{ kind: "sprint" | "run" | "trot" | "trip" | "grabbed"; show?: string } | null>(null);
+  const [beat, setBeat] = useState<{ kind: "sprint" | "run" | "trot" | "trip" | "grabbed" | "died"; show?: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ stars: number; xp: number; score?: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -131,6 +132,10 @@ function FactRush({
    * straight back as a miss in red. Updaters have to stay pure.
    */
   const typedRef = useRef("");
+  /** Ticks while something is walking towards them, so the screen can show it. */
+  const [now, setNow] = useState(() => Date.now());
+  /** The last step it was heard to take, so the growls are evenly spaced. */
+  const lastGrowl = useRef(0);
   const asked = useRef<number>(Date.now());
   const sent = useRef(false);
   const live = useRef({ pile, answers });
@@ -143,6 +148,15 @@ function FactRush({
   const maxGap = CHASE_FROM[pace] + (pace === "hard" ? 3 : 0);
   const card = pile[0] ? level.cards[pile[0].i] : null;
   const run = useMemo(() => play(level, { seed, answers, pace }, saved), [level, seed, answers, pace, saved]);
+  /**
+   * Where it has got to this instant.
+   *
+   * The run only knows where it was when the last card was answered. On hard
+   * it has been walking ever since, so the screen works the rest out from the
+   * clock - the same sum the server will do from the time on that answer.
+   */
+  const gap =
+    run.chase === null ? null : pace === "hard" ? run.chase - (CREEP_PER_SEC * Math.max(0, now - asked.current)) / 1000 : run.chase;
   // Out of cards, out of lives, or out of patience.
   const done = pile.length === 0 || run.over || answers.length >= MAX_ASKS;
 
@@ -192,9 +206,18 @@ function FactRush({
       setPile(next);
       // What the answer was worth, and then what the monster made of it.
       const after = play(level, { seed, answers: [...got, { a: value, ms }], pace }, saved);
-      if (after.justCaught) {
+      if (after.justDied) {
+        // Three wrong cards, or the hunter had them: either way a life is
+        // gone and they go back to the start of the level.
+        chime(after.justCaught ? "caught" : "died");
+        setBeat({
+          kind: "died",
+          show: after.justCaught ? "It got you! Back to the start." : "Three wrong - back to the start.",
+        });
+      } else if (after.justCaught) {
+        // Caught, but food had made them big: the size went, not a life.
         chime("caught");
-        setBeat({ kind: "grabbed", show: "It got you! Back to the start." });
+        setBeat({ kind: "grabbed", show: "It got you - but you were big. Keep going!" });
       } else if (right) {
         chime(ms <= 2500 ? "streak" : "right");
         setBeat({ kind: paceOf(ms) });
@@ -202,8 +225,13 @@ function FactRush({
         chime("oops");
         setBeat({ kind: "trip", show: `${level.cards[head.i].text} = ${level.cards[head.i].answer}` });
       }
-      // A step of something large, somewhere behind them.
-      if (after.chase !== null && !after.justCaught) chime("growl");
+      // A step of something large, somewhere behind them: when it arrives,
+      // and whenever it has gained ground. On hard the ticker growls as well,
+      // because there it is walking the whole time rather than only on cards.
+      const was = play(level, { seed, answers: got, pace }, saved).chase;
+      const arrived = was === null && after.chase !== null;
+      const closed = was !== null && after.chase !== null && after.chase < was;
+      if (!after.justCaught && (arrived || closed)) chime("growl");
     },
     [level, seed, pace, saved],
   );
@@ -241,10 +269,45 @@ function FactRush({
     return () => window.removeEventListener("keydown", onKey);
   }, [ready, asking, done, answer, type]);
 
+  /**
+   * On hard it never stops, so neither does this: it walks on while the kid
+   * thinks, growls as it steps, and if it reaches them mid-think that is
+   * recorded as time passing with nothing answered - which the server replays
+   * exactly the same way.
+   */
+  useEffect(() => {
+    if (pace !== "hard" || !ready || asking || done || count !== null) return;
+    const id = setInterval(() => {
+      const t = Date.now();
+      setNow(t);
+      if (live.current.pile.length === 0) return;
+      const since = t - asked.current;
+      const where = run.chase === null ? null : run.chase - (CREEP_PER_SEC * since) / 1000;
+      if (where === null) return;
+      // A step every so often, so a kid hears it coming without being deafened.
+      if (t - lastGrowl.current > 1100) {
+        lastGrowl.current = t;
+        chime("growl");
+      }
+      if (where <= 0) {
+        // It got them while they were thinking. Time passed; no card was
+        // answered; the run works out the rest.
+        const ms = since;
+        const { pile: cur, answers: got } = live.current;
+        live.current = { pile: cur, answers: [...got, { a: null, ms }] };
+        setAnswers((xs) => [...xs, { a: null, ms }]);
+        asked.current = Date.now();
+        chime("caught");
+        setBeat({ kind: "grabbed", show: "It got you! Back to the start." });
+      }
+    }, 220);
+    return () => clearInterval(id);
+  }, [pace, ready, asking, done, count, run.chase]);
+
   // The reaction clears itself so the scene does not keep shouting.
   useEffect(() => {
     if (!beat) return;
-    const t = setTimeout(() => setBeat(null), beat.kind === "grabbed" ? 1800 : beat.kind === "trip" ? 1500 : 560);
+    const t = setTimeout(() => setBeat(null), beat.kind === "died" ? 2000 : beat.kind === "grabbed" ? 1800 : beat.kind === "trip" ? 1500 : 560);
     return () => clearTimeout(t);
   }, [beat]);
 
@@ -281,7 +344,7 @@ function FactRush({
   }
 
   const at = posts > 0 ? Math.min(1, run.posts / posts) : 0;
-  const stepping = beat && beat.kind !== "trip" && beat.kind !== "grabbed";
+  const stepping = beat && beat.kind !== "trip" && beat.kind !== "grabbed" && beat.kind !== "died";
 
   return (
     <TeacherVoice kind={coachLook.voice}>
@@ -455,7 +518,7 @@ function FactRush({
             <span
               className={`${css.runner} ${biome.swim ? css.swimming : ""} ${run.big ? css.grown : ""} ${beat?.kind === "trip" ? css.trip : ""} ${
                 beat?.kind === "grabbed" ? css.grabbed : ""
-              } ${stepping ? css.step : ""} ${beat?.kind === "sprint" ? css.sprint : ""}`}
+              } ${beat?.kind === "died" ? css.died : ""} ${stepping ? css.step : ""} ${beat?.kind === "sprint" ? css.sprint : ""}`}
               style={{ left: `${standing(run.at) * BLOCK}px`, bottom: `${(biome.rise ?? 0) * standing(run.at) + 43}px` }}
             >
               <PixelSprite grid={runner[stepping ? 1 : 0]} scale={run.big ? 7 : 5} />
@@ -471,12 +534,12 @@ function FactRush({
               the thing that was catching them. Here it comes in from the edge
               and closes on them as the gap closes, which is the same
               information in a place they can see it. */}
-          {run.chase !== null && (
+          {gap !== null && (
             <span
-              className={`${css.beast} ${run.chase <= 2 ? css.close : ""}`}
-              style={{ left: `${CAMERA_AT * 100 * (1 - Math.min(1, Math.max(0, run.chase / maxGap))) }%` }}
+              className={`${css.beast} ${gap <= 2 ? css.close : ""}`}
+              style={{ left: `${CAMERA_AT * 100 * (1 - Math.min(1, Math.max(0, gap / maxGap)))}%` }}
             >
-              <PixelSprite grid={BEAST[stepping ? 1 : 0]} scale={5} />
+              <PixelSprite grid={BEAST[Math.floor(now / 260) % 2]} scale={5} />
             </span>
           )}
 

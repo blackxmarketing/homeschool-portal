@@ -18,7 +18,8 @@ import {
   factRushInfo,
   type Pace,
   CHASE_FROM,
-  CREEP,
+  CHASE_LEN,
+  CREEP_PER_SEC,
   DUNGEON_PRICE,
   HUNTS,
   LIVES,
@@ -488,8 +489,9 @@ describe("the chase, and how hard a kid wants it", () => {
     const blocks = huntBlocks(level, 3, "medium");
     expect(blocks.length).toBeGreaterThan(0);
     expect(blocks.length).toBeLessThanOrEqual(HUNTS);
-    // Never right at the start, and never on top of each other.
-    for (const b of blocks) expect(b).toBeGreaterThanOrEqual(2);
+    // The first comes in early, but never off the start line itself.
+    for (const b of blocks) expect(b).toBeGreaterThanOrEqual(1);
+    expect(blocks[0], "a kid should meet it in the first few cards").toBeLessThanOrEqual(3);
     // A different seed puts it somewhere else.
     expect(huntBlocks(level, 99, "medium")).not.toEqual(blocks);
     // The same seed puts it in the same places, or the server would disagree.
@@ -501,7 +503,7 @@ describe("the chase, and how hard a kid wants it", () => {
     // Hard closes a little on every single answer, so it starts further off.
     expect(CHASE_FROM.hard).toBeGreaterThan(CHASE_FROM.medium);
     expect(CHASE_FROM.easy).toBe(0);
-    expect(CREEP).toBeGreaterThan(0);
+    expect(CREEP_PER_SEC).toBeGreaterThan(0);
   });
 
   it("leaves a slow thinker alone on medium, and does not on hard", () => {
@@ -596,7 +598,7 @@ describe("arriving at the pet", () => {
     // A messy run: every card missed once before it is answered right. That
     // takes far more right answers than the track is long, which is what used
     // to walk them past the pet.
-    const answers: { a: number; ms: number }[] = [];
+    const answers: { a: number | null; ms: number }[] = [];
     let pile = openingPile(level, 11);
     let guard = 0;
     while (pile.length && guard++ < MAX_ASKS - 1) {
@@ -663,7 +665,7 @@ describe("paying the monster for the pet", () => {
   it("keeps dealing cards when they walk in short, until it is paid", () => {
     // Nothing saved: they have to earn the whole price in the dungeon.
     const level = dun;
-    const answers: { a: number; ms: number }[] = [];
+    const answers: { a: number | null; ms: number }[] = [];
     let pile = openingPile(level, 5);
     let coins = 0;
     let guard = 0;
@@ -752,7 +754,7 @@ describe("the hunter", () => {
     const r = play(level, { seed, pace: "hard", answers });
     expect(r.caught).toBeGreaterThan(0);
     // Whatever happened after, a catch cost them the ground they had made.
-    const upToCatch: { a: number; ms: number }[] = [];
+    const upToCatch: { a: number | null; ms: number }[] = [];
     let seen = 0;
     for (const a of answers) {
       upToCatch.push(a);
@@ -795,5 +797,117 @@ describe("what the directions tell a kid to do", () => {
   it("tells them what answering a card actually does", () => {
     const running = ALL_FACT_LEVELS.filter((l) => /run|get to your pet|towards your pet/i.test(l.intro));
     expect(running.length, "no level explains that answering is what moves you").toBeGreaterThan(40);
+  });
+});
+
+describe("the hunter walks on the clock", () => {
+  const level = levelById("fr-x6")!;
+  const card = (n: number) => perfectMoves(level, 6, "hard").answers.slice(0, n);
+
+  it("comes on while a kid is only thinking, with no card answered", () => {
+    // Four seconds of looking at a card, answering nothing.
+    const thinking = play(level, { seed: 6, pace: "hard", answers: [{ a: null, ms: 4000 }] });
+    const instant = play(level, { seed: 6, pace: "hard", answers: [{ a: null, ms: 0 }] });
+    expect(thinking.chase!, "time passing did not bring it closer").toBeLessThan(instant.chase!);
+    // And thinking is not a wrong answer: no card was touched.
+    expect(thinking.wrong).toBe(0);
+    expect(thinking.posts).toBe(0);
+    expect(thinking.at).toBe(0);
+  });
+
+  it("gets them if they sit there long enough, even answering nothing", () => {
+    const idle = Array.from({ length: 12 }, () => ({ a: null, ms: 8000 }));
+    const r = play(level, { seed: 6, pace: "hard", answers: idle });
+    expect(r.caught, "a kid who never answered was never caught").toBeGreaterThan(0);
+  });
+
+  it("is outrun by answering inside four seconds, and gains after that", () => {
+    // A block won per right answer against a quarter block a second.
+    const quick = play(level, { seed: 6, pace: "hard", answers: card(8).map((a) => ({ ...a, ms: 1500 })) });
+    const slow = play(level, { seed: 6, pace: "hard", answers: card(8).map((a) => ({ ...a, ms: 9000 })) });
+    expect(quick.chase!, "quick answers did not keep them ahead").toBeGreaterThan(CHASE_FROM.hard);
+    expect(slow.chase === null || slow.chase < CHASE_FROM.hard, "slow answers did not let it gain").toBe(true);
+  });
+
+  it("leaves medium alone: thinking time costs nothing there", () => {
+    const start = huntBlocks(level, 6, "medium")[0];
+    const upto = perfectMoves(level, 6, "medium").answers.slice(0, start + 1);
+    const a = play(level, { seed: 6, pace: "medium", answers: [...upto, { a: null, ms: 30000 }] });
+    const b = play(level, { seed: 6, pace: "medium", answers: [...upto, { a: null, ms: 0 }] });
+    expect(a.chase).toEqual(b.chase);
+  });
+
+  it("treats a made-up answer shape as junk, but a real pause as a pause", () => {
+    expect(cleanMove({ seed: 1, answers: [{ a: null, ms: 500 }] }).answers[0].a).toBeNull();
+    expect(cleanMove({ seed: 1, answers: [{ a: "soon", ms: 500 }] }).answers[0].a).toBeNaN();
+    // Pauses alone can never earn anything.
+    expect(replay(level, { seed: 1, pace: "hard", answers: [{ a: null, ms: 100 }] }).stars).toBe(0);
+  });
+});
+
+describe("medium meets them early", () => {
+  it("sends it in within the first few cards of every level", () => {
+    for (const l of [levelById("fr-a1")!, levelById("fr-x6")!, levelById("fr-d9")!]) {
+      for (const seed of [1, 42, 777, 31337]) {
+        const first = huntBlocks(l, seed, "medium")[0];
+        expect(first, `${l.id} seed ${seed}: it turns up at block ${first}`).toBeLessThanOrEqual(3);
+        expect(first, "it should not be standing on the start line").toBeGreaterThanOrEqual(1);
+      }
+    }
+  });
+
+  it("still comes in more than once, and not all at the same moment", () => {
+    const blocks = huntBlocks(levelById("fr-x6")!, 42, "medium");
+    expect(blocks.length).toBeGreaterThan(1);
+    for (let i = 1; i < blocks.length; i++) expect(blocks[i] - blocks[i - 1]).toBeGreaterThanOrEqual(CHASE_LEN);
+  });
+});
+
+describe("three wrong cards", () => {
+  const level = levelById("fr-x6")!;
+  /** A few right answers to get them off the start line, then misses. */
+  const run = (misses: number) => {
+    const good = perfectMoves(level, 12, "easy").answers.slice(0, 5);
+    const bad = Array.from({ length: misses }, () => ({ a: -1, ms: 600 }));
+    return play(level, { seed: 12, pace: "easy", answers: [...good, ...bad] });
+  };
+
+  it("leaves the first two where they stand", () => {
+    const moved = run(0);
+    expect(moved.at).toBeGreaterThan(0);
+    for (const n of [1, 2]) {
+      const r = run(n);
+      expect(r.lives, `${n} wrong should not cost a life`).toBe(LIVES);
+      expect(r.at, `${n} wrong should leave them where they are`).toBe(moved.at);
+      expect(r.strikes).toBe(n);
+      expect(r.justDied).toBe(false);
+    }
+  });
+
+  it("costs a life on the third and starts the level over", () => {
+    const r = run(3);
+    expect(r.lives, "the third wrong card should cost a life").toBe(LIVES - 1);
+    expect(r.at, "the third wrong card should send them back to the start").toBe(0);
+    expect(r.justDied, "the screen was never told they died").toBe(true);
+    // And the slate is clean for the next go.
+    expect(r.strikes).toBe(0);
+  });
+
+  it("spends the size instead when food has made them big", () => {
+    // Run to the food, then miss three times.
+    const good = perfectMoves(level, 12, "easy").answers.slice(0, TOKEN_EVERY);
+    const bad = Array.from({ length: 3 }, () => ({ a: -1, ms: 600 }));
+    const r = play(level, { seed: 12, pace: "easy", answers: [...good, ...bad] });
+    expect(r.lives, "being big should have taken the hit").toBe(LIVES);
+    expect(r.big).toBe(false);
+    expect(r.at, "being big should not send them back").toBeGreaterThan(0);
+    expect(r.justDied).toBe(false);
+  });
+
+  it("ends the run when the third life goes, rather than restarting forever", () => {
+    const r = run(9);
+    expect(r.lives).toBe(0);
+    expect(r.over).toBe(true);
+    expect(r.finished).toBe(false);
   });
 });

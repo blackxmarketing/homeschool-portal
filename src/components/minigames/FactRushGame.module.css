@@ -451,7 +451,8 @@
   position: absolute;
   bottom: 43px;
   z-index: 3;
-  transition: left 0.42s steps(7);
+  /* It walks on the clock on hard, so no stepped slide between the cards. */
+  transition: left 0.22s linear;
   animation: lope 0.5s steps(2) infinite;
 }
 .close {
@@ -527,4 +528,32 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .grabbed { animation: none; }
+}
+
+/* A life gone: up in the air, turn over, and out through the bottom of the
+   level - then they are back at the start line. */
+.died {
+  animation: dying 1.3s forwards;
+  z-index: 5;
+}
+@keyframes dying {
+  0% {
+    transform: translateY(0) rotate(0);
+  }
+  22% {
+    transform: translateY(-58px) rotate(-12deg);
+  }
+  40% {
+    transform: translateY(-58px) rotate(8deg);
+  }
+  100% {
+    transform: translateY(190px) rotate(26deg);
+    opacity: 0.15;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .died {
+    animation: none;
+    opacity: 0.4;
+  }
 }

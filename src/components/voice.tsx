@@ -570,12 +570,33 @@ export function SayButton({ id, text, label }: { id: string; text: string; label
 let audio: AudioContext | null = null;
 
 /** A short, soft chime: "right" (two rising notes), "streak" (three) or "oops" (one low note). */
-export function chime(kind: "right" | "streak" | "oops" | "caught" | "growl") {
+export function chime(kind: "right" | "streak" | "oops" | "caught" | "growl" | "died") {
   if (typeof window === "undefined" || !loadPrefs().sounds) return;
   try {
     const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!Ctx) return;
     audio ??= new Ctx();
+
+    if (kind === "died") {
+      // A life gone: a little hop of a tune and then the floor falls out of
+      // it. Short, and clearly an end rather than a telling-off.
+      const t = audio.currentTime;
+      const o = audio.createOscillator();
+      const g = audio.createGain();
+      o.type = "square";
+      o.frequency.setValueAtTime(523, t);
+      o.frequency.setValueAtTime(392, t + 0.1);
+      o.frequency.setValueAtTime(622, t + 0.2);
+      o.frequency.exponentialRampToValueAtTime(110, t + 0.75);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.12, t + 0.03);
+      g.gain.setValueAtTime(0.12, t + 0.5);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.8);
+      o.connect(g).connect(audio.destination);
+      o.start(t);
+      o.stop(t + 0.82);
+      return;
+    }
 
     if (kind === "growl") {
       // A step of something large and unfriendly, somewhere behind you. Short

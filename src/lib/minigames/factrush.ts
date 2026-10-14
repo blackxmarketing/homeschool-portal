@@ -346,8 +346,16 @@ export const PACES: Pace[] = ["easy", "medium", "hard"];
 /** How far back it starts, by pace. Easy never starts at all. */
 export const CHASE_FROM: Record<Pace, number> = { easy: 0, medium: 5, hard: 6 };
 
-/** How much ground it makes up on every answer, just by never stopping. */
-export const CREEP = 0.5;
+/**
+ * How much ground it makes up every second on hard, by never stopping.
+ *
+ * It moves on the clock, not on the cards, so a kid who sits looking at a
+ * card watches it come. A quarter of a block a second against the whole block
+ * they win for getting one right: answer in under four seconds and the gap
+ * opens, take longer and it closes. That is the whole of hard, and it needs
+ * no separate rule about dawdling - the clock is the rule.
+ */
+export const CREEP_PER_SEC = 0.25;
 /** How many cards it keeps after you before it gives up. */
 export const CHASE_LEN = 7;
 /** How many times it comes in over a level. */
@@ -365,17 +373,24 @@ export function huntBlocks(level: FactLevel, seed: number, pace: Pace): number[]
   const total = postsOn(level);
   const r: Rng = seededRng((seed >>> 0) * 7919 + 13);
   const out = new Set<number>();
-  // Never in the first couple of blocks: let them get going first.
+  // The first one comes in early. A kid should meet the thing in the first
+  // card or two, not find out halfway through that the level had a monster
+  // in it.
+  out.add(1 + Math.floor(r() * 2));
   for (let i = 0; i < HUNTS * 3 && out.size < HUNTS; i++) {
-    const at = 2 + Math.floor(r() * Math.max(1, total - 4));
+    const at = 3 + Math.floor(r() * Math.max(1, total - 5));
     if (![...out].some((x) => Math.abs(x - at) < CHASE_LEN)) out.add(at);
   }
   return [...out].sort((a, b) => a - b);
 }
 
 export interface Answer {
-  /** What they typed. */
-  a: number;
+  /**
+   * What they typed, or null for time passing with nothing answered - which
+   * is what the screen sends when the hunter reaches a kid mid-think. The
+   * card is untouched by one of those; only the clock moves.
+   */
+  a: number | null;
   /** How long they took, in milliseconds. */
   ms: number;
 }
@@ -438,6 +453,11 @@ export interface Run {
   paying: boolean;
   /** True on the answer that it caught them, for the screen to react to. */
   justCaught: boolean;
+  /**
+   * True on the answer that cost them a life, however it was lost - three
+   * wrong cards or the hunter. Either way they go back to the start.
+   */
+  justDied: boolean;
   pace: Pace;
 }
 
@@ -463,6 +483,7 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
   let chase: number | null = pace === "hard" && CHASE_FROM.hard > 0 ? CHASE_FROM.hard : null;
   let chaseLeft = CHASE_LEN;
   let justCaught = false;
+  let justDied = false;
   let caught = 0;
   let coins = 0;
   const total = postsOn(level);
@@ -470,11 +491,25 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
   /** The last block they stood on, for working out what they have run past. */
   let block = 0;
 
-  /** One life gone - unless they are big, in which case the size goes. */
+  /**
+   * One life gone - unless food has made them big, in which case the size
+   * goes instead and they carry on from where they stand.
+   *
+   * Losing one for real sends them back to the start of the level, whether it
+   * was three wrong cards or the hunter that did it.
+   */
+  let died = false;
   const knock = () => {
-    if (big) big = false;
-    else lives--;
-    if (lives <= 0) over = true;
+    if (big) {
+      big = false;
+      return;
+    }
+    lives--;
+    if (lives <= 0) {
+      over = true;
+      return;
+    }
+    died = true;
   };
 
   /** What the monster wants here, and what they walked in with. */
@@ -485,12 +520,19 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
   for (const ans of move.answers.slice(0, MAX_ASKS)) {
     const head = pile[0];
     if (!head || over) break;
-    const right = level.cards[head.i].answer === ans.a;
+    // Cleared before the answer is judged, not after: the three-wrong rule
+    // sets died on its way past, and clearing it later threw it away.
+    justCaught = false;
+    justDied = false;
+    died = false;
+    /** Time passing with nothing answered: the clock moves, the cards do not. */
+    const idle = ans.a === null;
+    const right = !idle && level.cards[head.i].answer === ans.a;
 
     if (right) {
       posts++;
       points += pointsFor(ans.ms);
-    } else {
+    } else if (!idle) {
       wrong++;
       strikes++;
       if (strikes >= STRIKES) {
@@ -506,7 +548,6 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
       chaseLeft = CHASE_LEN;
     }
 
-    justCaught = false;
     if (chase !== null) {
       // The gap is in blocks, so getting a card right opens it up by the
       // block they just ran. On hard the thing behind them never stops, and
@@ -515,12 +556,10 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
       // at the same distance and only a wrong card brings it in, which is why
       // a kid who needs a minute to think is left alone there.
       if (right) chase += 1;
-      if (pace === "hard") chase -= CREEP;
-      if (!right) chase -= 1;
-      // Keeping moving is the whole of it on hard: a card they sat on for
-      // half a minute is a card they were not moving through, and it comes
-      // the rest of the way.
-      else if (pace === "hard" && ans.ms > TROT_MS) chase -= 1;
+      // On hard it is walking the whole time, so what it makes up is however
+      // long they took - whether they were answering or just thinking.
+      if (pace === "hard") chase -= (CREEP_PER_SEC * ans.ms) / 1000;
+      if (!right && !idle) chase -= 1;
       // It never drops so far back that a kid forgets it is there.
       chase = Math.min(pace === "hard" ? from + 3 : from, chase);
 
@@ -528,24 +567,26 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
         caught++;
         justCaught = true;
         knock();
-        if (!over) {
-          // Back to the start of the level, and it backs off to give them a
-          // run at it again.
-          pile = openingPile(level, move.seed + caught);
-          at = 0;
-          block = 0;
-          chase = pace === "hard" ? from : null;
-          chaseLeft = CHASE_LEN;
-          continue;
-        }
-        chase = null;
+        // It backs off either way to give them a run at it again.
+        chase = pace === "hard" ? from : null;
+        chaseLeft = CHASE_LEN;
       } else if (pace !== "hard" && --chaseLeft <= 0) {
         // It gives up and slinks off to try again further on.
         chase = null;
       }
     }
 
-    pile = afterAnswer(pile, right, needOf(level));
+    // A life gone sends them back to the start of the level: fresh cards,
+  // fresh ground, and the walk starts over.
+    if (died && !over) {
+      pile = openingPile(level, move.seed + lives + caught);
+      at = 0;
+      block = 0;
+      justDied = true;
+      continue;
+    }
+
+    if (!idle) pile = afterAnswer(pile, right, needOf(level));
 
     // At the cage and still short: the monster deals another hand, and every
     // card they get right is a coin off what they owe.
@@ -571,7 +612,7 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
   const owed = Math.max(0, price - purse());
   const finished = pile.length === 0 && !over && owed === 0;
   if (finished) points += FINISH_BONUS;
-  return { posts, wrong, points, finished, lives: Math.max(0, lives), strikes, big, over, chase, caught, coins, owed, paying, justCaught, pace, at: finished ? 1 : at };
+  return { posts, wrong, points, finished, lives: Math.max(0, lives), strikes, big, over, chase, caught, coins, owed, paying, justCaught, justDied, pace, at: finished ? 1 : at };
 }
 
 /** The best a level can be worth: every card right twice, every one a sprint. */
@@ -591,8 +632,12 @@ export function cleanMove(raw: unknown): FactMove {
   const answers: Answer[] = [];
   for (const x of list) {
     const o2 = (x ?? {}) as { a?: unknown; ms?: unknown };
-    const a = Number(o2.a);
     const ms = Number(o2.ms);
+    if (o2.a === null) {
+      answers.push({ a: null, ms: Number.isFinite(ms) ? Math.min(Math.max(ms, 0), 120000) : 120000 });
+      continue;
+    }
+    const a = Number(o2.a);
     answers.push({
       a: Number.isFinite(a) ? a : NaN,
       ms: Number.isFinite(ms) ? Math.min(Math.max(ms, 0), 120000) : 120000,
