@@ -11,18 +11,29 @@ import {
   NEED,
   TOP,
   afterAnswer,
-  blockGrid,
   cageGrid,
   cloudGrid,
   evidenceFor,
   factRush,
+  type Pace,
+  CHASE_FROM,
+  HUNTS,
   LIVES,
+  PACES,
+  TROT_MS,
+  cleanMove,
+  huntBlocks,
   STRIKES,
   TOKEN_EVERY,
   familyFacts,
+  beastGrid,
+  biomeFor,
+  BIOMES,
   hazardAt,
   holeGrid,
   mountainGrid,
+  propGrid,
+  ridgeGrid,
   riverGrid,
   tokenGrid,
   tokenOn,
@@ -34,7 +45,6 @@ import {
   openingPile,
   paceOf,
   perfectMoves,
-  pipeGrid,
   play,
   postsOn,
   replay,
@@ -283,7 +293,7 @@ describe("what it tells the mastery meter", () => {
 
 describe("the art", () => {
   it("draws something in every piece of the scene", () => {
-    const grids = [cloudGrid(false), cloudGrid(true), hillGrid(), blockGrid("brick"), blockGrid("prize"), pipeGrid(), cageGrid(false), cageGrid(true)];
+    const grids = [cloudGrid(false), cloudGrid(true), hillGrid(), cageGrid(false), cageGrid(true), beastGrid(0), beastGrid(1), ridgeGrid("#333", true), ridgeGrid("#333", false)];
     for (const g of grids) {
       expect(g.w).toBeGreaterThan(0);
       expect(g.h).toBeGreaterThan(0);
@@ -453,6 +463,117 @@ describe("lives, tokens and what is in the way", () => {
       let filled = 0;
       for (let y = 0; y < g.h; y++) for (let x = 0; x < g.w; x++) if (g.get(x, y)) filled++;
       expect(filled, "a sprite with nothing drawn in it").toBeGreaterThan(4);
+    }
+  });
+});
+
+describe("the chase, and how hard a kid wants it", () => {
+  const level = levelById("fr-x6")!;
+  const misses = (n: number, pace: Pace) => ({ seed: 3, pace, answers: Array.from({ length: n }, () => ({ a: -1, ms: 500 })) });
+
+  it("leaves easy alone entirely", () => {
+    expect(huntBlocks(level, 3, "easy")).toEqual([]);
+    const r = play(level, misses(6, "easy"));
+    expect(r.chase).toBeNull();
+    expect(r.caught).toBe(0);
+    // Only the three-misses rule took a life, nothing else.
+    expect(r.lives).toBe(LIVES - 2);
+  });
+
+  it("sends it in a few times a level, and somewhere different each level", () => {
+    for (const pace of ["medium", "hard"] as Pace[]) {
+      const blocks = huntBlocks(level, 3, pace);
+      expect(blocks.length).toBeGreaterThan(0);
+      expect(blocks.length).toBeLessThanOrEqual(HUNTS);
+      // Never right at the start, and never on top of each other.
+      for (const b of blocks) expect(b).toBeGreaterThanOrEqual(2);
+      // A different seed puts it somewhere else.
+      expect(huntBlocks(level, 99, pace)).not.toEqual(blocks);
+      // The same seed puts it in the same places, or the server would disagree.
+      expect(huntBlocks(level, 3, pace)).toEqual(blocks);
+    }
+  });
+
+  it("starts further back on medium than on hard", () => {
+    expect(CHASE_FROM.medium).toBeGreaterThan(CHASE_FROM.hard);
+    expect(CHASE_FROM.easy).toBe(0);
+  });
+
+  it("leaves a slow thinker alone on medium, and does not on hard", () => {
+    // Every card right, but each one taken slowly.
+    const slow = (pace: Pace) => {
+      const m = perfectMoves(level, 3, pace);
+      return { ...m, answers: m.answers.map((a) => ({ ...a, ms: TROT_MS + 2000 })) };
+    };
+    expect(play(level, slow("medium")).caught, "medium caught a slow thinker").toBe(0);
+    expect(play(level, slow("hard")).caught, "hard let a dawdler off").toBeGreaterThan(0);
+  });
+
+  it("only comes once they are moving - nobody is chased at the start line", () => {
+    // Every answer wrong, so they never leave the first block.
+    const r = play(level, misses(12, "hard"));
+    expect(r.posts).toBe(0);
+    expect(r.caught).toBe(0);
+  });
+
+  it("costs a life when it does catch them", () => {
+    const seed = 3;
+    const first = huntBlocks(level, seed, "hard")[0];
+    // Run cleanly up to where it comes in, then miss until it has them.
+    const good = perfectMoves(level, seed, "hard").answers.slice(0, first);
+    const bad = Array.from({ length: CHASE_FROM.hard }, () => ({ a: -1, ms: 400 }));
+    const r = play(level, { seed, pace: "hard", answers: [...good, ...bad] });
+    expect(r.posts).toBe(first);
+    expect(r.caught, "it never got them").toBeGreaterThan(0);
+    expect(r.lives, "being caught cost nothing").toBeLessThan(LIVES);
+  });
+
+  it("never catches anyone on a clean quick run, whatever the pace", () => {
+    for (const pace of PACES) {
+      const r = replay(level, perfectMoves(level, 7, pace));
+      expect(r.caught, `${pace} caught a clean run`).toBe(0);
+      expect(r.lives).toBe(LIVES);
+      expect(r.stars).toBe(3);
+    }
+  });
+
+  it("scores the pace the kid actually chose, and junk falls back to medium", () => {
+    expect(cleanMove({ seed: 1, answers: [], pace: "hard" }).pace).toBe("hard");
+    expect(cleanMove({ seed: 1, answers: [], pace: "impossible" }).pace).toBe("medium");
+    expect(cleanMove({ seed: 1, answers: [] }).pace).toBe("medium");
+    expect(replay(level, { seed: 1, answers: [], pace: 7 }).stars).toBe(0);
+  });
+});
+
+describe("where a level happens", () => {
+  it("gives the families different places, not one repainted", () => {
+    const first12 = Array.from({ length: 12 }, (_, i) => biomeFor(levelById(`fr-a${i + 1}`)!).id);
+    expect(new Set(first12).size, "two families share a place").toBe(12);
+  });
+
+  it("always gives the same level the same place", () => {
+    for (const l of ALL_FACT_LEVELS) expect(biomeFor(l).id).toBe(biomeFor(l).id);
+    expect(biomeFor(levelById("fr-a4")!).rise, "the fourth family should be a climb").toBeGreaterThan(0);
+    expect(biomeFor(levelById("fr-a6")!).swim, "the sixth family should be underwater").toBe(true);
+  });
+
+  it("sends every dungeon to the dungeon", () => {
+    for (const l of ALL_FACT_LEVELS.filter((x) => x.dungeon)) expect(biomeFor(l).id).toBe("dungeon");
+  });
+
+  it("draws every prop a place can ask for", () => {
+    for (const b of BIOMES) {
+      const g = propGrid(b.prop, b.propInk[0], b.propInk[1]);
+      let filled = 0;
+      for (let y = 0; y < g.h; y++) for (let x = 0; x < g.w; x++) if (g.get(x, y)) filled++;
+      expect(filled, `${b.id}: "${b.prop}" draws nothing`).toBeGreaterThan(8);
+    }
+  });
+
+  it("names every place in words a kid can read", () => {
+    for (const b of BIOMES) {
+      expect(b.name.length).toBeGreaterThan(3);
+      expect(b.name).not.toMatch(BANNED);
     }
   });
 });

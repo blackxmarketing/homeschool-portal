@@ -36,6 +36,7 @@ export default function TeacherBrief({
   onAsking,
   onExample,
   example,
+  extra,
 }: {
   teacher: BriefTeacher;
   /** The level's skill in plain words - what he reads out. */
@@ -56,6 +57,8 @@ export default function TeacherBrief({
   onExample: () => void;
   /** The two squares to talk through, drawn by the game itself. */
   example?: React.ReactNode;
+  /** Anything else the game wants on this row before the level starts. */
+  extra?: React.ReactNode;
 }) {
   const look = avatarFor(teacher.id);
   const { speakOn } = useVoiceSettings();
@@ -137,6 +140,7 @@ export default function TeacherBrief({
           </div>
         ))}
 
+        {stage === "brief" && extra}
         {example}
 
         {open && (

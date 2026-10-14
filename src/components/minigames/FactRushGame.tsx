@@ -12,8 +12,12 @@ import {
   type FactLevel,
   type Seat,
   afterAnswer,
-  blockGrid,
   cageGrid,
+  cagedPetGrid,
+  type Pace,
+  PACES,
+  beastGrid,
+  biomeFor,
   cloudGrid,
   hazardAt,
   hillGrid,
@@ -25,8 +29,9 @@ import {
   needOf,
   openingPile,
   paceOf,
-  pipeGrid,
   play,
+  propGrid,
+  ridgeGrid,
   riverGrid,
   STRIKES,
   tokenGrid,
@@ -44,9 +49,7 @@ import css from "./FactRushGame.module.css";
 /** Built once: the scenery is the same on every level. */
 const CLOUD = [cloudGrid(false), cloudGrid(true)];
 const HILL = hillGrid();
-const BRICK = blockGrid("brick");
-const PRIZE = blockGrid("prize");
-const PIPE = pipeGrid();
+const BEAST = [beastGrid(0), beastGrid(1)];
 const CAGE = [cageGrid(false), cageGrid(true)];
 const TORCH = [torchGrid(0), torchGrid(1)];
 const STONE = stoneGrid();
@@ -95,6 +98,10 @@ function FactRush({
    * can see who they are running for, then sweeps back to the start line.
    */
   const [shot, setShot] = useState<"cage" | "start">("cage");
+  /** Easy has nothing chasing them; hard wants them to keep moving. */
+  const [pace, setPace] = useState<Pace>("medium");
+  /** Where this level happens. Fixed per level, so it is always theirs. */
+  const biome = useMemo(() => biomeFor(level), [level]);
   const [count, setCount] = useState<number | null>(null);
   const [asking, setAsking] = useState(false);
   const [example, setExample] = useState<ReturnType<typeof workedCard> | null>(null);
@@ -124,7 +131,7 @@ function FactRush({
 
   const posts = postsOn(level);
   const card = pile[0] ? level.cards[pile[0].i] : null;
-  const run = useMemo(() => play(level, { seed, answers }), [level, seed, answers]);
+  const run = useMemo(() => play(level, { seed, answers, pace }), [level, seed, answers, pace]);
   // Out of cards, out of lives, or out of patience.
   const done = pile.length === 0 || run.over || answers.length >= MAX_ASKS;
 
@@ -190,7 +197,7 @@ function FactRush({
     setBusy(true);
     void (async () => {
       try {
-        const r = await onFinish({ seed, answers });
+        const r = await onFinish({ seed, answers, pace });
         setResult({ stars: r.stars, xp: r.xp, score: r.score });
       } catch {
         setError("That run could not be saved. Check you are online.");
@@ -198,7 +205,7 @@ function FactRush({
         setBusy(false);
       }
     })();
-  }, [done, ready, onFinish, seed, answers]);
+  }, [done, ready, onFinish, seed, answers, pace]);
 
   // Typing works as well as tapping: a keyboard is faster, and speed is points.
   useEffect(() => {
@@ -235,8 +242,7 @@ function FactRush({
         <div className="mg-result">
           <h3 className="pixel-title">{run.finished ? "You got them out!" : run.over ? "Out of lives" : "Out of cards"}</h3>
           <div className={css.rescued}>
-            <PixelSprite grid={CAGE[1]} scale={2} />
-            {pet && <PixelSprite grid={pet} scale={2} className={css.freed} />}
+            <PixelSprite grid={cagedPetGrid(pet, true)} scale={3} className={css.freed} />
           </div>
           <div className="mg-stars" aria-label={`${result.stars} stars`}>
             {[1, 2, 3].map((n) => (
@@ -289,6 +295,24 @@ function FactRush({
           seed={seed}
           canAsk={canAsk}
           stage={ready ? "play" : "brief"}
+          extra={
+            <div className={css.paces} role="group" aria-label="How hard do you want it?">
+              {PACES.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  className={`chip ${css.pace} ${pace === p ? css.paceOn : ""}`}
+                  onClick={() => setPace(p)}
+                  aria-pressed={pace === p}
+                >
+                  {p === "easy" ? "🙂 Easy" : p === "medium" ? "😬 Medium" : "😱 Hard"}
+                </button>
+              ))}
+              <span className="kmuted small">
+                {pace === "easy" ? "Nothing chasing you." : pace === "medium" ? "Something chases you, but only a wrong answer lets it close in." : "Keep moving - slow answers let it close in too."}
+              </span>
+            </div>
+          }
           onReady={() => {
             // Sweep back from the cage to the start, then count them in.
             setShot("start");
@@ -311,34 +335,73 @@ function FactRush({
         {/* The level: your pet is in the cage at the far end, and every card
             you get right is another block closer to them. */}
         {/* The level, seen through a camera that keeps the runner big and a
-            third of the way in. It opens looking at the cage, so a kid sees
-            who they are running for before they start. */}
-        <div className={`${css.scene} ${level.dungeon ? css.dungeon : ""}`} aria-label={`${run.posts} of ${posts} blocks run`}>
-          {level.dungeon && (
-            <div className={css.wall}>
-              {Array.from({ length: 120 }, (_, i) => (
-                <PixelSprite key={i} grid={STONE} scale={2} />
-              ))}
-            </div>
-          )}
-
+            third of the way in. It opens looking at the cage so a kid sees who
+            they are running for, then sweeps back to the start. Every family
+            gets its own place to run it in. */}
+        <div
+          className={`${css.scene} ${biome.dark ? css.night : ""}`}
+          style={{ background: `linear-gradient(180deg, ${biome.sky[0]} 0%, ${biome.sky[1]} 78%)` }}
+          aria-label={`${biome.name}: ${run.posts} of ${posts} blocks`}
+        >
           <div
             className={`${css.world} ${shot === "cage" ? css.sweeping : ""}`}
             style={{
               width: `${(posts + 3) * BLOCK}px`,
               left: shot === "cage" ? `calc(58% - ${posts * BLOCK}px)` : `calc(${CAMERA_AT * 100}% - ${run.posts * BLOCK}px)`,
+              // On a level that climbs, the camera has to climb with it -
+              // and during the opening shot it is looking at the cage, which
+              // is at the top.
+              bottom: biome.rise ? `${-(shot === "cage" ? posts : run.posts) * biome.rise}px` : undefined,
             }}
           >
-            <div className={css.ground} />
+            {/* The floor, which climbs on a level that climbs. Under the sea
+                there is only the seabed, far below them. */}
+            {Array.from({ length: posts + 3 }, (_, i) => (
+              <span
+                key={i}
+                className={css.sod}
+                style={{
+                  left: `${i * BLOCK}px`,
+                  bottom: `${(biome.rise ?? 0) * i}px`,
+                  background: biome.ground,
+                  borderTopColor: biome.swim ? "transparent" : undefined,
+                  boxShadow: `inset 0 -12px 0 ${biome.under}`,
+                  opacity: biome.swim ? 0.55 : 1,
+                }}
+              />
+            ))}
 
-            {/* The ground a kid runs over: what is in the way, and what is
-                worth picking up. */}
-            {Array.from({ length: posts + 1 }, (_, i) => {
-              const h = hazardAt(i);
-              const token = tokenOn(i) && run.posts < i;
-              if (!h && !token && !(level.dungeon && i % 5 === 2)) return null;
+            {/* The ridge along the back. */}
+            {[1, 7, 13, 19, 25].map((i) => (
+              <span key={i} className={css.ridge} style={{ left: `${i * BLOCK}px`, bottom: `${(biome.rise ?? 0) * i + 30}px` }}>
+                <PixelSprite grid={ridgeGrid(biome.far, !!biome.rise)} scale={2} />
+              </span>
+            ))}
+
+            {/* What grows, stands or glows beside the track. */}
+            {Array.from({ length: posts + 2 }, (_, i) => {
+              if (i % 3 !== 1) return null;
               return (
-                <span key={i} className={css.at} style={{ left: `${i * BLOCK}px` }}>
+                <span key={`p${i}`} className={css.prop} style={{ left: `${i * BLOCK + 10}px`, bottom: `${(biome.rise ?? 0) * i + 34}px` }}>
+                  <PixelSprite grid={propGrid(biome.prop, biome.propInk[0], biome.propInk[1])} scale={2} />
+                </span>
+              );
+            })}
+
+            {biome.clouds &&
+              [2, 9, 17, 24].map((i) => (
+                <span key={`c${i}`} className={i % 2 ? css.cloudA : css.cloudB} style={{ left: `${i * BLOCK}px` }}>
+                  <PixelSprite grid={CLOUD[i % 2]} scale={2} />
+                </span>
+              ))}
+
+            {/* What is in the way, and what is worth picking up. */}
+            {Array.from({ length: posts + 1 }, (_, i) => {
+              const h = biome.swim ? null : hazardAt(i);
+              const token = tokenOn(i) && run.posts < i;
+              if (!h && !token) return null;
+              return (
+                <span key={`h${i}`} className={css.at} style={{ left: `${i * BLOCK}px`, bottom: `${(biome.rise ?? 0) * i + 36}px` }}>
                   {h && (
                     <span className={h === "hole" ? css.hole : h === "river" ? css.river : css.mountain}>
                       <PixelSprite grid={HAZARD_ART[h]} scale={2} />
@@ -349,63 +412,36 @@ function FactRush({
                       <PixelSprite grid={TOKEN[beat ? 1 : 0]} scale={2} />
                     </span>
                   )}
-                  {level.dungeon && i % 5 === 2 && !h && (
-                    <span className={css.torch}>
-                      <PixelSprite grid={TORCH[beat ? 1 : 0]} scale={2} />
-                    </span>
-                  )}
                 </span>
               );
             })}
 
-            {!level.dungeon && (
-              <>
-                <span className={css.cloudA} style={{ left: `${BLOCK * 2}px` }}>
-                  <PixelSprite grid={CLOUD[0]} scale={2} />
-                </span>
-                <span className={css.cloudB} style={{ left: `${BLOCK * 9}px` }}>
-                  <PixelSprite grid={CLOUD[1]} scale={2} />
-                </span>
-                <span className={css.cloudA} style={{ left: `${BLOCK * 17}px` }}>
-                  <PixelSprite grid={CLOUD[1]} scale={2} />
-                </span>
-                <span className={css.hill} style={{ left: `${BLOCK * 5}px` }}>
-                  <PixelSprite grid={HILL} scale={2} />
-                </span>
-                <span className={css.hill} style={{ left: `${BLOCK * 14}px` }}>
-                  <PixelSprite grid={HILL} scale={2} />
-                </span>
-                <span className={css.pipe} style={{ left: `${BLOCK * 11}px` }}>
-                  <PixelSprite grid={PIPE} scale={2} />
-                </span>
-                <span className={css.brick} style={{ left: `${BLOCK * 4}px` }}>
-                  <PixelSprite grid={BRICK} scale={2} />
-                </span>
-                <span className={css.brick} style={{ left: `${BLOCK * 8}px` }}>
-                  <PixelSprite grid={PRIZE} scale={2} />
-                </span>
-              </>
-            )}
-
             {/* The cage, at the last block. */}
-            <span className={css.cage} style={{ left: `${posts * BLOCK}px` }}>
-              <PixelSprite grid={CAGE[run.finished ? 1 : 0]} scale={3} />
-              {pet && (
-                <span className={`${css.caged} ${run.finished ? css.out : ""}`}>
-                  <PixelSprite grid={pet} scale={2} />
-                </span>
-              )}
+            <span className={css.cage} style={{ left: `${posts * BLOCK}px`, bottom: `${(biome.rise ?? 0) * posts + 33}px` }}>
+              <PixelSprite grid={cagedPetGrid(pet, run.finished)} scale={3} />
             </span>
 
+            {/* Whatever is after them, however far back it still is. */}
+            {run.chase !== null && (
+              <span
+                className={`${css.beast} ${run.chase <= 2 ? css.close : ""}`}
+                style={{ left: `${(run.posts - run.chase) * BLOCK}px`, bottom: `${(biome.rise ?? 0) * Math.max(0, run.posts - run.chase) + 33}px` }}
+              >
+                <PixelSprite grid={BEAST[stepping ? 1 : 0]} scale={3} />
+              </span>
+            )}
+
             <span
-              className={`${css.runner} ${run.big ? css.grown : ""} ${beat?.kind === "trip" ? css.trip : ""} ${stepping ? css.step : ""} ${
-                beat?.kind === "sprint" ? css.sprint : ""
-              }`}
-              style={{ left: `${run.posts * BLOCK}px` }}
+              className={`${css.runner} ${biome.swim ? css.swimming : ""} ${run.big ? css.grown : ""} ${beat?.kind === "trip" ? css.trip : ""} ${
+                stepping ? css.step : ""
+              } ${beat?.kind === "sprint" ? css.sprint : ""}`}
+              style={{ left: `${run.posts * BLOCK}px`, bottom: `${(biome.rise ?? 0) * run.posts + 33}px` }}
             >
               <PixelSprite grid={runner[stepping ? 1 : 0]} scale={run.big ? 4 : 3} />
             </span>
           </div>
+
+          <span className={css.where}>{biome.name}</span>
 
           {count !== null && (
             <div className={css.countOver} role="status" aria-live="assertive">
