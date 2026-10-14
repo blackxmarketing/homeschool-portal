@@ -49,8 +49,12 @@ export default function TeacherBrief({
   seed: number;
   /** False when the AI coach is off or has no key, which hides the ask button. */
   canAsk: boolean;
-  /** "brief" is before the level starts; "play" is while it is running. */
-  stage: "brief" | "play";
+  /**
+   * "brief" is before the level starts, "play" is while it is running, and
+   * "report" is afterwards - the same row, with how the level went read out
+   * in place of the directions.
+   */
+  stage: "brief" | "play" | "report";
   onReady: () => void;
   /** Tells the game to hold the clock while the coach has a question open. */
   onAsking: (open: boolean) => void;
@@ -62,7 +66,7 @@ export default function TeacherBrief({
   onExample?: () => void;
   /** The two squares to talk through, drawn by the game itself. */
   example?: React.ReactNode;
-  /** Anything else the game wants on this row before the level starts. */
+  /** Anything else the game wants on this row before or after the level. */
   extra?: React.ReactNode;
   /**
    * Whether to print what he is saying.
@@ -82,7 +86,9 @@ export default function TeacherBrief({
    */
   const kind = useTeacherVoice();
   const speech = useSpeech();
-  const readId = `coach-${levelId}`;
+  // A separate id for the report, or the read-aloud hook takes it for the
+  // directions it has already read and says nothing.
+  const readId = stage === "report" ? `coach-done-${levelId}` : `coach-${levelId}`;
   const [open, setOpen] = useState(false);
   const [turns, setTurns] = useState<{ q: string; a: string }[]>([]);
   const [typed, setTyped] = useState("");
@@ -90,7 +96,7 @@ export default function TeacherBrief({
   const [err, setErr] = useState<string | null>(null);
 
   // He reads the directions once, when the level opens.
-  useAutoRead(readId, directions, stage === "brief");
+  useAutoRead(readId, directions, stage === "brief" || stage === "report");
   useStopOnUnmount();
 
   const talking = speech.id === readId && !speech.paused;
@@ -153,7 +159,7 @@ export default function TeacherBrief({
           </div>
         ))}
 
-        {stage === "brief" && extra}
+        {stage !== "play" && extra}
         {example}
 
         {open && (
@@ -207,7 +213,7 @@ export default function TeacherBrief({
               )}
             </>
           )}
-          {canAsk && (
+          {canAsk && stage !== "report" && (
             <button type="button" className="kbtn ghost small-btn" onClick={() => toggle(!open)} disabled={busy}>
               {open ? "Done asking" : `🙋 Ask ${teacher.name}`}
             </button>

@@ -74,6 +74,11 @@ export interface MiniGame {
    */
   coins?: (levelId: string, moves: unknown, saved: number) => number;
   /**
+   * Whether this run was good enough to master the level - which is a higher
+   * bar than three stars and is worked out here from the replayed moves.
+   */
+  mastered?: (levelId: string, moves: unknown) => boolean;
+  /**
    * What the game saw the kid show, for the mastery meter. Optional: a game
    * that only earns stars leaves it out. Read on the server from the replayed
    * moves, never from anything the browser claims.

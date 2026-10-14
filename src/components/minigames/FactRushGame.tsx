@@ -30,6 +30,7 @@ import {
   LIVES,
   mountainGrid,
   levelById,
+  medalGrid,
   MAX_ASKS,
   needOf,
   openingPile,
@@ -88,6 +89,150 @@ const CAMERA_AT = 0.3;
 const GAP_PX = 18;
 
 const HAZARD_ART: Record<Hazard, ReturnType<typeof holeGrid>> = { hole: HOLE, river: RIVER, mountain: MOUNTAIN };
+
+/**
+ * A sky full of it, for mastering a level.
+ *
+ * Sparks thrown out from four points, each burst on its own delay so it reads
+ * as fireworks rather than one puff. Over in a couple of seconds: it is a
+ * cheer, not a screensaver.
+ */
+function Fireworks({ big = false }: { big?: boolean }) {
+  const bursts = [
+    { x: 22, y: 24, hue: "#f2d24a" },
+    { x: 70, y: 16, hue: "#e0453a" },
+    { x: 44, y: 40, hue: "#63c47f" },
+    { x: 84, y: 44, hue: "#7fd8ff" },
+    ...(big
+      ? [
+          { x: 12, y: 58, hue: "#ec6aa0" },
+          { x: 58, y: 66, hue: "#f2a516" },
+          { x: 34, y: 8, hue: "#fff3bf" },
+          { x: 90, y: 20, hue: "#8e44ad" },
+        ]
+      : []),
+  ];
+  return (
+    <div className={css.sky} aria-hidden>
+      {bursts.flatMap((b, bi) =>
+        Array.from({ length: 10 }, (_, i) => {
+          const a = (i / 10) * Math.PI * 2;
+          return (
+            <span
+              key={`${bi}-${i}`}
+              className={css.spark}
+              style={
+                {
+                  left: `${b.x}%`,
+                  top: `${b.y}%`,
+                  background: b.hue,
+                  "--dx": `${Math.round(Math.cos(a) * 62)}px`,
+                  "--dy": `${Math.round(Math.sin(a) * 62)}px`,
+                  animationDelay: `${bi * 0.28}s`,
+                  animationIterationCount: big ? "infinite" : 2,
+                } as React.CSSProperties
+              }
+            />
+          );
+        }),
+      )}
+    </div>
+  );
+}
+
+/**
+ * What the coach says when a level is over.
+ *
+ * The numbers out loud, in the order a kid cares about them: how it went, how
+ * many got away, what it was worth. He says it and it is written in his box,
+ * so it can be heard or read.
+ */
+function reportSay(r: {
+  stars: number;
+  wrong: number;
+  points: number;
+  xp: number;
+  mastered: boolean;
+  justMastered: boolean;
+  level?: number;
+  rank?: string;
+}): string {
+  const say: string[] = [];
+  say.push(r.justMastered ? "You mastered that one." : "You got them out!");
+  say.push(r.wrong === 0 ? "You did not miss a single card." : `You missed ${r.wrong} card${r.wrong === 1 ? "" : "s"}.`);
+  say.push(`That is ${r.points} points, and ${r.stars} star${r.stars === 1 ? "" : "s"}.`);
+  if (r.xp > 0) say.push(`${r.xp} XP for the new stars.`);
+  else if (r.mastered) say.push("There is no XP left in this one now you have mastered it - but come back for the practice whenever you like.");
+  else say.push("No XP this time: you already had these stars. New stars on a level you have not beaten yet are what pay.");
+  if (r.level) say.push(`And you are level ${r.level} now. You are ${/^[AEIOU]/.test(r.rank ?? "") ? "an" : "a"} ${r.rank}!`);
+  if (r.stars < 3) say.push("Answer a card inside two and a half seconds and it is worth double.");
+  return say.join(" ");
+}
+
+/**
+ * The stars, arriving one at a time with a note each.
+ *
+ * They land after the coach has started talking, so a kid hears them come in
+ * rather than finding them already sitting there.
+ */
+function StarPop({ stars }: { stars: number }) {
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    const timers = Array.from({ length: stars }, (_, i) =>
+      setTimeout(() => {
+        setShown(i + 1);
+        chime("star", i);
+      }, 700 + i * 650),
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [stars]);
+  return (
+    <div className={`mg-stars ${css.reportStars}`} aria-label={`${stars} stars`}>
+      {[1, 2, 3].map((n) => (
+        <span key={n} className={`star ${shown >= n ? `lit ${css.starIn}` : ""}`} aria-hidden>
+          ★
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Mastering a level, made a proper occasion of.
+ *
+ * It takes the whole screen before the stars are shown, because three stars
+ * happen most runs and this does not: it means every card came straight back
+ * with no counting and no mistakes, and it can only happen once per level.
+ */
+function MedalParty({ level, title, onDone }: { level: FactLevel; title: string; onDone: () => void }) {
+  const [frame, setFrame] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setFrame((f) => f + 1), 420);
+    return () => clearInterval(t);
+  }, []);
+  // The fanfare, and then the fireworks going off one at a time over it.
+  useEffect(() => {
+    chime("medal");
+    const pops = [300, 620, 900, 1240, 1900, 2240, 2560].map((ms) => setTimeout(() => chime("pop"), ms));
+    return () => pops.forEach(clearTimeout);
+  }, []);
+  return (
+    <div className={`mg ${css.fr}`}>
+      <div className={`mg-result ${css.party}`}>
+        <Fireworks big />
+        <p className={css.partyKicker}>You mastered</p>
+        <h3 className="pixel-title">{title}</h3>
+        <PixelSprite grid={medalGrid(level.id, frame)} scale={9} className={css.bigMedal} />
+        <p className={css.medalSay}>
+          Every card right, and every one of them straight off - no stopping to work one out. This level is yours now, and the medal stays on it.
+        </p>
+        <button type="button" className="kbtn kbtn-primary" onClick={onDone} autoFocus>
+          See my stars →
+        </button>
+      </div>
+    </div>
+  );
+}
 
 /** What each key does, for a kid who would rather see it than read it. */
 function FightKeys() {
@@ -220,7 +365,18 @@ function FactRush({
   /** What just happened, for the hero to react to. */
   const [beat, setBeat] = useState<{ kind: "sprint" | "run" | "trot" | "trip" | "grabbed" | "died"; show?: string } | null>(null);
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<{ stars: number; xp: number; score?: number; level?: number; rank?: string; unlocked?: string[] } | null>(null);
+  /** The medal screen, shown once before the stars when a level is mastered. */
+  const [party, setParty] = useState(false);
+  const [result, setResult] = useState<{
+    stars: number;
+    xp: number;
+    score?: number;
+    level?: number;
+    rank?: string;
+    unlocked?: string[];
+    mastered?: boolean;
+    justMastered?: boolean;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   /**
@@ -354,7 +510,17 @@ function FactRush({
     void (async () => {
       try {
         const r = await onFinish({ seed, answers, pace, thrown, beat: dragonDown });
-        setResult({ stars: r.stars, xp: r.xp, score: r.score, level: r.level, rank: r.rank, unlocked: r.unlocked });
+        setResult({
+          stars: r.stars,
+          xp: r.xp,
+          score: r.score,
+          level: r.level,
+          rank: r.rank,
+          unlocked: r.unlocked,
+          mastered: r.mastered,
+          justMastered: r.justMastered,
+        });
+        if (r.justMastered) setParty(true);
       } catch {
         setError("That run could not be saved. Check you are online.");
       } finally {
@@ -482,53 +648,61 @@ function FactRush({
     );
   }
 
+  if (result && party) return <MedalParty level={level} title={level.title} onDone={() => setParty(false)} />;
+
+  // A run that was not won leaves on the game over card above, so anything
+  // reaching here was a win: the coach talks them through how it went, on the
+  // same row he gave the directions from.
   if (result) {
     return (
-      <div className={`mg ${css.fr}`}>
-        <div className="mg-result">
-          <h3 className="pixel-title">
-            {run.finished
-              ? "You got them out!"
-              : run.over
-                ? "Out of lives"
-                : fightLost
-                  ? "The dragon won"
-                  : gaveUp
-                    ? "Out of fireballs"
-                    : level.dungeon
-                      ? "The dragon is still standing"
-                      : "Out of cards"}
-          </h3>
-          <div className={css.rescued}>
-            <PixelSprite grid={cagedPetGrid(pet, true)} scale={3} className={css.freed} />
-          </div>
-          <div className="mg-stars" aria-label={`${result.stars} stars`}>
-            {[1, 2, 3].map((n) => (
-              <span key={n} className={`star ${result.stars >= n ? "lit" : ""}`}>
-                ★
-              </span>
-            ))}
-          </div>
-          <p className="kmuted">
-            {run.posts} blocks run, {run.wrong} missed. {result.score ?? run.points} points.
-            {run.over || fightLost ? " Your pet is still in there - have another go." : ""}
-            {gaveUp ? " Beat a level you have not three-starred yet, or come back and answer more cards here." : ""}
-          </p>
-          {result.xp > 0 ? (
-            <p className="kmuted">+{result.xp} XP for new stars!</p>
-          ) : (
-            <p className="kmuted small">No XP this time - you already had these stars. New stars on a level you have not beaten yet are what pay.</p>
-          )}
-          {result.level && (
-            <p className={css.levelUp}>
-              Level {result.level} - you are {/^[AEIOU]/.test(result.rank ?? "") ? "an" : "a"} {result.rank}!
-              {result.unlocked?.length ? ` You unlocked ${result.unlocked.map(unlockName).join(" and ")} - go and put it on.` : ""}
-            </p>
-          )}
-          {result.stars < 3 && <p className="kmuted small">A card answered inside two and a half seconds is a sprint, and a sprint is worth double.</p>}
-          {error && <p className="kmuted small">{error}</p>}
+      <TeacherVoice kind={coachLook.voice}>
+        <div className={`mg ${css.fr}`}>
+          <TeacherBrief
+            teacher={coach}
+            directions={reportSay({
+              stars: result.stars,
+              wrong: run.wrong,
+              points: result.score ?? run.points,
+              xp: result.xp,
+              mastered: !!result.mastered,
+              justMastered: !!result.justMastered,
+              level: result.level,
+              rank: result.rank,
+            })}
+            rule={level.title}
+            levelId={level.id}
+            board={0}
+            seed={seed}
+            canAsk={false}
+            stage="report"
+            onReady={() => {}}
+            onAsking={() => {}}
+            extra={
+              <div className={css.report}>
+                <StarPop stars={result.stars} />
+                <div className={css.reportRow}>
+                  {/* Out of the cage and standing with them, which is the
+                      whole point of the level. */}
+                  <span className={css.pair}>
+                    <PixelSprite grid={runner[0]} scale={4} />
+                    {pet && <PixelSprite grid={pet} scale={4} />}
+                  </span>
+                  {result.justMastered && (
+                    <span className={css.reportMedal}>
+                      <PixelSprite grid={medalGrid(level.id)} scale={3} />
+                      <span>Mastered</span>
+                    </span>
+                  )}
+                </div>
+                {result.unlocked?.length ? (
+                  <p className={css.levelUp}>You unlocked {result.unlocked.map(unlockName).join(" and ")} - go and put it on.</p>
+                ) : null}
+                {error && <p className="kmuted small">{error}</p>}
+              </div>
+            }
+          />
         </div>
-      </div>
+      </TeacherVoice>
     );
   }
 

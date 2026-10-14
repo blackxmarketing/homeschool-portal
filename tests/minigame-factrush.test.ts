@@ -47,6 +47,10 @@ import {
   hillGrid,
   drawOf,
   levelById,
+  medalGrid,
+  MASTERY_MS,
+  MASTERY_SPREAD,
+  MASTERY_FLOOR_MS,
   maxPoints,
   needOf,
   openingPile,
@@ -1149,5 +1153,117 @@ describe("the fight after a burn", () => {
 
   it("thins the dragon out as it goes down, so they can see it going", () => {
     expect(fight).toMatch(/opacity: won \? [\d.]+ : [\d.]+ \+ [\d.]+ \* \(hp \/ need\)/);
+  });
+});
+
+describe("mastering a level", () => {
+  const level = levelById("fr-x6")!;
+  const steady = (ms: number[], seed = 1) => {
+    const base = perfectMoves(level, seed, "easy");
+    return { ...base, answers: base.answers.map((a, i) => ({ ...a, ms: ms[i % ms.length] })) };
+  };
+
+  it("is earned by a clean run answered at an even speed", () => {
+    const r = replay(level, steady([800]));
+    expect(r.finished).toBe(true);
+    expect(r.mastered).toBe(true);
+  });
+
+  it("is earned at any challenge level, because it is about knowing the facts", () => {
+    for (const pace of PACES) {
+      const base = perfectMoves(level, 6, pace);
+      const r = replay(level, base);
+      expect(r.finished).toBe(true);
+      expect(r.mastered).toBe(true);
+    }
+  });
+
+  it("is lost by a single wrong answer, however fast the rest were", () => {
+    // Played right through to the pet, so the only thing between this run and
+    // a medal is the one card they missed.
+    let pile = openingPile(level, 1);
+    const answers: { a: number; ms: number }[] = [];
+    let missed = false;
+    let guard = 0;
+    while (pile.length && guard++ < MAX_ASKS) {
+      const card = level.cards[pile[0].i];
+      answers.push({ a: missed ? card.answer : card.answer + 1, ms: 600 });
+      pile = afterAnswer(pile, missed, needOf(level));
+      missed = true;
+    }
+    const r = replay(level, { seed: 1, pace: "easy", answers });
+    expect(r.finished).toBe(true);
+    expect(r.wrong).toBe(1);
+    expect(r.mastered).toBe(false);
+  });
+
+  it("is lost by stopping to work one out", () => {
+    const ms = Array(12).fill(900);
+    ms[4] = MASTERY_MS + 1;
+    expect(replay(level, steady(ms)).mastered).toBe(false);
+  });
+
+  it("is lost by one card taking much longer than the others, even inside the pause limit", () => {
+    const ms = Array(12).fill(1000);
+    ms[7] = Math.round(1000 * MASTERY_SPREAD) + 200;
+    expect(ms[7]).toBeLessThan(MASTERY_MS);
+    expect(replay(level, steady(ms)).mastered).toBe(false);
+  });
+
+  it("does not hold a quick kid to tenths of a second", () => {
+    const ms = [200, 650, 300, 700, 250, 600, 350, 500, 220, 680, 300, 640];
+    expect(Math.max(...ms) / Math.min(...ms)).toBeGreaterThan(MASTERY_SPREAD);
+    expect(Math.max(...ms)).toBeLessThan(MASTERY_FLOOR_MS);
+    expect(replay(level, steady(ms)).mastered).toBe(true);
+  });
+
+  it("is not earned by a run that stopped short, however clean it was", () => {
+    const base = perfectMoves(level, 1, "easy");
+    const r = replay(level, { ...base, answers: base.answers.slice(0, 4) });
+    expect(r.finished).toBe(false);
+    expect(r.mastered).toBe(false);
+  });
+
+  it("is not earned by a run with time passing and no card answered", () => {
+    const base = perfectMoves(level, 1, "easy");
+    const r = replay(level, { ...base, answers: [{ a: null, ms: 1200 }, ...base.answers] });
+    expect(r.finished).toBe(true);
+    expect(r.wrong).toBe(0);
+    expect(r.mastered).toBe(false);
+  });
+
+  it("is reported to the server by the game itself, and never thrown by bad input", () => {
+    expect(factRush.mastered?.(level.id, steady([800]))).toBe(true);
+    expect(factRush.mastered?.(level.id, JSON.parse(JSON.stringify(steady([800]))))).toBe(true);
+    expect(factRush.mastered?.("no-such-level", steady([800]))).toBe(false);
+    for (const junk of [null, undefined, 7, "x", {}, { seed: NaN, answers: null }, { answers: Array(10000).fill({ a: 1, ms: 1 }) }]) {
+      expect(() => factRush.mastered?.(level.id, junk)).not.toThrow();
+    }
+  });
+
+  it("can be won on every level in the game", () => {
+    for (const l of ALL_FACT_LEVELS) {
+      const base = perfectMoves(l, 3, "easy");
+      const move = l.dungeon ? { ...base, thrown: DRAGON_HITS.easy, beat: true } : base;
+      expect(replay(l, move).mastered, l.id).toBe(true);
+    }
+  });
+
+  it("hands out a different medal for every level", () => {
+    const seen = new Map<string, string>();
+    for (const l of ALL_FACT_LEVELS) {
+      const g = medalGrid(l.id);
+      expect(g.w).toBeGreaterThan(0);
+      expect(g.px.some((c) => c)).toBe(true);
+      const key = g.px.join(",");
+      expect(seen.has(key), `${l.id} shares a medal with ${seen.get(key)}`).toBe(false);
+      seen.set(key, l.id);
+    }
+  });
+
+  it("draws the same medal for a level every time, and has a second frame", () => {
+    const a = medalGrid("fr-x6");
+    expect(medalGrid("fr-x6").px.join(",")).toBe(a.px.join(","));
+    expect(medalGrid("fr-x6", 1).px.join(",")).not.toBe(a.px.join(","));
   });
 });

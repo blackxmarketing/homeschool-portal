@@ -254,16 +254,6 @@
 
 /* ---- the end ---- */
 
-.rescued {
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 6px;
-  line-height: 0;
-}
-.freed {
-  animation: hop 0.6s infinite;
-}
 
 @media (max-width: 420px) {
   .scene {
@@ -278,9 +268,6 @@
   .sprint,
   .trip,
   .shout,
-  .freed {
-    animation: none;
-  }
   .runner {
     transition: none;
   }
@@ -747,4 +734,143 @@
   gap: 8px;
   flex-wrap: wrap;
   justify-content: center;
+}
+
+/* Mastering a level is the biggest thing that happens in this game, so it
+   gets a sky. */
+.sky {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 5;
+}
+.spark {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  opacity: 0;
+  animation: burst 1.5s ease-out 2;
+}
+@keyframes burst {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(0.3);
+    opacity: 0;
+  }
+}
+
+/* The medal itself, handed over. */
+@keyframes shine {
+  50% {
+    transform: rotate(-6deg) scale(1.06);
+  }
+}
+.medalSay {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spark,
+  .spark {
+    opacity: 0;
+  }
+}
+
+/* The medal screen: the one time this game stops everything for a cheer. */
+.party {
+  position: relative;
+  min-height: 340px;
+  gap: 10px;
+}
+.partyKicker {
+  margin: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: 0.7;
+}
+.bigMedal {
+  animation: land 0.7s cubic-bezier(0.2, 1.5, 0.4, 1) 1 both, shine 2.4s ease-in-out 0.7s infinite;
+  filter: drop-shadow(0 6px 0 rgba(27, 21, 48, 0.35));
+}
+@keyframes land {
+  0% {
+    transform: scale(0.2) rotate(-25deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bigMedal {
+    animation: none;
+  }
+}
+
+/* How the level went, in the coach's own box. */
+.report {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 6px 0 2px;
+}
+.reportStars {
+  margin: 0;
+}
+.starIn {
+  animation: starland 0.45s cubic-bezier(0.2, 1.6, 0.4, 1) 1 both;
+}
+@keyframes starland {
+  0% {
+    transform: scale(0.1) rotate(-40deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+/* The pet, out of the cage, with the medal beside it when there is one. */
+.reportRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.pair {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+.reportMedal {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 4px 10px 4px 6px;
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+  background: #fff8e1;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .starIn {
+    animation: none;
+  }
 }

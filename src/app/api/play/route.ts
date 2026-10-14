@@ -34,5 +34,12 @@ export async function POST(req: Request) {
     recordEvidence(kid.id, e.subject, e);
     logLearningEvent(kid.id, { subject: e.subject, concept: e.concept, firstTry: e.firstTry, score: e.correct ? 1 : 0, ms: e.ms, expectedMs: e.expectedMs, helped: e.rung > 0, source: "game" });
   }
-  return NextResponse.json({ ...recordMiniGame(kid.id, game.id, level, scored.stars, scored.best), earned: scored.stars, score: scored.best, ...(coins !== undefined && { coins }) });
+  // Mastery is worked out from the same replayed moves, never claimed.
+  const mastered = game.mastered?.(level, b.moves) ?? false;
+  return NextResponse.json({
+    ...recordMiniGame(kid.id, game.id, level, scored.stars, scored.best, mastered),
+    earned: scored.stars,
+    score: scored.best,
+    ...(coins !== undefined && { coins }),
+  });
 }

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { GAME_UI } from "./registry";
 import { gameById, type MiniLevel } from "@/lib/minigames";
+import { PixelSprite } from "../pixel/PixelArt";
+import { medalGrid } from "@/lib/minigames/factrush";
 import type { Hero, PetId } from "@/lib/pixel/hero";
 
 /** Picks a level, runs the game, and sends the result to the server to be scored. */
@@ -19,7 +21,7 @@ export default function GameHost({
 }: {
   game: string;
   levels: MiniLevel[];
-  progress: Record<string, { stars: number; best: number | null; plays: number }>;
+  progress: Record<string, { stars: number; best: number | null; plays: number; mastered?: boolean }>;
   /** Stars needed on a level before the next one opens. */
   unlockAt?: number;
   /** Levels up to here are open already, because an assessment said so. */
@@ -44,13 +46,15 @@ export default function GameHost({
     const res = await fetch("/api/play", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ game, level: levelId, moves }) });
     const d = await res.json();
     if (!res.ok) throw new Error(d.error ?? "Couldn't save the game.");
-    setStars((s) => ({ ...s, [levelId]: { stars: d.stars, best: d.best, plays: (s[levelId]?.plays ?? 0) + 1 } }));
+    setStars((s) => ({ ...s, [levelId]: { stars: d.stars, best: d.best, plays: (s[levelId]?.plays ?? 0) + 1, mastered: !!d.mastered } }));
     if (typeof d.coins === "number") setPurse(d.coins as number);
     return {
       stars: d.earned as number,
       xp: d.xp as number,
       score: d.score as number | undefined,
       coins: d.coins as number | undefined,
+      mastered: d.mastered as boolean | undefined,
+      justMastered: d.justMastered as boolean | undefined,
       level: d.level as number | undefined,
       rank: d.rank as string | undefined,
       unlocked: d.unlocked as string[] | undefined,
@@ -78,7 +82,7 @@ export default function GameHost({
         {!gameById(game)?.ownIntro && <p className="game-intro">{levels[idx]?.intro}</p>}
         {GAME_UI[game] && (() => {
           const Screen = GAME_UI[game];
-          return <Screen key={`${playing}-${round}`} levelId={playing} stars={stars[playing]?.stars ?? 0} plays={stars[playing]?.plays ?? 0} pet={pet} hero={hero} coins={purse} canAsk={canAsk} onReplay={() => setRound((r) => r + 1)} onQuit={() => setPlaying(null)} onFinish={(m) => finish(playing, m)} />;
+          return <Screen key={`${playing}-${round}`} levelId={playing} stars={stars[playing]?.stars ?? 0} plays={stars[playing]?.plays ?? 0} pet={pet} hero={hero} coins={purse} mastered={!!stars[playing]?.mastered} canAsk={canAsk} onReplay={() => setRound((r) => r + 1)} onQuit={() => setPlaying(null)} onFinish={(m) => finish(playing, m)} />;
         })()}
       </div>
     );
@@ -94,6 +98,11 @@ export default function GameHost({
           <button key={l.id} type="button" className={`level-card ${open ? "" : "locked"}`} disabled={!open} onClick={() => setPlaying(l.id)}>
             <span className="level-num">Level {i + 1}</span>
             <span className="level-title">{l.title}</span>
+            {stars[l.id]?.mastered && (
+              <span className="level-medal" title="Mastered: no mistakes, no hesitating" aria-label="Mastered">
+                <PixelSprite grid={medalGrid(l.id)} scale={2} />
+              </span>
+            )}
             <span className="level-stars">
               {[1, 2, 3].map((n) => (
                 <span key={n} className={`star ${s >= n ? "lit" : ""}`}>

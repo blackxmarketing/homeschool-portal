@@ -294,6 +294,9 @@ CREATE TABLE IF NOT EXISTS sprint_log (
 
 /** Columns added after the first release. Existing databases get them on startup. */
 const ADDED_COLUMNS: { table: string; column: string; ddl: string }[] = [
+  // A level mastered: finished with no wrong answers and no stopping to work
+  // one out. More than three stars, and it only ever happens once.
+  { table: "minigame_progress", column: "mastered", ddl: "ALTER TABLE minigame_progress ADD COLUMN mastered TEXT" },
   // JSON FocusProfile (see lib/focus.ts). NULL means defaults.
   { table: "kids", column: "focus", ddl: "ALTER TABLE kids ADD COLUMN focus TEXT" },
   // For the waste meter: when each question was answered and whether it was right.

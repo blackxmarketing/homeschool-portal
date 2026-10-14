@@ -168,14 +168,15 @@ export function mainQuests(kidId: number): (Quest & { land: LandId; landName: st
 /** XP per newly earned star (replaying for the same stars earns nothing new). */
 const XP_PER_STAR = 10;
 
-export function miniGameProgress(kidId: number, game: string): Record<string, { stars: number; best: number | null; plays: number }> {
-  const rows = getDb().prepare("SELECT level, stars, best, plays FROM minigame_progress WHERE kid_id = ? AND game = ?").all(kidId, game) as {
+export function miniGameProgress(kidId: number, game: string): Record<string, { stars: number; best: number | null; plays: number; mastered: boolean }> {
+  const rows = getDb().prepare("SELECT level, stars, best, plays, mastered FROM minigame_progress WHERE kid_id = ? AND game = ?").all(kidId, game) as {
     level: string;
     stars: number;
     best: number | null;
     plays: number;
+    mastered: string | null;
   }[];
-  return Object.fromEntries(rows.map((r) => [r.level, { stars: r.stars, best: r.best, plays: r.plays }]));
+  return Object.fromEntries(rows.map((r) => [r.level, { stars: r.stars, best: r.best, plays: r.plays, mastered: !!r.mastered }]));
 }
 
 /** Saves a finished game (already scored on the server). Returns the XP awarded for new stars. */
@@ -185,18 +186,35 @@ export function recordMiniGame(
   level: string,
   stars: number,
   best: number,
-): { stars: number; best: number; xp: number; newBest: boolean; level?: number; rank?: string; unlocked?: string[] } {
+  mastered = false,
+): {
+  stars: number;
+  best: number;
+  xp: number;
+  newBest: boolean;
+  level?: number;
+  rank?: string;
+  unlocked?: string[];
+  mastered?: boolean;
+  justMastered?: boolean;
+} {
   const db = getDb();
-  const prev = db.prepare("SELECT stars, best FROM minigame_progress WHERE kid_id = ? AND game = ? AND level = ?").get(kidId, game, level) as
-    | { stars: number; best: number | null }
+  const prev = db.prepare("SELECT stars, best, mastered FROM minigame_progress WHERE kid_id = ? AND game = ? AND level = ?").get(kidId, game, level) as
+    | { stars: number; best: number | null; mastered: string | null }
     | undefined;
+  /** Mastered before today, so there is nothing left to earn here. */
+  const already = !!prev?.mastered;
   const newStars = Math.max(0, stars - (prev?.stars ?? 0));
   const newBest = prev?.best === null || prev?.best === undefined || best > prev.best;
   db.prepare(
     `INSERT INTO minigame_progress (kid_id, game, level, stars, best, plays) VALUES (?, ?, ?, ?, ?, 1)
      ON CONFLICT (kid_id, game, level) DO UPDATE SET stars = MAX(stars, excluded.stars), best = MAX(COALESCE(best, excluded.best), excluded.best), plays = plays + 1, updated_at = datetime('now')`,
   ).run(kidId, game, level, stars, best);
-  const xp = newStars * XP_PER_STAR;
+  // A level already mastered has given everything it has to give.
+  const xp = already ? 0 : newStars * XP_PER_STAR;
+  if (mastered && !already) {
+    db.prepare("UPDATE minigame_progress SET mastered = datetime('now') WHERE kid_id = ? AND game = ? AND level = ?").run(kidId, game, level);
+  }
   // Where they were before this run, so a level crossed can be spotted.
   const was = levelInfo(kidXp(kidId)).level;
   if (xp) awardXp(kidId, xp);
@@ -208,6 +226,8 @@ export function recordMiniGame(
     xp,
     newBest,
     ...(now > was && { level: now, rank: rankFor(now).title, unlocked }),
+    mastered: already || mastered,
+    justMastered: mastered && !already,
   };
 }
 

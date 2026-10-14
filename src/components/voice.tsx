@@ -570,12 +570,93 @@ export function SayButton({ id, text, label }: { id: string; text: string; label
 let audio: AudioContext | null = null;
 
 /** A short, soft chime: "right" (two rising notes), "streak" (three) or "oops" (one low note). */
-export function chime(kind: "right" | "streak" | "oops" | "caught" | "growl" | "died") {
+export function chime(kind: "right" | "streak" | "oops" | "caught" | "growl" | "died" | "medal" | "pop" | "star", step = 0) {
   if (typeof window === "undefined" || !loadPrefs().sounds) return;
   try {
     const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!Ctx) return;
     audio ??= new Ctx();
+
+    if (kind === "star") {
+      // A star landing on the board. Each one a note higher than the last, so
+      // three of them arriving is a little tune.
+      const t = audio.currentTime;
+      const hz = [784, 988, 1319][Math.min(2, Math.max(0, Math.floor(step)))];
+      const o = audio.createOscillator();
+      const g = audio.createGain();
+      o.type = "triangle";
+      o.frequency.setValueAtTime(hz, t);
+      o.frequency.setValueAtTime(hz * 2, t + 0.07);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.09, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+      o.connect(g).connect(audio.destination);
+      o.start(t);
+      o.stop(t + 0.48);
+      return;
+    }
+
+    if (kind === "medal") {
+      // Mastering a level: the one fanfare in the game. A rising run up to the
+      // octave, held, with a shimmer over the top of it.
+      const t = audio.currentTime;
+      const tune = [523, 659, 784, 1047];
+      tune.forEach((hz, i) => {
+        const o = audio!.createOscillator();
+        const g = audio!.createGain();
+        const at = t + i * 0.13;
+        o.type = "square";
+        o.frequency.setValueAtTime(hz, at);
+        g.gain.setValueAtTime(0.0001, at);
+        g.gain.exponentialRampToValueAtTime(0.1, at + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, at + (i === tune.length - 1 ? 0.9 : 0.22));
+        o.connect(g).connect(audio!.destination);
+        o.start(at);
+        o.stop(at + (i === tune.length - 1 ? 0.95 : 0.25));
+      });
+      const s = audio.createOscillator();
+      const sg = audio.createGain();
+      s.type = "triangle";
+      s.frequency.setValueAtTime(1568, t + 0.4);
+      s.frequency.linearRampToValueAtTime(2093, t + 1.2);
+      sg.gain.setValueAtTime(0.0001, t + 0.4);
+      sg.gain.exponentialRampToValueAtTime(0.035, t + 0.5);
+      sg.gain.exponentialRampToValueAtTime(0.0001, t + 1.3);
+      s.connect(sg).connect(audio.destination);
+      s.start(t + 0.4);
+      s.stop(t + 1.35);
+      return;
+    }
+
+    if (kind === "pop") {
+      // One firework going off: a crack and a tail of sparks.
+      const t = audio.currentTime;
+      const o = audio.createOscillator();
+      const g = audio.createGain();
+      o.type = "sawtooth";
+      o.frequency.setValueAtTime(880, t);
+      o.frequency.exponentialRampToValueAtTime(140, t + 0.18);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.06, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+      o.connect(g).connect(audio.destination);
+      o.start(t);
+      o.stop(t + 0.32);
+      for (let i = 0; i < 5; i++) {
+        const sp = audio.createOscillator();
+        const sg2 = audio.createGain();
+        const at = t + 0.08 + i * 0.05;
+        sp.type = "triangle";
+        sp.frequency.setValueAtTime(1200 + Math.random() * 1400, at);
+        sg2.gain.setValueAtTime(0.0001, at);
+        sg2.gain.exponentialRampToValueAtTime(0.03, at + 0.01);
+        sg2.gain.exponentialRampToValueAtTime(0.0001, at + 0.12);
+        sp.connect(sg2).connect(audio.destination);
+        sp.start(at);
+        sp.stop(at + 0.14);
+      }
+      return;
+    }
 
     if (kind === "died") {
       // A life gone: a little hop of a tune and then the floor falls out of

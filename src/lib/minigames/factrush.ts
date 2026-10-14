@@ -1,5 +1,5 @@
 import type { GameEvidence, MiniGame, MiniLevel } from "./index";
-import { Grid } from "../pixel/grid";
+import { Grid, shade } from "../pixel/grid";
 import { seededRng, shuffle, type Rng } from "../curriculum/math";
 
 /**
@@ -413,6 +413,24 @@ export function huntBlocks(level: FactLevel, seed: number, pace: Pace): number[]
   return [...out].sort((a, b) => a - b);
 }
 
+/**
+ * Mastery: not just finishing a level, but owning it.
+ *
+ * Three stars says they got through. This says they knew every card without
+ * stopping to work one out - no wrong answers, no pauses, and no single card
+ * taking much longer than the rest of them. A kid counting on their fingers
+ * shows up as one card taking four times what the others did, which is
+ * exactly what this is looking for.
+ *
+ * Any pace counts. Mastery is about knowing the facts, not about outrunning
+ * anything.
+ */
+export const MASTERY_MS = 4000;
+/** The slowest card may be this many times the middling one, and no more. */
+export const MASTERY_SPREAD = 2.5;
+/** Below this, differences are reaction time rather than thinking. */
+export const MASTERY_FLOOR_MS = 900;
+
 export interface Answer {
   /**
    * What they typed, or null for time passing with nothing answered - which
@@ -487,6 +505,11 @@ export interface Run {
   head: number | null;
   /** Cards still in the pile, for knowing when the level is done. */
   inPile: number;
+  /**
+   * They finished it without a wrong answer, a pause, or a card that took
+   * them noticeably longer than the others. Worth a medal, once.
+   */
+  mastered: boolean;
   /** How far back the thing chasing them is, or null when nothing is. */
   chase: number | null;
   /** How many times it has had them. */
@@ -686,10 +709,30 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
    * every fireball had to be earned by answering, and a dragon cannot go down
    * to fewer throws than it has hit points. Both are checked here.
    */
+  /**
+   * Was every card answered at the same sort of speed?
+   *
+   * Measured against the middling card rather than the quickest, so one
+   * lucky fast answer cannot make the rest look slow, and with a floor under
+   * it so a kid who answers everything in half a second is not held to
+   * tenths.
+   */
+  const times = move.answers.filter((a) => a.a !== null).map((a) => a.ms);
+  const steady = (() => {
+    if (times.length === 0) return false;
+    if (times.some((ms) => ms > MASTERY_MS)) return false;
+    const sorted = [...times].sort((a, b) => a - b);
+    const middle = Math.max(MASTERY_FLOOR_MS, sorted[Math.floor(sorted.length / 2)]);
+    return Math.max(...times) <= middle * MASTERY_SPREAD;
+  })();
+
   const thrown = Math.max(0, Math.floor(Number(move.thrown ?? 0)) || 0);
   const honest = thrown <= ammo() && thrown >= DRAGON_HITS[pace];
   const finished = level.dungeon ? atDragon && beat === true && honest && !over : pile.length === 0 && !over;
   if (finished) points += FINISH_BONUS;
+  // No wrong cards, nothing skipped, nobody stopping to count, and they saw
+  // it through to the end.
+  const mastered = finished && wrong === 0 && times.length === move.answers.length && steady;
   return {
     posts,
     wrong,
@@ -699,6 +742,7 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
     strikes,
     big,
     over,
+    mastered,
     head: pile[0]?.i ?? null,
     inPile: pile.length,
     chase,
@@ -1065,6 +1109,87 @@ export function tokenGrid(frame = 0): Grid {
   return g;
 }
 
+/** The ribbons a medal can hang from. One per level, by its id. */
+const RIBBONS = ["#2340ff", "#e0453a", "#22a35a", "#8e44ad", "#16a3b8", "#ec6aa0", "#f2a516", "#3d4a5c", "#b5651d", "#1f7a5c", "#7a2f4a", "#4a5190"];
+
+/** Which family of facts a level drills, in the order they are taught. */
+const MEDAL_FAMILY: Record<string, number> = { a: 0, s: 1, x: 2, d: 3, c: 4 };
+
+/** The stamp kept for a dungeon, where the whole set comes back at once. */
+const DUNGEON_STAMP = 5;
+
+/**
+ * Which medal a level gets, read off the level's own id so that no two levels
+ * can land on the same one.
+ *
+ * The family of facts picks the stamp and the number picks the ribbon, so a
+ * shelf of them reads: all the sevens share a colour, all the multiplying
+ * shares a mark, and the four dungeon medals stand apart with their own stamp.
+ * Because it comes from the id and not from the level's place in the list,
+ * adding a level later cannot change a medal a kid has already won.
+ */
+function medalLook(levelId: string): { ribbon: number; stamp: number; notched: boolean } {
+  const m = /^fr-([asxdc])(\d+|dun|mix)$/.exec(levelId);
+  if (m) {
+    const family = MEDAL_FAMILY[m[1]];
+    // A dungeon, or the mixed coin level: one stamp between them, told apart
+    // by the family they finish off.
+    if (m[2] === "dun" || m[2] === "mix") return { ribbon: family, stamp: DUNGEON_STAMP, notched: m[2] === "mix" };
+    const n = Number(m[2]);
+    return { ribbon: (n - 1) % RIBBONS.length, stamp: family, notched: n > RIBBONS.length };
+  }
+  // Something not from the tables above: still deterministic, just not placed.
+  let h = 0;
+  for (let i = 0; i < levelId.length; i++) h = (h * 31 + levelId.charCodeAt(i)) >>> 0;
+  return { ribbon: h % RIBBONS.length, stamp: Math.floor(h / RIBBONS.length) % 6, notched: Math.floor(h / (RIBBONS.length * 6)) % 2 === 1 };
+}
+
+/**
+ * The medal for mastering a level - a different one for every level, so a
+ * shelf of them means something.
+ *
+ * Everything about it comes off the level's own id: which ribbon it hangs
+ * from, what is stamped on it, and whether the rim is plain or notched. Same
+ * level, same medal, every time and for every kid.
+ */
+export function medalGrid(levelId: string, frame = 0): Grid {
+  const look = medalLook(levelId);
+  const ribbon = RIBBONS[look.ribbon];
+  const stamp = look.stamp;
+  const notched = look.notched;
+
+  const g = new Grid(18, 22);
+  const gold = "#f2d24a";
+  const deep = "#b8860b";
+  const shine = "#fff3bf";
+
+  // The ribbon, in two tails.
+  g.rect(4, 0, 3, 8, ribbon);
+  g.rect(11, 0, 3, 8, ribbon);
+  g.rect(4, 7, 10, 2, shade(ribbon, -0.3));
+
+  // The disc.
+  g.disc(9, 14, 7, deep);
+  g.disc(9, 14, 5.6, gold);
+  if (notched) for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2;
+    g.set(Math.round(9 + Math.cos(a) * 6.6), Math.round(14 + Math.sin(a) * 6.6), deep);
+  }
+
+  // What is stamped on it.
+  const ink = "#8a6a10";
+  if (stamp === 0) g.tri(9, 10, 17, 4, ink);
+  else if (stamp === 1) { g.rect(6, 13, 7, 2, ink); g.rect(8, 11, 2, 6, ink); }
+  else if (stamp === 2) g.disc(9, 14, 3, ink).disc(9, 14, 1.6, gold);
+  else if (stamp === 3) { g.rect(6, 11, 2, 6, ink); g.rect(11, 11, 2, 6, ink); g.rect(8, 13, 3, 2, ink); }
+  else if (stamp === 4) { g.rect(6, 11, 7, 2, ink); g.rect(6, 16, 7, 2, ink); g.rect(8, 13, 3, 3, ink); }
+  else { g.rect(6, 11, 7, 7, ink); g.rect(8, 13, 3, 3, gold); }
+
+  // A glint that moves between the two frames.
+  g.set(frame % 2 === 0 ? 6 : 12, frame % 2 === 0 ? 11 : 17, shine);
+  return g;
+}
+
 /**
  * A fireball: ammunition for the dragon, and what the dragon throws back.
  * Two frames, so a row of them flickers rather than sitting still.
@@ -1252,6 +1377,15 @@ export const factRush: MiniGame = {
       return r.fireballs - thrown;
     } catch {
       return 0;
+    }
+  },
+  mastered: (levelId, moves) => {
+    const level = levelById(levelId);
+    if (!level) return false;
+    try {
+      return replay(level, moves).mastered;
+    } catch {
+      return false;
     }
   },
   evidence: (levelId, moves) => {
