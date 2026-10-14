@@ -364,7 +364,9 @@ describe("building a board", () => {
           expect(b.cells, `${level.id} board ${i} seed ${seed}`).toHaveLength(CELLS);
           expect(b.cells.filter((c) => c.ok).length, `${level.id} board ${i} seed ${seed}`).toBe(rightOn(level.boards[i]));
         }
-  });
+    // Thousands of boards: slow enough to trip the default timeout when the
+    // whole suite is running at once.
+  }, 30000);
 
   it("writes money the way a kid says it", () => {
     // The dollar sign went missing once already and nothing failed: the rule

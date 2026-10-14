@@ -36,6 +36,7 @@ import {
   familyFacts,
   biomeFor,
   BIOMES,
+  DUNGEONS,
   hazardAt,
   holeGrid,
   mountainGrid,
@@ -572,9 +573,25 @@ describe("the chase, and how hard a kid wants it", () => {
 });
 
 describe("where a level happens", () => {
-  it("gives the families different places, not one repainted", () => {
-    const first12 = Array.from({ length: 12 }, (_, i) => biomeFor(levelById(`fr-a${i + 1}`)!).id);
-    expect(new Set(first12).size, "two families share a place").toBe(12);
+  it("gives every single level its own place, all fifty-seven of them", () => {
+    const seen = new Map<string, string>();
+    for (const l of ALL_FACT_LEVELS) {
+      const b = biomeFor(l);
+      expect(seen.has(b.id), `${l.id} is run in the same place as ${seen.get(b.id)}`).toBe(false);
+      seen.set(b.id, l.id);
+    }
+    expect(seen.size).toBe(ALL_FACT_LEVELS.length);
+  });
+
+  it("gives every place a look of its own, not one repainted", () => {
+    // Two levels may share a tree, but not a tree and a palette: something
+    // about the ground has to tell them apart at a glance.
+    const seen = new Set<string>();
+    for (const b of [...BIOMES, ...DUNGEONS]) {
+      const look = `${b.prop}|${b.ground}|${b.sky[0]}`;
+      expect(seen.has(look), `${b.id} looks like somewhere else`).toBe(false);
+      seen.add(look);
+    }
   });
 
   it("always gives the same level the same place", () => {
@@ -583,12 +600,19 @@ describe("where a level happens", () => {
     expect(biomeFor(levelById("fr-a6")!).swim, "the sixth family should be underwater").toBe(true);
   });
 
-  it("sends every dungeon to the dungeon", () => {
-    for (const l of ALL_FACT_LEVELS.filter((x) => x.dungeon)) expect(biomeFor(l).id).toBe("dungeon");
+  it("gives every dungeon a dark room of its own", () => {
+    const dungeons = ALL_FACT_LEVELS.filter((x) => x.dungeon);
+    expect(dungeons.length).toBe(DUNGEONS.length);
+    for (const l of dungeons) {
+      const b = biomeFor(l);
+      expect(DUNGEONS, `${l.id} is not in a dungeon`).toContain(b);
+      expect(b.dark, `${b.id} should be dark`).toBe(true);
+      expect(b.clouds, `${b.id} is indoors and should have no sky`).toBe(false);
+    }
   });
 
   it("draws every prop a place can ask for", () => {
-    for (const b of BIOMES) {
+    for (const b of [...BIOMES, ...DUNGEONS]) {
       const g = propGrid(b.prop, b.propInk[0], b.propInk[1]);
       let filled = 0;
       for (let y = 0; y < g.h; y++) for (let x = 0; x < g.w; x++) if (g.get(x, y)) filled++;
@@ -597,7 +621,10 @@ describe("where a level happens", () => {
   });
 
   it("names every place in words a kid can read", () => {
-    for (const b of BIOMES) {
+    const names = new Set<string>();
+    for (const b of [...BIOMES, ...DUNGEONS]) {
+      expect(names.has(b.name), `two places are called "${b.name}"`).toBe(false);
+      names.add(b.name);
       expect(b.name.length).toBeGreaterThan(3);
       expect(b.name).not.toMatch(BANNED);
     }

@@ -895,7 +895,37 @@ const INK = "#1b1530";
 
 // ---------------- Where a level happens ----------------
 
-export type PropKind = "round" | "blossom" | "pine" | "cactus" | "palm" | "reed" | "column" | "crystal" | "lantern" | "torch";
+export type PropKind =
+  | "round"
+  | "blossom"
+  | "pine"
+  | "cactus"
+  | "palm"
+  | "reed"
+  | "column"
+  | "crystal"
+  | "lantern"
+  | "torch"
+  | "mushroom"
+  | "bamboo"
+  | "coral"
+  | "obelisk"
+  | "windmill"
+  | "signpost"
+  | "barrel"
+  | "haystack"
+  | "geyser"
+  | "anvil"
+  | "bell"
+  | "telescope"
+  | "abacus"
+  | "gear"
+  | "fern"
+  | "stalagmite"
+  | "icespike"
+  | "sail"
+  | "rocket"
+  | "banner";
 
 /**
  * The ground a level is run over.
@@ -931,7 +961,16 @@ export interface Biome {
   swim?: boolean;
 }
 
+/**
+ * Every level has its own place to run it in - all fifty-seven of them.
+ *
+ * Twelve to a family, in the order they are taught, then the coin levels,
+ * with a dungeon of its own at the end of each family. Nothing is repainted
+ * and nothing comes round twice: a kid who says "the one with the windmills"
+ * means one level and only one.
+ */
 export const BIOMES: Biome[] = [
+  // ---- Adding: open country, then stranger ground ----
   { id: "meadow", name: "Meadow", sky: ["#8fd0ff", "#c8e9ff"], ground: "#3f9d5a", under: "#2c6c3f", far: "#63c47f", prop: "round", propInk: ["#6b4a2a", "#3f9d5a"], clouds: true },
   { id: "orchard", name: "Blossom Orchard", sky: ["#ffd7ea", "#ffeaf4"], ground: "#5aa864", under: "#3d7446", far: "#8fd39a", prop: "blossom", propInk: ["#6b4a2a", "#ff9ec4"], clouds: true },
   { id: "canyon", name: "Red Canyon", sky: ["#ffcf8f", "#ffe6c2"], ground: "#c4703c", under: "#8a4a26", far: "#a85b30", prop: "cactus", propInk: ["#3f9d5a", "#63c47f"], clouds: false },
@@ -947,29 +986,80 @@ export const BIOMES: Biome[] = [
   { id: "cavern", name: "Crystal Cavern", sky: ["#241c45", "#3a2f5c"], ground: "#4a4a63", under: "#2f2f42", far: "#3a3350", prop: "crystal", propInk: ["#7fd8ff", "#bdf0ff"], clouds: false, dark: true },
   { id: "emberpeak", name: "Ember Peak", sky: ["#4a1f2b", "#8a3b2b"], ground: "#3a2f34", under: "#241c21", far: "#5c3a33", prop: "crystal", propInk: ["#ff8a3c", "#ffd08a"], clouds: false, dark: true, rise: 5 },
   { id: "starfield", name: "Starfield", sky: ["#171a3f", "#2f3a7a"], ground: "#3a3f6b", under: "#262a4a", far: "#4a5190", prop: "lantern", propInk: ["#6b6f9c", "#ffe08a"], clouds: false, dark: true, swim: true },
+
+  // ---- Taking away: working country, and places things are made ----
+  { id: "dunes", name: "Golden Dunes", sky: ["#ffd9a0", "#fff0d2"], ground: "#e0bd79", under: "#b9924f", far: "#ecd3a0", prop: "obelisk", propInk: ["#b08a4a", "#f0dcae"], clouds: false },
+  { id: "windmills", name: "Windmill Flats", sky: ["#a8d8ff", "#dff0ff"], ground: "#8fb74a", under: "#5f7f2d", far: "#b4d36a", prop: "windmill", propInk: ["#8a6a3c", "#f4efe2"], clouds: true },
+  { id: "chalk", name: "Chalk Cliffs", sky: ["#9fd9f0", "#e2f6ff"], ground: "#eef1f4", under: "#c2c8d0", far: "#d8dee6", prop: "fern", propInk: ["#4f7a3a", "#8cc06a"], clouds: true },
+  { id: "bamboogrove", name: "Bamboo Grove", sky: ["#d8f0c8", "#f0ffe4"], ground: "#6aa352", under: "#447032", far: "#8cc06a", prop: "bamboo", propInk: ["#4f7a3a", "#c8e59a"], clouds: false },
+  { id: "mushrooms", name: "Mushroom Hollow", sky: ["#cdbce0", "#e8dff4"], ground: "#5c5a4a", under: "#3c3a2e", far: "#7a7560", prop: "mushroom", propInk: ["#e8dcc0", "#d0564a"], clouds: false },
+  { id: "harbour", name: "The Old Harbour", sky: ["#8ec6e8", "#d8eefb"], ground: "#9a6f42", under: "#6d4a28", far: "#5f94b5", prop: "sail", propInk: ["#6d4a28", "#f4efe2"], clouds: true },
+  { id: "goldmine", name: "The Gold Mine", sky: ["#2b2419", "#443726"], ground: "#4a3c28", under: "#2e2516", far: "#5c4a31", prop: "lantern", propInk: ["#6b5636", "#ffd36a"], clouds: false, dark: true },
+  { id: "clockwork", name: "The Clockwork Yard", sky: ["#d8cdb4", "#efe7d2"], ground: "#7a6a52", under: "#54483a", far: "#a08b68", prop: "gear", propInk: ["#8a6a2a", "#e8c168"], clouds: false },
+  { id: "terraces", name: "Olive Terraces", sky: ["#bfe0f0", "#e8f6ff"], ground: "#9aa65a", under: "#6b7438", far: "#b9c478", prop: "round", propInk: ["#6b4a2a", "#7f9a4a"], clouds: true, rise: 5 },
+  { id: "sunflowers", name: "Sunflower Field", sky: ["#8fd0ff", "#d8f0ff"], ground: "#5aa054", under: "#3c7038", far: "#86c46a", prop: "blossom", propInk: ["#4f7a3a", "#f2c21a"], clouds: true },
+  { id: "saltflats", name: "The Salt Flats", sky: ["#e4d8ff", "#f6f0ff"], ground: "#f2f4f8", under: "#cdd4dd", far: "#dfe6ee", prop: "signpost", propInk: ["#8a8296", "#f4efe2"], clouds: false },
+  { id: "lanternroad", name: "Lantern Road", sky: ["#2a2340", "#4a3b63"], ground: "#4a4056", under: "#2e2838", far: "#5e5273", prop: "lantern", propInk: ["#6b5636", "#ffd36a"], clouds: false, dark: true },
+
+  // ---- Times: bigger country, and a few places that take some getting to ----
+  { id: "granary", name: "Granary Steps", sky: ["#ffe8b4", "#fff6de"], ground: "#c8a85a", under: "#8f7533", far: "#e0c478", prop: "haystack", propInk: ["#8f7533", "#f2d98a"], clouds: true, rise: 4 },
+  { id: "riverbank", name: "The Riverbank", sky: ["#a8dcf0", "#dff4ff"], ground: "#5c9a6a", under: "#3c6e46", far: "#8fc9a0", prop: "reed", propInk: ["#4f7a3a", "#a8d86a"], clouds: true },
+  { id: "fossilbeach", name: "Fossil Beach", sky: ["#ffd4b0", "#ffeedd"], ground: "#e8d2a8", under: "#b8a075", far: "#d8bd90", prop: "coral", propInk: ["#a07a58", "#efe2c8"], clouds: true },
+  { id: "shallows", name: "Coral Shallows", sky: ["#2f9ec4", "#7fd0e8"], ground: "#f0dcae", under: "#c4ab7a", far: "#4ab0cc", prop: "coral", propInk: ["#e06a8a", "#ffb0c4"], clouds: false, swim: true },
+  { id: "cedarridge", name: "Cedar Ridge", sky: ["#bcd8e8", "#e4f2fa"], ground: "#2f6b48", under: "#1f4a31", far: "#4a8a60", prop: "pine", propInk: ["#5b4228", "#2f8a52"], clouds: true },
+  { id: "kiln", name: "The Kiln Yard", sky: ["#f0c89a", "#fae6cc"], ground: "#9a5a3c", under: "#6b3a26", far: "#bb7a52", prop: "barrel", propInk: ["#6b4a2a", "#c08a4a"], clouds: false },
+  { id: "observatory", name: "Observatory Hill", sky: ["#3b3f78", "#7a6fae"], ground: "#4a5168", under: "#333848", far: "#5e6682", prop: "telescope", propInk: ["#cdd4dd", "#8fb4ff"], clouds: false, dark: true, rise: 6 },
+  { id: "geysers", name: "Geyser Basin", sky: ["#cfe0e8", "#eef6fa"], ground: "#8a8f84", under: "#5e6358", far: "#a7ab9d", prop: "geyser", propInk: ["#6b7068", "#dff4ff"], clouds: true },
+  { id: "amberwoods", name: "Amber Woods", sky: ["#ffd9a8", "#ffeed2"], ground: "#8a6a3c", under: "#5e4726", far: "#c08a4a", prop: "round", propInk: ["#6b4a2a", "#e08a2a"], clouds: true },
+  { id: "stonecircle", name: "The Stone Circle", sky: ["#b4c4cd", "#dde8ee"], ground: "#6a7a5c", under: "#47553c", far: "#8a9a78", prop: "column", propInk: ["#cdd4dd", "#8d9bad"], clouds: true },
+  { id: "glacier", name: "Glacier Pass", sky: ["#bfe4ff", "#eaf6ff"], ground: "#d8ecff", under: "#9fc0dd", far: "#bcd8ef", prop: "icespike", propInk: ["#7fb4d8", "#eef8ff"], clouds: true, rise: 6 },
+  { id: "comet", name: "The Comet Trail", sky: ["#120f2e", "#35215c"], ground: "#3a2f5c", under: "#241c45", far: "#4a3f70", prop: "crystal", propInk: ["#ff9ec4", "#ffe08a"], clouds: false, dark: true, swim: true },
+
+  // ---- Dividing: sharing country, and one or two places to think in ----
+  { id: "applerows", name: "Apple Rows", sky: ["#9fd8ff", "#dff2ff"], ground: "#4f9a52", under: "#356c38", far: "#7fc46a", prop: "round", propInk: ["#6b4a2a", "#d0564a"], clouds: true },
+  { id: "ferngully", name: "Fern Gully", sky: ["#9fc8b0", "#d2ecdc"], ground: "#3a6b4a", under: "#264a32", far: "#588a62", prop: "fern", propInk: ["#2f5c3a", "#8cc06a"], clouds: false },
+  { id: "coppercanyon", name: "Copper Canyon", sky: ["#f0b48a", "#fbdcc2"], ground: "#a0603a", under: "#6e3e24", far: "#c48a5a", prop: "cactus", propInk: ["#3f9d5a", "#8fd39a"], clouds: false },
+  { id: "bellgreen", name: "Bell Tower Green", sky: ["#a8d8ff", "#e2f2ff"], ground: "#58a05c", under: "#3a6e3c", far: "#8ac47a", prop: "bell", propInk: ["#8a8296", "#e8c168"], clouds: true },
+  { id: "countinghall", name: "The Counting Hall", sky: ["#e0cdab", "#f4e8d2"], ground: "#7a5a3c", under: "#523a26", far: "#a07a52", prop: "abacus", propInk: ["#5e4126", "#e8c168"], clouds: false },
+  { id: "kelpforest", name: "The Kelp Forest", sky: ["#1f6f6a", "#49a89a"], ground: "#c8b482", under: "#9a8a5e", far: "#2f8f82", prop: "reed", propInk: ["#2f6b48", "#8cc06a"], clouds: false, swim: true },
+  { id: "thundermesa", name: "Thunder Mesa", sky: ["#5a5f78", "#8f93a8"], ground: "#6b5a4a", under: "#473a2e", far: "#8a7560", prop: "obelisk", propInk: ["#4a3f36", "#cdd4dd"], clouds: true },
+  { id: "frozenlake", name: "The Frozen Lake", sky: ["#cfe8ff", "#f0f8ff"], ground: "#cfe4f2", under: "#9ab6cc", far: "#b4d2e6", prop: "icespike", propInk: ["#8fb4cc", "#f6fbff"], clouds: true },
+  { id: "windymoor", name: "Windy Moor", sky: ["#b4bcc8", "#dde3ea"], ground: "#7a7a52", under: "#525236", far: "#9a9a6a", prop: "fern", propInk: ["#5e5e3a", "#b4b47a"], clouds: true },
+  { id: "lavatubes", name: "The Lava Tubes", sky: ["#2a1410", "#5e2418"], ground: "#38282a", under: "#201618", far: "#4e3430", prop: "stalagmite", propInk: ["#6b4a3a", "#ff8a3c"], clouds: false, dark: true },
+  { id: "signalhill", name: "Signal Hill", sky: ["#ffc9a0", "#ffe8cf"], ground: "#7a8a5a", under: "#54603a", far: "#9aa878", prop: "signpost", propInk: ["#6b4a2a", "#f2d98a"], clouds: true, rise: 5 },
+  { id: "moondust", name: "Moon Dust", sky: ["#0d0f1c", "#232a45"], ground: "#9a9aa8", under: "#6b6b7a", far: "#7a7a8a", prop: "rocket", propInk: ["#cdd4dd", "#e8e3f4"], clouds: false, dark: true },
+
+  // ---- Coins: the places money actually changes hands ----
+  { id: "copperrow", name: "Copper Row", sky: ["#ffd9b4", "#ffefdd"], ground: "#9a6a4a", under: "#6b4631", far: "#c08a68", prop: "barrel", propInk: ["#6b4a2a", "#c87a3c"], clouds: true },
+  { id: "silvercreek", name: "Silver Creek", sky: ["#cfe4f0", "#eef8ff"], ground: "#8aa0a8", under: "#5e7078", far: "#b0c4cc", prop: "reed", propInk: ["#5e7078", "#dfeef4"], clouds: true },
+  { id: "marketbridge", name: "Market Bridge", sky: ["#ffe3b0", "#fff4dd"], ground: "#8a7a5a", under: "#5e523a", far: "#b0a078", prop: "lantern", propInk: ["#6b4a2a", "#f2c21a"], clouds: true },
+  { id: "mintsquare", name: "Mint Square", sky: ["#bfeadd", "#e4f8f2"], ground: "#7a9a8a", under: "#52705f", far: "#a0c4b0", prop: "column", propInk: ["#dfeee8", "#a0c4b0"], clouds: true },
+  { id: "greatfair", name: "The Great Fair", sky: ["#ffd0e8", "#fff0f8"], ground: "#6a8a9a", under: "#47606e", far: "#8fb0c0", prop: "banner", propInk: ["#6b4a2a", "#e0453a"], clouds: true },
 ];
 
-const DUNGEON_BIOME: Biome = {
-  id: "dungeon",
-  name: "The Dungeon",
-  sky: ["#211c33", "#2a2340"],
-  ground: "#3a3350",
-  under: "#241c45",
-  far: "#4a4a63",
-  prop: "torch",
-  propInk: ["#6b5636", "#f2a516"],
-  clouds: false,
-  dark: true,
-};
+/** One at the end of each family, and no two of them the same room. */
+export const DUNGEONS: Biome[] = [
+  { id: "stonekeep", name: "The Stone Keep", sky: ["#211c33", "#2a2340"], ground: "#3a3350", under: "#241c45", far: "#4a4a63", prop: "torch", propInk: ["#6b5636", "#f2a516"], clouds: false, dark: true },
+  { id: "bonevault", name: "The Bone Vault", sky: ["#241f1a", "#38302a"], ground: "#4a4238", under: "#2e2820", far: "#5e5448", prop: "column", propInk: ["#e8dcc0", "#a79f8a"], clouds: false, dark: true },
+  { id: "emberforge", name: "The Ember Forge", sky: ["#2e1410", "#5e2418"], ground: "#3a2a28", under: "#231a18", far: "#5c3a33", prop: "anvil", propInk: ["#6b5636", "#ff8a3c"], clouds: false, dark: true },
+  { id: "sunkencrypt", name: "The Sunken Crypt", sky: ["#102a33", "#1c4a52"], ground: "#2f4a4a", under: "#1c2e30", far: "#3e6a66", prop: "crystal", propInk: ["#7fd8ff", "#bdf0ff"], clouds: false, dark: true },
+];
+
+/** Where each family's twelve places start in the list above. */
+const FAMILY_AT: Record<string, number> = { a: 0, s: 1, x: 2, d: 3 };
+
+/** The coin levels, in the order they are played. */
+const COIN_ORDER = ["fr-c1", "fr-c5", "fr-c10", "fr-c25", "fr-cmix"];
 
 /** Which place this level is run in. Fixed per level, so it is always theirs. */
 export function biomeFor(level: FactLevel): Biome {
-  if (level.dungeon) return DUNGEON_BIOME;
-  // The family number off the id ("fr-a7" -> 7), or the coin levels in order.
-  const n = Number(level.id.replace(/^fr-[asxdc]/, "")) || 0;
-  if (n >= 1) return BIOMES[(n - 1) % BIOMES.length];
-  const coins = ["fr-c1", "fr-c5", "fr-c10", "fr-c25", "fr-cmix"].indexOf(level.id);
-  return BIOMES[(coins >= 0 ? coins + 5 : 0) % BIOMES.length];
+  const m = /^fr-([asxdc])(\d+|dun|mix)$/.exec(level.id);
+  if (!m) return BIOMES[0];
+  const family = FAMILY_AT[m[1]] ?? 0;
+  if (level.dungeon || m[2] === "dun") return DUNGEONS[family];
+  if (m[1] === "c") return BIOMES[48 + Math.max(0, COIN_ORDER.indexOf(level.id))];
+  const n = Math.min(12, Math.max(1, Number(m[2])));
+  return BIOMES[family * 12 + n - 1];
 }
 
 /** The ridge along the back of a level, in that place's colour. */
@@ -1034,6 +1124,126 @@ export function propGrid(kind: PropKind, a: string, b: string): Grid {
       g.rect(5, 11, 6, 2, a);
       g.rect(6, 3, 4, 6, b);
       g.rect(7, 1, 2, 4, "#ffe08a");
+      break;
+    case "mushroom":
+      g.rect(7, 11, 3, 11, a);
+      g.disc(8, 10, 6, b);
+      g.rect(2, 11, 13, 1, a);
+      g.disc(5, 8, 1.6, "#fff0f6").disc(11, 9, 1.2, "#fff0f6");
+      break;
+    case "bamboo":
+      for (const x of [3, 8, 13]) {
+        g.rect(x, 1, 2, 21, a);
+        for (const y of [6, 12, 18]) g.rect(x - 1, y, 4, 1, b);
+      }
+      break;
+    case "coral":
+      g.rect(7, 12, 2, 10, a);
+      g.rect(3, 7, 2, 9, b);
+      g.rect(11, 5, 2, 11, b);
+      g.rect(4, 10, 8, 2, b);
+      break;
+    case "obelisk":
+      g.rect(5, 5, 6, 17, a);
+      g.tri(8, 0, 5, 3, b);
+      g.rect(6, 9, 4, 2, b);
+      g.rect(3, 20, 10, 2, b);
+      break;
+    case "windmill":
+      g.tri(8, 6, 22, 5, a);
+      g.rect(1, 4, 14, 2, b);
+      g.rect(7, 0, 2, 11, b);
+      break;
+    case "signpost":
+      g.rect(7, 5, 2, 17, a);
+      g.rect(2, 6, 12, 6, b);
+      g.rect(4, 8, 8, 1, a);
+      g.rect(4, 10, 6, 1, a);
+      break;
+    case "barrel":
+      g.rect(4, 9, 9, 13, a);
+      g.rect(3, 12, 11, 2, b);
+      g.rect(3, 18, 11, 2, b);
+      break;
+    case "haystack":
+      g.tri(8, 4, 20, 7, a);
+      g.rect(2, 12, 12, 1, b);
+      g.rect(1, 20, 14, 2, b);
+      break;
+    case "geyser":
+      g.rect(3, 19, 11, 3, a);
+      g.rect(7, 8, 3, 11, b);
+      g.disc(8, 6, 3.5, b);
+      g.disc(8, 3, 2, "#eef6ff");
+      break;
+    case "anvil":
+      g.rect(2, 10, 12, 5, a);
+      g.rect(6, 15, 4, 4, a);
+      g.rect(2, 19, 12, 3, a);
+      g.rect(3, 10, 10, 1, b);
+      break;
+    case "bell":
+      g.rect(2, 1, 12, 2, a);
+      g.rect(7, 3, 2, 3, a);
+      g.disc(8, 11, 5.5, b);
+      g.rect(3, 15, 11, 2, b);
+      g.rect(7, 17, 2, 2, a);
+      break;
+    case "telescope":
+      g.rect(2, 20, 12, 2, a);
+      g.rect(7, 13, 3, 7, a);
+      g.rect(3, 8, 10, 4, b);
+      g.rect(12, 5, 3, 4, b);
+      break;
+    case "abacus":
+      g.rect(2, 3, 12, 18, a);
+      g.rect(4, 5, 8, 14, null);
+      for (const y of [7, 11, 15]) {
+        g.rect(4, y, 8, 1, a);
+        g.rect(5, y - 1, 2, 3, b);
+        g.rect(9, y - 1, 2, 3, b);
+      }
+      break;
+    case "gear":
+      for (let i = 0; i < 6; i++) {
+        const t = (i / 6) * Math.PI * 2;
+        g.rect(Math.round(8 + Math.cos(t) * 7) - 1, Math.round(11 + Math.sin(t) * 7) - 1, 3, 3, a);
+      }
+      g.disc(8, 11, 6, a);
+      g.disc(8, 11, 2.5, b);
+      break;
+    case "fern":
+      g.rect(8, 6, 1, 16, a);
+      for (let i = 0; i < 5; i++) {
+        g.rect(3, 8 + i * 3, 5, 1, b);
+        g.rect(9, 9 + i * 3, 5, 1, b);
+      }
+      g.tri(8, 3, 7, 3, b);
+      break;
+    case "stalagmite":
+      g.tri(5, 6, 22, 4, a);
+      g.tri(11, 11, 22, 3, b);
+      break;
+    case "icespike":
+      g.tri(6, 1, 22, 4, b);
+      g.tri(11, 7, 22, 3, a);
+      break;
+    case "sail":
+      g.rect(1, 18, 14, 3, a);
+      g.rect(8, 3, 1, 15, a);
+      g.tri(7, 4, 17, 5, b);
+      break;
+    case "rocket":
+      g.rect(6, 5, 4, 12, b);
+      g.tri(8, 1, 5, 2, a);
+      g.rect(4, 12, 2, 5, a);
+      g.rect(10, 12, 2, 5, a);
+      g.rect(7, 17, 2, 4, "#ffb84a");
+      break;
+    case "banner":
+      g.rect(7, 1, 2, 21, a);
+      g.rect(9, 3, 6, 5, b);
+      g.rect(9, 10, 5, 4, b);
       break;
   }
   return g;

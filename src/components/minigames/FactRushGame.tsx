@@ -158,12 +158,12 @@ function EndChoices({ from, canNext, onNext, onReplay }: { from: number; canNext
   return (
     <div className={css.endChoices}>
       {canNext && onNext && (
-        <button type="button" className="kbtn" onClick={onNext} autoFocus>
+        <button type="button" className="kbtn small-btn" onClick={onNext} autoFocus>
           Next level ▶
         </button>
       )}
       {onReplay && (
-        <button type="button" className={`kbtn ${canNext ? "ghost" : ""}`} onClick={onReplay}>
+        <button type="button" className={`kbtn small-btn ${canNext ? "ghost" : ""}`} onClick={onReplay}>
           ↺ Try again
         </button>
       )}
@@ -825,7 +825,6 @@ function FactRush({
             >
               <PixelSprite grid={runner[stepping ? 1 : 0]} scale={run.big ? 7 : 5} />
               {run.finished && pet && <PixelSprite grid={pet} scale={4} className={css.atHeel} />}
-              {result?.justMastered && <PixelSprite grid={medalGrid(level.id)} scale={1} className={css.medalDrop} />}
             </span>
           </div>
 
@@ -853,6 +852,24 @@ function FactRush({
             <div className={css.countOver} role="status" aria-live="assertive">
               <strong>{count}</strong>
             </div>
+          )}
+          {result?.justMastered && (
+            /* It arrives the size of the whole level and settles around their
+               neck. Where that is depends on how high up the hill they
+               finished, so the landing spot is worked out here rather than
+               guessed at in the stylesheet. */
+            <span
+              className={css.medalDrop}
+              aria-hidden
+              style={
+                {
+                  "--to-x": `calc(${CAMERA_AT * 100}% + ${((run.big ? 7 : 5) * 16) / 2}px)`,
+                  "--to-y": `${(biome.rise ?? 0) * standing(run.at) + 43 + (run.big ? 58 : 42)}px`,
+                } as React.CSSProperties
+              }
+            >
+              <PixelSprite grid={medalGrid(level.id)} scale={1} />
+            </span>
           )}
           {result && (
             <div className={css.endOver}>
