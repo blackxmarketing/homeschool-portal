@@ -16,8 +16,11 @@ import {
   COINS,
   coinGrid,
   coinsGrid,
+  angleGrid,
   diceGrid,
   dotsGrid,
+  linesGrid,
+  shapeGrid,
   tallyGrid,
   grumbleGrid,
   levelById,
@@ -56,7 +59,19 @@ function CellPicture({ art }: { art: CellArt }) {
   let grid = artCache.get(key);
   if (!grid) {
     grid =
-      art.kind === "dots" ? dotsGrid(art.parts[0]) : art.kind === "tally" ? tallyGrid(art.parts[0]) : art.kind === "dice" ? diceGrid(art.parts) : coinsGrid(art.parts);
+      art.kind === "dots"
+        ? dotsGrid(art.parts[0])
+        : art.kind === "tally"
+          ? tallyGrid(art.parts[0])
+          : art.kind === "dice"
+            ? diceGrid(art.parts)
+            : art.kind === "shape"
+              ? shapeGrid(art.parts[0], art.parts[1])
+              : art.kind === "angle"
+                ? angleGrid(art.parts[0], art.parts[1] === 1)
+                : art.kind === "lines"
+                  ? linesGrid(art.parts[0], art.parts[1])
+                  : coinsGrid(art.parts);
     artCache.set(key, grid);
   }
   // Drawn big and scaled down by the stylesheet, so the dots stay countable in

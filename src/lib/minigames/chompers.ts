@@ -119,6 +119,12 @@ export type RuleKind =
   | "evaluates"
   /** The same as `equals`, said the way a counting board should say it. */
   | "shows"
+  /** A shape with `target` straight sides. Nought means a round one. */
+  | "sides"
+  /** A shape with square corners. */
+  | "squareCorners"
+  /** Two lines sitting a certain way: 0 parallel, 1 perpendicular, 2 crossing. */
+  | "linesAre"
   /** Splits into two equal piles. */
   | "even"
   /** Does not. */
@@ -172,7 +178,15 @@ export type CellStyle =
   /** A handful of coins to add up. */
   | "coins"
   /** The same number four ways: as a numeral, as dots, as tallies, as dice. */
-  | "count";
+  | "count"
+  /** Drawn shapes. The value is how many straight sides it has. */
+  | "shapes"
+  /** Drawn shapes again, but the value says whether it has square corners. */
+  | "corners"
+  /** Drawn angles. The value is how many degrees. */
+  | "angles"
+  /** Two drawn lines. The value says how they sit together. */
+  | "lines";
 
 /** The four operations, as a board writes them. */
 export type Op = "+" | "-" | "x" | "/";
@@ -203,10 +217,11 @@ export interface BoardSpec {
  * words, which is all a screen reader can offer.
  */
 export interface CellArt {
-  kind: "dots" | "coins" | "tally" | "dice";
+  kind: "dots" | "coins" | "tally" | "dice" | "shape" | "angle" | "lines";
   /**
    * Dots and tallies: how many. Coins: the coins in it, biggest first, in
-   * cents. Dice: the face of each die, left to right.
+   * cents. Dice: the face of each die, left to right. Shape: which shape and
+   * how big. Angle: how many degrees. Lines: which pair and how turned.
    */
   parts: number[];
 }
@@ -298,7 +313,11 @@ export function fits(rule: Rule, cell: number | { value: number; frac?: Frac }):
       return Number.isInteger(value) && value > 0 && rule.target % value === 0 && (rule.of ?? 0) % value === 0;
     case "evaluates":
     case "shows":
+    case "sides":
+    case "linesAre":
       return q(value) === q(rule.target);
+    case "squareCorners":
+      return value === 1;
     case "even":
       return Number.isInteger(value) && value % 2 === 0;
     case "odd":
@@ -341,6 +360,12 @@ export function ruleLabel(rule: Rule): string {
       return `With x = ${rule.of}, equals ${rule.target}`;
     case "shows":
       return `Shows ${rule.target}`;
+    case "sides":
+      return rule.target === 0 ? "Round shapes, with no straight sides" : `Shapes with ${rule.target} straight sides`;
+    case "squareCorners":
+      return "Shapes with square corners";
+    case "linesAre":
+      return ["Parallel lines", "Perpendicular lines", "Lines that cross at a slant"][rule.target] ?? "Lines";
     case "even":
       return "Even numbers";
     case "odd":
@@ -414,6 +439,12 @@ export function teachFor(rule: Rule, cell: Cell): string {
     }
     case "shows":
       return `That one shows ${cell.value}, not ${t}. Count them again.`;
+    case "sides":
+      return cell.value === 0 ? `That one is round - it has no straight sides at all, let alone ${t}.` : `Count its sides: that one has ${cell.value}, not ${t}.`;
+    case "squareCorners":
+      return `${cell.text} has no square corners. A square corner is the one you could fit the corner of a book into.`;
+    case "linesAre":
+      return `Those two stay ${["the same distance apart for ever - they are parallel", "square to each other - they are perpendicular", "crossing at a slant"][cell.value] ?? "something else"}, and we want the ones that are ${["parallel: side by side, never meeting", "perpendicular: meeting at a square corner", "crossing at a slant, not square"][t]}.`;
     case "evaluates":
       return `${cell.text} comes to ${dec(cell.value, 3)} when x is ${rule.of}, not ${t}. Put ${rule.of} where the x is and work it out.`;
     case "even":
@@ -591,7 +622,40 @@ function countPool(lo: number, hi: number): Cand[] {
 }
 
 /** Every coin is drawn on this many pixels square, whatever size the coin is. */
-export const COIN_CANVAS = 16;
+export /** Every shape a board can draw, in three sizes. */
+function shapePool(byCorners: boolean): Cand[] {
+  const out: Cand[] = [];
+  SHAPES.forEach((sh, i) => {
+    SHAPE_SIZES.forEach((size, n) => {
+      const word = size || sh.name;
+      const a = "aeiou".includes(word[0]) ? "an" : "a";
+      const name = size ? `${a} ${size} ${sh.name}` : `${a} ${sh.name}`;
+      out.push({ value: byCorners ? (sh.corners ? 1 : 0) : sh.sides, text: name, art: { kind: "shape", parts: [i, n] } });
+    });
+  });
+  return out;
+}
+
+/** Angles from a narrow one to a wide one, in fives. */
+function anglePool(): Cand[] {
+  const out: Cand[] = [];
+  for (let d = 15; d <= 165; d += 5) {
+    out.push({ value: d, text: `an angle of ${d} degrees`, art: { kind: "angle", parts: [d, 0] } });
+    out.push({ value: d, text: `an angle of ${d} degrees, opening the other way`, art: { kind: "angle", parts: [d, 1] } });
+  }
+  return out;
+}
+
+/** Pairs of lines, each kind turned a dozen different ways. */
+function linePool(): Cand[] {
+  const out: Cand[] = [];
+  LINE_KINDS.forEach((kind, k) => {
+    for (let turn = 0; turn < 180; turn += 15) out.push({ value: k, text: `${kind} lines turned ${turn} degrees`, art: { kind: "lines", parts: [k, turn] } });
+  });
+  return out;
+}
+
+const COIN_CANVAS = 16;
 
 /** The coins, by what they are worth in cents. */
 export const COINS: { cents: number; one: string; many: string }[] = [
@@ -694,18 +758,24 @@ function split(spec: BoardSpec): { yes: Cand[]; no: Cand[] } {
           ? ratioPool(spec.hi)
           : spec.style === "power"
             ? powerPool(spec.lo, spec.hi)
-            : spec.style === "count"
-              ? countPool(spec.lo, spec.hi)
-              : spec.style === "dots"
-                ? dotsPool(spec.lo, spec.hi)
-                : spec.style === "coins"
-                  ? coinPool(spec.hi)
-                  : // A board allowed only to multiply can only show numbers that
+            : spec.style === "shapes" || spec.style === "corners"
+              ? shapePool(spec.style === "corners")
+              : spec.style === "angles"
+                ? anglePool()
+                : spec.style === "lines"
+                  ? linePool()
+                  : spec.style === "count"
+                    ? countPool(spec.lo, spec.hi)
+                    : spec.style === "dots"
+                      ? dotsPool(spec.lo, spec.hi)
+                      : spec.style === "coins"
+                        ? coinPool(spec.hi)
+                        : // A board allowed only to multiply can only show numbers that
                   // two factors can make: there is no way to write 37 as a
                   // product, so it must not turn up on one.
-                    spec.ops?.length === 1 && spec.ops[0] === "x"
-                    ? PRODUCTS.filter((v) => v >= spec.lo && v <= spec.hi).map((value) => ({ value }))
-                    : Array.from({ length: spec.hi - spec.lo + 1 }, (_, i) => ({ value: spec.lo + i }));
+                          spec.ops?.length === 1 && spec.ops[0] === "x"
+                          ? PRODUCTS.filter((v) => v >= spec.lo && v <= spec.hi).map((value) => ({ value }))
+                          : Array.from({ length: spec.hi - spec.lo + 1 }, (_, i) => ({ value: spec.lo + i }));
   const yes: Cand[] = [];
   const no: Cand[] = [];
   for (const c of pool) (fits(spec.rule, c) ? yes : no).push(c);
@@ -1103,6 +1173,11 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("equals", 9, "fact", 1, 28, { ops: ["-"] }),
       board("equals", 12, "fact", 1, 32, { ops: ["-"] }),
     ]),
+    lvl(1, "g1-5", "Sides and Corners", "math-1.shapes", "Skill: naming shapes by counting their sides. A triangle has three, a square has four - and a circle has none at all, however big it is drawn.", [
+      board("sides", 3, "shapes", 0, 0),
+      board("sides", 4, "shapes", 0, 0),
+      board("squareCorners", 1, "corners", 0, 0),
+    ]),
     lvl(1, "g1-3", "Coin Counting", "math-2.time-money", "Skill: adding coins up. The big one with a cross is a quarter (25), the one with a bar is a nickel (5), the little plain one is a dime (10), and the copper one is a penny (1).", [
       board("less", 9, "coins", 1, 50),
       board("greater", 25, "coins", 1, 60),
@@ -1173,6 +1248,16 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("greater", 0.5, "mixed", 2, 14, { show: "1/2" }),
       board("less", 0.25, "mixed", 2, 16, { show: "1/4" }),
       board("greater", 1, "fraction", 2, 18),
+    ]),
+    lvl(4, "g4-7", "Lines and Corners", "g4.angles", "Skill: how two lines can sit together. Parallel lines stay the same distance apart for ever; perpendicular ones meet at a square corner.", [
+      board("linesAre", 0, "lines", 0, 0),
+      board("linesAre", 1, "lines", 0, 0),
+      board("linesAre", 2, "lines", 0, 0),
+    ]),
+    lvl(4, "g4-8", "Wide and Narrow", "g4.angles", "Skill: comparing angles to a square corner. A square corner is ninety degrees: anything narrower is acute, anything wider is obtuse.", [
+      board("less", 90, "angles", 0, 0, { show: "90° (a square corner)" }),
+      board("greater", 90, "angles", 0, 0, { show: "90°" }),
+      board("greater", 120, "angles", 0, 0, { show: "120°" }),
     ]),
     lvl(4, "g4-1", "Factor Forest", "g4.factors-primes", "Skill: finding factors. A factor divides the number at the top with nothing left over. 6 is a factor of 24 because 24 ÷ 6 = 4.", [
       board("multiples", 4, "plain", 1, 40),
@@ -1714,6 +1799,175 @@ export function coinsGrid(parts: number[]): Grid {
 }
 
 const TALLY = "#1b1530";
+const DRAW = "#2340ff";
+const DRAW_FILL = "#dbe6ff";
+
+/** A straight line between two points, in whole pixels. */
+function line(g: Grid, x0: number, y0: number, x1: number, y1: number, c: string): void {
+  const dx = Math.abs(x1 - x0);
+  const dy = Math.abs(y1 - y0);
+  const sx = x0 < x1 ? 1 : -1;
+  const sy = y0 < y1 ? 1 : -1;
+  let err = dx - dy;
+  let [x, y] = [Math.round(x0), Math.round(y0)];
+  for (let guard = 0; guard < 200; guard++) {
+    g.set(x, y, c);
+    if (x === Math.round(x1) && y === Math.round(y1)) return;
+    const e2 = 2 * err;
+    if (e2 > -dy) {
+      err -= dy;
+      x += sx;
+    }
+    if (e2 < dx) {
+      err += dx;
+      y += sy;
+    }
+  }
+}
+
+/** Joins up a ring of points and floods the inside with a pale wash. */
+function polygon(g: Grid, pts: [number, number][], line_: string, fill: string): void {
+  // Fill first: for every row, colour between the leftmost and rightmost
+  // crossings of the outline. Good enough for the shapes a board shows.
+  const ys = pts.map(([, y]) => y);
+  for (let y = Math.ceil(Math.min(...ys)); y <= Math.floor(Math.max(...ys)); y++) {
+    const xs: number[] = [];
+    for (let i = 0; i < pts.length; i++) {
+      const [ax, ay] = pts[i];
+      const [bx, by] = pts[(i + 1) % pts.length];
+      if (ay === by || y < Math.min(ay, by) || y > Math.max(ay, by)) continue;
+      xs.push(ax + ((y - ay) / (by - ay)) * (bx - ax));
+    }
+    if (xs.length < 2) continue;
+    for (let x = Math.ceil(Math.min(...xs)); x <= Math.floor(Math.max(...xs)); x++) g.set(x, y, fill);
+  }
+  for (let i = 0; i < pts.length; i++) {
+    const [ax, ay] = pts[i];
+    const [bx, by] = pts[(i + 1) % pts.length];
+    line(g, ax, ay, bx, by, line_);
+  }
+}
+
+/** The shapes a board can show, and what is true about each one. */
+export const SHAPES = [
+  { name: "triangle", sides: 3, corners: 0 },
+  { name: "right triangle", sides: 3, corners: 1 },
+  { name: "tall triangle", sides: 3, corners: 0 },
+  { name: "square", sides: 4, corners: 4 },
+  { name: "rectangle", sides: 4, corners: 4 },
+  { name: "diamond", sides: 4, corners: 0 },
+  { name: "trapezoid", sides: 4, corners: 0 },
+  { name: "pentagon", sides: 5, corners: 0 },
+  { name: "hexagon", sides: 6, corners: 0 },
+  { name: "heptagon", sides: 7, corners: 0 },
+  { name: "octagon", sides: 8, corners: 0 },
+  { name: "circle", sides: 0, corners: 0 },
+  { name: "oval", sides: 0, corners: 0 },
+] as const;
+
+/** How big a drawn shape is: the three sizes a board mixes. */
+export const SHAPE_SIZES = ["small", "", "big"] as const;
+
+const GEO = 26;
+
+/** One shape, drawn as an outline with a pale wash inside. */
+export function shapeGrid(which: number, size = 1): Grid {
+  const g = new Grid(GEO, GEO);
+  const shape = SHAPES[Math.max(0, Math.min(SHAPES.length - 1, which))];
+  const c = (GEO - 1) / 2;
+  const r = [8, 10, 12][Math.max(0, Math.min(2, size))];
+
+  if (shape.name === "circle" || shape.name === "oval") {
+    const rx = r;
+    const ry = shape.name === "oval" ? Math.round(r * 0.62) : r;
+    // Fill it, then walk each row and each column and darken the outermost
+    // pixel. Testing the curve pixel by pixel leaves gaps at the sides, where
+    // the shape is only a pixel tall and nothing counts as "the edge".
+    for (let y = -ry; y <= ry; y++)
+      for (let x = -rx; x <= rx; x++) {
+        if ((x / rx) ** 2 + (y / ry) ** 2 <= 1) g.set(Math.round(c + x), Math.round(c + y), DRAW_FILL);
+      }
+    for (let y = 0; y < GEO; y++) {
+      const row = [...Array(GEO).keys()].filter((x) => g.get(x, y));
+      if (row.length) {
+        g.set(row[0], y, DRAW);
+        g.set(row[row.length - 1], y, DRAW);
+      }
+    }
+    for (let x = 0; x < GEO; x++) {
+      const col = [...Array(GEO).keys()].filter((y) => g.get(x, y));
+      if (col.length) {
+        g.set(x, col[0], DRAW);
+        g.set(x, col[col.length - 1], DRAW);
+      }
+    }
+    return g;
+  }
+
+  let pts: [number, number][];
+  if (shape.name === "right triangle") pts = [[c - r, c - r], [c - r, c + r], [c + r, c + r]];
+  else if (shape.name === "tall triangle") pts = [[c, c - r], [c + r * 0.55, c + r], [c - r * 0.55, c + r]];
+  else if (shape.name === "square") pts = [[c - r, c - r], [c + r, c - r], [c + r, c + r], [c - r, c + r]];
+  else if (shape.name === "rectangle") pts = [[c - r, c - r * 0.6], [c + r, c - r * 0.6], [c + r, c + r * 0.6], [c - r, c + r * 0.6]];
+  else if (shape.name === "diamond") pts = [[c, c - r], [c + r, c], [c, c + r], [c - r, c]];
+  else if (shape.name === "trapezoid") pts = [[c - r * 0.55, c - r * 0.7], [c + r * 0.55, c - r * 0.7], [c + r, c + r * 0.7], [c - r, c + r * 0.7]];
+  else {
+    // A regular shape: its corners spread evenly round a circle, with one
+    // of them pointing straight up.
+    pts = Array.from({ length: shape.sides }, (_, i) => {
+      const a = (i / shape.sides) * Math.PI * 2 - Math.PI / 2;
+      return [c + Math.cos(a) * r, c + Math.sin(a) * r] as [number, number];
+    });
+  }
+  polygon(g, pts.map(([x, y]) => [Math.round(x), Math.round(y)] as [number, number]), DRAW, DRAW_FILL);
+  return g;
+}
+
+/** An angle: two arms from one corner, with a little arc to say which angle. */
+export function angleGrid(deg: number, flip = false): Grid {
+  const g = new Grid(GEO, GEO);
+  const ox = 3;
+  const oy = GEO - 4;
+  const len = 19;
+  const rad = (deg * Math.PI) / 180;
+  line(g, ox, oy, ox + len, oy, DRAW);
+  line(g, ox, oy, ox + Math.cos(rad) * len, oy - Math.sin(rad) * len, DRAW);
+  // The arc, so it is clear which of the two angles is meant.
+  for (let a = 0; a <= deg; a += 3) {
+    const t = (a * Math.PI) / 180;
+    g.set(Math.round(ox + Math.cos(t) * 6), Math.round(oy - Math.sin(t) * 6), DRAW_FILL);
+  }
+  g.set(ox, oy, OUT);
+  return flip ? g.flipX() : g;
+}
+
+/** The three ways two lines can sit together. */
+export const LINE_KINDS = ["parallel", "perpendicular", "crossing"] as const;
+
+/** Two lines: side by side, square to each other, or crossing at a slant. */
+export function linesGrid(kind: number, turn = 0): Grid {
+  const g = new Grid(GEO, GEO);
+  const c = (GEO - 1) / 2;
+  const len = 11;
+  const a = (turn * Math.PI) / 180;
+  const arm = (ang: number, ox = 0, oy = 0) =>
+    line(g, c + ox - Math.cos(ang) * len, c + oy + Math.sin(ang) * len, c + ox + Math.cos(ang) * len, c + oy - Math.sin(ang) * len, DRAW);
+
+  if (kind === 0) {
+    // Side by side, the same distance apart all the way along.
+    const ox = Math.round(Math.sin(a) * 5);
+    const oy = Math.round(Math.cos(a) * 5);
+    arm(a, -ox, -oy);
+    arm(a, ox, oy);
+  } else if (kind === 1) {
+    arm(a);
+    arm(a + Math.PI / 2);
+  } else {
+    arm(a);
+    arm(a + Math.PI / 3);
+  }
+  return g;
+}
 const DIE = "#fffdf5";
 const DIE_EDGE = "#8d93a8";
 const PIP = "#1b1530";

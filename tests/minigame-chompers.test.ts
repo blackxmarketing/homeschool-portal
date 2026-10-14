@@ -18,6 +18,7 @@ import {
   maxFor,
   maxForLevel,
   ROWS,
+  SHAPES,
   buildBoard,
   chomperGrid,
   chompers,
@@ -214,6 +215,9 @@ describe("the levels", () => {
     const reach = (spec: { hi: number; rule: { target: number; of?: number } }) =>
       Math.max(spec.hi, Math.abs(spec.rule.target), Math.abs(spec.rule.of ?? 0)) + Math.abs(spec.rule.target);
     for (const l of ALL_CHOMPER_LEVELS) {
+      // Geometry boards have no number range to get bigger - three sides,
+      // four sides, square corners is a climb in ideas, not in digits.
+      if (l.boards.every((b) => b.hi === 0)) continue;
       const r = l.boards.map(reach);
       for (let i = 1; i < r.length; i++) {
         expect(r[i], `${l.id} board ${i + 1} is easier than the one before it: ${r.map(Math.round).join(" -> ")}`).toBeGreaterThanOrEqual(r[i - 1]);
@@ -387,8 +391,22 @@ describe("building a board", () => {
         expect(Number.isFinite(c.value)).toBe(true);
         expect(c.ok, `${level.id}: "${c.text}"`).toBe(fits(b.rule, c));
         // The text is either the number or a sum that comes to it.
-        // A picture cell is checked by its picture, not by reading its words.
-        if (c.art) expect(c.art.parts.reduce((t, n) => t + n, 0), `${level.id}: "${c.text}"`).toBe(c.value);
+        // A picture cell is checked by its picture, not by reading its words -
+        // and what the picture is worth depends on what it draws. Dots and
+        // coins add up; a shape is worth its number of sides; an angle its
+        // degrees; a pair of lines which pair it is.
+        if (c.art) {
+          const a = c.art;
+          const worth =
+            a.kind === "shape"
+              ? b.rule.kind === "squareCorners"
+                ? (SHAPES[a.parts[0]].corners ? 1 : 0)
+                : SHAPES[a.parts[0]].sides
+              : a.kind === "angle" || a.kind === "lines"
+                ? a.parts[0]
+                : a.parts.reduce((t, n) => t + n, 0);
+          expect(worth, `${level.id}: "${c.text}"`).toBe(c.value);
+        }
         else expect(evalCell(c.text, b.rule.of ?? 0), `${level.id}: "${c.text}" should be ${c.value}`).toBeCloseTo(c.value, 9);
       }
     });
