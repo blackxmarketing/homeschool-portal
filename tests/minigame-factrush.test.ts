@@ -1027,3 +1027,36 @@ describe("the dragon fight, and what the browser may claim about it", () => {
     expect(unspent - spent).toBe(DRAGON_HITS[pace]);
   });
 });
+
+describe("the hunter keeps its own speed", () => {
+  const level = levelById("fr-a1")!;
+  const quick = (n: number) => perfectMoves(level, 6, "hard").answers.slice(0, n).map((a) => ({ ...a, ms: 900 }));
+
+  it("falls further behind the faster they answer", () => {
+    // Each right answer is a block run; it takes back a quarter of one a
+    // second. Answer quickly and the gap only grows.
+    const gaps = [2, 4, 6, 8].map((n) => play(level, { seed: 6, pace: "hard", answers: quick(n) }).chase!);
+    for (let i = 1; i < gaps.length; i++) {
+      expect(gaps[i], `the gap stopped growing after ${i} answers: ${gaps.join(" -> ")}`).toBeGreaterThan(gaps[i - 1]);
+    }
+  });
+
+  it("is let off the leash on hard, so a good run really does leave it behind", () => {
+    const far = play(level, { seed: 6, pace: "hard", answers: quick(20) }).chase!;
+    // Well past the distance it starts at, rather than pinned a step behind.
+    expect(far).toBeGreaterThan(CHASE_FROM.hard * 2);
+  });
+
+  it("closes at the same rate whatever they are doing, because it is on the clock", () => {
+    // Two idle pauses of the same length close the gap by the same amount,
+    // whether they were answering in between or not.
+    const a = play(level, { seed: 6, pace: "hard", answers: [{ a: null, ms: 4000 }] }).chase!;
+    const b = play(level, { seed: 6, pace: "hard", answers: [{ a: null, ms: 2000 }, { a: null, ms: 2000 }] }).chase!;
+    expect(Math.abs(a - b)).toBeLessThan(0.001);
+  });
+
+  it("still gets them if they stop answering for long enough", () => {
+    const idle = Array.from({ length: 30 }, () => ({ a: null, ms: 6000 }));
+    expect(play(level, { seed: 6, pace: "hard", answers: idle }).caught).toBeGreaterThan(0);
+  });
+});

@@ -615,7 +615,10 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
       if (pace === "hard") chase -= (CREEP_PER_SEC * ans.ms) / 1000;
       if (!right && !idle) chase -= 1;
       // It never drops so far back that a kid forgets it is there.
-      chase = Math.min(pace === "hard" ? from + 3 : from, chase);
+      // On hard it may fall a long way back. A kid who keeps answering
+      // should be able to leave it behind altogether rather than have it
+      // shadow them at a fixed distance for the whole level.
+      chase = Math.min(pace === "hard" ? from + 12 : from, chase);
 
       if (chase <= 0) {
         caught++;

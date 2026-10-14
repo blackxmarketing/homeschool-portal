@@ -73,15 +73,19 @@ const BLOCK = 86;
 /** How far from the left edge the camera keeps the runner. */
 const CAMERA_AT = 0.3;
 /**
- * The closest the hunter is drawn while it has not got them yet, as a
- * percentage across the scene.
+ * How much screen one block of the gap is worth when drawing the hunter.
  *
- * It used to run all the way up to the runner's own mark, so at a gap of one
- * or two blocks the two sprites overlapped and it looked as though it was
- * standing on them for several cards before anything happened. It stops short
- * now, and only the catch itself closes the last of it.
+ * Far less than a block is wide. A block is 86 pixels and only about 110 of
+ * ground sits behind the runner, so at a block a block it was off the side of
+ * the screen at any honest distance. At eighteen it is right behind them at a
+ * gap of one or two, at the edge by five, and gone by nine.
+ *
+ * It is a straight multiple of the gap and nothing else, which is the point:
+ * the hunter moves at its own speed. A kid who answers quickly pulls away and
+ * leaves it behind, rather than having it keep pace just off the screen
+ * because the drawing was squeezing the whole gap into the visible strip.
  */
-const CHASE_NEAR = 21;
+const GAP_PX = 18;
 
 const HAZARD_ART: Record<Hazard, ReturnType<typeof holeGrid>> = { hole: HOLE, river: RIVER, mountain: MOUNTAIN };
 
@@ -179,8 +183,6 @@ function FactRush({
   const posts = postsOn(level);
   /** Which block they are standing on: how far along, in blocks. */
   const standing = (at: number) => at * posts;
-  /** The furthest back the hunter ever gets, which is where it enters. */
-  const maxGap = CHASE_FROM[pace] + (pace === "hard" ? 3 : 0);
   const run = useMemo(() => play(level, { seed, answers, pace, thrown, beat: dragonDown }, saved), [level, seed, answers, pace, saved, thrown, dragonDown]);
   const fightLives = Math.max(0, run.lives - burns);
   const fightLost = run.atDragon && !dragonDown && burns > 0 && fightLives <= 0;
@@ -610,7 +612,7 @@ function FactRush({
           {gap !== null && (
             <span
               className={`${css.beast} ${gap <= 2 ? css.close : ""}`}
-              style={{ left: `${CHASE_NEAR * (1 - Math.min(1, Math.max(0, gap / maxGap)))}%` }}
+              style={{ left: `calc(${CAMERA_AT * 100}% - ${Math.max(0, gap) * GAP_PX}px)` }}
             >
               <PixelSprite grid={BEAST[Math.floor(now / 260) % 2]} scale={5} />
             </span>
