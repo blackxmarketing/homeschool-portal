@@ -89,6 +89,31 @@ const GAP_PX = 18;
 
 const HAZARD_ART: Record<Hazard, ReturnType<typeof holeGrid>> = { hole: HOLE, river: RIVER, mountain: MOUNTAIN };
 
+/** What each key does, for a kid who would rather see it than read it. */
+function FightKeys() {
+  return (
+    <div className={css.keys}>
+      {[
+        { cap: "←", also: "→", what: "Move" },
+        { cap: "↑", what: "Jump" },
+        { cap: "↓", what: "Duck" },
+      ].map((k) => (
+        <span key={k.what} className={css.keyRow}>
+          <kbd className={css.cap}>{k.cap}</kbd>
+          {k.also && <kbd className={css.cap}>{k.also}</kbd>}
+          <span className={css.keyWhat}>{k.what}</span>
+        </span>
+      ))}
+      <span className={css.keyRow}>
+        <kbd className={`${css.cap} ${css.capWide}`}>space</kbd>
+        <span className={css.keyWhat}>
+          Throw <PixelSprite grid={fireballGrid(0)} scale={2} className={css.keyFire} />
+        </span>
+      </span>
+    </div>
+  );
+}
+
 export default function FactRushGame({ levelId, onFinish, stars, plays, hero, coins, canAsk }: MiniGameUIProps) {
   const level = levelById(levelId);
   return level ? <FactRush level={level} onFinish={onFinish} earned={stars ?? 0} plays={plays ?? 0} hero={hero} saved={coins ?? 0} canAsk={!!canAsk} /> : null;
@@ -457,7 +482,7 @@ function FactRush({
 
         <TeacherBrief
           teacher={coach}
-          directions={level.intro}
+          directions={`${level.intro} Before you go, pick how hard you want it: easy for no monster, medium for one that comes and goes, hard for one that never stops.`}
           rule={level.title}
           levelId={level.id}
           board={0}
@@ -704,6 +729,8 @@ function FactRush({
                     board={0}
                     seed={seed}
                     canAsk={canAsk}
+                    showDirections={false}
+                    extra={<FightKeys />}
                     stage="brief"
                     onReady={() => {
                       speak("fight-count", "Three. Two. One. Go!", { kind: coachLook.voice });

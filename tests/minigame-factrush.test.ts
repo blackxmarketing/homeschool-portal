@@ -1062,3 +1062,29 @@ describe("the hunter keeps its own speed", () => {
     expect(play(level, { seed: 6, pace: "hard", answers: idle }).caught).toBeGreaterThan(0);
   });
 });
+
+describe("what the coach puts on screen", () => {
+  const screen = fs.readFileSync(path.join(process.cwd(), "src/components/minigames/FactRushGame.tsx"), "utf8");
+  const brief = fs.readFileSync(path.join(process.cwd(), "src/components/minigames/TeacherBrief.tsx"), "utf8");
+
+  it("reminds them to pick a challenge before the level starts", () => {
+    expect(screen).toMatch(/pick how hard you want it/i);
+    // And the three to pick from are on that same row.
+    expect(screen).toContain("PACES.map");
+  });
+
+  it("shows the keys for the fight instead of reading a paragraph out at them", () => {
+    // He still says the words; they just are not printed.
+    expect(screen).toContain("showDirections={false}");
+    expect(screen).toContain("<FightKeys />");
+    for (const k of ["Move", "Jump", "Duck", "Throw"]) expect(screen, `the fight keys do not mention ${k}`).toContain(k);
+    // And the keys themselves, drawn as caps rather than described.
+    for (const cap of ["←", "→", "↑", "↓", "space"]) expect(screen, `no key cap for ${cap}`).toContain(cap);
+    // The panel honours it rather than printing them anyway.
+    expect(brief).toContain("{showDirections && <p");
+  });
+
+  it("still prints the directions everywhere else", () => {
+    expect(brief).toMatch(/showDirections = true/);
+  });
+});

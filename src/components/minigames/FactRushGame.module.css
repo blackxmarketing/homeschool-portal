@@ -647,3 +647,45 @@
   gap: 8px;
   flex-wrap: wrap;
 }
+
+/* Which key does what in the fight, shown rather than written out. */
+.keys {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.keyRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.6rem;
+  color: var(--ink);
+  background: #fffdf5;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  box-shadow: 0 3px 0 var(--ink);
+}
+.capWide {
+  min-width: 70px;
+  font-size: 0.45rem;
+}
+.keyWhat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+.keyFire {
+  vertical-align: middle;
+}

@@ -37,6 +37,7 @@ export default function TeacherBrief({
   onExample,
   example,
   extra,
+  showDirections = true,
 }: {
   teacher: BriefTeacher;
   /** The level's skill in plain words - what he reads out. */
@@ -59,6 +60,14 @@ export default function TeacherBrief({
   example?: React.ReactNode;
   /** Anything else the game wants on this row before the level starts. */
   extra?: React.ReactNode;
+  /**
+   * Whether to print what he is saying.
+   *
+   * Off for the fight, where a kid wants to see which key does what rather
+   * than read a paragraph about it - he still says the words, and the keys
+   * are shown instead through `extra`.
+   */
+  showDirections?: boolean;
 }) {
   const look = avatarFor(teacher.id);
   const { speakOn } = useVoiceSettings();
@@ -129,7 +138,7 @@ export default function TeacherBrief({
 
       <div className={css.text}>
         <span className={css.who}>{teacher.name}</span>
-        <p className={css.skill}>{directions}</p>
+        {showDirections && <p className={css.skill}>{directions}</p>}
 
         {turns.map((t, i) => (
           <div key={i} className={css.turn}>
