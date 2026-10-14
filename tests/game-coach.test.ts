@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { avatarFor } from "@/content/avatars";
 import { teacherFor, TEACHERS } from "@/content/teachers";
-import { ALL_CHOMPER_LEVELS, GAME_COACH, chompersInfo, workedExample } from "@/lib/minigames/chompers";
+import { ALL_CHOMPER_LEVELS, GAME_COACH, buildBoard, chompersInfo, workedExample } from "@/lib/minigames/chompers";
 
 /**
  * The coach in XP Rush: Math reads the skill out before a level and answers
@@ -146,7 +146,7 @@ describe("the worked example", () => {
     for (const l of ALL_CHOMPER_LEVELS) {
       for (let i = 0; i < l.boards.length; i++) {
         for (const seed of [1, 7, 12345, 2 ** 31 - 2]) {
-          const ex = workedExample(l.boards[i], i, seed);
+          const ex = workedExample(l.boards[i], i, buildBoard(l.boards[i], i, seed));
           expect(ex, `${l.id} board ${i} seed ${seed} has no example to show`).toBeTruthy();
         }
       }
@@ -155,23 +155,29 @@ describe("the worked example", () => {
 
   it("shows one square that fits and one that does not", () => {
     for (const l of ALL_CHOMPER_LEVELS) {
-      const ex = workedExample(l.boards[0], 0, 99)!;
+      const ex = workedExample(l.boards[0], 0, buildBoard(l.boards[0], 0, 99))!;
       expect(ex.yes.ok, `${l.id}: the "eat it" square does not fit the rule`).toBe(true);
       expect(ex.no.ok, `${l.id}: the "leave it" square fits the rule`).toBe(false);
     }
   });
 
-  it("is built off a seed nowhere near the kid's, so it is never a peek at their board", () => {
-    // Same spec, same board index, their seed - and the example must not be
-    // reading the board they are about to play.
-    const src = fs.readFileSync(path.join(process.cwd(), "src/lib/minigames/chompers.ts"), "utf8");
-    const fn = src.slice(src.indexOf("export function workedExample"));
-    expect(fn.slice(0, 400)).toMatch(/buildBoard\(spec, boardIndex, \(\(seed >>> 0\) \* 104729 \+ 31\)/);
+  it("is never just the kid's own board read back to them", () => {
+    // Whatever it does inside, it must not be showing them the squares they
+    // are about to play in the order they will see them.
+    for (const l of ALL_CHOMPER_LEVELS) {
+      for (const seed of [1, 99, 12345]) {
+        const playing = buildBoard(l.boards[0], 0, seed);
+        const ex = workedExample(l.boards[0], 0, playing)!;
+        const firstOk = playing.cells.find((c) => c.ok)!;
+        const firstNo = playing.cells.find((c) => !c.ok)!;
+        expect(`${ex.yes.text}|${ex.no.text}`, `${l.id}: the example is their own board`).not.toBe(`${firstOk.text}|${firstNo.text}`);
+      }
+    }
   });
 
   it("says something a kid can follow, with nothing missing from it", () => {
     for (const l of ALL_CHOMPER_LEVELS) {
-      const ex = workedExample(l.boards[0], 0, 4242)!;
+      const ex = workedExample(l.boards[0], 0, buildBoard(l.boards[0], 0, 4242))!;
       expect(ex.say).toContain(ex.rule);
       expect(ex.say).toContain("eat that one");
       expect(ex.say).toContain("leave it");
@@ -182,11 +188,46 @@ describe("the worked example", () => {
     }
   });
 
+  it("shows their rule, never one from the window it borrowed numbers from", () => {
+    for (const l of ALL_CHOMPER_LEVELS) {
+      for (let i = 0; i < l.boards.length; i++) {
+        for (const seed of [1, 7, 99, 12345, 777]) {
+          const playing = buildBoard(l.boards[i], i, seed);
+          const ex = workedExample(l.boards[i], i, playing)!;
+          expect(ex.rule, `${l.id} board ${i} is being shown the wrong rule`).toBe(playing.label);
+        }
+      }
+    }
+  });
+
+  it("mostly picks numbers that are not already on the board", () => {
+    // An example that hands over a square teaches a kid to hunt for that
+    // square rather than work it out. It used to do that 41% of the time.
+    // What is left are the boards whose squares are a fixed set - the ways to
+    // show 5, the three-sided shapes, the times-table facts - where another
+    // number genuinely does not exist, and one of theirs beats showing none.
+    let hits = 0;
+    let tried = 0;
+    for (const l of ALL_CHOMPER_LEVELS) {
+      for (let i = 0; i < l.boards.length; i++) {
+        for (const seed of [1, 7, 99, 12345, 777]) {
+          const playing = buildBoard(l.boards[i], i, seed);
+          const ex = workedExample(l.boards[i], i, playing)!;
+          const theirs = new Set(playing.cells.map((c) => c.text));
+          tried += 2;
+          if (theirs.has(ex.yes.text)) hits++;
+          if (theirs.has(ex.no.text)) hits++;
+        }
+      }
+    }
+    expect(hits / tried, `${hits} of ${tried} example squares are already on the board`).toBeLessThan(0.15);
+  });
+
   it("keeps the family rule, same as every other word in the game", () => {
     const BANNED = /\b(gender|identity|politic|election|president|democrat|republican)\b/i;
     for (const l of ALL_CHOMPER_LEVELS) {
       for (const seed of [1, 500, 9999]) {
-        expect(workedExample(l.boards[0], 0, seed)!.say).not.toMatch(BANNED);
+        expect(workedExample(l.boards[0], 0, buildBoard(l.boards[0], 0, seed))!.say).not.toMatch(BANNED);
       }
     }
   });

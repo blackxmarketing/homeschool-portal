@@ -1400,16 +1400,54 @@ export interface WorkedExample {
  * Two squares to talk a kid through before they start: one to eat, one to
  * leave, and why.
  *
- * They come from a board built on a seed nowhere near the kid's own, so the
- * example can never be a preview of the squares they are about to play. The
- * reason it does not fit is the same line the game gives when a kid eats the
- * wrong thing, so the explaining is written in one place.
+ * Neither square is one of theirs. An example that hands over an answer
+ * teaches a kid to look for that square rather than to work it out, and a
+ * board drawn on another seed is no help: it comes out of the same pool, so
+ * four times in ten the "eat it" square was already in front of them.
+ *
+ * Another seed is not enough on its own either. "Multiples of 4" between 1
+ * and 40 has exactly ten right answers and the board uses all ten, so a
+ * different square does not exist - only a bigger number does. When the
+ * squares in range are used up, the window slides up by its own width and
+ * the example is drawn from there instead: same rule, numbers they will not
+ * find on the board. A window that slides somewhere with no right answers in
+ * it - "less than 9", moved past 9 - simply does not win, and the search
+ * falls back to the board in range.
+ *
+ * The reason the second one does not fit is the same line the game gives when
+ * a kid eats the wrong thing, so the explaining is written in one place.
  */
-export function workedExample(spec: BoardSpec, boardIndex: number, seed: number): WorkedExample | null {
-  const b = buildBoard(spec, boardIndex, ((seed >>> 0) * 104729 + 31) % 2147483647);
+export function workedExample(spec: BoardSpec, boardIndex: number, playing: Board): WorkedExample | null {
+  const theirs = new Set(playing.cells.map((c) => c.text));
+  const span = Math.max(1, spec.hi - spec.lo + 1);
+  /** Their own range first, then the same window slid up, then slid again. */
+  const windows: BoardSpec[] = [spec, { ...spec, lo: spec.lo + span, hi: spec.hi + span }, { ...spec, lo: spec.lo + 2 * span, hi: spec.hi + 2 * span }];
+
+  let fallback: Board | null = null;
+  for (const w of windows) {
+    let yes: Cell | undefined;
+    let no: Cell | undefined;
+    let b: Board | null = null;
+    for (let k = 1; k <= 12; k++) {
+      b = buildBoard(w, boardIndex, ((playing.seed >>> 0) * 104729 + k * 7919 + 31) % 2147483647);
+      fallback ??= b;
+      yes = b.cells.find((c) => c.ok && !theirs.has(c.text)) ?? yes;
+      no = b.cells.find((c) => !c.ok && !theirs.has(c.text)) ?? no;
+      if (yes && no) return example(b, yes, no);
+    }
+  }
+
+  // A board too thin to have anything new on it - "Shows 5" has only so many
+  // ways to show 5. One of theirs beats showing them nothing.
+  const b = fallback;
+  if (!b) return null;
   const yes = b.cells.find((c) => c.ok);
   const no = b.cells.find((c) => !c.ok);
   if (!yes || !no) return null;
+  return example(b, yes, no);
+}
+
+function example(b: Board, yes: Cell, no: Cell): WorkedExample {
   // Only a counting picture is "worth" a number. A shape is worth its sides
   // and an angle its degrees, which saying out loud helps nobody.
   const COUNTS = ["dots", "coins", "tally", "dice"];

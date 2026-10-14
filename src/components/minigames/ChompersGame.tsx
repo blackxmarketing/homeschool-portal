@@ -339,7 +339,7 @@ function Chompers({
    */
   const [example, setExample] = useState<ReturnType<typeof workedExample>>(null);
   function showExample() {
-    const ex = workedExample(level.boards[bi], bi, seed);
+    const ex = workedExample(level.boards[bi], bi, board);
     setExample(ex);
     if (ex) speak("coach-example", ex.say, { kind: coachLook.voice });
   }
