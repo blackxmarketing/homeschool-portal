@@ -141,9 +141,31 @@ export interface FactLevel extends MiniLevel {
   /** The curriculum skill or lesson this drills, same words as the lessons use. */
   skill: string;
   cards: Fact[];
+  /**
+   * Draw this many cards from the pack instead of using all of them. A
+   * dungeon holds every fact of its operation - 144 of them - and asks a
+   * different two dozen each time, so it cannot be learned by rote.
+   */
+  sample?: number;
+  /**
+   * How many times a card has to come up right. Two for a drill, where the
+   * point is to wear the fact in; one for a dungeon, where the point is to
+   * find out what is already there.
+   */
+  need?: number;
+  /** Drawn as a dungeon rather than a run in the sunshine. */
+  dungeon?: boolean;
 }
 
+/** How many right answers a card in this level needs. */
+export const needOf = (level: FactLevel) => level.need ?? NEED;
+
+/** How many cards this level draws from its pack. */
+export const drawOf = (level: FactLevel) => Math.min(level.sample ?? level.cards.length, level.cards.length);
+
 const OP_WORD: Record<Op, string> = { "+": "Adding", "-": "Taking away", x: "Times", "/": "Sharing" };
+/** The same words with the capitals a title wants. */
+const DUNGEON_WORD: Record<Op, string> = { "+": "Adding", "-": "Taking Away", x: "Times", "/": "Sharing" };
 
 const opLevel = (op: Op, n: number, grade: number, skill: string): FactLevel => ({
   id: `fr-${op === "x" ? "x" : op === "/" ? "d" : op === "+" ? "a" : "s"}${n}`,
@@ -170,6 +192,25 @@ const coinLevel = (id: string, title: string, intro: string, cards: Fact[]): Fac
   cards,
 });
 
+/**
+ * The dungeon at the end of a set: every fact of that operation in one pack,
+ * two dozen drawn at a time, each one wanted right once. It is not a drill -
+ * it is the room where you find out which of the twelve families actually
+ * stuck.
+ */
+const dungeon = (op: Op, grade: number, skill: string): FactLevel => ({
+  id: `fr-${op === "x" ? "x" : op === "/" ? "d" : op === "+" ? "a" : "s"}dun`,
+  title: `The ${DUNGEON_WORD[op]} Dungeon`,
+  intro: `Every ${OP_WORD[op].toLowerCase()} fact from the ones to the twelves, all mixed together, and two dozen of them drawn at random. No warm-up and no pattern to lean on - this is the room that tells you which ones really stuck.`,
+  grade,
+  skill,
+  cards: Array.from({ length: TOP }, (_, i) => familyFacts(op, i + 1)).flat(),
+  sample: 24,
+  // One right answer each: a dungeon is asking what you know, not teaching it.
+  need: 1,
+  dungeon: true,
+});
+
 const family = (op: Op, grade: number, skill: string) => Array.from({ length: TOP }, (_, i) => opLevel(op, i + 1, grade, skill));
 
 /**
@@ -179,9 +220,13 @@ const family = (op: Op, grade: number, skill: string) => Array.from({ length: TO
  */
 export const ALL_FACT_LEVELS: FactLevel[] = [
   ...family("+", 1, "math-2.facts-20"),
+  dungeon("+", 1, "math-2.facts-20"),
   ...family("-", 2, "math-2.facts-20"),
+  dungeon("-", 2, "math-2.facts-20"),
   ...family("x", 3, "g3.mult-facts"),
+  dungeon("x", 3, "g3.mult-facts"),
   ...family("/", 4, "g3.div-facts"),
+  dungeon("/", 4, "g3.div-facts"),
   coinLevel("fr-c1", "Pennies", "Skill: counting on in ones. How much is a handful of pennies worth?", coinFacts(1, TOP)),
   coinLevel("fr-c5", "Nickels", "Skill: counting on in fives. A nickel is five cents, so three of them is three fives.", coinFacts(5, TOP)),
   coinLevel("fr-c10", "Dimes", "Skill: counting on in tens. A dime is ten cents - ten of them make a dollar.", coinFacts(10, 10)),
@@ -200,13 +245,15 @@ export interface Seat {
   got: number;
 }
 
-/** The pile at the start: every card once, mixed up. */
+/** The pile at the start: the level's cards, mixed up, as many as it draws. */
 export function openingPile(level: FactLevel, seed: number): Seat[] {
   const r: Rng = seededRng((seed >>> 0) * 31 + 7);
   return shuffle(
     r,
     level.cards.map((_, i) => i),
-  ).map((i) => ({ i, got: 0 }));
+  )
+    .slice(0, drawOf(level))
+    .map((i) => ({ i, got: 0 }));
 }
 
 /**
@@ -216,11 +263,11 @@ export function openingPile(level: FactLevel, seed: number): Seat[] {
  * wrong: it goes to the back to come round again. Wrong also wipes what it had
  * banked, because a card you just missed is not a card you know.
  */
-export function afterAnswer(pile: Seat[], right: boolean): Seat[] {
+export function afterAnswer(pile: Seat[], right: boolean, need = NEED): Seat[] {
   const [head, ...rest] = pile;
   if (!head) return pile;
   const got = right ? head.got + 1 : 0;
-  if (right && got >= NEED) return rest;
+  if (right && got >= need) return rest;
   return [...rest, { i: head.i, got }];
 }
 
@@ -234,6 +281,33 @@ export const RIGHT = 2;
 export const SPRINT_BONUS = 2;
 export const TROT_BONUS = 1;
 export const FINISH_BONUS = 6;
+
+/** Three lives, and three wrong answers costs one of them. */
+export const LIVES = 3;
+export const STRIKES = 3;
+
+/** A token every so many blocks. Pick one up and you grow. */
+export const TOKEN_EVERY = 7;
+
+/** Whether the block you have just reached has a token standing on it. */
+export const tokenOn = (post: number) => post > 0 && post % TOKEN_EVERY === 0;
+
+export type Hazard = "hole" | "river" | "mountain";
+
+/**
+ * What is in the way at a given block.
+ *
+ * The pattern is fixed rather than seeded, so a kid who plays a level twice
+ * runs the same ground twice and can see themselves getting further. It is
+ * scenery with a jump attached, not a second thing to fail at - the only way
+ * to fall behind here is to not know the fact.
+ */
+export function hazardAt(block: number): Hazard | null {
+  if (block % 7 === 3) return "hole";
+  if (block % 11 === 5) return "river";
+  if (block % 9 === 6) return "mountain";
+  return null;
+}
 
 export interface Answer {
   /** What they typed. */
@@ -253,15 +327,23 @@ export const paceOf = (ms: number): "sprint" | "run" | "trot" => (ms <= SPRINT_M
 const pointsFor = (ms: number) => RIGHT + (ms <= SPRINT_MS ? SPRINT_BONUS : ms <= TROT_MS ? TROT_BONUS : 0);
 
 /** Every post on the track: one per right answer the level needs. */
-export const postsOn = (level: FactLevel) => level.cards.length * NEED;
+export const postsOn = (level: FactLevel) => drawOf(level) * needOf(level);
 
 export interface Run {
-  /** Posts gone by: right answers, which is how far the pet has run. */
+  /** Blocks gone by: right answers, which is how far they have run. */
   posts: number;
   wrong: number;
   points: number;
-  /** True when the pile emptied - every card right twice. */
+  /** True when the pile emptied - every card answered as many times as it needed. */
   finished: boolean;
+  /** Lives left. Out of lives ends the run where it stands. */
+  lives: number;
+  /** Wrong answers since the last life went. */
+  strikes: number;
+  /** Grown by a token: the next life you would lose costs you this instead. */
+  big: boolean;
+  /** True when the lives ran out before the cards did. */
+  over: boolean;
 }
 
 /**
@@ -274,21 +356,35 @@ export function play(level: FactLevel, move: FactMove): Run {
   let posts = 0;
   let wrong = 0;
   let points = 0;
+  let lives = LIVES;
+  let strikes = 0;
+  let big = false;
+  let over = false;
   for (const ans of move.answers.slice(0, MAX_ASKS)) {
     const head = pile[0];
-    if (!head) break;
+    if (!head || over) break;
     const right = level.cards[head.i].answer === ans.a;
     if (right) {
       posts++;
       points += pointsFor(ans.ms);
+      // A token on this block: grow, and keep the next knock for free.
+      if (tokenOn(posts)) big = true;
     } else {
       wrong++;
+      strikes++;
+      if (strikes >= STRIKES) {
+        strikes = 0;
+        // Being big is as good as a life: you shrink instead of losing one.
+        if (big) big = false;
+        else lives--;
+        if (lives <= 0) over = true;
+      }
     }
-    pile = afterAnswer(pile, right);
+    pile = afterAnswer(pile, right, needOf(level));
   }
-  const finished = pile.length === 0;
+  const finished = pile.length === 0 && !over;
   if (finished) points += FINISH_BONUS;
-  return { posts, wrong, points, finished };
+  return { posts, wrong, points, finished, lives: Math.max(0, lives), strikes, big, over };
 }
 
 /** The best a level can be worth: every card right twice, every one a sprint. */
@@ -332,7 +428,7 @@ export function perfectMoves(level: FactLevel, seed = 1): FactMove {
   let guard = 0;
   while (pile.length && guard++ < MAX_ASKS) {
     answers.push({ a: level.cards[pile[0].i].answer, ms: 800 });
-    pile = afterAnswer(pile, true);
+    pile = afterAnswer(pile, true, needOf(level));
   }
   return { seed, answers };
 }
@@ -366,7 +462,7 @@ export function evidenceFor(levelId: string, raw: unknown): GameEvidence[] {
     row.ms += ans.ms;
     row.last = right;
     seen.set(head.i, row);
-    pile = afterAnswer(pile, right);
+    pile = afterAnswer(pile, right, needOf(level));
   }
   const at = Date.now();
   return [...seen.values()].map((row) => ({
@@ -409,6 +505,66 @@ export function workedCard(level: FactLevel): { card: Fact; say: string } {
 // ---------------- The art ----------------
 
 const INK = "#1b1530";
+
+/** A token to run into: a spinning coin-ish star that makes you big. */
+export function tokenGrid(frame = 0): Grid {
+  const g = new Grid(10, 10);
+  const w = frame % 2 === 0 ? 4 : 2;
+  g.disc(4.5, 4.5, 4.6, "#b8860b");
+  g.disc(4.5, 4.5, 3.4, "#f2d24a");
+  g.rect(5 - Math.ceil(w / 2), 2, w, 6, "#fff3bf");
+  return g;
+}
+
+/** A mountain to climb, sat on the ground and taller than the runner. */
+export function mountainGrid(): Grid {
+  const g = new Grid(34, 26);
+  g.tri(17, 0, 25, 17, "#7a6f94");
+  g.tri(17, 0, 9, 7, "#fffdf5");
+  g.rect(0, 24, 34, 2, "#5c5478");
+  return g;
+}
+
+/** A river to cross: banks, water and a couple of ripples. */
+export function riverGrid(): Grid {
+  const g = new Grid(26, 12);
+  g.rect(0, 2, 26, 10, "#2f7fd4");
+  g.rect(0, 2, 26, 2, "#59a7f2");
+  g.rect(3, 6, 6, 1, "#8ec8ff");
+  g.rect(14, 8, 7, 1, "#8ec8ff");
+  return g;
+}
+
+/** A hole to jump: a gap in the ground with a dark bottom to it. */
+export function holeGrid(): Grid {
+  const g = new Grid(22, 12);
+  g.rect(0, 0, 22, 12, "#1b1530");
+  g.rect(2, 0, 18, 3, "#241c45");
+  return g;
+}
+
+/** A torch on a dungeon wall: a bracket and a flame that flickers by frame. */
+export function torchGrid(frame = 0): Grid {
+  const g = new Grid(9, 14);
+  g.rect(3, 6, 3, 8, "#6b5636");
+  g.rect(2, 9, 5, 2, "#8b6b46");
+  const tall = frame % 2 === 0;
+  g.rect(3, tall ? 1 : 2, 3, tall ? 5 : 4, "#f2a516");
+  g.rect(4, tall ? 0 : 1, 1, 3, "#ffe08a");
+  g.rect(3, 5, 3, 1, "#e0453a");
+  return g;
+}
+
+/** A block of dungeon wall, so the background reads as stone and not sky. */
+export function stoneGrid(): Grid {
+  const g = new Grid(16, 8);
+  g.rect(0, 0, 16, 8, "#4a4a63");
+  g.rect(1, 1, 6, 2, "#5b5b78");
+  g.rect(9, 1, 6, 2, "#5b5b78");
+  g.rect(1, 5, 3, 2, "#5b5b78");
+  g.rect(6, 5, 8, 2, "#5b5b78");
+  return g;
+}
 
 /**
  * A cloud. Flat-bottomed and lumpy on top, drawn in the keyline style the

@@ -8,19 +8,31 @@ import { teacherFor } from "@/content/teachers";
 import { GAME_COACH } from "@/lib/minigames/chompers";
 import {
   type Answer,
+  type Hazard,
   type FactLevel,
   type Seat,
   afterAnswer,
   blockGrid,
   cageGrid,
   cloudGrid,
+  hazardAt,
   hillGrid,
+  holeGrid,
+  LIVES,
+  mountainGrid,
   levelById,
   MAX_ASKS,
+  needOf,
   openingPile,
   paceOf,
   pipeGrid,
   play,
+  riverGrid,
+  STRIKES,
+  tokenGrid,
+  tokenOn,
+  stoneGrid,
+  torchGrid,
   postsOn,
   workedCard,
 } from "@/lib/minigames/factrush";
@@ -36,6 +48,19 @@ const BRICK = blockGrid("brick");
 const PRIZE = blockGrid("prize");
 const PIPE = pipeGrid();
 const CAGE = [cageGrid(false), cageGrid(true)];
+const TORCH = [torchGrid(0), torchGrid(1)];
+const STONE = stoneGrid();
+const TOKEN = [tokenGrid(0), tokenGrid(1)];
+const MOUNTAIN = mountainGrid();
+const RIVER = riverGrid();
+const HOLE = holeGrid();
+
+/** How wide one block of the world is on screen. */
+const BLOCK = 58;
+/** How far from the left edge the camera keeps the runner. */
+const CAMERA_AT = 0.3;
+
+const HAZARD_ART: Record<Hazard, ReturnType<typeof holeGrid>> = { hole: HOLE, river: RIVER, mountain: MOUNTAIN };
 
 export default function FactRushGame({ levelId, onFinish, stars, plays, hero, canAsk }: MiniGameUIProps) {
   const level = levelById(levelId);
@@ -65,6 +90,11 @@ function FactRush({
 
   const [seed] = useState(newSeed);
   const [ready, setReady] = useState(false);
+  /**
+   * Where the camera is looking. It opens on the cage at the far end so a kid
+   * can see who they are running for, then sweeps back to the start line.
+   */
+  const [shot, setShot] = useState<"cage" | "start">("cage");
   const [count, setCount] = useState<number | null>(null);
   const [asking, setAsking] = useState(false);
   const [example, setExample] = useState<ReturnType<typeof workedCard> | null>(null);
@@ -78,6 +108,15 @@ function FactRush({
   const [result, setResult] = useState<{ stars: number; xp: number; score?: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * What is typed, where a key handler can read it.
+   *
+   * It used to answer from inside a setState updater. React runs those twice
+   * over in development, so one press of Enter answered two cards - the
+   * second one with the same number against the next question, which came
+   * straight back as a miss in red. Updaters have to stay pure.
+   */
+  const typedRef = useRef("");
   const asked = useRef<number>(Date.now());
   const sent = useRef(false);
   const live = useRef({ pile, answers });
@@ -86,11 +125,26 @@ function FactRush({
   const posts = postsOn(level);
   const card = pile[0] ? level.cards[pile[0].i] : null;
   const run = useMemo(() => play(level, { seed, answers }), [level, seed, answers]);
-  const done = pile.length === 0 || answers.length >= MAX_ASKS;
+  // Out of cards, out of lives, or out of patience.
+  const done = pile.length === 0 || run.over || answers.length >= MAX_ASKS;
+
+  /**
+   * The ref is what is typed; the state only draws it.
+   *
+   * A kid who presses Enter in the same instant as the last digit would
+   * otherwise lose that digit, because the digit's setState has not committed
+   * yet and the key handler would read the old value. Writing the ref first
+   * means the answer is never a render behind the keys.
+   */
+  const type = useCallback((next: (cur: string) => string) => {
+    typedRef.current = next(typedRef.current).slice(0, 4);
+    setTyped(typedRef.current);
+  }, []);
 
   // The clock on a card starts the moment that card appears.
   useEffect(() => {
     asked.current = Date.now();
+    typedRef.current = "";
     setTyped("");
   }, [pile]);
 
@@ -114,7 +168,7 @@ function FactRush({
       if (!head || got.length >= MAX_ASKS) return;
       const ms = Date.now() - asked.current;
       const right = level.cards[head.i].answer === value;
-      const next = afterAnswer(cur, right);
+      const next = afterAnswer(cur, right, needOf(level));
       live.current = { pile: next, answers: [...got, { a: value, ms }] };
       setAnswers((xs) => [...xs, { a: value, ms }]);
       setPile(next);
@@ -151,19 +205,16 @@ function FactRush({
     if (!ready || asking || done) return;
     function onKey(e: KeyboardEvent) {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (e.key >= "0" && e.key <= "9") setTyped((t) => (t.length < 4 ? t + e.key : t));
-      else if (e.key === "Backspace") setTyped((t) => t.slice(0, -1));
-      else if (e.key === "Enter")
-        setTyped((t) => {
-          if (t.length) answer(Number(t));
-          return t;
-        });
-      else return;
+      if (e.key >= "0" && e.key <= "9") type((t) => t + e.key);
+      else if (e.key === "Backspace") type((t) => t.slice(0, -1));
+      else if (e.key === "Enter" || e.key === " ") {
+        if (typedRef.current.length) answer(Number(typedRef.current));
+      } else return;
       e.preventDefault();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [ready, asking, done, answer]);
+  }, [ready, asking, done, answer, type]);
 
   // The reaction clears itself so the scene does not keep shouting.
   useEffect(() => {
@@ -182,7 +233,7 @@ function FactRush({
     return (
       <div className={`mg ${css.fr}`}>
         <div className="mg-result">
-          <h3 className="pixel-title">{run.finished ? "You got them out!" : "Out of cards"}</h3>
+          <h3 className="pixel-title">{run.finished ? "You got them out!" : run.over ? "Out of lives" : "Out of cards"}</h3>
           <div className={css.rescued}>
             <PixelSprite grid={CAGE[1]} scale={2} />
             {pet && <PixelSprite grid={pet} scale={2} className={css.freed} />}
@@ -195,7 +246,7 @@ function FactRush({
             ))}
           </div>
           <p className="kmuted">
-            {run.posts} blocks run, {run.wrong} missed. {result.score ?? run.points} points.
+            {run.posts} blocks run, {run.wrong} missed. {result.score ?? run.points} points.{run.over ? " Your pet is still in there - have another go." : ""}
           </p>
           {result.xp > 0 && <p className="kmuted">+{result.xp} XP for new stars!</p>}
           {result.stars < 3 && <p className="kmuted small">A card answered inside two and a half seconds is a sprint, and a sprint is worth double.</p>}
@@ -216,7 +267,17 @@ function FactRush({
           <span className="chip">
             {run.posts} / {posts}
           </span>
-          <span className="chip">✗ {run.wrong}</span>
+          <span className={`chip ${css.lives}`} aria-label={`${run.lives} lives left`}>
+            {Array.from({ length: LIVES }, (_, i) => (
+              <span key={i} className={i < run.lives ? css.life : css.lifeGone} aria-hidden>
+                ♥
+              </span>
+            ))}
+          </span>
+          <span className="chip" aria-label={`${STRIKES - run.strikes} mistakes before a life goes`}>
+            ✗ {run.strikes} / {STRIKES}
+          </span>
+          {run.big && <span className="chip">⭐ Big!</span>}
         </div>
 
         <TeacherBrief
@@ -228,7 +289,11 @@ function FactRush({
           seed={seed}
           canAsk={canAsk}
           stage={ready ? "play" : "brief"}
-          onReady={() => setCount(3)}
+          onReady={() => {
+            // Sweep back from the cage to the start, then count them in.
+            setShot("start");
+            window.setTimeout(() => setCount(3), 1200);
+          }}
           onAsking={setAsking}
           onExample={showExample}
           example={
@@ -245,48 +310,109 @@ function FactRush({
 
         {/* The level: your pet is in the cage at the far end, and every card
             you get right is another block closer to them. */}
-        <div className={css.scene} aria-label={`${run.posts} of ${posts} blocks run`}>
-          <span className={css.cloudA}>
-            <PixelSprite grid={CLOUD[0]} scale={1} />
-          </span>
-          <span className={css.cloudB}>
-            <PixelSprite grid={CLOUD[1]} scale={1} />
-          </span>
-          <span className={css.hill}>
-            <PixelSprite grid={HILL} scale={1} />
-          </span>
-          <span className={css.pipe}>
-            <PixelSprite grid={PIPE} scale={1} />
-          </span>
-          {[0.3, 0.38, 0.62].map((p, i) => (
-            <span key={p} className={css.block} style={{ left: `${p * 100}%` }}>
-              <PixelSprite grid={i === 1 ? PRIZE : BRICK} scale={1} />
-            </span>
-          ))}
+        {/* The level, seen through a camera that keeps the runner big and a
+            third of the way in. It opens looking at the cage, so a kid sees
+            who they are running for before they start. */}
+        <div className={`${css.scene} ${level.dungeon ? css.dungeon : ""}`} aria-label={`${run.posts} of ${posts} blocks run`}>
+          {level.dungeon && (
+            <div className={css.wall}>
+              {Array.from({ length: 120 }, (_, i) => (
+                <PixelSprite key={i} grid={STONE} scale={2} />
+              ))}
+            </div>
+          )}
 
-          <span className={css.cage}>
-            <PixelSprite grid={CAGE[run.finished ? 1 : 0]} scale={1} />
-            {pet && (
-              <span className={`${css.caged} ${run.finished ? css.out : ""}`}>
-                <PixelSprite grid={pet} scale={1} />
-              </span>
-            )}
-          </span>
-
-          <span
-            className={`${css.runner} ${beat?.kind === "trip" ? css.trip : ""} ${stepping ? css.step : ""} ${beat?.kind === "sprint" ? css.sprint : ""}`}
-            style={{ left: `calc(${at * 78}% + 6px)` }}
+          <div
+            className={`${css.world} ${shot === "cage" ? css.sweeping : ""}`}
+            style={{
+              width: `${(posts + 3) * BLOCK}px`,
+              left: shot === "cage" ? `calc(58% - ${posts * BLOCK}px)` : `calc(${CAMERA_AT * 100}% - ${run.posts * BLOCK}px)`,
+            }}
           >
-            <PixelSprite grid={runner[stepping ? 1 : 0]} scale={1} />
-          </span>
+            <div className={css.ground} />
 
-          <div className={css.ground} />
+            {/* The ground a kid runs over: what is in the way, and what is
+                worth picking up. */}
+            {Array.from({ length: posts + 1 }, (_, i) => {
+              const h = hazardAt(i);
+              const token = tokenOn(i) && run.posts < i;
+              if (!h && !token && !(level.dungeon && i % 5 === 2)) return null;
+              return (
+                <span key={i} className={css.at} style={{ left: `${i * BLOCK}px` }}>
+                  {h && (
+                    <span className={h === "hole" ? css.hole : h === "river" ? css.river : css.mountain}>
+                      <PixelSprite grid={HAZARD_ART[h]} scale={2} />
+                    </span>
+                  )}
+                  {token && (
+                    <span className={css.token}>
+                      <PixelSprite grid={TOKEN[beat ? 1 : 0]} scale={2} />
+                    </span>
+                  )}
+                  {level.dungeon && i % 5 === 2 && !h && (
+                    <span className={css.torch}>
+                      <PixelSprite grid={TORCH[beat ? 1 : 0]} scale={2} />
+                    </span>
+                  )}
+                </span>
+              );
+            })}
+
+            {!level.dungeon && (
+              <>
+                <span className={css.cloudA} style={{ left: `${BLOCK * 2}px` }}>
+                  <PixelSprite grid={CLOUD[0]} scale={2} />
+                </span>
+                <span className={css.cloudB} style={{ left: `${BLOCK * 9}px` }}>
+                  <PixelSprite grid={CLOUD[1]} scale={2} />
+                </span>
+                <span className={css.cloudA} style={{ left: `${BLOCK * 17}px` }}>
+                  <PixelSprite grid={CLOUD[1]} scale={2} />
+                </span>
+                <span className={css.hill} style={{ left: `${BLOCK * 5}px` }}>
+                  <PixelSprite grid={HILL} scale={2} />
+                </span>
+                <span className={css.hill} style={{ left: `${BLOCK * 14}px` }}>
+                  <PixelSprite grid={HILL} scale={2} />
+                </span>
+                <span className={css.pipe} style={{ left: `${BLOCK * 11}px` }}>
+                  <PixelSprite grid={PIPE} scale={2} />
+                </span>
+                <span className={css.brick} style={{ left: `${BLOCK * 4}px` }}>
+                  <PixelSprite grid={BRICK} scale={2} />
+                </span>
+                <span className={css.brick} style={{ left: `${BLOCK * 8}px` }}>
+                  <PixelSprite grid={PRIZE} scale={2} />
+                </span>
+              </>
+            )}
+
+            {/* The cage, at the last block. */}
+            <span className={css.cage} style={{ left: `${posts * BLOCK}px` }}>
+              <PixelSprite grid={CAGE[run.finished ? 1 : 0]} scale={3} />
+              {pet && (
+                <span className={`${css.caged} ${run.finished ? css.out : ""}`}>
+                  <PixelSprite grid={pet} scale={2} />
+                </span>
+              )}
+            </span>
+
+            <span
+              className={`${css.runner} ${run.big ? css.grown : ""} ${beat?.kind === "trip" ? css.trip : ""} ${stepping ? css.step : ""} ${
+                beat?.kind === "sprint" ? css.sprint : ""
+              }`}
+              style={{ left: `${run.posts * BLOCK}px` }}
+            >
+              <PixelSprite grid={runner[stepping ? 1 : 0]} scale={run.big ? 4 : 3} />
+            </span>
+          </div>
 
           {count !== null && (
             <div className={css.countOver} role="status" aria-live="assertive">
               <strong>{count}</strong>
             </div>
           )}
+          {shot === "cage" && <span className={css.shout}>Go and get them!</span>}
           {beat?.kind === "sprint" && <span className={css.shout}>Sprint!</span>}
         </div>
 
@@ -300,20 +426,21 @@ function FactRush({
               </output>
             </div>
             <p className={`${css.teach} ${beat?.show ? css.teachOn : ""}`}>{beat?.show ?? " "}</p>
+            <p className={css.hint}>Type the answer and press Enter or the space bar - quicker than tapping.</p>
 
             <div className={css.pad}>
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
-                <button key={n} type="button" className={`kbtn ${css.key}`} onClick={() => setTyped((t) => (t.length < 4 ? t + n : t))}>
+                <button key={n} type="button" className={`kbtn ${css.key}`} onClick={() => type((t) => t + n)}>
                   {n}
                 </button>
               ))}
-              <button type="button" className={`kbtn ghost ${css.key}`} onClick={() => setTyped((t) => t.slice(0, -1))} aria-label="Rub out">
+              <button type="button" className={`kbtn ghost ${css.key}`} onClick={() => type((t) => t.slice(0, -1))} aria-label="Rub out">
                 ⌫
               </button>
-              <button type="button" className={`kbtn ${css.key}`} onClick={() => setTyped((t) => (t.length < 4 ? t + "0" : t))}>
+              <button type="button" className={`kbtn ${css.key}`} onClick={() => type((t) => t + "0")}>
                 0
               </button>
-              <button type="button" className={`kbtn ${css.key} ${css.go}`} onClick={() => typed.length && answer(Number(typed))} disabled={!typed.length} aria-label="Answer">
+              <button type="button" className={`kbtn ${css.key} ${css.go}`} onClick={() => typedRef.current.length && answer(Number(typedRef.current))} disabled={!typed.length} aria-label="Answer">
                 Go
               </button>
             </div>

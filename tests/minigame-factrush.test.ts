@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import fs from "node:fs";
+import path from "node:path";
 import { COURSES } from "@/content/courses";
 import { SKILL_BY_ID } from "@/lib/curriculum/skills";
 import { GAMES, gameById } from "@/lib/minigames";
@@ -14,10 +16,21 @@ import {
   cloudGrid,
   evidenceFor,
   factRush,
+  LIVES,
+  STRIKES,
+  TOKEN_EVERY,
   familyFacts,
+  hazardAt,
+  holeGrid,
+  mountainGrid,
+  riverGrid,
+  tokenGrid,
+  tokenOn,
   hillGrid,
+  drawOf,
   levelById,
   maxPoints,
+  needOf,
   openingPile,
   paceOf,
   perfectMoves,
@@ -299,6 +312,147 @@ describe("the coach's example", () => {
       expect(l.cards).toContain(card);
       expect(say).toContain(String(card.answer));
       expect(say, `${l.id}: "${say}"`).not.toMatch(/undefined|NaN|\[object/);
+    }
+  });
+});
+
+describe("the dungeons", () => {
+  const dungeons = ALL_FACT_LEVELS.filter((l) => l.dungeon);
+
+  it("puts one at the end of each of the four sets", () => {
+    expect(dungeons.map((l) => l.id)).toEqual(["fr-adun", "fr-sdun", "fr-xdun", "fr-ddun"]);
+    // And each sits after the twelfth family of its own operation.
+    for (const d of dungeons) {
+      const twelfth = ALL_FACT_LEVELS.findIndex((l) => l.id === d.id.replace("dun", "12"));
+      expect(twelfth, `${d.id} has no 12s before it`).toBeGreaterThan(-1);
+      expect(ALL_FACT_LEVELS.indexOf(d)).toBe(twelfth + 1);
+    }
+  });
+
+  it("holds every family of its operation, not just the last one", () => {
+    for (const d of dungeons) {
+      expect(d.cards.length, `${d.id}`).toBe(TOP * TOP);
+      // The 1s and the 12s both have to be in there.
+      const firsts = new Set(d.cards.map((c) => (c.op === "+" || c.op === "x" ? c.a : c.b)));
+      for (let n = 1; n <= TOP; n++) expect(firsts.has(n), `${d.id} is missing the ${n}s`).toBe(true);
+    }
+  });
+
+  it("deals two dozen at a time, wanted right once, so it asks rather than drills", () => {
+    for (const d of dungeons) {
+      expect(needOf(d)).toBe(1);
+      expect(drawOf(d)).toBe(24);
+      expect(postsOn(d)).toBe(24);
+      expect(openingPile(d, 5).length).toBe(24);
+      // A different draw next time: it cannot be learned by rote.
+      expect(openingPile(d, 5).map((s) => s.i)).not.toEqual(openingPile(d, 6).map((s) => s.i));
+    }
+  });
+
+  it("can be run clean for three stars, and scores through the server's door", () => {
+    for (const d of dungeons) {
+      const r = replay(d, perfectMoves(d));
+      expect(r.finished, `${d.id} could not be finished`).toBe(true);
+      expect(r.posts).toBe(24);
+      expect(r.stars).toBe(3);
+      expect(factRush.score(d.id, perfectMoves(d))?.stars).toBe(3);
+    }
+  });
+
+  it("still stops them dead on a wrong answer", () => {
+    const d = dungeons[0];
+    const pile = openingPile(d, 2);
+    const r = play(d, { seed: 2, answers: [{ a: d.cards[pile[0].i].answer + 1, ms: 400 }] });
+    expect(r.posts).toBe(0);
+    expect(r.wrong).toBe(1);
+  });
+
+  it("is drawn as a dungeon, and the drills are not", () => {
+    for (const l of ALL_FACT_LEVELS) expect(!!l.dungeon).toBe(l.id.endsWith("dun"));
+  });
+});
+
+describe("answering from the keyboard", () => {
+  const screen = fs.readFileSync(path.join(process.cwd(), "src/components/minigames/FactRushGame.tsx"), "utf8");
+
+  it("never answers from inside a setState updater", () => {
+    // React runs updaters twice over in development, so answering inside one
+    // sent two answers for one press of Enter: the second went against the
+    // next card with the same number and came back as a miss in red.
+    expect(screen, "answer() is being called inside a setTyped updater again").not.toMatch(/setTyped\(\([^)]*\)\s*=>\s*\{[^}]*answer\(/s);
+  });
+
+  it("reads what was typed from a ref, not from a render", () => {
+    // A kid who hits Enter in the same instant as the last digit would lose
+    // that digit if the handler read state instead.
+    expect(screen).toContain("answer(Number(typedRef.current))");
+    expect(screen).toContain("typedRef.current = next(typedRef.current)");
+  });
+
+  it("takes Enter and the space bar", () => {
+    expect(screen).toContain(`e.key === "Enter" || e.key === " "`);
+  });
+});
+
+describe("lives, tokens and what is in the way", () => {
+  const level = levelById("fr-x6")!;
+  /** Answers that are all wrong, so lives go in a straight line. */
+  const misses = (n: number) => ({ seed: 1, answers: Array.from({ length: n }, () => ({ a: -1, ms: 500 })) });
+
+  it("gives three lives and takes one every three misses", () => {
+    expect(play(level, misses(1)).lives).toBe(LIVES);
+    expect(play(level, misses(2)).lives).toBe(LIVES);
+    expect(play(level, misses(3)).lives).toBe(LIVES - 1);
+    expect(play(level, misses(6)).lives).toBe(LIVES - 2);
+    expect(play(level, misses(9)).lives).toBe(0);
+  });
+
+  it("ends the run when the lives are gone, and stops counting after", () => {
+    const r = play(level, misses(30));
+    expect(r.over).toBe(true);
+    expect(r.finished).toBe(false);
+    // Nine misses took the three lives; nothing after that was looked at.
+    expect(r.wrong).toBe(STRIKES * LIVES);
+    expect(r.lives).toBe(0);
+  });
+
+  it("never goes over on a clean run", () => {
+    const r = replay(level, perfectMoves(level));
+    expect(r.over).toBe(false);
+    expect(r.lives).toBe(LIVES);
+    expect(r.finished).toBe(true);
+  });
+
+  it("grows them on a token, and spends the size instead of a life", () => {
+    // Run cleanly to the first token, then miss three times.
+    const clean = perfectMoves(level).answers.slice(0, TOKEN_EVERY);
+    const r = play(level, { seed: 1, answers: [...clean, ...misses(3).answers] });
+    expect(tokenOn(TOKEN_EVERY)).toBe(true);
+    expect(r.posts).toBe(TOKEN_EVERY);
+    // Three misses while big: the size went, the life did not.
+    expect(r.lives).toBe(LIVES);
+    expect(r.big).toBe(false);
+  });
+
+  it("puts a token every seventh block and nowhere else", () => {
+    expect(tokenOn(0)).toBe(false);
+    for (let i = 1; i <= 24; i++) expect(tokenOn(i), `block ${i}`).toBe(i % TOKEN_EVERY === 0);
+  });
+
+  it("lays the same ground every time, so a kid can see themselves getting further", () => {
+    const first = Array.from({ length: 30 }, (_, i) => hazardAt(i));
+    const again = Array.from({ length: 30 }, (_, i) => hazardAt(i));
+    expect(again).toEqual(first);
+    // And there is something of each kind in a level's worth of ground.
+    const kinds = new Set(first.filter(Boolean));
+    for (const k of ["hole", "river", "mountain"]) expect(kinds.has(k as never), `no ${k} in 30 blocks`).toBe(true);
+  });
+
+  it("draws everything the ground can hold", () => {
+    for (const g of [tokenGrid(0), tokenGrid(1), mountainGrid(), riverGrid(), holeGrid()]) {
+      let filled = 0;
+      for (let y = 0; y < g.h; y++) for (let x = 0; x < g.w; x++) if (g.get(x, y)) filled++;
+      expect(filled, "a sprite with nothing drawn in it").toBeGreaterThan(4);
     }
   });
 });
