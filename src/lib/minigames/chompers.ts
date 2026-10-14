@@ -170,9 +170,20 @@ export type CellStyle =
   /** A handful of coins to add up. */
   | "coins";
 
+/** The four operations, as a board writes them. */
+export type Op = "+" | "-" | "x" | "/";
+
+/** All four, for a board that does not care. */
+export const ALL_OPS: Op[] = ["+", "-", "x", "/"];
+
 export interface BoardSpec {
   rule: Rule;
   style: CellStyle;
+  /**
+   * Which operations the squares may use. A level called Adding Up should not
+   * be quietly setting multiplication, which is exactly what it was doing.
+   */
+  ops?: Op[];
   /** The range the numbers come from; for fractions, the biggest denominator. */
   lo: number;
   hi: number;
@@ -408,17 +419,24 @@ export function teachFor(rule: Rule, cell: Cell): string {
 // ---------------- Writing a number as a problem ----------------
 
 /** Every way of writing `v` as one operation: "9 x 4", "50 - 8", "84 / 2". */
-function factWays(v: number, hi: number): string[] {
+/**
+ * Every way of writing `v` as one operation, using only the operations the
+ * board allows.
+ *
+ * Dividing is the generous one: any number from two to twelve will do, since
+ * v times it, divided by it, is always v again. Multiplying is the mean one -
+ * a number has only as many factor pairs as it has, and six is a good haul.
+ */
+function factWays(v: number, hi: number, ops: Op[] = ALL_OPS): string[] {
   const ways: string[] = [];
-  if (v > 1) {
-    for (const d of divisors(v).filter((d) => d > 1 && d <= 12 && v / d <= 12)) ways.push(`${d} × ${v / d}`);
-    for (const d of divisors(v).filter((d) => d > 1 && d <= 12)) ways.push(`${v * d} ÷ ${d}`);
-  }
+  if (ops.includes("x") && v > 1) for (const d of divisors(v).filter((d) => d > 1 && d <= 12 && v / d <= 12)) ways.push(`${d} × ${v / d}`);
+  if (ops.includes("/") && v >= 1) for (let d = 2; d <= 12; d++) ways.push(`${v * d} ÷ ${d}`);
   for (let b = 1; b <= 20; b++) {
-    if (v - b >= 0) ways.push(`${v - b} + ${b}`);
-    if (v + b <= hi + 60) ways.push(`${v + b} − ${b}`);
+    // Not "0 + 8": adding nothing is not a sum, it is a nuisance.
+    if (ops.includes("+") && v - b > 0) ways.push(`${v - b} + ${b}`);
+    if (ops.includes("-") && v + b <= hi + 60) ways.push(`${v + b} − ${b}`);
   }
-  return ways.length ? ways : [`${v} + 0`];
+  return ways.length ? ways : [String(v)];
 }
 
 /** How a number reads inside a sum: 4, or (-4) when it is negative. */
@@ -475,7 +493,13 @@ function twoStepWays(v: number): string[] {
 function cellText(r: Rng, v: number, spec: BoardSpec, used: Set<string>): string {
   if (spec.style === "plain") return v < 0 ? `−${Math.abs(v)}` : String(v);
   const ways =
-    spec.style === "twostep" ? twoStepWays(v) : spec.style === "signed" ? signedWays(v) : spec.style === "variable" ? variableWays(v, spec.rule.of ?? 1) : factWays(v, spec.hi);
+    spec.style === "twostep"
+      ? twoStepWays(v)
+      : spec.style === "signed"
+        ? signedWays(v)
+        : spec.style === "variable"
+          ? variableWays(v, spec.rule.of ?? 1)
+          : factWays(v, spec.hi, spec.ops);
   for (const w of shuffle(r, ways)) if (!used.has(w)) return w;
   return ways[0];
 }
@@ -613,6 +637,13 @@ function mixedPool(maxDen: number): Cand[] {
   return out;
 }
 
+/** The numbers two single-digit-ish factors can make, for a times-tables board. */
+const PRODUCTS = (() => {
+  const out = new Set<number>();
+  for (let a = 2; a <= 12; a++) for (let b = 2; b <= 12; b++) out.add(a * b);
+  return [...out].sort((x, y) => x - y);
+})();
+
 /** Everything a board could show, split into the ones that fit and the ones that do not. */
 function split(spec: BoardSpec): { yes: Cand[]; no: Cand[] } {
   const pool: Cand[] =
@@ -628,7 +659,12 @@ function split(spec: BoardSpec): { yes: Cand[]; no: Cand[] } {
               ? dotsPool(spec.lo, spec.hi)
               : spec.style === "coins"
                 ? coinPool(spec.hi)
-                : Array.from({ length: spec.hi - spec.lo + 1 }, (_, i) => ({ value: spec.lo + i }));
+                : // A board allowed only to multiply can only show numbers that
+                  // two factors can make: there is no way to write 37 as a
+                  // product, so it must not turn up on one.
+                  spec.ops?.length === 1 && spec.ops[0] === "x"
+                  ? PRODUCTS.filter((v) => v >= spec.lo && v <= spec.hi).map((value) => ({ value }))
+                  : Array.from({ length: spec.hi - spec.lo + 1 }, (_, i) => ({ value: spec.lo + i }));
   const yes: Cand[] = [];
   const no: Cand[] = [];
   for (const c of pool) (fits(spec.rule, c) ? yes : no).push(c);
@@ -979,13 +1015,14 @@ export interface ChomperLevel extends MiniLevel {
 }
 
 const board = (kind: RuleKind, target: number, style: CellStyle, lo: number, hi: number, extra: Partial<BoardSpec> & Partial<Rule> = {}): BoardSpec => {
-  const { of, show, frac, right } = extra;
+  const { of, show, frac, right, ops } = extra;
   return {
     rule: { kind, target, ...(of !== undefined && { of }), ...(show !== undefined && { show }), ...(frac !== undefined && { frac }) },
     style,
     lo,
     hi,
     ...(right !== undefined && { right }),
+    ...(ops !== undefined && { ops }),
   };
 };
 
@@ -1010,10 +1047,20 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("odd", 0, "plain", 1, 50),
       board("even", 0, "plain", 1, 99),
     ]),
-    lvl(1, "g1-2", "Add and Take Away", "math-1.add20", "Skill: adding and taking away within ten. Work each one out, then eat the ones that come to the number at the top.", [
-      board("equals", 5, "fact", 1, 20),
-      board("equals", 7, "fact", 1, 20),
-      board("equals", 10, "fact", 1, 20),
+    lvl(1, "g1-2", "Adding Up", "math-1.add20", "Skill: adding within ten. Every square is a sum. Work it out, then eat the ones that come to the number at the top.", [
+      // Eight can be written seven ways as a sum of two whole numbers and no
+      // more, so the board holds seven right answers rather than repeating
+      // itself - and the range has to be wide enough to find enough wrong ones.
+      // From two up: one is not the sum of two whole numbers, so it would
+      // have to sit on the board as a bare "1" among the sums.
+      board("equals", 8, "fact", 2, 34, { ops: ["+"], right: 7 }),
+      board("equals", 10, "fact", 2, 40, { ops: ["+"], right: 9 }),
+      board("equals", 12, "fact", 2, 46, { ops: ["+"] }),
+    ]),
+    lvl(1, "g1-4", "Taking Away", "math-1.subtract20", "Skill: taking away within twenty. Every square is a subtraction. What is left when you take the second number off the first?", [
+      board("equals", 6, "fact", 1, 24, { ops: ["-"] }),
+      board("equals", 9, "fact", 1, 28, { ops: ["-"] }),
+      board("equals", 12, "fact", 1, 32, { ops: ["-"] }),
     ]),
     lvl(1, "g1-3", "Coin Counting", "math-2.time-money", "Skill: adding coins up. The big one with a cross is a quarter (25), the one with a bar is a nickel (5), the little plain one is a dime (10), and the copper one is a penny (1).", [
       board("less", 9, "coins", 1, 50),
@@ -1022,10 +1069,10 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
     ]),
   ],
   2: [
-    lvl(2, "g2-0", "Facts to Twenty", "math-2.facts-20", "Skill: adding and taking away within twenty. Same game, bigger numbers - and the ones that cross ten are the ones worth knowing.", [
-      board("equals", 9, "fact", 1, 24),
-      board("equals", 14, "fact", 1, 28),
-      board("equals", 18, "fact", 1, 32),
+    lvl(2, "g2-0", "Adding and Taking Away", "math-2.facts-20", "Skill: both of them together, within twenty. Some squares add and some take away, so read the sign before you work it out.", [
+      board("equals", 9, "fact", 1, 24, { ops: ["+", "-"] }),
+      board("equals", 14, "fact", 1, 28, { ops: ["+", "-"] }),
+      board("equals", 18, "fact", 1, 32, { ops: ["+", "-"] }),
     ]),
     lvl(2, "g2-1", "Skip Counting", "math-2.skip-odd-even", "Skill: counting by 2s, 5s and 10s. Every number you land on while skip counting is a multiple.", [
       board("multiples", 2, "plain", 1, 60),
@@ -1044,20 +1091,25 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
     ]),
   ],
   3: [
-    lvl(3, "g3-1", "Times Table Trail", "g3.mult-facts", "Skill: knowing your times tables by heart. Every square is a multiplication to work out. Eat the ones worth the number at the top.", [
-      board("equals", 6, "fact", 2, 48),
-      board("equals", 12, "fact", 2, 60),
-      board("equals", 24, "fact", 2, 72),
+    lvl(3, "g3-1", "Times Table Trail", "g3.mult-facts", "Skill: knowing your times tables by heart. Every square is a multiplication. Work it out, then decide whether it fits.", [
+      board("multiples", 4, "fact", 4, 90, { ops: ["x"] }),
+      board("multiples", 6, "fact", 4, 120, { ops: ["x"] }),
+      board("multiples", 8, "fact", 4, 144, { ops: ["x"] }),
     ]),
     lvl(3, "g3-2", "Multiple Marsh", "g3.mult-facts", "Skill: spotting multiples. A multiple of 4 is a number you land on when you count by 4s: 4, 8, 12, 16...", [
       board("multiples", 3, "plain", 2, 40),
       board("multiples", 4, "plain", 2, 48),
       board("multiples", 6, "plain", 3, 72),
     ]),
-    lvl(3, "g3-3", "Division Dell", "g3.div-facts", "Skill: division facts. Work out each sharing problem, then eat the ones that come to the number at the top.", [
-      board("equals", 4, "fact", 2, 30),
-      board("equals", 6, "fact", 2, 36),
-      board("equals", 9, "fact", 2, 45),
+    lvl(3, "g3-3", "Sharing Out", "g3.div-facts", "Skill: division facts. Every square is a sharing problem. How many does each one get?", [
+      board("equals", 4, "fact", 2, 30, { ops: ["/"] }),
+      board("equals", 6, "fact", 2, 36, { ops: ["/"] }),
+      board("equals", 9, "fact", 2, 45, { ops: ["/"] }),
+    ]),
+    lvl(3, "g3-6", "All Four Ways", "g3.two-step", "Skill: all four at once. Some squares add, some take away, some multiply and some share out - read the sign first, every time.", [
+      board("equals", 9, "fact", 2, 40, { ops: ALL_OPS }),
+      board("equals", 16, "fact", 2, 60, { ops: ALL_OPS }),
+      board("equals", 24, "fact", 2, 80, { ops: ALL_OPS }),
     ]),
     lvl(3, "g3-5", "Fraction Fields", "g3.equiv-fractions", "Skill: equal fractions. 1/2 and 2/4 are the same amount of pie, just cut into different numbers of slices.", [
       board("equivalent", 0.5, "fraction", 2, 20, { frac: { n: 1, d: 2 } }),

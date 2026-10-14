@@ -157,6 +157,37 @@ describe("the levels", () => {
     expect(ALL_CHOMPER_LEVELS.some((l) => l.boards.some((b) => b.style === "mixed"))).toBe(true);
   });
 
+  it("never sets a sum a level did not ask for", () => {
+    // "Adding Up" was quietly setting multiplication and division, because
+    // every board shared one writer that used whatever it liked.
+    const SIGN: Record<string, string> = { "+": "+", "-": "\u2212", x: "\u00d7", "/": "\u00f7" };
+    for (const level of ALL_CHOMPER_LEVELS)
+      level.boards.forEach((spec, i) => {
+        if (!spec.ops) return;
+        for (const seed of [1, 2, 3, 9]) {
+          const b = buildBoard(spec, i, seed);
+          for (const c of b.cells) {
+            for (const [op, sign] of Object.entries(SIGN)) {
+              if (!c.text.includes(sign)) continue;
+              expect(spec.ops, `${level.id} board ${i} set "${c.text}" but only allows ${spec.ops.join(", ")}`).toContain(op);
+            }
+          }
+        }
+      });
+  });
+
+  it("has a section for each of the four, and one that mixes them", () => {
+    const only = (op: string) => ALL_CHOMPER_LEVELS.filter((l) => l.boards.every((b) => b.ops?.length === 1 && b.ops[0] === op));
+    for (const op of ["+", "-", "x", "/"]) expect(only(op).length, `nothing drills "${op}" on its own`).toBeGreaterThan(0);
+    // And a level where all four turn up, once the four are behind them.
+    const mixed = ALL_CHOMPER_LEVELS.filter((l) => l.boards.every((b) => b.ops?.length === 4));
+    expect(mixed.length, "nothing puts all four together").toBeGreaterThan(0);
+    // The mixed one comes after every single-operation section.
+    const at = (l: (typeof ALL_CHOMPER_LEVELS)[number]) => ALL_CHOMPER_LEVELS.indexOf(l);
+    const lastSingle = Math.max(...["+", "-", "x", "/"].flatMap((op) => only(op).map(at)));
+    expect(Math.max(...mixed.map(at)), "the mix should come after the four").toBeGreaterThan(lastSingle);
+  });
+
   it("makes the kid work out arithmetic, not just read numbers", () => {
     const styles = new Set(ALL_CHOMPER_LEVELS.flatMap((l) => l.boards.map((b) => b.style)));
     expect(styles.has("fact")).toBe(true);
