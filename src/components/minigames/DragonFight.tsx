@@ -29,6 +29,13 @@ import css from "./DragonFight.module.css";
 
 /** The floor the two of them stand on, as a share of the pit's height. */
 const FLOOR = 0.78;
+/** The pit's height in pixels, which the stylesheet also sets. */
+const PIT_H = 300;
+/** How tall they are standing, and squashed down into a duck. */
+const ME_H = 72;
+const DUCK_H = 43;
+/** How high a jump takes them off the floor. */
+const JUMP_PX = 36;
 const JUMP_MS = 620;
 const DUCK_MS = 520;
 /** How far across the pit a throw travels every second. */
@@ -125,6 +132,21 @@ export default function DragonFight({
   const live = useRef({ ammo, hp: need, won: false });
   live.current = { ammo, hp, won: won || dying };
   meRef.current = me;
+
+  /**
+   * The box they occupy, top and bottom, as shares of the pit's height.
+   *
+   * Fire is drawn from the top of the pit and they are drawn from the floor
+   * up, and the two were being compared as if they were the same number. The
+   * bands that came out of that were wrong in both dodges: fire went through
+   * their legs mid-jump and straight through them while ducked, and a kid saw
+   * themselves hit and nothing happen. This is the body as it is drawn.
+   */
+  const bodyBand = () => {
+    const feet = FLOOR * 100 + (meRef.current.jump ? JUMP_PX : 0);
+    const head = feet + (meRef.current.duck ? DUCK_H : ME_H);
+    return { top: 1 - head / PIT_H, bottom: 1 - feet / PIT_H };
+  };
 
   const throwOne = useCallback(() => {
     if (live.current.won) return;
@@ -249,12 +271,14 @@ export default function DragonFight({
       }
       const burning: Shot[] = [];
       let caught = false;
+      const body = bodyBand();
       for (const f of flamesRef.current) {
         const x = f.x - (DRAGON_FIRE_SPEED[pace] / 420) * dt;
         const mx = meRef.current.x;
-        const myLow = meRef.current.jump ? 0.3 : meRef.current.duck ? 0.86 : 0.58;
-        const myHigh = meRef.current.jump ? 0.52 : meRef.current.duck ? 0.98 : 0.98;
-        if (!caught && Math.abs(x - mx) < 0.07 && f.y > myLow - 0.12 && f.y < myHigh && now > invuln.current) {
+        // Anything that touches them burns them. The only way past it is to
+        // be somewhere else: jump it, duck it, or back off.
+        const onMe = Math.abs(x - mx) < 0.07 && f.y > body.top - 0.05 && f.y < body.bottom + 0.05;
+        if (!caught && onMe && now > invuln.current) {
           caught = true;
           continue;
         }
@@ -265,7 +289,7 @@ export default function DragonFight({
       if (caught) {
         // Burned: they go up in smoke and come back, and it costs a life -
         // but never the hits they have already landed.
-        invuln.current = now + 2600;
+        invuln.current = now + 1700;
         setHurtAt(now);
         setDying(true);
         chime("died");

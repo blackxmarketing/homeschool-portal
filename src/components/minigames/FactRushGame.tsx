@@ -245,6 +245,9 @@ export default function FactRushGame({ levelId, onFinish, stars, plays, hero, co
 
 const newSeed = () => Math.floor(Math.random() * 2 ** 31);
 
+/** The count-in, a word at a time, so the voice keeps step with the screen. */
+const COUNT_WORDS: Record<number, string> = { 3: "Three.", 2: "Two.", 1: "One.", 0: "Go!" };
+
 function FactRush({
   level,
   onFinish,
@@ -302,10 +305,7 @@ function FactRush({
     // Sweep back from the cage to the start, then count them in - out loud,
     // in the voice that read them the directions, the same as the dragon.
     setShot("start");
-    window.setTimeout(() => {
-      setCount(3);
-      if (speakOn) speak("fr-count", "Three. Two. One. Go!", { kind: coachLook.voice });
-    }, 1200);
+    window.setTimeout(() => setCount(3), 1200);
   }
   /** Where this level happens. Fixed per level, so it is always theirs. */
   const biome = useMemo(() => biomeFor(level), [level]);
@@ -414,7 +414,7 @@ function FactRush({
    * stop to make more fire, and the level comes straight back with them
    * standing in it.
    */
-  const fighting = ready && level.dungeon && run.atDragon && !dragonDown;
+  const fighting = ready && level.dungeon && run.atDragon && !dragonDown && !fightLost && !result;
   const card = run.head === null ? null : level.cards[run.head];
   /**
    * The cage is open and the pet is out.
@@ -467,6 +467,9 @@ function FactRush({
   /** Three, two, one, in the coach's voice - same as the other XP Rush. */
   useEffect(() => {
     if (count === null) return;
+    // One word a number, as the number comes up, so what they hear is what
+    // they are looking at.
+    if (speakOn) speak(`fr-count-${count}`, COUNT_WORDS[count] ?? String(count), { kind: coachLook.voice });
     if (count === 0) {
       setCount(null);
       setReady(true);
@@ -475,6 +478,8 @@ function FactRush({
     }
     const t = setTimeout(() => setCount((c) => (c === null ? null : c - 1)), 700);
     return () => clearTimeout(t);
+    // The voice is settled when the level opens; it does not change mid-count.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count]);
 
   const answer = useCallback(
@@ -609,6 +614,7 @@ function FactRush({
   /** Three, two, one into the fight, same as into the level. */
   useEffect(() => {
     if (fightCount === null) return;
+    if (speakOn) speak(`fight-count-${fightCount}`, COUNT_WORDS[fightCount] ?? String(fightCount), { kind: coachLook.voice });
     if (fightCount === 0) {
       setFightCount(null);
       setFightOn(true);
@@ -616,6 +622,7 @@ function FactRush({
     }
     const t = setTimeout(() => setFightCount((c) => (c === null ? null : c - 1)), 700);
     return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fightCount]);
 
   // Down it goes: the cage is open, and they have a few steps to make.
@@ -625,9 +632,12 @@ function FactRush({
       setAtCage(true);
       setWalking(true);
     }, 650);
+    // The bolt goes back and their pet is out.
+    const open = setTimeout(() => chime("streak"), 1900);
     const there = setTimeout(() => setWalking(false), 2000);
     return () => {
       clearTimeout(off);
+      clearTimeout(open);
       clearTimeout(there);
     };
   }, [dragonDown]);
@@ -653,41 +663,16 @@ function FactRush({
     speak("fr-example", ex.say, { kind: coachLook.voice });
   }
 
-  if (result && !run.finished) {
-    const why = run.over
-      ? "You ran out of lives."
-      : fightLost
-        ? "The dragon got the better of you."
-        : gaveUp
-          ? "You ran out of fireballs."
-          : level.dungeon
-            ? "The dragon is still standing."
-            : "That is the end of this go.";
-    return (
-      <div className={`mg ${css.fr}`}>
-        <div className={css.overCard}>
-          <strong className={css.overTitle}>Game over</strong>
-          <p className={css.overSay}>
-            {why} {level.dungeon ? "Your pet is still in that cage." : ""} {run.posts} blocks run, {run.wrong} missed.
-          </p>
-          {result.xp > 0 && <p className="kmuted small">+{result.xp} XP for new stars.</p>}
-          <div className={css.overButtons}>
-            {onReplay && (
-              <button type="button" className="kbtn small-btn" onClick={onReplay}>
-                ↺ Try this level again
-              </button>
-            )}
-            {onQuit && (
-              <button type="button" className="kbtn ghost small-btn" onClick={onQuit}>
-                ← Practise an earlier level
-              </button>
-            )}
-          </div>
-          {error && <p className="kmuted small">{error}</p>}
-        </div>
-      </div>
-    );
-  }
+  /** Why it ended, when it ended badly. */
+  const why = run.over
+    ? "You ran out of lives."
+    : fightLost
+      ? "The dragon got the better of you."
+      : gaveUp
+        ? "You ran out of fireballs."
+        : level.dungeon
+          ? "The dragon is still standing."
+          : "That is the end of this go.";
 
   const at = posts > 0 ? Math.min(1, run.posts / posts) : 0;
   const stepping = (beat && beat.kind !== "trip" && beat.kind !== "grabbed" && beat.kind !== "died") || walking;
@@ -781,7 +766,7 @@ function FactRush({
             className={`${css.world} ${shot === "cage" ? css.sweeping : ""}`}
             style={{
               width: `${(posts + 3) * BLOCK}px`,
-              left: shot === "cage" ? `calc(66% - ${posts * BLOCK}px)` : `calc(${CAMERA_AT * 100}% - ${runnerX(run.at) + walkIn}px)`,
+              left: shot === "cage" ? `calc(66% - ${posts * BLOCK}px)` : `calc(${CAMERA_AT * 100}% - ${runnerX(run.at)}px)`,
               // On a level that climbs, the camera has to climb with it -
               // and during the opening shot it is looking at the cage, which
               // is at the top.
@@ -925,7 +910,31 @@ function FactRush({
               <PixelSprite grid={medalGrid(level.id)} scale={1} />
             </span>
           )}
-          {result && (
+          {result && !run.finished && (
+            <div className={css.endOver}>
+              <div className={css.overCard}>
+                <strong className={css.overTitle}>Game over</strong>
+                <p className={css.overSay}>
+                  {why} {level.dungeon ? "Your pet is still in that cage." : ""} {run.posts} blocks run, {run.wrong} missed.
+                </p>
+                {result.xp > 0 && <p className="kmuted small">+{result.xp} XP for new stars.</p>}
+                <div className={css.overButtons}>
+                  {onReplay && (
+                    <button type="button" className="kbtn small-btn" onClick={onReplay} autoFocus>
+                      ↺ Try this level again
+                    </button>
+                  )}
+                  {onQuit && (
+                    <button type="button" className="kbtn ghost small-btn" onClick={onQuit}>
+                      ← Practise an earlier level
+                    </button>
+                  )}
+                </div>
+                {error && <p className="kmuted small">{error}</p>}
+              </div>
+            </div>
+          )}
+          {result && run.finished && (
             <div className={css.endOver}>
               {result.justMastered && <Fireworks big />}
               <StarPop stars={result.stars} from={(result.justMastered ? 2000 : 600) + (level.dungeon ? 1500 : 0)} />
@@ -1004,10 +1013,7 @@ function FactRush({
                     showDirections={false}
                     extra={<FightKeys />}
                     stage="brief"
-                    onReady={() => {
-                      speak("fight-count", "Three. Two. One. Go!", { kind: coachLook.voice });
-                      setFightCount(3);
-                    }}
+                    onReady={() => setFightCount(3)}
                     onAsking={setAsking}
                   />
                 ) : (
