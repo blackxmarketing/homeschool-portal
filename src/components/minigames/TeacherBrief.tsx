@@ -3,16 +3,7 @@
 import { useCallback, useState } from "react";
 import TeacherFace from "../TeacherFace";
 import { avatarFor } from "@/content/avatars";
-import {
-  MicButton,
-  speak,
-  stopSpeaking,
-  useAutoRead,
-  useSpeech,
-  useStopOnUnmount,
-  useTeacherVoice,
-  useVoiceSettings,
-} from "../voice";
+import { MicButton, speak, stopSpeaking, useAutoRead, useSpeech, useStopOnUnmount, useTeacherVoice, useVoiceSettings } from "../voice";
 import css from "./TeacherBrief.module.css";
 
 export interface BriefTeacher {
@@ -127,15 +118,9 @@ export default function TeacherBrief({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ levelId, board, seed, text: q }),
         });
-        const d = (await r.json().catch(() => ({}))) as {
-          answer?: string;
-          error?: string;
-        };
+        const d = (await r.json().catch(() => ({}))) as { answer?: string; error?: string };
         if (!r.ok || !d.answer) {
-          setErr(
-            d.error ||
-              "The coach could not answer that one. Try asking it a different way.",
-          );
+          setErr(d.error || "The coach could not answer that one. Try asking it a different way.");
           return;
         }
         setTurns((t) => [...t, { q, a: d.answer as string }]);
@@ -152,13 +137,7 @@ export default function TeacherBrief({
   return (
     <div className={css.row}>
       <span className={css.face}>
-        <TeacherFace
-          look={look}
-          talking={talking}
-          size={92}
-          speakingId={readId}
-          text={directions}
-        />
+        <TeacherFace look={look} talking={talking} size={92} speakingId={readId} text={directions} />
       </span>
 
       <div className={css.text}>
@@ -179,9 +158,7 @@ export default function TeacherBrief({
 
         {open && (
           <>
-            {stage === "play" && (
-              <p className={css.rule}>The rule on your board: {rule}</p>
-            )}
+            {stage === "play" && <p className={css.rule}>The rule on your board: {rule}</p>}
             {err && <p className="error small">{err}</p>}
             <form
               className={css.askRow}
@@ -194,27 +171,14 @@ export default function TeacherBrief({
                 className={css.box}
                 value={typed}
                 onChange={(e) => setTyped(e.target.value)}
-                placeholder={
-                  busy
-                    ? "Coach is thinking…"
-                    : "Ask the coach anything about this skill"
-                }
+                placeholder={busy ? "Coach is thinking…" : "Ask the coach anything about this skill"}
                 disabled={busy}
                 maxLength={300}
                 aria-label="Ask the coach a question"
                 autoFocus
               />
-              <MicButton
-                onText={(t) => void ask(t)}
-                disabled={busy}
-                label="Ask"
-                compact
-              />
-              <button
-                type="submit"
-                className="kbtn ghost small-btn"
-                disabled={busy || !typed.trim()}
-              >
+              <MicButton onText={(t) => void ask(t)} disabled={busy} label="Ask" compact />
+              <button type="submit" className="kbtn ghost small-btn" disabled={busy || !typed.trim()}>
                 Ask
               </button>
             </form>
@@ -237,23 +201,14 @@ export default function TeacherBrief({
                 I&apos;m ready
               </button>
               {onExample && (
-                <button
-                  type="button"
-                  className="kbtn ghost small-btn"
-                  onClick={onExample}
-                >
+                <button type="button" className="kbtn ghost small-btn" onClick={onExample}>
                   🔎 Show me an example
                 </button>
               )}
             </>
           )}
           {canAsk && (
-            <button
-              type="button"
-              className="kbtn ghost small-btn"
-              onClick={() => toggle(!open)}
-              disabled={busy}
-            >
+            <button type="button" className="kbtn ghost small-btn" onClick={() => toggle(!open)} disabled={busy}>
               {open ? "Done asking" : `🙋 Ask ${teacher.name}`}
             </button>
           )}

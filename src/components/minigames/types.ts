@@ -35,6 +35,11 @@ export interface MiniGameUIProps {
   onReplay?: () => void;
   /** Leave the level and go back to the list. */
   onQuit?: () => void;
+  /**
+   * Move on to the next level. Left out when there is no next level, or when
+   * the kid has not earned their way into it yet.
+   */
+  onNext?: () => void;
   /** Whether the AI coach can take questions, for games that let a kid ask. */
   canAsk?: boolean;
 }

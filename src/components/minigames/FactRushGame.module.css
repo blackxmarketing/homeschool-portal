@@ -31,6 +31,9 @@
   overflow: hidden;
 }
 
+
+
+
 .cloudA {
   top: 10px;
   left: 16%;
@@ -251,6 +254,7 @@
 
 /* ---- the end ---- */
 
+
 @media (max-width: 420px) {
   .scene {
     height: 260px;
@@ -276,11 +280,7 @@
 }
 .dungeon .ground {
   background: #3a3350;
-  background-image: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, 0.35) 2px,
-    transparent 2px
-  );
+  background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.35) 2px, transparent 2px);
 }
 .wall {
   position: absolute;
@@ -327,6 +327,7 @@
 .sweeping {
   transition: left 1.1s ease-in-out;
 }
+
 
 .at,
 .cloudA,
@@ -427,12 +428,8 @@
   position: absolute;
   line-height: 0;
 }
-.ridge {
-  opacity: 0.85;
-}
-.prop {
-  z-index: 1;
-}
+.ridge { opacity: 0.85; }
+.prop { z-index: 1; }
 
 /* Whatever is chasing them. */
 .beast {
@@ -448,21 +445,13 @@
 .close {
   filter: drop-shadow(0 0 9px rgba(224, 69, 58, 0.9));
 }
-@keyframes lope {
-  50% {
-    transform: translateY(-4px);
-  }
-}
+@keyframes lope { 50% { transform: translateY(-4px); } }
 
 /* Under the sea nobody is standing on anything. */
 .swimming {
   animation: float 2.2s ease-in-out infinite;
 }
-@keyframes float {
-  50% {
-    transform: translateY(-9px);
-  }
-}
+@keyframes float { 50% { transform: translateY(-9px); } }
 
 /* Where you are, written in the corner. */
 .where {
@@ -477,30 +466,15 @@
   border-radius: 3px;
   padding: 4px 6px;
 }
-.night .where {
-  background: rgba(255, 253, 245, 0.18);
-}
+.night .where { background: rgba(255, 253, 245, 0.18); }
 
 /* How hard they want it. */
-.paces {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-.pace {
-  cursor: pointer;
-}
-.paceOn {
-  background: #2340ff !important;
-  color: #fffdf5 !important;
-}
+.paces { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.pace { cursor: pointer; }
+.paceOn { background: #2340ff !important; color: #fffdf5 !important; }
 
 @media (prefers-reduced-motion: reduce) {
-  .beast,
-  .swimming {
-    animation: none;
-  }
+  .beast, .swimming { animation: none; }
 }
 
 /* A coin on the track, turning over as it waits to be picked up. */
@@ -512,9 +486,7 @@
   animation: bob 1.3s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
-  .coin {
-    animation: none;
-  }
+  .coin { animation: none; }
 }
 
 /* What the monster is still owed, and the line that explains it. */
@@ -536,23 +508,13 @@
   z-index: 4;
 }
 @keyframes grabbed {
-  0% {
-    transform: translateY(0) rotate(0);
-  }
-  35% {
-    transform: translateY(-46px) rotate(-18deg);
-  }
-  70% {
-    transform: translateY(-20px) rotate(14deg);
-  }
-  100% {
-    transform: translateY(0) rotate(0);
-  }
+  0% { transform: translateY(0) rotate(0); }
+  35% { transform: translateY(-46px) rotate(-18deg); }
+  70% { transform: translateY(-20px) rotate(14deg); }
+  100% { transform: translateY(0) rotate(0); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .grabbed {
-    animation: none;
-  }
+  .grabbed { animation: none; }
 }
 
 /* A life gone: up in the air, turn over, and out through the bottom of the
@@ -900,5 +862,43 @@
   .medalDrop {
     animation: none;
     transform: translate(-50%, -50%);
+  }
+}
+
+/* The cage they got open, and the way on once the stars have landed. */
+.emptyCage {
+  align-self: flex-end;
+  opacity: 0.9;
+}
+.endChoices {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  animation: popin 0.35s ease-out both;
+}
+.endHint {
+  margin: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--ink);
+  opacity: 0.7;
+}
+@keyframes popin {
+  from {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .endChoices {
+    animation: none;
   }
 }

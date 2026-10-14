@@ -49,6 +49,7 @@ import {
   levelById,
   medalGrid,
   MASTERY_MS,
+  MOVE_ON_STARS,
   MASTERY_SPREAD,
   MASTERY_FLOOR_MS,
   maxPoints,
@@ -1265,5 +1266,33 @@ describe("mastering a level", () => {
     const a = medalGrid("fr-x6");
     expect(medalGrid("fr-x6").px.join(",")).toBe(a.px.join(","));
     expect(medalGrid("fr-x6", 1).px.join(",")).not.toBe(a.px.join(","));
+  });
+});
+
+describe("moving on", () => {
+  it("wants two stars, and the level list wants the same", () => {
+    expect(MOVE_ON_STARS).toBe(2);
+    expect(factRushInfo.unlockAt).toBe(MOVE_ON_STARS);
+  });
+
+  it("is within reach of a run that was not perfect", () => {
+    // A kid who finishes the level with a couple of misses still gets to the
+    // next one: the bar is knowing it, not knowing it flawlessly.
+    const level = levelById("fr-a1")!;
+    let pile = openingPile(level, 4);
+    const answers: { a: number; ms: number }[] = [];
+    let missed = 0;
+    let guard = 0;
+    while (pile.length && guard++ < MAX_ASKS) {
+      const card = level.cards[pile[0].i];
+      const slip = missed < 2 && guard % 5 === 0;
+      answers.push({ a: slip ? card.answer + 1 : card.answer, ms: 1500 });
+      if (slip) missed++;
+      pile = afterAnswer(pile, !slip, needOf(level));
+    }
+    const r = replay(level, { seed: 4, pace: "easy", answers });
+    expect(r.finished).toBe(true);
+    expect(r.wrong).toBe(2);
+    expect(r.stars).toBeGreaterThanOrEqual(MOVE_ON_STARS);
   });
 });

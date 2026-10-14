@@ -2,13 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PixelSprite } from "../pixel/PixelArt";
-import {
-  chime,
-  speak,
-  stopSpeaking,
-  TeacherVoice,
-  useVoiceSettings,
-} from "../voice";
+import { chime, speak, TeacherVoice } from "../voice";
 import { avatarFor } from "@/content/avatars";
 import { teacherFor } from "@/content/teachers";
 import { GAME_COACH, grumbleGrid } from "@/lib/minigames/chompers";
@@ -37,6 +31,7 @@ import {
   mountainGrid,
   levelById,
   medalGrid,
+  MOVE_ON_STARS,
   MAX_ASKS,
   needOf,
   openingPile,
@@ -54,7 +49,6 @@ import {
   workedCard,
 } from "@/lib/minigames/factrush";
 import { heroGrid, petGrid, DEFAULT_HERO, type Hero } from "@/lib/pixel/hero";
-import { unlockName } from "@/lib/pixel/cosmetics";
 import DragonFight from "./DragonFight";
 import TeacherBrief from "./TeacherBrief";
 import type { MiniGameUIProps } from "./types";
@@ -94,11 +88,7 @@ const CAMERA_AT = 0.3;
  */
 const GAP_PX = 18;
 
-const HAZARD_ART: Record<Hazard, ReturnType<typeof holeGrid>> = {
-  hole: HOLE,
-  river: RIVER,
-  mountain: MOUNTAIN,
-};
+const HAZARD_ART: Record<Hazard, ReturnType<typeof holeGrid>> = { hole: HOLE, river: RIVER, mountain: MOUNTAIN };
 
 /**
  * A sky full of it, for mastering a level.
@@ -151,33 +141,35 @@ function Fireworks({ big = false }: { big?: boolean }) {
 }
 
 /**
- * What the coach says when the level is over.
+ * The way out of a finished level, offered once the stars have landed.
  *
- * Said out loud and nowhere written: the end of a level is the stars, their
- * character and their pet, not a paragraph to read.
+ * Moving on has to be earned: under two stars the only button is another go,
+ * because the point of a facts drill is the facts you do not have yet. The
+ * same number opens the next level in the list, so this is never a door the
+ * list has locked.
  */
-function coachSay(r: {
-  stars: number;
-  right: number;
-  justMastered: boolean;
-  level?: number;
-  rank?: string;
-  unlocked?: string[];
-}): string {
-  const say = [
-    `Great job! ${["No stars", "One star", "Two stars", "Three stars"][r.stars] ?? `${r.stars} stars`}, and you got ${r.right} right.`,
-  ];
-  if (r.justMastered)
-    say.push(
-      "And you mastered this level. Every card right, and never once slowing down - that medal is yours for good.",
-    );
-  if (r.level) say.push(`You are level ${r.level} now. ${r.rank}!`);
-  if (r.unlocked?.length)
-    say.push(
-      `You unlocked ${r.unlocked.map(unlockName).join(" and ")}. Go and put it on.`,
-    );
-  say.push("Keep up the good work.");
-  return say.join(" ");
+function EndChoices({ from, canNext, onNext, onReplay }: { from: number; canNext: boolean; onNext?: () => void; onReplay?: () => void }) {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setShow(true), from);
+    return () => clearTimeout(t);
+  }, [from]);
+  if (!show) return null;
+  return (
+    <div className={css.endChoices}>
+      {canNext && onNext && (
+        <button type="button" className="kbtn" onClick={onNext} autoFocus>
+          Next level ▶
+        </button>
+      )}
+      {onReplay && (
+        <button type="button" className={`kbtn ${canNext ? "ghost" : ""}`} onClick={onReplay}>
+          ↺ Try again
+        </button>
+      )}
+      {!canNext && <p className={css.endHint}>Two stars opens the next level - have another go.</p>}
+    </div>
+  );
 }
 
 /**
@@ -190,24 +182,17 @@ function StarPop({ stars, from }: { stars: number; from: number }) {
   const [shown, setShown] = useState(0);
   useEffect(() => {
     const timers = Array.from({ length: stars }, (_, i) =>
-      setTimeout(
-        () => {
-          setShown(i + 1);
-          chime("star", i);
-        },
-        from + i * 650,
-      ),
+      setTimeout(() => {
+        setShown(i + 1);
+        chime("star", i);
+      }, from + i * 650),
     );
     return () => timers.forEach(clearTimeout);
   }, [stars, from]);
   return (
     <div className={`mg-stars ${css.endStars}`} aria-label={`${stars} stars`}>
       {[1, 2, 3].map((n) => (
-        <span
-          key={n}
-          className={`star ${shown >= n ? `lit ${css.starIn}` : ""}`}
-          aria-hidden
-        >
+        <span key={n} className={`star ${shown >= n ? `lit ${css.starIn}` : ""}`} aria-hidden>
           ★
         </span>
       ))}
@@ -233,29 +218,14 @@ function FightKeys() {
       <span className={css.keyRow}>
         <kbd className={`${css.cap} ${css.capWide}`}>space</kbd>
         <span className={css.keyWhat}>
-          Throw{" "}
-          <PixelSprite
-            grid={fireballGrid(0)}
-            scale={2}
-            className={css.keyFire}
-          />
+          Throw <PixelSprite grid={fireballGrid(0)} scale={2} className={css.keyFire} />
         </span>
       </span>
     </div>
   );
 }
 
-export default function FactRushGame({
-  levelId,
-  onFinish,
-  stars,
-  plays,
-  hero,
-  coins,
-  canAsk,
-  onReplay,
-  onQuit,
-}: MiniGameUIProps) {
+export default function FactRushGame({ levelId, onFinish, stars, plays, hero, coins, canAsk, onReplay, onQuit, onNext }: MiniGameUIProps) {
   const level = levelById(levelId);
   return level ? (
     <FactRush
@@ -268,6 +238,7 @@ export default function FactRushGame({
       canAsk={!!canAsk}
       onReplay={onReplay}
       onQuit={onQuit}
+      onNext={onNext}
     />
   ) : null;
 }
@@ -277,14 +248,17 @@ const newSeed = () => Math.floor(Math.random() * 2 ** 31);
 function FactRush({
   level,
   onFinish,
+  earned,
   hero,
   saved,
   canAsk,
   onReplay,
   onQuit,
+  onNext,
 }: {
   level: FactLevel;
   onFinish: MiniGameUIProps["onFinish"];
+  /** Stars already on this level, which is a way on in its own right. */
   earned: number;
   plays: number;
   hero?: Hero;
@@ -293,14 +267,13 @@ function FactRush({
   canAsk: boolean;
   onReplay?: () => void;
   onQuit?: () => void;
+  onNext?: () => void;
 }) {
   const who = hero ?? DEFAULT_HERO;
   const runner = useMemo(() => [heroGrid(who, 0), heroGrid(who, 1)], [who]);
   const pet = useMemo(() => petGrid(who.pet, 0), [who.pet]);
   const coach = teacherFor(GAME_COACH);
   const coachLook = avatarFor(coach.id);
-  /** Read-aloud can be turned off for the family, and that holds here too. */
-  const { speakOn } = useVoiceSettings();
 
   const [seed] = useState(newSeed);
   const [ready, setReady] = useState(false);
@@ -332,9 +305,7 @@ function FactRush({
   const biome = useMemo(() => biomeFor(level), [level]);
   const [count, setCount] = useState<number | null>(null);
   const [asking, setAsking] = useState(false);
-  const [example, setExample] = useState<ReturnType<typeof workedCard> | null>(
-    null,
-  );
+  const [example, setExample] = useState<ReturnType<typeof workedCard> | null>(null);
   /** Fireballs thrown at the dragon, and whether it went down. */
   const [thrown, setThrown] = useState(0);
   const [dragonDown, setDragonDown] = useState(false);
@@ -363,10 +334,7 @@ function FactRush({
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [typed, setTyped] = useState("");
   /** What just happened, for the hero to react to. */
-  const [beat, setBeat] = useState<{
-    kind: "sprint" | "run" | "trot" | "trip" | "grabbed" | "died";
-    show?: string;
-  } | null>(null);
+  const [beat, setBeat] = useState<{ kind: "sprint" | "run" | "trot" | "trip" | "grabbed" | "died"; show?: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{
     stars: number;
@@ -412,10 +380,7 @@ function FactRush({
    */
   const SHORT = level.dungeon ? 210 : 0;
   const runnerX = (at: number) => standing(at) * BLOCK - SHORT * at;
-  const run = useMemo(
-    () => play(level, { seed, answers, pace, thrown, beat: dragonDown }, saved),
-    [level, seed, answers, pace, saved, thrown, dragonDown],
-  );
+  const run = useMemo(() => play(level, { seed, answers, pace, thrown, beat: dragonDown }, saved), [level, seed, answers, pace, saved, thrown, dragonDown]);
   const fightLives = Math.max(0, run.lives - burns);
   const fightLost = run.atDragon && !dragonDown && burns > 0 && fightLives <= 0;
   const card = run.head === null ? null : level.cards[run.head];
@@ -427,19 +392,10 @@ function FactRush({
    * clock - the same sum the server will do from the time on that answer.
    */
   const gap =
-    run.chase === null
-      ? null
-      : pace === "hard"
-        ? run.chase - (CREEP_PER_SEC * Math.max(0, now - asked.current)) / 1000
-        : run.chase;
+    run.chase === null ? null : pace === "hard" ? run.chase - (CREEP_PER_SEC * Math.max(0, now - asked.current)) / 1000 : run.chase;
   // Out of cards, out of lives, burned to nothing by the dragon, or out of
   // patience.
-  const done =
-    run.inPile === 0 ||
-    run.over ||
-    fightLost ||
-    gaveUp ||
-    answers.length >= MAX_ASKS;
+  const done = run.inPile === 0 || run.over || fightLost || gaveUp || answers.length >= MAX_ASKS;
 
   /**
    * The ref is what is typed; the state only draws it.
@@ -470,10 +426,7 @@ function FactRush({
       asked.current = Date.now();
       return;
     }
-    const t = setTimeout(
-      () => setCount((c) => (c === null ? null : c - 1)),
-      700,
-    );
+    const t = setTimeout(() => setCount((c) => (c === null ? null : c - 1)), 700);
     return () => clearTimeout(t);
   }, [count]);
 
@@ -494,26 +447,18 @@ function FactRush({
         chime(after.justCaught ? "caught" : "died");
         setBeat({
           kind: "died",
-          show: after.justCaught
-            ? "It got you! Back to the start."
-            : "Three wrong - back to the start.",
+          show: after.justCaught ? "It got you! Back to the start." : "Three wrong - back to the start.",
         });
       } else if (after.justCaught) {
         // Caught, but food had made them big: the size went, not a life.
         chime("caught");
-        setBeat({
-          kind: "grabbed",
-          show: "It got you - but you were big. Keep going!",
-        });
+        setBeat({ kind: "grabbed", show: "It got you - but you were big. Keep going!" });
       } else if (right) {
         chime(ms <= 2500 ? "streak" : "right");
         setBeat({ kind: paceOf(ms) });
       } else {
         chime("oops");
-        setBeat({
-          kind: "trip",
-          show: `${level.cards[showing].text} = ${level.cards[showing].answer}`,
-        });
+        setBeat({ kind: "trip", show: `${level.cards[showing].text} = ${level.cards[showing].answer}` });
       }
       // A step of something large, somewhere behind them: when it arrives,
       // and whenever it has gained ground. On hard the ticker growls as well,
@@ -533,13 +478,7 @@ function FactRush({
     setBusy(true);
     void (async () => {
       try {
-        const r = await onFinish({
-          seed,
-          answers,
-          pace,
-          thrown,
-          beat: dragonDown,
-        });
+        const r = await onFinish({ seed, answers, pace, thrown, beat: dragonDown });
         setResult({
           stars: r.stars,
           xp: r.xp,
@@ -559,53 +498,22 @@ function FactRush({
   }, [done, ready, onFinish, seed, answers, pace, thrown, dragonDown]);
 
   /**
-   * The end of the level, out loud: the fanfare and the fireworks going off
-   * when a medal has been won, and the coach over the top of it once the
-   * medal has settled.
+   * A medal, out loud: the fanfare and the fireworks going off as it lands.
+   * Nothing is said over the end of a level - what they did is on the screen
+   * in stars, and the sounds are the rest of it.
    */
   useEffect(() => {
-    if (!result) return;
-    const won = !!result.justMastered;
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    if (won) {
-      chime("medal");
-      for (const ms of [260, 580, 900, 1240])
-        timers.push(setTimeout(() => chime("pop"), ms));
-    }
-    const right = answers.filter((a) => a.a !== null).length - run.wrong;
-    const say = coachSay({
-      stars: result.stars,
-      right: Math.max(0, right),
-      justMastered: won,
-      level: result.level,
-      rank: result.rank,
-      unlocked: result.unlocked,
-    });
-    // Over the top of the medal landing, not under it.
-    if (speakOn)
-      timers.push(
-        setTimeout(
-          () => speak("fr-done", say, { kind: coachLook.voice }),
-          won ? 2100 : 500,
-        ),
-      );
-    return () => {
-      timers.forEach(clearTimeout);
-      stopSpeaking();
-    };
-    // Said once, when the run is scored - not again on every re-render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [result]);
+    if (!result?.justMastered) return;
+    chime("medal");
+    const timers = [260, 580, 900, 1240].map((ms) => setTimeout(() => chime("pop"), ms));
+    return () => timers.forEach(clearTimeout);
+  }, [result?.justMastered]);
 
   // Typing works as well as tapping: a keyboard is faster, and speed is points.
   useEffect(() => {
     if (!ready || asking || done) return;
     function onKey(e: KeyboardEvent) {
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
-      )
-        return;
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key >= "0" && e.key <= "9") type((t) => t + e.key);
       else if (e.key === "Backspace") type((t) => t.slice(0, -1));
       else if (e.key === "Enter" || e.key === " ") {
@@ -630,8 +538,7 @@ function FactRush({
       setNow(t);
       if (run.inPile === 0) return;
       const since = t - asked.current;
-      const where =
-        run.chase === null ? null : run.chase - (CREEP_PER_SEC * since) / 1000;
+      const where = run.chase === null ? null : run.chase - (CREEP_PER_SEC * since) / 1000;
       if (where === null) return;
       // A step every so often, so a kid hears it coming without being deafened.
       if (t - lastGrowl.current > 1100) {
@@ -660,10 +567,7 @@ function FactRush({
       setFightOn(true);
       return;
     }
-    const t = setTimeout(
-      () => setFightCount((c) => (c === null ? null : c - 1)),
-      700,
-    );
+    const t = setTimeout(() => setFightCount((c) => (c === null ? null : c - 1)), 700);
     return () => clearTimeout(t);
   }, [fightCount]);
 
@@ -678,16 +582,7 @@ function FactRush({
   // The reaction clears itself so the scene does not keep shouting.
   useEffect(() => {
     if (!beat) return;
-    const t = setTimeout(
-      () => setBeat(null),
-      beat.kind === "died"
-        ? 2000
-        : beat.kind === "grabbed"
-          ? 1800
-          : beat.kind === "trip"
-            ? 1500
-            : 560,
-    );
+    const t = setTimeout(() => setBeat(null), beat.kind === "died" ? 2000 : beat.kind === "grabbed" ? 1800 : beat.kind === "trip" ? 1500 : 560);
     return () => clearTimeout(t);
   }, [beat]);
 
@@ -712,28 +607,17 @@ function FactRush({
         <div className={css.overCard}>
           <strong className={css.overTitle}>Game over</strong>
           <p className={css.overSay}>
-            {why} {level.dungeon ? "Your pet is still in that cage." : ""}{" "}
-            {run.posts} blocks run, {run.wrong} missed.
+            {why} {level.dungeon ? "Your pet is still in that cage." : ""} {run.posts} blocks run, {run.wrong} missed.
           </p>
-          {result.xp > 0 && (
-            <p className="kmuted small">+{result.xp} XP for new stars.</p>
-          )}
+          {result.xp > 0 && <p className="kmuted small">+{result.xp} XP for new stars.</p>}
           <div className={css.overButtons}>
             {onReplay && (
-              <button
-                type="button"
-                className="kbtn small-btn"
-                onClick={onReplay}
-              >
+              <button type="button" className="kbtn small-btn" onClick={onReplay}>
                 ↺ Try this level again
               </button>
             )}
             {onQuit && (
-              <button
-                type="button"
-                className="kbtn ghost small-btn"
-                onClick={onQuit}
-              >
+              <button type="button" className="kbtn ghost small-btn" onClick={onQuit}>
                 ← Practise an earlier level
               </button>
             )}
@@ -751,25 +635,24 @@ function FactRush({
       <div className={`mg ${css.fr}`}>
         <div className={css.endScene}>
           {result.justMastered && <Fireworks big />}
-          <StarPop
-            stars={result.stars}
-            from={result.justMastered ? 2000 : 600}
-          />
+          <StarPop stars={result.stars} from={result.justMastered ? 2000 : 600} />
           <div className={css.cast}>
+            {/* The cage they got open, stood empty beside them. */}
+            <PixelSprite grid={cagedPetGrid(null, true)} scale={4} className={css.emptyCage} />
             <span className={css.standing}>
               <PixelSprite grid={runner[0]} scale={6} />
               {/* It arrives the size of the screen and settles around their
                   neck, which is where it stays. */}
-              {result.justMastered && (
-                <PixelSprite
-                  grid={medalGrid(level.id)}
-                  scale={1}
-                  className={css.medalDrop}
-                />
-              )}
+              {result.justMastered && <PixelSprite grid={medalGrid(level.id)} scale={1} className={css.medalDrop} />}
             </span>
             {pet && <PixelSprite grid={pet} scale={6} className={css.beside} />}
           </div>
+          <EndChoices
+            from={(result.justMastered ? 2000 : 600) + result.stars * 650 + 200}
+            canNext={result.stars >= MOVE_ON_STARS || earned >= MOVE_ON_STARS}
+            onNext={onNext}
+            onReplay={onReplay}
+          />
           {error && <p className="kmuted small">{error}</p>}
         </div>
       </div>
@@ -777,47 +660,27 @@ function FactRush({
   }
 
   const at = posts > 0 ? Math.min(1, run.posts / posts) : 0;
-  const stepping =
-    beat &&
-    beat.kind !== "trip" &&
-    beat.kind !== "grabbed" &&
-    beat.kind !== "died";
+  const stepping = beat && beat.kind !== "trip" && beat.kind !== "grabbed" && beat.kind !== "died";
 
   return (
     <TeacherVoice kind={coachLook.voice}>
       <div className={`mg ${css.fr}`}>
         <div className="mg-hud">
           <span className="chip">⚡ {run.points}</span>
-          <span
-            className="chip"
-            aria-label={`${Math.round(run.at * posts)} of ${posts} blocks`}
-          >
+          <span className="chip" aria-label={`${Math.round(run.at * posts)} of ${posts} blocks`}>
             {Math.round(run.at * posts)} / {posts}
           </span>
-          <span
-            className={`chip ${css.lives}`}
-            aria-label={`${run.lives} lives left`}
-          >
+          <span className={`chip ${css.lives}`} aria-label={`${run.lives} lives left`}>
             {Array.from({ length: LIVES }, (_, i) => (
-              <span
-                key={i}
-                className={i < run.lives ? css.life : css.lifeGone}
-                aria-hidden
-              >
+              <span key={i} className={i < run.lives ? css.life : css.lifeGone} aria-hidden>
                 ♥
               </span>
             ))}
           </span>
-          <span
-            className="chip"
-            aria-label={`${STRIKES - run.strikes} mistakes before a life goes`}
-          >
+          <span className="chip" aria-label={`${STRIKES - run.strikes} mistakes before a life goes`}>
             ✗ {run.strikes} / {STRIKES}
           </span>
-          <span
-            className="chip"
-            aria-label={`${saved + run.fireballs - thrown} fireballs`}
-          >
+          <span className="chip" aria-label={`${saved + run.fireballs - thrown} fireballs`}>
             🔥 {Math.max(0, saved + run.fireballs - thrown)}
           </span>
           {run.big && <span className="chip">🍎 Big!</span>}
@@ -852,228 +715,141 @@ function FactRush({
         {/* Once they are at the dragon the run is over and the pit takes the
             screen, so a kid is not looking at two scenes at once. */}
         {!(level.dungeon && run.atDragon) && (
-          <div className={css.sceneWrap}>
-            {picking && (
-              <div className={css.fightBrief}>
-                <div className={css.outOfFire}>
-                  <strong className={css.outTitle}>
-                    How hard do you want it?
-                  </strong>
-                  <div className={css.pickRow}>
-                    {PACES.map((p) => (
-                      <button
-                        key={p}
-                        type="button"
-                        className={`kbtn small-btn ${css.pick}`}
-                        onClick={() => begin(p)}
-                      >
-                        <span className={css.pickName}>
-                          {p === "easy"
-                            ? "🙂 Easy"
-                            : p === "medium"
-                              ? "😬 Medium"
-                              : "😱 Hard"}
-                        </span>
-                        <span className={css.pickSay}>
-                          {p === "easy"
-                            ? "Nothing chasing you."
-                            : p === "medium"
-                              ? "Something comes and goes. Only a wrong answer lets it close in."
-                              : "It never stops. Keep answering or it will have you."}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+        <div className={css.sceneWrap}>
+        {picking && (
+          <div className={css.fightBrief}>
+            <div className={css.outOfFire}>
+              <strong className={css.outTitle}>How hard do you want it?</strong>
+              <div className={css.pickRow}>
+                {PACES.map((p) => (
+                  <button key={p} type="button" className={`kbtn small-btn ${css.pick}`} onClick={() => begin(p)}>
+                    <span className={css.pickName}>{p === "easy" ? "🙂 Easy" : p === "medium" ? "😬 Medium" : "😱 Hard"}</span>
+                    <span className={css.pickSay}>
+                      {p === "easy"
+                        ? "Nothing chasing you."
+                        : p === "medium"
+                          ? "Something comes and goes. Only a wrong answer lets it close in."
+                          : "It never stops. Keep answering or it will have you."}
+                    </span>
+                  </button>
+                ))}
               </div>
-            )}
-            <>
-              {/* The level, seen through a camera that keeps the runner big and a
+            </div>
+          </div>
+        )}
+        <>
+        {/* The level, seen through a camera that keeps the runner big and a
             third of the way in. It opens looking at the cage so a kid sees who
             they are running for, then sweeps back to the start. Every family
             gets its own place to run it in. */}
-              <div
-                className={`${css.scene} ${biome.dark ? css.night : ""}`}
-                style={{
-                  background: `linear-gradient(180deg, ${biome.sky[0]} 0%, ${biome.sky[1]} 78%)`,
-                }}
-                aria-label={`${biome.name}: ${run.posts} of ${posts} blocks`}
-              >
-                <div
-                  className={`${css.world} ${shot === "cage" ? css.sweeping : ""}`}
-                  style={{
-                    width: `${(posts + 3) * BLOCK}px`,
-                    left:
-                      shot === "cage"
-                        ? `calc(66% - ${posts * BLOCK}px)`
-                        : `calc(${CAMERA_AT * 100}% - ${runnerX(run.at)}px)`,
-                    // On a level that climbs, the camera has to climb with it -
-                    // and during the opening shot it is looking at the cage, which
-                    // is at the top.
-                    bottom: biome.rise
-                      ? `${-(shot === "cage" ? posts : standing(run.at)) * biome.rise}px`
-                      : undefined,
-                  }}
-                >
-                  {/* The floor, which climbs on a level that climbs. Under the sea
+        <div
+          className={`${css.scene} ${biome.dark ? css.night : ""}`}
+          style={{ background: `linear-gradient(180deg, ${biome.sky[0]} 0%, ${biome.sky[1]} 78%)` }}
+          aria-label={`${biome.name}: ${run.posts} of ${posts} blocks`}
+        >
+          <div
+            className={`${css.world} ${shot === "cage" ? css.sweeping : ""}`}
+            style={{
+              width: `${(posts + 3) * BLOCK}px`,
+              left: shot === "cage" ? `calc(66% - ${posts * BLOCK}px)` : `calc(${CAMERA_AT * 100}% - ${runnerX(run.at)}px)`,
+              // On a level that climbs, the camera has to climb with it -
+              // and during the opening shot it is looking at the cage, which
+              // is at the top.
+              bottom: biome.rise ? `${-(shot === "cage" ? posts : standing(run.at)) * biome.rise}px` : undefined,
+            }}
+          >
+            {/* The floor, which climbs on a level that climbs. Under the sea
                 there is only the seabed, far below them. */}
-                  {Array.from({ length: posts + 3 }, (_, i) => (
-                    <span
-                      key={i}
-                      className={css.sod}
-                      style={{
-                        left: `${i * BLOCK}px`,
-                        bottom: `${(biome.rise ?? 0) * i}px`,
-                        background: biome.ground,
-                        borderTopColor: biome.swim ? "transparent" : undefined,
-                        boxShadow: `inset 0 -12px 0 ${biome.under}`,
-                        opacity: biome.swim ? 0.55 : 1,
-                      }}
-                    />
-                  ))}
+            {Array.from({ length: posts + 3 }, (_, i) => (
+              <span
+                key={i}
+                className={css.sod}
+                style={{
+                  left: `${i * BLOCK}px`,
+                  bottom: `${(biome.rise ?? 0) * i}px`,
+                  background: biome.ground,
+                  borderTopColor: biome.swim ? "transparent" : undefined,
+                  boxShadow: `inset 0 -12px 0 ${biome.under}`,
+                  opacity: biome.swim ? 0.55 : 1,
+                }}
+              />
+            ))}
 
-                  {/* The ridge along the back. */}
-                  {[1, 7, 13, 19, 25].map((i) => (
-                    <span
-                      key={i}
-                      className={css.ridge}
-                      style={{
-                        left: `${i * BLOCK}px`,
-                        bottom: `${(biome.rise ?? 0) * i + 40}px`,
-                      }}
-                    >
-                      <PixelSprite
-                        grid={ridgeGrid(biome.far, !!biome.rise)}
-                        scale={3}
-                      />
-                    </span>
-                  ))}
+            {/* The ridge along the back. */}
+            {[1, 7, 13, 19, 25].map((i) => (
+              <span key={i} className={css.ridge} style={{ left: `${i * BLOCK}px`, bottom: `${(biome.rise ?? 0) * i + 40}px` }}>
+                <PixelSprite grid={ridgeGrid(biome.far, !!biome.rise)} scale={3} />
+              </span>
+            ))}
 
-                  {/* What grows, stands or glows beside the track. */}
-                  {Array.from({ length: posts + 2 }, (_, i) => {
-                    if (i % 3 !== 1) return null;
-                    return (
-                      <span
-                        key={`p${i}`}
-                        className={css.prop}
-                        style={{
-                          left: `${i * BLOCK + 10}px`,
-                          bottom: `${(biome.rise ?? 0) * i + 44}px`,
-                        }}
-                      >
-                        <PixelSprite
-                          grid={propGrid(
-                            biome.prop,
-                            biome.propInk[0],
-                            biome.propInk[1],
-                          )}
-                          scale={3}
-                        />
-                      </span>
-                    );
-                  })}
+            {/* What grows, stands or glows beside the track. */}
+            {Array.from({ length: posts + 2 }, (_, i) => {
+              if (i % 3 !== 1) return null;
+              return (
+                <span key={`p${i}`} className={css.prop} style={{ left: `${i * BLOCK + 10}px`, bottom: `${(biome.rise ?? 0) * i + 44}px` }}>
+                  <PixelSprite grid={propGrid(biome.prop, biome.propInk[0], biome.propInk[1])} scale={3} />
+                </span>
+              );
+            })}
 
-                  {biome.clouds &&
-                    [2, 9, 17, 24].map((i) => (
-                      <span
-                        key={`c${i}`}
-                        className={i % 2 ? css.cloudA : css.cloudB}
-                        style={{ left: `${i * BLOCK}px` }}
-                      >
-                        <PixelSprite grid={CLOUD[i % 2]} scale={3} />
-                      </span>
-                    ))}
+            {biome.clouds &&
+              [2, 9, 17, 24].map((i) => (
+                <span key={`c${i}`} className={i % 2 ? css.cloudA : css.cloudB} style={{ left: `${i * BLOCK}px` }}>
+                  <PixelSprite grid={CLOUD[i % 2]} scale={3} />
+                </span>
+              ))}
 
-                  {/* What is in the way, and what is worth picking up. */}
-                  {Array.from({ length: posts + 1 }, (_, i) => {
-                    const h = biome.swim ? null : hazardAt(i);
-                    const ahead = standing(run.at) < i;
-                    const token = tokenOn(i) && ahead;
-                    const coin = fireballOn(i) && ahead;
-                    if (!h && !token && !coin) return null;
-                    return (
-                      <span
-                        key={`h${i}`}
-                        className={css.at}
-                        style={{
-                          left: `${i * BLOCK}px`,
-                          bottom: `${(biome.rise ?? 0) * i + 46}px`,
-                        }}
-                      >
-                        {h && (
-                          <span
-                            className={
-                              h === "hole"
-                                ? css.hole
-                                : h === "river"
-                                  ? css.river
-                                  : css.mountain
-                            }
-                          >
-                            <PixelSprite grid={HAZARD_ART[h]} scale={3} />
-                          </span>
-                        )}
-                        {token && (
-                          <span className={css.token}>
-                            <PixelSprite grid={TOKEN[beat ? 1 : 0]} scale={3} />
-                          </span>
-                        )}
-                        {coin && (
-                          <span className={css.coin}>
-                            <PixelSprite grid={COIN[beat ? 1 : 0]} scale={3} />
-                          </span>
-                        )}
-                      </span>
-                    );
-                  })}
-
-                  {/* The cage, at the last block - and in a dungeon, the one who
-                has the pet, standing over it with a price. */}
-                  <span
-                    className={css.cage}
-                    style={{
-                      left: `${posts * BLOCK}px`,
-                      bottom: `${(biome.rise ?? 0) * posts + 43}px`,
-                    }}
-                  >
-                    <PixelSprite
-                      grid={cagedPetGrid(pet, run.finished)}
-                      scale={5}
-                    />
-                  </span>
-                  {level.dungeon && !run.finished && (
-                    <span
-                      className={css.keeper}
-                      style={{
-                        left: `${posts * BLOCK - 126}px`,
-                        bottom: `${(biome.rise ?? 0) * posts + 43}px`,
-                      }}
-                    >
-                      <span className={css.price}>🔥 {DRAGON_HITS[pace]}</span>
-                      <PixelSprite
-                        grid={DRAGON[Math.floor(now / 620) % 2]}
-                        scale={4}
-                      />
+            {/* What is in the way, and what is worth picking up. */}
+            {Array.from({ length: posts + 1 }, (_, i) => {
+              const h = biome.swim ? null : hazardAt(i);
+              const ahead = standing(run.at) < i;
+              const token = tokenOn(i) && ahead;
+              const coin = fireballOn(i) && ahead;
+              if (!h && !token && !coin) return null;
+              return (
+                <span key={`h${i}`} className={css.at} style={{ left: `${i * BLOCK}px`, bottom: `${(biome.rise ?? 0) * i + 46}px` }}>
+                  {h && (
+                    <span className={h === "hole" ? css.hole : h === "river" ? css.river : css.mountain}>
+                      <PixelSprite grid={HAZARD_ART[h]} scale={3} />
                     </span>
                   )}
+                  {token && (
+                    <span className={css.token}>
+                      <PixelSprite grid={TOKEN[beat ? 1 : 0]} scale={3} />
+                    </span>
+                  )}
+                  {coin && (
+                    <span className={css.coin}>
+                      <PixelSprite grid={COIN[beat ? 1 : 0]} scale={3} />
+                    </span>
+                  )}
+                </span>
+              );
+            })}
 
-                  <span
-                    className={`${css.runner} ${biome.swim ? css.swimming : ""} ${run.big ? css.grown : ""} ${beat?.kind === "trip" ? css.trip : ""} ${
-                      beat?.kind === "grabbed" ? css.grabbed : ""
-                    } ${beat?.kind === "died" ? css.died : ""} ${stepping ? css.step : ""} ${beat?.kind === "sprint" ? css.sprint : ""}`}
-                    style={{
-                      left: `${runnerX(run.at)}px`,
-                      bottom: `${(biome.rise ?? 0) * standing(run.at) + 43}px`,
-                    }}
-                  >
-                    <PixelSprite
-                      grid={runner[stepping ? 1 : 0]}
-                      scale={run.big ? 7 : 5}
-                    />
-                  </span>
-                </div>
+            {/* The cage, at the last block - and in a dungeon, the one who
+                has the pet, standing over it with a price. */}
+            <span className={css.cage} style={{ left: `${posts * BLOCK}px`, bottom: `${(biome.rise ?? 0) * posts + 43}px` }}>
+              <PixelSprite grid={cagedPetGrid(pet, run.finished)} scale={5} />
+            </span>
+            {level.dungeon && !run.finished && (
+              <span className={css.keeper} style={{ left: `${posts * BLOCK - 126}px`, bottom: `${(biome.rise ?? 0) * posts + 43}px` }}>
+                <span className={css.price}>🔥 {DRAGON_HITS[pace]}</span>
+                <PixelSprite grid={DRAGON[Math.floor(now / 620) % 2]} scale={4} />
+              </span>
+            )}
 
-                {/* Whatever is after them.
+            <span
+              className={`${css.runner} ${biome.swim ? css.swimming : ""} ${run.big ? css.grown : ""} ${beat?.kind === "trip" ? css.trip : ""} ${
+                beat?.kind === "grabbed" ? css.grabbed : ""
+              } ${beat?.kind === "died" ? css.died : ""} ${stepping ? css.step : ""} ${beat?.kind === "sprint" ? css.sprint : ""}`}
+              style={{ left: `${runnerX(run.at)}px`, bottom: `${(biome.rise ?? 0) * standing(run.at) + 43}px` }}
+            >
+              <PixelSprite grid={runner[stepping ? 1 : 0]} scale={run.big ? 7 : 5} />
+            </span>
+          </div>
+
+          {/* Whatever is after them.
 
               It is drawn against the camera rather than against the ground,
               because the gap is measured in blocks and a block is wider than
@@ -1082,194 +858,132 @@ function FactRush({
               the thing that was catching them. Here it comes in from the edge
               and closes on them as the gap closes, which is the same
               information in a place they can see it. */}
-                {gap !== null && (
-                  <span
-                    className={`${css.beast} ${gap <= 2 ? css.close : ""}`}
-                    style={{
-                      left: `calc(${CAMERA_AT * 100}% - ${Math.max(0, gap) * GAP_PX}px)`,
-                    }}
-                  >
-                    <PixelSprite
-                      grid={BEAST[Math.floor(now / 260) % 2]}
-                      scale={5}
-                    />
-                  </span>
-                )}
+          {gap !== null && (
+            <span
+              className={`${css.beast} ${gap <= 2 ? css.close : ""}`}
+              style={{ left: `calc(${CAMERA_AT * 100}% - ${Math.max(0, gap) * GAP_PX}px)` }}
+            >
+              <PixelSprite grid={BEAST[Math.floor(now / 260) % 2]} scale={5} />
+            </span>
+          )}
 
-                <span className={css.where}>{biome.name}</span>
+          <span className={css.where}>{biome.name}</span>
 
-                {count !== null && (
-                  <div
-                    className={css.countOver}
-                    role="status"
-                    aria-live="assertive"
-                  >
-                    <strong>{count}</strong>
-                  </div>
-                )}
-                {shot === "cage" && (
-                  <span className={css.shout}>Go and get them!</span>
-                )}
-                {beat?.kind === "sprint" && (
-                  <span className={css.shout}>Sprint!</span>
-                )}
-              </div>
-            </>
-          </div>
-        )}
-
-        {ready &&
-          level.dungeon &&
-          run.atDragon &&
-          !dragonDown &&
-          !reloading && (
-            <div className={css.fightWrap}>
-              <DragonFight
-                pace={pace}
-                ammo={Math.max(0, saved + run.fireballs - thrown)}
-                lives={fightLives}
-                paused={!fightOn}
-                hero={runner[0]}
-                pet={pet}
-                onThrow={() => setThrown((t) => t + 1)}
-                onHurt={() => setBurns((b) => b + 1)}
-                onOutOfFire={() => setOutOfFire(true)}
-                onWon={(t) => {
-                  setThrown(t);
-                  setDragonDown(true);
-                }}
-              />
-              {outOfFire && (
-                <div className={css.fightBrief}>
-                  <div className={css.outOfFire}>
-                    <strong className={css.outTitle}>Out of fireballs!</strong>
-                    <p className={css.outSay}>
-                      The dragon is still standing and you have nothing left to
-                      throw. Every card you get right is another fireball - so
-                      you can make more here, or go back and stock up on the
-                      levels you have already beaten.
-                    </p>
-                    <div className={css.outButtons}>
-                      <button
-                        type="button"
-                        className="kbtn small-btn"
-                        onClick={() => {
-                          setOutOfFire(false);
-                          setReloading(true);
-                        }}
-                      >
-                        Answer more cards here
-                      </button>
-                      <button
-                        type="button"
-                        className="kbtn ghost small-btn"
-                        onClick={() => setGaveUp(true)}
-                      >
-                        Go back and collect more
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {!fightOn && !outOfFire && (
-                <div className={css.fightBrief}>
-                  {fightCount === null ? (
-                    <TeacherBrief
-                      teacher={coach}
-                      directions={`The dragon has your pet and will not hand them over. Every card you got right is a fireball: you have ${Math.max(0, saved + run.fireballs - thrown)}. Space throws one. Arrows walk you about, Up jumps, Down ducks - it breathes fire back. ${DRAGON_HITS[pace]} hits and it is done.`}
-                      rule={level.title}
-                      levelId={level.id}
-                      board={0}
-                      seed={seed}
-                      canAsk={canAsk}
-                      showDirections={false}
-                      extra={<FightKeys />}
-                      stage="brief"
-                      onReady={() => {
-                        speak("fight-count", "Three. Two. One. Go!", {
-                          kind: coachLook.voice,
-                        });
-                        setFightCount(3);
-                      }}
-                      onAsking={setAsking}
-                    />
-                  ) : (
-                    <div
-                      className={css.fightCount}
-                      role="status"
-                      aria-live="assertive"
-                    >
-                      <strong>{fightCount}</strong>
-                    </div>
-                  )}
-                </div>
-              )}
+          {count !== null && (
+            <div className={css.countOver} role="status" aria-live="assertive">
+              <strong>{count}</strong>
             </div>
           )}
+          {shot === "cage" && <span className={css.shout}>Go and get them!</span>}
+          {beat?.kind === "sprint" && <span className={css.shout}>Sprint!</span>}
+        </div>
+        </>
+        </div>
+        )}
+
+        {ready && level.dungeon && run.atDragon && !dragonDown && !reloading && (
+          <div className={css.fightWrap}>
+            <DragonFight
+              pace={pace}
+              ammo={Math.max(0, saved + run.fireballs - thrown)}
+              lives={fightLives}
+              paused={!fightOn}
+              hero={runner[0]}
+              pet={pet}
+              onThrow={() => setThrown((t) => t + 1)}
+              onHurt={() => setBurns((b) => b + 1)}
+              onOutOfFire={() => setOutOfFire(true)}
+              onWon={(t) => {
+                setThrown(t);
+                setDragonDown(true);
+              }}
+            />
+            {outOfFire && (
+              <div className={css.fightBrief}>
+                <div className={css.outOfFire}>
+                  <strong className={css.outTitle}>Out of fireballs!</strong>
+                  <p className={css.outSay}>
+                    The dragon is still standing and you have nothing left to throw. Every card you get right is another fireball - so you can
+                    make more here, or go back and stock up on the levels you have already beaten.
+                  </p>
+                  <div className={css.outButtons}>
+                    <button
+                      type="button"
+                      className="kbtn small-btn"
+                      onClick={() => {
+                        setOutOfFire(false);
+                        setReloading(true);
+                      }}
+                    >
+                      Answer more cards here
+                    </button>
+                    <button type="button" className="kbtn ghost small-btn" onClick={() => setGaveUp(true)}>
+                      Go back and collect more
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {!fightOn && !outOfFire && (
+              <div className={css.fightBrief}>
+                {fightCount === null ? (
+                  <TeacherBrief
+                    teacher={coach}
+                    directions={`The dragon has your pet and will not hand them over. Every card you got right is a fireball: you have ${Math.max(0, saved + run.fireballs - thrown)}. Space throws one. Arrows walk you about, Up jumps, Down ducks - it breathes fire back. ${DRAGON_HITS[pace]} hits and it is done.`}
+                    rule={level.title}
+                    levelId={level.id}
+                    board={0}
+                    seed={seed}
+                    canAsk={canAsk}
+                    showDirections={false}
+                    extra={<FightKeys />}
+                    stage="brief"
+                    onReady={() => {
+                      speak("fight-count", "Three. Two. One. Go!", { kind: coachLook.voice });
+                      setFightCount(3);
+                    }}
+                    onAsking={setAsking}
+                  />
+                ) : (
+                  <div className={css.fightCount} role="status" aria-live="assertive">
+                    <strong>{fightCount}</strong>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {ready && card && (!level.dungeon || !run.atDragon || reloading) && (
           <>
             <div className={css.cardRow}>
               <strong className={css.card}>{card.text}</strong>
               <span className={css.equals}>=</span>
-              <output
-                className={`${css.slot} ${beat?.kind === "trip" ? css.slotBad : ""}`}
-                aria-live="polite"
-              >
+              <output className={`${css.slot} ${beat?.kind === "trip" ? css.slotBad : ""}`} aria-live="polite">
                 {typed || "?"}
               </output>
             </div>
-            <p className={`${css.teach} ${beat?.show ? css.teachOn : ""}`}>
-              {beat?.show ?? " "}
-            </p>
+            <p className={`${css.teach} ${beat?.show ? css.teachOn : ""}`}>{beat?.show ?? " "}</p>
             {reloading ? (
-              <p className={css.owed}>
-                Out of fire! Every card you get right is another fireball for
-                the dragon.
-              </p>
+              <p className={css.owed}>Out of fire! Every card you get right is another fireball for the dragon.</p>
             ) : (
-              <p className={css.hint}>
-                Type the answer and press Enter or the space bar - quicker than
-                tapping.
-              </p>
+              <p className={css.hint}>Type the answer and press Enter or the space bar - quicker than tapping.</p>
             )}
 
             <div className={css.pad}>
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  className={`kbtn ${css.key}`}
-                  onClick={() => type((t) => t + n)}
-                >
+                <button key={n} type="button" className={`kbtn ${css.key}`} onClick={() => type((t) => t + n)}>
                   {n}
                 </button>
               ))}
-              <button
-                type="button"
-                className={`kbtn ghost ${css.key}`}
-                onClick={() => type((t) => t.slice(0, -1))}
-                aria-label="Rub out"
-              >
+              <button type="button" className={`kbtn ghost ${css.key}`} onClick={() => type((t) => t.slice(0, -1))} aria-label="Rub out">
                 ⌫
               </button>
-              <button
-                type="button"
-                className={`kbtn ${css.key}`}
-                onClick={() => type((t) => t + "0")}
-              >
+              <button type="button" className={`kbtn ${css.key}`} onClick={() => type((t) => t + "0")}>
                 0
               </button>
-              <button
-                type="button"
-                className={`kbtn ${css.key} ${css.go}`}
-                onClick={() =>
-                  typedRef.current.length && answer(Number(typedRef.current))
-                }
-                disabled={!typed.length}
-                aria-label="Answer"
-              >
+              <button type="button" className={`kbtn ${css.key} ${css.go}`} onClick={() => typedRef.current.length && answer(Number(typedRef.current))} disabled={!typed.length} aria-label="Answer">
                 Go
               </button>
             </div>

@@ -21,6 +21,17 @@ import { seededRng, shuffle, type Rng } from "../curriculum/math";
  * walks it again - so the only way to a three-star run is to have answered.
  */
 
+/**
+ * Stars needed before a kid moves on.
+ *
+ * Running ahead of facts you do not know is the one thing this game exists to
+ * prevent, so one star is not enough: the level is there to be gone back to.
+ * The same number opens the next level in the list and puts the "next level"
+ * button on the end of a run, so a kid is never offered a door the list has
+ * locked.
+ */
+export const MOVE_ON_STARS = 2;
+
 export const factRushInfo = {
   id: "factrush",
   title: "XP Rush: Facts",
@@ -28,9 +39,7 @@ export const factRushInfo = {
   land: "math" as const,
   subject: "math" as const,
   grades: [0, 1, 2, 3, 4, 5],
-  // Drill: three stars before the next family opens. Running ahead of facts
-  // you do not know is the one thing this game exists to prevent.
-  unlockAt: 3,
+  unlockAt: MOVE_ON_STARS,
   ownIntro: true,
   blurb: "Your pet is caged at the end of the level. Answer the cards to run to them - and the faster you answer, the faster you run.",
 };

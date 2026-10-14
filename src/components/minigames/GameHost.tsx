@@ -64,6 +64,8 @@ export default function GameHost({
   if (playing) {
     const idx = levels.findIndex((l) => l.id === playing);
     const next = levels[idx + 1];
+    // The same rule the level list uses, so the button and the lock agree.
+    const nextOpen = !!next && (idx + 1 <= openTo || (stars[playing]?.stars ?? 0) >= unlockAt);
     return (
       <div className="game-host">
         <div className="btnrow">
@@ -73,7 +75,7 @@ export default function GameHost({
           <button className="kbtn ghost small-btn" onClick={() => setRound((r) => r + 1)}>
             ↺ Play again
           </button>
-          {next && (stars[playing]?.stars ?? 0) > 0 && (
+          {nextOpen && (
             <button className="kbtn small-btn" onClick={() => setPlaying(next.id)}>
               Next level ▶
             </button>
@@ -82,7 +84,7 @@ export default function GameHost({
         {!gameById(game)?.ownIntro && <p className="game-intro">{levels[idx]?.intro}</p>}
         {GAME_UI[game] && (() => {
           const Screen = GAME_UI[game];
-          return <Screen key={`${playing}-${round}`} levelId={playing} stars={stars[playing]?.stars ?? 0} plays={stars[playing]?.plays ?? 0} pet={pet} hero={hero} coins={purse} mastered={!!stars[playing]?.mastered} canAsk={canAsk} onReplay={() => setRound((r) => r + 1)} onQuit={() => setPlaying(null)} onFinish={(m) => finish(playing, m)} />;
+          return <Screen key={`${playing}-${round}`} levelId={playing} stars={stars[playing]?.stars ?? 0} plays={stars[playing]?.plays ?? 0} pet={pet} hero={hero} coins={purse} mastered={!!stars[playing]?.mastered} canAsk={canAsk} onReplay={() => setRound((r) => r + 1)} onQuit={() => setPlaying(null)} onNext={next ? () => setPlaying(next.id) : undefined} onFinish={(m) => finish(playing, m)} />;
         })()}
       </div>
     );
