@@ -15,6 +15,7 @@ import {
   cloudGrid,
   evidenceFor,
   factRush,
+  factRushInfo,
   type Pace,
   CHASE_FROM,
   CREEP,
@@ -778,5 +779,21 @@ describe("the hunter", () => {
     const seed = 6;
     const r = play(level, { seed, pace: "hard", answers: clean(TOKEN_EVERY) });
     expect(r.big || r.caught > 0).toBe(true);
+  });
+});
+
+describe("what the directions tell a kid to do", () => {
+  it("never says the pet is the one running", () => {
+    // The pet was the runner before it went in the cage, and the directions
+    // went on saying so for a while after. They describe the game as it is.
+    for (const l of ALL_FACT_LEVELS) {
+      expect(l.intro, `${l.id}: "${l.intro}"`).not.toMatch(/pet runs|your pet run/i);
+    }
+    expect(factRushInfo.blurb).not.toMatch(/pet runs|your pet run/i);
+  });
+
+  it("tells them what answering a card actually does", () => {
+    const running = ALL_FACT_LEVELS.filter((l) => /run|get to your pet|towards your pet/i.test(l.intro));
+    expect(running.length, "no level explains that answering is what moves you").toBeGreaterThan(40);
   });
 });

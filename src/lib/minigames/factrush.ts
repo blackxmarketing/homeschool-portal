@@ -6,10 +6,11 @@ import { seededRng, shuffle, type Rng } from "../curriculum/math";
  * XP Rush: Facts. Flash cards as a race.
  *
  * One level is one fact family - the 1s, the 2s, up to the 12s - for one
- * operation, and the coins after them. The kid answers; their pet runs. A
- * right answer is a post gone by, and a quick one is a sprint. A wrong answer
- * stops them where they stand, shows the answer, and puts that card back in
- * the pile to come round again.
+ * operation, and the coins after them. Their pet is in a cage at the far end
+ * and they run to it; the cards are what move them. A right answer is a block
+ * gone by, and a quick one is a sprint. A wrong answer stops them where they
+ * stand, shows the answer, and puts that card back in the pile to come round
+ * again.
  *
  * The level is over when every card in the family has been answered right
  * twice, which is why a kid who knows the 2s is through in a minute and a kid
@@ -172,12 +173,12 @@ const opLevel = (op: Op, n: number, grade: number, skill: string): FactLevel => 
   title: `${OP_WORD[op]} ${n}${op === "/" ? "s" : "s"}`,
   intro:
     op === "+"
-      ? `Skill: adding ${n} to every number up to twelve. Answer the card and your pet runs. Get it wrong and you stop where you are - and that card comes back round.`
+      ? `Skill: adding ${n} to every number up to twelve. Answer the card to run on towards your pet - and the quicker you answer, the quicker you get there. Get it wrong and you stop where you are, and that card comes back round.`
       : op === "-"
-        ? `Skill: taking ${n} away. Every card here undoes one of the adding ${n}s, which is why they are worth learning side by side.`
+        ? `Skill: taking ${n} away. Every card here undoes one of the adding ${n}s, which is why they are worth learning side by side. Answer them to run on towards your pet.`
         : op === "x"
-          ? `Skill: the ${n} times table, by heart. The quicker you know it, the quicker your pet runs.`
-          : `Skill: sharing into ${n}s - the ${n} times table backwards. If you know ${n} times four is ${n * 4}, you already know this one.`,
+          ? `Skill: the ${n} times table, by heart. The quicker you know it, the quicker you get to your pet.`
+          : `Skill: sharing into ${n}s - the ${n} times table backwards. If you know ${n} times four is ${n * 4}, you already know this one. Answer them to run on towards your pet.`,
   grade,
   skill,
   cards: familyFacts(op, n),
