@@ -164,6 +164,25 @@ describe("the levels", () => {
     expect(styles.has("mixed")).toBe(true);
   });
 
+  it("starts small and works up, round by round and rung by rung", () => {
+    // How far a board reaches: the biggest number in play, plus what the rule
+    // asks about. It is a rough measure and it is meant to be - the point is
+    // that a level never goes backwards, and that the first rung asks about
+    // single digits rather than opening with "less than fifteen".
+    const reach = (spec: { hi: number; rule: { target: number; of?: number } }) =>
+      Math.max(spec.hi, Math.abs(spec.rule.target), Math.abs(spec.rule.of ?? 0)) + Math.abs(spec.rule.target);
+    for (const l of ALL_CHOMPER_LEVELS) {
+      const r = l.boards.map(reach);
+      for (let i = 1; i < r.length; i++) {
+        expect(r[i], `${l.id} board ${i + 1} is easier than the one before it: ${r.map(Math.round).join(" -> ")}`).toBeGreaterThanOrEqual(r[i - 1]);
+      }
+    }
+    // The ladder itself climbs by grade, which the ordering test covers; the
+    // first rung is the one that has to be gentle enough for a five-year-old.
+    const first = ALL_CHOMPER_LEVELS[0];
+    for (const spec of first.boards) expect(Math.abs(spec.rule.target), `${first.id} asks about a big number`).toBeLessThanOrEqual(10);
+  });
+
   it("has unique ids, three boards a level, and an intro that says the skill", () => {
     const ids = ALL_CHOMPER_LEVELS.map((l) => l.id);
     expect(new Set(ids).size).toBe(ids.length);

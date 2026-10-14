@@ -991,34 +991,39 @@ const lvl = (grade: number, id: string, title: string, skill: string, intro: str
 export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
   0: [
     lvl(0, "k-1", "Count the Dots", "math-k.how-many", "Skill: counting a group and matching it to its number. The dots sit in a ten frame, so a full row is five and a full frame is ten.", [
-      board("greater", 11, "dots", 1, 24),
-      board("less", 11, "dots", 1, 22),
-      board("greater", 14, "dots", 1, 26),
+      board("less", 6, "dots", 1, 20),
+      board("less", 8, "dots", 1, 22),
+      board("less", 10, "dots", 1, 24),
     ]),
-    lvl(0, "k-2", "More or Fewer", "math-k.compare", "Skill: saying which of two numbers is more. Count the dots, read the numbers, and eat the ones that fit.", [
-      board("less", 10, "dots", 1, 22),
+    lvl(0, "k-2", "More or Fewer", "math-k.compare", "Skill: saying which of two numbers is more. Count the dots, read the numbers, and eat every one that is bigger than the number at the top.", [
+      board("greater", 10, "dots", 1, 22),
       board("greater", 12, "dots", 1, 24),
-      board("less", 13, "dots", 1, 26),
+      board("greater", 14, "dots", 1, 26),
     ]),
   ],
   1: [
     lvl(1, "g1-1", "Even and Odd", "math-2.skip-odd-even", "Skill: even and odd. An even number shares into two equal piles; an odd one always has one left over.", [
       board("even", 0, "plain", 1, 40),
-      board("odd", 0, "plain", 1, 40),
+      board("odd", 0, "plain", 1, 50),
       board("even", 0, "plain", 1, 99),
     ]),
-    lvl(1, "g1-2", "Add and Take Away", "math-1.add20", "Skill: adding and subtracting within 20. Work out each one, then eat the ones that match the number at the top.", [
-      board("equals", 12, "fact", 1, 20),
-      board("equals", 15, "fact", 1, 20),
-      board("equals", 18, "fact", 1, 20),
+    lvl(1, "g1-2", "Add and Take Away", "math-1.add20", "Skill: adding and taking away within ten. Work each one out, then eat the ones that come to the number at the top.", [
+      board("equals", 5, "fact", 1, 20),
+      board("equals", 7, "fact", 1, 20),
+      board("equals", 10, "fact", 1, 20),
     ]),
     lvl(1, "g1-3", "Coin Counting", "math-2.time-money", "Skill: adding coins up. The big one with a cross is a quarter (25), the one with a bar is a nickel (5), the little plain one is a dime (10), and the copper one is a penny (1).", [
-      board("greater", 25, "coins", 1, 60),
       board("less", 20, "coins", 1, 50),
+      board("greater", 25, "coins", 1, 60),
       board("greater", 40, "coins", 1, 80),
     ]),
   ],
   2: [
+    lvl(2, "g2-0", "Facts to Twenty", "math-2.facts-20", "Skill: adding and taking away within twenty. Same game, bigger numbers - and the ones that cross ten are the ones worth knowing.", [
+      board("equals", 12, "fact", 1, 24),
+      board("equals", 15, "fact", 1, 28),
+      board("equals", 18, "fact", 1, 32),
+    ]),
     lvl(2, "g2-1", "Skip Counting", "math-2.skip-odd-even", "Skill: counting by 2s, 5s and 10s. Every number you land on while skip counting is a multiple.", [
       board("multiples", 2, "plain", 1, 60),
       board("multiples", 5, "plain", 1, 100),
@@ -1030,16 +1035,16 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("digitIs", 3, "plain", 100, 999, { of: 100 }),
     ]),
     lvl(2, "g2-3", "Fill the Purse", "math-2.time-money", "Skill: adding coins and comparing the totals. Quarter is the big one with a cross, nickel has a bar, the little plain one is a dime, copper is a penny - and five coins can be worth less than two.", [
+      board("greater", 35, "coins", 1, 90),
       board("less", 50, "coins", 1, 95),
       board("greater", 60, "coins", 1, 99),
-      board("greater", 35, "coins", 1, 99),
     ]),
   ],
   3: [
     lvl(3, "g3-1", "Times Table Trail", "g3.mult-facts", "Skill: knowing your times tables by heart. Every square is a multiplication to work out. Eat the ones worth the number at the top.", [
-      board("equals", 24, "fact", 2, 60),
-      board("equals", 36, "fact", 2, 72),
-      board("equals", 42, "fact", 2, 84),
+      board("equals", 12, "fact", 2, 48),
+      board("equals", 18, "fact", 2, 60),
+      board("equals", 24, "fact", 2, 72),
     ]),
     lvl(3, "g3-2", "Multiple Marsh", "g3.mult-facts", "Skill: spotting multiples. A multiple of 4 is a number you land on when you count by 4s: 4, 8, 12, 16...", [
       board("multiples", 3, "plain", 2, 40),
@@ -1047,8 +1052,8 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("multiples", 6, "plain", 3, 72),
     ]),
     lvl(3, "g3-3", "Division Dell", "g3.div-facts", "Skill: division facts. Work out each sharing problem, then eat the ones that come to the number at the top.", [
-      board("equals", 6, "fact", 2, 30),
-      board("equals", 8, "fact", 2, 40),
+      board("equals", 4, "fact", 2, 30),
+      board("equals", 6, "fact", 2, 36),
       board("equals", 9, "fact", 2, 45),
     ]),
     lvl(3, "g3-5", "Fraction Fields", "g3.equiv-fractions", "Skill: equal fractions. 1/2 and 2/4 are the same amount of pie, just cut into different numbers of slices.", [
@@ -1057,26 +1062,26 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("equivalent", 1 / 3, "fraction", 2, 24, { frac: { n: 1, d: 3 } }),
     ]),
     lvl(3, "g3-4", "More or Less", "g3.add-sub-1000", "Skill: adding, subtracting and comparing. Work out each sum first, then decide whether it is small enough to eat.", [
-      board("less", 50, "fact", 10, 99),
-      board("greater", 120, "fact", 60, 200),
-      board("less", 300, "fact", 150, 480),
+      board("less", 20, "fact", 1, 60),
+      board("greater", 50, "fact", 10, 120),
+      board("less", 100, "fact", 40, 220),
     ]),
   ],
   4: [
     lvl(4, "g4-5", "Three Ways to Say It", "g4.decimal-fractions", "Skill: the same number written as a fraction, a decimal and a percent. 3/4, 0.75 and 75% are all the same amount.", [
       board("equivalent", 0.5, "mixed", 2, 20, { frac: { n: 1, d: 2 } }),
-      board("equivalent", 0.75, "mixed", 2, 24, { frac: { n: 3, d: 4 } }),
-      board("equivalent", 0.2, "mixed", 2, 20, { frac: { n: 1, d: 5 } }),
+      board("equivalent", 0.2, "mixed", 2, 24, { frac: { n: 1, d: 5 } }),
+      board("equivalent", 0.75, "mixed", 2, 28, { frac: { n: 3, d: 4 } }),
     ]),
     lvl(4, "g4-6", "Bigger or Smaller Than a Half", "g4.compare-fractions", "Skill: comparing fractions, decimals and percents. If the top is more than half the bottom, the fraction is more than a half.", [
-      board("greater", 0.5, "mixed", 2, 16, { show: "1/2" }),
+      board("greater", 0.5, "mixed", 2, 14, { show: "1/2" }),
       board("less", 0.25, "mixed", 2, 16, { show: "1/4" }),
-      board("greater", 1, "fraction", 2, 16),
+      board("greater", 1, "fraction", 2, 18),
     ]),
     lvl(4, "g4-1", "Factor Forest", "g4.factors-primes", "Skill: finding factors. A factor divides the number at the top with nothing left over. 6 is a factor of 24 because 24 ÷ 6 = 4.", [
-      board("factors", 24, "plain", 1, 30),
-      board("factors", 36, "plain", 1, 40),
-      board("factors", 48, "plain", 1, 50),
+      board("factors", 12, "plain", 1, 32),
+      board("factors", 24, "plain", 1, 36),
+      board("factors", 36, "plain", 1, 42),
     ]),
     lvl(4, "g4-2", "Prime Peaks", "g4.factors-primes", "Skill: prime numbers. A prime is bigger than 1 and can only be made by 1 times itself. Eat only the primes.", [
       board("primes", 0, "plain", 2, 40),
@@ -1089,9 +1094,9 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("composites", 0, "plain", 2, 120),
     ]),
     lvl(4, "g4-4", "Product Pass", "g4.mult-multidigit", "Skill: multiplying bigger numbers. Work out each product, then eat the ones that match the number at the top.", [
-      board("equals", 60, "fact", 10, 120),
-      board("equals", 84, "fact", 10, 170),
-      board("equals", 96, "fact", 10, 200),
+      board("equals", 36, "fact", 5, 90),
+      board("equals", 60, "fact", 10, 140),
+      board("equals", 84, "fact", 10, 180),
     ]),
   ],
   5: [
@@ -1111,9 +1116,9 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("simplest", 0, "fraction", 2, 20),
     ]),
     lvl(5, "g5-6", "Percent Pursuit", "g6.percent", "Skill: finding a percent of a number. To find 25% of 80, find 1% first - that is 80 ÷ 100 - then take 25 of them.", [
+      board("percentOf", 50, "fact", 1, 50, { of: 20 }),
       board("percentOf", 25, "fact", 1, 60, { of: 80 }),
       board("percentOf", 10, "fact", 1, 90, { of: 300 }),
-      board("percentOf", 50, "fact", 1, 90, { of: 90 }),
     ]),
     lvl(5, "g5-3", "Order of Operations", "g5.order-of-operations", "Skill: the order of operations. Multiply and divide before you add and subtract, so 4 + 2 × 8 is 20, not 48.", [
       board("equals", 20, "twostep", 5, 60),
@@ -1122,8 +1127,8 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
     ]),
     lvl(5, "g5-4", "Prime Hunt", "g4.factors-primes", "Skill: primes up to 100. The sneaky ones are 51, 57, 87 and 91 - they look prime but they are not.", [
       board("primes", 0, "plain", 2, 100),
+      board("primes", 0, "plain", 20, 130),
       board("composites", 0, "plain", 20, 160),
-      board("primes", 0, "plain", 20, 120),
     ]),
   ],
 };
@@ -1136,8 +1141,8 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
  */
 export const BAND_ONLY_LEVELS: ChomperLevel[] = [
   lvl(6, "b-integers", "Integer Island", "g7.integer-add-sub", "Skill: adding, subtracting and comparing numbers below zero. On the number line, -12 sits further left than -5, so it is the smaller one.", [
+    board("less", 0, "signed", -36, 36),
     board("greater", -5, "signed", -40, 40),
-    board("less", 0, "signed", -40, 40),
     board("equals", -12, "signed", -60, 60),
   ]),
   lvl(6, "b-ratios", "Ratio Road", "g6.ratios", "Skill: equal ratios. 3:4 and 6:8 are the same mix - double both sides and nothing changes.", [
@@ -1151,8 +1156,8 @@ export const BAND_ONLY_LEVELS: ChomperLevel[] = [
     board("less", 100, "power", 4, 1000),
   ]),
   lvl(6, "b-common", "Common Ground", "g6.gcf-lcm", "Skill: common multiples and common factors. A number has to work for both, not just one of them.", [
-    board("commonMultiples", 4, "plain", 1, 130, { of: 6 }),
     board("commonFactors", 48, "plain", 1, 50, { of: 72 }),
+    board("commonMultiples", 4, "plain", 1, 130, { of: 6 }),
     board("commonMultiples", 6, "plain", 1, 250, { of: 8 }),
   ]),
   lvl(7, "b-xmarks", "X Marks the Spot", "g6.evaluate-expressions", "Skill: working out an expression once you know what x is. Put the number where the x is, then do the sum.", [
@@ -1161,9 +1166,9 @@ export const BAND_ONLY_LEVELS: ChomperLevel[] = [
     board("evaluates", 36, "variable", 1, 90, { of: 6 }),
   ]),
   lvl(7, "b-percent", "Percent Problems", "g7.percent-problems", "Skill: percents of harder numbers. 15% is 10% plus half of it again, which beats reaching for a calculator.", [
+    board("percentOf", 12.5, "fact", 1, 100, { of: 64 }),
     board("percentOf", 15, "fact", 1, 120, { of: 240 }),
     board("percentOf", 80, "fact", 1, 200, { of: 45 }),
-    board("percentOf", 12.5, "fact", 1, 100, { of: 64 }),
   ]),
 ];
 
