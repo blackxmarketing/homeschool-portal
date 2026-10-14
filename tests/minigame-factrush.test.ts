@@ -911,3 +911,54 @@ describe("three wrong cards", () => {
     expect(r.finished).toBe(false);
   });
 });
+
+describe("one pile, not two", () => {
+  const level = levelById("fr-a1")!;
+
+  /** Play by always answering whatever card the run says is in front of them. */
+  const playAlong = (seed: number, pace: Pace, plan: ("right" | "wrong")[]) => {
+    const answers: { a: number | null; ms: number }[] = [];
+    for (const step of plan) {
+      const r = play(level, { seed, pace, answers }, 0);
+      if (r.head === null || r.over) break;
+      const want = level.cards[r.head].answer;
+      answers.push({ a: step === "right" ? want : want + 1, ms: 700 });
+    }
+    return { answers, run: play(level, { seed, pace, answers }, 0) };
+  };
+
+  it("counts an answer to the card it says is showing, before and after a death", () => {
+    // Three right, three wrong (a death), then five right.
+    const plan: ("right" | "wrong")[] = [
+      ...Array(3).fill("right"),
+      ...Array(3).fill("wrong"),
+      ...Array(5).fill("right"),
+    ];
+    const { run } = playAlong(7, "easy", plan);
+    // The three misses cost a life and sent them back; the five after it all
+    // counted, which is what the screen and the server have to agree on.
+    expect(run.lives).toBe(LIVES - 1);
+    expect(run.wrong, "an answer to the showing card was counted wrong").toBe(3);
+    expect(run.at, "they did not move after dying").toBeGreaterThan(0);
+    expect(Math.round(run.at * postsOn(level))).toBe(5);
+  });
+
+  it("always has a card to show until the pile is empty", () => {
+    const { run, answers } = playAlong(3, "easy", Array(200).fill("right"));
+    expect(run.finished).toBe(true);
+    expect(run.head, "a finished run should have no card showing").toBeNull();
+    expect(run.inPile).toBe(0);
+    // And it never ran out of cards early.
+    expect(answers.length).toBe(postsOn(level));
+  });
+
+  it("deals a fresh hand on a death rather than carrying the old one on", () => {
+    const before = playAlong(9, "easy", Array(5).fill("right")).run;
+    const after = playAlong(9, "easy", [...Array(5).fill("right"), ...Array(3).fill("wrong")]).run;
+    // Five right answers bank a go on five cards without finishing any of
+    // them, so the pile is still full - what matters is the ground made.
+    expect(before.at, "they should have made ground before dying").toBeGreaterThan(0);
+    expect(after.at, "a death should put them back on the start line").toBe(0);
+    expect(after.inPile, "a death should deal them a whole new hand").toBe(level.cards.length);
+  });
+});

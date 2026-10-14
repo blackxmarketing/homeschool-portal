@@ -441,6 +441,19 @@ export interface Run {
    * never goes past the cage - the level is over the moment it reaches 1.
    */
   at: number;
+  /**
+   * The card in front of them now, as an index into the level's cards, or
+   * null when there are none left.
+   *
+   * The screen reads the card from here rather than keeping a pile of its
+   * own. It used to keep one, and the two came apart the moment a kid died:
+   * this one deals a fresh hand, that one carried on, and from then on the
+   * card a kid was looking at was not the card their answer was judged
+   * against.
+   */
+  head: number | null;
+  /** Cards still in the pile, for knowing when the level is done. */
+  inPile: number;
   /** How far back the thing chasing them is, or null when nothing is. */
   chase: number | null;
   /** How many times it has had them. */
@@ -612,7 +625,27 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
   const owed = Math.max(0, price - purse());
   const finished = pile.length === 0 && !over && owed === 0;
   if (finished) points += FINISH_BONUS;
-  return { posts, wrong, points, finished, lives: Math.max(0, lives), strikes, big, over, chase, caught, coins, owed, paying, justCaught, justDied, pace, at: finished ? 1 : at };
+  return {
+    posts,
+    wrong,
+    points,
+    finished,
+    lives: Math.max(0, lives),
+    strikes,
+    big,
+    over,
+    head: pile[0]?.i ?? null,
+    inPile: pile.length,
+    chase,
+    caught,
+    coins,
+    owed,
+    paying,
+    justCaught,
+    justDied,
+    pace,
+    at: finished ? 1 : at,
+  };
 }
 
 /** The best a level can be worth: every card right twice, every one a sprint. */

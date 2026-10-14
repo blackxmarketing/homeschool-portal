@@ -68,6 +68,16 @@ const HOLE = holeGrid();
 const BLOCK = 86;
 /** How far from the left edge the camera keeps the runner. */
 const CAMERA_AT = 0.3;
+/**
+ * The closest the hunter is drawn while it has not got them yet, as a
+ * percentage across the scene.
+ *
+ * It used to run all the way up to the runner's own mark, so at a gap of one
+ * or two blocks the two sprites overlapped and it looked as though it was
+ * standing on them for several cards before anything happened. It stops short
+ * now, and only the catch itself closes the last of it.
+ */
+const CHASE_NEAR = 21;
 
 const HAZARD_ART: Record<Hazard, ReturnType<typeof holeGrid>> = { hole: HOLE, river: RIVER, mountain: MOUNTAIN };
 
@@ -115,7 +125,6 @@ function FactRush({
   const [asking, setAsking] = useState(false);
   const [example, setExample] = useState<ReturnType<typeof workedCard> | null>(null);
 
-  const [pile, setPile] = useState<Seat[]>(() => openingPile(level, seed));
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [typed, setTyped] = useState("");
   /** What just happened, for the hero to react to. */
@@ -139,16 +148,17 @@ function FactRush({
   const lastGrowl = useRef(0);
   const asked = useRef<number>(Date.now());
   const sent = useRef(false);
-  const live = useRef({ pile, answers });
-  live.current = { pile, answers };
+  /** The answers so far, where a key handler or a timer can read them. */
+  const live = useRef(answers);
+  live.current = answers;
 
   const posts = postsOn(level);
   /** Which block they are standing on: how far along, in blocks. */
   const standing = (at: number) => at * posts;
   /** The furthest back the hunter ever gets, which is where it enters. */
   const maxGap = CHASE_FROM[pace] + (pace === "hard" ? 3 : 0);
-  const card = pile[0] ? level.cards[pile[0].i] : null;
   const run = useMemo(() => play(level, { seed, answers, pace }, saved), [level, seed, answers, pace, saved]);
+  const card = run.head === null ? null : level.cards[run.head];
   /**
    * Where it has got to this instant.
    *
@@ -159,7 +169,7 @@ function FactRush({
   const gap =
     run.chase === null ? null : pace === "hard" ? run.chase - (CREEP_PER_SEC * Math.max(0, now - asked.current)) / 1000 : run.chase;
   // Out of cards, out of lives, or out of patience.
-  const done = pile.length === 0 || run.over || answers.length >= MAX_ASKS;
+  const done = run.inPile === 0 || run.over || answers.length >= MAX_ASKS;
 
   /**
    * The ref is what is typed; the state only draws it.
@@ -179,7 +189,7 @@ function FactRush({
     asked.current = Date.now();
     typedRef.current = "";
     setTyped("");
-  }, [pile]);
+  }, [run.head, answers.length]);
 
   /** Three, two, one, in the coach's voice - same as the other XP Rush. */
   useEffect(() => {
@@ -196,17 +206,15 @@ function FactRush({
 
   const answer = useCallback(
     (value: number) => {
-      const { pile: cur, answers: got } = live.current;
-      const head = cur[0];
-      if (!head || got.length >= MAX_ASKS) return;
+      const got = live.current;
+      const showing = play(level, { seed, answers: got, pace }, saved).head;
+      if (showing === null || got.length >= MAX_ASKS) return;
       const ms = Date.now() - asked.current;
-      const right = level.cards[head.i].answer === value;
-      const next = afterAnswer(cur, right, needOf(level));
-      live.current = { pile: next, answers: [...got, { a: value, ms }] };
+      const right = level.cards[showing].answer === value;
+      live.current = [...got, { a: value, ms }];
       setAnswers((xs) => [...xs, { a: value, ms }]);
-      setPile(next);
       // What the answer was worth, and then what the monster made of it.
-      const after = play(level, { seed, answers: [...got, { a: value, ms }], pace }, saved);
+      const after = play(level, { seed, answers: live.current, pace }, saved);
       if (after.justDied) {
         // Three wrong cards, or the hunter had them: either way a life is
         // gone and they go back to the start of the level.
@@ -224,7 +232,7 @@ function FactRush({
         setBeat({ kind: paceOf(ms) });
       } else {
         chime("oops");
-        setBeat({ kind: "trip", show: `${level.cards[head.i].text} = ${level.cards[head.i].answer}` });
+        setBeat({ kind: "trip", show: `${level.cards[showing].text} = ${level.cards[showing].answer}` });
       }
       // A step of something large, somewhere behind them: when it arrives,
       // and whenever it has gained ground. On hard the ticker growls as well,
@@ -281,7 +289,7 @@ function FactRush({
     const id = setInterval(() => {
       const t = Date.now();
       setNow(t);
-      if (live.current.pile.length === 0) return;
+      if (run.inPile === 0) return;
       const since = t - asked.current;
       const where = run.chase === null ? null : run.chase - (CREEP_PER_SEC * since) / 1000;
       if (where === null) return;
@@ -294,8 +302,7 @@ function FactRush({
         // It got them while they were thinking. Time passed; no card was
         // answered; the run works out the rest.
         const ms = since;
-        const { pile: cur, answers: got } = live.current;
-        live.current = { pile: cur, answers: [...got, { a: null, ms }] };
+        live.current = [...live.current, { a: null, ms }];
         setAnswers((xs) => [...xs, { a: null, ms }]);
         asked.current = Date.now();
         chime("caught");
@@ -544,7 +551,7 @@ function FactRush({
           {gap !== null && (
             <span
               className={`${css.beast} ${gap <= 2 ? css.close : ""}`}
-              style={{ left: `${CAMERA_AT * 100 * (1 - Math.min(1, Math.max(0, gap / maxGap)))}%` }}
+              style={{ left: `${CHASE_NEAR * (1 - Math.min(1, Math.max(0, gap / maxGap)))}%` }}
             >
               <PixelSprite grid={BEAST[Math.floor(now / 260) % 2]} scale={5} />
             </span>
