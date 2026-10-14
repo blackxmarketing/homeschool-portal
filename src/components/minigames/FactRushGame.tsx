@@ -315,6 +315,16 @@ function FactRush({
   /** Fireballs thrown at the dragon, and whether it went down. */
   const [thrown, setThrown] = useState(0);
   const [dragonDown, setDragonDown] = useState(false);
+  /**
+   * The walk at the end of a dungeon.
+   *
+   * The dragon goes down where it stood, a little short of the cage, so the
+   * last thing a kid sees is their character walking the rest of the way and
+   * letting their pet out - not the pet appearing beside them.
+   */
+  const [atCage, setAtCage] = useState(false);
+  /** True while those steps are being taken, so their legs move. */
+  const [walking, setWalking] = useState(false);
   /** True while they are back on the cards because they ran out of fire. */
   const [reloading, setReloading] = useState(false);
   /** The dragon is still up and they have nothing left to throw at it. */
@@ -404,8 +414,23 @@ function FactRush({
    * stop to make more fire, and the level comes straight back with them
    * standing in it.
    */
-  const fighting = ready && level.dungeon && run.atDragon && !dragonDown && !reloading;
+  const fighting = ready && level.dungeon && run.atDragon && !dragonDown;
   const card = run.head === null ? null : level.cards[run.head];
+  /**
+   * The cage is open and the pet is out.
+   *
+   * On an ordinary level that is the moment they arrive. In a dungeon the
+   * dragon has to go down first, and then they still have the last few steps
+   * to walk - the cage stays shut until they are standing at it.
+   */
+  const freed = level.dungeon ? atCage : run.finished;
+  /**
+   * Those last few steps, once the dragon is down.
+   *
+   * Up to the cage and no further: they stop a shoulder short of it rather
+   * than standing in it.
+   */
+  const walkIn = atCage ? Math.max(0, SHORT - (run.big ? 112 : 80) - 12) : 0;
   /**
    * Where it has got to this instant.
    *
@@ -593,6 +618,20 @@ function FactRush({
     return () => clearTimeout(t);
   }, [fightCount]);
 
+  // Down it goes: the cage is open, and they have a few steps to make.
+  useEffect(() => {
+    if (!dragonDown) return;
+    const off = setTimeout(() => {
+      setAtCage(true);
+      setWalking(true);
+    }, 650);
+    const there = setTimeout(() => setWalking(false), 2000);
+    return () => {
+      clearTimeout(off);
+      clearTimeout(there);
+    };
+  }, [dragonDown]);
+
   // Enough fire to go back at it.
   useEffect(() => {
     if (reloading && saved + run.fireballs - thrown > 0) {
@@ -651,7 +690,7 @@ function FactRush({
   }
 
   const at = posts > 0 ? Math.min(1, run.posts / posts) : 0;
-  const stepping = beat && beat.kind !== "trip" && beat.kind !== "grabbed" && beat.kind !== "died";
+  const stepping = (beat && beat.kind !== "trip" && beat.kind !== "grabbed" && beat.kind !== "died") || walking;
 
   return (
     <TeacherVoice kind={coachLook.voice}>
@@ -742,7 +781,7 @@ function FactRush({
             className={`${css.world} ${shot === "cage" ? css.sweeping : ""}`}
             style={{
               width: `${(posts + 3) * BLOCK}px`,
-              left: shot === "cage" ? `calc(66% - ${posts * BLOCK}px)` : `calc(${CAMERA_AT * 100}% - ${runnerX(run.at)}px)`,
+              left: shot === "cage" ? `calc(66% - ${posts * BLOCK}px)` : `calc(${CAMERA_AT * 100}% - ${runnerX(run.at) + walkIn}px)`,
               // On a level that climbs, the camera has to climb with it -
               // and during the opening shot it is looking at the cage, which
               // is at the top.
@@ -823,7 +862,7 @@ function FactRush({
             <span className={css.cage} style={{ left: `${posts * BLOCK}px`, bottom: `${(biome.rise ?? 0) * posts + 43}px` }}>
               {/* Open and empty at the end of it: the pet is out and standing
                   with them, a step from the cage they came out of. */}
-              <PixelSprite grid={cagedPetGrid(run.finished ? null : pet, run.finished)} scale={5} />
+              <PixelSprite grid={cagedPetGrid(freed ? null : pet, freed)} scale={5} />
             </span>
             {level.dungeon && !run.finished && (
               <span className={css.keeper} style={{ left: `${posts * BLOCK - 126}px`, bottom: `${(biome.rise ?? 0) * posts + 43}px` }}>
@@ -833,13 +872,13 @@ function FactRush({
             )}
 
             <span
-              className={`${css.runner} ${biome.swim ? css.swimming : ""} ${run.big ? css.grown : ""} ${beat?.kind === "trip" ? css.trip : ""} ${
+              className={`${css.runner} ${walking ? css.strolling : ""} ${biome.swim ? css.swimming : ""} ${run.big ? css.grown : ""} ${beat?.kind === "trip" ? css.trip : ""} ${
                 beat?.kind === "grabbed" ? css.grabbed : ""
               } ${beat?.kind === "died" ? css.died : ""} ${stepping ? css.step : ""} ${beat?.kind === "sprint" ? css.sprint : ""}`}
-              style={{ left: `${runnerX(run.at)}px`, bottom: `${(biome.rise ?? 0) * standing(run.at) + 43}px` }}
+              style={{ left: `${runnerX(run.at) + walkIn}px`, bottom: `${(biome.rise ?? 0) * standing(run.at) + 43}px` }}
             >
               <PixelSprite grid={runner[stepping ? 1 : 0]} scale={run.big ? 7 : 5} />
-              {run.finished && pet && <PixelSprite grid={pet} scale={4} className={css.atHeel} />}
+              {freed && pet && <PixelSprite grid={pet} scale={4} className={css.atHeel} />}
             </span>
           </div>
 
@@ -889,9 +928,9 @@ function FactRush({
           {result && (
             <div className={css.endOver}>
               {result.justMastered && <Fireworks big />}
-              <StarPop stars={result.stars} from={result.justMastered ? 2000 : 600} />
+              <StarPop stars={result.stars} from={(result.justMastered ? 2000 : 600) + (level.dungeon ? 1500 : 0)} />
               <EndChoices
-                from={(result.justMastered ? 2000 : 600) + result.stars * 650 + 200}
+                from={(result.justMastered ? 2000 : 600) + (level.dungeon ? 1500 : 0) + result.stars * 650 + 200}
                 canNext={result.stars >= MOVE_ON_STARS || earned >= MOVE_ON_STARS}
                 onNext={onNext}
                 onReplay={onReplay}
@@ -912,7 +951,8 @@ function FactRush({
               pace={pace}
               ammo={Math.max(0, saved + run.fireballs - thrown)}
               lives={fightLives}
-              paused={!fightOn}
+              paused={!fightOn || reloading}
+              reloading={reloading}
               hero={runner[0]}
               pet={pet}
               onThrow={() => setThrown((t) => t + 1)}
@@ -980,7 +1020,7 @@ function FactRush({
           </div>
         )}
 
-        {ready && card && !fighting && !done && (
+        {ready && card && (!fighting || reloading) && !done && (
           <>
             <div className={css.cardRow}>
               <strong className={css.card}>{card.text}</strong>

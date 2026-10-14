@@ -33,6 +33,8 @@ const JUMP_MS = 620;
 const DUCK_MS = 520;
 /** How far across the pit a throw travels every second. */
 const THROW_SPEED = 0.85;
+/** The least time between two throws, so one press is one fireball. */
+const THROW_GAP_MS = 260;
 
 type Shot = { id: number; x: number; y: number };
 
@@ -47,6 +49,7 @@ export default function DragonFight({
   ammo,
   lives,
   paused,
+  reloading,
   hero,
   pet,
   onThrow,
@@ -60,6 +63,8 @@ export default function DragonFight({
   lives: number;
   /** Held still while the coach explains it over the top. */
   paused: boolean;
+  /** They are back on the cards making more fire, with the dragon waiting. */
+  reloading?: boolean;
   hero: Grid;
   pet: Grid | null;
   /** Spend one. */
@@ -93,15 +98,39 @@ export default function DragonFight({
   const jumpUntil = useRef(0);
   const duckUntil = useRef(0);
   const lastBreath = useRef(0);
+  /**
+   * When they last threw.
+   *
+   * Holding the space bar repeats the key about thirty times a second, and
+   * every repeat was a fireball: a kid who leaned on it emptied a hundred
+   * of them into the wall in three seconds and was told they had run out.
+   * One throw per press, and no faster than this between presses.
+   */
+  const lastThrow = useRef(0);
   const invuln = useRef(0);
   /** Where they are, for the loop to read without re-subscribing each frame. */
   const meRef = useRef({ x: 0.14, jump: 0, duck: 0 });
+  /**
+   * What is in the air, held outside React.
+   *
+   * Everything that happens in a frame - a hit landing, a life going, the
+   * dragon falling - used to be worked out inside a setState updater, which
+   * React is free to run twice and which must not touch anything outside
+   * itself. It did both: hits were counted twice and the parent was updated
+   * mid-render. The frame now works it out here and hands React the answer.
+   */
+  const shotsRef = useRef<Shot[]>([]);
+  const flamesRef = useRef<Shot[]>([]);
+  const hpRef = useRef(need);
   const live = useRef({ ammo, hp: need, won: false });
   live.current = { ammo, hp, won: won || dying };
   meRef.current = me;
 
   const throwOne = useCallback(() => {
     if (live.current.won) return;
+    const now = Date.now();
+    if (now - lastThrow.current < THROW_GAP_MS) return;
+    lastThrow.current = now;
     if (live.current.ammo <= 0) {
       onOutOfFire();
       return;
@@ -109,7 +138,11 @@ export default function DragonFight({
     thrown.current++;
     onThrow();
     chime("right");
-    setShots((xs) => [...xs, { id: nextId.current++, x: 0.2, y: jumpUntil.current > Date.now() ? 0.42 : duckUntil.current > Date.now() ? 0.9 : 0.66 }]);
+    shotsRef.current = [
+      ...shotsRef.current,
+      { id: nextId.current++, x: 0.2, y: jumpUntil.current > Date.now() ? 0.42 : duckUntil.current > Date.now() ? 0.9 : 0.66 },
+    ];
+    setShots(shotsRef.current);
   }, [onThrow, onOutOfFire]);
 
   // Keys: the arrows move, up jumps, down ducks, space or enter throws.
@@ -121,7 +154,9 @@ export default function DragonFight({
       if (k === "ArrowLeft" || k === "ArrowRight") held.current[k] = true;
       else if (k === "ArrowUp" && jumpUntil.current < Date.now()) jumpUntil.current = Date.now() + JUMP_MS;
       else if (k === "ArrowDown") duckUntil.current = Date.now() + DUCK_MS;
-      else if (k === " " || k === "Enter") throwOne();
+      // Not on a repeat: a held key is one press, not thirty.
+      else if ((k === " " || k === "Enter") && !e.repeat) throwOne();
+      else if (k === " " || k === "Enter") e.preventDefault();
       else return;
       e.preventDefault();
     };
@@ -142,6 +177,8 @@ export default function DragonFight({
     const t = setTimeout(() => {
       setMe({ x: 0.14, jump: 0, duck: 0 });
       meRef.current = { x: 0.14, jump: 0, duck: 0 };
+      shotsRef.current = [];
+      flamesRef.current = [];
       setShots([]);
       setFlames([]);
       // The hits they had already landed stay landed: a careless moment costs
@@ -154,7 +191,7 @@ export default function DragonFight({
     return () => clearTimeout(t);
   }, [dying]);
 
-  // The fight itself.
+  // The fight itself: one frame, worked out in order, then handed to React.
   useEffect(() => {
     if (won || paused || dying) return;
     let raf = 0;
@@ -174,56 +211,66 @@ export default function DragonFight({
 
       // It: up and down, and in and out.
       const beat = DRAGON_PACE[pace];
-      setDragon({ x: 0.72 + Math.sin(t / 1000 * beat * 2.1) * 0.08, y: Math.sin(t / 1000 * beat * 3.3) * 0.26 });
+      const d = { x: 0.72 + Math.sin((t / 1000) * beat * 2.1) * 0.08, y: Math.sin((t / 1000) * beat * 3.3) * 0.26 };
+      setDragon(d);
 
-      // Their throws, travelling right.
-      setShots((xs) =>
-        xs
-          .map((f) => ({ ...f, x: f.x + THROW_SPEED * dt }))
-          .filter((f) => {
-            const d = { x: 0.72 + Math.sin(t / 1000 * beat * 2.1) * 0.08, y: Math.sin(t / 1000 * beat * 3.3) * 0.26 };
-            const onIt = Math.abs(f.x - d.x) < 0.1 && Math.abs(f.y - (0.6 + d.y)) < 0.22;
-            if (onIt) {
-              setHp((h) => {
-                const left = h - 1;
-                if (left <= 0 && !live.current.won) {
-                  setWon(true);
-                  chime("streak");
-                  onWon(thrown.current);
-                } else chime("oops");
-                return Math.max(0, left);
-              });
-              return false;
-            }
-            return f.x < 1.05;
-          }),
-      );
+      // Their throws, travelling right. A hit is counted once, here.
+      const flying: Shot[] = [];
+      let landed = 0;
+      for (const f of shotsRef.current) {
+        const x = f.x + THROW_SPEED * dt;
+        if (Math.abs(x - d.x) < 0.1 && Math.abs(f.y - (0.6 + d.y)) < 0.22) {
+          landed++;
+          continue;
+        }
+        if (x < 1.05) flying.push({ ...f, x });
+      }
+      if (landed > 0) {
+        const left = Math.max(0, hpRef.current - landed);
+        hpRef.current = left;
+        setHp(left);
+        if (left <= 0 && !live.current.won) {
+          live.current.won = true;
+          setWon(true);
+          chime("streak");
+          onWon(thrown.current);
+        } else {
+          chime("oops");
+        }
+      }
+      shotsRef.current = flying;
+      setShots(flying);
 
       // Its fire, travelling left at whatever height it is at.
       if (now - lastBreath.current > DRAGON_BREATH_MS[pace]) {
         lastBreath.current = now;
-        setFlames((fs) => [...fs, { id: nextId.current++, x: 0.7, y: 0.6 + Math.sin(t / 1000 * beat * 3.3) * 0.26 }]);
+        flamesRef.current = [...flamesRef.current, { id: nextId.current++, x: 0.7, y: 0.6 + Math.sin((t / 1000) * beat * 3.3) * 0.26 }];
         chime("growl");
       }
-      setFlames((fs) =>
-        fs
-          .map((f) => ({ ...f, x: f.x - (DRAGON_FIRE_SPEED[pace] / 420) * dt }))
-          .filter((f) => {
-            const mx = meRef.current.x;
-            const myLow = meRef.current.jump ? 0.3 : meRef.current.duck ? 0.86 : 0.58;
-            const myHigh = meRef.current.jump ? 0.52 : meRef.current.duck ? 0.98 : 0.98;
-            const onMe = Math.abs(f.x - mx) < 0.07 && f.y > myLow - 0.12 && f.y < myHigh;
-            if (onMe && now > invuln.current) {
-              invuln.current = now + 2600;
-              setHurtAt(now);
-              setDying(true);
-              chime("died");
-              onHurt();
-              return false;
-            }
-            return f.x > -0.1;
-          }),
-      );
+      const burning: Shot[] = [];
+      let caught = false;
+      for (const f of flamesRef.current) {
+        const x = f.x - (DRAGON_FIRE_SPEED[pace] / 420) * dt;
+        const mx = meRef.current.x;
+        const myLow = meRef.current.jump ? 0.3 : meRef.current.duck ? 0.86 : 0.58;
+        const myHigh = meRef.current.jump ? 0.52 : meRef.current.duck ? 0.98 : 0.98;
+        if (!caught && Math.abs(x - mx) < 0.07 && f.y > myLow - 0.12 && f.y < myHigh && now > invuln.current) {
+          caught = true;
+          continue;
+        }
+        if (x > -0.1) burning.push({ ...f, x });
+      }
+      flamesRef.current = burning;
+      setFlames(burning);
+      if (caught) {
+        // Burned: they go up in smoke and come back, and it costs a life -
+        // but never the hits they have already landed.
+        invuln.current = now + 2600;
+        setHurtAt(now);
+        setDying(true);
+        chime("died");
+        onHurt();
+      }
 
       raf = requestAnimationFrame(step);
     };
@@ -244,6 +291,7 @@ export default function DragonFight({
       <div className={css.floor} />
 
       {dying && <span className={css.lost}>Burned! A life gone - here we go again</span>}
+      {reloading && <span className={css.lost}>Out of fire! Answer below to make more.</span>}
 
       {!dying && (
       <span

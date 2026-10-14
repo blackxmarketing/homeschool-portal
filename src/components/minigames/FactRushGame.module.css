@@ -916,3 +916,9 @@
     animation: none;
   }
 }
+
+/* The last few steps to the cage, once the dragon is down: a walk, not the
+   hop they do between cards. */
+.strolling {
+  transition: left 1.25s steps(14) !important;
+}
