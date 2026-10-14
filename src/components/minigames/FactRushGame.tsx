@@ -325,6 +325,13 @@ function FactRush({
   const [atCage, setAtCage] = useState(false);
   /** True while those steps are being taken, so their legs move. */
   const [walking, setWalking] = useState(false);
+  /**
+   * The bolt drawn back.
+   *
+   * Not until they are standing at it: the dragon falls, their pet is still
+   * in there watching them come, and the cage only opens when they arrive.
+   */
+  const [opened, setOpened] = useState(false);
   /** True while they are back on the cards because they ran out of fire. */
   const [reloading, setReloading] = useState(false);
   /** The dragon is still up and they have nothing left to throw at it. */
@@ -423,7 +430,7 @@ function FactRush({
    * dragon has to go down first, and then they still have the last few steps
    * to walk - the cage stays shut until they are standing at it.
    */
-  const freed = level.dungeon ? atCage : run.finished;
+  const freed = level.dungeon ? opened : run.finished;
   /**
    * Those last few steps, once the dragon is down.
    *
@@ -628,16 +635,19 @@ function FactRush({
   // Down it goes: the cage is open, and they have a few steps to make.
   useEffect(() => {
     if (!dragonDown) return;
+    // A beat to see the dragon gone and their pet still caged, then the walk.
     const off = setTimeout(() => {
       setAtCage(true);
       setWalking(true);
-    }, 650);
-    // The bolt goes back and their pet is out.
-    const open = setTimeout(() => chime("streak"), 1900);
-    const there = setTimeout(() => setWalking(false), 2000);
+    }, 700);
+    // They arrive, the bolt goes back, and their pet comes out to them.
+    const there = setTimeout(() => {
+      setWalking(false);
+      setOpened(true);
+      chime("streak");
+    }, 2000);
     return () => {
       clearTimeout(off);
-      clearTimeout(open);
       clearTimeout(there);
     };
   }, [dragonDown]);
@@ -937,9 +947,9 @@ function FactRush({
           {result && run.finished && (
             <div className={css.endOver}>
               {result.justMastered && <Fireworks big />}
-              <StarPop stars={result.stars} from={(result.justMastered ? 2000 : 600) + (level.dungeon ? 1500 : 0)} />
+              <StarPop stars={result.stars} from={(result.justMastered ? 2000 : 600) + (level.dungeon ? 2100 : 0)} />
               <EndChoices
-                from={(result.justMastered ? 2000 : 600) + (level.dungeon ? 1500 : 0) + result.stars * 650 + 200}
+                from={(result.justMastered ? 2000 : 600) + (level.dungeon ? 2100 : 0) + result.stars * 650 + 200}
                 canNext={result.stars >= MOVE_ON_STARS || earned >= MOVE_ON_STARS}
                 onNext={onNext}
                 onReplay={onReplay}
