@@ -16,7 +16,9 @@ import {
   COINS,
   coinGrid,
   coinsGrid,
+  diceGrid,
   dotsGrid,
+  tallyGrid,
   grumbleGrid,
   levelById,
   startState,
@@ -53,7 +55,8 @@ function CellPicture({ art }: { art: CellArt }) {
   const key = `${art.kind}:${art.parts.join(",")}`;
   let grid = artCache.get(key);
   if (!grid) {
-    grid = art.kind === "dots" ? dotsGrid(art.parts[0]) : coinsGrid(art.parts);
+    grid =
+      art.kind === "dots" ? dotsGrid(art.parts[0]) : art.kind === "tally" ? tallyGrid(art.parts[0]) : art.kind === "dice" ? diceGrid(art.parts) : coinsGrid(art.parts);
     artCache.set(key, grid);
   }
   // Drawn big and scaled down by the stylesheet, so the dots stay countable in

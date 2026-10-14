@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { PixelSprite } from "../pixel/PixelArt";
 import { chime } from "../voice";
-import { coinsGrid, dotsGrid, type CellArt } from "@/lib/minigames/chompers";
+import { coinsGrid, diceGrid, dotsGrid, tallyGrid, type CellArt } from "@/lib/minigames/chompers";
 import css from "./ChompersGame.module.css";
 
 /** A question as the browser sees it: no answers in it anywhere. */
@@ -19,7 +19,8 @@ function CellPicture({ art }: { art: CellArt }) {
   const key = `${art.kind}:${art.parts.join(",")}`;
   let grid = artCache.get(key);
   if (!grid) {
-    grid = art.kind === "dots" ? dotsGrid(art.parts[0]) : coinsGrid(art.parts);
+    grid =
+      art.kind === "dots" ? dotsGrid(art.parts[0]) : art.kind === "tally" ? tallyGrid(art.parts[0]) : art.kind === "dice" ? diceGrid(art.parts) : coinsGrid(art.parts);
     artCache.set(key, grid);
   }
   return <PixelSprite grid={grid} scale={4} className={css.cellArt} />;

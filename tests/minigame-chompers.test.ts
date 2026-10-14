@@ -107,17 +107,24 @@ describe("the levels", () => {
 
   it("gives the youngest kids something they can play before they read numerals", () => {
     const k = CHOMPER_LEVELS[0].flatMap((l) => l.boards);
-    expect(k.every((b) => b.style === "dots")).toBe(true);
-    // Dots and numerals share the board, which is the whole point: a kid has
-    // to match a drawn 14 against a written 9.
+    expect(k.every((b) => b.style === "count")).toBe(true);
+    // The same number written down, counted in a ten frame, scratched in
+    // tallies and rolled on dice - all on one board, which is the whole of
+    // early counting.
     const b = buildBoard(k[0], 0, 1);
     const drawn = b.cells.filter((c) => c.art);
     expect(drawn.length).toBeGreaterThan(5);
-    expect(b.cells.length - drawn.length).toBeGreaterThan(5);
+    expect(b.cells.length - drawn.length, "no numerals on the board").toBeGreaterThan(0);
     for (const c of drawn) {
-      expect(c.art!.kind).toBe("dots");
-      expect(c.art!.parts[0]).toBe(c.value);
-      expect(c.text).toBe(`${c.value} dots`);
+      expect(["dots", "tally", "dice"]).toContain(c.art!.kind);
+      // Whatever it is, the picture is worth what the cell says it is.
+      expect(c.art!.parts.reduce((t, n) => t + n, 0), c.text).toBe(c.value);
+    }
+    // And the right answers really do turn up in all four forms.
+    for (const spec of CHOMPER_LEVELS[0][0].boards) {
+      const board = buildBoard(spec, 0, 2);
+      const forms = new Set(board.cells.filter((c) => c.ok).map((c) => c.art?.kind ?? "numeral"));
+      for (const want of ["numeral", "dots", "tally", "dice"]) expect(forms, `${board.label} never shows ${want}`).toContain(want);
     }
     // And the coin boards add up to what they say they do.
     const coins = ALL_CHOMPER_LEVELS.flatMap((l) => l.boards).filter((bd) => bd.style === "coins");

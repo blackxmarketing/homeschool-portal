@@ -117,6 +117,8 @@ export type RuleKind =
   | "commonFactors"
   /** Worth `target` once x is `of`: "With x = 5, equals 20". */
   | "evaluates"
+  /** The same as `equals`, said the way a counting board should say it. */
+  | "shows"
   /** Splits into two equal piles. */
   | "even"
   /** Does not. */
@@ -168,7 +170,9 @@ export type CellStyle =
   /** A group of dots to count, for kids who do not read numerals yet. */
   | "dots"
   /** A handful of coins to add up. */
-  | "coins";
+  | "coins"
+  /** The same number four ways: as a numeral, as dots, as tallies, as dice. */
+  | "count";
 
 /** The four operations, as a board writes them. */
 export type Op = "+" | "-" | "x" | "/";
@@ -199,8 +203,11 @@ export interface BoardSpec {
  * words, which is all a screen reader can offer.
  */
 export interface CellArt {
-  kind: "dots" | "coins";
-  /** Dots: how many. Coins: the coins in it, biggest first, in cents. */
+  kind: "dots" | "coins" | "tally" | "dice";
+  /**
+   * Dots and tallies: how many. Coins: the coins in it, biggest first, in
+   * cents. Dice: the face of each die, left to right.
+   */
   parts: number[];
 }
 
@@ -290,6 +297,7 @@ export function fits(rule: Rule, cell: number | { value: number; frac?: Frac }):
     case "commonFactors":
       return Number.isInteger(value) && value > 0 && rule.target % value === 0 && (rule.of ?? 0) % value === 0;
     case "evaluates":
+    case "shows":
       return q(value) === q(rule.target);
     case "even":
       return Number.isInteger(value) && value % 2 === 0;
@@ -331,6 +339,8 @@ export function ruleLabel(rule: Rule): string {
       return `Factors of both ${rule.target} and ${rule.of}`;
     case "evaluates":
       return `With x = ${rule.of}, equals ${rule.target}`;
+    case "shows":
+      return `Shows ${rule.target}`;
     case "even":
       return "Even numbers";
     case "odd":
@@ -402,6 +412,8 @@ export function teachFor(rule: Rule, cell: Cell): string {
       const bad = t % cell.value !== 0 ? t : other;
       return `${shown} does not divide ${bad} evenly. The factors they share are ${divisors(gcd(t, other)).join(", ")}.`;
     }
+    case "shows":
+      return `That one shows ${cell.value}, not ${t}. Count them again.`;
     case "evaluates":
       return `${cell.text} comes to ${dec(cell.value, 3)} when x is ${rule.of}, not ${t}. Put ${rule.of} where the x is and work it out.`;
     case "even":
@@ -551,6 +563,33 @@ function dotsPool(lo: number, hi: number): Cand[] {
   return out;
 }
 
+/**
+ * A number shown every way a young kid meets it: written down, counted out
+ * in a ten frame, scratched in tallies, and rolled on dice.
+ *
+ * Knowing that all four say the same thing is the whole of early counting,
+ * and it is the only way a board asking for one exact number has enough
+ * right squares to be worth playing - four ways of writing seven, plus
+ * every pair of dice that makes it.
+ */
+function countPool(lo: number, hi: number): Cand[] {
+  const out: Cand[] = [];
+  for (let n = Math.max(1, lo); n <= hi; n++) {
+    out.push({ value: n, text: String(n) });
+    if (n <= MOST_DOTS) out.push({ value: n, text: `${n} dots`, art: { kind: "dots", parts: [n] } });
+    if (n <= 20) out.push({ value: n, text: `${n} in tally marks`, art: { kind: "tally", parts: [n] } });
+    if (n >= 1 && n <= 6) out.push({ value: n, text: `a die showing ${n}`, art: { kind: "dice", parts: [n] } });
+    // Two dice, left and right - which is which makes them different
+    // pictures, and gives a board enough of them to fill.
+    for (let a = 1; a <= 6; a++) {
+      const b = n - a;
+      if (b < 1 || b > 6) continue;
+      out.push({ value: n, text: `dice showing ${a} and ${b}`, art: { kind: "dice", parts: [a, b] } });
+    }
+  }
+  return out;
+}
+
 /** Every coin is drawn on this many pixels square, whatever size the coin is. */
 export const COIN_CANVAS = 16;
 
@@ -655,16 +694,18 @@ function split(spec: BoardSpec): { yes: Cand[]; no: Cand[] } {
           ? ratioPool(spec.hi)
           : spec.style === "power"
             ? powerPool(spec.lo, spec.hi)
-            : spec.style === "dots"
-              ? dotsPool(spec.lo, spec.hi)
-              : spec.style === "coins"
-                ? coinPool(spec.hi)
-                : // A board allowed only to multiply can only show numbers that
+            : spec.style === "count"
+              ? countPool(spec.lo, spec.hi)
+              : spec.style === "dots"
+                ? dotsPool(spec.lo, spec.hi)
+                : spec.style === "coins"
+                  ? coinPool(spec.hi)
+                  : // A board allowed only to multiply can only show numbers that
                   // two factors can make: there is no way to write 37 as a
                   // product, so it must not turn up on one.
-                  spec.ops?.length === 1 && spec.ops[0] === "x"
-                  ? PRODUCTS.filter((v) => v >= spec.lo && v <= spec.hi).map((value) => ({ value }))
-                  : Array.from({ length: spec.hi - spec.lo + 1 }, (_, i) => ({ value: spec.lo + i }));
+                    spec.ops?.length === 1 && spec.ops[0] === "x"
+                    ? PRODUCTS.filter((v) => v >= spec.lo && v <= spec.hi).map((value) => ({ value }))
+                    : Array.from({ length: spec.hi - spec.lo + 1 }, (_, i) => ({ value: spec.lo + i }));
   const yes: Cand[] = [];
   const no: Cand[] = [];
   for (const c of pool) (fits(spec.rule, c) ? yes : no).push(c);
@@ -1030,15 +1071,15 @@ const lvl = (grade: number, id: string, title: string, skill: string, intro: str
 
 export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
   0: [
-    lvl(0, "k-1", "Count the Dots", "math-k.how-many", "Skill: counting a group and matching it to its number. The dots sit in a ten frame, so a full row is five and a full frame is ten.", [
-      board("less", 6, "dots", 1, 20),
-      board("less", 8, "dots", 1, 22),
-      board("less", 10, "dots", 1, 24),
+    lvl(0, "k-1", "How Many?", "math-k.how-many", "Skill: counting, and knowing the same number when you meet it written down, in dots, in tally marks and on dice. Find every square that shows the number at the top.", [
+      board("shows", 5, "count", 1, 12),
+      board("shows", 7, "count", 1, 12),
+      board("shows", 9, "count", 1, 12),
     ]),
-    lvl(0, "k-2", "More or Fewer", "math-k.compare", "Skill: saying which of two numbers is more. Count the dots, read the numbers, and eat every one that is bigger than the number at the top.", [
-      board("less", 9, "dots", 1, 22),
-      board("greater", 10, "dots", 1, 24),
-      board("greater", 12, "dots", 1, 26),
+    lvl(0, "k-2", "More or Fewer", "math-k.compare", "Skill: saying which of two numbers is more. Count the dots, the tallies and the dice, read the numbers, and eat the ones that fit.", [
+      board("less", 9, "count", 1, 20),
+      board("greater", 10, "count", 1, 22),
+      board("greater", 12, "count", 1, 24),
     ]),
   ],
   1: [
@@ -1670,6 +1711,102 @@ export function coinsGrid(parts: number[]): Grid {
     y += rowH[ri] + 1;
   });
   return g.outline(OUT);
+}
+
+const TALLY = "#1b1530";
+const DIE = "#fffdf5";
+const DIE_EDGE = "#8d93a8";
+const PIP = "#1b1530";
+
+/**
+ * Tally marks: four upright strokes and a fifth laid across them, in
+ * bundles of five. Counting in fives is the whole point of writing them
+ * this way, so the bundles are spaced clearly apart.
+ */
+export function tallyGrid(n: number): Grid {
+  const count = Math.max(0, Math.min(20, n));
+  const bundles = Math.floor(count / 5);
+  const rest = count % 5;
+  const groups = bundles + (rest ? 1 : 0);
+  const perRow = 3;
+  const rows = Math.max(1, Math.ceil(groups / perRow));
+  const width = perRow * 11 - 2;
+  const g = new Grid(width, rows * 11 - 2);
+
+  const bundle = (ox: number, oy: number, marks: number, crossed: boolean) => {
+    for (let i = 0; i < marks; i++) g.rect(ox + i * 2, oy, 1, 9, TALLY);
+    // The fifth goes across the other four, corner to corner.
+    if (crossed) for (let i = 0; i < 9; i++) g.set(ox - 1 + i, oy + 8 - i, TALLY);
+  };
+
+  for (let row = 0; row < rows; row++) {
+    const here = Math.min(perRow, groups - row * perRow);
+    // Each row sits in the middle of the square rather than hard against the
+    // left, so three tallies and thirteen look like the same kind of thing.
+    const indent = Math.floor((width - (here * 11 - 2)) / 2);
+    for (let i = 0; i < here; i++) {
+      const at = row * perRow + i;
+      const full = at < bundles;
+      bundle(indent + i * 11 + 1, row * 11, full ? 4 : rest, full);
+    }
+  }
+  return g;
+}
+
+/** The pips on one face of a die, as fractions of the face. */
+const PIPS: [number, number][][] = [
+  [[1, 1]],
+  [
+    [0, 0],
+    [2, 2],
+  ],
+  [
+    [0, 0],
+    [1, 1],
+    [2, 2],
+  ],
+  [
+    [0, 0],
+    [2, 0],
+    [0, 2],
+    [2, 2],
+  ],
+  [
+    [0, 0],
+    [2, 0],
+    [1, 1],
+    [0, 2],
+    [2, 2],
+  ],
+  [
+    [0, 0],
+    [2, 0],
+    [0, 1],
+    [2, 1],
+    [0, 2],
+    [2, 2],
+  ],
+];
+
+/** One die, face up. */
+function dieGrid(face: number): Grid {
+  const g = new Grid(13, 13);
+  g.rect(0, 0, 13, 13, DIE_EDGE).rect(1, 1, 11, 11, DIE);
+  for (const [px, py] of PIPS[Math.max(1, Math.min(6, face)) - 1]) g.rect(2 + px * 4, 2 + py * 4, 3, 3, PIP);
+  return g.outline(OUT);
+}
+
+/**
+ * One or two dice, side by side - the way a kid meets a number on a board
+ * game. Always on a canvas wide enough for two, so a single die is drawn the
+ * size of one of a pair rather than swelling to fill the square on its own.
+ */
+export function diceGrid(faces: number[]): Grid {
+  const dice = faces.slice(0, 2).map(dieGrid);
+  const g = new Grid(27, 13);
+  const left = dice.length === 1 ? 7 : 0;
+  dice.forEach((d, i) => g.draw(d, left + i * 14, 0));
+  return g;
 }
 
 const GRUMBLE_SKIN: Record<GrumbleKind, string> = { plodder: "#b14bd8", rover: "#f0803c", chaser: "#d6202c" };
