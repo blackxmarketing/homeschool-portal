@@ -508,3 +508,18 @@
   font-size: 0.9rem;
   color: var(--k-bad-ink, #b42318);
 }
+
+/* Caught: thrown up in the air, then back to the start line. */
+.grabbed {
+  animation: grabbed 0.9s;
+  z-index: 4;
+}
+@keyframes grabbed {
+  0% { transform: translateY(0) rotate(0); }
+  35% { transform: translateY(-46px) rotate(-18deg); }
+  70% { transform: translateY(-20px) rotate(14deg); }
+  100% { transform: translateY(0) rotate(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .grabbed { animation: none; }
+}

@@ -5,7 +5,7 @@ import { PixelSprite } from "../pixel/PixelArt";
 import { chime, speak, TeacherVoice } from "../voice";
 import { avatarFor } from "@/content/avatars";
 import { teacherFor } from "@/content/teachers";
-import { GAME_COACH } from "@/lib/minigames/chompers";
+import { GAME_COACH, grumbleGrid } from "@/lib/minigames/chompers";
 import {
   type Answer,
   type Hazard,
@@ -16,7 +16,6 @@ import {
   cagedPetGrid,
   type Pace,
   PACES,
-  beastGrid,
   biomeFor,
   cloudGrid,
   DUNGEON_PRICE,
@@ -52,7 +51,7 @@ import css from "./FactRushGame.module.css";
 /** Built once: the scenery is the same on every level. */
 const CLOUD = [cloudGrid(false), cloudGrid(true)];
 const HILL = hillGrid();
-const BEAST = [beastGrid(0), beastGrid(1)];
+const BEAST = [grumbleGrid("chaser", 0), grumbleGrid("chaser", 1)];
 const CAGE = [cageGrid(false), cageGrid(true)];
 const TORCH = [torchGrid(0), torchGrid(1)];
 const STONE = stoneGrid();
@@ -117,7 +116,7 @@ function FactRush({
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [typed, setTyped] = useState("");
   /** What just happened, for the hero to react to. */
-  const [beat, setBeat] = useState<{ kind: "sprint" | "run" | "trot" | "trip"; show?: string } | null>(null);
+  const [beat, setBeat] = useState<{ kind: "sprint" | "run" | "trot" | "trip" | "grabbed"; show?: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ stars: number; xp: number; score?: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -188,15 +187,22 @@ function FactRush({
       live.current = { pile: next, answers: [...got, { a: value, ms }] };
       setAnswers((xs) => [...xs, { a: value, ms }]);
       setPile(next);
-      if (right) {
+      // What the answer was worth, and then what the monster made of it.
+      const after = play(level, { seed, answers: [...got, { a: value, ms }], pace }, saved);
+      if (after.justCaught) {
+        chime("caught");
+        setBeat({ kind: "grabbed", show: "It got you! Back to the start." });
+      } else if (right) {
         chime(ms <= 2500 ? "streak" : "right");
         setBeat({ kind: paceOf(ms) });
       } else {
         chime("oops");
         setBeat({ kind: "trip", show: `${level.cards[head.i].text} = ${level.cards[head.i].answer}` });
       }
+      // A step of something large, somewhere behind them.
+      if (after.chase !== null && !after.justCaught) chime("growl");
     },
-    [level],
+    [level, seed, pace, saved],
   );
 
   // The run is over: send it to be scored on the server.
@@ -235,7 +241,7 @@ function FactRush({
   // The reaction clears itself so the scene does not keep shouting.
   useEffect(() => {
     if (!beat) return;
-    const t = setTimeout(() => setBeat(null), beat.kind === "trip" ? 1500 : 560);
+    const t = setTimeout(() => setBeat(null), beat.kind === "grabbed" ? 1800 : beat.kind === "trip" ? 1500 : 560);
     return () => clearTimeout(t);
   }, [beat]);
 
@@ -272,7 +278,7 @@ function FactRush({
   }
 
   const at = posts > 0 ? Math.min(1, run.posts / posts) : 0;
-  const stepping = beat && beat.kind !== "trip";
+  const stepping = beat && beat.kind !== "trip" && beat.kind !== "grabbed";
 
   return (
     <TeacherVoice kind={coachLook.voice}>
@@ -458,8 +464,8 @@ function FactRush({
 
             <span
               className={`${css.runner} ${biome.swim ? css.swimming : ""} ${run.big ? css.grown : ""} ${beat?.kind === "trip" ? css.trip : ""} ${
-                stepping ? css.step : ""
-              } ${beat?.kind === "sprint" ? css.sprint : ""}`}
+                beat?.kind === "grabbed" ? css.grabbed : ""
+              } ${stepping ? css.step : ""} ${beat?.kind === "sprint" ? css.sprint : ""}`}
               style={{ left: `${standing(run.at) * BLOCK}px`, bottom: `${(biome.rise ?? 0) * standing(run.at) + 43}px` }}
             >
               <PixelSprite grid={runner[stepping ? 1 : 0]} scale={run.big ? 7 : 5} />

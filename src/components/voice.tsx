@@ -570,12 +570,31 @@ export function SayButton({ id, text, label }: { id: string; text: string; label
 let audio: AudioContext | null = null;
 
 /** A short, soft chime: "right" (two rising notes), "streak" (three) or "oops" (one low note). */
-export function chime(kind: "right" | "streak" | "oops" | "caught") {
+export function chime(kind: "right" | "streak" | "oops" | "caught" | "growl") {
   if (typeof window === "undefined" || !loadPrefs().sounds) return;
   try {
     const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!Ctx) return;
     audio ??= new Ctx();
+
+    if (kind === "growl") {
+      // A step of something large and unfriendly, somewhere behind you. Short
+      // and low enough to sit under a kid answering out loud rather than
+      // talking over them.
+      const o = audio.createOscillator();
+      const g = audio.createGain();
+      const t = audio.currentTime;
+      o.type = "sawtooth";
+      o.frequency.setValueAtTime(96, t);
+      o.frequency.linearRampToValueAtTime(58, t + 0.16);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.07, t + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+      o.connect(g).connect(audio.destination);
+      o.start(t);
+      o.stop(t + 0.22);
+      return;
+    }
 
     if (kind === "caught") {
       // Something got you: a growl that slides downwards. Deliberately not the

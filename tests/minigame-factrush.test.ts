@@ -17,6 +17,7 @@ import {
   factRush,
   type Pace,
   CHASE_FROM,
+  CREEP,
   DUNGEON_PRICE,
   HUNTS,
   LIVES,
@@ -27,7 +28,6 @@ import {
   STRIKES,
   TOKEN_EVERY,
   familyFacts,
-  beastGrid,
   biomeFor,
   BIOMES,
   hazardAt,
@@ -295,7 +295,7 @@ describe("what it tells the mastery meter", () => {
 
 describe("the art", () => {
   it("draws something in every piece of the scene", () => {
-    const grids = [cloudGrid(false), cloudGrid(true), hillGrid(), cageGrid(false), cageGrid(true), beastGrid(0), beastGrid(1), ridgeGrid("#333", true), ridgeGrid("#333", false)];
+    const grids = [cloudGrid(false), cloudGrid(true), hillGrid(), cageGrid(false), cageGrid(true), ridgeGrid("#333", true), ridgeGrid("#333", false)];
     for (const g of grids) {
       expect(g.w).toBeGreaterThan(0);
       expect(g.h).toBeGreaterThan(0);
@@ -483,23 +483,24 @@ describe("the chase, and how hard a kid wants it", () => {
     expect(r.lives).toBe(LIVES - 2);
   });
 
-  it("sends it in a few times a level, and somewhere different each level", () => {
-    for (const pace of ["medium", "hard"] as Pace[]) {
-      const blocks = huntBlocks(level, 3, pace);
-      expect(blocks.length).toBeGreaterThan(0);
-      expect(blocks.length).toBeLessThanOrEqual(HUNTS);
-      // Never right at the start, and never on top of each other.
-      for (const b of blocks) expect(b).toBeGreaterThanOrEqual(2);
-      // A different seed puts it somewhere else.
-      expect(huntBlocks(level, 99, pace)).not.toEqual(blocks);
-      // The same seed puts it in the same places, or the server would disagree.
-      expect(huntBlocks(level, 3, pace)).toEqual(blocks);
-    }
+  it("sends it in a few times a level on medium, somewhere different each level", () => {
+    const blocks = huntBlocks(level, 3, "medium");
+    expect(blocks.length).toBeGreaterThan(0);
+    expect(blocks.length).toBeLessThanOrEqual(HUNTS);
+    // Never right at the start, and never on top of each other.
+    for (const b of blocks) expect(b).toBeGreaterThanOrEqual(2);
+    // A different seed puts it somewhere else.
+    expect(huntBlocks(level, 99, "medium")).not.toEqual(blocks);
+    // The same seed puts it in the same places, or the server would disagree.
+    expect(huntBlocks(level, 3, "medium")).toEqual(blocks);
   });
 
-  it("starts further back on medium than on hard", () => {
-    expect(CHASE_FROM.medium).toBeGreaterThan(CHASE_FROM.hard);
+  it("starts further back on hard, because on hard it never stops", () => {
+    // Medium only closes on a mistake, so it can afford to start close.
+    // Hard closes a little on every single answer, so it starts further off.
+    expect(CHASE_FROM.hard).toBeGreaterThan(CHASE_FROM.medium);
     expect(CHASE_FROM.easy).toBe(0);
+    expect(CREEP).toBeGreaterThan(0);
   });
 
   it("leaves a slow thinker alone on medium, and does not on hard", () => {
@@ -509,14 +510,20 @@ describe("the chase, and how hard a kid wants it", () => {
       return { ...m, answers: m.answers.map((a) => ({ ...a, ms: TROT_MS + 2000 })) };
     };
     expect(play(level, slow("medium")).caught, "medium caught a slow thinker").toBe(0);
+    // On hard it does not matter how right they are: it keeps coming.
     expect(play(level, slow("hard")).caught, "hard let a dawdler off").toBeGreaterThan(0);
   });
 
-  it("only comes once they are moving - nobody is chased at the start line", () => {
+  it("waits until they are moving on medium - nobody is chased off the start line", () => {
     // Every answer wrong, so they never leave the first block.
-    const r = play(level, misses(12, "hard"));
+    const r = play(level, misses(12, "medium"));
     expect(r.posts).toBe(0);
     expect(r.caught).toBe(0);
+  });
+
+  it("is on them from the first card on hard, wherever they are", () => {
+    const r = play(level, misses(12, "hard"));
+    expect(r.caught, "hard let a kid stand still unbothered").toBeGreaterThan(0);
   });
 
   it("costs a life when it does catch them", () => {
@@ -696,5 +703,80 @@ describe("paying the monster for the pet", () => {
     // The balance is the server's argument, not anything in the move log.
     const rich = { seed: 2, pace: "easy", answers: perfectMoves(dun, 2, "easy").answers, coins: 9999, saved: 9999 };
     expect(replay(dun, rich, 0).owed, "a claimed balance paid the monster").toBeGreaterThan(0);
+  });
+});
+
+describe("the hunter", () => {
+  const level = levelById("fr-x6")!;
+  const clean = (n: number, pace: Pace = "hard") => perfectMoves(level, 6, pace).answers.slice(0, n);
+
+  it("is there from the first card on hard, and nowhere on easy", () => {
+    expect(huntBlocks(level, 6, "hard")).toEqual([0]);
+    expect(huntBlocks(level, 6, "easy")).toEqual([]);
+    expect(huntBlocks(level, 6, "medium").length).toBeGreaterThan(0);
+  });
+
+  it("is outrun by a kid who keeps answering, and catches one who stops", () => {
+    // Quick and right: the block they run is worth more than the half block
+    // it takes back, so the gap opens and hard is winnable.
+    const early = play(level, { seed: 6, pace: "hard", answers: clean(2) }).chase!;
+    const later = play(level, { seed: 6, pace: "hard", answers: clean(6) }).chase!;
+    expect(later, "keeping moving did not keep them ahead").toBeGreaterThan(early);
+    expect(play(level, { seed: 6, pace: "hard", answers: clean(20) }).caught, "it caught a kid who did everything right").toBe(0);
+
+    // Right, but sat on every card: it comes the rest of the way.
+    const dawdled = clean(20).map((a) => ({ ...a, ms: TROT_MS + 4000 }));
+    expect(play(level, { seed: 6, pace: "hard", answers: dawdled }).caught, "a kid who stopped moving was never caught").toBeGreaterThan(0);
+  });
+
+  it("leaves a clean run alone on medium", () => {
+    const r = replay(level, perfectMoves(level, 6, "medium"));
+    expect(r.caught).toBe(0);
+  });
+
+  it("closes in on a wrong answer on medium, and not on a right one", () => {
+    const seed = 6;
+    const start = huntBlocks(level, seed, "medium")[0];
+    const upto = perfectMoves(level, seed, "medium").answers.slice(0, start + 1);
+    const good = play(level, { seed, pace: "medium", answers: [...upto, ...perfectMoves(level, seed, "medium").answers.slice(start + 1, start + 2)] });
+    const miss = play(level, { seed, pace: "medium", answers: [...upto, { a: -1, ms: 400 }] });
+    expect(miss.chase, "a miss did not bring it closer").not.toBeNull();
+    if (good.chase !== null && miss.chase !== null) expect(miss.chase).toBeLessThan(good.chase);
+  });
+
+  it("puts them back at the start line when it gets them", () => {
+    const seed = 6;
+    // Right answers, but sat on every one of them, so it closes in.
+    const answers = clean(24).map((a) => ({ ...a, ms: TROT_MS + 4000 }));
+    const r = play(level, { seed, pace: "hard", answers });
+    expect(r.caught).toBeGreaterThan(0);
+    // Whatever happened after, a catch cost them the ground they had made.
+    const upToCatch: { a: number; ms: number }[] = [];
+    let seen = 0;
+    for (const a of answers) {
+      upToCatch.push(a);
+      const step = play(level, { seed, pace: "hard", answers: upToCatch });
+      if (step.caught > seen) {
+        seen = step.caught;
+        expect(step.at, "a catch did not send them back to the start").toBe(0);
+        expect(step.justCaught).toBe(true);
+        break;
+      }
+    }
+    expect(seen, "it never caught anyone to check").toBeGreaterThan(0);
+  });
+
+  it("says so on the one answer it got them, and not after", () => {
+    const seed = 6;
+    const r = play(level, { seed, pace: "hard", answers: clean(24).map((a) => ({ ...a, ms: TROT_MS + 4000 })) });
+    // justCaught is about the last answer only, so a screen can react once.
+    expect(typeof r.justCaught).toBe("boolean");
+  });
+
+  it("costs the size first when they are big, and the run is not reset", () => {
+    // Food is on every seventh block, so get there then let it have them.
+    const seed = 6;
+    const r = play(level, { seed, pace: "hard", answers: clean(TOKEN_EVERY) });
+    expect(r.big || r.caught > 0).toBe(true);
   });
 });

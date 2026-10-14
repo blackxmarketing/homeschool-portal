@@ -330,15 +330,23 @@ export function hazardAt(block: number): Hazard | null {
 /**
  * How hard a kid wants it. Theirs to pick, every time they play.
  *
- * Easy has nothing chasing them. Medium has something, but it only closes in
- * when they get a card wrong, so taking a while to think costs nothing.
- * Hard counts dawdling against them as well.
+ * Easy has nothing chasing them.
+ *
+ * Medium sends it in a few times a level and it closes in only when they get
+ * a card wrong, so taking a while to think costs nothing.
+ *
+ * Hard has it on screen from the first card to the last. It never stops and
+ * never gives up, creeping forward a little on every answer, so the only way
+ * to stay ahead of it is to keep getting cards right.
  */
 export type Pace = "easy" | "medium" | "hard";
 export const PACES: Pace[] = ["easy", "medium", "hard"];
 
 /** How far back it starts, by pace. Easy never starts at all. */
-export const CHASE_FROM: Record<Pace, number> = { easy: 0, medium: 5, hard: 3 };
+export const CHASE_FROM: Record<Pace, number> = { easy: 0, medium: 5, hard: 6 };
+
+/** How much ground it makes up on every answer, just by never stopping. */
+export const CREEP = 0.5;
 /** How many cards it keeps after you before it gives up. */
 export const CHASE_LEN = 7;
 /** How many times it comes in over a level. */
@@ -351,6 +359,8 @@ export const HUNTS = 3;
  */
 export function huntBlocks(level: FactLevel, seed: number, pace: Pace): number[] {
   if (pace === "easy") return [];
+  // On hard it is simply there, from the start line.
+  if (pace === "hard") return [0];
   const total = postsOn(level);
   const r: Rng = seededRng((seed >>> 0) * 7919 + 13);
   const out = new Set<number>();
@@ -425,6 +435,8 @@ export interface Run {
   owed: number;
   /** They are at the cage, working off what they still owe. */
   paying: boolean;
+  /** True on the answer that it caught them, for the screen to react to. */
+  justCaught: boolean;
   pace: Pace;
 }
 
@@ -445,8 +457,11 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
   let strikes = 0;
   let big = false;
   let over = false;
-  let chase: number | null = null;
-  let chaseLeft = 0;
+  // On hard it is already there when the first card comes up, so it starts
+  // set rather than waiting for a block to trigger it.
+  let chase: number | null = pace === "hard" && CHASE_FROM.hard > 0 ? CHASE_FROM.hard : null;
+  let chaseLeft = CHASE_LEN;
+  let justCaught = false;
   let caught = 0;
   let coins = 0;
   const total = postsOn(level);
@@ -483,25 +498,47 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
       }
     }
 
-    // Something starts after them at certain blocks.
-    if (chase === null && hunts.includes(posts) && from > 0) {
+    // Something starts after them at certain blocks - or, on hard, is simply
+    // there from the off and stays there.
+    if (chase === null && from > 0 && hunts.includes(posts)) {
       chase = from;
       chaseLeft = CHASE_LEN;
     }
 
+    justCaught = false;
     if (chase !== null) {
-      // It closes in on a wrong answer, and on hard it closes on dawdling too.
-      // On medium a kid who needs a minute to think is left alone.
-      if (!right) chase--;
-      else if (pace === "hard" && ans.ms > TROT_MS) chase--;
-      else if (ans.ms <= SPRINT_MS) chase = Math.min(from, chase + 1);
+      // The gap is in blocks, so getting a card right opens it up by the
+      // block they just ran. On hard the thing behind them never stops, and
+      // takes back half a block whatever they answered - so keeping moving
+      // keeps them ahead, and only stopping lets it close. On medium it sits
+      // at the same distance and only a wrong card brings it in, which is why
+      // a kid who needs a minute to think is left alone there.
+      if (right) chase += 1;
+      if (pace === "hard") chase -= CREEP;
+      if (!right) chase -= 1;
+      // Keeping moving is the whole of it on hard: a card they sat on for
+      // half a minute is a card they were not moving through, and it comes
+      // the rest of the way.
+      else if (pace === "hard" && ans.ms > TROT_MS) chase -= 1;
+      // It never drops so far back that a kid forgets it is there.
+      chase = Math.min(pace === "hard" ? from + 3 : from, chase);
 
       if (chase <= 0) {
         caught++;
-        chase = null;
-        chaseLeft = 0;
+        justCaught = true;
         knock();
-      } else if (--chaseLeft <= 0) {
+        if (!over) {
+          // Back to the start of the level, and it backs off to give them a
+          // run at it again.
+          pile = openingPile(level, move.seed + caught);
+          at = 0;
+          block = 0;
+          chase = pace === "hard" ? from : null;
+          chaseLeft = CHASE_LEN;
+          continue;
+        }
+        chase = null;
+      } else if (pace !== "hard" && --chaseLeft <= 0) {
         // It gives up and slinks off to try again further on.
         chase = null;
       }
@@ -517,8 +554,8 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
       if (purse() < price) pile = openingPile(level, move.seed + coins + 1);
     }
 
-    // How far along they are: the work done, never backwards. A miss costs a
-    // card its banked go, so the walk stalls rather than reversing.
+    // How far along they are: the work done, never backwards - until they are
+    // caught, which puts them back at the start line and starts it over.
     const left = workLeft(pile, needOf(level));
     at = Math.max(at, total > 0 ? Math.min(1, (total - left) / total) : 1);
 
@@ -533,7 +570,7 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
   const owed = Math.max(0, price - purse());
   const finished = pile.length === 0 && !over && owed === 0;
   if (finished) points += FINISH_BONUS;
-  return { posts, wrong, points, finished, lives: Math.max(0, lives), strikes, big, over, chase, caught, coins, owed, paying, pace, at: finished ? 1 : at };
+  return { posts, wrong, points, finished, lives: Math.max(0, lives), strikes, big, over, chase, caught, coins, owed, paying, justCaught, pace, at: finished ? 1 : at };
 }
 
 /** The best a level can be worth: every card right twice, every one a sprint. */
@@ -800,30 +837,6 @@ export function propGrid(kind: PropKind, a: string, b: string): Grid {
       g.rect(7, 1, 2, 4, "#ffe08a");
       break;
   }
-  return g;
-}
-
-/**
- * The thing that chases them: all teeth and eyes, and plainly not a Grumble
- * from the other game - this one runs.
- */
-export function beastGrid(frame = 0): Grid {
-  const g = new Grid(18, 14);
-  const body = "#7a2f4a";
-  const dark = "#511f33";
-  g.rect(2, 4, 14, 7, body);
-  g.rect(2, 9, 14, 2, dark);
-  g.disc(13, 5, 4, body);
-  // Eyes, and a mouth with something in it.
-  g.rect(12, 3, 2, 2, "#fffdf5").rect(15, 3, 2, 2, "#fffdf5");
-  g.set(13, 4, INK).set(16, 4, INK);
-  for (let x = 11; x < 17; x += 2) g.rect(x, 7, 1, 2, "#fffdf5");
-  // Legs, which swap over as it runs.
-  const a = frame % 2 === 0 ? 0 : 2;
-  g.rect(4, 11, 2, 3 - (a ? 1 : 0), dark);
-  g.rect(11, 11, 2, 3 - (a ? 0 : 1), dark);
-  // A tail behind it.
-  g.rect(0, 5, 3, 2, dark);
   return g;
 }
 
