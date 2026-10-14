@@ -226,3 +226,48 @@
   width: 92%;
   filter: drop-shadow(0 0 3px rgba(214, 32, 44, 0.55));
 }
+
+/* What each coin is worth, shown over a money board. The coins on the board
+   are too small to carry their own number, so the board says it once up here. */
+.coinKey {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 5px 8px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: var(--cell);
+}
+.coinKeyItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-kid), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+.coinKeyItem svg {
+  image-rendering: pixelated;
+}
+
+@media (max-width: 420px) {
+  .coinKey {
+    gap: 6px;
+    font-size: 0.78rem;
+  }
+}
+
+/* Every coin is drawn on the same square of canvas, so fixing the height
+   here keeps a quarter visibly bigger than a dime. */
+.coinKeyItem svg {
+  height: 30px;
+  width: auto;
+}
+@media (max-width: 420px) {
+  .coinKeyItem svg {
+    height: 24px;
+  }
+}

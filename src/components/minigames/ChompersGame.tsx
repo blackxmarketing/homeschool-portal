@@ -13,6 +13,8 @@ import {
   maxForLevel,
   buildBoard,
   chomperGrid,
+  COINS,
+  coinGrid,
   coinsGrid,
   dotsGrid,
   grumbleGrid,
@@ -57,6 +59,31 @@ function CellPicture({ art }: { art: CellArt }) {
   // Drawn big and scaled down by the stylesheet, so the dots stay countable in
   // a square that is only sixty pixels across on a phone.
   return <PixelSprite grid={grid} scale={4} className={css.cellArt} />;
+}
+
+/** One of each coin, built once, for the key above a money board. */
+const COIN_KEY = COINS.map((c) => ({ ...c, grid: coinGrid(c.cents, true) }));
+
+/**
+ * What each coin is worth, over the top of a money board.
+ *
+ * A dime is two pixels smaller than a nickel at the size these are drawn,
+ * and writing the value on the coin itself would be a two-digit number
+ * across fifteen pixels - unreadable. So the board says it once, up here,
+ * big enough to read and close enough to check against.
+ */
+function CoinKey() {
+  return (
+    <div className={css.coinKey}>
+      <span className="kmuted small">Worth:</span>
+      {COIN_KEY.map((c) => (
+        <span key={c.cents} className={css.coinKeyItem}>
+          <PixelSprite grid={c.grid} scale={3} />
+          <span>{c.cents}¢</span>
+        </span>
+      ))}
+    </div>
+  );
 }
 
 const KEYS: Record<string, Act> = {
@@ -378,6 +405,8 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
         )}
         <span className="kmuted small">{left} left</span>
       </div>
+
+      {board.cells.some((c) => c.art?.kind === "coins") && <CoinKey />}
 
       <div className="mg-goalbar" aria-hidden>
         <span style={{ width: `${((CORRECT_PER_BOARD - left) / CORRECT_PER_BOARD) * 100}%` }} />

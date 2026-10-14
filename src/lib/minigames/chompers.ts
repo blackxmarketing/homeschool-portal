@@ -527,6 +527,9 @@ function dotsPool(lo: number, hi: number): Cand[] {
   return out;
 }
 
+/** Every coin is drawn on this many pixels square, whatever size the coin is. */
+export const COIN_CANVAS = 16;
+
 /** The coins, by what they are worth in cents. */
 export const COINS: { cents: number; one: string; many: string }[] = [
   { cents: 25, one: "a quarter", many: "quarters" },
@@ -1566,25 +1569,29 @@ export function dotsGrid(n: number): Grid {
 }
 
 /**
- * One coin, drawn at the size it really is next to the others, with a mark on
- * the face so a quarter is not just a bigger circle: the sizes alone are a
- * pixel or two apart, which is not a difference a kid can see.
+ * One coin. On the board it gets a canvas that fits it snugly, so a handful
+ * of them is drawn as big as the square allows. For the key at the top it
+ * gets the same canvas as every other coin, so they can all be scaled to one
+ * height and a quarter still looks bigger than a dime.
  */
-function coinGrid(cents: number): Grid {
+export function coinGrid(cents: number, uniform = false): Grid {
   const r = cents === 25 ? 7 : cents === 5 ? 5.5 : cents === 1 ? 4.5 : 3.5;
   const face = cents === 1 ? COPPER : SILVER;
   const edge = cents === 1 ? COPPER_D : SILVER_D;
-  const w = Math.ceil(r * 2) + 2;
+  const w = uniform ? COIN_CANVAS : Math.ceil(r * 2) + 2;
   const g = new Grid(w, w);
   const c = (w - 1) / 2;
   g.disc(c, c, r, edge).disc(c, c, r - 1.2, face);
   // A mark per coin: a quarter has a cross, a nickel a bar, a dime a dot, a
-  // penny a ring. Four shapes a kid learns in one go.
+  // penny a ring. Four shapes a kid learns in one go - and in a much darker
+  // ink than the coin's edge, because at the size these are drawn on the
+  // board a faint mark is no mark at all.
+  const mark = shade(face, -0.5);
   const m = Math.round(c);
-  if (cents === 25) g.rect(m - 2, m, 5, 1, edge).rect(m, m - 2, 1, 5, edge);
-  else if (cents === 5) g.rect(m - 2, m, 5, 1, edge);
-  else if (cents === 10) g.set(m, m, edge);
-  else g.disc(c, c, 2, edge).disc(c, c, 1, face);
+  if (cents === 25) g.rect(m - 3, m - 1, 7, 2, mark).rect(m - 1, m - 3, 2, 7, mark);
+  else if (cents === 5) g.rect(m - 2, m - 1, 5, 2, mark);
+  else if (cents === 10) g.rect(m - 1, m - 1, 2, 2, mark);
+  else g.disc(c, c, 2.4, mark).disc(c, c, 1.2, face);
   return g;
 }
 
@@ -1594,7 +1601,7 @@ function coinGrid(cents: number): Grid {
  * left one out would be worth less than the cell says it is.
  */
 export function coinsGrid(parts: number[]): Grid {
-  const coins = [...parts].sort((a, b) => b - a).map(coinGrid);
+  const coins = [...parts].sort((a, b) => b - a).map((c) => coinGrid(c));
   const perRow = coins.length > 3 ? Math.ceil(coins.length / 2) : coins.length;
   const rows: Grid[][] = [];
   for (let i = 0; i < coins.length; i += perRow) rows.push(coins.slice(i, i + perRow));
