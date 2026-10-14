@@ -1,5 +1,6 @@
 import type { GameEvidence, MiniGame, MiniLevel } from "./index";
 import { Grid, shade } from "../pixel/grid";
+import type { Strand } from "../curriculum/skills";
 import { dec, divisors, fracToString, gcd, int, isPrime, lcm, pick, seededRng, shuffle, simplify, type Frac, type Rng } from "../curriculum/math";
 
 /**
@@ -39,6 +40,14 @@ import { dec, divisors, fracToString, gcd, int, isPrime, lcm, pick, seededRng, s
  * back to the middle; out of lives ends the level where it stands.
  */
 
+/**
+ * The coach who runs the game. One teacher from level 1 to level 37 rather
+ * than a new face per skill: Coach Forge, the whole-numbers teacher, whose
+ * reps-and-keeping-score way of talking is the closest fit to an arcade.
+ * Change this to any strand in content/teachers.ts to swap him out.
+ */
+export const GAME_COACH: Strand = "whole-numbers";
+
 export const chompersInfo = {
   id: "chompers",
   title: "XP Rush: Math",
@@ -49,6 +58,7 @@ export const chompersInfo = {
   // Drill: three stars on a level before the next one opens. Knowing the
   // facts is the point, so running ahead of them is not allowed.
   unlockAt: 3,
+  ownIntro: true,
   blurb: "Eat every number that fits the rule, and don't let the Grumbles catch you.",
 };
 

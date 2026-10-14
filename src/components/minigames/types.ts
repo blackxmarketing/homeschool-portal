@@ -15,4 +15,6 @@ export interface MiniGameUIProps {
   plays?: number;
   /** The kid's pet, so a game can use it as the character they steer. */
   pet?: PetId;
+  /** Whether the AI coach can take questions, for games that let a kid ask. */
+  canAsk?: boolean;
 }

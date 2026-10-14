@@ -35,6 +35,8 @@ white, big friendly buttons, one screen at a time.
    the demo family. Seed it with `node scripts/seed-demo.mjs`; logins and
    ready-made session cookies (`lp_session`) are printed / saved in
    `<DATA_DIR>/demo-sessions.json`.
+   Those cookies last 12 hours; `node scripts/demo-sessions.mjs` re-signs them
+   without touching the demo family (seed-demo only runs on an empty database).
 4. Push to `main`. The server checks GitHub every 5 minutes and redeploys on
    its own (`deploy/update.sh`, Docker + Caddy on a DigitalOcean droplet). To
    confirm a deploy, fetch the live site and look for something new (e.g. a

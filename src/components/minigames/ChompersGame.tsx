@@ -6,6 +6,7 @@ import { chime, SayButton } from "../voice";
 import {
   CLEAR_BONUS,
   CORRECT_PER_BOARD,
+  GAME_COACH,
   BOARD_SECONDS,
   EASY_LIVES,
   LIVES,
@@ -36,6 +37,10 @@ import {
   type ChomperState,
 } from "@/lib/minigames/chompers";
 import { petGrid, type PetId } from "@/lib/pixel/hero";
+import { avatarFor } from "@/content/avatars";
+import { teacherFor } from "@/content/teachers";
+import TeacherFace from "../TeacherFace";
+import TeacherBrief from "./TeacherBrief";
 import type { MiniGameUIProps } from "./types";
 import css from "./ChompersGame.module.css";
 
@@ -138,9 +143,11 @@ const KEYS: Record<string, Act> = {
 
 const newSeed = () => Math.floor(Math.random() * 2147483647);
 
-export default function ChompersGame({ levelId, onFinish, stars, plays, pet }: MiniGameUIProps) {
+export default function ChompersGame({ levelId, onFinish, stars, plays, pet, canAsk }: MiniGameUIProps) {
   const level = levelById(levelId);
-  return level ? <Chompers level={level} onFinish={onFinish} earned={stars ?? 0} plays={plays ?? 0} pet={pet} /> : null;
+  return level ? (
+    <Chompers level={level} onFinish={onFinish} earned={stars ?? 0} plays={plays ?? 0} pet={pet} canAsk={!!canAsk} />
+  ) : null;
 }
 
 /** What to say when something catches you. Only mention the square if one really went back. */
@@ -150,9 +157,32 @@ function caughtLine(strikes: number, gaveBack: boolean, walkedInto: boolean): st
   return gaveBack ? `${how} That square goes back on the board.` : `${how} Back to the middle.`;
 }
 
-function Chompers({ level, onFinish, earned, plays, pet }: { level: ChomperLevel; onFinish: MiniGameUIProps["onFinish"]; earned: number; plays: number; pet?: PetId }) {
+function Chompers({
+  level,
+  onFinish,
+  earned,
+  plays,
+  pet,
+  canAsk,
+}: {
+  level: ChomperLevel;
+  onFinish: MiniGameUIProps["onFinish"];
+  earned: number;
+  plays: number;
+  pet?: PetId;
+  canAsk: boolean;
+}) {
   /** The kid's own pet, or the Chomper if they have not chosen one. */
   const hero = heroFrames(pet);
+  /** One coach for the whole game - the same teacher as in the lessons. */
+  const coach = teacherFor(GAME_COACH);
+  const coachLook = avatarFor(coach.id);
+  /**
+   * The coach has the screen before the level starts, and again whenever a
+   * kid taps Stuck?. Both stop the clock. The Grumbles need no stopping: they
+   * only move when the kid does.
+   */
+  const [brief, setBrief] = useState<"brief" | "stuck" | null>("brief");
   /** Quick mode is the reward for having shown you know this one. */
   const mayGoQuick = earned >= 3;
   const [quick, setQuick] = useState(false);
@@ -269,7 +299,7 @@ function Chompers({ level, onFinish, earned, plays, pet }: { level: ChomperLevel
    * up instead and never stops them.
    */
   useEffect(() => {
-    if (over || st.over || st.cleared) return;
+    if (over || st.over || st.cleared || brief) return;
     const id = setInterval(() => {
       setClock((c) => {
         if (untimed) return c + 1;
@@ -286,7 +316,7 @@ function Chompers({ level, onFinish, earned, plays, pet }: { level: ChomperLevel
       });
     }, 1000);
     return () => clearInterval(id);
-  }, [over, st.over, st.cleared, untimed, bi]);
+  }, [over, st.over, st.cleared, untimed, bi, brief]);
 
   // A fresh board gets a fresh clock.
   useEffect(() => {
@@ -401,6 +431,25 @@ function Chompers({ level, onFinish, earned, plays, pet }: { level: ChomperLevel
     );
   }
 
+  // The coach, before the level and whenever they get stuck in it.
+  if (brief) {
+    return (
+      <div className={`mg ${css.ch}`} ref={card}>
+        <TeacherBrief
+          teacher={coach}
+          mode={brief}
+          title={level.title}
+          text={brief === "brief" ? level.intro : `The rule on your board: ${board.label}`}
+          levelId={level.id}
+          board={bi}
+          seed={seed}
+          canAsk={canAsk}
+          onDone={() => setBrief(null)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={`mg ${css.ch}`} ref={card}>
       <div className="mg-hud">
@@ -428,6 +477,9 @@ function Chompers({ level, onFinish, earned, plays, pet }: { level: ChomperLevel
       </div>
 
       <div className={css.rule}>
+        <span className={css.coach} title={coach.name} aria-hidden>
+          <TeacherFace look={coachLook} size={40} still />
+        </span>
         <h2 className="pixel-title small">{board.label}</h2>
         <SayButton id={`chomp-${level.id}-${bi}`} text={`Eat every square that fits: ${board.label}`} />
         {mayGoQuick && (
@@ -440,6 +492,11 @@ function Chompers({ level, onFinish, earned, plays, pet }: { level: ChomperLevel
             title={acts.length > 0 ? "Finish this board first" : "The Grumbles keep moving whether you do or not"}
           >
             {quick ? "⚡ Quick" : "🐢 Steady"}
+          </button>
+        )}
+        {canAsk && (
+          <button type="button" className={`chip ${css.stuck}`} onClick={() => setBrief("stuck")} title="Stop the clock and ask the coach">
+            🙋 Stuck?
           </button>
         )}
         <span className="kmuted small">{left} left</span>

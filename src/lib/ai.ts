@@ -382,3 +382,43 @@ answer: 2-4 short sentences, spoken aloud by you, warm and clear, at a 6th-8th g
   if (input.secret.length >= 4 && result.answer.toLowerCase().includes(input.secret.toLowerCase())) return null;
   return result;
 }
+
+/** What to call the grade a level is pitched at, for the coach's ear. */
+const gradeWord = (g: number) => (g <= 0 ? "kindergarten" : `grade ${g}`);
+
+/**
+ * A kid asks the coach a question while playing XP Rush: Math - either in
+ * the briefing before a level or from the Stuck? button mid-board.
+ *
+ * The coach is deliberately kept blind. It is told the rule the kid can
+ * already read on screen and nothing else: not the squares, not which ones
+ * are right. There is no board state here to leak, so no amount of asking
+ * can turn the coach into an answer key.
+ */
+export async function gameAsk(input: {
+  teacher: { name: string; inspiredBy: string; voice: string };
+  levelTitle: string;
+  intro: string;
+  rule: string;
+  grade: number;
+  question: string;
+}): Promise<{ answer: string; onTopic: boolean } | null> {
+  return askStructured<{ answer: string; onTopic: boolean }>(
+    coachSystem(input.teacher),
+    `You are coaching a student through a fast arcade drill called XP Rush: Math. They see a grid of squares and have to eat every square that fits one rule while dodging monsters. They have paused the game to ask you something.
+Level: ${input.levelTitle}
+What you told them at the start: ${input.intro}
+The rule on their board right now: ${input.rule}
+This student is in ${gradeWord(input.grade)}. Use words a child that age knows - this overrides any older age given above.
+
+You CANNOT see their board. You do not know which squares are on it or which ones fit. Never guess at a square, never say a number is or is not on their board, and never say "the answer is". Teach them the test to run on any square to decide yes or no, and if an example helps, make up your own rather than reaching for theirs.
+
+Student's question (it may come from speech-to-text, so forgive odd wording):
+"""
+${input.question}
+"""
+
+answer: 2-4 short sentences, spoken aloud by you, warm and plain. If the question is off-topic or not right for school, give one friendly sentence steering back to the game and set onTopic false.`,
+    ASK_SCHEMA,
+  );
+}

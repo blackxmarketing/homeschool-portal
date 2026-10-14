@@ -23,6 +23,7 @@ export default function PlayArea({
   placedAt,
   placement,
   pet,
+  canAsk,
 }: {
   game: string;
   levels: MiniLevel[];
@@ -34,6 +35,8 @@ export default function PlayArea({
   placement: { seed: number; questions: PublicQuestion[] } | null;
   /** The kid's pet, which is who they play as. */
   pet?: PetId;
+  /** Whether the AI coach can take questions. */
+  canAsk?: boolean;
 }) {
   const [placed, setPlaced] = useState(placedAt);
   const [just, setJust] = useState<{ rung: number; title: string; right: number; asked: number } | null>(null);
@@ -66,7 +69,7 @@ export default function PlayArea({
           Starting you on <strong>{just.title}</strong>. Everything before it is open too, so you can go back over anything you want to brush up.
         </p>
       )}
-      <GameHost game={game} levels={levels} progress={progress} unlockAt={unlockAt} openTo={placed ?? 0} pet={pet} />
+      <GameHost game={game} levels={levels} progress={progress} unlockAt={unlockAt} openTo={placed ?? 0} pet={pet} canAsk={canAsk} />
     </div>
   );
 }

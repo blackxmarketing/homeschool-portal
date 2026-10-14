@@ -1,0 +1,149 @@
+/* The coach's panel: before a level, and from the Stuck? button inside one.
+   Same ink keyline and hard shadow as the board, so he reads as part of the
+   arcade rather than a web form bolted to the top of it. */
+
+.brief {
+  --ink: #1b1530;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+  background: #fffdf5;
+  box-shadow: 0 4px 0 var(--ink);
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+/* The teacher is a fixed-size picture, not something for the text beside
+   it to squeeze. */
+.face {
+  flex: none;
+  line-height: 0;
+  display: inline-flex;
+}
+
+.headText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.who {
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.5rem;
+  color: #fff;
+  background: #2340ff;
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  padding: 4px 6px;
+  box-shadow: 0 2px 0 var(--ink);
+  align-self: flex-start;
+}
+.title {
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+.skill {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+/* A question and the answer it got, kept on screen so a kid can read back
+   what the coach said while they play. */
+.turn {
+  border-top: 2px dashed #d0d6e6;
+  padding-top: 8px;
+}
+.q {
+  margin: 0 0 4px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--k-muted, #5a6489);
+}
+.a {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.err {
+  margin: 0;
+}
+
+.askRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.box {
+  flex: 1;
+  min-width: 160px;
+  padding: 10px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  background: #fff;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+.box:focus-visible {
+  outline: 3px solid #2340ff;
+  outline-offset: 1px;
+}
+
+.go {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Three, two, one. */
+.counting {
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 190px;
+}
+.count {
+  font-family: var(--font-pixel), monospace;
+  font-size: 2.4rem;
+  color: #2340ff;
+  animation: pop 0.7s;
+}
+@keyframes pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.2;
+  }
+  40% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 420px) {
+  .head {
+    gap: 8px;
+  }
+  .title {
+    font-size: 0.95rem;
+  }
+  .skill {
+    font-size: 0.88rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .count {
+    animation: none;
+  }
+}

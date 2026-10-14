@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { requireKid } from "@/lib/auth";
 import { gameById, levelsForKid } from "@/lib/minigames";
 import { gamePlacement, heroOf, miniGameProgress } from "@/lib/gameState";
+import { aiEnabled } from "@/lib/ai";
+import { features } from "@/lib/content";
 import { placementQuestions, publicPlacement } from "@/lib/minigames/chompers";
 import { bandFor, landById } from "@/lib/pixel/world";
 import { canVisit } from "@/lib/explore/state";
@@ -39,6 +41,10 @@ export default async function PlayPage({ params, searchParams }: { params: Promi
   // The kid steers their own pet, so changing it in the hero creator changes
   // what they are playing as here.
   const pet = heroOf(kid.id)?.pet ?? "none";
+  // The coach only takes questions when the AI teachers are switched on and
+  // the server has a key, so the question box stays hidden rather than
+  // offering something that cannot answer.
+  const canAsk = features().aiTeachers && aiEnabled();
   return (
     <main className={`wrap game-page band-${band}`} style={{ maxWidth: 1000 }}>
       <div className="game-title-row">
@@ -60,6 +66,7 @@ export default async function PlayPage({ params, searchParams }: { params: Promi
         placedAt={placedAt}
         placement={placement}
         pet={pet}
+        canAsk={canAsk}
       />
     </main>
   );

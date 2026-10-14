@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { GAME_UI } from "./registry";
-import type { MiniLevel } from "@/lib/minigames";
+import { gameById, type MiniLevel } from "@/lib/minigames";
 import type { PetId } from "@/lib/pixel/hero";
 
 /** Picks a level, runs the game, and sends the result to the server to be scored. */
@@ -13,6 +13,7 @@ export default function GameHost({
   unlockAt = 1,
   openTo = 0,
   pet,
+  canAsk,
 }: {
   game: string;
   levels: MiniLevel[];
@@ -23,6 +24,8 @@ export default function GameHost({
   openTo?: number;
   /** The kid's pet, for games that let them play as it. */
   pet?: PetId;
+  /** Whether the AI coach can take questions. */
+  canAsk?: boolean;
 }) {
   const [stars, setStars] = useState(progress);
   const [playing, setPlaying] = useState<string | null>(null);
@@ -54,10 +57,10 @@ export default function GameHost({
             </button>
           )}
         </div>
-        <p className="game-intro">{levels[idx]?.intro}</p>
+        {!gameById(game)?.ownIntro && <p className="game-intro">{levels[idx]?.intro}</p>}
         {GAME_UI[game] && (() => {
           const Screen = GAME_UI[game];
-          return <Screen key={`${playing}-${round}`} levelId={playing} stars={stars[playing]?.stars ?? 0} plays={stars[playing]?.plays ?? 0} pet={pet} onFinish={(m) => finish(playing, m)} />;
+          return <Screen key={`${playing}-${round}`} levelId={playing} stars={stars[playing]?.stars ?? 0} plays={stars[playing]?.plays ?? 0} pet={pet} canAsk={canAsk} onFinish={(m) => finish(playing, m)} />;
         })()}
       </div>
     );

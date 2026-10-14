@@ -48,6 +48,11 @@ export interface MiniGame {
    * facts they do not know yet.
    */
   unlockAt?: number;
+  /**
+   * The game says the level's intro itself - a teacher reading it out, say -
+   * so the chrome above the game should not print it a second time.
+   */
+  ownIntro?: boolean;
   /** K-5 games: which subject zone of the world they sit in. */
   subject?: "math" | "ela" | "sci" | "soc" | "span";
   levelsForGrade?: (grade: number) => MiniLevel[];
