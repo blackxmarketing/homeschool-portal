@@ -24,6 +24,7 @@ import {
   hazardAt,
   hillGrid,
   holeGrid,
+  CHASE_FROM,
   LIVES,
   mountainGrid,
   levelById,
@@ -138,6 +139,8 @@ function FactRush({
   const posts = postsOn(level);
   /** Which block they are standing on: how far along, in blocks. */
   const standing = (at: number) => at * posts;
+  /** The furthest back the hunter ever gets, which is where it enters. */
+  const maxGap = CHASE_FROM[pace] + (pace === "hard" ? 3 : 0);
   const card = pile[0] ? level.cards[pile[0].i] : null;
   const run = useMemo(() => play(level, { seed, answers, pace }, saved), [level, seed, answers, pace, saved]);
   // Out of cards, out of lives, or out of patience.
@@ -449,19 +452,6 @@ function FactRush({
               <PixelSprite grid={cagedPetGrid(pet, run.finished)} scale={5} />
             </span>
 
-            {/* Whatever is after them, however far back it still is. */}
-            {run.chase !== null && (
-              <span
-                className={`${css.beast} ${run.chase <= 2 ? css.close : ""}`}
-                style={{
-                  left: `${(standing(run.at) - run.chase) * BLOCK}px`,
-                  bottom: `${(biome.rise ?? 0) * Math.max(0, standing(run.at) - run.chase) + 43}px`,
-                }}
-              >
-                <PixelSprite grid={BEAST[stepping ? 1 : 0]} scale={5} />
-              </span>
-            )}
-
             <span
               className={`${css.runner} ${biome.swim ? css.swimming : ""} ${run.big ? css.grown : ""} ${beat?.kind === "trip" ? css.trip : ""} ${
                 beat?.kind === "grabbed" ? css.grabbed : ""
@@ -471,6 +461,24 @@ function FactRush({
               <PixelSprite grid={runner[stepping ? 1 : 0]} scale={run.big ? 7 : 5} />
             </span>
           </div>
+
+          {/* Whatever is after them.
+
+              It is drawn against the camera rather than against the ground,
+              because the gap is measured in blocks and a block is wider than
+              the ground you can see behind the runner - so at any honest
+              distance it sat off the left of the screen and a kid never saw
+              the thing that was catching them. Here it comes in from the edge
+              and closes on them as the gap closes, which is the same
+              information in a place they can see it. */}
+          {run.chase !== null && (
+            <span
+              className={`${css.beast} ${run.chase <= 2 ? css.close : ""}`}
+              style={{ left: `${CAMERA_AT * 100 * (1 - Math.min(1, Math.max(0, run.chase / maxGap))) }%` }}
+            >
+              <PixelSprite grid={BEAST[stepping ? 1 : 0]} scale={5} />
+            </span>
+          )}
 
           <span className={css.where}>{biome.name}</span>
 

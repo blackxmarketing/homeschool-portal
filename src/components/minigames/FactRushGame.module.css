@@ -446,7 +446,12 @@
 
 /* Whatever is chasing them. */
 .beast {
+  /* On the camera, not in the world: the runner's feet are always at this
+     height on screen, however high the ground has climbed under them. */
+  position: absolute;
+  bottom: 43px;
   z-index: 3;
+  transition: left 0.42s steps(7);
   animation: lope 0.5s steps(2) infinite;
 }
 .close {
