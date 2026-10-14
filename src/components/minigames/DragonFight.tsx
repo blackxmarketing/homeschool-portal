@@ -144,14 +144,15 @@ export default function DragonFight({
       meRef.current = { x: 0.14, jump: 0, duck: 0 };
       setShots([]);
       setFlames([]);
-      setHp(need);
+      // The hits they had already landed stay landed: a careless moment costs
+      // them a life, not the four good throws before it.
       jumpUntil.current = 0;
       duckUntil.current = 0;
       lastBreath.current = Date.now();
       setDying(false);
     }, 1500);
     return () => clearTimeout(t);
-  }, [dying, need]);
+  }, [dying]);
 
   // The fight itself.
   useEffect(() => {
@@ -265,7 +266,12 @@ export default function DragonFight({
         </span>
       ))}
 
-      <span className={`${css.dragon} ${won ? css.beaten : ""}`} style={{ left: `${dragon.x * 100}%`, top: `${(0.52 + dragon.y) * 100}%` }}>
+      {/* It thins out with every hit, so a kid can see it going rather than
+          having to read the number. */}
+      <span
+        className={`${css.dragon} ${won ? css.beaten : ""}`}
+        style={{ left: `${dragon.x * 100}%`, top: `${(0.52 + dragon.y) * 100}%`, opacity: won ? 0.25 : 0.3 + 0.7 * (hp / need) }}
+      >
         <PixelSprite grid={dragonGrid(Math.floor(Date.now() / 420) % 2)} scale={4} />
       </span>
 

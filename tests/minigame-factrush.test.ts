@@ -1132,3 +1132,22 @@ describe("a dungeon won after making more fire", () => {
     expect(r.finished, `a won fight was rejected: threw ${thrown} of ${earned} earned`).toBe(true);
   });
 });
+
+describe("the fight after a burn", () => {
+  const fight = fs.readFileSync(path.join(process.cwd(), "src/components/minigames/DragonFight.tsx"), "utf8");
+  const respawn = fight.slice(fight.indexOf("Gone for a moment"), fight.indexOf("}, [dying]);"));
+
+  it("leaves the hits they landed on the dragon alone", () => {
+    // Only the kid goes back to the start line. Losing four good throws to
+    // one careless moment made a five-hit dragon nearly impossible.
+    expect(respawn, "the respawn is healing the dragon again").not.toMatch(/setHp\(/);
+    // It does put them back and clear what is in the air.
+    expect(respawn).toContain("setMe(");
+    expect(respawn).toContain("setShots([])");
+    expect(respawn).toContain("setFlames([])");
+  });
+
+  it("thins the dragon out as it goes down, so they can see it going", () => {
+    expect(fight).toMatch(/opacity: won \? [\d.]+ : [\d.]+ \+ [\d.]+ \* \(hp \/ need\)/);
+  });
+});
