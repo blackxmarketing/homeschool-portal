@@ -737,7 +737,6 @@ function FactRush({
                       setFightCount(3);
                     }}
                     onAsking={setAsking}
-                    onExample={showExample}
                   />
                 ) : (
                   <div className={css.fightCount} role="status" aria-live="assertive">

@@ -54,8 +54,12 @@ export default function TeacherBrief({
   onReady: () => void;
   /** Tells the game to hold the clock while the coach has a question open. */
   onAsking: (open: boolean) => void;
-  /** Asks the game for a worked example, which the coach then talks through. */
-  onExample: () => void;
+  /**
+   * Asks the game for a worked example, which the coach then talks through.
+   * Left out where there is no sum to work - the fight before the dragon, for
+   * one - and then no button is offered.
+   */
+  onExample?: () => void;
   /** The two squares to talk through, drawn by the game itself. */
   example?: React.ReactNode;
   /** Anything else the game wants on this row before the level starts. */
@@ -196,9 +200,11 @@ export default function TeacherBrief({
               >
                 I&apos;m ready
               </button>
-              <button type="button" className="kbtn ghost small-btn" onClick={onExample}>
-                🔎 Show me an example
-              </button>
+              {onExample && (
+                <button type="button" className="kbtn ghost small-btn" onClick={onExample}>
+                  🔎 Show me an example
+                </button>
+              )}
             </>
           )}
           {canAsk && (

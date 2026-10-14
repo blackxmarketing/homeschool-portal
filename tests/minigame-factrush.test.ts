@@ -1082,6 +1082,8 @@ describe("what the coach puts on screen", () => {
     for (const cap of ["←", "→", "↑", "↓", "space"]) expect(screen, `no key cap for ${cap}`).toContain(cap);
     // The panel honours it rather than printing them anyway.
     expect(brief).toContain("{showDirections && <p");
+    // And no worked example is offered, because there is no sum to work.
+    expect(brief).toContain("{onExample && (");
   });
 
   it("still prints the directions everywhere else", () => {
