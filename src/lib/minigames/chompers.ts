@@ -996,9 +996,9 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("less", 10, "dots", 1, 24),
     ]),
     lvl(0, "k-2", "More or Fewer", "math-k.compare", "Skill: saying which of two numbers is more. Count the dots, read the numbers, and eat every one that is bigger than the number at the top.", [
-      board("greater", 10, "dots", 1, 22),
-      board("greater", 12, "dots", 1, 24),
-      board("greater", 14, "dots", 1, 26),
+      board("less", 9, "dots", 1, 22),
+      board("greater", 10, "dots", 1, 24),
+      board("greater", 12, "dots", 1, 26),
     ]),
   ],
   1: [
@@ -1013,15 +1013,15 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("equals", 10, "fact", 1, 20),
     ]),
     lvl(1, "g1-3", "Coin Counting", "math-2.time-money", "Skill: adding coins up. The big one with a cross is a quarter (25), the one with a bar is a nickel (5), the little plain one is a dime (10), and the copper one is a penny (1).", [
-      board("less", 20, "coins", 1, 50),
+      board("less", 9, "coins", 1, 50),
       board("greater", 25, "coins", 1, 60),
       board("greater", 40, "coins", 1, 80),
     ]),
   ],
   2: [
     lvl(2, "g2-0", "Facts to Twenty", "math-2.facts-20", "Skill: adding and taking away within twenty. Same game, bigger numbers - and the ones that cross ten are the ones worth knowing.", [
-      board("equals", 12, "fact", 1, 24),
-      board("equals", 15, "fact", 1, 28),
+      board("equals", 9, "fact", 1, 24),
+      board("equals", 14, "fact", 1, 28),
       board("equals", 18, "fact", 1, 32),
     ]),
     lvl(2, "g2-1", "Skip Counting", "math-2.skip-odd-even", "Skill: counting by 2s, 5s and 10s. Every number you land on while skip counting is a multiple.", [
@@ -1035,15 +1035,15 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("digitIs", 3, "plain", 100, 999, { of: 100 }),
     ]),
     lvl(2, "g2-3", "Fill the Purse", "math-2.time-money", "Skill: adding coins and comparing the totals. Quarter is the big one with a cross, nickel has a bar, the little plain one is a dime, copper is a penny - and five coins can be worth less than two.", [
-      board("greater", 35, "coins", 1, 90),
+      board("less", 9, "coins", 1, 90),
       board("less", 50, "coins", 1, 95),
       board("greater", 60, "coins", 1, 99),
     ]),
   ],
   3: [
     lvl(3, "g3-1", "Times Table Trail", "g3.mult-facts", "Skill: knowing your times tables by heart. Every square is a multiplication to work out. Eat the ones worth the number at the top.", [
-      board("equals", 12, "fact", 2, 48),
-      board("equals", 18, "fact", 2, 60),
+      board("equals", 6, "fact", 2, 48),
+      board("equals", 12, "fact", 2, 60),
       board("equals", 24, "fact", 2, 72),
     ]),
     lvl(3, "g3-2", "Multiple Marsh", "g3.mult-facts", "Skill: spotting multiples. A multiple of 4 is a number you land on when you count by 4s: 4, 8, 12, 16...", [
@@ -1062,7 +1062,7 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("equivalent", 1 / 3, "fraction", 2, 24, { frac: { n: 1, d: 3 } }),
     ]),
     lvl(3, "g3-4", "More or Less", "g3.add-sub-1000", "Skill: adding, subtracting and comparing. Work out each sum first, then decide whether it is small enough to eat.", [
-      board("less", 20, "fact", 1, 60),
+      board("less", 9, "fact", 1, 60),
       board("greater", 50, "fact", 10, 120),
       board("less", 100, "fact", 40, 220),
     ]),
@@ -1079,7 +1079,7 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("greater", 1, "fraction", 2, 18),
     ]),
     lvl(4, "g4-1", "Factor Forest", "g4.factors-primes", "Skill: finding factors. A factor divides the number at the top with nothing left over. 6 is a factor of 24 because 24 ÷ 6 = 4.", [
-      board("factors", 12, "plain", 1, 32),
+      board("multiples", 4, "plain", 1, 40),
       board("factors", 24, "plain", 1, 36),
       board("factors", 36, "plain", 1, 42),
     ]),
@@ -1094,7 +1094,7 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("composites", 0, "plain", 2, 120),
     ]),
     lvl(4, "g4-4", "Product Pass", "g4.mult-multidigit", "Skill: multiplying bigger numbers. Work out each product, then eat the ones that match the number at the top.", [
-      board("equals", 36, "fact", 5, 90),
+      board("equals", 9, "fact", 5, 90),
       board("equals", 60, "fact", 10, 140),
       board("equals", 84, "fact", 10, 180),
     ]),
@@ -1106,7 +1106,7 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("multiples", 12, "plain", 5, 144),
     ]),
     lvl(5, "g5-2", "Factor Falls", "g4.factors-primes", "Skill: factors of bigger numbers. Try each one: does it divide the number at the top with nothing left over?", [
-      board("factors", 60, "plain", 1, 64),
+      board("multiples", 9, "plain", 1, 70),
       board("factors", 72, "plain", 1, 76),
       board("factors", 84, "plain", 1, 88),
     ]),
@@ -1116,12 +1116,12 @@ export const CHOMPER_LEVELS: Record<number, ChomperLevel[]> = {
       board("simplest", 0, "fraction", 2, 20),
     ]),
     lvl(5, "g5-6", "Percent Pursuit", "g6.percent", "Skill: finding a percent of a number. To find 25% of 80, find 1% first - that is 80 ÷ 100 - then take 25 of them.", [
-      board("percentOf", 50, "fact", 1, 50, { of: 20 }),
+      board("percentOf", 50, "fact", 1, 50, { of: 16 }),
       board("percentOf", 25, "fact", 1, 60, { of: 80 }),
       board("percentOf", 10, "fact", 1, 90, { of: 300 }),
     ]),
     lvl(5, "g5-3", "Order of Operations", "g5.order-of-operations", "Skill: the order of operations. Multiply and divide before you add and subtract, so 4 + 2 × 8 is 20, not 48.", [
-      board("equals", 20, "twostep", 5, 60),
+      board("equals", 9, "twostep", 5, 60),
       board("equals", 30, "twostep", 5, 80),
       board("equals", 45, "twostep", 5, 99),
     ]),
@@ -1156,12 +1156,12 @@ export const BAND_ONLY_LEVELS: ChomperLevel[] = [
     board("less", 100, "power", 4, 1000),
   ]),
   lvl(6, "b-common", "Common Ground", "g6.gcf-lcm", "Skill: common multiples and common factors. A number has to work for both, not just one of them.", [
+    board("commonMultiples", 2, "plain", 1, 70, { of: 3 }),
     board("commonFactors", 48, "plain", 1, 50, { of: 72 }),
-    board("commonMultiples", 4, "plain", 1, 130, { of: 6 }),
     board("commonMultiples", 6, "plain", 1, 250, { of: 8 }),
   ]),
   lvl(7, "b-xmarks", "X Marks the Spot", "g6.evaluate-expressions", "Skill: working out an expression once you know what x is. Put the number where the x is, then do the sum.", [
-    board("evaluates", 20, "variable", 1, 60, { of: 5 }),
+    board("evaluates", 8, "variable", 1, 60, { of: 2 }),
     board("evaluates", 24, "variable", 1, 80, { of: 3 }),
     board("evaluates", 36, "variable", 1, 90, { of: 6 }),
   ]),
@@ -1225,12 +1225,29 @@ export interface BoardMove {
  * lets the screen and the server, which see the game at completely different
  * moments, land on the same answer.
  */
-export function playBoard(board: Board, mv: BoardMove, lives: number): ChomperState {
+/**
+ * The seed for a given try at a board. Every try gets its own numbers: a kid
+ * who has just lost one should be solving the thing again, not remembering
+ * where the right squares were last time.
+ */
+export const trySeed = (seed: number, tryNo: number) => ((seed >>> 0) + tryNo * 7919) % 2147483647;
+
+export function playBoard(spec: BoardSpec, boardIndex: number, mv: BoardMove, lives: number): ChomperState {
   const quick = !!mv.quick;
+  let tryNo = 0;
+  let board = buildBoard(spec, boardIndex, trySeed(mv.seed, tryNo));
   let st = startState(board, lives);
   for (const a of mv.acts) {
+    const had = st.lives;
     st = step(board, st, a, quick);
     if (st.over || st.cleared) break;
+    if (st.lives < had) {
+      // A fresh set of numbers for the fresh try, and the Grumbles that come
+      // with them.
+      tryNo++;
+      board = buildBoard(spec, boardIndex, trySeed(mv.seed, tryNo));
+      st = { ...st, foes: board.grumbles.map((g) => ({ ...g })) };
+    }
   }
   return st;
 }
@@ -1288,9 +1305,8 @@ export function replay(level: ChomperLevel, raw: unknown): { boards: BoardResult
   const boards = level.boards.map((spec, i) => {
     const mv = moves[i];
     if (!mv) return { points: 0, max: maxFor(spec), cleared: false, wrong: 0, caught: 0, eaten: 0 };
-    const b = buildBoard(spec, i, mv.seed);
     // A fresh set of lives for every board.
-    const st = playBoard(b, mv, mv.easy ? EASY_LIVES : LIVES);
+    const st = playBoard(spec, i, mv, mv.easy ? EASY_LIVES : LIVES);
     lives = st.lives;
     // The best of the tries, so an earlier good run is never thrown away by
     // a worse one afterwards.

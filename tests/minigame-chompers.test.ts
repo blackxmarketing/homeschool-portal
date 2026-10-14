@@ -48,6 +48,7 @@ import {
   placeName,
   starsFor,
   STRIKES,
+  trySeed,
   startState,
   step,
   tick,
@@ -655,25 +656,42 @@ describe("scoring a level", () => {
     }
   });
 
-  it("ends a board when the tries are gone, but the next board starts fresh", () => {
+  it("does not let a lost board take the rest of the level with it", () => {
+    // Three stars opens the next rung, so a board lost to bad luck must
+    // not lock the ladder behind it.
     const level = levelById("g4-2")!;
-    const b = buildBoard(level.boards[0], 0, 1);
-    const bad = b.cells.findIndex((c) => !c.ok);
-    const to: Act[] = [];
-    for (let i = 0; i < Math.abs((bad % COLS) - 2); i++) to.push(bad % COLS > 2 ? "right" : "left");
-    for (let i = 0; i < Math.abs(Math.floor(bad / COLS) - 2); i++) to.push(Math.floor(bad / COLS) > 2 ? "down" : "up");
-    const kill = Array.from({ length: LIVES * STRIKES }, () => [...to, "munch" as Act]).flat();
-    const r = replay(level, [{ seed: 1, acts: kill }, ...perfectMoves(level).slice(1)]);
+    const moves = perfectMoves(level);
+    const r = replay(level, [{ seed: moves[0].seed, acts: [] }, ...moves.slice(1)]);
     expect(r.boards[0].points).toBe(0);
-    // Three strikes a try, three tries - and a Grumble catching you on the
-    // way to the wrong square counts towards them just the same.
-    expect(r.boards[0].wrong + r.boards[0].caught).toBe(LIVES * STRIKES);
-    // Losing board one does not take the rest of the level with it. Three
-    // stars opens the next rung, so a board lost to bad luck must not lock
-    // the ladder behind it.
+    expect(r.boards[0].cleared).toBe(false);
     expect(r.boards[1].points).toBeGreaterThan(0);
+    expect(r.boards[2].points).toBeGreaterThan(0);
   });
 
+  it("ends the board once every try is spent", () => {
+    // Strikes land wherever the numbers fall - every try is a fresh board -
+    // so this counts them as they happen rather than from a route worked
+    // out in advance.
+    const level = levelById("g4-2")!;
+    let spent = 0;
+    let board = buildBoard(level.boards[0], 0, trySeed(1, 0));
+    let st = startState(board);
+    for (let n = 0; n < 400 && !st.over; n++) {
+      const bad = board.cells.findIndex((c, i) => !c.ok && !st.eaten[i]);
+      st = { ...st, x: bad % COLS, y: Math.floor(bad / COLS) };
+      const had = st.lives;
+      st = step(board, st, "munch");
+      if (st.lives < had) {
+        spent++;
+        board = buildBoard(level.boards[0], 0, trySeed(1, spent));
+        st = { ...st, foes: board.grumbles.map((g) => ({ ...g })) };
+      }
+    }
+    expect(st.over).toBe(true);
+    expect(st.lives).toBe(0);
+    expect(spent, "every try should have been spent").toBe(LIVES);
+    expect(st.wrong).toBe(LIVES * STRIKES);
+  });
   it("eases off for a kid who is still stuck on the third go", () => {
     const level = ALL_CHOMPER_LEVELS[0];
     const moves = perfectMoves(level).map((m) => ({ ...m, easy: true }));
@@ -711,9 +729,9 @@ describe("when the Grumbles get their turn", () => {
   it("gives them nothing at all while the kid sits and thinks", () => {
     // They move with the board, not against a clock. Working an answer out
     // costs nothing, which is what the clock on the board is for.
-    const st = playBoard(board, { seed: 1, acts: [] }, LIVES);
+    const st = playBoard(level.boards[1], 1, { seed: 1, acts: [] }, LIVES);
     expect(st.phase).toBe(0);
-    expect(st.foes).toEqual(board.grumbles);
+    expect(st.foes).toEqual(buildBoard(level.boards[1], 1, 1).grumbles);
   });
 
   it("counts a munch and a step into the wall as turns, the same as a move", () => {
@@ -726,12 +744,24 @@ describe("when the Grumbles get their turn", () => {
     expect(st.phase).toBe(1);
   });
 
+  it("deals a fresh set of numbers for every try at a board", () => {
+    // A kid who has just lost a try should be solving it again, not
+    // remembering which squares were right last time.
+    const spec = level.boards[0];
+    const seeds = [0, 1, 2].map((t) => trySeed(5, t));
+    expect(new Set(seeds).size, "every try should get its own seed").toBe(3);
+    const boards = seeds.map((sd) => buildBoard(spec, 0, sd).cells.map((c) => c.text).join("|"));
+    expect(new Set(boards).size, "every try should get its own numbers").toBe(3);
+    // The rule, though, stays exactly the same - it is the same skill.
+    const labels = seeds.map((sd) => buildBoard(spec, 0, sd).label);
+    expect(new Set(labels).size).toBe(1);
+  });
+
   it("moves them oftener in Quick mode, which is all it changes", () => {
     // Board one has a roamer and no hunter, so nothing resets the count.
-    const calm = buildBoard(level.boards[0], 0, 1);
     const acts = Array<Act>(12).fill("left");
-    const quick = playBoard(calm, { seed: 1, acts, quick: true }, LIVES);
-    const steady = playBoard(calm, { seed: 1, acts }, LIVES);
+    const quick = playBoard(level.boards[0], 0, { seed: 1, acts, quick: true }, LIVES);
+    const steady = playBoard(level.boards[0], 0, { seed: 1, acts }, LIVES);
     expect(steady.phase).toBe(Math.floor(acts.length / MONSTER_EVERY));
     expect(quick.phase).toBeGreaterThan(steady.phase);
   });

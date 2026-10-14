@@ -19,6 +19,7 @@ import {
   levelById,
   startState,
   step,
+  trySeed,
   hunting,
   teachFor,
   type Act,
@@ -124,7 +125,13 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
   const sent = useRef(false);
   const card = useRef<HTMLDivElement>(null);
 
-  const board: Board = useMemo(() => buildBoard(level.boards[bi], bi, seed), [level, bi, seed]);
+  /**
+   * Which try this is at the board. Every try is a fresh set of numbers: a
+   * kid who has just lost one should be solving it again, not remembering
+   * where the right squares were.
+   */
+  const [tryNo, setTryNo] = useState(0);
+  const board: Board = useMemo(() => buildBoard(level.boards[bi], bi, trySeed(seed, tryNo)), [level, bi, seed, tryNo]);
   const bankedTotal = banked.reduce((t, n) => t + n, 0);
 
   /** Plays one turn, and moves on when the board is finished with. */
@@ -134,8 +141,17 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
       if (cur.over || cur.cleared) return;
       const next = step(board, cur, a, quick);
       if (next === cur) return;
-      live.current = next;
-      setSt(next);
+      if (next.lives < cur.lives && !next.over) {
+        // A try gone: new numbers, and the Grumbles that come with them.
+        const fresh = buildBoard(level.boards[bi], bi, trySeed(seed, tryNo + 1));
+        const reset = { ...next, foes: fresh.grumbles.map((g) => ({ ...g })) };
+        setTryNo(tryNo + 1);
+        live.current = reset;
+        setSt(reset);
+      } else {
+        live.current = next;
+        setSt(next);
+      }
       setActs((xs) => [...xs, a]);
       const what = next.last;
       if (what?.kind === "right") {
@@ -154,7 +170,7 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
       if (next.cleared) chime("streak");
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [board, quick],
+    [board, quick, tryNo, seed, bi, level],
   );
 
   /**
@@ -253,6 +269,7 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
       const nextSeed = newSeed();
       setBi(bi + 1);
       setSeed(nextSeed);
+      setTryNo(0);
       setActs([]);
       setNote(null);
       const fresh = startState(buildBoard(level.boards[bi + 1], bi + 1, nextSeed), lives);
