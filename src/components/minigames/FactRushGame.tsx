@@ -18,14 +18,14 @@ import {
   PACES,
   biomeFor,
   cloudGrid,
-  DUNGEON_PRICE,
-  coinOn,
-  coinPieceGrid,
+  fireballOn,
+  fireballGrid,
   dragonGrid,
   hazardAt,
   hillGrid,
   holeGrid,
   CHASE_FROM,
+  DRAGON_HITS,
   CREEP_PER_SEC,
   LIVES,
   mountainGrid,
@@ -48,6 +48,7 @@ import {
 } from "@/lib/minigames/factrush";
 import { heroGrid, petGrid, DEFAULT_HERO, type Hero } from "@/lib/pixel/hero";
 import { unlockName } from "@/lib/pixel/cosmetics";
+import DragonFight from "./DragonFight";
 import TeacherBrief from "./TeacherBrief";
 import type { MiniGameUIProps } from "./types";
 import css from "./FactRushGame.module.css";
@@ -62,7 +63,7 @@ const CAGE = [cageGrid(false), cageGrid(true)];
 const TORCH = [torchGrid(0), torchGrid(1)];
 const STONE = stoneGrid();
 const TOKEN = [tokenGrid(0), tokenGrid(1)];
-const COIN = [coinPieceGrid(0), coinPieceGrid(1)];
+const COIN = [fireballGrid(0), fireballGrid(1)];
 const MOUNTAIN = mountainGrid();
 const RIVER = riverGrid();
 const HOLE = holeGrid();
@@ -127,6 +128,26 @@ function FactRush({
   const [count, setCount] = useState<number | null>(null);
   const [asking, setAsking] = useState(false);
   const [example, setExample] = useState<ReturnType<typeof workedCard> | null>(null);
+  /** Fireballs thrown at the dragon, and whether it went down. */
+  const [thrown, setThrown] = useState(0);
+  const [dragonDown, setDragonDown] = useState(false);
+  /** True while they are back on the cards because they ran out of fire. */
+  const [reloading, setReloading] = useState(false);
+  /** The coach explains the fight before it starts, over the top of it. */
+  const [fightOn, setFightOn] = useState(false);
+  const [fightCount, setFightCount] = useState<number | null>(null);
+  /**
+   * Lives left in the fight.
+   *
+   * The dragon's fire costs one, but unlike everywhere else in the level it
+   * does not send them back to the start - they pick themselves up and carry
+   * on. Only running out of all three ends it, and then the pet stays caged.
+   *
+   * It is counted here rather than in the replay because the fight is the one
+   * thing the browser runs. Nothing is earned by it: running out only ever
+   * ends the run without the dragon beaten.
+   */
+  const [burns, setBurns] = useState(0);
 
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [typed, setTyped] = useState("");
@@ -160,7 +181,9 @@ function FactRush({
   const standing = (at: number) => at * posts;
   /** The furthest back the hunter ever gets, which is where it enters. */
   const maxGap = CHASE_FROM[pace] + (pace === "hard" ? 3 : 0);
-  const run = useMemo(() => play(level, { seed, answers, pace }, saved), [level, seed, answers, pace, saved]);
+  const run = useMemo(() => play(level, { seed, answers, pace, thrown, beat: dragonDown }, saved), [level, seed, answers, pace, saved, thrown, dragonDown]);
+  const fightLives = Math.max(0, run.lives - burns);
+  const fightLost = run.atDragon && !dragonDown && burns > 0 && fightLives <= 0;
   const card = run.head === null ? null : level.cards[run.head];
   /**
    * Where it has got to this instant.
@@ -171,8 +194,9 @@ function FactRush({
    */
   const gap =
     run.chase === null ? null : pace === "hard" ? run.chase - (CREEP_PER_SEC * Math.max(0, now - asked.current)) / 1000 : run.chase;
-  // Out of cards, out of lives, or out of patience.
-  const done = run.inPile === 0 || run.over || answers.length >= MAX_ASKS;
+  // Out of cards, out of lives, burned to nothing by the dragon, or out of
+  // patience.
+  const done = run.inPile === 0 || run.over || fightLost || answers.length >= MAX_ASKS;
 
   /**
    * The ref is what is typed; the state only draws it.
@@ -255,7 +279,7 @@ function FactRush({
     setBusy(true);
     void (async () => {
       try {
-        const r = await onFinish({ seed, answers, pace });
+        const r = await onFinish({ seed, answers, pace, thrown, beat: dragonDown });
         setResult({ stars: r.stars, xp: r.xp, score: r.score, level: r.level, rank: r.rank, unlocked: r.unlocked });
       } catch {
         setError("That run could not be saved. Check you are online.");
@@ -263,7 +287,7 @@ function FactRush({
         setBusy(false);
       }
     })();
-  }, [done, ready, onFinish, seed, answers, pace]);
+  }, [done, ready, onFinish, seed, answers, pace, thrown, dragonDown]);
 
   // Typing works as well as tapping: a keyboard is faster, and speed is points.
   useEffect(() => {
@@ -315,6 +339,23 @@ function FactRush({
     return () => clearInterval(id);
   }, [pace, ready, asking, done, count, run.chase]);
 
+  /** Three, two, one into the fight, same as into the level. */
+  useEffect(() => {
+    if (fightCount === null) return;
+    if (fightCount === 0) {
+      setFightCount(null);
+      setFightOn(true);
+      return;
+    }
+    const t = setTimeout(() => setFightCount((c) => (c === null ? null : c - 1)), 700);
+    return () => clearTimeout(t);
+  }, [fightCount]);
+
+  // Enough fire to go back at it.
+  useEffect(() => {
+    if (reloading && saved + run.fireballs - thrown > 0) setReloading(false);
+  }, [reloading, saved, run.fireballs, thrown]);
+
   // The reaction clears itself so the scene does not keep shouting.
   useEffect(() => {
     if (!beat) return;
@@ -332,7 +373,9 @@ function FactRush({
     return (
       <div className={`mg ${css.fr}`}>
         <div className="mg-result">
-          <h3 className="pixel-title">{run.finished ? "You got them out!" : run.over ? "Out of lives" : "Out of cards"}</h3>
+          <h3 className="pixel-title">
+            {run.finished ? "You got them out!" : run.over ? "Out of lives" : fightLost ? "The dragon won" : "Out of cards"}
+          </h3>
           <div className={css.rescued}>
             <PixelSprite grid={cagedPetGrid(pet, true)} scale={3} className={css.freed} />
           </div>
@@ -344,7 +387,8 @@ function FactRush({
             ))}
           </div>
           <p className="kmuted">
-            {run.posts} blocks run, {run.wrong} missed. {result.score ?? run.points} points.{run.over ? " Your pet is still in there - have another go." : ""}
+            {run.posts} blocks run, {run.wrong} missed. {result.score ?? run.points} points.
+            {run.over || fightLost ? " Your pet is still in there - have another go." : ""}
           </p>
           {result.xp > 0 ? (
             <p className="kmuted">+{result.xp} XP for new stars!</p>
@@ -385,12 +429,9 @@ function FactRush({
           <span className="chip" aria-label={`${STRIKES - run.strikes} mistakes before a life goes`}>
             ✗ {run.strikes} / {STRIKES}
           </span>
-          <span className="chip" aria-label={`${saved + run.coins} coins`}>
-            🪙 {saved + run.coins}
+          <span className="chip" aria-label={`${saved + run.fireballs - thrown} fireballs`}>
+            🔥 {Math.max(0, saved + run.fireballs - thrown)}
           </span>
-          {level.dungeon && (
-            <span className={`chip ${run.owed > 0 ? css.owing : ""}`}>{run.owed > 0 ? `Wants ${run.owed}` : "Paid!"}</span>
-          )}
           {run.big && <span className="chip">🍎 Big!</span>}
         </div>
 
@@ -442,6 +483,10 @@ function FactRush({
 
         {/* The level: your pet is in the cage at the far end, and every card
             you get right is another block closer to them. */}
+        {/* Once they are at the dragon the run is over and the pit takes the
+            screen, so a kid is not looking at two scenes at once. */}
+        {!(level.dungeon && run.atDragon) && (
+        <>
         {/* The level, seen through a camera that keeps the runner big and a
             third of the way in. It opens looking at the cage so a kid sees who
             they are running for, then sweeps back to the start. Every family
@@ -508,7 +553,7 @@ function FactRush({
               const h = biome.swim ? null : hazardAt(i);
               const ahead = standing(run.at) < i;
               const token = tokenOn(i) && ahead;
-              const coin = coinOn(i) && ahead;
+              const coin = fireballOn(i) && ahead;
               if (!h && !token && !coin) return null;
               return (
                 <span key={`h${i}`} className={css.at} style={{ left: `${i * BLOCK}px`, bottom: `${(biome.rise ?? 0) * i + 46}px` }}>
@@ -538,7 +583,7 @@ function FactRush({
             </span>
             {level.dungeon && !run.finished && (
               <span className={css.keeper} style={{ left: `${posts * BLOCK - 126}px`, bottom: `${(biome.rise ?? 0) * posts + 43}px` }}>
-                <span className={css.price}>🪙 {DUNGEON_PRICE}</span>
+                <span className={css.price}>🔥 {DRAGON_HITS[pace]}</span>
                 <PixelSprite grid={DRAGON[Math.floor(now / 620) % 2]} scale={4} />
               </span>
             )}
@@ -581,8 +626,56 @@ function FactRush({
           {shot === "cage" && <span className={css.shout}>Go and get them!</span>}
           {beat?.kind === "sprint" && <span className={css.shout}>Sprint!</span>}
         </div>
+        </>
+        )}
 
-        {ready && card && (
+        {ready && level.dungeon && run.atDragon && !dragonDown && !reloading && (
+          <div className={css.fightWrap}>
+            <DragonFight
+              pace={pace}
+              ammo={Math.max(0, saved + run.fireballs - thrown)}
+              lives={fightLives}
+              paused={!fightOn}
+              hero={runner[0]}
+              pet={pet}
+              onThrow={() => setThrown((t) => t + 1)}
+              onHurt={() => setBurns((b) => b + 1)}
+              onOutOfFire={() => setReloading(true)}
+              onWon={(t) => {
+                setThrown(t);
+                setDragonDown(true);
+              }}
+            />
+            {!fightOn && (
+              <div className={css.fightBrief}>
+                {fightCount === null ? (
+                  <TeacherBrief
+                    teacher={coach}
+                    directions={`The dragon has your pet and will not hand them over. Every card you got right is a fireball: you have ${Math.max(0, saved + run.fireballs - thrown)}. Space throws one. Arrows walk you about, Up jumps, Down ducks - it breathes fire back. ${DRAGON_HITS[pace]} hits and it is done.`}
+                    rule={level.title}
+                    levelId={level.id}
+                    board={0}
+                    seed={seed}
+                    canAsk={canAsk}
+                    stage="brief"
+                    onReady={() => {
+                      speak("fight-count", "Three. Two. One. Go!", { kind: coachLook.voice });
+                      setFightCount(3);
+                    }}
+                    onAsking={setAsking}
+                    onExample={showExample}
+                  />
+                ) : (
+                  <div className={css.fightCount} role="status" aria-live="assertive">
+                    <strong>{fightCount}</strong>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {ready && card && (!level.dungeon || !run.atDragon || reloading) && (
           <>
             <div className={css.cardRow}>
               <strong className={css.card}>{card.text}</strong>
@@ -592,10 +685,8 @@ function FactRush({
               </output>
             </div>
             <p className={`${css.teach} ${beat?.show ? css.teachOn : ""}`}>{beat?.show ?? " "}</p>
-            {run.paying ? (
-              <p className={css.owed}>
-                The monster has your pet and wants {DUNGEON_PRICE} coins. You are {run.owed} short - every card you get right is a coin.
-              </p>
+            {reloading ? (
+              <p className={css.owed}>Out of fire! Every card you get right is another fireball for the dragon.</p>
             ) : (
               <p className={css.hint}>Type the answer and press Enter or the space bar - quicker than tapping.</p>
             )}

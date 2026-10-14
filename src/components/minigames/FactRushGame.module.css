@@ -595,3 +595,26 @@
   padding: 4px 5px;
   box-shadow: 0 2px 0 var(--ink);
 }
+
+/* The coach, over the top of the fight, before it starts. */
+.fightWrap {
+  position: relative;
+}
+.fightBrief {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  background: rgba(27, 21, 48, 0.72);
+  border-radius: 4px;
+  overflow: auto;
+  z-index: 6;
+}
+.fightCount {
+  font-family: var(--font-pixel), monospace;
+  font-size: clamp(2rem, 12vw, 4.5rem);
+  color: #fffdf5;
+  text-shadow: 0 4px 0 var(--ink);
+}

@@ -20,7 +20,10 @@ import {
   CHASE_FROM,
   CHASE_LEN,
   CREEP_PER_SEC,
-  DUNGEON_PRICE,
+  DRAGON_BREATH_MS,
+  DRAGON_FIRE_SPEED,
+  DRAGON_HITS,
+  DRAGON_PACE,
   HUNTS,
   HUNT_GAP,
   LIVES,
@@ -364,14 +367,18 @@ describe("the dungeons", () => {
     }
   });
 
-  it("can be run clean for three stars by a kid who saved up for it", () => {
+  it("is only finished once the dragon is down, however well the cards went", () => {
     for (const d of dungeons) {
-      // A kid who worked through the twelve families walks in able to pay.
-      const r = replay(d, perfectMoves(d), DUNGEON_PRICE);
+      const clean = perfectMoves(d);
+      // Every card right, but the dragon is still standing.
+      expect(replay(d, clean).finished, `${d.id} was finished without the dragon`).toBe(false);
+      // Every card right and the dragon beaten with the fire they earned.
+      const won = { ...clean, thrown: DRAGON_HITS[clean.pace ?? "medium"], beat: true };
+      const r = replay(d, won);
       expect(r.finished, `${d.id} could not be finished`).toBe(true);
-      expect(r.posts).toBe(24);
+      expect(r.atDragon).toBe(true);
       expect(r.stars).toBe(3);
-      expect(factRush.score(d.id, perfectMoves(d), DUNGEON_PRICE)?.stars).toBe(3);
+      expect(factRush.score(d.id, won)?.stars).toBe(3);
     }
   });
 
@@ -645,70 +652,6 @@ describe("arriving at the pet", () => {
   });
 });
 
-describe("paying the monster for the pet", () => {
-  const dun = levelById("fr-adun")!;
-  const ordinary = levelById("fr-a5")!;
-
-  it("asks nothing on an ordinary level", () => {
-    const r = replay(ordinary, perfectMoves(ordinary, 2, "easy"));
-    expect(r.owed).toBe(0);
-    expect(r.paying).toBe(false);
-    expect(r.finished).toBe(true);
-  });
-
-  it("hands the pet over when they walk in with enough", () => {
-    const r = replay(dun, perfectMoves(dun, 2, "easy"), DUNGEON_PRICE);
-    expect(r.owed).toBe(0);
-    expect(r.finished).toBe(true);
-    expect(r.stars).toBe(3);
-  });
-
-  it("keeps dealing cards when they walk in short, until it is paid", () => {
-    // Nothing saved: they have to earn the whole price in the dungeon.
-    const level = dun;
-    const answers: { a: number | null; ms: number }[] = [];
-    let pile = openingPile(level, 5);
-    let coins = 0;
-    let guard = 0;
-    while (guard++ < MAX_ASKS) {
-      if (!pile.length) break;
-      answers.push({ a: level.cards[pile[0].i].answer, ms: 600 });
-      pile = afterAnswer(pile, true, needOf(level));
-      if (!pile.length && coins < DUNGEON_PRICE) {
-        coins++;
-        if (coins < DUNGEON_PRICE) pile = openingPile(level, 5 + coins + 1);
-      }
-    }
-    const r = play(level, { seed: 5, pace: "easy", answers }, 0);
-    // They were made to keep going rather than turned away.
-    expect(r.paying, "the monster never asked them for anything").toBe(true);
-    expect(answers.length, "a short kid should answer more than one hand").toBeGreaterThan(postsOn(level));
-  });
-
-  it("does not let them leave with the pet while they are short", () => {
-    // One clean hand of the dungeon, nothing saved: not enough to pay.
-    const r = play(dun, { seed: 5, pace: "easy", answers: perfectMoves(dun, 5, "easy").answers }, 0);
-    expect(r.owed, "the monster was paid in coins nobody earned").toBeGreaterThan(0);
-    expect(r.finished).toBe(false);
-  });
-
-  it("takes the price out of what they carry, and only when the pet is freed", () => {
-    const paid = factRush.coins!(dun.id, perfectMoves(dun, 2, "easy"), DUNGEON_PRICE);
-    // They picked some up on the way and the monster took its price.
-    expect(paid).toBeLessThan(0);
-    // An unfinished dungeon run costs them nothing.
-    const short = factRush.coins!(dun.id, { seed: 5, pace: "easy", answers: perfectMoves(dun, 5, "easy").answers }, 0);
-    expect(short).toBeGreaterThanOrEqual(0);
-    // An ordinary level only ever adds.
-    expect(factRush.coins!(ordinary.id, perfectMoves(ordinary, 2, "easy"), 0)).toBeGreaterThan(0);
-  });
-
-  it("cannot be paid by a browser claiming to be rich", () => {
-    // The balance is the server's argument, not anything in the move log.
-    const rich = { seed: 2, pace: "easy", answers: perfectMoves(dun, 2, "easy").answers, coins: 9999, saved: 9999 };
-    expect(replay(dun, rich, 0).owed, "a claimed balance paid the monster").toBeGreaterThan(0);
-  });
-});
 
 describe("the hunter", () => {
   const level = levelById("fr-x6")!;
@@ -1015,5 +958,72 @@ describe("the coach stops when they say they are ready", () => {
     const brief = fs.readFileSync(path.join(process.cwd(), "src/components/minigames/TeacherBrief.tsx"), "utf8");
     const ready = brief.slice(brief.indexOf("I&apos;m ready") - 500, brief.indexOf("I&apos;m ready"));
     expect(ready, "the ready button does not stop him reading").toContain("stopSpeaking()");
+  });
+});
+
+describe("the dragon fight, and what the browser may claim about it", () => {
+  const dun = levelById("fr-adun")!;
+  const clean = (pace: Pace = "medium") => perfectMoves(dun, 4, pace);
+
+  it("gives a fireball for every card got right", () => {
+    const r = replay(dun, clean());
+    // Two dozen cards answered, so at least two dozen fireballs, plus any
+    // lying on the ground.
+    expect(r.fireballs).toBeGreaterThanOrEqual(postsOn(dun));
+  });
+
+  it("will not take the browser's word that the dragon is dead", () => {
+    const pace: Pace = "medium";
+    const base = clean(pace);
+    // Beaten, but with fewer throws than the dragon has hit points.
+    const cheap = replay(dun, { ...base, thrown: DRAGON_HITS[pace] - 1, beat: true });
+    expect(cheap.finished, "a dragon went down to fewer hits than it has").toBe(false);
+    // Beaten with more fireballs than they ever earned.
+    const rich = replay(dun, { ...base, thrown: 9999, beat: true });
+    expect(rich.finished, "they threw fire they never earned").toBe(false);
+    // Beaten honestly.
+    expect(replay(dun, { ...base, thrown: DRAGON_HITS[pace], beat: true }).finished).toBe(true);
+  });
+
+  it("is harder to beat on a harder pace", () => {
+    expect(DRAGON_HITS.easy).toBeLessThan(DRAGON_HITS.medium);
+    expect(DRAGON_HITS.medium).toBeLessThan(DRAGON_HITS.hard);
+    // And it fights back faster and quicker off the mark.
+    expect(DRAGON_BREATH_MS.easy).toBeGreaterThan(DRAGON_BREATH_MS.hard);
+    expect(DRAGON_FIRE_SPEED.easy).toBeLessThan(DRAGON_FIRE_SPEED.hard);
+    expect(DRAGON_PACE.easy).toBeLessThan(DRAGON_PACE.hard);
+  });
+
+  it("says when they have run the cards and the dragon is in front of them", () => {
+    const part = { ...clean(), answers: clean().answers.slice(0, 5) };
+    expect(play(dun, part).atDragon, "it thinks they are at the dragon already").toBe(false);
+    expect(play(dun, clean()).atDragon, "they ran the whole way and it says they are not there").toBe(true);
+  });
+
+  it("keeps dealing cards while the dragon is up, so they can never be stuck", () => {
+    // Twice as many answers as the level is long: the dragon keeps dealing.
+    const many = { seed: 4, pace: "medium" as Pace, answers: [] as { a: number | null; ms: number }[] };
+    for (let i = 0; i < 60; i++) {
+      const r = play(dun, many);
+      if (r.head === null) break;
+      many.answers.push({ a: dun.cards[r.head].answer, ms: 700 });
+    }
+    expect(many.answers.length, "it stopped dealing and left them with nothing to answer").toBe(60);
+    expect(play(dun, many).fireballs).toBeGreaterThanOrEqual(60);
+  });
+
+  it("asks nothing of an ordinary level", () => {
+    const l = levelById("fr-a5")!;
+    const r = replay(l, perfectMoves(l));
+    expect(r.finished, "an ordinary level needs a dragon beaten").toBe(true);
+    expect(r.atDragon).toBe(true);
+  });
+
+  it("counts the fire they walk away with, less what they threw", () => {
+    const pace: Pace = "medium";
+    const base = clean(pace);
+    const spent = factRush.coins!(dun.id, { ...base, thrown: DRAGON_HITS[pace], beat: true }, 0);
+    const unspent = factRush.coins!(dun.id, base, 0);
+    expect(unspent - spent).toBe(DRAGON_HITS[pace]);
   });
 });

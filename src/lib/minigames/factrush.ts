@@ -294,22 +294,33 @@ export const TOKEN_EVERY = 7;
 export const tokenOn = (post: number) => post > 0 && post % TOKEN_EVERY === 0;
 
 /**
- * Coins lie on every third block that has no food on it.
+ * Fireballs lie on every third block that has no food on it.
  *
- * They are worth nothing to the running. They are for the monster at the end
- * of the set, who has the pet and wants paying.
+ * They are worth nothing to the running. They are ammunition for the dragon
+ * at the end of the set, which is sitting on the pet.
  */
-export const coinOn = (post: number) => post > 0 && post % 3 === 0 && !tokenOn(post);
+export const fireballOn = (post: number) => post > 0 && post % 3 === 0 && !tokenOn(post);
 
 /**
- * What the monster at the end of a set wants for the pet.
+ * How many fireballs have to land on the dragon before it gives the pet up,
+ * and how hard it fights back - all by the pace the kid chose.
  *
- * Twelve levels of running pays it comfortably, so a kid who has worked
- * through the set arrives able to afford their pet. One who skipped ahead
- * arrives short, and the monster deals them cards until they have earned the
- * difference - a coin a card. Nobody is turned away, they just pay in work.
+ * The fight itself runs in the browser, because it is a real-time scrap and
+ * nothing else in this game is. What the browser cannot invent is the
+ * ammunition: every fireball is a card answered right, which the server works
+ * out by replaying the answers. A kid may claim every throw hit, but they
+ * cannot claim a throw they never earned.
  */
-export const DUNGEON_PRICE = 20;
+export const DRAGON_HITS: Record<Pace, number> = { easy: 5, medium: 8, hard: 12 };
+
+/** How often it breathes fire, in milliseconds. */
+export const DRAGON_BREATH_MS: Record<Pace, number> = { easy: 2300, medium: 1600, hard: 1050 };
+
+/** How fast its fire travels across the floor, in pixels a second. */
+export const DRAGON_FIRE_SPEED: Record<Pace, number> = { easy: 170, medium: 240, hard: 330 };
+
+/** How fast it swims up and down and in and out, in cycles a second. */
+export const DRAGON_PACE: Record<Pace, number> = { easy: 0.22, medium: 0.34, hard: 0.5 };
 
 export type Hazard = "hole" | "river" | "mountain";
 
@@ -417,6 +428,10 @@ export interface FactMove {
   answers: Answer[];
   /** The pace the kid chose. It changes what can catch them, so it is scored. */
   pace?: Pace;
+  /** Fireballs thrown at the dragon. Never more than they earned. */
+  thrown?: number;
+  /** The browser's word that the dragon went down. Checked against the throws. */
+  beat?: boolean;
 }
 
 /** How fast that answer was, which is what the pet does about it. */
@@ -475,12 +490,12 @@ export interface Run {
   chase: number | null;
   /** How many times it has had them. */
   caught: number;
-  /** Coins picked up along the way, and spent at the end of a set. */
-  coins: number;
-  /** What the monster still wants, once they have reached it. 0 when paid. */
-  owed: number;
-  /** They are at the cage, working off what they still owe. */
-  paying: boolean;
+  /** Fireballs picked up along the way: one a card, one a pickup. */
+  fireballs: number;
+  /** True once they have run the whole way and the dragon is in front of them. */
+  atDragon: boolean;
+  /** The dragon is dealing them another hand because they ran out of fire. */
+  reloading: boolean;
   /** True on the answer that it caught them, for the screen to react to. */
   justCaught: boolean;
   /**
@@ -515,7 +530,7 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
   let justCaught = false;
   let justDied = false;
   let caught = 0;
-  let coins = 0;
+  let fire = 0;
   const total = postsOn(level);
   let at = 0;
   /** The last block they stood on, for working out what they have run past. */
@@ -542,10 +557,14 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
     died = true;
   };
 
-  /** What the monster wants here, and what they walked in with. */
-  const price = level.dungeon ? DUNGEON_PRICE : 0;
-  const purse = () => Math.max(0, saved) + coins;
-  let paying = false;
+  /** Fireballs in hand: what they walked in with, plus what they have earned. */
+  const ammo = () => Math.max(0, saved) + fire;
+  const beat = level.dungeon && move.beat === true;
+  /** True once the cards have been run through and the dragon is in front of them. */
+  let atDragon = false;
+  let reloading = false;
+  /** Hands the dragon has thrown down because they ran out of fire. */
+  let deals = 0;
 
   for (const ans of move.answers.slice(0, MAX_ASKS)) {
     const head = pile[0];
@@ -562,6 +581,9 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
     if (right) {
       posts++;
       points += pointsFor(ans.ms);
+      // Every card got right is a fireball. That is the whole supply line:
+      // the maths is where the ammunition comes from.
+      fire++;
     } else if (!idle) {
       wrong++;
       strikes++;
@@ -620,29 +642,42 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
 
     if (!idle) pile = afterAnswer(pile, right, needOf(level));
 
-    // At the cage and still short: the monster deals another hand, and every
-    // card they get right is a coin off what they owe.
-    if (pile.length === 0 && price > 0 && purse() < price) {
-      paying = true;
-      if (right) coins++;
-      if (purse() < price) pile = openingPile(level, move.seed + coins + 1);
+    // The end of the cards is the end of the run: the dragon is there.
+    if (pile.length === 0 && !atDragon) {
+      atDragon = true;
+      at = 1;
+    }
+    // While it is still standing, it keeps throwing down another hand - every
+    // card right is another fireball, so the way out is always to answer.
+    if (pile.length === 0 && level.dungeon && !beat) {
+      reloading = true;
+      deals++;
+      pile = openingPile(level, move.seed + 1009 + deals);
     }
 
     // How far along they are: the work done, never backwards - until they are
     // caught, which puts them back at the start line and starts it over.
-    const left = workLeft(pile, needOf(level));
-    at = Math.max(at, total > 0 ? Math.min(1, (total - left) / total) : 1);
+    if (!atDragon) {
+      const left = workLeft(pile, needOf(level));
+      at = Math.max(at, total > 0 ? Math.min(1, (total - left) / total) : 1);
+    }
 
     // Anything run over on the way: food makes them big, coins go in the purse.
     const now = Math.floor(at * total);
     for (let b = block + 1; b <= now; b++) {
       if (tokenOn(b)) big = true;
-      else if (coinOn(b)) coins++;
+      else if (fireballOn(b)) fire++;
     }
     block = now;
   }
-  const owed = Math.max(0, price - purse());
-  const finished = pile.length === 0 && !over && owed === 0;
+  /**
+   * The browser runs the fight, so it reports the throws and the kill - but
+   * every fireball had to be earned by answering, and a dragon cannot go down
+   * to fewer throws than it has hit points. Both are checked here.
+   */
+  const thrown = Math.max(0, Math.floor(Number(move.thrown ?? 0)) || 0);
+  const honest = thrown <= ammo() && thrown >= DRAGON_HITS[pace];
+  const finished = level.dungeon ? atDragon && beat === true && honest && !over : pile.length === 0 && !over;
   if (finished) points += FINISH_BONUS;
   return {
     posts,
@@ -657,9 +692,9 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
     inPile: pile.length,
     chase,
     caught,
-    coins,
-    owed,
-    paying,
+    fireballs: fire,
+    atDragon,
+    reloading,
     justCaught,
     justDied,
     pace,
@@ -678,7 +713,7 @@ export function starsFor(points: number, max: number): number {
 
 /** Junk in, zero out: every value coerced, every length capped, nothing thrown. */
 export function cleanMove(raw: unknown): FactMove {
-  const o = (raw ?? {}) as { seed?: unknown; answers?: unknown; pace?: unknown };
+  const o = (raw ?? {}) as { seed?: unknown; answers?: unknown; pace?: unknown; thrown?: unknown; beat?: unknown };
   const seed = Number.isFinite(Number(o.seed)) ? Math.abs(Math.floor(Number(o.seed))) % 2147483647 : 1;
   const list = Array.isArray(o.answers) ? o.answers.slice(0, MAX_ASKS) : [];
   const answers: Answer[] = [];
@@ -696,7 +731,9 @@ export function cleanMove(raw: unknown): FactMove {
     });
   }
   const pace = PACES.includes(o.pace as Pace) ? (o.pace as Pace) : "medium";
-  return { seed, answers, pace };
+  const t = Number(o.thrown);
+  const thrown = Number.isFinite(t) && t > 0 ? Math.min(Math.floor(t), MAX_ASKS) : 0;
+  return { seed, answers, pace, thrown, beat: o.beat === true };
 }
 
 export function replay(level: FactLevel, raw: unknown, saved = 0): Run & { max: number; stars: number } {
@@ -1017,15 +1054,19 @@ export function tokenGrid(frame = 0): Grid {
   return g;
 }
 
-/** A coin to pick up. It is for paying the monster at the end of the set. */
-export function coinPieceGrid(frame = 0): Grid {
+/**
+ * A fireball: ammunition for the dragon, and what the dragon throws back.
+ * Two frames, so a row of them flickers rather than sitting still.
+ */
+export function fireballGrid(frame = 0): Grid {
   const g = new Grid(10, 10);
-  // Turning edge-on and back, which is what makes a row of them read as coins.
-  const w = frame % 2 === 0 ? 9 : 5;
-  const x = Math.round((10 - w) / 2);
-  g.rect(x, 1, w, 8, "#b8860b");
-  g.rect(x + 1, 2, w - 2, 6, "#f2d24a");
-  g.rect(x + Math.floor(w / 2), 3, 1, 4, "#fff3bf");
+  const lick = frame % 2;
+  g.disc(5, 6, 4, "#e0453a");
+  g.disc(5, 6, 2.6, "#f2a516");
+  g.disc(5, 6, 1.2, "#ffe08a");
+  // A tail of flame, flicking between the two frames.
+  g.rect(4, lick ? 0 : 1, 2, 3, "#e0453a");
+  g.set(lick ? 3 : 6, 1, "#f2a516");
   return g;
 }
 
@@ -1195,8 +1236,9 @@ export const factRush: MiniGame = {
     if (!level) return 0;
     try {
       const r = replay(level, moves, saved);
-      // Picked up on the way, less what the monster took for the pet.
-      return r.coins - (level.dungeon && r.finished ? DUNGEON_PRICE : 0);
+      // Earned on the way, less whatever was thrown at the dragon.
+      const thrown = level.dungeon ? Math.max(0, Math.floor(Number(cleanMove(moves).thrown ?? 0)) || 0) : 0;
+      return r.fireballs - thrown;
     } catch {
       return 0;
     }
