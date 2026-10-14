@@ -1065,12 +1065,16 @@ export function holeGrid(): Grid {
  * construction: there is no layout left to get wrong.
  */
 export function cagedPetGrid(pet: Grid | null, open: boolean): Grid {
-  const g = cageGrid(open);
-  if (!pet) return g;
-  // Centred on the floor of the cage, which is 20 across and 20 down.
-  const x = Math.round((g.w - pet.w) / 2);
-  const y = g.h - 3 - pet.h;
-  return open ? g.draw(pet, x, y - 7) : g.draw(pet, x, y);
+  const cage = cageGrid(open);
+  if (!pet) return cage;
+  // The pet goes down first and the cage over the top of it, so the bars pass
+  // in front of them. Drawn the other way round the pet sat in front of its
+  // own cage, which looks like a pet standing next to a cage.
+  const g = new Grid(cage.w, cage.h);
+  const x = Math.round((cage.w - pet.w) / 2);
+  const y = cage.h - 3 - pet.h;
+  g.draw(pet, x, open ? y - 7 : y);
+  return g.draw(cage, 0, 0);
 }
 
 /** A torch on a dungeon wall: a bracket and a flame that flickers by frame. */
