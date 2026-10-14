@@ -570,12 +570,33 @@ export function SayButton({ id, text, label }: { id: string; text: string; label
 let audio: AudioContext | null = null;
 
 /** A short, soft chime: "right" (two rising notes), "streak" (three) or "oops" (one low note). */
-export function chime(kind: "right" | "streak" | "oops") {
+export function chime(kind: "right" | "streak" | "oops" | "caught") {
   if (typeof window === "undefined" || !loadPrefs().sounds) return;
   try {
     const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!Ctx) return;
     audio ??= new Ctx();
+
+    if (kind === "caught") {
+      // Something got you: a growl that slides downwards. Deliberately not the
+      // same as a wrong answer - one of them means you miscounted, the other
+      // means a monster is standing on your head, and a kid should be able to
+      // tell which without looking up.
+      const o = audio.createOscillator();
+      const g = audio.createGain();
+      const t = audio.currentTime;
+      o.type = "sawtooth";
+      o.frequency.setValueAtTime(300, t);
+      o.frequency.exponentialRampToValueAtTime(70, t + 0.42);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.16, t + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+      o.connect(g).connect(audio.destination);
+      o.start(t);
+      o.stop(t + 0.46);
+      return;
+    }
+
     const notes = kind === "right" ? [660, 880] : kind === "streak" ? [660, 880, 1175] : [220];
     notes.forEach((f, i) => {
       const o = audio!.createOscillator();

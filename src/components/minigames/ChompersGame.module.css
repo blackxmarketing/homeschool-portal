@@ -220,3 +220,9 @@
 .picked:hover {
   transform: translateY(2px);
 }
+
+/* The hunter, while it is actually hunting you. */
+.keen .sprite {
+  width: 92%;
+  filter: drop-shadow(0 0 3px rgba(214, 32, 44, 0.55));
+}

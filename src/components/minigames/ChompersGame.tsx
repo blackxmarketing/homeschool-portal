@@ -11,7 +11,6 @@ import {
   LIVES,
   STRIKES,
   maxForLevel,
-  QUICK_TICK_MS,
   buildBoard,
   chomperGrid,
   coinsGrid,
@@ -20,6 +19,7 @@ import {
   levelById,
   startState,
   step,
+  hunting,
   teachFor,
   tick,
   type Act,
@@ -38,6 +38,7 @@ const GRUMBLE: Record<string, ReturnType<typeof grumbleGrid>[]> = {
   plodder: [grumbleGrid("plodder", 0), grumbleGrid("plodder", 1)],
   rover: [grumbleGrid("rover", 0), grumbleGrid("rover", 1)],
   chaser: [grumbleGrid("chaser", 0), grumbleGrid("chaser", 1)],
+  calm: [grumbleGrid("chaser", 0, true), grumbleGrid("chaser", 1, true)],
 };
 
 /**
@@ -78,6 +79,13 @@ export default function ChompersGame({ levelId, onFinish, stars, plays }: MiniGa
   return level ? <Chompers level={level} onFinish={onFinish} earned={stars ?? 0} plays={plays ?? 0} /> : null;
 }
 
+/** What to say when something catches you. Only mention the square if one really went back. */
+function caughtLine(strikes: number, gaveBack: boolean, walkedInto: boolean): string {
+  if (strikes === 0) return "Got you - that's three. The board starts again.";
+  const how = walkedInto ? "You walked into one!" : "Got you!";
+  return gaveBack ? `${how} That square goes back on the board.` : `${how} Back to the middle.`;
+}
+
 function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onFinish: MiniGameUIProps["onFinish"]; earned: number; plays: number }) {
   /** Quick mode is the reward for having shown you know this one. */
   const mayGoQuick = earned >= 3;
@@ -92,12 +100,10 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
   const lives = untimed ? EASY_LIVES : LIVES;
   const [bi, setBi] = useState(0);
   const [seed, setSeed] = useState(newSeed);
-  /** Quick mode only: when this board started, and when each move happened. */
-  const started = useRef(0);
+  /** When this board started, and when each move happened, in milliseconds. */
+  const started = useRef(performance.now());
   const times = useRef<number[]>([]);
-  /** Where the clock had got to when the last life was lost. */
-  const base = useRef(0);
-  const [st, setSt] = useState<ChomperState>(() => startState(buildBoard(level.boards[0], 0, seed), lives));
+  const [st, setSt] = useState<ChomperState>(() => startState(buildBoard(level.boards[0], 0, seed), lives, false));
   const [done, setDone] = useState<BoardMove[]>([]);
   /** Points from the boards already finished. */
   const [banked, setBanked] = useState<number[]>([]);
@@ -130,19 +136,14 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
     (a: Act) => {
       let cur = live.current;
       if (cur.over || cur.cleared) return;
-      let at = 0;
-      if (quick) {
-        at = Math.round(performance.now() - started.current);
-        cur = catchUp(at);
-        if (cur.over || cur.cleared) return;
-      }
-      const lives0 = cur.lives;
-      const next = step(board, cur, a, !quick);
+      // Bring the Grumbles up to now first, then move - the same order the
+      // server replays in, or the two would see different boards.
+      const at = Math.round(performance.now() - started.current);
+      cur = catchUp(at);
+      if (cur.over || cur.cleared) return;
+      const next = step(board, cur, a, at, quick);
       if (next === cur) return;
-      if (quick) {
-        if (next.lives < lives0) base.current = at;
-        times.current = [...times.current, at];
-      }
+      times.current = [...times.current, at];
       live.current = next;
       setSt(next);
       setActs((xs) => [...xs, a]);
@@ -157,8 +158,8 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
         chime("oops");
       } else if (what?.kind === "caught") {
         setFace(2);
-        setNote(next.strikes === 0 ? "A Grumble got you - that's three. The board starts again." : "A Grumble got you! Back to the middle.");
-        chime("oops");
+        setNote(caughtLine(next.strikes, next.last?.cell != null, true));
+        chime("caught");
       }
       if (next.cleared) chime("streak");
     },
@@ -181,37 +182,43 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
   }, []);
 
   /**
-   * Quick mode: walk the Grumbles forward to where the clock says they are.
-   * Exactly the loop the server runs when it re-scores the game, including
-   * how a lost life restarts the clock - at the tick it happened on, not at
-   * the moment this browser happened to notice.
+   * Walk the Grumbles forward to wherever their own clock has got to. This is
+   * the identical loop the server runs when it re-scores the game, which is
+   * what lets a browser and a server that see the board at completely
+   * different moments agree on what happened.
    */
   const catchUp = useCallback(
     (to: number) => {
       let cur = live.current;
-      while (!cur.over && !cur.cleared) {
-        const next = base.current + (cur.phase + 1) * QUICK_TICK_MS;
-        if (next > to) break;
-        const lives0 = cur.lives;
-        const after = tick(board, cur);
-        if (after.lives < lives0) {
-          base.current = next;
-          chime("oops");
+      while (!cur.over && !cur.cleared && cur.dueAt <= to) {
+        const after = tick(board, cur, quick);
+        if (after.caught > cur.caught) {
+          chime("caught");
+          setFace(2);
+          setNote(caughtLine(after.strikes, after.last?.cell != null, false));
         }
         cur = after;
       }
       if (cur !== live.current) {
         live.current = cur;
         setSt(cur);
-        if (cur.last?.kind === "caught") {
-          setFace(2);
-          setNote("A Grumble got you! Back to the middle.");
-        }
       }
       return cur;
     },
-    [board],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [board, quick],
   );
+
+  /**
+   * The Grumbles keep their own time, so something has to drive it even when
+   * the kid is sitting still working the answer out. That is the point: this
+   * is what makes standing and staring unsafe.
+   */
+  useEffect(() => {
+    if (over) return;
+    const id = setInterval(() => catchUp(Math.round(performance.now() - started.current)), 100);
+    return () => clearInterval(id);
+  }, [over, catchUp, bi]);
 
   /**
    * Switching speed restarts this board's clock. Only offered before the
@@ -221,8 +228,10 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
   function goQuick(on: boolean) {
     if (acts.length) return;
     times.current = [];
-    base.current = 0;
     started.current = performance.now();
+    const fresh = startState(board, st.lives, on);
+    live.current = fresh;
+    setSt(fresh);
     setQuick(on);
   }
 
@@ -306,7 +315,14 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
   // Board over: bank it, then either set up the next one or send the lot off.
   useEffect(() => {
     if (!st.cleared && !st.over) return;
-    const move: BoardMove = quick ? { seed, acts, times: times.current, endMs: Math.round(performance.now() - started.current), ...(untimed && { easy: true }) } : { seed, acts, ...(untimed && { easy: true }) };
+    const move: BoardMove = {
+      seed,
+      acts,
+      times: times.current,
+      endMs: Math.round(performance.now() - started.current),
+      ...(untimed && { easy: true }),
+      ...(quick && { quick: true }),
+    };
     const all = [...done, move];
     const pts = [...banked, st.points];
     const cleared = clears + (st.cleared ? 1 : 0);
@@ -328,9 +344,8 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
       setActs([]);
       setNote(null);
       times.current = [];
-      base.current = 0;
       started.current = performance.now();
-      const fresh = startState(buildBoard(level.boards[bi + 1], bi + 1, nextSeed), lives);
+      const fresh = startState(buildBoard(level.boards[bi + 1], bi + 1, nextSeed), lives, quick);
       live.current = fresh;
       setSt(fresh);
     }, 1400);
@@ -456,11 +471,17 @@ function Chompers({ level, onFinish, earned, plays }: { level: ChomperLevel; onF
         </div>
 
         <div className={css.actors} aria-hidden>
-          {st.foes.map((g, i) => (
-            <div key={i} className={css.actor} style={{ gridColumn: g.x + 1, gridRow: g.y + 1 }}>
-              <PixelSprite grid={GRUMBLE[g.kind][st.phase % 2]} scale={1} className={css.sprite} />
-            </div>
-          ))}
+          {st.foes.map((g, i) => {
+            // A hunter off the scent is drawn calm, so the rhythm of it
+            // coming after you and then losing interest is something a kid
+            // can see rather than something that just happens to them.
+            const keen = g.kind !== "chaser" || hunting(st.phase);
+            return (
+              <div key={i} className={`${css.actor} ${g.kind === "chaser" && keen ? css.keen : ""}`} style={{ gridColumn: g.x + 1, gridRow: g.y + 1 }}>
+                <PixelSprite grid={GRUMBLE[keen ? g.kind : "calm"][st.phase % 2]} scale={1} className={css.sprite} />
+              </div>
+            );
+          })}
           <div className={css.actor} style={{ gridColumn: st.x + 1, gridRow: st.y + 1 }}>
             <PixelSprite grid={CHOMPER[face]} scale={1} className={css.sprite} />
           </div>
