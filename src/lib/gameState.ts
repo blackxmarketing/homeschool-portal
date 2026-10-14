@@ -205,3 +205,23 @@ export function saveGamePlacement(kidId: number, game: string, rung: number): vo
     .prepare("INSERT INTO game_placement (kid_id, game, rung) VALUES (?, ?, ?) ON CONFLICT (kid_id, game) DO UPDATE SET rung = excluded.rung, at = datetime('now')")
     .run(kidId, game, Math.max(0, Math.round(rung)));
 }
+
+/** Coins a kid is carrying in a game. They survive from level to level. */
+export function gameCoins(kidId: number, game: string): number {
+  const row = getDb().prepare("SELECT coins FROM game_coins WHERE kid_id = ? AND game = ?").get(kidId, game) as { coins: number } | undefined;
+  return row?.coins ?? 0;
+}
+
+/**
+ * Adds to (or spends from) what a kid is carrying. Never goes below nothing,
+ * and the number comes from a replayed run, never from the browser.
+ */
+export function addGameCoins(kidId: number, game: string, delta: number): number {
+  const now = Math.max(0, gameCoins(kidId, game) + Math.trunc(delta));
+  getDb()
+    .prepare(
+      "INSERT INTO game_coins (kid_id, game, coins) VALUES (?, ?, ?) ON CONFLICT(kid_id, game) DO UPDATE SET coins = excluded.coins, at = datetime('now')",
+    )
+    .run(kidId, game, now);
+  return now;
+}

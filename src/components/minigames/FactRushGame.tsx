@@ -19,6 +19,7 @@ import {
   beastGrid,
   biomeFor,
   cloudGrid,
+  DUNGEON_PRICE,
   coinOn,
   coinPieceGrid,
   hazardAt,
@@ -68,9 +69,9 @@ const CAMERA_AT = 0.3;
 
 const HAZARD_ART: Record<Hazard, ReturnType<typeof holeGrid>> = { hole: HOLE, river: RIVER, mountain: MOUNTAIN };
 
-export default function FactRushGame({ levelId, onFinish, stars, plays, hero, canAsk }: MiniGameUIProps) {
+export default function FactRushGame({ levelId, onFinish, stars, plays, hero, coins, canAsk }: MiniGameUIProps) {
   const level = levelById(levelId);
-  return level ? <FactRush level={level} onFinish={onFinish} earned={stars ?? 0} plays={plays ?? 0} hero={hero} canAsk={!!canAsk} /> : null;
+  return level ? <FactRush level={level} onFinish={onFinish} earned={stars ?? 0} plays={plays ?? 0} hero={hero} saved={coins ?? 0} canAsk={!!canAsk} /> : null;
 }
 
 const newSeed = () => Math.floor(Math.random() * 2 ** 31);
@@ -79,6 +80,7 @@ function FactRush({
   level,
   onFinish,
   hero,
+  saved,
   canAsk,
 }: {
   level: FactLevel;
@@ -86,6 +88,8 @@ function FactRush({
   earned: number;
   plays: number;
   hero?: Hero;
+  /** Coins carried in from the levels before this one. */
+  saved: number;
   canAsk: boolean;
 }) {
   const who = hero ?? DEFAULT_HERO;
@@ -136,7 +140,7 @@ function FactRush({
   /** Which block they are standing on: how far along, in blocks. */
   const standing = (at: number) => at * posts;
   const card = pile[0] ? level.cards[pile[0].i] : null;
-  const run = useMemo(() => play(level, { seed, answers, pace }), [level, seed, answers, pace]);
+  const run = useMemo(() => play(level, { seed, answers, pace }, saved), [level, seed, answers, pace, saved]);
   // Out of cards, out of lives, or out of patience.
   const done = pile.length === 0 || run.over || answers.length >= MAX_ASKS;
 
@@ -288,9 +292,12 @@ function FactRush({
           <span className="chip" aria-label={`${STRIKES - run.strikes} mistakes before a life goes`}>
             ✗ {run.strikes} / {STRIKES}
           </span>
-          <span className="chip" aria-label={`${run.coins} coins`}>
-            🪙 {run.coins}
+          <span className="chip" aria-label={`${saved + run.coins} coins`}>
+            🪙 {saved + run.coins}
           </span>
+          {level.dungeon && (
+            <span className={`chip ${run.owed > 0 ? css.owing : ""}`}>{run.owed > 0 ? `Wants ${run.owed}` : "Paid!"}</span>
+          )}
           {run.big && <span className="chip">🍎 Big!</span>}
         </div>
 
@@ -480,7 +487,13 @@ function FactRush({
               </output>
             </div>
             <p className={`${css.teach} ${beat?.show ? css.teachOn : ""}`}>{beat?.show ?? " "}</p>
-            <p className={css.hint}>Type the answer and press Enter or the space bar - quicker than tapping.</p>
+            {run.paying ? (
+              <p className={css.owed}>
+                The monster has your pet and wants {DUNGEON_PRICE} coins. You are {run.owed} short - every card you get right is a coin.
+              </p>
+            ) : (
+              <p className={css.hint}>Type the answer and press Enter or the space bar - quicker than tapping.</p>
+            )}
 
             <div className={css.pad}>
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { kidFromRequest } from "@/lib/auth";
 import { gameById, levelsKidMayPlay } from "@/lib/minigames";
-import { recordMiniGame } from "@/lib/gameState";
+import { addGameCoins, gameCoins, recordMiniGame } from "@/lib/gameState";
 import { logLearningEvent, recordEvidence } from "@/lib/store";
 
 /**
@@ -21,13 +21,18 @@ export async function POST(req: Request) {
   if (!game) return NextResponse.json({ error: "Unknown game." }, { status: 400 });
   const level = String(b.level ?? "");
   if (!levelsKidMayPlay(game, kid.grade).some((l) => l.id === level)) return NextResponse.json({ error: "Unknown level." }, { status: 400 });
-  const scored = game.score(level, b.moves);
+  // What they walked in carrying, for the games where that matters. It comes
+  // from here, not from the browser, so the monster cannot be paid in coins
+  // nobody earned.
+  const saved = game.coins ? gameCoins(kid.id, game.id) : 0;
+  const scored = game.score(level, b.moves, saved);
   if (!scored) return NextResponse.json({ error: "Unknown level." }, { status: 400 });
+  const coins = game.coins ? addGameCoins(kid.id, game.id, game.coins(level, b.moves, saved)) : undefined;
   for (const e of game.evidence?.(level, b.moves) ?? []) {
     // The meter first: it reads past events to fill itself in, so logging
     // before recording would count this answer twice.
     recordEvidence(kid.id, e.subject, e);
     logLearningEvent(kid.id, { subject: e.subject, concept: e.concept, firstTry: e.firstTry, score: e.correct ? 1 : 0, ms: e.ms, expectedMs: e.expectedMs, helped: e.rung > 0, source: "game" });
   }
-  return NextResponse.json({ ...recordMiniGame(kid.id, game.id, level, scored.stars, scored.best), earned: scored.stars, score: scored.best });
+  return NextResponse.json({ ...recordMiniGame(kid.id, game.id, level, scored.stars, scored.best), earned: scored.stars, score: scored.best, ...(coins !== undefined && { coins }) });
 }

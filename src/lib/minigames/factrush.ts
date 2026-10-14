@@ -300,6 +300,16 @@ export const tokenOn = (post: number) => post > 0 && post % TOKEN_EVERY === 0;
  */
 export const coinOn = (post: number) => post > 0 && post % 3 === 0 && !tokenOn(post);
 
+/**
+ * What the monster at the end of a set wants for the pet.
+ *
+ * Twelve levels of running pays it comfortably, so a kid who has worked
+ * through the set arrives able to afford their pet. One who skipped ahead
+ * arrives short, and the monster deals them cards until they have earned the
+ * difference - a coin a card. Nobody is turned away, they just pay in work.
+ */
+export const DUNGEON_PRICE = 20;
+
 export type Hazard = "hole" | "river" | "mountain";
 
 /**
@@ -409,8 +419,12 @@ export interface Run {
   chase: number | null;
   /** How many times it has had them. */
   caught: number;
-  /** Coins picked up along the way. */
+  /** Coins picked up along the way, and spent at the end of a set. */
   coins: number;
+  /** What the monster still wants, once they have reached it. 0 when paid. */
+  owed: number;
+  /** They are at the cage, working off what they still owe. */
+  paying: boolean;
   pace: Pace;
 }
 
@@ -419,7 +433,7 @@ export interface Run {
  * by the screen to draw it and by the server to score it, so they cannot
  * come to different answers.
  */
-export function play(level: FactLevel, move: FactMove): Run {
+export function play(level: FactLevel, move: FactMove, saved = 0): Run {
   const pace = move.pace ?? "medium";
   const hunts = huntBlocks(level, move.seed, pace);
   const from = CHASE_FROM[pace];
@@ -446,6 +460,11 @@ export function play(level: FactLevel, move: FactMove): Run {
     else lives--;
     if (lives <= 0) over = true;
   };
+
+  /** What the monster wants here, and what they walked in with. */
+  const price = level.dungeon ? DUNGEON_PRICE : 0;
+  const purse = () => Math.max(0, saved) + coins;
+  let paying = false;
 
   for (const ans of move.answers.slice(0, MAX_ASKS)) {
     const head = pile[0];
@@ -490,6 +509,14 @@ export function play(level: FactLevel, move: FactMove): Run {
 
     pile = afterAnswer(pile, right, needOf(level));
 
+    // At the cage and still short: the monster deals another hand, and every
+    // card they get right is a coin off what they owe.
+    if (pile.length === 0 && price > 0 && purse() < price) {
+      paying = true;
+      if (right) coins++;
+      if (purse() < price) pile = openingPile(level, move.seed + coins + 1);
+    }
+
     // How far along they are: the work done, never backwards. A miss costs a
     // card its banked go, so the walk stalls rather than reversing.
     const left = workLeft(pile, needOf(level));
@@ -503,9 +530,10 @@ export function play(level: FactLevel, move: FactMove): Run {
     }
     block = now;
   }
-  const finished = pile.length === 0 && !over;
+  const owed = Math.max(0, price - purse());
+  const finished = pile.length === 0 && !over && owed === 0;
   if (finished) points += FINISH_BONUS;
-  return { posts, wrong, points, finished, lives: Math.max(0, lives), strikes, big, over, chase, caught, coins, pace, at: finished ? 1 : at };
+  return { posts, wrong, points, finished, lives: Math.max(0, lives), strikes, big, over, chase, caught, coins, owed, paying, pace, at: finished ? 1 : at };
 }
 
 /** The best a level can be worth: every card right twice, every one a sprint. */
@@ -536,9 +564,9 @@ export function cleanMove(raw: unknown): FactMove {
   return { seed, answers, pace };
 }
 
-export function replay(level: FactLevel, raw: unknown): Run & { max: number; stars: number } {
+export function replay(level: FactLevel, raw: unknown, saved = 0): Run & { max: number; stars: number } {
   const move = cleanMove(raw);
-  const run = play(level, move);
+  const run = play(level, move, saved);
   const max = maxPoints(level);
   return { ...run, max, stars: starsFor(run.points, max) };
 }
@@ -969,14 +997,25 @@ export const factRush: MiniGame = {
   // are in - the same rule the other XP Rush follows.
   levels: () => ALL_FACT_LEVELS,
   levelsForGrade: () => ALL_FACT_LEVELS,
-  score: (levelId, moves) => {
+  score: (levelId, moves, saved = 0) => {
     const level = levelById(levelId);
     if (!level) return null;
     try {
-      const r = replay(level, moves);
+      const r = replay(level, moves, saved);
       return { stars: r.stars, best: r.points };
     } catch {
       return { stars: 0, best: 0 };
+    }
+  },
+  coins: (levelId, moves, saved) => {
+    const level = levelById(levelId);
+    if (!level) return 0;
+    try {
+      const r = replay(level, moves, saved);
+      // Picked up on the way, less what the monster took for the pet.
+      return r.coins - (level.dungeon && r.finished ? DUNGEON_PRICE : 0);
+    } catch {
+      return 0;
     }
   },
   evidence: (levelId, moves) => {

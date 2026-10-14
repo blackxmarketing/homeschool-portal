@@ -240,6 +240,17 @@ CREATE TABLE IF NOT EXISTS minigame_progress (
 
 -- Where a kid was placed on a drill game's ladder by its sit-down assessment,
 -- so an older kid skips the facts they already have instead of counting dots.
+-- Coins a kid has collected in a game and not yet spent. Kept here rather
+-- than in the browser so the monster at the end of a set cannot be paid in
+-- coins nobody earned.
+CREATE TABLE IF NOT EXISTS game_coins (
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  game TEXT NOT NULL,
+  coins INTEGER NOT NULL DEFAULT 0,
+  at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (kid_id, game)
+);
+
 CREATE TABLE IF NOT EXISTS game_placement (
   kid_id INTEGER NOT NULL REFERENCES kids(id),
   game TEXT NOT NULL,

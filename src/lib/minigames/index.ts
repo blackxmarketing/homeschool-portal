@@ -63,7 +63,16 @@ export interface MiniGame {
   subject?: "math" | "ela" | "sci" | "soc" | "span";
   levelsForGrade?: (grade: number) => MiniLevel[];
   /** Checks a finished game: the stars earned and a score to keep as "best". */
-  score: (levelId: string, moves: unknown) => { stars: number; best: number } | null;
+  /**
+   * Checks a finished game. `saved` is what the kid was carrying into it, for
+   * the games that carry anything; the rest ignore it.
+   */
+  score: (levelId: string, moves: unknown, saved?: number) => { stars: number; best: number } | null;
+  /**
+   * What this run did to the kid's coins: picked up, less anything spent.
+   * Read from the replayed moves on the server, never from the browser.
+   */
+  coins?: (levelId: string, moves: unknown, saved: number) => number;
   /**
    * What the game saw the kid show, for the mastery meter. Optional: a game
    * that only earns stars leaves it out. Read on the server from the replayed

@@ -14,6 +14,7 @@ export default function GameHost({
   openTo = 0,
   pet,
   hero,
+  coins,
   canAsk,
 }: {
   game: string;
@@ -27,10 +28,15 @@ export default function GameHost({
   pet?: PetId;
   /** The kid's whole character, for games they run around in themselves. */
   hero?: Hero;
+  /** Coins the kid is carrying in this game. */
+  coins?: number;
   /** Whether the AI coach can take questions. */
   canAsk?: boolean;
 }) {
   const [stars, setStars] = useState(progress);
+  // What they are carrying, kept live so finishing a level shows up on the
+  // next one without reloading the page.
+  const [purse, setPurse] = useState(coins);
   const [playing, setPlaying] = useState<string | null>(null);
   const [round, setRound] = useState(0);
 
@@ -39,7 +45,8 @@ export default function GameHost({
     const d = await res.json();
     if (!res.ok) throw new Error(d.error ?? "Couldn't save the game.");
     setStars((s) => ({ ...s, [levelId]: { stars: d.stars, best: d.best, plays: (s[levelId]?.plays ?? 0) + 1 } }));
-    return { stars: d.earned as number, xp: d.xp as number, score: d.score as number | undefined };
+    if (typeof d.coins === "number") setPurse(d.coins as number);
+    return { stars: d.earned as number, xp: d.xp as number, score: d.score as number | undefined, coins: d.coins as number | undefined };
   }
 
   if (playing) {
@@ -63,7 +70,7 @@ export default function GameHost({
         {!gameById(game)?.ownIntro && <p className="game-intro">{levels[idx]?.intro}</p>}
         {GAME_UI[game] && (() => {
           const Screen = GAME_UI[game];
-          return <Screen key={`${playing}-${round}`} levelId={playing} stars={stars[playing]?.stars ?? 0} plays={stars[playing]?.plays ?? 0} pet={pet} hero={hero} canAsk={canAsk} onFinish={(m) => finish(playing, m)} />;
+          return <Screen key={`${playing}-${round}`} levelId={playing} stars={stars[playing]?.stars ?? 0} plays={stars[playing]?.plays ?? 0} pet={pet} hero={hero} coins={purse} canAsk={canAsk} onFinish={(m) => finish(playing, m)} />;
         })()}
       </div>
     );

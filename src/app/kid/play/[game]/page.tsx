@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireKid } from "@/lib/auth";
 import { gameById, levelsForKid } from "@/lib/minigames";
-import { gamePlacement, heroOf, miniGameProgress } from "@/lib/gameState";
+import { gameCoins, gamePlacement, heroOf, miniGameProgress } from "@/lib/gameState";
 import { aiEnabled } from "@/lib/ai";
 import { features } from "@/lib/content";
 import { placementQuestions, publicPlacement } from "@/lib/minigames/chompers";
@@ -47,6 +47,8 @@ export default async function PlayPage({ params, searchParams }: { params: Promi
   // the server has a key, so the question box stays hidden rather than
   // offering something that cannot answer.
   const canAsk = features().aiTeachers && aiEnabled();
+  // What they are carrying into this level, for the games that carry anything.
+  const coins = game.coins ? gameCoins(kid.id, game.id) : undefined;
   return (
     <main className={`wrap game-page band-${band}`} style={{ maxWidth: 1000 }}>
       <div className="game-title-row">
@@ -69,6 +71,7 @@ export default async function PlayPage({ params, searchParams }: { params: Promi
         placement={placement}
         pet={pet}
         hero={hero}
+        coins={coins}
         canAsk={canAsk}
       />
     </main>

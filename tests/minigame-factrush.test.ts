@@ -17,6 +17,7 @@ import {
   factRush,
   type Pace,
   CHASE_FROM,
+  DUNGEON_PRICE,
   HUNTS,
   LIVES,
   PACES,
@@ -360,13 +361,14 @@ describe("the dungeons", () => {
     }
   });
 
-  it("can be run clean for three stars, and scores through the server's door", () => {
+  it("can be run clean for three stars by a kid who saved up for it", () => {
     for (const d of dungeons) {
-      const r = replay(d, perfectMoves(d));
+      // A kid who worked through the twelve families walks in able to pay.
+      const r = replay(d, perfectMoves(d), DUNGEON_PRICE);
       expect(r.finished, `${d.id} could not be finished`).toBe(true);
       expect(r.posts).toBe(24);
       expect(r.stars).toBe(3);
-      expect(factRush.score(d.id, perfectMoves(d))?.stars).toBe(3);
+      expect(factRush.score(d.id, perfectMoves(d), DUNGEON_PRICE)?.stars).toBe(3);
     }
   });
 
@@ -629,5 +631,70 @@ describe("arriving at the pet", () => {
     const mixed = messy.flatMap((a, i) => (i % 2 === 0 ? [{ a: -1, ms: 500 }, a] : [a]));
     const slow = play(level, { seed, pace: "easy", answers: mixed }).at;
     expect(slow, "a messy run should not be as far along as a clean one").toBeLessThan(clean);
+  });
+});
+
+describe("paying the monster for the pet", () => {
+  const dun = levelById("fr-adun")!;
+  const ordinary = levelById("fr-a5")!;
+
+  it("asks nothing on an ordinary level", () => {
+    const r = replay(ordinary, perfectMoves(ordinary, 2, "easy"));
+    expect(r.owed).toBe(0);
+    expect(r.paying).toBe(false);
+    expect(r.finished).toBe(true);
+  });
+
+  it("hands the pet over when they walk in with enough", () => {
+    const r = replay(dun, perfectMoves(dun, 2, "easy"), DUNGEON_PRICE);
+    expect(r.owed).toBe(0);
+    expect(r.finished).toBe(true);
+    expect(r.stars).toBe(3);
+  });
+
+  it("keeps dealing cards when they walk in short, until it is paid", () => {
+    // Nothing saved: they have to earn the whole price in the dungeon.
+    const level = dun;
+    const answers: { a: number; ms: number }[] = [];
+    let pile = openingPile(level, 5);
+    let coins = 0;
+    let guard = 0;
+    while (guard++ < MAX_ASKS) {
+      if (!pile.length) break;
+      answers.push({ a: level.cards[pile[0].i].answer, ms: 600 });
+      pile = afterAnswer(pile, true, needOf(level));
+      if (!pile.length && coins < DUNGEON_PRICE) {
+        coins++;
+        if (coins < DUNGEON_PRICE) pile = openingPile(level, 5 + coins + 1);
+      }
+    }
+    const r = play(level, { seed: 5, pace: "easy", answers }, 0);
+    // They were made to keep going rather than turned away.
+    expect(r.paying, "the monster never asked them for anything").toBe(true);
+    expect(answers.length, "a short kid should answer more than one hand").toBeGreaterThan(postsOn(level));
+  });
+
+  it("does not let them leave with the pet while they are short", () => {
+    // One clean hand of the dungeon, nothing saved: not enough to pay.
+    const r = play(dun, { seed: 5, pace: "easy", answers: perfectMoves(dun, 5, "easy").answers }, 0);
+    expect(r.owed, "the monster was paid in coins nobody earned").toBeGreaterThan(0);
+    expect(r.finished).toBe(false);
+  });
+
+  it("takes the price out of what they carry, and only when the pet is freed", () => {
+    const paid = factRush.coins!(dun.id, perfectMoves(dun, 2, "easy"), DUNGEON_PRICE);
+    // They picked some up on the way and the monster took its price.
+    expect(paid).toBeLessThan(0);
+    // An unfinished dungeon run costs them nothing.
+    const short = factRush.coins!(dun.id, { seed: 5, pace: "easy", answers: perfectMoves(dun, 5, "easy").answers }, 0);
+    expect(short).toBeGreaterThanOrEqual(0);
+    // An ordinary level only ever adds.
+    expect(factRush.coins!(ordinary.id, perfectMoves(ordinary, 2, "easy"), 0)).toBeGreaterThan(0);
+  });
+
+  it("cannot be paid by a browser claiming to be rich", () => {
+    // The balance is the server's argument, not anything in the move log.
+    const rich = { seed: 2, pace: "easy", answers: perfectMoves(dun, 2, "easy").answers, coins: 9999, saved: 9999 };
+    expect(replay(dun, rich, 0).owed, "a claimed balance paid the monster").toBeGreaterThan(0);
   });
 });

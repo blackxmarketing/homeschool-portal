@@ -24,6 +24,7 @@ export default function PlayArea({
   placement,
   pet,
   hero,
+  coins,
   canAsk,
 }: {
   game: string;
@@ -38,6 +39,8 @@ export default function PlayArea({
   pet?: PetId;
   /** The kid's whole character, for games they run around in themselves. */
   hero?: Hero;
+  /** Coins the kid is carrying in this game. */
+  coins?: number;
   /** Whether the AI coach can take questions. */
   canAsk?: boolean;
 }) {
@@ -72,7 +75,7 @@ export default function PlayArea({
           Starting you on <strong>{just.title}</strong>. Everything before it is open too, so you can go back over anything you want to brush up.
         </p>
       )}
-      <GameHost game={game} levels={levels} progress={progress} unlockAt={unlockAt} openTo={placed ?? 0} pet={pet} hero={hero} canAsk={canAsk} />
+      <GameHost game={game} levels={levels} progress={progress} unlockAt={unlockAt} openTo={placed ?? 0} pet={pet} hero={hero} coins={coins} canAsk={canAsk} />
     </div>
   );
 }
