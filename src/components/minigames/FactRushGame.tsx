@@ -114,9 +114,21 @@ function FightKeys() {
   );
 }
 
-export default function FactRushGame({ levelId, onFinish, stars, plays, hero, coins, canAsk }: MiniGameUIProps) {
+export default function FactRushGame({ levelId, onFinish, stars, plays, hero, coins, canAsk, onReplay, onQuit }: MiniGameUIProps) {
   const level = levelById(levelId);
-  return level ? <FactRush level={level} onFinish={onFinish} earned={stars ?? 0} plays={plays ?? 0} hero={hero} saved={coins ?? 0} canAsk={!!canAsk} /> : null;
+  return level ? (
+    <FactRush
+      level={level}
+      onFinish={onFinish}
+      earned={stars ?? 0}
+      plays={plays ?? 0}
+      hero={hero}
+      saved={coins ?? 0}
+      canAsk={!!canAsk}
+      onReplay={onReplay}
+      onQuit={onQuit}
+    />
+  ) : null;
 }
 
 const newSeed = () => Math.floor(Math.random() * 2 ** 31);
@@ -127,6 +139,8 @@ function FactRush({
   hero,
   saved,
   canAsk,
+  onReplay,
+  onQuit,
 }: {
   level: FactLevel;
   onFinish: MiniGameUIProps["onFinish"];
@@ -136,6 +150,8 @@ function FactRush({
   /** Coins carried in from the levels before this one. */
   saved: number;
   canAsk: boolean;
+  onReplay?: () => void;
+  onQuit?: () => void;
 }) {
   const who = hero ?? DEFAULT_HERO;
   const runner = useMemo(() => [heroGrid(who, 0), heroGrid(who, 1)], [who]);
@@ -152,6 +168,23 @@ function FactRush({
   const [shot, setShot] = useState<"cage" | "start">("cage");
   /** Easy has nothing chasing them; hard wants them to keep moving. */
   const [pace, setPace] = useState<Pace>("medium");
+  /**
+   * True while they are being asked how hard they want it.
+   *
+   * The coach used to remind them to pick one and the three sat on his panel,
+   * where a kid could walk straight past them. Now saying "I'm ready" asks the
+   * question, and answering it is what starts the level.
+   */
+  const [picking, setPicking] = useState(false);
+
+  /** What they chose, and off they go. */
+  function begin(p: Pace) {
+    setPace(p);
+    setPicking(false);
+    // Sweep back from the cage to the start, then count them in.
+    setShot("start");
+    window.setTimeout(() => setCount(3), 1200);
+  }
   /** Where this level happens. Fixed per level, so it is always theirs. */
   const biome = useMemo(() => biomeFor(level), [level]);
   const [count, setCount] = useState<number | null>(null);
@@ -413,12 +446,58 @@ function FactRush({
     speak("fr-example", ex.say, { kind: coachLook.voice });
   }
 
+  if (result && !run.finished) {
+    const why = run.over
+      ? "You ran out of lives."
+      : fightLost
+        ? "The dragon got the better of you."
+        : gaveUp
+          ? "You ran out of fireballs."
+          : level.dungeon
+            ? "The dragon is still standing."
+            : "That is the end of this go.";
+    return (
+      <div className={`mg ${css.fr}`}>
+        <div className={css.overCard}>
+          <strong className={css.overTitle}>Game over</strong>
+          <p className={css.overSay}>
+            {why} {level.dungeon ? "Your pet is still in that cage." : ""} {run.posts} blocks run, {run.wrong} missed.
+          </p>
+          {result.xp > 0 && <p className="kmuted small">+{result.xp} XP for new stars.</p>}
+          <div className={css.overButtons}>
+            {onReplay && (
+              <button type="button" className="kbtn small-btn" onClick={onReplay}>
+                ↺ Try this level again
+              </button>
+            )}
+            {onQuit && (
+              <button type="button" className="kbtn ghost small-btn" onClick={onQuit}>
+                ← Practise an earlier level
+              </button>
+            )}
+          </div>
+          {error && <p className="kmuted small">{error}</p>}
+        </div>
+      </div>
+    );
+  }
+
   if (result) {
     return (
       <div className={`mg ${css.fr}`}>
         <div className="mg-result">
           <h3 className="pixel-title">
-            {run.finished ? "You got them out!" : run.over ? "Out of lives" : fightLost ? "The dragon won" : gaveUp ? "Out of fireballs" : "Out of cards"}
+            {run.finished
+              ? "You got them out!"
+              : run.over
+                ? "Out of lives"
+                : fightLost
+                  ? "The dragon won"
+                  : gaveUp
+                    ? "Out of fireballs"
+                    : level.dungeon
+                      ? "The dragon is still standing"
+                      : "Out of cards"}
           </h3>
           <div className={css.rescued}>
             <PixelSprite grid={cagedPetGrid(pet, true)} scale={3} className={css.freed} />
@@ -482,36 +561,14 @@ function FactRush({
 
         <TeacherBrief
           teacher={coach}
-          directions={`${level.intro} Before you go, pick how hard you want it: easy for no monster, medium for one that comes and goes, hard for one that never stops.`}
+          directions={level.intro}
           rule={level.title}
           levelId={level.id}
           board={0}
           seed={seed}
           canAsk={canAsk}
           stage={ready ? "play" : "brief"}
-          extra={
-            <div className={css.paces} role="group" aria-label="How hard do you want it?">
-              {PACES.map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  className={`chip ${css.pace} ${pace === p ? css.paceOn : ""}`}
-                  onClick={() => setPace(p)}
-                  aria-pressed={pace === p}
-                >
-                  {p === "easy" ? "🙂 Easy" : p === "medium" ? "😬 Medium" : "😱 Hard"}
-                </button>
-              ))}
-              <span className="kmuted small">
-                {pace === "easy" ? "Nothing chasing you." : pace === "medium" ? "Something chases you, but only a wrong answer lets it close in." : "Keep moving - slow answers let it close in too."}
-              </span>
-            </div>
-          }
-          onReady={() => {
-            // Sweep back from the cage to the start, then count them in.
-            setShot("start");
-            window.setTimeout(() => setCount(3), 1200);
-          }}
+          onReady={() => setPicking(true)}
           onAsking={setAsking}
           onExample={showExample}
           example={
@@ -531,6 +588,28 @@ function FactRush({
         {/* Once they are at the dragon the run is over and the pit takes the
             screen, so a kid is not looking at two scenes at once. */}
         {!(level.dungeon && run.atDragon) && (
+        <div className={css.sceneWrap}>
+        {picking && (
+          <div className={css.fightBrief}>
+            <div className={css.outOfFire}>
+              <strong className={css.outTitle}>How hard do you want it?</strong>
+              <div className={css.pickRow}>
+                {PACES.map((p) => (
+                  <button key={p} type="button" className={`kbtn small-btn ${css.pick}`} onClick={() => begin(p)}>
+                    <span className={css.pickName}>{p === "easy" ? "🙂 Easy" : p === "medium" ? "😬 Medium" : "😱 Hard"}</span>
+                    <span className={css.pickSay}>
+                      {p === "easy"
+                        ? "Nothing chasing you."
+                        : p === "medium"
+                          ? "Something comes and goes. Only a wrong answer lets it close in."
+                          : "It never stops. Keep answering or it will have you."}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
         <>
         {/* The level, seen through a camera that keeps the runner big and a
             third of the way in. It opens looking at the cage so a kid sees who
@@ -672,6 +751,7 @@ function FactRush({
           {beat?.kind === "sprint" && <span className={css.shout}>Sprint!</span>}
         </div>
         </>
+        </div>
         )}
 
         {ready && level.dungeon && run.atDragon && !dragonDown && !reloading && (

@@ -118,3 +118,45 @@
     animation: none;
   }
 }
+
+/* Said loudly, because losing a life used to look like being singed. */
+.lost {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  z-index: 6;
+  white-space: nowrap;
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.6rem;
+  color: #fffdf5;
+  background: #e0453a;
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+  padding: 8px 10px;
+  box-shadow: 0 4px 0 var(--ink);
+  animation: lostpop 0.5s;
+}
+@keyframes lostpop {
+  0% {
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 0;
+  }
+  45% {
+    transform: translate(-50%, -50%) scale(1.12);
+    opacity: 1;
+  }
+}
+@media (max-width: 420px) {
+  .lost {
+    font-size: 0.48rem;
+    white-space: normal;
+    max-width: 80%;
+    text-align: center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lost {
+    animation: none;
+  }
+}

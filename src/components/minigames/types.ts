@@ -19,6 +19,10 @@ export interface MiniGameUIProps {
   hero?: Hero;
   /** Coins the kid is carrying in this game, for the games that carry any. */
   coins?: number;
+  /** Start this level again from the beginning. */
+  onReplay?: () => void;
+  /** Leave the level and go back to the list. */
+  onQuit?: () => void;
   /** Whether the AI coach can take questions, for games that let a kid ask. */
   canAsk?: boolean;
 }

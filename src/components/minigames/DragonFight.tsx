@@ -78,6 +78,14 @@ export default function DragonFight({
   const [dragon, setDragon] = useState({ x: 0.74, y: 0 });
   const [hurtAt, setHurtAt] = useState(0);
   const [won, setWon] = useState(false);
+  /**
+   * Burned to nothing, and about to come back.
+   *
+   * Being singed and losing a life looked the same as being singed, so a kid
+   * could not tell what it had cost them. Now they go up in smoke, the fight
+   * stops, and it starts over with the dragon back on its feet.
+   */
+  const [dying, setDying] = useState(false);
 
   const thrown = useRef(0);
   const nextId = useRef(1);
@@ -89,7 +97,7 @@ export default function DragonFight({
   /** Where they are, for the loop to read without re-subscribing each frame. */
   const meRef = useRef({ x: 0.14, jump: 0, duck: 0 });
   const live = useRef({ ammo, hp: need, won: false });
-  live.current = { ammo, hp, won };
+  live.current = { ammo, hp, won: won || dying };
   meRef.current = me;
 
   const throwOne = useCallback(() => {
@@ -106,7 +114,7 @@ export default function DragonFight({
 
   // Keys: the arrows move, up jumps, down ducks, space or enter throws.
   useEffect(() => {
-    if (paused) return;
+    if (paused || dying) return;
     const down = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement) return;
       const k = e.key;
@@ -126,11 +134,28 @@ export default function DragonFight({
       window.removeEventListener("keydown", down);
       window.removeEventListener("keyup", up);
     };
-  }, [throwOne, paused]);
+  }, [throwOne, paused, dying]);
+
+  // Gone for a moment, then the whole thing starts again.
+  useEffect(() => {
+    if (!dying) return;
+    const t = setTimeout(() => {
+      setMe({ x: 0.14, jump: 0, duck: 0 });
+      meRef.current = { x: 0.14, jump: 0, duck: 0 };
+      setShots([]);
+      setFlames([]);
+      setHp(need);
+      jumpUntil.current = 0;
+      duckUntil.current = 0;
+      lastBreath.current = Date.now();
+      setDying(false);
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [dying, need]);
 
   // The fight itself.
   useEffect(() => {
-    if (won || paused) return;
+    if (won || paused || dying) return;
     let raf = 0;
     let last = performance.now();
     const step = (t: number) => {
@@ -188,9 +213,10 @@ export default function DragonFight({
             const myHigh = meRef.current.jump ? 0.52 : meRef.current.duck ? 0.98 : 0.98;
             const onMe = Math.abs(f.x - mx) < 0.07 && f.y > myLow - 0.12 && f.y < myHigh;
             if (onMe && now > invuln.current) {
-              invuln.current = now + 900;
+              invuln.current = now + 2600;
               setHurtAt(now);
-              chime("caught");
+              setDying(true);
+              chime("died");
               onHurt();
               return false;
             }
@@ -202,7 +228,7 @@ export default function DragonFight({
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
-  }, [pace, won, paused, onHurt, onWon]);
+  }, [pace, won, paused, dying, onHurt, onWon]);
 
   const hurt = Date.now() - hurtAt < 500;
 
@@ -216,12 +242,16 @@ export default function DragonFight({
 
       <div className={css.floor} />
 
+      {dying && <span className={css.lost}>Burned! A life gone - here we go again</span>}
+
+      {!dying && (
       <span
         className={`${css.me} ${hurt ? css.hurt : ""}`}
         style={{ left: `${me.x * 100}%`, bottom: `${FLOOR * 100 - (me.jump ? -14 : 0) + (me.jump ? 22 : 0)}px`, transform: me.duck ? "scaleY(0.6)" : undefined }}
       >
         <PixelSprite grid={hero} scale={4} />
       </span>
+      )}
 
       {shots.map((f) => (
         <span key={f.id} className={css.shot} style={{ left: `${f.x * 100}%`, top: `${f.y * 100}%` }}>

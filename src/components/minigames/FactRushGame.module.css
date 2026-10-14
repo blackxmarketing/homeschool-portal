@@ -689,3 +689,62 @@
 .keyFire {
   vertical-align: middle;
 }
+
+/* The level, with room for a question over the top of it. */
+.sceneWrap {
+  position: relative;
+}
+.pickRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pick {
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-start !important;
+  gap: 2px;
+  text-align: left;
+  padding: 10px 12px !important;
+}
+.pickName {
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.62rem;
+}
+.pickSay {
+  font-size: 0.78rem;
+  font-weight: 600;
+  opacity: 0.92;
+  white-space: normal;
+}
+
+/* The end of a run that was not won, and the two ways on from it. */
+.overCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  padding: 16px 12px;
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+  background: #fffdf5;
+  box-shadow: 0 5px 0 var(--ink);
+}
+.overTitle {
+  font-family: var(--font-pixel), monospace;
+  font-size: 1rem;
+  color: var(--k-bad-ink, #b42318);
+}
+.overSay {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.overButtons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}

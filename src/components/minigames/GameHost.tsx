@@ -78,7 +78,7 @@ export default function GameHost({
         {!gameById(game)?.ownIntro && <p className="game-intro">{levels[idx]?.intro}</p>}
         {GAME_UI[game] && (() => {
           const Screen = GAME_UI[game];
-          return <Screen key={`${playing}-${round}`} levelId={playing} stars={stars[playing]?.stars ?? 0} plays={stars[playing]?.plays ?? 0} pet={pet} hero={hero} coins={purse} canAsk={canAsk} onFinish={(m) => finish(playing, m)} />;
+          return <Screen key={`${playing}-${round}`} levelId={playing} stars={stars[playing]?.stars ?? 0} plays={stars[playing]?.plays ?? 0} pet={pet} hero={hero} coins={purse} canAsk={canAsk} onReplay={() => setRound((r) => r + 1)} onQuit={() => setPlaying(null)} onFinish={(m) => finish(playing, m)} />;
         })()}
       </div>
     );

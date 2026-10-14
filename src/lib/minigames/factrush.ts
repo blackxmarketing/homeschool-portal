@@ -651,9 +651,16 @@ export function play(level: FactLevel, move: FactMove, saved = 0): Run {
       atDragon = true;
       at = 1;
     }
-    // While it is still standing, it keeps throwing down another hand - every
-    // card right is another fireball, so the way out is always to answer.
-    if (pile.length === 0 && level.dungeon && !beat) {
+    // It keeps throwing down another hand whenever they run out - every card
+    // right is another fireball, so the way out is always to answer.
+    //
+    // This must not depend on whether they went on to win. It used to, and a
+    // kid who needed a second hand to make more fire had every one of those
+    // answers thrown away when the run was scored: the replay stopped dealing,
+    // the loop ran out of cards, their earned fire was undercounted, and their
+    // won fight came back as more throws than they could pay for. Whether they
+    // won is about the fight; what they earned is about the cards.
+    if (pile.length === 0 && level.dungeon) {
       reloading = true;
       deals++;
       pile = openingPile(level, move.seed + 1009 + deals);

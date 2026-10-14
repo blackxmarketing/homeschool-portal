@@ -1067,10 +1067,16 @@ describe("what the coach puts on screen", () => {
   const screen = fs.readFileSync(path.join(process.cwd(), "src/components/minigames/FactRushGame.tsx"), "utf8");
   const brief = fs.readFileSync(path.join(process.cwd(), "src/components/minigames/TeacherBrief.tsx"), "utf8");
 
-  it("reminds them to pick a challenge before the level starts", () => {
-    expect(screen).toMatch(/pick how hard you want it/i);
-    // And the three to pick from are on that same row.
+  it("asks how hard they want it when they say they are ready, and waits for an answer", () => {
+    // The coach used to remind them and the three sat on his panel, where a
+    // kid could walk straight past them. Saying ready asks the question now,
+    // and answering it is what starts the level.
+    expect(screen).toContain("onReady={() => setPicking(true)}");
+    expect(screen).toContain("How hard do you want it?");
     expect(screen).toContain("PACES.map");
+    // Choosing is the only thing that sets it going.
+    expect(screen).toContain("function begin(p: Pace)");
+    expect(screen).toContain("onClick={() => begin(p)}");
   });
 
   it("shows the keys for the fight instead of reading a paragraph out at them", () => {
@@ -1088,5 +1094,41 @@ describe("what the coach puts on screen", () => {
 
   it("still prints the directions everywhere else", () => {
     expect(brief).toMatch(/showDirections = true/);
+  });
+});
+
+describe("a dungeon won after making more fire", () => {
+  const dun = levelById("fr-adun")!;
+
+  /** Answer n cards, whatever the run says is in front of them. */
+  const answerCards = (n: number, seed = 21) => {
+    const answers: { a: number | null; ms: number }[] = [];
+    for (let i = 0; i < n; i++) {
+      const r = play(dun, { seed, pace: "easy", answers }, 0);
+      if (r.head === null) break;
+      answers.push({ a: dun.cards[r.head].answer, ms: 700 });
+    }
+    return answers;
+  };
+
+  it("counts the cards answered during a reload, not just the first hand", () => {
+    // A kid who misses the dragon a lot answers more cards to make more fire.
+    // Those answers come after the first hand ran out.
+    const first = answerCards(postsOn(dun));
+    const withReload = answerCards(postsOn(dun) + 20);
+    expect(withReload.length, "the dungeon stopped dealing them cards").toBe(postsOn(dun) + 20);
+
+    const earnedFirst = play(dun, { seed: 21, pace: "easy", answers: first }, 0).fireballs;
+    const earnedAll = play(dun, { seed: 21, pace: "easy", answers: withReload }, 0).fireballs;
+    expect(earnedAll, "the extra cards earned them nothing").toBeGreaterThan(earnedFirst);
+  });
+
+  it("lets them win with fire they earned after the first hand ran out", () => {
+    const answers = answerCards(postsOn(dun) + 20);
+    const earned = play(dun, { seed: 21, pace: "easy", answers }, 0).fireballs;
+    // They threw more than the first hand alone could have paid for.
+    const thrown = earned - 2;
+    const r = replay(dun, { seed: 21, pace: "easy", answers, thrown, beat: true }, 0);
+    expect(r.finished, `a won fight was rejected: threw ${thrown} of ${earned} earned`).toBe(true);
   });
 });
