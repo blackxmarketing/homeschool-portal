@@ -789,6 +789,12 @@
 /* How the level went, in the coach's own box. */
 .endStars {
   margin: 0;
+  font-size: 3.6rem;
+  line-height: 1;
+  letter-spacing: 4px;
+  text-shadow:
+    0 3px 0 var(--ink),
+    0 0 10px rgba(255, 255, 255, 0.65);
 }
 .starIn {
   animation: starland 0.45s cubic-bezier(0.2, 1.6, 0.4, 1) 1 both;
@@ -811,29 +817,6 @@
 
 /* The end of a level: their character and their pet, and the stars coming in
    over them. Nothing to read - the coach says the rest out loud. */
-.endScene {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-  min-height: 300px;
-  padding: 20px 12px 26px;
-}
-.cast {
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-}
-.standing {
-  position: relative;
-  display: inline-flex;
-}
-.beside {
-  margin-bottom: 2px;
-}
 /* Handed over the size of the screen, settling around their neck. */
 .medalDrop {
   position: absolute;
@@ -866,9 +849,28 @@
 }
 
 /* The cage they got open, and the way on once the stars have landed. */
-.emptyCage {
-  align-self: flex-end;
-  opacity: 0.9;
+/* The end of a level, over the level itself: the stars they earned and the
+   way on, with the ground they ran and the cage they opened still behind it. */
+.endOver {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  pointer-events: none;
+  z-index: 4;
+}
+.endOver > * {
+  pointer-events: auto;
+}
+/* The pet, out and at their side. */
+.atHeel {
+  position: absolute;
+  left: 100%;
+  bottom: 0;
+  margin-left: 4px;
 }
 .endChoices {
   display: flex;

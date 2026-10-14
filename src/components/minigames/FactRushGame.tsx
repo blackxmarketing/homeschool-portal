@@ -378,7 +378,14 @@ function FactRush({
    * dragon and only then found the fight starting. They pull up in front of
    * it now.
    */
-  const SHORT = level.dungeon ? 210 : 0;
+  /**
+   * How far short of the cage they pull up.
+   *
+   * Far enough back on an ordinary level to stand beside the cage with their
+   * pet rather than inside it, and far enough on a dungeon level to stop in
+   * front of the dragon instead of walking through it.
+   */
+  const SHORT = level.dungeon ? 210 : 96;
   const runnerX = (at: number) => standing(at) * BLOCK - SHORT * at;
   const run = useMemo(() => play(level, { seed, answers, pace, thrown, beat: dragonDown }, saved), [level, seed, answers, pace, saved, thrown, dragonDown]);
   const fightLives = Math.max(0, run.lives - burns);
@@ -628,37 +635,6 @@ function FactRush({
     );
   }
 
-  // A run that was not won leaves on the game over card above, so anything
-  // reaching here was a win.
-  if (result) {
-    return (
-      <div className={`mg ${css.fr}`}>
-        <div className={css.endScene}>
-          {result.justMastered && <Fireworks big />}
-          <StarPop stars={result.stars} from={result.justMastered ? 2000 : 600} />
-          <div className={css.cast}>
-            {/* The cage they got open, stood empty beside them. */}
-            <PixelSprite grid={cagedPetGrid(null, true)} scale={4} className={css.emptyCage} />
-            <span className={css.standing}>
-              <PixelSprite grid={runner[0]} scale={6} />
-              {/* It arrives the size of the screen and settles around their
-                  neck, which is where it stays. */}
-              {result.justMastered && <PixelSprite grid={medalGrid(level.id)} scale={1} className={css.medalDrop} />}
-            </span>
-            {pet && <PixelSprite grid={pet} scale={6} className={css.beside} />}
-          </div>
-          <EndChoices
-            from={(result.justMastered ? 2000 : 600) + result.stars * 650 + 200}
-            canNext={result.stars >= MOVE_ON_STARS || earned >= MOVE_ON_STARS}
-            onNext={onNext}
-            onReplay={onReplay}
-          />
-          {error && <p className="kmuted small">{error}</p>}
-        </div>
-      </div>
-    );
-  }
-
   const at = posts > 0 ? Math.min(1, run.posts / posts) : 0;
   const stepping = beat && beat.kind !== "trip" && beat.kind !== "grabbed" && beat.kind !== "died";
 
@@ -830,7 +806,9 @@ function FactRush({
             {/* The cage, at the last block - and in a dungeon, the one who
                 has the pet, standing over it with a price. */}
             <span className={css.cage} style={{ left: `${posts * BLOCK}px`, bottom: `${(biome.rise ?? 0) * posts + 43}px` }}>
-              <PixelSprite grid={cagedPetGrid(pet, run.finished)} scale={5} />
+              {/* Open and empty at the end of it: the pet is out and standing
+                  with them, a step from the cage they came out of. */}
+              <PixelSprite grid={cagedPetGrid(run.finished ? null : pet, run.finished)} scale={5} />
             </span>
             {level.dungeon && !run.finished && (
               <span className={css.keeper} style={{ left: `${posts * BLOCK - 126}px`, bottom: `${(biome.rise ?? 0) * posts + 43}px` }}>
@@ -846,6 +824,8 @@ function FactRush({
               style={{ left: `${runnerX(run.at)}px`, bottom: `${(biome.rise ?? 0) * standing(run.at) + 43}px` }}
             >
               <PixelSprite grid={runner[stepping ? 1 : 0]} scale={run.big ? 7 : 5} />
+              {run.finished && pet && <PixelSprite grid={pet} scale={4} className={css.atHeel} />}
+              {result?.justMastered && <PixelSprite grid={medalGrid(level.id)} scale={1} className={css.medalDrop} />}
             </span>
           </div>
 
@@ -872,6 +852,19 @@ function FactRush({
           {count !== null && (
             <div className={css.countOver} role="status" aria-live="assertive">
               <strong>{count}</strong>
+            </div>
+          )}
+          {result && (
+            <div className={css.endOver}>
+              {result.justMastered && <Fireworks big />}
+              <StarPop stars={result.stars} from={result.justMastered ? 2000 : 600} />
+              <EndChoices
+                from={(result.justMastered ? 2000 : 600) + result.stars * 650 + 200}
+                canNext={result.stars >= MOVE_ON_STARS || earned >= MOVE_ON_STARS}
+                onNext={onNext}
+                onReplay={onReplay}
+              />
+              {error && <p className={css.endHint}>{error}</p>}
             </div>
           )}
           {shot === "cage" && <span className={css.shout}>Go and get them!</span>}
