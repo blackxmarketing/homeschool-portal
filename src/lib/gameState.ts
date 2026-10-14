@@ -4,7 +4,7 @@ import { isUnlockId, onlyOwned } from "./pixel/cosmetics";
 import { LANDS, type LandId } from "./pixel/world";
 import { awardXp, courseOverview, skillTable, teachProgress } from "./store";
 import { STRANDS } from "./curriculum/skills";
-import { WORLDS } from "./game";
+import { WORLDS, levelInfo, rankFor, rewardsBetween } from "./game";
 import { lessonPlan, tickedPlan } from "./lessonPlan";
 
 /**
@@ -20,6 +20,12 @@ export function heroOf(kidId: number): Hero | null {
   } catch {
     return null;
   }
+}
+
+/** A kid's XP total, for working out what level they are on. */
+function kidXp(kidId: number): number {
+  const row = getDb().prepare("SELECT xp FROM kids WHERE id = ?").get(kidId) as { xp: number } | undefined;
+  return row?.xp ?? 0;
 }
 
 /** Hero styles a kid has unlocked (docs/WORLDS.md), e.g. "pet:duckling". */
@@ -173,7 +179,13 @@ export function miniGameProgress(kidId: number, game: string): Record<string, { 
 }
 
 /** Saves a finished game (already scored on the server). Returns the XP awarded for new stars. */
-export function recordMiniGame(kidId: number, game: string, level: string, stars: number, best: number): { stars: number; best: number; xp: number; newBest: boolean } {
+export function recordMiniGame(
+  kidId: number,
+  game: string,
+  level: string,
+  stars: number,
+  best: number,
+): { stars: number; best: number; xp: number; newBest: boolean; level?: number; rank?: string; unlocked?: string[] } {
   const db = getDb();
   const prev = db.prepare("SELECT stars, best FROM minigame_progress WHERE kid_id = ? AND game = ? AND level = ?").get(kidId, game, level) as
     | { stars: number; best: number | null }
@@ -185,8 +197,18 @@ export function recordMiniGame(kidId: number, game: string, level: string, stars
      ON CONFLICT (kid_id, game, level) DO UPDATE SET stars = MAX(stars, excluded.stars), best = MAX(COALESCE(best, excluded.best), excluded.best), plays = plays + 1, updated_at = datetime('now')`,
   ).run(kidId, game, level, stars, best);
   const xp = newStars * XP_PER_STAR;
+  // Where they were before this run, so a level crossed can be spotted.
+  const was = levelInfo(kidXp(kidId)).level;
   if (xp) awardXp(kidId, xp);
-  return { stars: Math.max(stars, prev?.stars ?? 0), best: newBest ? best : (prev?.best ?? best), xp, newBest };
+  const now = levelInfo(kidXp(kidId)).level;
+  const unlocked = now > was ? grantUnlocks(kidId, rewardsBetween(was, now)) : [];
+  return {
+    stars: Math.max(stars, prev?.stars ?? 0),
+    best: newBest ? best : (prev?.best ?? best),
+    xp,
+    newBest,
+    ...(now > was && { level: now, rank: rankFor(now).title, unlocked }),
+  };
 }
 
 /**

@@ -46,7 +46,15 @@ export default function GameHost({
     if (!res.ok) throw new Error(d.error ?? "Couldn't save the game.");
     setStars((s) => ({ ...s, [levelId]: { stars: d.stars, best: d.best, plays: (s[levelId]?.plays ?? 0) + 1 } }));
     if (typeof d.coins === "number") setPurse(d.coins as number);
-    return { stars: d.earned as number, xp: d.xp as number, score: d.score as number | undefined, coins: d.coins as number | undefined };
+    return {
+      stars: d.earned as number,
+      xp: d.xp as number,
+      score: d.score as number | undefined,
+      coins: d.coins as number | undefined,
+      level: d.level as number | undefined,
+      rank: d.rank as string | undefined,
+      unlocked: d.unlocked as string[] | undefined,
+    };
   }
 
   if (playing) {

@@ -31,6 +31,42 @@ export const RANKS = [
   { from: 60, title: "Legend", icon: "🏆" },
 ];
 
+/**
+ * What reaching a level gives them.
+ *
+ * Levels and ranks already existed and nothing happened at one, so a kid
+ * climbed a bar that did nothing. Each level now hands over something for
+ * their hero through the same unlock system the explore worlds use, so a
+ * level-up is a thing they can see on themselves.
+ *
+ * Only levels a kid can realistically reach are listed: all the XP in every
+ * game put together is a few thousand, which is somewhere in the teens. Add
+ * more here when there is more game to play.
+ */
+export const LEVEL_REWARDS: Record<number, string[]> = {
+  2: ["hat:explorer"],
+  3: ["pet:fox"],
+  4: ["outfit:8"],
+  5: ["hair:ponytail"],
+  6: ["pet:owl"],
+  7: ["hat:wizard"],
+  8: ["hairColor:8"],
+  9: ["pet:bunny"],
+  10: ["hat:crown", "outfit:9"],
+  11: ["pet:hedgehog"],
+  12: ["hat:aviator"],
+  13: ["pet:dragon"],
+  14: ["hair:braids"],
+  15: ["hat:starcrown", "pet:eagle"],
+};
+
+/** Everything earned by climbing from one level to another. */
+export function rewardsBetween(from: number, to: number): string[] {
+  const out: string[] = [];
+  for (let l = from + 1; l <= to; l++) out.push(...(LEVEL_REWARDS[l] ?? []));
+  return out;
+}
+
 export function rankFor(level: number) {
   return [...RANKS].reverse().find((r) => level >= r.from)!;
 }

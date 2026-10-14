@@ -46,6 +46,7 @@ import {
   workedCard,
 } from "@/lib/minigames/factrush";
 import { heroGrid, petGrid, DEFAULT_HERO, type Hero } from "@/lib/pixel/hero";
+import { unlockName } from "@/lib/pixel/cosmetics";
 import TeacherBrief from "./TeacherBrief";
 import type { MiniGameUIProps } from "./types";
 import css from "./FactRushGame.module.css";
@@ -120,7 +121,7 @@ function FactRush({
   /** What just happened, for the hero to react to. */
   const [beat, setBeat] = useState<{ kind: "sprint" | "run" | "trot" | "trip" | "grabbed" | "died"; show?: string } | null>(null);
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<{ stars: number; xp: number; score?: number } | null>(null);
+  const [result, setResult] = useState<{ stars: number; xp: number; score?: number; level?: number; rank?: string; unlocked?: string[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   /**
@@ -244,7 +245,7 @@ function FactRush({
     void (async () => {
       try {
         const r = await onFinish({ seed, answers, pace });
-        setResult({ stars: r.stars, xp: r.xp, score: r.score });
+        setResult({ stars: r.stars, xp: r.xp, score: r.score, level: r.level, rank: r.rank, unlocked: r.unlocked });
       } catch {
         setError("That run could not be saved. Check you are online.");
       } finally {
@@ -336,6 +337,12 @@ function FactRush({
             {run.posts} blocks run, {run.wrong} missed. {result.score ?? run.points} points.{run.over ? " Your pet is still in there - have another go." : ""}
           </p>
           {result.xp > 0 && <p className="kmuted">+{result.xp} XP for new stars!</p>}
+          {result.level && (
+            <p className={css.levelUp}>
+              Level {result.level} - you are {/^[AEIOU]/.test(result.rank ?? "") ? "an" : "a"} {result.rank}!
+              {result.unlocked?.length ? ` You unlocked ${result.unlocked.map(unlockName).join(" and ")} - go and put it on.` : ""}
+            </p>
+          )}
           {result.stars < 3 && <p className="kmuted small">A card answered inside two and a half seconds is a sprint, and a sprint is worth double.</p>}
           {error && <p className="kmuted small">{error}</p>}
         </div>
