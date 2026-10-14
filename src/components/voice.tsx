@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 /**
  * Voice for the kid side: the teacher reads lessons aloud (the browser's
@@ -23,9 +31,19 @@ interface VoiceSettings {
 
 const VoiceCtx = createContext<VoiceSettings>({ speakOn: true, micOn: true });
 
-export function VoiceProvider({ speakOn, micOn, natural = false, faces = false, children }: VoiceSettings & { children: React.ReactNode }) {
+export function VoiceProvider({
+  speakOn,
+  micOn,
+  natural = false,
+  faces = false,
+  children,
+}: VoiceSettings & { children: React.ReactNode }) {
   naturalOn = natural;
-  return <VoiceCtx.Provider value={{ speakOn, micOn, natural, faces }}>{children}</VoiceCtx.Provider>;
+  return (
+    <VoiceCtx.Provider value={{ speakOn, micOn, natural, faces }}>
+      {children}
+    </VoiceCtx.Provider>
+  );
 }
 
 export const useVoiceSettings = () => useContext(VoiceCtx);
@@ -35,8 +53,16 @@ export type VoiceKind = "male" | "female";
 const TeacherVoiceCtx = createContext<VoiceKind>("female");
 
 /** Everything inside reads aloud in this teacher's kind of voice. */
-export function TeacherVoice({ kind, children }: { kind: VoiceKind; children: React.ReactNode }) {
-  return <TeacherVoiceCtx.Provider value={kind}>{children}</TeacherVoiceCtx.Provider>;
+export function TeacherVoice({
+  kind,
+  children,
+}: {
+  kind: VoiceKind;
+  children: React.ReactNode;
+}) {
+  return (
+    <TeacherVoiceCtx.Provider value={kind}>{children}</TeacherVoiceCtx.Provider>
+  );
 }
 
 export const useTeacherVoice = () => useContext(TeacherVoiceCtx);
@@ -62,9 +88,15 @@ function loadPrefs(): VoicePrefs {
       const raw = JSON.parse(localStorage.getItem(PREFS_KEY) ?? "null");
       if (raw && typeof raw === "object") {
         prefs = {
-          autoRead: typeof raw.autoRead === "boolean" ? raw.autoRead : DEFAULT_PREFS.autoRead,
-          rate: [0.8, 1, 1.2].includes(raw.rate) ? raw.rate : DEFAULT_PREFS.rate,
-          sounds: typeof raw.sounds === "boolean" ? raw.sounds : DEFAULT_PREFS.sounds,
+          autoRead:
+            typeof raw.autoRead === "boolean"
+              ? raw.autoRead
+              : DEFAULT_PREFS.autoRead,
+          rate: [0.8, 1, 1.2].includes(raw.rate)
+            ? raw.rate
+            : DEFAULT_PREFS.rate,
+          sounds:
+            typeof raw.sounds === "boolean" ? raw.sounds : DEFAULT_PREFS.sounds,
         };
       }
     } catch {
@@ -74,7 +106,10 @@ function loadPrefs(): VoicePrefs {
   return prefs;
 }
 
-export function useVoicePrefs(): [VoicePrefs, (p: Partial<VoicePrefs>) => void] {
+export function useVoicePrefs(): [
+  VoicePrefs,
+  (p: Partial<VoicePrefs>) => void,
+] {
   const p = useSyncExternalStore(
     (cb) => {
       prefListeners.add(cb);
@@ -111,7 +146,14 @@ export interface SpeechState {
   lastDone: string | null;
 }
 
-const IDLE: SpeechState = { id: null, charIndex: -1, sentence: [-1, -1], words: false, paused: false, lastDone: null };
+const IDLE: SpeechState = {
+  id: null,
+  charIndex: -1,
+  sentence: [-1, -1],
+  words: false,
+  paused: false,
+  lastDone: null,
+};
 let speech: SpeechState = IDLE;
 const speechListeners = new Set<() => void>();
 let runToken = 0;
@@ -122,12 +164,18 @@ function setSpeech(next: Partial<SpeechState>) {
 }
 
 export function speechSupported(): boolean {
-  return typeof window !== "undefined" && "speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined";
+  return (
+    typeof window !== "undefined" &&
+    "speechSynthesis" in window &&
+    typeof SpeechSynthesisUtterance !== "undefined"
+  );
 }
 
 /** Voice names browsers use, by kind (Edge's "Natural" voices sound the most human). */
-const MALE = /\b(male|guy|andrew|brian|christopher|eric|roger|steffan|davis|tony|jason|ryan|thomas|william|liam|connor|david|mark|james|george|daniel|alex|fred|tom|aaron|arthur|oliver|reed|rocko|evan|nathan|ralph|gordon)\b/;
-const FEMALE = /\b(female|aria|jenny|ava|emma|michelle|ana|sara|nancy|jane|libby|sonia|maisie|natasha|clara|zira|hazel|susan|samantha|karen|moira|tessa|fiona|victoria|allison|ava|serena|kate|catherine|google us english|aria|joanna|salli|kimberly|ivy)\b/;
+const MALE =
+  /\b(male|guy|andrew|brian|christopher|eric|roger|steffan|davis|tony|jason|ryan|thomas|william|liam|connor|david|mark|james|george|daniel|alex|fred|tom|aaron|arthur|oliver|reed|rocko|evan|nathan|ralph|gordon)\b/;
+const FEMALE =
+  /\b(female|aria|jenny|ava|emma|michelle|ana|sara|nancy|jane|libby|sonia|maisie|natasha|clara|zira|hazel|susan|samantha|karen|moira|tessa|fiona|victoria|allison|ava|serena|kate|catherine|google us english|aria|joanna|salli|kimberly|ivy)\b/;
 
 export function voiceKindOf(name: string): VoiceKind | null {
   const n = name.toLowerCase();
@@ -138,7 +186,10 @@ export function voiceKindOf(name: string): VoiceKind | null {
 }
 
 /** The most natural-sounding English voice of the right kind. */
-export function pickVoice(voices: SpeechSynthesisVoice[], kind: VoiceKind): { voice: SpeechSynthesisVoice | null; matched: boolean } {
+export function pickVoice(
+  voices: SpeechSynthesisVoice[],
+  kind: VoiceKind,
+): { voice: SpeechSynthesisVoice | null; matched: boolean } {
   const en = voices.filter((v) => v.lang.toLowerCase().startsWith("en"));
   if (!en.length) return { voice: null, matched: false };
   const score = (v: SpeechSynthesisVoice) => {
@@ -149,7 +200,12 @@ export function pickVoice(voices: SpeechSynthesisVoice[], kind: VoiceKind): { vo
     if (/natural|neural|online|premium|enhanced/.test(n)) s += 8;
     // Chrome's Google voices sound far less robotic than the old desktop voices.
     if (/^google/.test(n)) s += 6;
-    if (/novelty|whisper|bad news|bells|boing|bubbles|cellos|zarvox|trinoids|albert|jester|organ|superstar|wobble|grandpa|grandma|eddy|flo|shelley|sandy|rocko/.test(n)) s -= 40;
+    if (
+      /novelty|whisper|bad news|bells|boing|bubbles|cellos|zarvox|trinoids|albert|jester|organ|superstar|wobble|grandpa|grandma|eddy|flo|shelley|sandy|rocko/.test(
+        n,
+      )
+    )
+      s -= 40;
     return s;
   };
   const voice = [...en].sort((a, b) => score(b) - score(a))[0];
@@ -160,7 +216,8 @@ export function pickVoice(voices: SpeechSynthesisVoice[], kind: VoiceKind): { vo
 export function sentences(text: string): [number, number][] {
   const out: [number, number][] = [];
   // A period inside a number (0.62), after a title (Dr. Carver) or inside U.S. doesn't end a sentence.
-  const re = /(?:[^.!?]|\.(?=\d)|(?<=\b(?:Dr|Mr|Mrs|Ms|Mt|St|Jr|Sr))\.|(?<=\b[A-Za-z])\.(?=[A-Za-z]\.)|(?<=\b[A-Z]\.[A-Z])\.(?=\s+[a-z]))+(?:[.!?]+["')\]]*|$)\s*/g;
+  const re =
+    /(?:[^.!?]|\.(?=\d)|(?<=\b(?:Dr|Mr|Mrs|Ms|Mt|St|Jr|Sr))\.|(?<=\b[A-Za-z])\.(?=[A-Za-z]\.)|(?<=\b[A-Z]\.[A-Z])\.(?=\s+[a-z]))+(?:[.!?]+["')\]]*|$)\s*/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(text))) {
     if (!m[0]) {
@@ -178,16 +235,30 @@ export function sentences(text: string): [number, number][] {
 let naturalOn = false;
 let audioEl: HTMLAudioElement | null = null;
 let frame = 0;
-const clipCache = new Map<string, Promise<{ id: string; starts: number[] } | null>>();
+const clipCache = new Map<
+  string,
+  Promise<{ id: string; starts: number[] } | null>
+>();
 
 /** Asks the server for the natural voice of this text (made once, then cached). */
-export function fetchClip(text: string, kind: VoiceKind): Promise<{ id: string; starts: number[] } | null> {
+export function fetchClip(
+  text: string,
+  kind: VoiceKind,
+): Promise<{ id: string; starts: number[] } | null> {
   const key = `${kind}|${text}`;
   let p = clipCache.get(key);
   if (!p) {
-    p = fetch("/api/voice", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, kind }) })
+    p = fetch("/api/voice", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ text, kind }),
+    })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => (d && typeof d.id === "string" && Array.isArray(d.starts) ? { id: d.id, starts: d.starts } : null))
+      .then((d) =>
+        d && typeof d.id === "string" && Array.isArray(d.starts)
+          ? { id: d.id, starts: d.starts }
+          : null,
+      )
       .catch(() => null);
     clipCache.set(key, p);
     // Failures can be retried later.
@@ -226,20 +297,32 @@ function stopAudio() {
   }
 }
 
-function playNatural(id: string, text: string, clip: { id: string; starts: number[] }, rate: number, token: number, fallback: () => void) {
+function playNatural(
+  id: string,
+  text: string,
+  clip: { id: string; starts: number[] },
+  rate: number,
+  token: number,
+  fallback: () => void,
+) {
   const parts = sentences(text);
   const a = new Audio(`/api/voice/${clip.id}`);
   audioEl = a;
   a.playbackRate = rate;
   (a as HTMLAudioElement & { preservesPitch?: boolean }).preservesPitch = true;
-  const scale = clip.starts.length && clip.starts.length !== text.length ? text.length / clip.starts.length : 1;
+  const scale =
+    clip.starts.length && clip.starts.length !== text.length
+      ? text.length / clip.starts.length
+      : 1;
   const tick = () => {
     if (token !== runToken || audioEl !== a) return;
     const i = charAt(clip.starts, a.currentTime);
     if (i >= 0) {
       const ci = Math.min(text.length - 1, Math.round(i * scale));
-      const sentence = parts.find(([s0, e0]) => ci >= s0 && ci < e0) ?? parts[0];
-      if (ci !== speech.charIndex) setSpeech({ charIndex: ci, sentence, words: true });
+      const sentence =
+        parts.find(([s0, e0]) => ci >= s0 && ci < e0) ?? parts[0];
+      if (ci !== speech.charIndex)
+        setSpeech({ charIndex: ci, sentence, words: true });
     }
     frame = requestAnimationFrame(tick);
   };
@@ -256,7 +339,11 @@ function playNatural(id: string, text: string, clip: { id: string; starts: numbe
   );
 }
 
-export function speak(id: string, text: string, opts: { rate?: number; kind?: VoiceKind } = {}) {
+export function speak(
+  id: string,
+  text: string,
+  opts: { rate?: number; kind?: VoiceKind } = {},
+) {
   if (typeof window === "undefined" || !text.trim()) return;
   const rate = opts.rate ?? loadPrefs().rate;
   const kind = opts.kind ?? "female";
@@ -265,7 +352,14 @@ export function speak(id: string, text: string, opts: { rate?: number; kind?: Vo
   const token = ++runToken;
   if (naturalOn) {
     const parts = sentences(text);
-    setSpeech({ id, charIndex: -1, sentence: parts[0], words: true, paused: false, lastDone: null });
+    setSpeech({
+      id,
+      charIndex: -1,
+      sentence: parts[0],
+      words: true,
+      paused: false,
+      lastDone: null,
+    });
     const fallback = () => {
       stopAudio();
       if (token === runToken) speakBrowser(id, text, rate, kind, token);
@@ -281,7 +375,13 @@ export function speak(id: string, text: string, opts: { rate?: number; kind?: Vo
 }
 
 /** The browser's built-in voice (used when natural voices are off or unavailable). */
-function speakBrowser(id: string, text: string, rate: number, kind: VoiceKind, token: number) {
+function speakBrowser(
+  id: string,
+  text: string,
+  rate: number,
+  kind: VoiceKind,
+  token: number,
+) {
   if (!speechSupported()) {
     setSpeech(IDLE);
     return;
@@ -292,7 +392,14 @@ function speakBrowser(id: string, text: string, rate: number, kind: VoiceKind, t
   const { voice, matched } = pickVoice(synth.getVoices(), kind);
   // No voice of the right kind on this computer: shift the pitch so it still sounds right.
   const pitch = matched ? 1 : kind === "male" ? 0.75 : 1.2;
-  setSpeech({ id, charIndex: -1, sentence: parts[0], words: false, paused: false, lastDone: null });
+  setSpeech({
+    id,
+    charIndex: -1,
+    sentence: parts[0],
+    words: false,
+    paused: false,
+    lastDone: null,
+  });
 
   const say = (i: number) => {
     if (token !== runToken) return;
@@ -306,9 +413,11 @@ function speakBrowser(id: string, text: string, rate: number, kind: VoiceKind, t
     u.lang = voice?.lang ?? "en-US";
     u.rate = rate;
     u.pitch = pitch;
-    u.onstart = () => token === runToken && setSpeech({ sentence: [start, end] });
+    u.onstart = () =>
+      token === runToken && setSpeech({ sentence: [start, end] });
     u.onboundary = (e) => {
-      if (token === runToken && e.name !== "sentence") setSpeech({ charIndex: start + e.charIndex, words: true });
+      if (token === runToken && e.name !== "sentence")
+        setSpeech({ charIndex: start + e.charIndex, words: true });
     };
     u.onend = () => say(i + 1);
     // Our own restarts change the token first, so an error here means the browser stopped talking.
@@ -357,7 +466,8 @@ function useVoicesReady() {
     window.speechSynthesis.getVoices();
     const onChange = () => window.speechSynthesis.getVoices();
     window.speechSynthesis.addEventListener?.("voiceschanged", onChange);
-    return () => window.speechSynthesis.removeEventListener?.("voiceschanged", onChange);
+    return () =>
+      window.speechSynthesis.removeEventListener?.("voiceschanged", onChange);
   }, []);
 }
 
@@ -368,7 +478,9 @@ export function useStopOnUnmount() {
 
 /** Browsers only allow speech after the kid has clicked or tapped something. */
 function canAutoPlay(): boolean {
-  const ua = (navigator as Navigator & { userActivation?: { hasBeenActive: boolean } }).userActivation;
+  const ua = (
+    navigator as Navigator & { userActivation?: { hasBeenActive: boolean } }
+  ).userActivation;
   return ua ? ua.hasBeenActive : true;
 }
 
@@ -376,14 +488,19 @@ function canAutoPlay(): boolean {
  * Speaks `text` once when it appears, if read-aloud is on and the kid has
  * auto-read turned on.
  */
-export function useAutoRead(id: string, text: string | null | undefined, enabled = true) {
+export function useAutoRead(
+  id: string,
+  text: string | null | undefined,
+  enabled = true,
+) {
   const { speakOn } = useVoiceSettings();
   const [p] = useVoicePrefs();
   const kind = useTeacherVoice();
   const spoken = useRef<string | null>(null);
   useVoicesReady();
   useEffect(() => {
-    if (!enabled || !text || !speakOn || !p.autoRead || !speechSupported()) return;
+    if (!enabled || !text || !speakOn || !p.autoRead || !speechSupported())
+      return;
     const key = `${id}:${text}`;
     if (spoken.current === key || !canAutoPlay()) return;
     // A short pause lets the screen settle before the teacher starts.
@@ -404,14 +521,22 @@ interface RecognitionLike {
   start(): void;
   stop(): void;
   abort(): void;
-  onresult: ((e: { resultIndex: number; results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }> }) => void) | null;
+  onresult:
+    | ((e: {
+        resultIndex: number;
+        results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }>;
+      }) => void)
+    | null;
   onerror: ((e: { error: string }) => void) | null;
   onend: (() => void) | null;
 }
 
 function recognitionCtor(): (new () => RecognitionLike) | null {
   if (typeof window === "undefined") return null;
-  const w = window as unknown as { SpeechRecognition?: new () => RecognitionLike; webkitSpeechRecognition?: new () => RecognitionLike };
+  const w = window as unknown as {
+    SpeechRecognition?: new () => RecognitionLike;
+    webkitSpeechRecognition?: new () => RecognitionLike;
+  };
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 
@@ -420,8 +545,10 @@ export function micSupported(): boolean {
 }
 
 const MIC_ERRORS: Record<string, string> = {
-  "not-allowed": "The microphone is blocked. Ask a parent to allow it in the browser (the lock icon next to the address).",
-  "service-not-allowed": "The microphone is blocked. Ask a parent to allow it in the browser (the lock icon next to the address).",
+  "not-allowed":
+    "The microphone is blocked. Ask a parent to allow it in the browser (the lock icon next to the address).",
+  "service-not-allowed":
+    "The microphone is blocked. Ask a parent to allow it in the browser (the lock icon next to the address).",
   "no-speech": "I didn't hear anything. Try again a little louder.",
   "audio-capture": "No microphone found. You can type instead.",
   network: "Speech needs the internet. You can type instead.",
@@ -450,7 +577,9 @@ export function useDictation(onText: (text: string) => void) {
   const start = useCallback(() => {
     const Ctor = recognitionCtor();
     if (!Ctor) {
-      setError("Talking isn't supported in this browser. Try Chrome, Edge or Safari, or type instead.");
+      setError(
+        "Talking isn't supported in this browser. Try Chrome, Edge or Safari, or type instead.",
+      );
       return;
     }
     // The teacher stops talking so the mic doesn't hear them.
@@ -472,7 +601,11 @@ export function useDictation(onText: (text: string) => void) {
       setInterim(live);
     };
     r.onerror = (e) => {
-      if (e.error !== "aborted") setError(MIC_ERRORS[e.error] ?? "The microphone stopped. Try again, or type instead.");
+      if (e.error !== "aborted")
+        setError(
+          MIC_ERRORS[e.error] ??
+            "The microphone stopped. Try again, or type instead.",
+        );
     };
     r.onend = () => {
       setListening(false);
@@ -522,7 +655,11 @@ export function MicButton({
   useEffect(() => setSupported(micSupported()), []);
   if (!micOn) return null;
   if (!supported) {
-    return compact ? null : <span className="kmuted small">🎤 Talking works in Chrome, Edge or Safari.</span>;
+    return compact ? null : (
+      <span className="kmuted small">
+        🎤 Talking works in Chrome, Edge or Safari.
+      </span>
+    );
   }
   return (
     <span className="mic-wrap">
@@ -536,14 +673,24 @@ export function MicButton({
       >
         {d.listening ? "■ Done talking" : `🎤 ${label}`}
       </button>
-      {d.listening && <span className="mic-interim">{d.interim || "Listening…"}</span>}
+      {d.listening && (
+        <span className="mic-interim">{d.interim || "Listening…"}</span>
+      )}
       {d.error && <span className="error small">{d.error}</span>}
     </span>
   );
 }
 
 /** A small "read this to me" button for any piece of teacher text. */
-export function SayButton({ id, text, label }: { id: string; text: string; label?: string }) {
+export function SayButton({
+  id,
+  text,
+  label,
+}: {
+  id: string;
+  text: string;
+  label?: string;
+}) {
   const { speakOn } = useVoiceSettings();
   const kind = useTeacherVoice();
   const s = useSpeech();
@@ -570,10 +717,25 @@ export function SayButton({ id, text, label }: { id: string; text: string; label
 let audio: AudioContext | null = null;
 
 /** A short, soft chime: "right" (two rising notes), "streak" (three) or "oops" (one low note). */
-export function chime(kind: "right" | "streak" | "oops" | "caught" | "growl" | "died" | "medal" | "pop" | "star", step = 0) {
+export function chime(
+  kind:
+    | "right"
+    | "streak"
+    | "oops"
+    | "caught"
+    | "growl"
+    | "died"
+    | "medal"
+    | "pop"
+    | "star",
+  step = 0,
+) {
   if (typeof window === "undefined" || !loadPrefs().sounds) return;
   try {
-    const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    const Ctx =
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext;
     if (!Ctx) return;
     audio ??= new Ctx();
 
@@ -609,7 +771,10 @@ export function chime(kind: "right" | "streak" | "oops" | "caught" | "growl" | "
         o.frequency.setValueAtTime(hz, at);
         g.gain.setValueAtTime(0.0001, at);
         g.gain.exponentialRampToValueAtTime(0.1, at + 0.02);
-        g.gain.exponentialRampToValueAtTime(0.0001, at + (i === tune.length - 1 ? 0.9 : 0.22));
+        g.gain.exponentialRampToValueAtTime(
+          0.0001,
+          at + (i === tune.length - 1 ? 0.9 : 0.22),
+        );
         o.connect(g).connect(audio!.destination);
         o.start(at);
         o.stop(at + (i === tune.length - 1 ? 0.95 : 0.25));
@@ -718,7 +883,12 @@ export function chime(kind: "right" | "streak" | "oops" | "caught" | "growl" | "
       return;
     }
 
-    const notes = kind === "right" ? [660, 880] : kind === "streak" ? [660, 880, 1175] : [220];
+    const notes =
+      kind === "right"
+        ? [660, 880]
+        : kind === "streak"
+          ? [660, 880, 1175]
+          : [220];
     notes.forEach((f, i) => {
       const o = audio!.createOscillator();
       const g = audio!.createGain();

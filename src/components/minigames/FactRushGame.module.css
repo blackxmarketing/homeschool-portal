@@ -31,9 +31,6 @@
   overflow: hidden;
 }
 
-
-
-
 .cloudA {
   top: 10px;
   left: 16%;
@@ -254,7 +251,6 @@
 
 /* ---- the end ---- */
 
-
 @media (max-width: 420px) {
   .scene {
     height: 260px;
@@ -280,7 +276,11 @@
 }
 .dungeon .ground {
   background: #3a3350;
-  background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.35) 2px, transparent 2px);
+  background-image: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.35) 2px,
+    transparent 2px
+  );
 }
 .wall {
   position: absolute;
@@ -327,7 +327,6 @@
 .sweeping {
   transition: left 1.1s ease-in-out;
 }
-
 
 .at,
 .cloudA,
@@ -428,8 +427,12 @@
   position: absolute;
   line-height: 0;
 }
-.ridge { opacity: 0.85; }
-.prop { z-index: 1; }
+.ridge {
+  opacity: 0.85;
+}
+.prop {
+  z-index: 1;
+}
 
 /* Whatever is chasing them. */
 .beast {
@@ -445,13 +448,21 @@
 .close {
   filter: drop-shadow(0 0 9px rgba(224, 69, 58, 0.9));
 }
-@keyframes lope { 50% { transform: translateY(-4px); } }
+@keyframes lope {
+  50% {
+    transform: translateY(-4px);
+  }
+}
 
 /* Under the sea nobody is standing on anything. */
 .swimming {
   animation: float 2.2s ease-in-out infinite;
 }
-@keyframes float { 50% { transform: translateY(-9px); } }
+@keyframes float {
+  50% {
+    transform: translateY(-9px);
+  }
+}
 
 /* Where you are, written in the corner. */
 .where {
@@ -466,15 +477,30 @@
   border-radius: 3px;
   padding: 4px 6px;
 }
-.night .where { background: rgba(255, 253, 245, 0.18); }
+.night .where {
+  background: rgba(255, 253, 245, 0.18);
+}
 
 /* How hard they want it. */
-.paces { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.pace { cursor: pointer; }
-.paceOn { background: #2340ff !important; color: #fffdf5 !important; }
+.paces {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.pace {
+  cursor: pointer;
+}
+.paceOn {
+  background: #2340ff !important;
+  color: #fffdf5 !important;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .beast, .swimming { animation: none; }
+  .beast,
+  .swimming {
+    animation: none;
+  }
 }
 
 /* A coin on the track, turning over as it waits to be picked up. */
@@ -486,7 +512,9 @@
   animation: bob 1.3s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
-  .coin { animation: none; }
+  .coin {
+    animation: none;
+  }
 }
 
 /* What the monster is still owed, and the line that explains it. */
@@ -508,13 +536,23 @@
   z-index: 4;
 }
 @keyframes grabbed {
-  0% { transform: translateY(0) rotate(0); }
-  35% { transform: translateY(-46px) rotate(-18deg); }
-  70% { transform: translateY(-20px) rotate(14deg); }
-  100% { transform: translateY(0) rotate(0); }
+  0% {
+    transform: translateY(0) rotate(0);
+  }
+  35% {
+    transform: translateY(-46px) rotate(-18deg);
+  }
+  70% {
+    transform: translateY(-20px) rotate(14deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .grabbed { animation: none; }
+  .grabbed {
+    animation: none;
+  }
 }
 
 /* A life gone: up in the air, turn over, and out through the bottom of the
@@ -773,12 +811,6 @@
     transform: rotate(-6deg) scale(1.06);
   }
 }
-.medalSay {
-  margin: 0;
-  font-size: 0.92rem;
-  line-height: 1.5;
-  color: var(--ink);
-}
 
 @media (prefers-reduced-motion: reduce) {
   .spark,
@@ -788,48 +820,12 @@
 }
 
 /* The medal screen: the one time this game stops everything for a cheer. */
-.party {
-  position: relative;
-  min-height: 340px;
-  gap: 10px;
-}
-.partyKicker {
-  margin: 0;
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink);
-  opacity: 0.7;
-}
-.bigMedal {
-  animation: land 0.7s cubic-bezier(0.2, 1.5, 0.4, 1) 1 both, shine 2.4s ease-in-out 0.7s infinite;
-  filter: drop-shadow(0 6px 0 rgba(27, 21, 48, 0.35));
-}
-@keyframes land {
-  0% {
-    transform: scale(0.2) rotate(-25deg);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1) rotate(0deg);
-    opacity: 1;
-  }
-}
 
 @media (prefers-reduced-motion: reduce) {
-  .bigMedal {
-    animation: none;
-  }
 }
 
 /* How the level went, in the coach's own box. */
-.report {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin: 6px 0 2px;
-}
-.reportStars {
+.endStars {
   margin: 0;
 }
 .starIn {
@@ -844,33 +840,65 @@
   }
 }
 /* The pet, out of the cage, with the medal beside it when there is one. */
-.reportRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.pair {
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-}
-.reportMedal {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  align-self: flex-start;
-  padding: 4px 10px 4px 6px;
-  border: 3px solid var(--ink);
-  border-radius: 4px;
-  background: #fff8e1;
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: var(--ink);
-}
 
 @media (prefers-reduced-motion: reduce) {
   .starIn {
     animation: none;
+  }
+}
+
+/* The end of a level: their character and their pet, and the stars coming in
+   over them. Nothing to read - the coach says the rest out loud. */
+.endScene {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-height: 300px;
+  padding: 20px 12px 26px;
+}
+.cast {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+.standing {
+  position: relative;
+  display: inline-flex;
+}
+.beside {
+  margin-bottom: 2px;
+}
+/* Handed over the size of the screen, settling around their neck. */
+.medalDrop {
+  position: absolute;
+  left: 50%;
+  top: 36%;
+  z-index: 2;
+  animation: medalland 1.9s cubic-bezier(0.25, 0.9, 0.3, 1) both;
+}
+@keyframes medalland {
+  0% {
+    transform: translate(-50%, -50%) scale(7) rotate(-14deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  78% {
+    transform: translate(-50%, -50%) scale(1.3) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .medalDrop {
+    animation: none;
+    transform: translate(-50%, -50%);
   }
 }
