@@ -50,6 +50,39 @@ describe("the coach", () => {
   });
 });
 
+describe("the coach speaks in one voice", () => {
+  const gameSource = read("src/components/minigames/ChompersGame.tsx");
+
+  it("wraps the whole game in his voice, so nothing falls back to the default", () => {
+    // The default teacher voice is female and Coach Forge is male. Without
+    // this provider the directions were read by one voice and the count-in
+    // by another, which is exactly what it sounded like.
+    expect(gameSource).toContain("<TeacherVoice kind={coachLook.voice}>");
+    expect(gameSource).toContain("</TeacherVoice>");
+  });
+
+  it("never names a voice by hand, which is how they drift apart", () => {
+    for (const src of [gameSource, briefSource]) {
+      expect(src).not.toContain(`kind: "male"`);
+      expect(src).not.toContain(`kind: "female"`);
+      expect(src).not.toContain("kind: look.voice");
+    }
+  });
+});
+
+describe("the level does not run until the kid says go", () => {
+  const gameSource = read("src/components/minigames/ChompersGame.tsx");
+
+  it("holds the clock and the kid while the coach is talking or answering", () => {
+    expect(gameSource).toContain("const frozen = !ready || count !== null || asking;");
+    // The clock bails out...
+    expect(gameSource).toContain("if (over || st.over || st.cleared || frozen) return;");
+    // ...and so does a move, read off a ref because the keyboard holds on to
+    // act() and would otherwise see a stale frozen.
+    expect(gameSource).toContain("if (frozenRef.current) return;");
+  });
+});
+
 describe("what the coach is allowed to know", () => {
   it("is told it cannot see the board", () => {
     const ask = aiSource.slice(aiSource.indexOf("export async function gameAsk"));
@@ -83,8 +116,8 @@ describe("what the coach is allowed to know", () => {
 
   it("is switched off, rather than failing oddly, when the AI is not available", () => {
     expect(routeSource).toMatch(/!features\(\)\.aiTeachers \|\| !aiEnabled\(\)/);
-    // And the question box hides itself rather than offering what cannot answer.
-    expect(briefSource).toContain("canAsk ?");
+    // And the ask button hides itself rather than offering what cannot answer.
+    expect(briefSource).toContain("canAsk &&");
   });
 
   it("caps what a kid can send and counts it against their daily messages", () => {

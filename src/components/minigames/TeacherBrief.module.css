@@ -1,38 +1,34 @@
-/* The coach's panel: before a level, and from the Stuck? button inside one.
-   Same ink keyline and hard shadow as the board, so he reads as part of the
-   arcade rather than a web form bolted to the top of it. */
+/* The coach, on the board itself beside the directions. Same ink keyline and
+   hard shadow as everything else, so he reads as part of the arcade. */
 
-.brief {
+.row {
   --ink: #1b1530;
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 12px;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px;
   border: 3px solid var(--ink);
   border-radius: 4px;
   background: #fffdf5;
   box-shadow: 0 4px 0 var(--ink);
 }
 
-.head {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-/* The teacher is a fixed-size picture, not something for the text beside
-   it to squeeze. */
+/* The teacher is a fixed-size picture, not something for the text beside it
+   to squeeze. */
 .face {
   flex: none;
   line-height: 0;
   display: inline-flex;
 }
 
-.headText {
+.text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
   min-width: 0;
+  flex: 1;
 }
+
 .who {
   font-family: var(--font-pixel), monospace;
   font-size: 0.5rem;
@@ -44,10 +40,7 @@
   box-shadow: 0 2px 0 var(--ink);
   align-self: flex-start;
 }
-.title {
-  font-size: 1.05rem;
-  color: var(--ink);
-}
+
 .skill {
   margin: 0;
   font-size: 0.95rem;
@@ -55,26 +48,30 @@
   color: var(--ink);
 }
 
+.rule {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #2340ff;
+}
+
 /* A question and the answer it got, kept on screen so a kid can read back
    what the coach said while they play. */
 .turn {
   border-top: 2px dashed #d0d6e6;
-  padding-top: 8px;
+  padding-top: 6px;
 }
 .q {
   margin: 0 0 4px;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--k-muted, #5a6489);
 }
 .a {
   margin: 0;
-  font-size: 0.98rem;
+  font-size: 0.95rem;
   line-height: 1.5;
   color: var(--ink);
-}
-.err {
-  margin: 0;
 }
 
 .askRow {
@@ -85,8 +82,8 @@
 }
 .box {
   flex: 1;
-  min-width: 160px;
-  padding: 10px 12px;
+  min-width: 150px;
+  padding: 9px 11px;
   border: 2px solid var(--ink);
   border-radius: 4px;
   background: #fff;
@@ -99,51 +96,19 @@
   outline-offset: 1px;
 }
 
-.go {
+.btns {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-/* Three, two, one. */
-.counting {
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-height: 190px;
-}
-.count {
-  font-family: var(--font-pixel), monospace;
-  font-size: 2.4rem;
-  color: #2340ff;
-  animation: pop 0.7s;
-}
-@keyframes pop {
-  0% {
-    transform: scale(0.6);
-    opacity: 0.2;
-  }
-  40% {
-    transform: scale(1.15);
-    opacity: 1;
-  }
-}
-
 @media (max-width: 420px) {
-  .head {
+  .row {
     gap: 8px;
-  }
-  .title {
-    font-size: 0.95rem;
+    padding: 8px;
   }
   .skill {
     font-size: 0.88rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .count {
-    animation: none;
   }
 }

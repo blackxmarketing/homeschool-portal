@@ -351,17 +351,29 @@
   .hurt { animation: none; }
 }
 
-/* The coach's face beside the rule, in the same frame as everything else, and
-   the button that stops the clock to go and ask him something. */
-.coach {
-  display: inline-flex;
-  border: 2px solid var(--ink);
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 2px 0 var(--ink);
-  line-height: 0;
-  flex: none;
+
+/* Three, two, one, over the board the kid is about to play. */
+.countOver {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(27, 21, 48, 0.55);
+  border-radius: 2px;
+  z-index: 2;
 }
-.stuck {
-  cursor: pointer;
+.countOver strong {
+  font-family: var(--font-pixel), monospace;
+  font-size: clamp(2rem, 12vw, 4.5rem);
+  color: #fffdf5;
+  text-shadow: 0 4px 0 var(--ink);
+  animation: countpop 0.7s;
+}
+@keyframes countpop {
+  0% { transform: scale(0.5); opacity: 0.2; }
+  40% { transform: scale(1.15); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .countOver strong { animation: none; }
 }

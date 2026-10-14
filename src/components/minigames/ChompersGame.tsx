@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PixelSprite } from "../pixel/PixelArt";
-import { chime, SayButton } from "../voice";
+import { chime, SayButton, speak, TeacherVoice } from "../voice";
 import {
   CLEAR_BONUS,
   CORRECT_PER_BOARD,
@@ -39,7 +39,6 @@ import {
 import { petGrid, type PetId } from "@/lib/pixel/hero";
 import { avatarFor } from "@/content/avatars";
 import { teacherFor } from "@/content/teachers";
-import TeacherFace from "../TeacherFace";
 import TeacherBrief from "./TeacherBrief";
 import type { MiniGameUIProps } from "./types";
 import css from "./ChompersGame.module.css";
@@ -182,7 +181,20 @@ function Chompers({
    * kid taps Stuck?. Both stop the clock. The Grumbles need no stopping: they
    * only move when the kid does.
    */
-  const [brief, setBrief] = useState<"brief" | "stuck" | null>("brief");
+  const [ready, setReady] = useState(false);
+  /** 3, 2, 1 over the board; null when it is not counting. */
+  const [count, setCount] = useState<number | null>(null);
+  /** True while the coach has a question box open. */
+  const [asking, setAsking] = useState(false);
+  /**
+   * The board is on screen the whole time, but it does not run until the kid
+   * says they are ready, and it holds while the coach is answering. The
+   * Grumbles need no holding - they only move when the kid does.
+   */
+  const frozen = !ready || count !== null || asking;
+  /** act() is a callback the keyboard holds on to, so it reads this, not frozen. */
+  const frozenRef = useRef(frozen);
+  frozenRef.current = frozen;
   /** Quick mode is the reward for having shown you know this one. */
   const mayGoQuick = earned >= 3;
   const [quick, setQuick] = useState(false);
@@ -233,6 +245,7 @@ function Chompers({
   /** Plays one turn, and moves on when the board is finished with. */
   const act = useCallback(
     (a: Act) => {
+      if (frozenRef.current) return;
       const cur = live.current;
       if (cur.over || cur.cleared) return;
       const next = step(board, cur, a, quick);
@@ -299,7 +312,7 @@ function Chompers({
    * up instead and never stops them.
    */
   useEffect(() => {
-    if (over || st.over || st.cleared || brief) return;
+    if (over || st.over || st.cleared || frozen) return;
     const id = setInterval(() => {
       setClock((c) => {
         if (untimed) return c + 1;
@@ -316,7 +329,24 @@ function Chompers({
       });
     }, 1000);
     return () => clearInterval(id);
-  }, [over, st.over, st.cleared, untimed, bi, brief]);
+  }, [over, st.over, st.cleared, untimed, bi, frozen]);
+
+  /** Three, two, one - in the coach's voice, over the board. */
+  function countIn() {
+    speak("coach-count", "Three. Two. One. Go!");
+    setCount(3);
+  }
+
+  useEffect(() => {
+    if (count === null) return;
+    if (count === 0) {
+      setCount(null);
+      setReady(true);
+      return;
+    }
+    const t = setTimeout(() => setCount((c) => (c === null ? null : c - 1)), 700);
+    return () => clearTimeout(t);
+  }, [count]);
 
   // A fresh board gets a fresh clock.
   useEffect(() => {
@@ -431,26 +461,8 @@ function Chompers({
     );
   }
 
-  // The coach, before the level and whenever they get stuck in it.
-  if (brief) {
-    return (
-      <div className={`mg ${css.ch}`} ref={card}>
-        <TeacherBrief
-          teacher={coach}
-          mode={brief}
-          title={level.title}
-          text={brief === "brief" ? level.intro : `The rule on your board: ${board.label}`}
-          levelId={level.id}
-          board={bi}
-          seed={seed}
-          canAsk={canAsk}
-          onDone={() => setBrief(null)}
-        />
-      </div>
-    );
-  }
-
   return (
+    <TeacherVoice kind={coachLook.voice}>
     <div className={`mg ${css.ch}`} ref={card}>
       <div className="mg-hud">
         <span className="chip">
@@ -476,10 +488,20 @@ function Chompers({
         </span>
       </div>
 
+      <TeacherBrief
+        teacher={coach}
+        directions={level.intro}
+        rule={board.label}
+        levelId={level.id}
+        board={bi}
+        seed={seed}
+        canAsk={canAsk}
+        stage={ready ? "play" : "brief"}
+        onReady={countIn}
+        onAsking={setAsking}
+      />
+
       <div className={css.rule}>
-        <span className={css.coach} title={coach.name} aria-hidden>
-          <TeacherFace look={coachLook} size={40} still />
-        </span>
         <h2 className="pixel-title small">{board.label}</h2>
         <SayButton id={`chomp-${level.id}-${bi}`} text={`Eat every square that fits: ${board.label}`} />
         {mayGoQuick && (
@@ -494,11 +516,6 @@ function Chompers({
             {quick ? "⚡ Quick" : "🐢 Steady"}
           </button>
         )}
-        {canAsk && (
-          <button type="button" className={`chip ${css.stuck}`} onClick={() => setBrief("stuck")} title="Stop the clock and ask the coach">
-            🙋 Stuck?
-          </button>
-        )}
         <span className="kmuted small">{left} left</span>
       </div>
 
@@ -509,6 +526,11 @@ function Chompers({
       </div>
 
       <div className={css.boardWrap}>
+        {count !== null && (
+          <div className={css.countOver} role="status" aria-live="assertive">
+            <strong>{count}</strong>
+          </div>
+        )}
         <div className={css.board} role="grid" aria-label={board.label}>
           {board.cells.map((c, i) => (
             <div
@@ -561,6 +583,7 @@ function Chompers({
         </button>
       </div>
     </div>
+    </TeacherVoice>
   );
 }
 
