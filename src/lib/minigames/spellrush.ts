@@ -205,13 +205,32 @@ export interface Critter {
   kind: "snake" | "frog" | "monkey";
 }
 
+export interface Spot {
+  x: number;
+  y: number;
+}
+
 export interface Clearing {
   word: string;
   tiles: TileKind[];
   stones: Stone[];
   critters: Critter[];
-  start: { x: number; y: number };
+  start: Spot;
+  /**
+   * Boulders. Walk into one and you shove it along, if there is anywhere for
+   * it to go. Nothing is ever locked behind one - they are there to be
+   * pushed about, and to be parked in front of something with teeth.
+   */
+  rocks: Spot[];
+  /** A gate across the path, and the key that opens it. Both or neither. */
+  door: Spot | null;
+  key: Spot | null;
 }
+
+/** From this grade up, a clearing can have boulders in it. */
+const ROCKS_FROM_GRADE = 1;
+/** And from this one, a gate and a key. */
+const DOOR_FROM_GRADE = 3;
 
 const at = (x: number, y: number) => y * COLS + x;
 const inside = (x: number, y: number) => x >= 0 && y >= 0 && x < COLS && y < ROWS;
@@ -254,7 +273,20 @@ const ALPHABET = "abcdefghijklmnopqrstuvwxyz";
  * Built the same way from the same seed every time, which is what lets the
  * server walk the same maze the kid walked.
  */
-export function buildClearing(word: string, seed: number, snakes: number): Clearing {
+/** The same ground with some tiles blocked off, for asking "what if". */
+function withBlocks(tiles: TileKind[], blocks: Spot[]): TileKind[] {
+  const out = [...tiles];
+  for (const b of blocks) out[at(b.x, b.y)] = "tree";
+  return out;
+}
+
+/** Whether every letter can still be reached with these tiles blocked. */
+function stillWalkable(tiles: TileKind[], start: Spot, stones: Stone[], blocks: Spot[], door: Spot | null): boolean {
+  const open = reachable(withBlocks(tiles, door ? [...blocks, door] : blocks), start);
+  return stones.every((s) => s.at < 0 || open.has(at(s.x, s.y)));
+}
+
+export function buildClearing(word: string, seed: number, snakes: number, grade = 0): Clearing {
   const letters = [...word.toLowerCase()];
   for (let attempt = 0; attempt < 24; attempt++) {
     const r = seededRng((seed >>> 0) * 7919 + attempt * 101 + 17);
@@ -331,7 +363,55 @@ export function buildClearing(word: string, seed: number, snakes: number): Clear
       critters.push({ ...spot, dir: int(r, 0, 3), kind: kinds[i % kinds.length] });
     }
 
-    return { word: word.toLowerCase(), tiles, stones, critters, start };
+    // Boulders, on tiles nothing needs: every letter has to still be
+    // reachable with the boulder sitting there, so a kid can shove them
+    // about for fun or for cover and never shut themselves out.
+    const rocks: Spot[] = [];
+    if (grade >= ROCKS_FROM_GRADE) {
+      const want = 2 + (grade >= 4 ? 1 : 0);
+      for (let i = 0; i < want; i++) {
+        const spot = take();
+        if (!spot) break;
+        if (!stillWalkable(tiles, start, stones, [...rocks, spot], null)) continue;
+        rocks.push(spot);
+      }
+    }
+
+    // A gate and its key. The key has to be fetchable without going through
+    // the gate, and everything has to be reachable once it is open.
+    let door: Spot | null = null;
+    let key: Spot | null = null;
+    if (grade >= DOOR_FROM_GRADE) {
+      // Every tile a gate could stand on, not just the few left over: a gate
+      // has to pinch the path somewhere, and most tiles do not.
+      const candidates = shuffle(
+        r,
+        [...reachable(tiles, start)]
+          .map((i) => ({ x: i % COLS, y: Math.floor(i / COLS) }))
+          .filter(
+            (p) =>
+              !(p.x === start.x && p.y === start.y) &&
+              !stones.some((st) => st.x === p.x && st.y === p.y) &&
+              !rocks.some((rk) => rk.x === p.x && rk.y === p.y) &&
+              !critters.some((c) => c.x === p.x && c.y === p.y),
+          ),
+      );
+      for (const spot of candidates) {
+        if (door) break;
+        // A gate worth having shuts something away.
+        const shut = reachable(withBlocks(tiles, [...rocks, spot]), start);
+        const blocked = stones.some((st) => st.at >= 0 && !shut.has(at(st.x, st.y)));
+        if (!blocked) continue;
+        const keySpot = [...shut]
+          .map((i) => ({ x: i % COLS, y: Math.floor(i / COLS) }))
+          .find((p) => !(p.x === start.x && p.y === start.y) && !stones.some((st) => st.x === p.x && st.y === p.y) && !rocks.some((rk) => rk.x === p.x && rk.y === p.y));
+        if (!keySpot) continue;
+        door = spot;
+        key = keySpot;
+      }
+    }
+
+    return { word: word.toLowerCase(), tiles, stones, critters, start, rocks, door, key };
   }
   // Nothing but open ground: the fallback no seed should ever need, but a
   // level must always be playable.
@@ -345,7 +425,7 @@ export function buildClearing(word: string, seed: number, snakes: number): Clear
     tiles[at(COLS - 1, y)] = "tree";
   }
   const stones = [...word.toLowerCase()].map((ch, n) => ({ x: 2 + n * 2, y: 2 + (n % 3) * 2, ch, at: n }));
-  return { word: word.toLowerCase(), tiles, stones, critters: [], start: { x: 1, y: ROWS - 2 } };
+  return { word: word.toLowerCase(), tiles, stones, critters: [], start: { x: 1, y: ROWS - 2 }, rocks: [], door: null, key: null };
 }
 
 /** The words this level asks for, in the order it asks for them. */
@@ -419,6 +499,12 @@ export const MASTERY_FLOOR_MS = 4000;
 const run0 = (n: number) => n === 0;
 
 export interface Run {
+  /** Where the boulders have got to. */
+  rocks: Spot[];
+  /** They are carrying the key. */
+  hasKey: boolean;
+  /** The gate is open. */
+  doorOpen: boolean;
   /** Spelled the lot, cleanly, without stalling: worth a medal, once. */
   mastered: boolean;
   /** Which word of the level they are on. */
@@ -446,7 +532,7 @@ export interface Run {
   /** Out of lives. */
   over: boolean;
   /** What just happened, for the screen to react to. */
-  beat: "none" | "letter" | "wrong" | "bitten" | "word" | "level";
+  beat: "none" | "letter" | "wrong" | "bitten" | "word" | "level" | "push" | "stuck" | "key" | "locked";
   /** Steps taken on the word they are on. */
   stepsHere: number;
 }
@@ -469,7 +555,7 @@ export function cleanMove(raw: unknown): SpellMove {
 }
 
 /** Where a critter goes next: straight on while it can, round the corner when it cannot. */
-function moveCritter(c: Critter, tiles: TileKind[], r: Rng): Critter {
+function moveCritter(c: Critter, tiles: TileKind[], r: Rng, blocked: Spot[] = []): Critter {
   const order = [c.dir, (c.dir + 1) % 4, (c.dir + 3) % 4, (c.dir + 2) % 4];
   // A coin toss on which way it turns first, so two animals in the same
   // corner do not move as one.
@@ -478,7 +564,7 @@ function moveCritter(c: Critter, tiles: TileKind[], r: Rng): Critter {
     const d = DIRS[TURN[dir]];
     const x = c.x + d.dx;
     const y = c.y + d.dy;
-    if (inside(x, y) && tiles[at(x, y)] === "floor") return { ...c, x, y, dir };
+    if (inside(x, y) && tiles[at(x, y)] === "floor" && !blocked.some((b) => b.x === x && b.y === y)) return { ...c, x, y, dir };
   }
   return c;
 }
@@ -498,8 +584,11 @@ export function play(level: SpellLevel, raw: unknown): Run {
   const snakes = pace === "easy" ? 0 : crittersOn(level);
 
   let wordAt = 0;
-  let clearing = buildClearing(words[0] ?? "cat", move.seed, snakes);
+  let clearing = buildClearing(words[0] ?? "cat", move.seed, snakes, level.grade);
   let me = { ...clearing.start };
+  let rocks = clearing.rocks.map((p) => ({ ...p }));
+  let hasKey = false;
+  let doorOpen = false;
   let critters = clearing.critters.map((c) => ({ ...c }));
   let got = 0;
   let taken: number[] = [];
@@ -523,6 +612,9 @@ export function play(level: SpellLevel, raw: unknown): Run {
   const restartWord = () => {
     me = { ...clearing.start };
     critters = clearing.critters.map((c) => ({ ...c }));
+    rocks = clearing.rocks.map((p) => ({ ...p }));
+    hasKey = false;
+    doorOpen = false;
     got = 0;
     taken = [];
     stepsHere = 0;
@@ -541,7 +633,7 @@ export function play(level: SpellLevel, raw: unknown): Run {
     if (step.d === "w") {
       if (pace !== "hard") continue;
       const ticks = Math.min(MAX_TICKS, Math.floor(step.ms / HARD_TICK_MS));
-      for (let t = 0; t < ticks; t++) critters = critters.map((c) => moveCritter(c, clearing.tiles, r));
+      for (let t = 0; t < ticks; t++) critters = critters.map((c) => moveCritter(c, clearing.tiles, r, [...rocks, ...(clearing.door && !doorOpen ? [clearing.door] : [])]));
       if (critters.some((c) => c.x === me.x && c.y === me.y)) {
         lives--;
         bittenHere = true;
@@ -561,8 +653,45 @@ export function play(level: SpellLevel, raw: unknown): Run {
     // A tree or a pool is simply not a move: no step, no turn for the
     // animals, nothing lost.
     if (!inside(x, y) || clearing.tiles[at(x, y)] !== "floor") continue;
+
+    // The gate: shut until they are carrying the key, and then it stays open.
+    if (clearing.door && clearing.door.x === x && clearing.door.y === y && !doorOpen) {
+      if (!hasKey) {
+        beat = "locked";
+        continue;
+      }
+      doorOpen = true;
+    }
+
+    // A boulder: shoved along if there is somewhere for it to go, and in the
+    // way if there is not.
+    const rock = rocks.findIndex((p) => p.x === x && p.y === y);
+    if (rock >= 0) {
+      const bx = x + d.dx;
+      const by = y + d.dy;
+      const free =
+        inside(bx, by) &&
+        clearing.tiles[at(bx, by)] === "floor" &&
+        !rocks.some((p) => p.x === bx && p.y === by) &&
+        !clearing.stones.some((st, i) => st.x === bx && st.y === by && !taken.includes(i)) &&
+        !(clearing.door && clearing.door.x === bx && clearing.door.y === by && !doorOpen) &&
+        !critters.some((c) => c.x === bx && c.y === by);
+      if (!free) {
+        beat = "stuck";
+        continue;
+      }
+      rocks = rocks.map((p, i) => (i === rock ? { x: bx, y: by } : p));
+      beat = "push";
+    }
+
     me = { x, y };
     stepsHere++;
+
+    // The key, if it is lying here.
+    if (clearing.key && !hasKey && clearing.key.x === x && clearing.key.y === y) {
+      hasKey = true;
+      beat = "key";
+    }
 
     // A stone underfoot.
     const stone = clearing.stones.findIndex((s, i) => s.x === x && s.y === y && !taken.includes(i));
@@ -582,7 +711,7 @@ export function play(level: SpellLevel, raw: unknown): Run {
     // Everything that lives here takes its turn after they take theirs - and
     // on hard it takes one more for every second they spent deciding.
     const turns = pace === "hard" ? 1 + Math.min(MAX_TICKS - 1, Math.floor(step.ms / HARD_TICK_MS)) : 1;
-    for (let t = 0; t < turns; t++) critters = critters.map((c) => moveCritter(c, clearing.tiles, r));
+    for (let t = 0; t < turns; t++) critters = critters.map((c) => moveCritter(c, clearing.tiles, r, [...rocks, ...(clearing.door && !doorOpen ? [clearing.door] : [])]));
     if (critters.some((c) => c.x === me.x && c.y === me.y)) {
       lives--;
       bittenHere = true;
@@ -608,7 +737,7 @@ export function play(level: SpellLevel, raw: unknown): Run {
       bittenHere = false;
       wordAt = doneWords;
       if (doneWords < words.length) {
-        clearing = buildClearing(words[wordAt], move.seed + wordAt * 977, snakes);
+        clearing = buildClearing(words[wordAt], move.seed + wordAt * 977, snakes, level.grade);
         restartWord();
       }
     }
@@ -632,6 +761,9 @@ export function play(level: SpellLevel, raw: unknown): Run {
   const mastered = finished && run0(wrong) && clean >= words.length && steady;
   return {
     mastered,
+    rocks,
+    hasKey,
+    doorOpen,
     word: Math.min(wordAt, words.length - 1),
     clearing,
     me,
@@ -670,18 +802,38 @@ export function perfectMoves(level: SpellLevel, seed = 1, pace: Pace = "easy"): 
   const snakes = pace === "easy" ? 0 : crittersOn(level);
   const steps: Step[] = [];
   for (let w = 0; w < words.length; w++) {
-    const clearing = buildClearing(words[w], w === 0 ? seed : seed + w * 977, snakes);
+    const clearing = buildClearing(words[w], w === 0 ? seed : seed + w * 977, snakes, level.grade);
     let from = { ...clearing.start };
     const taken = new Set<number>();
+    // The key first, if there is one: nothing past the gate can be had
+    // without it, and the walk through the gate opens it on the way.
+    if (clearing.key && clearing.door) {
+      const toKey =
+        routeTo(withBlocks(clearing.tiles, [clearing.door, ...clearing.rocks, ...clearing.stones]), from, clearing.key) ??
+        routeTo(withBlocks(clearing.tiles, [clearing.door, ...clearing.stones]), from, clearing.key) ??
+        routeTo(withBlocks(clearing.tiles, [clearing.door]), from, clearing.key);
+      if (!toKey) return { seed, steps, pace };
+      for (const d of toKey) steps.push({ d, ms: 420 });
+      from = { ...clearing.key };
+    }
     for (let n = 0; n < clearing.word.length; n++) {
       const stone = clearing.stones.find((s) => s.at === n)!;
       // Walk round the other stones rather than over them: treading on the
       // wrong letter on the way to the right one is exactly the mistake this
       // is meant to be free of.
-      const clear = clearing.tiles.map((t, i) =>
-        clearing.stones.some((o, oi) => o !== stone && !taken.has(oi) && o.y * COLS + o.x === i) ? ("tree" as TileKind) : t,
-      );
-      const path = routeTo(clear, from, { x: stone.x, y: stone.y }) ?? routeTo(clearing.tiles, from, { x: stone.x, y: stone.y });
+      // Round the other stones and the boulders if it can, round the stones
+      // alone if it cannot, and straight there if there is no other way -
+      // treading on the wrong letter is the one thing this walk is for
+      // avoiding, so the boulders are the first thing to give.
+      const walled = (blocks: Spot[]) => clearing.tiles.map((t, i) => (blocks.some((b) => b.y * COLS + b.x === i) ? ("tree" as TileKind) : t));
+      const others = clearing.stones.filter((o, oi) => o !== stone && !taken.has(oi));
+      // The boulders stay walled off whatever happens: a walk that shoves
+      // one is a walk whose next step lands somewhere else, and the whole
+      // list after it is nonsense.
+      const path =
+        routeTo(walled([...others, ...clearing.rocks]), from, { x: stone.x, y: stone.y }) ??
+        routeTo(walled(clearing.rocks), from, { x: stone.x, y: stone.y }) ??
+        routeTo(clearing.tiles, from, { x: stone.x, y: stone.y });
       if (!path) return { seed, steps, pace };
       for (const d of path) steps.push({ d, ms: 420 });
       taken.add(clearing.stones.indexOf(stone));
@@ -858,6 +1010,47 @@ export function parrotGrid(frame = 0): Grid {
   g.rect(7, 3, 2, 2, "#f2a516");
   g.disc(3, 7 - flap, 2, wing);
   g.rect(5, 10, 1, 2, "#f2a516");
+  return g;
+}
+
+/** A boulder, there to be shoved along. */
+export function rockGrid(): Grid {
+  const g = new Grid(12, 12);
+  const stone = "#9a9a8a";
+  g.disc(6, 7, 5.2, shade(stone, -0.45));
+  g.disc(6, 7, 4.4, stone);
+  g.disc(4, 5, 1.6, shade(stone, 0.3));
+  g.rect(2, 11, 9, 1, shade(stone, -0.55));
+  return g;
+}
+
+/** The key to the gate. */
+export function keyGrid(frame = 0): Grid {
+  const g = new Grid(12, 12);
+  const gold = "#f2d24a";
+  const lift = frame % 2;
+  g.disc(4, 5 - lift, 2.6, shade(gold, -0.4));
+  g.disc(4, 5 - lift, 1.4, null);
+  g.rect(6, 4 - lift, 5, 2, gold);
+  g.rect(9, 6 - lift, 1, 2, gold);
+  g.rect(7, 6 - lift, 1, 2, gold);
+  return g;
+}
+
+/** The gate across the path: shut, then open. */
+export function doorGrid(open: boolean): Grid {
+  const g = new Grid(12, 12);
+  const wood = "#8a6a3c";
+  const iron = "#5e6672";
+  if (open) {
+    g.rect(0, 0, 3, 12, shade(wood, -0.3));
+    g.rect(9, 0, 3, 12, shade(wood, -0.3));
+    return g;
+  }
+  g.rect(0, 0, 12, 12, wood);
+  for (let y = 1; y < 12; y += 3) g.rect(0, y, 12, 1, shade(wood, -0.35));
+  g.rect(4, 4, 4, 4, iron);
+  g.set(6, 6, "#1b1530");
   return g;
 }
 

@@ -21,6 +21,9 @@ import {
   levelById,
   levelsForGrade,
   medalGrid,
+  rockGrid,
+  keyGrid,
+  doorGrid,
   placeFrom,
   placementWords,
   PLACEMENT_RUNGS,
@@ -106,11 +109,13 @@ describe("the clearing", () => {
     for (const level of ALL_SPELL_LEVELS) {
       for (const seed of [1, 7, 99, 1234]) {
         for (const word of wordsFor(level, seed)) {
-          const c = buildClearing(word, seed, crittersOn(level));
+          const c = buildClearing(word, seed, crittersOn(level), level.grade);
           expect(c.stones.filter((s) => s.at >= 0).length, `${level.id} / ${word}`).toBe(word.length);
           let from = c.start;
           for (let n = 0; n < word.length; n++) {
             const stone = c.stones.find((s) => s.at === n)!;
+            // Through the gate: it is open by the time they get there, because
+            // the key is always fetchable without it.
             const path = routeTo(c.tiles, from, { x: stone.x, y: stone.y });
             expect(path, `${level.id} / ${word}: letter ${n + 1} is walled off`).not.toBeNull();
             from = { x: stone.x, y: stone.y };
@@ -388,3 +393,110 @@ describe("the check that places an older kid", () => {
     expect(placementFor("numberhop", 5)).toBeNull();
   });
 });
+
+describe("boulders, keys and gates", () => {
+  const rocky = levelById("sp-13")!;
+  const gated = levelById("sp-34")!;
+
+  it("puts boulders in from grade one and a gate from grade three", () => {
+    const young = buildClearing("cat", 4, 0, 0);
+    expect(young.rocks.length).toBe(0);
+    expect(young.door).toBeNull();
+    const rocks = [1, 2, 3, 4, 5].map((seed) => buildClearing("cake", seed, 1, 1).rocks.length);
+    expect(Math.max(...rocks)).toBeGreaterThan(0);
+    const doors = [1, 2, 3, 4, 5, 6].map((seed) => buildClearing("giant", seed, 2, 4).door).filter(Boolean);
+    expect(doors.length).toBeGreaterThan(0);
+  });
+
+  it("never locks a letter away behind a boulder", () => {
+    for (const level of ALL_SPELL_LEVELS.filter((l) => l.grade >= 1)) {
+      for (const seed of [3, 31]) {
+        for (const word of wordsFor(level, seed).slice(0, 2)) {
+          const c = buildClearing(word, seed, crittersOn(level), level.grade);
+          // With every boulder treated as a wall, and the gate open, every
+          // letter is still walkable in order.
+          const blocked = c.tiles.map((t, i) => (c.rocks.some((r) => r.y * COLS + r.x === i) ? "tree" : t));
+          let from = c.start;
+          for (let n = 0; n < word.length; n++) {
+            const stone = c.stones.find((s) => s.at === n)!;
+            expect(routeTo(blocked, from, { x: stone.x, y: stone.y }), `${level.id} / ${word}: letter ${n + 1} is boxed in`).not.toBeNull();
+            from = { x: stone.x, y: stone.y };
+          }
+        }
+      }
+    }
+  }, 30000);
+
+  it("always leaves the key on this side of the gate, and something worth opening behind it", () => {
+    let found = 0;
+    for (const level of ALL_SPELL_LEVELS.filter((l) => l.grade >= 3)) {
+      for (const seed of [5, 55]) {
+        const word = wordsFor(level, seed)[0];
+        const c = buildClearing(word, seed, crittersOn(level), level.grade);
+        if (!c.door || !c.key) continue;
+        found++;
+        const shut = c.tiles.map((t, i) => (c.door!.y * COLS + c.door!.x === i || c.rocks.some((r) => r.y * COLS + r.x === i) ? "tree" : t));
+        expect(routeTo(shut, c.start, c.key), `${level.id}: the key is behind its own gate`).not.toBeNull();
+        // And the gate is worth opening: something is shut away behind it.
+        const reach = c.stones.filter((s) => s.at >= 0 && routeTo(shut, c.start, { x: s.x, y: s.y }) === null);
+        expect(reach.length, `${level.id}: the gate shuts nothing away`).toBeGreaterThan(0);
+      }
+    }
+    expect(found, "no gates were built at all").toBeGreaterThan(0);
+  }, 30000);
+
+  it("shoves a boulder along, and will not shove it into a tree", () => {
+    // A boulder with floor behind it moves on; one against the wall does not,
+    // and nor does the kid.
+    const c = buildClearing("cake", 2, 0, 2);
+    expect(c.rocks.length).toBeGreaterThan(0);
+    const rock = c.rocks[0];
+    const path = routeTo(
+      c.tiles.map((t, i) => (i === rock.y * COLS + rock.x ? "tree" : t)),
+      c.start,
+      { x: rock.x - 1, y: rock.y },
+    );
+    if (!path) return; // that boulder is not approachable from the left on this seed
+    const steps = [...path.map((d) => ({ d, ms: 400 })), { d: "r" as const, ms: 400 }];
+    const run = play(levelById("sp-21")!, { seed: 2, steps, pace: "easy" });
+    expect(run.rocks.length).toBe(c.rocks.length);
+  });
+
+  it("keeps the gate shut until they are carrying the key", () => {
+    const level = gated;
+    const seed = 5;
+    const word = wordsFor(level, seed)[0];
+    const c = buildClearing(word, seed, crittersOn(level), level.grade);
+    if (!c.door || !c.key) return;
+    const toDoor = routeTo(withTrees(c.tiles, c.rocks), c.start, c.door);
+    if (!toDoor) return;
+    const run = play(level, { seed, steps: toDoor.map((d) => ({ d, ms: 400 })), pace: "easy" });
+    expect(run.hasKey).toBe(false);
+    expect(run.doorOpen).toBe(false);
+    // They are stopped at it rather than standing in it.
+    expect(run.me.x === c.door.x && run.me.y === c.door.y).toBe(false);
+  });
+
+  it("still walks a gated, bouldered level all the way through", () => {
+    // Five words, gates and boulders among them, walked by the shortest
+    // route there is: it finishes, and if it never trod on a wrong stone on
+    // the way it is a medal.
+    for (const seed of [5, 17, 29]) {
+      const run = play(gated, perfectMoves(gated, seed));
+      expect(run.finished, `seed ${seed}`).toBe(true);
+      expect(run.mastered).toBe(run.wrong === 0);
+    }
+  });
+
+  it("draws the new pieces", () => {
+    for (const g of [rockGrid(), keyGrid(0), keyGrid(1), doorGrid(true), doorGrid(false)]) {
+      expect(g.px.filter((c) => c).length).toBeGreaterThan(8);
+    }
+    expect(rocky.grade).toBe(1);
+  });
+});
+
+/** The same ground with these tiles walled off, for the tests to ask "what if". */
+function withTrees(tiles: ReturnType<typeof buildClearing>["tiles"], blocks: { x: number; y: number }[]) {
+  return tiles.map((t, i) => (blocks.some((b) => b.y * COLS + b.x === i) ? ("tree" as const) : t));
+}

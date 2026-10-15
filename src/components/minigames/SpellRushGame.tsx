@@ -17,7 +17,10 @@ import {
   ROWS,
   WORDS_PER_LEVEL,
   crittersOn,
+  doorGrid,
   floorGrid,
+  keyGrid,
+  rockGrid,
   frogGrid,
   gateGrid,
   levelById,
@@ -73,6 +76,9 @@ const TREES = [treeGrid(0), treeGrid(1)];
 const WATER = [waterGrid(0), waterGrid(1)];
 const FLOOR = floorGrid();
 const STONE = [stoneGrid(false), stoneGrid(true)];
+const ROCK = rockGrid();
+const KEY = [keyGrid(0), keyGrid(1)];
+const DOOR = [doorGrid(false), doorGrid(true)];
 const CRITTER: Record<string, ReturnType<typeof snakeGrid>[]> = {
   snake: [snakeGrid(0), snakeGrid(1)],
   frog: [frogGrid(0), frogGrid(1)],
@@ -110,6 +116,14 @@ function SpellRush({
 
   const [ready, setReady] = useState(false);
   const [picking, setPicking] = useState(false);
+  /**
+   * The raft.
+   *
+   * The whole trip is upriver, so every clearing is arrived at rather than
+   * simply appearing: a couple of seconds of paddling between one word and
+   * the next, which is also a breath between them.
+   */
+  const [rafting, setRafting] = useState(false);
   const [pace, setPace] = useState<Pace>("easy");
   const [count, setCount] = useState<number | null>(null);
   const [frame, setFrame] = useState(0);
@@ -159,13 +173,24 @@ function SpellRush({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count]);
 
-  /** Every new word is said out loud - that is the whole test. */
+  /**
+   * A word done: paddle up to the next clearing, and only then say the word.
+   * The first one needs no raft - they are already standing in it.
+   */
   useEffect(() => {
     if (!ready || done) return;
-    const t = setTimeout(() => {
+    if (run.done === 0) {
+      const t = setTimeout(() => {
+        if (speakOn) speak(`sp-word-0`, `Spell: ${word}. ${word}.`, { kind: "male" });
+      }, 350);
+      return () => clearTimeout(t);
+    }
+    setRafting(true);
+    const off = setTimeout(() => {
+      setRafting(false);
       if (speakOn) speak(`sp-word-${run.done}`, `Spell: ${word}. ${word}.`, { kind: "male" });
-    }, 350);
-    return () => clearTimeout(t);
+    }, 2200);
+    return () => clearTimeout(off);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, run.done, done]);
 
@@ -174,6 +199,9 @@ function SpellRush({
     if (run.beat === "letter") chime("right");
     else if (run.beat === "wrong") chime("oops");
     else if (run.beat === "bitten") chime("died");
+    else if (run.beat === "key") chime("streak");
+    else if (run.beat === "locked" || run.beat === "stuck") chime("oops");
+    else if (run.beat === "push") chime("growl");
     else if (run.beat === "word") chime("streak");
     else if (run.beat === "level") chime("streak");
   }, [run.beat, run.done, run.wrong, run.lives]);
@@ -199,14 +227,14 @@ function SpellRush({
 
   const walk = useCallback(
     (d: Dir) => {
-      if (!ready || done || live.current.length >= 1200) return;
+      if (!ready || done || rafting || live.current.length >= 1200) return;
       const now = Date.now();
       const step = { d, ms: Math.min(60000, now - moved.current) };
       moved.current = now;
       live.current = [...live.current, step];
       setSteps(live.current);
     },
-    [ready, done],
+    [ready, done, rafting],
   );
 
   // The keyboard: arrows or WASD, the way every other game on here works.
@@ -273,6 +301,7 @@ function SpellRush({
             ))}
           </span>
           <span className="chip">✗ {run.wrong}</span>
+          {run.clearing.door && <span className="chip">{run.doorOpen ? "🚪 open" : run.hasKey ? "🔑 got it" : "🔒 locked"}</span>}
         </div>
 
         <TeacherBrief
@@ -329,6 +358,24 @@ function SpellRush({
             ))}
           </div>
 
+          {run.rocks.map((p, i) => (
+            <span key={`r${i}`} className={css.rock} style={spot(p.x, p.y)}>
+              <PixelSprite grid={ROCK} scale={3} />
+            </span>
+          ))}
+
+          {run.clearing.door && (
+            <span className={css.door} style={spot(run.clearing.door.x, run.clearing.door.y)}>
+              <PixelSprite grid={DOOR[run.doorOpen ? 1 : 0]} scale={3} />
+            </span>
+          )}
+
+          {run.clearing.key && !run.hasKey && (
+            <span className={css.keyLies} style={spot(run.clearing.key.x, run.clearing.key.y)}>
+              <PixelSprite grid={KEY[frame % 2]} scale={3} />
+            </span>
+          )}
+
           {stones.map((s, i) =>
             run.taken.includes(i) ? null : (
               <span key={`s${i}`} className={css.stone} style={spot(s.x, s.y)}>
@@ -384,12 +431,23 @@ function SpellRush({
               </div>
             </div>
           )}
+          {rafting && (
+            <div className={css.river} role="status" aria-live="polite">
+              <span className={css.raft}>
+                <PixelSprite grid={me[frame % 2]} scale={3} />
+              </span>
+              <span className={css.riverSay}>Upriver to the next clearing…</span>
+            </div>
+          )}
           {count !== null && (
             <div className={css.countOver} role="status" aria-live="assertive">
               <strong>{count}</strong>
             </div>
           )}
           {run.beat === "wrong" && <span className={css.shout}>Not that one!</span>}
+          {run.beat === "locked" && <span className={css.shout}>Locked - find the key.</span>}
+          {run.beat === "key" && <span className={css.shout}>The key!</span>}
+          {run.beat === "stuck" && <span className={css.shout}>That rock will not budge.</span>}
           {run.beat === "bitten" && <span className={css.shout}>Caught! Start the word again.</span>}
 
           {result && !run.finished && (
