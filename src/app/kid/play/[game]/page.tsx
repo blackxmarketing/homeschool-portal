@@ -5,7 +5,7 @@ import { gameById, levelsForKid } from "@/lib/minigames";
 import { gameCoins, gamePlacement, heroOf, miniGameProgress } from "@/lib/gameState";
 import { aiEnabled } from "@/lib/ai";
 import { features } from "@/lib/content";
-import { placementQuestions, publicPlacement } from "@/lib/minigames/chompers";
+import { placementFor } from "@/lib/minigames/placement";
 import { bandFor, landById } from "@/lib/pixel/world";
 import { canVisit } from "@/lib/explore/state";
 import { worldByKey, worldForGrade } from "@/lib/explore/worlds";
@@ -38,7 +38,7 @@ export default async function PlayPage({ params, searchParams }: { params: Promi
   const sits = game.placement === true && kid.grade >= 6;
   const placedAt = sits ? gamePlacement(kid.id, game.id) : 0;
   const seed = Math.floor(Math.random() * 2147483647);
-  const placement = sits && placedAt === null ? { seed, questions: publicPlacement(placementQuestions(seed)) } : null;
+  const placement = sits && placedAt === null ? placementFor(game.id, seed) : null;
   // The kid steers their own pet, so changing it in the hero creator changes
   // what they are playing as here.
   const hero = heroOf(kid.id) ?? undefined;
@@ -68,7 +68,7 @@ export default async function PlayPage({ params, searchParams }: { params: Promi
         progress={miniGameProgress(kid.id, game.id)}
         unlockAt={game.unlockAt}
         placedAt={placedAt}
-        placement={placement}
+        placement={placement && { seed, ...placement }}
         pet={pet}
         hero={hero}
         coins={coins}

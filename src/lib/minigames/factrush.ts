@@ -1598,6 +1598,7 @@ export const factRush: MiniGame = {
       return 0;
     }
   },
+  medal: (levelId, frame) => medalGrid(levelId, frame),
   mastered: (levelId, moves) => {
     const level = levelById(levelId);
     if (!level) return false;

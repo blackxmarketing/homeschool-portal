@@ -4,7 +4,7 @@ import { useState } from "react";
 import { GAME_UI } from "./registry";
 import { gameById, type MiniLevel } from "@/lib/minigames";
 import { PixelSprite } from "../pixel/PixelArt";
-import { medalGrid } from "@/lib/minigames/factrush";
+
 import type { Hero, PetId } from "@/lib/pixel/hero";
 
 /** Picks a level, runs the game, and sends the result to the server to be scored. */
@@ -35,6 +35,8 @@ export default function GameHost({
   /** Whether the AI coach can take questions. */
   canAsk?: boolean;
 }) {
+  // Each game draws its own medals, so a shelf of them is that game's own.
+  const medalOf = gameById(game)?.medal;
   const [stars, setStars] = useState(progress);
   // What they are carrying, kept live so finishing a level shows up on the
   // next one without reloading the page.
@@ -100,9 +102,9 @@ export default function GameHost({
           <button key={l.id} type="button" className={`level-card ${open ? "" : "locked"}`} disabled={!open} onClick={() => setPlaying(l.id)}>
             <span className="level-num">Level {i + 1}</span>
             <span className="level-title">{l.title}</span>
-            {stars[l.id]?.mastered && (
+            {stars[l.id]?.mastered && medalOf && (
               <span className="level-medal" title="Mastered: no mistakes, no hesitating" aria-label="Mastered">
-                <PixelSprite grid={medalGrid(l.id)} scale={2} />
+                <PixelSprite grid={medalOf(l.id)} scale={2} />
               </span>
             )}
             <span className="level-stars">

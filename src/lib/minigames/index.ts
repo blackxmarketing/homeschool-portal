@@ -1,4 +1,5 @@
 import { bandFor, type Band, type LandId } from "../pixel/world";
+import type { Grid } from "../pixel/grid";
 import type { Evidence } from "../masteryMeter";
 import { LEMONADE_LEVELS, levelById as lemonLevel, replay as lemonReplay } from "./lemonade";
 import { pizzaParty } from "./pizza";
@@ -10,6 +11,7 @@ import { critters } from "./critters";
 import { numberHop } from "./numberhop";
 import { chompers } from "./chompers";
 import { factRush } from "./factrush";
+import { spellRush } from "./spellrush";
 import { coinShop } from "./coinshop";
 import { arrayGarden } from "./arraygarden";
 import { treasureGrid } from "./treasuregrid";
@@ -79,6 +81,11 @@ export interface MiniGame {
    */
   mastered?: (levelId: string, moves: unknown) => boolean;
   /**
+   * The medal this level gives for mastering it, drawn by the game itself so
+   * each one has its own. Shown on the folder once it is won.
+   */
+  medal?: (levelId: string, frame?: number) => Grid;
+  /**
    * What the game saw the kid show, for the mastery meter. Optional: a game
    * that only earns stars leaves it out. Read on the server from the replayed
    * moves, never from anything the browser claims.
@@ -117,7 +124,7 @@ const LEMONADE: MiniGame = {
 export const GAMES: MiniGame[] = [
   LEMONADE, pizzaParty, rocketLaunch, voyage, bugHunt, expedition,
   // Grades K-5
-  critters, numberHop, chompers, factRush, coinShop, arrayGarden, treasureGrid, wordBuilder, sentenceSmith, habitatRescue, weatherWatch, sproutLab, circuitBuilder, mapQuest, palabras,
+  critters, numberHop, chompers, factRush, spellRush, coinShop, arrayGarden, treasureGrid, wordBuilder, sentenceSmith, habitatRescue, weatherWatch, sproutLab, circuitBuilder, mapQuest, palabras,
 ].filter((g): g is MiniGame => !!g);
 
 /** The levels a kid plays: their own grade's levels when the game has them, otherwise their grade band's. */

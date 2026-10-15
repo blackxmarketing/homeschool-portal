@@ -738,34 +738,6 @@
 
 /* Mastering a level is the biggest thing that happens in this game, so it
    gets a sky. */
-.sky {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 5;
-}
-.spark {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  border-radius: 1px;
-  opacity: 0;
-  animation: burst 1.5s ease-out 2;
-}
-@keyframes burst {
-  0% {
-    transform: translate(0, 0) scale(1);
-    opacity: 1;
-  }
-  70% {
-    opacity: 1;
-  }
-  100% {
-    transform: translate(var(--dx), var(--dy)) scale(0.3);
-    opacity: 0;
-  }
-}
 
 /* The medal itself, handed over. */
 @keyframes shine {
@@ -775,10 +747,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .spark,
-  .spark {
-    opacity: 0;
-  }
 }
 
 /* The medal screen: the one time this game stops everything for a cheer. */
@@ -787,32 +755,9 @@
 }
 
 /* How the level went, in the coach's own box. */
-.endStars {
-  margin: 0;
-  font-size: 3.6rem;
-  line-height: 1;
-  letter-spacing: 4px;
-  text-shadow:
-    0 3px 0 var(--ink),
-    0 0 10px rgba(255, 255, 255, 0.65);
-}
-.starIn {
-  animation: starland 0.45s cubic-bezier(0.2, 1.6, 0.4, 1) 1 both;
-}
-@keyframes starland {
-  0% {
-    transform: scale(0.1) rotate(-40deg);
-  }
-  100% {
-    transform: scale(1) rotate(0deg);
-  }
-}
 /* The pet, out of the cage, with the medal beside it when there is one. */
 
 @media (prefers-reduced-motion: reduce) {
-  .starIn {
-    animation: none;
-  }
 }
 
 /* The end of a level: their character and their pet, and the stars coming in
@@ -884,37 +829,8 @@
   bottom: 0;
   margin-left: 4px;
 }
-.endChoices {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  animation: popin 0.35s ease-out both;
-}
-.endHint {
-  margin: 0;
-  flex-basis: 100%;
-  text-align: center;
-  font-size: 0.8rem;
-  color: var(--ink);
-  opacity: 0.7;
-}
-@keyframes popin {
-  from {
-    transform: scale(0.7);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
 
 @media (prefers-reduced-motion: reduce) {
-  .endChoices {
-    animation: none;
-  }
 }
 
 /* The last few steps to the cage, once the dragon is down: a walk, not the

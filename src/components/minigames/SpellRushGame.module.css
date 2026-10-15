@@ -1,0 +1,357 @@
+/* XP Rush: Spelling - a jungle clearing, drawn in the same pixels as the
+   rest of the game. The tiles make the ground; everything that moves sits
+   over it and slides from tile to tile. */
+
+.sr {
+  --ink: #1b1530;
+}
+
+.lives {
+  letter-spacing: 1px;
+}
+.life {
+  color: #e0453a;
+}
+.lifeGone {
+  color: #cdd4dd;
+}
+
+/* The word so far. */
+.wordBar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.wordShown {
+  display: inline-flex;
+  gap: 4px;
+  font-family: var(--font-pixel), monospace;
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+  padding: 6px 10px;
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+  background: #fffdf5;
+  box-shadow: 0 4px 0 var(--ink);
+  text-transform: lowercase;
+}
+.gotLetter {
+  color: #22a35a;
+}
+.toGo {
+  color: var(--ink);
+  opacity: 0.55;
+}
+.blank {
+  color: var(--ink);
+  opacity: 0.35;
+}
+
+/* The clearing itself: thirteen tiles across, nine down, and it keeps that
+   shape at any width so a phone gets the whole maze rather than half of it. */
+.clearing {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 13 / 9;
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 5px 0 var(--ink);
+  background: #6f8f4a;
+}
+.ground {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+}
+.tile {
+  line-height: 0;
+}
+.tile svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Everything that stands on the ground is placed by its tile and is one
+   tile wide, so it lines up at every screen size. */
+.stone,
+.critter,
+.me,
+.gate {
+  position: absolute;
+  width: calc(100% / 13);
+  height: calc(100% / 9);
+  line-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.stone svg,
+.critter svg,
+.gate svg {
+  width: 100%;
+  height: 100%;
+}
+.me svg {
+  width: 112%;
+  height: 112%;
+}
+.me {
+  z-index: 3;
+  transition:
+    left 0.12s steps(3),
+    top 0.12s steps(3);
+}
+.critter {
+  z-index: 2;
+  transition:
+    left 0.16s steps(3),
+    top 0.16s steps(3);
+}
+.facingLeft svg {
+  transform: scaleX(-1);
+}
+.stone {
+  z-index: 1;
+}
+.gate {
+  z-index: 1;
+  opacity: 0.9;
+}
+
+/* The letter written on a stone. */
+.letter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-pixel), monospace;
+  font-size: clamp(0.5rem, 1.6vw, 0.85rem);
+  color: #1b1530;
+  text-transform: lowercase;
+  pointer-events: none;
+}
+
+.atHeel {
+  position: absolute;
+  left: 78%;
+  bottom: 0;
+}
+
+/* Caught. */
+.bitten svg {
+  animation: tumble 0.5s steps(3) 2;
+}
+@keyframes tumble {
+  50% {
+    transform: rotate(-20deg) translateY(-6px);
+    opacity: 0.4;
+  }
+}
+
+.countOver {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-pixel), monospace;
+  font-size: 2.6rem;
+  color: #fffdf5;
+  text-shadow: 0 4px 0 var(--ink);
+  background: rgba(27, 21, 48, 0.25);
+  z-index: 6;
+}
+.shout {
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  transform: translateX(-50%);
+  padding: 3px 10px;
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+  background: #fff3bf;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink);
+  z-index: 5;
+}
+
+/* The end of a level, over the clearing it happened in. */
+.endOver {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  pointer-events: none;
+  z-index: 7;
+}
+.endOver > * {
+  pointer-events: auto;
+}
+.overCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  padding: 12px;
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+  background: #fffdf5;
+  box-shadow: 0 5px 0 var(--ink);
+}
+.overTitle {
+  font-family: var(--font-pixel), monospace;
+  font-size: 1rem;
+  color: #e0453a;
+}
+.overSay {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+.overButtons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* The thumb pad. */
+.pad {
+  display: grid;
+  grid-template-columns: repeat(3, 44px);
+  grid-template-rows: repeat(2, 44px);
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+}
+.padKey {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font-size: 1rem;
+}
+.up {
+  grid-column: 2;
+  grid-row: 1;
+}
+.left {
+  grid-column: 1;
+  grid-row: 2;
+}
+.down {
+  grid-column: 2;
+  grid-row: 2;
+}
+.right {
+  grid-column: 3;
+  grid-row: 2;
+}
+.padSay {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--ink);
+  opacity: 0.65;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .me,
+  .critter {
+    transition: none;
+  }
+  .bitten svg {
+    animation: none;
+  }
+}
+
+/* How hard they want it, asked on the clearing before the count-in. */
+.pickWrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background: rgba(27, 21, 48, 0.55);
+  z-index: 8;
+}
+.pickCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+  background: #fffdf5;
+  box-shadow: 0 5px 0 var(--ink);
+  max-width: 460px;
+}
+.pickTitle {
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--ink);
+}
+.pickRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pick {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+  padding: 6px 10px;
+}
+.pickName {
+  font-weight: 700;
+}
+.pickSay {
+  font-size: 0.72rem;
+  opacity: 0.8;
+  white-space: normal;
+}
+
+/* The medal, handed over on the clearing it was won in. */
+.medalDrop {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  line-height: 0;
+  z-index: 9;
+  animation: medalland 1.9s cubic-bezier(0.25, 0.9, 0.3, 1) both;
+}
+@keyframes medalland {
+  0% {
+    transform: translate(-50%, -50%) scale(9) rotate(-10deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .medalDrop {
+    animation: none;
+    transform: translate(-50%, -50%);
+  }
+}

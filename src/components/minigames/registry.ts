@@ -11,6 +11,7 @@ import CrittersGame from "./CrittersGame";
 import NumberHopGame from "./NumberHopGame";
 import ChompersGame from "./ChompersGame";
 import FactRushGame from "./FactRushGame";
+import SpellRushGame from "./SpellRushGame";
 import CoinShopGame from "./CoinShopGame";
 import ArrayGardenGame from "./ArrayGardenGame";
 import TreasureGridGame from "./TreasureGridGame";
@@ -35,6 +36,7 @@ export const GAME_UI: Record<string, ComponentType<MiniGameUIProps>> = {
   numberhop: NumberHopGame,
   chompers: ChompersGame,
   factrush: FactRushGame,
+  spellrush: SpellRushGame,
   coinshop: CoinShopGame,
   arraygarden: ArrayGardenGame,
   treasuregrid: TreasureGridGame,
