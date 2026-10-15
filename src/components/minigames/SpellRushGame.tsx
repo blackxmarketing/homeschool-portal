@@ -124,6 +124,8 @@ function SpellRush({
    * the next, which is also a breath between them.
    */
   const [rafting, setRafting] = useState(false);
+  /** The clearing itself, so it can be brought into view and given the keys. */
+  const board = useRef<HTMLDivElement>(null);
   const [pace, setPace] = useState<Pace>("easy");
   const [count, setCount] = useState<number | null>(null);
   const [frame, setFrame] = useState(0);
@@ -224,6 +226,20 @@ function SpellRush({
     }, 300);
     return () => clearInterval(id);
   }, [pace, ready, done]);
+
+  /**
+   * Bring the clearing into view and give it the keyboard.
+   *
+   * On a laptop the coach's row pushes the clearing below the fold, and a
+   * kid pressing arrow keys at a board they cannot see thinks the game is
+   * broken. When a level starts, the board scrolls to and takes focus, so
+   * the arrows go to it and it is the thing they are looking at.
+   */
+  useEffect(() => {
+    if (!picking && !ready) return;
+    board.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    if (ready) board.current?.focus({ preventScroll: true });
+  }, [picking, ready]);
 
   const walk = useCallback(
     (d: Dir) => {
@@ -349,7 +365,19 @@ function SpellRush({
         {/* The clearing. Tiles underneath, everything that moves over the
             top of them, placed by where they are rather than drawn into the
             grid, so a step slides instead of jumping. */}
-        <div className={css.clearing} aria-label={`A jungle clearing: spell ${showsWord(level) ? word : "the word you heard"}`}>
+        <div
+          ref={board}
+          className={`${css.clearing} ${ready && !done ? css.live : ""}`}
+          tabIndex={ready && !done ? 0 : -1}
+          onKeyDown={(e) => {
+            const d = KEYS[e.key];
+            if (!d) return;
+            e.preventDefault();
+            walk(d);
+          }}
+          onClick={() => board.current?.focus({ preventScroll: true })}
+          aria-label={`A jungle clearing: spell ${showsWord(level) ? word : "the word you heard"}`}
+        >
           <div className={css.ground}>
             {tiles.map((t, i) => (
               <span key={i} className={css.tile}>
@@ -443,6 +471,9 @@ function SpellRush({
             <div className={css.countOver} role="status" aria-live="assertive">
               <strong>{count}</strong>
             </div>
+          )}
+          {ready && !done && !rafting && steps.length === 0 && count === null && (
+            <span className={css.nudge}>Arrow keys (or WASD) to walk — or use the buttons below</span>
           )}
           {run.beat === "wrong" && <span className={css.shout}>Not that one!</span>}
           {run.beat === "locked" && <span className={css.shout}>Locked - find the key.</span>}

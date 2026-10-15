@@ -427,3 +427,49 @@
     animation: none;
   }
 }
+
+/* The board has the keys while a level is running, and says so. */
+.clearing:focus-visible {
+  outline: 4px solid #2340ff;
+  outline-offset: 3px;
+}
+.live {
+  cursor: pointer;
+}
+.nudge {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+  background: #fffdf5;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  z-index: 5;
+  animation: nudgein 0.4s ease-out both;
+}
+@keyframes nudgein {
+  from {
+    transform: translateX(-50%) translateY(8px);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 460px) {
+  .nudge {
+    font-size: 0.66rem;
+    white-space: normal;
+    text-align: center;
+    width: 86%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nudge {
+    animation: none;
+  }
+}
