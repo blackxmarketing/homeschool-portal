@@ -473,3 +473,23 @@
     animation: none;
   }
 }
+
+/* Which place this is, in the corner of it. */
+.where {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  padding: 2px 8px;
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  background: rgba(255, 253, 245, 0.88);
+  font-family: var(--font-pixel), monospace;
+  font-size: 0.5rem;
+  color: var(--ink);
+  z-index: 4;
+}
+.whereDark {
+  background: rgba(27, 21, 48, 0.8);
+  color: #fffdf5;
+  border-color: #0d0b16;
+}

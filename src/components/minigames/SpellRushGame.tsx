@@ -9,6 +9,16 @@ import type { MiniGameUIProps } from "./types";
 import { heroGrid, petGrid, DEFAULT_HERO, type Hero } from "@/lib/pixel/hero";
 import {
   COLS,
+  batGrid,
+  beetleGrid,
+  crocGrid,
+  iceGrid,
+  mudGrid,
+  pitGrid,
+  placeOf,
+  spiderGrid,
+  vineGrid,
+  wallGrid,
   HARD_TICK_MS,
   PACES,
   medalGrid,
@@ -32,8 +42,10 @@ import {
   treeGrid,
   waterGrid,
   wordsFor,
+  type CritterKind,
   type Dir,
   type Pace,
+  type Place,
   type SpellLevel,
   type Step,
 } from "@/lib/minigames/spellrush";
@@ -72,18 +84,45 @@ const KEYS: Record<string, Dir> = {
   D: "r",
 };
 
-const TREES = [treeGrid(0), treeGrid(1)];
-const WATER = [waterGrid(0), waterGrid(1)];
-const FLOOR = floorGrid();
 const STONE = [stoneGrid(false), stoneGrid(true)];
 const ROCK = rockGrid();
 const KEY = [keyGrid(0), keyGrid(1)];
 const DOOR = [doorGrid(false), doorGrid(true)];
-const CRITTER: Record<string, ReturnType<typeof snakeGrid>[]> = {
+const MUD = mudGrid();
+const ICE = iceGrid();
+const PIT = pitGrid();
+const VINE = [vineGrid(0), vineGrid(1)];
+
+/** Every animal, in both frames. */
+const CRITTER: Record<CritterKind, ReturnType<typeof snakeGrid>[]> = {
   snake: [snakeGrid(0), snakeGrid(1)],
   frog: [frogGrid(0), frogGrid(1)],
   monkey: [monkeyGrid(0), monkeyGrid(1)],
+  bat: [batGrid(0), batGrid(1)],
+  croc: [crocGrid(0), crocGrid(1)],
+  spider: [spiderGrid(0), spiderGrid(1)],
+  beetle: [beetleGrid(0), beetleGrid(1)],
 };
+
+/**
+ * The ground of one place, drawn once and kept.
+ *
+ * Fifty-four places times seven kinds of tile times two frames is a lot of
+ * little grids to build on every frame, and none of them ever change.
+ */
+const groundCache = new Map<string, { wall: ReturnType<typeof wallGrid>[]; water: ReturnType<typeof waterGrid>[]; floor: ReturnType<typeof floorGrid> }>();
+function groundOf(place: Place) {
+  let g = groundCache.get(place.id);
+  if (!g) {
+    g = {
+      wall: [wallGrid(place.wall, place.wallInk[0], place.wallInk[1], 0), wallGrid(place.wall, place.wallInk[0], place.wallInk[1], 1)],
+      water: [waterGrid(0), waterGrid(1)],
+      floor: floorGrid(),
+    };
+    groundCache.set(place.id, g);
+  }
+  return g;
+}
 
 export default function SpellRushGame({ levelId, onFinish, stars, hero, onReplay, onQuit, onNext }: MiniGameUIProps) {
   const level = levelById(levelId);
@@ -147,6 +186,8 @@ function SpellRush({
   const me = useMemo(() => [heroGrid(who, 0), heroGrid(who, 1)], [who]);
   const pet = useMemo(() => petGrid(who.pet, 0), [who.pet]);
 
+  const place = useMemo(() => placeOf(level), [level]);
+  const ground = useMemo(() => groundOf(place), [place]);
   const words = useMemo(() => wordsFor(level, seed), [level, seed]);
   const run = useMemo(() => play(level, { seed, steps, pace }), [level, seed, steps, pace]);
   const done = run.finished || run.over;
@@ -376,12 +417,30 @@ function SpellRush({
             walk(d);
           }}
           onClick={() => board.current?.focus({ preventScroll: true })}
-          aria-label={`A jungle clearing: spell ${showsWord(level) ? word : "the word you heard"}`}
+          style={{ background: place.floor, borderColor: place.dark ? "#0d0b16" : undefined }}
+          aria-label={`${place.name}: spell ${showsWord(level) ? word : "the word you heard"}`}
         >
           <div className={css.ground}>
             {tiles.map((t, i) => (
               <span key={i} className={css.tile}>
-                <PixelSprite grid={t === "tree" ? TREES[frame % 2] : t === "water" ? WATER[frame % 2] : FLOOR} scale={3} />
+                <PixelSprite
+                  grid={
+                    t === "wall"
+                      ? ground.wall[frame % 2]
+                      : t === "water"
+                        ? ground.water[frame % 2]
+                        : t === "mud"
+                          ? MUD
+                          : t === "ice"
+                            ? ICE
+                            : t === "pit"
+                              ? PIT
+                              : t === "vine"
+                                ? VINE[frame % 2]
+                                : ground.floor
+                  }
+                  scale={3}
+                />
               </span>
             ))}
           </div>
@@ -464,7 +523,7 @@ function SpellRush({
               <span className={css.raft}>
                 <PixelSprite grid={me[frame % 2]} scale={3} />
               </span>
-              <span className={css.riverSay}>Upriver to the next clearing…</span>
+              <span className={css.riverSay}>Upriver to {place.name}…</span>
             </div>
           )}
           {count !== null && (
@@ -472,6 +531,7 @@ function SpellRush({
               <strong>{count}</strong>
             </div>
           )}
+          <span className={`${css.where} ${place.dark ? css.whereDark : ""}`}>{place.name}</span>
           {ready && !done && !rafting && steps.length === 0 && count === null && (
             <span className={css.nudge}>Arrow keys (or WASD) to walk — or use the buttons below</span>
           )}
@@ -479,6 +539,8 @@ function SpellRush({
           {run.beat === "locked" && <span className={css.shout}>Locked - find the key.</span>}
           {run.beat === "key" && <span className={css.shout}>The key!</span>}
           {run.beat === "stuck" && <span className={css.shout}>That rock will not budge.</span>}
+          {run.beat === "slide" && <span className={css.shout}>Whoa - ice!</span>}
+          {run.beat === "carried" && <span className={css.shout}>The vine carries you on.</span>}
           {run.beat === "bitten" && <span className={css.shout}>Caught! Start the word again.</span>}
 
           {result && !run.finished && (

@@ -175,13 +175,165 @@ export const levelById = (id: string): SpellLevel | undefined => ALL_SPELL_LEVEL
 /** The levels for one grade, in order. */
 export const levelsForGrade = (grade: number): SpellLevel[] => ALL_SPELL_LEVELS.filter((l) => l.grade === Math.max(0, Math.min(8, grade)));
 
+// ---------------- Where a level happens ----------------
+
+/** What the walls of a place are made of. */
+export type WallKind = "leaf" | "bamboo" | "rock" | "column" | "crystal" | "reed" | "snow" | "stack";
+
+/** What a place keeps in it. */
+export type CritterKind = "snake" | "frog" | "monkey" | "bat" | "croc" | "spider" | "beetle";
+export const CRITTER_KINDS: CritterKind[] = ["snake", "frog", "monkey", "bat", "croc", "spider", "beetle"];
+
+/** Ground that does something when you stand on it. */
+export type SpecialTile = "mud" | "vine" | "ice" | "pit";
+
+/**
+ * One place to spell in.
+ *
+ * Fifty-four of them, one per level, so no two levels look the same and a
+ * kid can say which one they mean. A place is its colours, what its walls
+ * are made of, what lives in it and what its ground does.
+ */
+export interface Place {
+  id: string;
+  /** Written under the clearing and said by the teacher. */
+  name: string;
+  /** The ground, and the shade under it. */
+  floor: string;
+  under: string;
+  /** The walls, and what they are. */
+  wall: WallKind;
+  wallInk: [string, string];
+  water: string;
+  /** What lives here. */
+  critters: CritterKind[];
+  /** What its ground does, if anything. */
+  special: SpecialTile | null;
+  /** A dark place wants its writing light. */
+  dark?: boolean;
+}
+
+const place = (
+  id: string,
+  name: string,
+  floor: string,
+  under: string,
+  wall: WallKind,
+  wallInk: [string, string],
+  water: string,
+  critters: CritterKind[],
+  special: SpecialTile | null = null,
+  dark = false,
+): Place => ({ id, name, floor, under, wall, wallInk, water, critters, special, dark });
+
+/**
+ * Six per grade, in the order the levels are played: the ground changes as
+ * the spelling does.
+ */
+export const PLACES: Place[] = [
+  // Kindergarten: easy ground, nothing much in it.
+  place("meadow", "Sunny Meadow", "#8aa65a", "#5f7f2d", "leaf", ["#2f7d46", "#63c47f"], "#4aa8d8", []),
+  place("glade", "Fern Glade", "#7fa85c", "#54722f", "leaf", ["#2f6b48", "#8cc06a"], "#4aa8d8", []),
+  place("palms", "Palm Beach", "#e8d2a8", "#b8a075", "leaf", ["#5b4228", "#63c47f"], "#2f9ec4", ["frog"]),
+  place("pond", "Lily Pond", "#7fa870", "#53704a", "reed", ["#2f7d46", "#a8d86a"], "#2f88bb", ["frog"], "mud"),
+  place("hollow", "Mossy Hollow", "#6f9a52", "#466a30", "leaf", ["#355c2a", "#7fc46a"], "#3f94c4", ["snake"]),
+  place("clearing", "The First Clearing", "#8aa65a", "#5f7f2d", "leaf", ["#2f7d46", "#63c47f"], "#4aa8d8", ["snake", "frog"]),
+
+  // Grade 1: bamboo, vines, the first monkeys.
+  place("bamboo", "Bamboo Walk", "#7aa84f", "#4e7030", "bamboo", ["#4f7a3a", "#c8e59a"], "#3f94c4", ["monkey"]),
+  place("canopy", "The Canopy", "#5f8f4a", "#3c5e2c", "leaf", ["#2f6b48", "#8cc06a"], "#3f94c4", ["monkey"], "vine"),
+  place("creek", "Stony Creek", "#9aa87a", "#68744f", "rock", ["#8a8f84", "#cdd4dd"], "#2f88bb", ["frog", "croc"]),
+  place("thicket", "Thorn Thicket", "#6a8f4a", "#44602c", "leaf", ["#5b4228", "#7fc46a"], "#3f94c4", ["snake"], "mud"),
+  place("orchard", "Wild Orchard", "#8fb05c", "#5e7536", "leaf", ["#6b4a2a", "#ff9ec4"], "#4aa8d8", ["monkey", "frog"]),
+  place("riverbend", "The River Bend", "#8aa65a", "#5f7f2d", "reed", ["#4f7a3a", "#a8d86a"], "#2f88bb", ["croc"], "vine"),
+
+  // Grade 2: the first caves and the first bats.
+  place("cave", "Dripping Cave", "#6a6a7a", "#42424f", "rock", ["#5e6672", "#9aa0ab"], "#2f6b8a", ["bat"], null, true),
+  place("gorge", "Red Gorge", "#c4703c", "#8a4a26", "rock", ["#a85b30", "#e0a070"], "#2f88bb", ["snake"]),
+  place("falls", "Shouting Falls", "#7fa870", "#53704a", "rock", ["#6b7a8c", "#bcd8e8"], "#2f9ec4", ["croc", "frog"]),
+  place("roots", "The Root Tangle", "#6f8a4a", "#475c2c", "leaf", ["#5b4228", "#63c47f"], "#3f94c4", ["spider"], "vine"),
+  place("mudflats", "The Mudflats", "#8a7a52", "#5c5236", "reed", ["#7a8f4a", "#c2cf7a"], "#4a6b45", ["croc"], "mud"),
+  place("hive", "The Beetle Hive", "#9a8a5a", "#685c38", "stack", ["#6b4a2a", "#e8c168"], "#3f94c4", ["beetle", "spider"]),
+
+  // Grade 3: ruins, and ground that moves you.
+  place("ruins", "Old Ruins", "#9a9a86", "#6b6b5c", "column", ["#d8d2c0", "#a79fb5"], "#3f94c4", ["spider"]),
+  place("temple", "The Lost Temple", "#8a8296", "#5e5870", "column", ["#cdd4dd", "#8d9bad"], "#2f6b8a", ["spider", "bat"], null, true),
+  place("steps", "The Moss Steps", "#6f9a52", "#466a30", "rock", ["#6b7a8c", "#8cc06a"], "#3f94c4", ["snake", "monkey"], "vine"),
+  place("crystalcave", "Crystal Cave", "#4a4a63", "#2f2f42", "crystal", ["#7fd8ff", "#bdf0ff"], "#1b6fa8", ["bat"], null, true),
+  place("swamp", "The Green Swamp", "#5c7a4a", "#3a5230", "reed", ["#4a6b45", "#8cc06a"], "#3a6b4a", ["croc", "frog"], "mud"),
+  place("stormwood", "Stormwood", "#6a7a5c", "#47553c", "leaf", ["#4a3f36", "#8a9a78"], "#3f7a9c", ["snake", "bat"]),
+
+  // Grade 4: colder, higher, stranger.
+  place("pines", "Pine Ridge", "#6f8a6a", "#475c44", "snow", ["#5b4228", "#2f8a52"], "#3f94c4", ["beetle"]),
+  place("frost", "Frostfields", "#e4eefb", "#b9cde4", "snow", ["#6b7a8c", "#eef6ff"], "#7fb4d8", ["beetle"], "ice"),
+  place("glacier", "Glacier Pass", "#d8ecff", "#9fc0dd", "snow", ["#7fb4d8", "#eef8ff"], "#4aa8d8", ["bat"], "ice"),
+  place("quarry", "The Old Quarry", "#9a9a8a", "#68685c", "rock", ["#7a8f6a", "#cdd4dd"], "#3f94c4", ["spider"], "pit"),
+  place("ash", "Ash Flats", "#7a7068", "#4e4740", "rock", ["#5e5448", "#a79f8a"], "#3f7a9c", ["beetle", "snake"], "pit"),
+  place("nightjungle", "The Night Jungle", "#3a5a40", "#243a28", "leaf", ["#2f4a35", "#63c47f"], "#1b4f78", ["bat", "spider"], null, true),
+
+  // Grade 5: deep country.
+  place("deepcave", "The Deep Cave", "#5a5a6a", "#3a3a45", "rock", ["#5e6672", "#9aa0ab"], "#2f6b8a", ["bat", "beetle"], "pit", true),
+  place("lagoon", "Blue Lagoon", "#e0d2a0", "#b09a63", "reed", ["#2f7d46", "#63c47f"], "#2f9ec4", ["croc"], null),
+  place("mangrove", "The Mangroves", "#6a8a5a", "#445838", "reed", ["#5b4228", "#8cc06a"], "#3a6b6a", ["croc", "spider"], "mud"),
+  place("obelisks", "The Obelisks", "#9a9a86", "#6b6b5c", "column", ["#cdd4dd", "#8d9bad"], "#3f94c4", ["spider", "bat"]),
+  place("highvines", "The High Vines", "#5f8f4a", "#3c5e2c", "bamboo", ["#4f7a3a", "#c8e59a"], "#3f94c4", ["monkey", "snake"], "vine"),
+  place("summit", "Cloud Summit", "#b4c4cd", "#7f8d96", "snow", ["#8d9bad", "#eef8ff"], "#4aa8d8", ["bat"], "ice"),
+
+  // Grade 6: the strange and the built.
+  place("mines", "The Old Mines", "#4a3c28", "#2e2516", "rock", ["#6b5636", "#c09a5a"], "#2f6b8a", ["bat", "beetle"], "pit", true),
+  place("archive", "The Stone Archive", "#8a8296", "#5e5870", "column", ["#d8d2e0", "#a79fb5"], "#3f7a9c", ["spider"], null),
+  place("geysers", "Geyser Flats", "#8a8f84", "#5e6358", "rock", ["#6b7068", "#dff4ff"], "#4aa8d8", ["beetle"], "mud"),
+  place("coral", "The Coral Shallows", "#f0dcae", "#c4ab7a", "reed", ["#e06a8a", "#ffb0c4"], "#2f9ec4", ["croc", "frog"]),
+  place("hollowtree", "The Hollow Tree", "#6b4a2a", "#452f1a", "leaf", ["#5b4228", "#8cc06a"], "#3f94c4", ["spider", "beetle"], "vine", true),
+  place("market", "The Jungle Market", "#9a8a5a", "#685c38", "stack", ["#6b4a2a", "#f2c21a"], "#3f94c4", ["monkey"]),
+
+  // Grade 7: higher and harder.
+  place("cliffs", "The Chalk Cliffs", "#eef1f4", "#c2c8d0", "rock", ["#8d9bad", "#dfe6ee"], "#2f88bb", ["bat"], "pit"),
+  place("windmoor", "Wind Moor", "#7a7a52", "#525236", "reed", ["#5e5e3a", "#b4b47a"], "#3f7a9c", ["snake", "beetle"]),
+  place("icecaves", "The Ice Caves", "#cfe4f2", "#9ab6cc", "crystal", ["#7fb4d8", "#f6fbff"], "#2f88bb", ["bat"], "ice", false),
+  place("lavatubes", "The Lava Tubes", "#4e3430", "#2a1c18", "rock", ["#6b4a3a", "#ff8a3c"], "#8a3b2b", ["beetle"], "pit", true),
+  place("sunkencity", "The Sunken City", "#7a9a8a", "#52705f", "column", ["#dfeee8", "#a0c4b0"], "#2f88bb", ["croc", "spider"], "mud"),
+  place("stormpeak", "Storm Peak", "#6a7a8c", "#45525f", "snow", ["#8d9bad", "#eef8ff"], "#3f7a9c", ["bat", "beetle"], "ice"),
+
+  // Grade 8: the last stretch.
+  place("library", "The Jungle Library", "#8a7a5a", "#5e523a", "stack", ["#6b4a2a", "#e8c168"], "#3f94c4", ["spider"]),
+  place("observatory", "The Star Terrace", "#4a5168", "#333848", "column", ["#cdd4dd", "#8fb4ff"], "#2f6b8a", ["bat"], null, true),
+  place("catacombs", "The Catacombs", "#5a5448", "#38342c", "rock", ["#e8dcc0", "#a79f8a"], "#2f6b8a", ["spider", "beetle"], "pit", true),
+  place("rapids", "The White Rapids", "#9aa87a", "#68744f", "rock", ["#8a8f84", "#dff4ff"], "#2f9ec4", ["croc"], "mud"),
+  place("greatroots", "The Great Roots", "#5f7a3a", "#3c4e24", "bamboo", ["#5b4228", "#8cc06a"], "#3a6b4a", ["monkey", "spider"], "vine"),
+  place("lastgate", "The Last Gate", "#8a8296", "#5e5870", "column", ["#f2d24a", "#d8d2c0"], "#2f6b8a", ["bat", "spider", "beetle"], "ice", true),
+];
+
+/** Where this level happens. Fixed per level, so it is always theirs. */
+export function placeOf(level: SpellLevel): Place {
+  const i = ALL_SPELL_LEVELS.findIndex((l) => l.id === level.id);
+  return PLACES[(i < 0 ? 0 : i) % PLACES.length];
+}
+
 // ---------------- The clearing ----------------
 
 /** The maze is this many tiles across and down. */
 export const COLS = 13;
 export const ROWS = 9;
 
-export type TileKind = "floor" | "tree" | "water";
+/**
+ * What a tile is.
+ *
+ * - floor: walk on it.
+ * - wall: the edge of the clearing and the clumps inside it, drawn as
+ *   whatever that place grows or is built of.
+ * - water: no way through, and where some things live.
+ * - pit: a hole. Same as a wall to walk into, and far more obvious why.
+ * - mud: walk it, but everything else gets a free move while you pull your
+ *   boots out.
+ * - vine: a creeper that carries you one tile further the way you were going.
+ * - ice: you keep going one more tile unless there is something to stop you.
+ */
+export type TileKind = "floor" | "wall" | "water" | "pit" | "mud" | "vine" | "ice";
+
+/** Tiles a kid can stand on. */
+export const WALKABLE: TileKind[] = ["floor", "mud", "vine", "ice"];
+export const walkable = (t: TileKind | undefined) => t !== undefined && WALKABLE.includes(t);
 
 export interface Stone {
   /** Where it sits. */
@@ -201,8 +353,10 @@ export interface Critter {
   y: number;
   /** Which way it is facing: 0 right, 1 down, 2 left, 3 up. */
   dir: number;
-  /** What it is, for the art. */
-  kind: "snake" | "frog" | "monkey";
+  /** What it is: it decides how it moves as well as how it looks. */
+  kind: CritterKind;
+  /** Counts turns, for the ones that do not move on every one. */
+  tick?: number;
 }
 
 export interface Spot {
@@ -253,7 +407,7 @@ function reachable(tiles: TileKind[], from: { x: number; y: number }): Set<numbe
     for (const d of TURN) {
       const x = p.x + DIRS[d].dx;
       const y = p.y + DIRS[d].dy;
-      if (!inside(x, y) || tiles[at(x, y)] !== "floor" || seen.has(at(x, y))) continue;
+      if (!inside(x, y) || !walkable(tiles[at(x, y)]) || seen.has(at(x, y))) continue;
       seen.add(at(x, y));
       queue.push({ x, y });
     }
@@ -276,7 +430,7 @@ const ALPHABET = "abcdefghijklmnopqrstuvwxyz";
 /** The same ground with some tiles blocked off, for asking "what if". */
 function withBlocks(tiles: TileKind[], blocks: Spot[]): TileKind[] {
   const out = [...tiles];
-  for (const b of blocks) out[at(b.x, b.y)] = "tree";
+  for (const b of blocks) out[at(b.x, b.y)] = "wall";
   return out;
 }
 
@@ -286,28 +440,28 @@ function stillWalkable(tiles: TileKind[], start: Spot, stones: Stone[], blocks: 
   return stones.every((s) => s.at < 0 || open.has(at(s.x, s.y)));
 }
 
-export function buildClearing(word: string, seed: number, snakes: number, grade = 0): Clearing {
+export function buildClearing(word: string, seed: number, snakes: number, grade = 0, place: Place = PLACES[0]): Clearing {
   const letters = [...word.toLowerCase()];
   for (let attempt = 0; attempt < 24; attempt++) {
     const r = seededRng((seed >>> 0) * 7919 + attempt * 101 + 17);
     const tiles: TileKind[] = new Array(COLS * ROWS).fill("floor");
     // A wall all the way round, so nobody walks out of the jungle.
     for (let x = 0; x < COLS; x++) {
-      tiles[at(x, 0)] = "tree";
-      tiles[at(x, ROWS - 1)] = "tree";
+      tiles[at(x, 0)] = "wall";
+      tiles[at(x, ROWS - 1)] = "wall";
     }
     for (let y = 0; y < ROWS; y++) {
-      tiles[at(0, y)] = "tree";
-      tiles[at(COLS - 1, y)] = "tree";
+      tiles[at(0, y)] = "wall";
+      tiles[at(COLS - 1, y)] = "wall";
     }
     // Clumps of trees and pools inside it, on the odd tiles, so there is
     // always a lane between any two of them.
     for (let y = 2; y < ROWS - 1; y += 2) {
       for (let x = 2; x < COLS - 1; x += 2) {
         const roll = r();
-        if (roll < 0.52) tiles[at(x, y)] = "tree";
+        if (roll < 0.52) tiles[at(x, y)] = "wall";
         else if (roll < 0.62) tiles[at(x, y)] = "water";
-        if (roll < 0.3 && inside(x + 1, y) && r() < 0.5) tiles[at(x + 1, y)] = "tree";
+        if (roll < 0.3 && inside(x + 1, y) && r() < 0.5) tiles[at(x + 1, y)] = "wall";
       }
     }
     const start = { x: 1, y: ROWS - 2 };
@@ -351,16 +505,46 @@ export function buildClearing(word: string, seed: number, snakes: number, grade 
       stones.push({ ...spot, ch, at: -1 });
     }
 
+    // Ground that does something, where the place has any: a handful of
+    // tiles, and never one that a letter cannot be reached without.
+    if (place.special) {
+      const want = place.special === "pit" ? 3 : 5;
+      // Checked against all of them at once, not one at a time: two patches
+      // of ice can each look harmless and together be the only lane to a
+      // letter, and a walk that has to cross ice is a walk that slides.
+      const laid: Spot[] = [];
+      for (let i = 0; i < want; i++) {
+        const spot = take();
+        if (!spot) break;
+        const was = tiles[at(spot.x, spot.y)];
+        tiles[at(spot.x, spot.y)] = place.special;
+        // A hole is a wall as far as walking goes, and the slippery ones
+        // carry a kid along, so neither may be the only way to a letter.
+        // The boulders are not down yet; they do their own check after this.
+        if (stillWalkable(withBlocks(tiles, [...laid, spot]), start, stones, [], null)) laid.push(spot);
+        else tiles[at(spot.x, spot.y)] = was;
+      }
+    }
+
     // What lives here. They start a good way from the start tile, so nothing
     // is on top of a kid before they have taken a step.
     const critters: Critter[] = [];
-    const kinds: Critter["kind"][] = ["snake", "frog", "monkey"];
+    const kinds: CritterKind[] = place.critters.length ? place.critters : ["snake", "frog", "monkey"];
     for (let i = 0; i < snakes; i++) {
       let spot = take();
       let guard = 0;
       while (spot && Math.abs(spot.x - start.x) + Math.abs(spot.y - start.y) < 5 && guard++ < 20) spot = take();
       if (!spot) break;
-      critters.push({ ...spot, dir: int(r, 0, 3), kind: kinds[i % kinds.length] });
+      const kind = kinds[i % kinds.length];
+      // A crocodile belongs in the water; everything else on the ground.
+      if (kind === "croc") {
+        const pool = [...tiles.keys()].filter((n) => tiles[n] === "water" && Math.abs((n % COLS) - start.x) + Math.abs(Math.floor(n / COLS) - start.y) >= 4);
+        if (!pool.length) continue;
+        const n = pool[int(r, 0, pool.length - 1)];
+        critters.push({ x: n % COLS, y: Math.floor(n / COLS), dir: int(r, 0, 3), kind });
+        continue;
+      }
+      critters.push({ ...spot, dir: int(r, 0, 3), kind });
     }
 
     // Boulders, on tiles nothing needs: every letter has to still be
@@ -417,12 +601,12 @@ export function buildClearing(word: string, seed: number, snakes: number, grade 
   // level must always be playable.
   const tiles: TileKind[] = new Array(COLS * ROWS).fill("floor");
   for (let x = 0; x < COLS; x++) {
-    tiles[at(x, 0)] = "tree";
-    tiles[at(x, ROWS - 1)] = "tree";
+    tiles[at(x, 0)] = "wall";
+    tiles[at(x, ROWS - 1)] = "wall";
   }
   for (let y = 0; y < ROWS; y++) {
-    tiles[at(0, y)] = "tree";
-    tiles[at(COLS - 1, y)] = "tree";
+    tiles[at(0, y)] = "wall";
+    tiles[at(COLS - 1, y)] = "wall";
   }
   const stones = [...word.toLowerCase()].map((ch, n) => ({ x: 2 + n * 2, y: 2 + (n % 3) * 2, ch, at: n }));
   return { word: word.toLowerCase(), tiles, stones, critters: [], start: { x: 1, y: ROWS - 2 }, rocks: [], door: null, key: null };
@@ -532,7 +716,7 @@ export interface Run {
   /** Out of lives. */
   over: boolean;
   /** What just happened, for the screen to react to. */
-  beat: "none" | "letter" | "wrong" | "bitten" | "word" | "level" | "push" | "stuck" | "key" | "locked";
+  beat: "none" | "letter" | "wrong" | "bitten" | "word" | "level" | "push" | "stuck" | "key" | "locked" | "slide" | "carried";
   /** Steps taken on the word they are on. */
   stepsHere: number;
 }
@@ -554,20 +738,67 @@ export function cleanMove(raw: unknown): SpellMove {
   return { seed: Number.isFinite(seed) ? Math.floor(Math.abs(seed)) % 2147483647 : 1, steps, pace };
 }
 
-/** Where a critter goes next: straight on while it can, round the corner when it cannot. */
+/** The eight ways out of a tile, for the things that do not keep to the paths. */
+const DIAGS = [
+  { dx: 1, dy: 1 },
+  { dx: -1, dy: 1 },
+  { dx: -1, dy: -1 },
+  { dx: 1, dy: -1 },
+];
+
+/**
+ * Where a creature goes next.
+ *
+ * Each kind moves its own way, and every one of them is worked out from the
+ * ground and the seed alone - nothing here is random in a way the server
+ * cannot repeat.
+ *
+ * - snake and monkey keep going until something stops them, then turn.
+ * - frog hops two tiles when the ground allows it.
+ * - beetle takes every other turn off.
+ * - bat flies: walls and holes are nothing to it, water still is.
+ * - spider goes corner to corner rather than along the paths.
+ * - croc stays in the water, and takes anyone who walks along the bank.
+ */
 function moveCritter(c: Critter, tiles: TileKind[], r: Rng, blocked: Spot[] = []): Critter {
-  const order = [c.dir, (c.dir + 1) % 4, (c.dir + 3) % 4, (c.dir + 2) % 4];
-  // A coin toss on which way it turns first, so two animals in the same
+  const tick = (c.tick ?? 0) + 1;
+  const free = (x: number, y: number) => {
+    if (!inside(x, y) || blocked.some((b) => b.x === x && b.y === y)) return false;
+    const t = tiles[at(x, y)];
+    if (c.kind === "croc") return t === "water";
+    if (c.kind === "bat") return t !== "water";
+    return walkable(t);
+  };
+
+  // The slow one: half the time it simply sits there.
+  if (c.kind === "beetle" && tick % 2 === 0) return { ...c, tick };
+
+  const steps = c.kind === "frog" ? 2 : 1;
+  const ways = c.kind === "spider" ? DIAGS.map((d, i) => ({ d, dir: i })) : TURN.map((k, i) => ({ d: DIRS[k], dir: i }));
+  const order = [c.dir % ways.length, (c.dir + 1) % ways.length, (c.dir + 3) % ways.length, (c.dir + 2) % ways.length];
+  // A coin toss on which way it turns first, so two of them in the same
   // corner do not move as one.
   if (r() < 0.5) [order[1], order[2]] = [order[2], order[1]];
+
   for (const dir of order) {
-    const d = DIRS[TURN[dir]];
-    const x = c.x + d.dx;
-    const y = c.y + d.dy;
-    if (inside(x, y) && tiles[at(x, y)] === "floor" && !blocked.some((b) => b.x === x && b.y === y)) return { ...c, x, y, dir };
+    const way = ways[dir];
+    let x = c.x;
+    let y = c.y;
+    let went = 0;
+    for (let n = 0; n < steps; n++) {
+      if (!free(x + way.d.dx, y + way.d.dy)) break;
+      x += way.d.dx;
+      y += way.d.dy;
+      went++;
+    }
+    if (went > 0) return { ...c, x, y, dir, tick };
   }
-  return c;
+  return { ...c, tick };
 }
+
+/** Whether this creature has them: on the tile, or - for a croc - on the bank beside it. */
+const hasThem = (c: Critter, me: Spot) =>
+  c.kind === "croc" ? Math.abs(c.x - me.x) + Math.abs(c.y - me.y) <= 1 : c.x === me.x && c.y === me.y;
 
 /**
  * Walk the maze.
@@ -582,9 +813,10 @@ export function play(level: SpellLevel, raw: unknown): Run {
   const pace = move.pace ?? "easy";
   // Easy empties the clearing; the other two fill it the level's own way.
   const snakes = pace === "easy" ? 0 : crittersOn(level);
+  const place = placeOf(level);
 
   let wordAt = 0;
-  let clearing = buildClearing(words[0] ?? "cat", move.seed, snakes, level.grade);
+  let clearing = buildClearing(words[0] ?? "cat", move.seed, snakes, level.grade, place);
   let me = { ...clearing.start };
   let rocks = clearing.rocks.map((p) => ({ ...p }));
   let hasKey = false;
@@ -634,7 +866,7 @@ export function play(level: SpellLevel, raw: unknown): Run {
       if (pace !== "hard") continue;
       const ticks = Math.min(MAX_TICKS, Math.floor(step.ms / HARD_TICK_MS));
       for (let t = 0; t < ticks; t++) critters = critters.map((c) => moveCritter(c, clearing.tiles, r, [...rocks, ...(clearing.door && !doorOpen ? [clearing.door] : [])]));
-      if (critters.some((c) => c.x === me.x && c.y === me.y)) {
+      if (critters.some((c) => hasThem(c, me))) {
         lives--;
         bittenHere = true;
         beat = "bitten";
@@ -650,9 +882,9 @@ export function play(level: SpellLevel, raw: unknown): Run {
     const d = DIRS[step.d];
     const x = me.x + d.dx;
     const y = me.y + d.dy;
-    // A tree or a pool is simply not a move: no step, no turn for the
-    // animals, nothing lost.
-    if (!inside(x, y) || clearing.tiles[at(x, y)] !== "floor") continue;
+    // A wall, a pool or a hole is simply not a move: no step, no turn for
+    // the animals, nothing lost.
+    if (!inside(x, y) || !walkable(clearing.tiles[at(x, y)])) continue;
 
     // The gate: shut until they are carrying the key, and then it stays open.
     if (clearing.door && clearing.door.x === x && clearing.door.y === y && !doorOpen) {
@@ -671,7 +903,7 @@ export function play(level: SpellLevel, raw: unknown): Run {
       const by = y + d.dy;
       const free =
         inside(bx, by) &&
-        clearing.tiles[at(bx, by)] === "floor" &&
+        walkable(clearing.tiles[at(bx, by)]) &&
         !rocks.some((p) => p.x === bx && p.y === by) &&
         !clearing.stones.some((st, i) => st.x === bx && st.y === by && !taken.includes(i)) &&
         !(clearing.door && clearing.door.x === bx && clearing.door.y === by && !doorOpen) &&
@@ -686,6 +918,26 @@ export function play(level: SpellLevel, raw: unknown): Run {
 
     me = { x, y };
     stepsHere++;
+
+    // Vines and ice carry them one tile further the way they were going -
+    // unless there is a letter there, which they are always allowed to stop
+    // on, or anything else in the way.
+    const ground = clearing.tiles[at(me.x, me.y)];
+    if (ground === "vine" || ground === "ice") {
+      const sx = me.x + d.dx;
+      const sy = me.y + d.dy;
+      const stoneThere = clearing.stones.some((st, i) => st.x === sx && st.y === sy && !taken.includes(i));
+      const clear =
+        inside(sx, sy) &&
+        walkable(clearing.tiles[at(sx, sy)]) &&
+        !stoneThere &&
+        !rocks.some((p) => p.x === sx && p.y === sy) &&
+        !(clearing.door && clearing.door.x === sx && clearing.door.y === sy && !doorOpen);
+      if (clear) {
+        me = { x: sx, y: sy };
+        beat = ground === "ice" ? "slide" : "carried";
+      }
+    }
 
     // The key, if it is lying here.
     if (clearing.key && !hasKey && clearing.key.x === x && clearing.key.y === y) {
@@ -709,10 +961,13 @@ export function play(level: SpellLevel, raw: unknown): Run {
     }
 
     // Everything that lives here takes its turn after they take theirs - and
-    // on hard it takes one more for every second they spent deciding.
-    const turns = pace === "hard" ? 1 + Math.min(MAX_TICKS - 1, Math.floor(step.ms / HARD_TICK_MS)) : 1;
+    // on hard it takes one more for every second they spent deciding. Mud
+    // gives them a free one whatever the setting: it takes a while to pull
+    // your boots out of it.
+    const stuckInMud = clearing.tiles[at(me.x, me.y)] === "mud";
+    const turns = (pace === "hard" ? 1 + Math.min(MAX_TICKS - 1, Math.floor(step.ms / HARD_TICK_MS)) : 1) + (stuckInMud ? 1 : 0);
     for (let t = 0; t < turns; t++) critters = critters.map((c) => moveCritter(c, clearing.tiles, r, [...rocks, ...(clearing.door && !doorOpen ? [clearing.door] : [])]));
-    if (critters.some((c) => c.x === me.x && c.y === me.y)) {
+    if (critters.some((c) => hasThem(c, me))) {
       lives--;
       bittenHere = true;
       beat = "bitten";
@@ -737,7 +992,7 @@ export function play(level: SpellLevel, raw: unknown): Run {
       bittenHere = false;
       wordAt = doneWords;
       if (doneWords < words.length) {
-        clearing = buildClearing(words[wordAt], move.seed + wordAt * 977, snakes, level.grade);
+        clearing = buildClearing(words[wordAt], move.seed + wordAt * 977, snakes, level.grade, place);
         restartWord();
       }
     }
@@ -802,7 +1057,7 @@ export function perfectMoves(level: SpellLevel, seed = 1, pace: Pace = "easy"): 
   const snakes = pace === "easy" ? 0 : crittersOn(level);
   const steps: Step[] = [];
   for (let w = 0; w < words.length; w++) {
-    const clearing = buildClearing(words[w], w === 0 ? seed : seed + w * 977, snakes, level.grade);
+    const clearing = buildClearing(words[w], w === 0 ? seed : seed + w * 977, snakes, level.grade, placeOf(level));
     let from = { ...clearing.start };
     const taken = new Set<number>();
     // The key first, if there is one: nothing past the gate can be had
@@ -825,13 +1080,17 @@ export function perfectMoves(level: SpellLevel, seed = 1, pace: Pace = "easy"): 
       // alone if it cannot, and straight there if there is no other way -
       // treading on the wrong letter is the one thing this walk is for
       // avoiding, so the boulders are the first thing to give.
-      const walled = (blocks: Spot[]) => clearing.tiles.map((t, i) => (blocks.some((b) => b.y * COLS + b.x === i) ? ("tree" as TileKind) : t));
+      const slippery: Spot[] = clearing.tiles
+        .map((t, i) => (t === "ice" || t === "vine" ? { x: i % COLS, y: Math.floor(i / COLS) } : null))
+        .filter((p): p is Spot => p !== null);
+      const walled = (blocks: Spot[]) => clearing.tiles.map((t, i) => (blocks.some((b) => b.y * COLS + b.x === i) ? ("wall" as TileKind) : t));
       const others = clearing.stones.filter((o, oi) => o !== stone && !taken.has(oi));
       // The boulders stay walled off whatever happens: a walk that shoves
       // one is a walk whose next step lands somewhere else, and the whole
       // list after it is nonsense.
       const path =
-        routeTo(walled([...others, ...clearing.rocks]), from, { x: stone.x, y: stone.y }) ??
+        routeTo(walled([...others, ...clearing.rocks, ...slippery]), from, { x: stone.x, y: stone.y }) ??
+        routeTo(walled([...clearing.rocks, ...slippery]), from, { x: stone.x, y: stone.y }) ??
         routeTo(walled(clearing.rocks), from, { x: stone.x, y: stone.y }) ??
         routeTo(clearing.tiles, from, { x: stone.x, y: stone.y });
       if (!path) return { seed, steps, pace };
@@ -854,7 +1113,7 @@ export function routeTo(tiles: TileKind[], from: { x: number; y: number }, to: {
     for (const d of TURN) {
       const x = p.x + DIRS[d].dx;
       const y = p.y + DIRS[d].dy;
-      if (!inside(x, y) || tiles[at(x, y)] !== "floor" || seen.has(at(x, y))) continue;
+      if (!inside(x, y) || !walkable(tiles[at(x, y)]) || seen.has(at(x, y))) continue;
       seen.add(at(x, y));
       came.set(at(x, y), { prev: at(p.x, p.y), d });
       queue.push({ x, y });
@@ -905,16 +1164,71 @@ export function evidenceFor(levelId: string, raw: unknown): GameEvidence[] {
 
 // ---------------- The art ----------------
 
-/** A tree: the wall of the clearing, in two shades so it reads as leaves. */
-export function treeGrid(frame = 0): Grid {
+/**
+ * The wall of a clearing, in whatever that place is made of.
+ *
+ * Leaves in the jungle, bamboo on the terraces, pillars in the temple, ice
+ * on the summit - the same job done in the local material, which is what
+ * makes two levels with the same maze look like two different places.
+ */
+export function wallGrid(kind: WallKind, a: string, b: string, frame = 0): Grid {
   const g = new Grid(12, 12);
-  const leaf = "#2f7d46";
-  g.rect(0, 0, 12, 12, shade(leaf, -0.55));
-  g.disc(4, 4, 3.4, leaf);
-  g.disc(8, 5, 3.2, shade(leaf, 0.18));
-  g.disc(6, 9, 3.4, shade(leaf, -0.2));
-  g.set(3 + (frame % 2), 3, shade(leaf, 0.45));
+  const back = shade(a, -0.5);
+  g.rect(0, 0, 12, 12, back);
+  switch (kind) {
+    case "leaf":
+      g.disc(4, 4, 3.4, a);
+      g.disc(8, 5, 3.2, b);
+      g.disc(6, 9, 3.4, shade(b, -0.2));
+      g.set(3 + (frame % 2), 3, shade(b, 0.45));
+      break;
+    case "bamboo":
+      for (const x of [1, 5, 9]) {
+        g.rect(x, 0, 3, 12, a);
+        for (const y of [2, 6, 10]) g.rect(x, y, 3, 1, b);
+      }
+      break;
+    case "rock":
+      g.disc(4, 7, 4, a);
+      g.disc(9, 5, 3.6, shade(a, 0.18));
+      g.rect(0, 10, 12, 2, shade(a, -0.3));
+      g.set(3, 5, b);
+      break;
+    case "column":
+      g.rect(3, 0, 6, 12, a);
+      g.rect(2, 0, 8, 2, b);
+      g.rect(2, 10, 8, 2, b);
+      g.rect(5, 2, 1, 8, shade(a, -0.35));
+      break;
+    case "crystal":
+      g.tri(4, 2, 11, 3, a);
+      g.tri(9, 0, 11, 2, b);
+      break;
+    case "reed":
+      for (const x of [2, 5, 8, 11]) {
+        g.rect(x, 2 + ((x + frame) % 2), 1, 10, a);
+        g.rect(x - 1, 1 + ((x + frame) % 2), 3, 2, b);
+      }
+      break;
+    case "snow":
+      g.rect(0, 0, 12, 12, a);
+      g.disc(4, 8, 3.6, b);
+      g.disc(8, 6, 3, shade(b, -0.12));
+      g.set(6, 3, shade(b, 0.4));
+      break;
+    case "stack":
+      g.rect(1, 1, 10, 4, a);
+      g.rect(1, 6, 10, 4, b);
+      g.rect(1, 1, 10, 1, shade(a, 0.3));
+      g.rect(1, 6, 10, 1, shade(b, 0.3));
+      break;
+  }
   return g;
+}
+
+/** The old name, kept for the jungle: a wall of leaves. */
+export function treeGrid(frame = 0): Grid {
+  return wallGrid("leaf", "#2f7d46", "#63c47f", frame);
 }
 
 /** Water: a pool they have to walk around. */
@@ -935,6 +1249,48 @@ export function floorGrid(): Grid {
   g.set(2, 3, shade(dirt, -0.18));
   g.set(8, 6, shade(dirt, -0.18));
   g.set(5, 9, shade(dirt, 0.2));
+  return g;
+}
+
+/** Mud: walkable, and slow enough that everything else gets a move. */
+export function mudGrid(): Grid {
+  const g = new Grid(12, 12);
+  const mud = "#6b5a3c";
+  g.rect(0, 0, 12, 12, mud);
+  g.disc(4, 5, 2, shade(mud, -0.3));
+  g.disc(8, 9, 1.6, shade(mud, -0.3));
+  g.set(9, 3, shade(mud, 0.25));
+  return g;
+}
+
+/** A creeper across the path: step on it and it carries you on a tile. */
+export function vineGrid(frame = 0): Grid {
+  const g = new Grid(12, 12);
+  const green = "#2f8f52";
+  g.rect(0, 0, 12, 12, "#6f8f4a");
+  for (let x = 0; x < 12; x++) g.set(x, 5 + ((x + frame) % 3 === 0 ? 1 : 0), green);
+  for (let x = 1; x < 12; x += 4) g.set(x, 7, shade(green, 0.3));
+  return g;
+}
+
+/** Ice: you keep going. */
+export function iceGrid(): Grid {
+  const g = new Grid(12, 12);
+  const ice = "#cfe8ff";
+  g.rect(0, 0, 12, 12, ice);
+  g.rect(1, 2, 5, 1, "#ffffff");
+  g.rect(6, 7, 4, 1, "#ffffff");
+  g.rect(0, 11, 12, 1, shade(ice, -0.25));
+  return g;
+}
+
+/** A hole in the ground. Not a way through, and it looks it. */
+export function pitGrid(): Grid {
+  const g = new Grid(12, 12);
+  g.rect(0, 0, 12, 12, "#6f8f4a");
+  g.disc(6, 6, 5, "#241c21");
+  g.disc(6, 5, 4, "#120d12");
+  g.rect(2, 10, 8, 1, "#3a2f34");
   return g;
 }
 
@@ -1051,6 +1407,71 @@ export function doorGrid(open: boolean): Grid {
   for (let y = 1; y < 12; y += 3) g.rect(0, y, 12, 1, shade(wood, -0.35));
   g.rect(4, 4, 4, 4, iron);
   g.set(6, 6, "#1b1530");
+  return g;
+}
+
+/** A bat: walls are nothing to it, and it keeps odd hours. */
+export function batGrid(frame = 0): Grid {
+  const g = new Grid(14, 10);
+  const fur = "#4a3f5c";
+  const web = "#6b5c80";
+  const flap = frame % 2;
+  g.disc(7, 5, 2.2, fur);
+  g.set(6, 4, "#ffe08a");
+  g.set(8, 4, "#ffe08a");
+  g.tri(3, 2 + flap, 6 + flap, 3, web);
+  g.tri(11, 2 + flap, 6 + flap, 3, web);
+  g.rect(6, 2, 1, 2, fur);
+  g.rect(8, 2, 1, 2, fur);
+  return g;
+}
+
+/** A crocodile: it stays in the water and takes anyone on the bank. */
+export function crocGrid(frame = 0): Grid {
+  const g = new Grid(14, 10);
+  const hide = "#3a6b3a";
+  const belly = "#7fa85c";
+  const jaw = frame % 2;
+  g.rect(2, 5, 11, 3, hide);
+  g.rect(2, 7, 11, 1, shade(hide, -0.35));
+  g.rect(0, 4 + jaw, 5, 2, hide);
+  g.rect(0, 6, 5, 1, belly);
+  g.set(4, 3, "#f2d24a");
+  g.set(6, 3, "#f2d24a");
+  for (let x = 4; x < 12; x += 2) g.set(x, 4, shade(hide, 0.3));
+  return g;
+}
+
+/** A spider: corner to corner, never along the path. */
+export function spiderGrid(frame = 0): Grid {
+  const g = new Grid(12, 12);
+  const body = "#3a2f34";
+  const leg = "#5c4a50";
+  const step = frame % 2;
+  g.disc(6, 7, 3, body);
+  g.disc(6, 4, 1.8, body);
+  g.set(5, 4, "#e0453a");
+  g.set(7, 4, "#e0453a");
+  for (const y of [5, 7, 9]) {
+    g.rect(1, y - step, 4, 1, leg);
+    g.rect(7, y + step, 4, 1, leg);
+  }
+  return g;
+}
+
+/** A beetle: slow, and it only moves every other turn. */
+export function beetleGrid(frame = 0): Grid {
+  const g = new Grid(12, 10);
+  const shell = "#8a4a2a";
+  const back = "#c07a3c";
+  const step = frame % 2;
+  g.disc(6, 5, 4, shell);
+  g.disc(6, 5, 3, back);
+  g.rect(6, 1, 1, 8, shade(shell, -0.4));
+  g.rect(1, 3 + step, 3, 1, shell);
+  g.rect(8, 3 - step, 3, 1, shell);
+  g.rect(1, 7 - step, 3, 1, shell);
+  g.rect(8, 7 + step, 3, 1, shell);
   return g;
 }
 

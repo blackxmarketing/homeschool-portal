@@ -22,6 +22,17 @@ import {
   levelsForGrade,
   medalGrid,
   rockGrid,
+  PLACES,
+  placeOf,
+  wallGrid,
+  mudGrid,
+  vineGrid,
+  iceGrid,
+  pitGrid,
+  batGrid,
+  crocGrid,
+  spiderGrid,
+  beetleGrid,
   keyGrid,
   doorGrid,
   placeFrom,
@@ -170,14 +181,14 @@ describe("the walk", () => {
     expect(starsFor(run, WORDS_PER_LEVEL)).toBe(3);
   });
 
-  it("will not let them walk into a tree", () => {
+  it("will not let them walk into a wall", () => {
     const c = buildClearing("cat", 1, 0);
     // A wall of trees runs all the way round, so from the start tile one of
     // left or down is always a wall.
     const run = play(quiet, { seed: 1, steps: [{ d: "l", ms: 300 }, { d: "d", ms: 300 }] });
     expect(run.me.x).toBeGreaterThanOrEqual(1);
     expect(run.me.y).toBeLessThanOrEqual(ROWS - 2);
-    expect(c.tiles[0]).toBe("tree");
+    expect(c.tiles[0]).toBe("wall");
   });
 
   it("does not take a letter that is out of turn, and counts it against them", () => {
@@ -415,7 +426,7 @@ describe("boulders, keys and gates", () => {
           const c = buildClearing(word, seed, crittersOn(level), level.grade);
           // With every boulder treated as a wall, and the gate open, every
           // letter is still walkable in order.
-          const blocked = c.tiles.map((t, i) => (c.rocks.some((r) => r.y * COLS + r.x === i) ? "tree" : t));
+          const blocked = c.tiles.map((t, i) => (c.rocks.some((r) => r.y * COLS + r.x === i) ? "wall" : t));
           let from = c.start;
           for (let n = 0; n < word.length; n++) {
             const stone = c.stones.find((s) => s.at === n)!;
@@ -435,7 +446,7 @@ describe("boulders, keys and gates", () => {
         const c = buildClearing(word, seed, crittersOn(level), level.grade);
         if (!c.door || !c.key) continue;
         found++;
-        const shut = c.tiles.map((t, i) => (c.door!.y * COLS + c.door!.x === i || c.rocks.some((r) => r.y * COLS + r.x === i) ? "tree" : t));
+        const shut = c.tiles.map((t, i) => (c.door!.y * COLS + c.door!.x === i || c.rocks.some((r) => r.y * COLS + r.x === i) ? "wall" : t));
         expect(routeTo(shut, c.start, c.key), `${level.id}: the key is behind its own gate`).not.toBeNull();
         // And the gate is worth opening: something is shut away behind it.
         const reach = c.stones.filter((s) => s.at >= 0 && routeTo(shut, c.start, { x: s.x, y: s.y }) === null);
@@ -452,7 +463,7 @@ describe("boulders, keys and gates", () => {
     expect(c.rocks.length).toBeGreaterThan(0);
     const rock = c.rocks[0];
     const path = routeTo(
-      c.tiles.map((t, i) => (i === rock.y * COLS + rock.x ? "tree" : t)),
+      c.tiles.map((t, i) => (i === rock.y * COLS + rock.x ? "wall" : t)),
       c.start,
       { x: rock.x - 1, y: rock.y },
     );
@@ -498,5 +509,57 @@ describe("boulders, keys and gates", () => {
 
 /** The same ground with these tiles walled off, for the tests to ask "what if". */
 function withTrees(tiles: ReturnType<typeof buildClearing>["tiles"], blocks: { x: number; y: number }[]) {
-  return tiles.map((t, i) => (blocks.some((b) => b.y * COLS + b.x === i) ? ("tree" as const) : t));
+  return tiles.map((t, i) => (blocks.some((b) => b.y * COLS + b.x === i) ? ("wall" as const) : t));
 }
+
+describe("where a level happens", () => {
+  it("gives every level a place of its own", () => {
+    const seen = new Map<string, string>();
+    for (const l of ALL_SPELL_LEVELS) {
+      const p = placeOf(l);
+      expect(seen.has(p.id), `${l.id} is set in the same place as ${seen.get(p.id)}`).toBe(false);
+      seen.set(p.id, l.id);
+    }
+    expect(PLACES.length).toBe(ALL_SPELL_LEVELS.length);
+    expect(new Set(PLACES.map((p) => p.name)).size).toBe(PLACES.length);
+    for (const p of PLACES) {
+      expect(p.name.length).toBeGreaterThan(3);
+      expect(p.name).not.toMatch(BANNED);
+    }
+  });
+
+  it("draws every wall, every bit of odd ground and every animal", () => {
+    const walls = new Set(PLACES.map((p) => p.wall));
+    for (const w of walls) {
+      const g = wallGrid(w, "#2f7d46", "#63c47f", 0);
+      expect(g.px.filter((c) => c).length, w).toBeGreaterThan(10);
+    }
+    for (const g of [mudGrid(), vineGrid(0), iceGrid(), pitGrid()]) expect(g.px.filter((c) => c).length).toBeGreaterThan(10);
+    for (const g of [batGrid(0), batGrid(1), crocGrid(0), spiderGrid(0), beetleGrid(0)]) expect(g.px.filter((c) => c).length).toBeGreaterThan(8);
+  });
+
+  it("puts the animals a place keeps, and the ground it has", () => {
+    for (const level of ALL_SPELL_LEVELS) {
+      const p = placeOf(level);
+      const c = buildClearing(wordsFor(level, 3)[0], 3, crittersOn(level), level.grade, p);
+      for (const m of c.critters) expect(p.critters, `${p.id} has no ${m.kind}`).toContain(m.kind);
+      const odd = new Set(c.tiles.filter((t) => t === "mud" || t === "ice" || t === "vine" || t === "pit"));
+      for (const t of odd) expect(t, `${p.id} grew ${t} from nowhere`).toBe(p.special);
+    }
+  }, 30000);
+
+  it("keeps a crocodile in the water and lets a bat over the walls", () => {
+    const pool = PLACES.find((p) => p.critters.includes("croc"))!;
+    for (const seed of [2, 4, 6, 8]) {
+      const c = buildClearing("river", seed, 2, 2, pool);
+      for (const m of c.critters.filter((x) => x.kind === "croc")) expect(c.tiles[m.y * COLS + m.x]).toBe("water");
+    }
+  });
+
+  it("still finishes every level with the new ground in it", () => {
+    for (const level of ALL_SPELL_LEVELS) {
+      const run = play(level, perfectMoves(level, 12));
+      expect(run.finished, `${level.id} cannot be finished`).toBe(true);
+    }
+  }, 60000);
+});
