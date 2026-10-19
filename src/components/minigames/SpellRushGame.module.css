@@ -82,6 +82,8 @@
 .stone,
 .critter,
 .me,
+.log,
+.runner,
 .rock,
 .door,
 .keyLies,
@@ -96,6 +98,8 @@
 }
 .stone svg,
 .critter svg,
+.log svg,
+.runner svg,
 .rock svg,
 .door svg,
 .keyLies svg,
@@ -492,4 +496,26 @@
   background: rgba(27, 21, 48, 0.8);
   color: #fffdf5;
   border-color: #0d0b16;
+}
+
+/* The river's logs and whatever is thundering along the stampede row. */
+.log {
+  z-index: 1;
+}
+.runner {
+  z-index: 2;
+}
+
+/* A lantern: all you can see of a dark place. */
+.lantern {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  background: radial-gradient(circle 86px at var(--x, 50%) var(--y, 50%), rgba(0, 0, 0, 0) 0%, rgba(8, 6, 16, 0.45) 55%, rgba(8, 6, 16, 0.92) 78%);
+}
+
+.wait {
+  grid-column: 3;
+  grid-row: 1;
 }

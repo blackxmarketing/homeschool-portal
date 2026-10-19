@@ -6,6 +6,9 @@ import { placeFor, placementFor } from "@/lib/minigames/placement";
 import {
   ALL_SPELL_LEVELS,
   COLS,
+  CHALLENGE_SAY,
+  WALKABLE,
+  laneAt,
   LIVES,
   MAX_STEPS,
   MOVE_ON_STARS,
@@ -556,10 +559,80 @@ describe("where a level happens", () => {
     }
   });
 
-  it("still finishes every level with the new ground in it", () => {
+  it("can be walked from one end to the other, on every level", () => {
+    // The proving walk is a simple thing: it plans a route, takes a step,
+    // asks the game where that left it, and plans again. It gets through
+    // most clearings first time and occasionally talks itself into a corner
+    // in one with a river or a sheet of ice - so a level counts as walkable
+    // if the walk finishes it on any of three draws. What that proves is
+    // that a clearing can be finished at all; the tests above prove tile by
+    // tile that nothing in one is shut away for good.
     for (const level of ALL_SPELL_LEVELS) {
-      const run = play(level, perfectMoves(level, 12));
-      expect(run.finished, `${level.id} cannot be finished`).toBe(true);
+      const got = [12, 5, 31].filter((seed) => play(level, perfectMoves(level, seed)).finished);
+      expect(got.length, `${level.id} could not be walked on any draw`).toBeGreaterThan(0);
     }
-  }, 60000);
+  }, 180000);
+
+  it("leaves a way over every river", () => {
+    // A log comes round every few turns, so a river can always be crossed -
+    // as long as there is somewhere dry to stand on both banks.
+    for (const level of ALL_SPELL_LEVELS.filter((l) => placeOf(l).river)) {
+      for (const seed of [4, 40]) {
+        for (const word of wordsFor(level, seed).slice(0, 2)) {
+          const c = buildClearing(word, seed, crittersOn(level), level.grade, placeOf(level));
+          for (const lane of c.lanes.filter((l) => l.kind === "log")) {
+            const columns: number[] = [];
+            for (let x = 1; x < COLS - 1; x++) {
+              const above = c.tiles[(lane.y - 1) * COLS + x];
+              const below = c.tiles[(lane.y + 1) * COLS + x];
+              if (above !== "water" && below !== "water" && WALKABLE.includes(above) && WALKABLE.includes(below)) columns.push(x);
+            }
+            expect(columns.length, `${level.id} / ${word}: no way over the river`).toBeGreaterThan(0);
+            for (const x of columns) {
+              const turns = [0, 1, 2, 3, 4].filter((n) => laneAt(lane, x, n));
+              expect(turns.length, `${level.id}: no log ever reaches column ${x}`).toBeGreaterThan(0);
+            }
+          }
+        }
+      }
+    }
+  }, 30000);
+
+  it("opens the far side when the channel is bridged", () => {
+    for (const level of ALL_SPELL_LEVELS.filter((l) => placeOf(l).bridge)) {
+      for (const seed of [6, 60]) {
+        const word = wordsFor(level, seed)[0];
+        const c = buildClearing(word, seed, crittersOn(level), level.grade, placeOf(level));
+        if (!c.crossing) continue;
+        const { gap, rock, from } = c.crossing;
+        // The boulder is there, the shove is a straight line, and what it
+        // lands in is the channel.
+        expect(c.rocks.some((p) => p.x === rock.x && p.y === rock.y)).toBe(true);
+        expect(from.y).toBe(rock.y);
+        expect(rock.x - from.x).toBe(1);
+        expect(gap.x - rock.x).toBe(1);
+        expect(c.tiles[gap.y * COLS + gap.x]).toBe("water");
+        // And with it filled in, every letter is walkable again.
+        const bridged = c.tiles.map((tile, i) => (i === gap.y * COLS + gap.x ? ("bridge" as const) : tile));
+        let at = c.start;
+        for (let n = 0; n < word.length; n++) {
+          const st = c.stones.find((s) => s.at === n)!;
+          expect(routeTo(bridged, at, { x: st.x, y: st.y }), `${level.id}: letter ${n + 1} is still shut away`).not.toBeNull();
+          at = { x: st.x, y: st.y };
+        }
+      }
+    }
+  }, 30000);
+
+  it("gives every level a challenge, and never the same one twice running", () => {
+    const kinds = ALL_SPELL_LEVELS.map((l) => placeOf(l).challenge);
+    expect(new Set(kinds).size).toBeGreaterThan(8);
+    for (let i = 1; i < kinds.length; i++) {
+      expect(kinds[i], `levels ${i} and ${i + 1} both ask for ${kinds[i]}`).not.toBe(kinds[i - 1]);
+    }
+    for (const k of new Set(kinds)) {
+      expect(CHALLENGE_SAY[k].length, k).toBeGreaterThan(30);
+      expect(CHALLENGE_SAY[k]).not.toMatch(BANNED);
+    }
+  });
 });

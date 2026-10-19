@@ -8,13 +8,18 @@ import { EndChoices, Fireworks, StarPop } from "./EndOnLevel";
 import type { MiniGameUIProps } from "./types";
 import { heroGrid, petGrid, DEFAULT_HERO, type Hero } from "@/lib/pixel/hero";
 import {
+  CHALLENGE_SAY,
   COLS,
+  laneAt,
+  logGrid,
+  runnerGrid,
   batGrid,
   beetleGrid,
   crocGrid,
   iceGrid,
   mudGrid,
   pitGrid,
+  bridgeGrid,
   placeOf,
   spiderGrid,
   vineGrid,
@@ -92,6 +97,9 @@ const MUD = mudGrid();
 const ICE = iceGrid();
 const PIT = pitGrid();
 const VINE = [vineGrid(0), vineGrid(1)];
+const BRIDGE = bridgeGrid();
+const LOG = logGrid();
+const RUNNER = [runnerGrid(0), runnerGrid(1)];
 
 /** Every animal, in both frames. */
 const CRITTER: Record<CritterKind, ReturnType<typeof snakeGrid>[]> = {
@@ -283,7 +291,7 @@ function SpellRush({
   }, [picking, ready]);
 
   const walk = useCallback(
-    (d: Dir) => {
+    (d: Dir | "w") => {
       if (!ready || done || rafting || live.current.length >= 1200) return;
       const now = Date.now();
       const step = { d, ms: Math.min(60000, now - moved.current) };
@@ -299,7 +307,7 @@ function SpellRush({
     if (!ready || done) return;
     function onKey(e: KeyboardEvent) {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      const d = KEYS[e.key];
+      const d = e.key === " " ? "w" : KEYS[e.key];
       if (!d) return;
       e.preventDefault();
       walk(d);
@@ -363,7 +371,7 @@ function SpellRush({
 
         <TeacherBrief
           teacher={SPELLING_TEACHER}
-          directions={level.intro}
+          directions={`${level.intro} ${CHALLENGE_SAY[place.challenge]}`}
           rule={level.title}
           levelId={level.id}
           board={0}
@@ -437,13 +445,28 @@ function SpellRush({
                               ? PIT
                               : t === "vine"
                                 ? VINE[frame % 2]
-                                : ground.floor
+                                : t === "bridge"
+                                  ? BRIDGE
+                                  : ground.floor
                   }
                   scale={3}
                 />
               </span>
             ))}
           </div>
+
+          {/* The logs on the river and whatever is running the stampede
+              row: both worked out from the turn, so they are where the
+              server says they are. */}
+          {run.clearing.lanes.flatMap((lane) =>
+            Array.from({ length: COLS }, (_, x) => x)
+              .filter((x) => laneAt(lane, x, run.turn))
+              .map((x) => (
+                <span key={`${lane.kind}${lane.y}-${x}`} className={lane.kind === "log" ? css.log : css.runner} style={spot(x, lane.y)}>
+                  <PixelSprite grid={lane.kind === "log" ? LOG : RUNNER[frame % 2]} scale={3} />
+                </span>
+              )),
+          )}
 
           {run.rocks.map((p, i) => (
             <span key={`r${i}`} className={css.rock} style={spot(p.x, p.y)}>
@@ -531,6 +554,15 @@ function SpellRush({
               <strong>{count}</strong>
             </div>
           )}
+          {/* In the dark you see as far as the lantern reaches, and no
+              further. The letters are still out there. */}
+          {place.challenge === "dark" && ready && !done && (
+            <div
+              className={css.lantern}
+              style={{ ["--x" as string]: `${((run.me.x + 0.5) / COLS) * 100}%`, ["--y" as string]: `${((run.me.y + 0.5) / ROWS) * 100}%` }}
+              aria-hidden
+            />
+          )}
           <span className={`${css.where} ${place.dark ? css.whereDark : ""}`}>{place.name}</span>
           {ready && !done && !rafting && steps.length === 0 && count === null && (
             <span className={css.nudge}>Arrow keys (or WASD) to walk — or use the buttons below</span>
@@ -541,6 +573,10 @@ function SpellRush({
           {run.beat === "stuck" && <span className={css.shout}>That rock will not budge.</span>}
           {run.beat === "slide" && <span className={css.shout}>Whoa - ice!</span>}
           {run.beat === "carried" && <span className={css.shout}>The vine carries you on.</span>}
+          {run.beat === "bridge" && <span className={css.shout}>That will do as a bridge.</span>}
+          {run.beat === "ride" && <span className={css.shout}>Riding the log - step off before the end!</span>}
+          {run.beat === "splash" && <span className={css.shout}>Splash! Wait for a log next time.</span>}
+          {run.beat === "run-down" && <span className={css.shout}>Run down! Watch the row.</span>}
           {run.beat === "bitten" && <span className={css.shout}>Caught! Start the word again.</span>}
 
           {result && !run.finished && (
@@ -601,7 +637,10 @@ function SpellRush({
             <button type="button" className={`kbtn ${css.padKey} ${css.down}`} onClick={() => walk("d")} aria-label="Walk down">
               ▼
             </button>
-            <span className={css.padSay}>Arrow keys or WASD</span>
+            <button type="button" className={`kbtn ghost ${css.padKey} ${css.wait}`} onClick={() => walk("w")} aria-label="Wait where you are">
+              ⏳
+            </button>
+            <span className={css.padSay}>Arrow keys or WASD · space to wait</span>
           </div>
         )}
 
