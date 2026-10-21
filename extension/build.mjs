@@ -12,7 +12,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(here, "..");
 const out = path.join(here, "dist");
 const dev = process.argv.includes("--dev");
-const portal = (process.env.MIA_PORTAL ?? "https://137-184-200-44.sslip.io").replace(/\/+$/, "");
+const portal = (process.env.MIA_PORTAL ?? "https://lvluplearningacademy.com").replace(/\/+$/, "");
 const version = JSON.parse(fs.readFileSync(path.join(here, "version.json"), "utf8")).version;
 
 fs.rmSync(out, { recursive: true, force: true });

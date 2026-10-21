@@ -15,7 +15,7 @@ still reviews it, usually within a few days.
 npm run ext:zip
 ```
 
-This builds the live version (talking to https://137-184-200-44.sslip.io) and
+This builds the live version (talking to https://lvluplearningacademy.com) and
 writes `extension/focus-buddy-<version>.zip`. For each later update, raise the
 version in `extension/version.json` first.
 
@@ -57,7 +57,7 @@ store version is installed.
 - Data usage: tick **"User activity"** (timer starts, pauses and finishes are
   sent to the family's portal), and confirm the three statements (not sold, not
   used for unrelated purposes, not used for credit).
-- Privacy policy URL: `https://137-184-200-44.sslip.io/focus-buddy/privacy`
+- Privacy policy URL: `https://lvluplearningacademy.com/focus-buddy/privacy`
 
 **Distribution**
 - Visibility: **Unlisted**.
