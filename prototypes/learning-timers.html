@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Learning Timers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f1ea; --panel:#fffdf8; --ink:#2b2a33; --muted:#7a7785; --line:#e3ded2; --face:#ffffff;
+  --math:#e8505b; --ela:#3b82f6; --sci:#22a06b; --his:#f59e0b;
+  --sky:#bfe3ff; --grass:#8fd18b;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#1b1a20; --panel:#25242c; --ink:#f1eff6; --muted:#a19fab; --line:#393743; --face:#302f38; --sky:#23324a; --grass:#2f5a35; }
+}
+:root[data-theme="dark"]{ --bg:#1b1a20; --panel:#25242c; --ink:#f1eff6; --muted:#a19fab; --line:#393743; --face:#302f38; --sky:#23324a; --grass:#2f5a35; }
+
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;display:flex;min-height:100vh}
+
+/* Left side: where Miacademy lives */
+main{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;min-width:0}
+.hub{border:3px dashed var(--line);border-radius:24px;width:100%;height:100%;min-height:400px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--muted);text-align:center;padding:24px}
+.hub h1{margin:0;font-size:28px;color:var(--ink)}
+.hub a{background:var(--ink);color:var(--bg);text-decoration:none;font-weight:800;padding:12px 22px;border-radius:999px}
+
+/* Right side: timers */
+aside{width:300px;flex-shrink:0;max-height:100vh;overflow-y:auto;position:sticky;top:0;background:var(--panel);border-left:1px solid var(--line);padding:16px;display:flex;flex-direction:column;gap:12px;transition:width .3s}
+aside.focus{width:380px}
+.head{display:flex;justify-content:space-between;align-items:center;font-weight:900;font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.parent-btn{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:4px 10px;font:inherit;font-size:11px;cursor:pointer}
+
+.card{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:18px;background:var(--bg);border-left:8px solid var(--c);cursor:pointer;transition:transform .15s,opacity .3s,filter .3s}
+.card:hover{transform:translateX(-4px)}
+.card:focus-visible{outline:3px solid var(--c);outline-offset:2px}
+.card svg{width:84px;height:84px;flex-shrink:0}
+.card .name{font-weight:900;font-size:20px;color:var(--c)}
+.card .time{font-weight:800;font-size:15px}
+.card .status{font-size:12px;color:var(--muted)}
+.card.done{opacity:.35;filter:grayscale(.85);cursor:not-allowed}
+.card.done:hover{transform:none}
+.card.done .status{font-weight:800}
+
+/* Focused (opened) timer */
+.big{display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px;border-radius:24px;background:var(--bg);border-top:10px solid var(--c)}
+.big .name{font-weight:900;font-size:26px;color:var(--c)}
+.big svg{width:260px;height:260px;max-width:100%}
+.big .time{font-weight:900;font-size:40px;font-variant-numeric:tabular-nums}
+.controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.btn{border:none;border-radius:999px;padding:10px 22px;font:inherit;font-weight:900;font-size:16px;cursor:pointer;background:var(--c,var(--ink));color:#fff}
+.btn.ghost{background:transparent;color:var(--muted);border:2px solid var(--line)}
+.waiting{font-weight:900;color:var(--c);text-align:center}
+.focus-flag{font-weight:900;font-size:14px;padding:6px 14px;border-radius:999px}
+.focus-flag.on{background:#22a06b22;color:#1f8a5b}
+.focus-flag.off{background:#f59e0b33;color:#b45309;animation:pulse 1s infinite}
+.checkin{display:flex;gap:10px;align-items:flex-start;background:var(--panel);border:2px solid var(--c);border-radius:18px 18px 18px 4px;padding:10px 12px;font-weight:800;font-size:16px;animation:rise .4s ease-out}
+.checkin .teacher{font-size:28px}
+.checkin .btn{margin-top:8px;font-size:15px;padding:8px 16px}
+
+.checklist{border-radius:20px;background:var(--bg);padding:14px;display:flex;flex-direction:column;gap:8px}
+.checklist h2{margin:0;font-size:16px;display:flex;justify-content:space-between}
+.checklist h2 span{color:var(--muted);font-size:13px}
+.tasks{display:flex;flex-direction:column;gap:8px}
+.task{display:flex;align-items:center;gap:10px;border-radius:14px;padding:8px 12px;font-weight:700;font-size:14px;color:var(--muted);opacity:.5;border:2px solid transparent}
+.task .badge{font-size:14px}
+.task.top{opacity:1;color:var(--ink);background:var(--panel);border-color:var(--c);padding:14px 12px;align-items:flex-start;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.task.top .kind{font-size:12px;font-weight:800;color:var(--c);text-transform:uppercase;letter-spacing:.04em}
+.task.top .title{font-size:20px;font-weight:900;line-height:1.2}
+.task.top .hint{font-size:12px;color:var(--muted);margin-top:4px}
+.task.locked{opacity:.55;box-shadow:none}
+.tick{all:unset;box-sizing:border-box;width:36px;height:36px;flex-shrink:0;border-radius:10px;border:3px solid var(--c);display:flex;align-items:center;justify-content:center;font-size:16px;margin-top:2px}
+button.tick{cursor:pointer}
+button.tick:hover{background:var(--c)}
+.tick.auto{border-style:dashed}
+.demo-link{all:unset;cursor:pointer;text-decoration:underline;color:var(--muted)}
+.task.poof{animation:poof .65s ease-in forwards}
+@keyframes poof{30%{transform:scale(1.06);filter:brightness(1.2)}100%{transform:scale(.6) translateY(-10px);opacity:0;filter:blur(6px)}}
+.tasks.rise .task{animation:rise .45s ease-out both}
+.tasks.rise .task.top{animation:rise .45s ease-out both,glow 1s .3s}
+@keyframes rise{from{transform:translateY(40px);opacity:0}}
+@keyframes glow{50%{box-shadow:0 0 0 6px var(--c)}}
+.spark{position:fixed;z-index:70;pointer-events:none;font-size:20px;animation:spark .9s ease-out forwards}
+@keyframes spark{to{transform:translate(var(--dx),var(--dy)) scale(.4);opacity:0}}
+.cl-note{font-size:13px;color:var(--muted);text-align:center}
+.cl-done{text-align:center;font-weight:900;font-size:18px;color:var(--c)}
+.week{margin-top:4px;font-size:12px;color:var(--muted);font-weight:800}
+.week-row{display:flex;justify-content:space-between;margin-bottom:4px}
+.bar{height:8px;border-radius:999px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--c);border-radius:999px}
+
+.bank{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:18px;background:var(--bg)}
+.piggy-wrap{position:relative;width:78px;flex-shrink:0}
+.piggy{width:78px;display:block}
+.bank-label{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.bank-total{font-size:28px;font-weight:900;color:#1f9d55;line-height:1.1}
+.bank-sub{font-size:11px;color:var(--muted)}
+.coin{position:absolute;left:30px;top:-40px;font-size:22px;animation:drop 1.2s ease-in both}
+@keyframes drop{0%{transform:translateY(-30px);opacity:0}20%{opacity:1}80%{transform:translateY(48px);opacity:1}100%{transform:translateY(52px);opacity:0}}
+
+.packet p{color:var(--muted);font-size:16px}
+.emoji-big{font-size:64px}
+.key{text-align:left;border:2px solid var(--line);border-radius:14px;padding:12px 16px;background:#fff;color:#222;max-height:40vh;overflow:auto}
+.key-head{font-weight:900}
+.key-note{font-size:12px;color:#777;margin:4px 0}
+.key ol{margin:6px 0 0;padding-left:22px;columns:2}
+.shot{max-width:100%;max-height:30vh;border-radius:12px;display:block;margin:0 auto 10px}
+.shot.small{max-height:14vh}
+.spinner{width:44px;height:44px;border-radius:50%;border:5px solid var(--line);border-top-color:var(--c);margin:10px auto;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+.chip{background:#e8505b;color:#fff;font-weight:900;border-radius:999px;padding:4px 12px}
+.key li.miss{color:#e8505b;font-weight:900}
+label.btn{display:inline-block}
+.transfer{all:unset;cursor:pointer;margin-top:6px;background:#1f9d55;color:#fff;font-weight:900;font-size:12px;border-radius:999px;padding:5px 12px}
+.counter{display:flex;align-items:center;justify-content:center;gap:18px;margin:10px 0 18px}
+.counter .btn{font-size:28px;width:56px;height:56px;padding:0}
+.counter div{display:flex;flex-direction:column;align-items:center}
+.counter span{font-size:56px;font-weight:900;line-height:1}
+.counter small{color:var(--muted);font-weight:800}
+
+.demo{margin-top:auto;font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:center}
+
+/* Overlays: pause chooser + break screen */
+#overlay:empty{display:none}
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px}
+.chooser{background:var(--panel);border-radius:28px;padding:28px;width:min(520px,100%);text-align:center}
+.chooser h2{margin:0 0 18px;font-size:28px}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.choice{all:unset;box-sizing:border-box;cursor:pointer;border-radius:22px;padding:22px 12px;background:var(--bg);border:3px solid var(--line);font-weight:900;font-size:20px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.choice:hover,.choice:focus-visible{border-color:var(--c)}
+.choice .emoji{font-size:48px}
+.choice small{font-size:13px;color:var(--muted);font-weight:700}
+.nvm{margin-top:16px}
+
+.break{position:fixed;inset:0;z-index:50;background:linear-gradient(var(--sky) 0 72%, var(--grass) 72%);display:flex;flex-direction:column;align-items:center;padding:6vh 16px 0;text-align:center;overflow:hidden}
+.break h1{margin:0;font-size:clamp(32px,6vw,64px)}
+.break .count{font-size:clamp(64px,14vw,160px);font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.break .warn{font-size:clamp(20px,3.4vw,34px);font-weight:900;background:#fff3;padding:8px 20px;border-radius:999px;visibility:hidden}
+.break.ending .warn{visibility:visible;animation:pulse 1s infinite}
+.break.ending .count{color:#e8505b}
+.break .btn{margin-top:14px;font-size:20px;padding:14px 28px}
+@keyframes pulse{50%{transform:scale(1.06)}}
+.walker{position:absolute;bottom:22%;left:0;width:220px;will-change:transform}
+.walker .tag{position:absolute;top:-6px;left:120px;background:#fff;color:#2b2a33;border-radius:10px;padding:2px 8px;font-weight:900;font-size:14px;white-space:nowrap}
+.raccoon{width:220px;display:block;animation:bob .3s infinite alternate ease-in-out}
+.leg{transform-box:fill-box;transform-origin:50% 0;animation:step .6s infinite ease-in-out}
+.l2,.l3{animation-delay:-.3s}
+@keyframes step{0%,100%{transform:rotate(20deg)}50%{transform:rotate(-20deg)}}
+@keyframes bob{to{transform:translateY(-4px)}}
+
+dialog{border:none;border-radius:20px;padding:20px;background:var(--panel);color:var(--ink);width:min(360px,90vw);font-family:inherit}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog input[type=password]{font:inherit;font-size:22px;letter-spacing:.3em;width:100%;padding:8px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink);text-align:center}
+dialog h3{margin:0 0 10px}
+dialog h4{margin:16px 0 4px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+.row button,.dlg-actions button,.row select{font:inherit;font-weight:800;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:5px 12px;cursor:pointer}
+.dlg-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;flex-wrap:wrap}
+.err{color:var(--math);font-size:13px;min-height:18px}
+.toast{position:fixed;left:16px;bottom:16px;z-index:60;background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:14px;font-weight:800;max-width:min(420px,calc(100vw - 32px));box-shadow:0 6px 20px rgba(0,0,0,.25)}
+
+@media (max-width:700px){
+  body{flex-direction:column}
+  aside,aside.focus{width:100%;border-left:none;border-top:1px solid var(--line)}
+  .choices{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<main>
+  <div class="hub">
+    <h1>Miacademy</h1>
+    <div>Their learning hub goes here.</div>
+    <a href="https://miacademy.co" target="_blank" rel="noopener">Open Miacademy ↗</a>
+  </div>
+</main>
+
+<aside id="side"></aside>
+<div id="overlay"></div>
+
+<dialog id="parent">
+  <div id="parent-body"></div>
+</dialog>
+
+<script>
+const SUBJECTS = [
+  { id:'math', name:'Math',          color:'var(--math)' },
+  { id:'ela',  name:'Language Arts', color:'var(--ela)'  },
+  { id:'sci',  name:'Science',       color:'var(--sci)'  },
+  { id:'his',  name:'History',       color:'var(--his)'  },
+];
+const KEY = 'learning-timers-v1';
+const PARENT_PIN = '1234'; // placeholder; the portal version uses the real parent login
+const FULL = 30 * 60 * 1000;
+
+const side = document.getElementById('side');
+const overlay = document.getElementById('overlay');
+const byId = id => SUBJECTS.find(s => s.id === id);
+
+function today(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+const DEFAULT_SETTINGS = { allowPause: true, breakMin: 5, helpPin: true };
+const fresh = prev => ({ date: today(), done: {}, active: null, focus: null, choosing: false, alerts: [],
+  demo: prev?.demo || false, settings: { ...DEFAULT_SETTINGS, ...prev?.settings } });
+
+let st;
+try { st = JSON.parse(localStorage.getItem(KEY)); } catch {}
+if (!st || st.date !== today()) st = fresh(st);
+st.settings = { ...DEFAULT_SETTINGS, ...st.settings };
+st.alerts ||= [];
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(st)); } catch {} }
+
+// Demo mode: the 30-minute timer runs in 1 minute, a break lasts 40 seconds, the late alert fires after 10 seconds
+const duration = () => st.demo ? 60 * 1000 : FULL;
+const breakLen = () => st.demo ? 40 * 1000 : st.settings.breakMin * 60 * 1000;
+const lateAfter = () => st.demo ? 10 * 1000 : 60 * 1000; // how long after a break before the parent is told
+
+function remaining(id){
+  const a = st.active;
+  if (!a || a.id !== id) return st.done[id] ? 0 : duration();
+  return a.running ? Math.max(0, a.endAt - Date.now()) : a.left;
+}
+function totalFor(id){ return st.active?.id === id ? st.active.dur : duration(); }
+
+function fmt(ms){
+  const s = Math.ceil(ms / 1000);
+  return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+}
+
+/* ---------- Clock face (Time Timer style: full colored disk shrinks back toward 0) ---------- */
+function wedgePath(f){
+  if (f <= 0) return '';
+  if (f >= 0.9999) return 'M50,10 A40,40 0 1 0 50,90 A40,40 0 1 0 50,10 Z';
+  const a = f * 2 * Math.PI;
+  const x = 50 - 40 * Math.sin(a), y = 50 - 40 * Math.cos(a);
+  return `M50,50 L50,10 A40,40 0 ${f > 0.5 ? 1 : 0} 0 ${x.toFixed(2)},${y.toFixed(2)} Z`;
+}
+function face(s){
+  let ticks = '';
+  for (let m = 0; m < 30; m++){
+    const a = m / 30 * 2 * Math.PI, major = m % 5 === 0;
+    const r1 = major ? 40.5 : 42, r2 = 44.5;
+    const p = r => [50 - r*Math.sin(a), 50 - r*Math.cos(a)];
+    const [x1,y1] = p(r1), [x2,y2] = p(r2);
+    ticks += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="currentColor" stroke-width="${major?1.4:.6}" opacity=".55"/>`;
+    if (major){ const [tx,ty] = p(51); ticks += `<text x="${tx}" y="${ty}" font-size="7" font-weight="800" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity=".7">${m}</text>`; }
+  }
+  const f = remaining(s.id) / totalFor(s.id);
+  return `<svg viewBox="-6 -6 112 112" aria-hidden="true">
+    <circle cx="50" cy="50" r="40" fill="var(--face)" stroke="var(--line)" stroke-width="1"/>
+    <path class="wedge" data-id="${s.id}" d="${wedgePath(f)}" fill="${s.color}"/>
+    ${ticks}
+    <circle cx="50" cy="50" r="4.5" fill="var(--face)" stroke="var(--line)"/>
+  </svg>`;
+}
+
+/* ---------- Jimothy (placeholder cartoon raccoon, walks right) ---------- */
+const JIMOTHY = `<svg class="raccoon" viewBox="0 0 220 130" aria-hidden="true">
+  <defs><clipPath id="tailclip"><ellipse cx="38" cy="62" rx="36" ry="13" transform="rotate(-28 38 62)"/></clipPath></defs>
+  <g clip-path="url(#tailclip)">
+    <rect x="0" y="20" width="90" height="90" fill="#8d939c"/>
+    <g fill="#2d2f35" transform="rotate(-28 38 62)"><rect x="6" y="40" width="9" height="44"/><rect x="24" y="40" width="9" height="44"/><rect x="42" y="40" width="9" height="44"/></g>
+  </g>
+  <rect class="leg l1" x="70" y="84" width="13" height="32" rx="6" fill="#4a4e56"/>
+  <rect class="leg l2" x="86" y="84" width="13" height="32" rx="6" fill="#3d4047"/>
+  <rect class="leg l3" x="128" y="84" width="13" height="32" rx="6" fill="#4a4e56"/>
+  <rect class="leg l4" x="144" y="84" width="13" height="32" rx="6" fill="#3d4047"/>
+  <ellipse cx="112" cy="74" rx="54" ry="30" fill="#8d939c"/>
+  <ellipse cx="118" cy="86" rx="36" ry="14" fill="#b9bec5"/>
+  <circle cx="153" cy="30" r="10" fill="#6b7079"/><circle cx="153" cy="30" r="5" fill="#e7d7cf"/>
+  <circle cx="179" cy="27" r="10" fill="#6b7079"/><circle cx="179" cy="27" r="5" fill="#e7d7cf"/>
+  <circle cx="168" cy="54" r="27" fill="#8d939c"/>
+  <ellipse cx="177" cy="62" rx="21" ry="14" fill="#eef0f2"/>
+  <ellipse cx="173" cy="50" rx="23" ry="8.5" fill="#2d2f35"/>
+  <circle cx="165" cy="50" r="4" fill="#fff"/><circle cx="166" cy="50" r="2.2" fill="#111"/>
+  <circle cx="183" cy="50" r="4" fill="#fff"/><circle cx="184" cy="50" r="2.2" fill="#111"/>
+  <ellipse cx="193" cy="64" rx="9" ry="7" fill="#eef0f2"/>
+  <circle cx="201" cy="62" r="4.5" fill="#222"/>
+  <path d="M186 70 q6 5 12 0" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>`;
+
+/* ---------- Voice + chime ---------- */
+let audioCtx;
+function chime(){
+  try {
+    audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
+    [660, 880].forEach((hz, i) => {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.frequency.value = hz; o.type = 'sine';
+      const t = audioCtx.currentTime + i * 0.22;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.3, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+      o.connect(g).connect(audioCtx.destination); o.start(t); o.stop(t + 0.55);
+    });
+  } catch {}
+}
+// In the portal this becomes the teacher voice: speak(id, text) from src/components/voice.tsx
+function say(text){
+  chime();
+  if (!('speechSynthesis' in window)) return;
+  setTimeout(() => {
+    const u = new SpeechSynthesisUtterance(text);
+    const v = speechSynthesis.getVoices().find(v => /en-US/i.test(v.lang) && /female|samantha|zira|aria|jenny/i.test(v.name))
+           || speechSynthesis.getVoices().find(v => /^en/i.test(v.lang));
+    if (v) u.voice = v;
+    u.rate = 0.95; u.pitch = 1.1;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }, 600);
+}
+
+/* ---------- Rendering ---------- */
+function render(){
+  const focus = st.focus && byId(st.focus);
+  side.className = focus ? 'focus' : '';
+  const head = `<div class="head"><span>${focus ? 'Now learning' : "Today's subjects"}</span><button class="parent-btn" onclick="openParent()">Parent</button></div>`;
+  const demo = `<label class="demo"><input type="checkbox" ${st.demo?'checked':''} ${st.active?'disabled':''} onchange="setDemo(this.checked)"> Demo speed (30 min → 1 min, break → 40 sec)</label>`;
+
+  if (!focus){
+    side.innerHTML = head + piggyCard() + SUBJECTS.map(s => {
+      const done = st.done[s.id];
+      return `<button class="card ${done?'done':''}" style="--c:${s.color}" onclick="openSubject('${s.id}')" ${done?'aria-disabled="true"':''}>
+        ${face(s)}
+        <div><div class="name">${s.name}</div>
+        <div class="time" data-time="${s.id}">${done ? '0:00' : fmt(remaining(s.id))}</div>
+        <div class="status">${done ? '✓ Done for today' : 'Tap to open'}</div></div>
+      </button>`;
+    }).join('') + demo;
+  } else {
+    const a = st.active, started = !!a, help = a?.pause?.type === 'help', ready = a?.pause?.type === 'ready';
+    let controls;
+    if (help) controls = `<div class="waiting">✋ Paused — a grown-up is coming to help</div>
+                          <button class="btn" onclick="helpRestart()">Grown-up: start timer</button>`;
+    else if (ready) controls = `<div class="waiting">Break's over! Press Start when you're in your seat.</div>
+                          ${a.pause.notified ? `<div class="status" style="color:var(--muted);font-size:13px">We let a grown-up know.</div>` : ''}
+                          <button class="btn" onclick="start()">Start</button>`;
+    else if (a?.running) controls = st.settings.allowPause ? `<button class="btn" onclick="choosePause()">Pause</button>` : '';
+    else controls = `<button class="btn" onclick="start()">${started ? 'Resume' : 'Start'}</button>
+                     ${started ? '' : `<button class="btn ghost" onclick="back()">Back</button>`}`;
+
+    side.innerHTML = head + `
+      <div class="big" style="--c:${focus.color}">
+        <div class="name">${focus.name}</div>
+        ${face(focus)}
+        <div class="time" data-time="${focus.id}">${fmt(remaining(focus.id))}</div>
+        <div class="controls">${controls}</div>
+        ${a?.running ? (a.awaySince
+          ? `<div class="focus-flag off">👀 Off task — come back to ${focus.name}!</div>`
+          : `<div class="focus-flag on">🟢 On task</div>`) +
+          `<button class="demo-link" onclick="toggleAway()">${a.awaySince ? '(demo: back on Miacademy)' : '(demo: switch to another site)'}</button>` : ''}
+        ${a?.checkin ? `<div class="checkin"><span class="teacher">👩‍🏫</span><div><div>${a.checkin.text}</div>
+          ${a.checkin.ask ? `<button class="btn" onclick="answerCheckin()">👍 Yes, I'm on it!</button>` : ''}</div></div>` : ''}
+      </div>
+      ${checklist(focus, started)}` + demo;
+  }
+  renderOverlay();
+}
+
+function renderOverlay(){
+  const a = st.active, s = a && byId(a.id);
+  if (packetFlow && s){
+    overlay.innerHTML = packetOverlay(s);
+  } else if (st.choosing && s){
+    overlay.innerHTML = `<div class="scrim" style="--c:${s.color}"><div class="chooser">
+      <h2>Why do you need to pause?</h2>
+      <div class="choices">
+        <button class="choice" onclick="needHelp()"><span class="emoji">🙋</span>I need help<small>A grown-up will come</small></button>
+        ${a.breaks >= 1
+          ? `<button class="choice" disabled style="opacity:.45;cursor:not-allowed"><span class="emoji">🦝</span>I need a break<small>You already had your break for ${s.name}</small></button>`
+          : `<button class="choice" onclick="takeBreak()"><span class="emoji">🦝</span>I need a break<small>${st.demo ? '40 seconds (demo)' : st.settings.breakMin + ' minute' + (st.settings.breakMin>1?'s':'')}</small></button>`}
+      </div>
+      <button class="btn ghost nvm" onclick="cancelPause()">Never mind, keep going</button>
+    </div></div>`;
+  } else if (a?.pause?.type === 'break'){
+    overlay.innerHTML = `<div class="break" id="breakscreen">
+      <h1>Break time!</h1>
+      <div class="count" id="breakcount">${fmt(a.pause.endAt - Date.now())}</div>
+      <div class="warn">30 seconds — head back to your seat!</div>
+      <button class="btn" style="--c:${s.color}" onclick="endBreak(true)">I'm ready to go back</button>
+      <div class="walker" id="walker"><span class="tag">Jimothy</span>${JIMOTHY}</div>
+    </div>`;
+    updateBreak();
+  } else {
+    overlay.innerHTML = '';
+  }
+}
+
+/* ---------- The year's task list (sample; the real one follows Miacademy's assigned order) ---------- */
+const LESSON_TOPICS = {
+  math: ['Place value','Adding decimals','Subtracting decimals','Multiplying decimals','Dividing decimals','Fractions review','Equivalent fractions','Adding fractions','Ratios','Percents','Area','Volume'],
+  ela:  ['Nouns and pronouns','Main idea','Verbs and tenses','Story elements','Adjectives','Context clues','Adverbs','Theme','Commas','Poetry','Paragraphs','Persuasive writing'],
+  sci:  ['The scientific method','Cells','Plants','Food chains','Ecosystems','Weather','Water cycle','Rocks','Forces','Energy','Light','Sound'],
+  his:  ['Ancient Egypt','The Nile','Pyramids','Ancient Greece','Athens and Sparta','Greek ideas','Ancient Rome','The Republic','Roman roads','Fall of Rome','Middle Ages','Castles'],
+};
+// Each lesson = the online lesson in Miacademy, then its packet page(s)
+const TASKS = Object.fromEntries(Object.entries(LESSON_TOPICS).map(([sid, topics]) => [sid,
+  topics.flatMap((t, i) => [
+    { kind: 'online', lesson: i + 1, title: `Lesson ${i + 1}: ${t}` },
+    { kind: 'packet', lesson: i + 1, title: `Packet: Lesson ${i + 1} worksheet`, page: 2 * i + 3, questions: 8 + (i % 3) * 2 },
+  ])]));
+const DEFAULT_TARGETS = { math: 4, ela: 3, sci: 1, his: 1 }; // lessons per week, per subject (parent sets these)
+const targetFor = sid => prog.targets?.[sid] ?? DEFAULT_TARGETS[sid];
+const PAY_PER_CLASS = 0.25;
+
+// Progress lasts across days (the daily timer state above resets each morning)
+const PKEY = 'learning-progress-v1';
+let prog;
+try { prog = JSON.parse(localStorage.getItem(PKEY)); } catch {}
+prog ||= { pos: {}, weekDone: {}, saved: 0, scores: [] };
+prog.off ||= {}; // off-task time this week per subject (ms)
+// Off-task rules (parent-adjustable later). Real version: the desktop app sees which window is in front.
+const NUDGE_AFTER = () => st.demo ? 3000 : 30 * 1000;          // voice nudge after this long away
+const TELL_PARENT_AFTER = () => st.demo ? 8000 : 2 * 60 * 1000; // parent alert after this long away
+const DISTRACTED = () => st.demo ? 10 * 1000 : 5 * 60 * 1000;   // more than this off task in a week = distracted
+const PAY_EXTRA_TIME = 0.15;                                     // missed target but stayed on task (finished over the weekend)
+
+/* Teacher focus check-ins every 5 minutes: a question to answer, or a bit of encouragement */
+const CHECKIN_LINES = {
+  ask:         ['Are you on task?', 'Are you staying focused?', 'Quick check: are you still working on {task}?'],
+  cheer:       ['Keep it up!', "Stay focused. You've got this!", "Nice work. Keep going!", "You're doing great. Stay with it!"],
+  packetAsk:   ["How's your packet going? Are you still working on it?", 'Are you working on your packet right now?'],
+  packetCheer: ['Keep going on that packet. Take your time and show your work!', "You're doing great on your packet. Stay focused!"],
+};
+const CHECKIN_WAIT = () => st.demo ? 6000 : 60 * 1000; // time to tap "Yes, I'm on it!" before it counts as missed
+const pick = list => list[Math.floor(Math.random() * list.length)];
+prog.missed ||= {};
+function doCheckin(n){
+  const a = st.active, task = TASKS[a.id][prog.pos[a.id] || 0];
+  const packet = task?.kind === 'packet', ask = n !== 2; // 5 and 20 minutes in: question; 10 minutes in: encouragement
+  const text = pick(CHECKIN_LINES[(packet ? 'packet' : '') + (ask ? (packet ? 'Ask' : 'ask') : (packet ? 'Cheer' : 'cheer'))])
+    .replace('{task}', task ? task.title : byId(a.id).name);
+  a.checkin = { text, ask, at: Date.now() };
+  save(); render(); say(text);
+}
+function answerCheckin(){
+  st.active.checkin = null; save(); render();
+  say(pick(['Awesome! Keep going.', "Great! You've got this.", 'Nice! Back to it.']));
+}
+
+function closeAway(a){
+  if (!a?.awaySince) return;
+  prog.off[a.id] = (prog.off[a.id] || 0) + (Date.now() - a.awaySince);
+  a.awaySince = null; saveProg();
+}
+function toggleAway(){
+  const a = st.active;
+  if (a.awaySince) closeAway(a);
+  else { a.awaySince = Date.now(); a.nudged = false; a.told = false; }
+  save(); render();
+}
+function saveProg(){ try { localStorage.setItem(PKEY, JSON.stringify(prog)); } catch {} }
+const money = n => '$' + n.toFixed(2);
+
+let justAdvanced = null; // subject whose list just moved up (plays the rise animation once)
+
+function checklist(s, started){
+  const list = TASKS[s.id], pos = prog.pos[s.id] || 0;
+  const visible = list.slice(pos, pos + 3);
+  const lessonsDone = prog.weekDone[s.id] || 0;
+  const items = visible.map((t, i) => {
+    if (i > 0) return `<div class="task dim"><span class="badge">${t.kind === 'online' ? '💻' : '📄'}</span><span>${t.title}</span></div>`;
+    const check = !started ? `<span class="tick" aria-hidden="true"></span>`
+      : t.kind === 'packet' ? `<button class="tick" onclick="startPacket()" aria-label="I finished this packet"></button>`
+      : `<span class="tick auto" title="Miacademy checks this off for you">⏳</span>`;
+    return `<div class="task top ${started ? '' : 'locked'}" id="toptask">
+      ${check}
+      <div><div class="kind">${t.kind === 'online' ? '💻 Online in Miacademy' : `📄 Packet · page ${t.page}`}</div>
+      <div class="title">${t.title}</div>
+      ${started && t.kind === 'online' ? `<div class="hint">Miacademy checks this off when you finish. <button class="demo-link" onclick="completeTop()">(demo: Miacademy says done)</button></div>` : ''}
+      </div></div>`;
+  }).join('');
+  return `<div class="checklist" style="--c:${s.color}">
+    <h2>Up next <span>Lesson ${list[pos]?.lesson ?? '—'} of ${list.at(-1).lesson}</span></h2>
+    <div class="tasks ${justAdvanced === s.id ? 'rise' : ''}">${items || '<div class="cl-done">🎉 All done for the year!</div>'}</div>
+    ${started ? '' : `<div class="cl-note">Press Start to begin</div>`}
+    <div class="week"><div class="week-row"><span>This week</span><span>${Math.min(lessonsDone, targetFor(s.id))} of ${targetFor(s.id)} lesson${targetFor(s.id) > 1 ? 's' : ''}</span></div>
+      <div class="bar"><i style="width:${Math.min(100, lessonsDone / targetFor(s.id) * 100)}%"></i></div></div>
+  </div>`;
+}
+
+/* The top task dissolves with a fun sound, then the list moves up */
+function tada(){
+  try {
+    audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
+    [523, 659, 784, 1047].forEach((hz, i) => {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = 'triangle'; o.frequency.value = hz;
+      const t = audioCtx.currentTime + i * 0.09;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + (i === 3 ? 0.6 : 0.2));
+      o.connect(g).connect(audioCtx.destination); o.start(t); o.stop(t + 0.65);
+    });
+  } catch {}
+}
+function sparkle(el){
+  const r = el.getBoundingClientRect();
+  for (let i = 0; i < 14; i++){
+    const p = document.createElement('span');
+    p.className = 'spark'; p.textContent = ['✨','⭐','🎉'][i % 3];
+    p.style.left = (r.left + r.width * Math.random()) + 'px';
+    p.style.top = (r.top + r.height * Math.random()) + 'px';
+    p.style.setProperty('--dx', (Math.random() * 160 - 80) + 'px');
+    p.style.setProperty('--dy', (-40 - Math.random() * 90) + 'px');
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 900);
+  }
+}
+function completeTop(){
+  const sid = st.active?.id, el = document.getElementById('toptask');
+  if (!sid || !el || el.classList.contains('poof')) return;
+  const task = TASKS[sid][prog.pos[sid] || 0];
+  el.classList.add('poof'); sparkle(el); tada();
+  setTimeout(() => {
+    prog.pos[sid] = (prog.pos[sid] || 0) + 1;
+    if (task.kind === 'packet') prog.weekDone[sid] = (prog.weekDone[sid] || 0) + 1; // packet finishes the lesson
+    saveProg();
+    justAdvanced = sid; render(); justAdvanced = null;
+    const next = TASKS[sid][prog.pos[sid]];
+    if (next) say(`Nice! Next up: ${next.title}.`);
+  }, 650);
+}
+
+/* Packet: photo of the work -> checked against the answer key -> fix mistakes with a pen */
+let packetFlow = null;
+function startPacket(){
+  const sid = st.active.id;
+  packetFlow = { step: 'photo', task: TASKS[sid][prog.pos[sid] || 0], right: null, wrong: [], photo: null };
+  renderOverlay();
+  say('Great job finishing your packet! Take a photo of your page so we can check it together.');
+}
+function packetStep(step){
+  packetFlow.step = step;
+  if (step === 'count') packetFlow.right ??= packetFlow.task.questions;
+  renderOverlay();
+  if (step === 'key') say('Grab a pen or a marker. Check each answer, and fix any that are wrong.');
+  if (step === 'count') say('How many did you get right?');
+}
+function packetPhoto(input){
+  const file = input.files?.[0];
+  if (!file) return;
+  packetFlow.photo = URL.createObjectURL(file);
+  packetStep('checking');
+  // Prototype stand-in: the real version sends the photo and the answer key page to the portal's AI to compare
+  setTimeout(() => {
+    const q = packetFlow.task.questions, wrong = new Set();
+    const misses = Math.floor(Math.random() * 5);
+    while (wrong.size < misses) wrong.add(1 + Math.floor(Math.random() * q));
+    packetFlow.wrong = [...wrong].sort((a, b) => a - b);
+    packetFlow.right = q - packetFlow.wrong.length;
+    packetStep('results');
+    say(packetFlow.wrong.length
+      ? `You got ${packetFlow.right} out of ${q}! Grab a pen or a marker and fix number${packetFlow.wrong.length > 1 ? 's' : ''} ${packetFlow.wrong.join(', ')}.`
+      : `Wow, you got all ${q} right!`);
+  }, 2200);
+}
+function packetCount(d){
+  const q = packetFlow.task.questions;
+  packetFlow.right = Math.max(0, Math.min(q, packetFlow.right + d));
+  document.getElementById('rightcount').textContent = packetFlow.right;
+}
+function packetFinish(){
+  const { task, right } = packetFlow, sid = st.active.id;
+  prog.scores.push({ subject: sid, lesson: task.lesson, right, of: task.questions, date: today(), photo: !!packetFlow.photo });
+  saveProg();
+  if (right / task.questions < 0.7)
+    notifyParent(`${byId(sid).name} Lesson ${task.lesson} packet: ${right} of ${task.questions} (${Math.round(right / task.questions * 100)}%).`);
+  packetFlow = null; renderOverlay();
+  completeTop();
+}
+function answerKey(t, wrong = []){
+  return `<div class="key"><div class="key-head">${byId(st.active.id).name} · ${t.title.replace('Packet: ', '')} · page ${t.page}</div>
+    <div class="key-note">The real answer key page from your Miacademy parent account shows here.</div>
+    <ol>${Array.from({ length: t.questions }, (_, i) => `<li class="${wrong.includes(i + 1) ? 'miss' : ''}">Answer ${i + 1}</li>`).join('')}</ol></div>`;
+}
+function packetOverlay(s){
+  const t = packetFlow.task, f = packetFlow;
+  let inner;
+  if (f.step === 'photo') inner = `<div class="emoji-big">📸</div>
+      <h2>Take a photo of your packet</h2>
+      <p>Lay your ${t.title.replace('Packet: ', '')} (page ${t.page}) flat and hold it up to the camera.</p>
+      <label class="btn">Take a photo<input type="file" accept="image/*" capture="environment" hidden onchange="packetPhoto(this)"></label>
+      <div><button class="demo-link nvm" onclick="packetStep('key')">Can't take a photo? Check it myself</button></div>`;
+  else if (f.step === 'checking') inner = `<img class="shot" src="${f.photo}" alt="Photo of your packet">
+      <h2>Jimothy is checking your work…</h2><div class="spinner"></div>`;
+  else if (f.step === 'results') inner = `<img class="shot small" src="${f.photo}" alt="Photo of your packet">
+      <h2>You got ${f.right} of ${t.questions} right!</h2>
+      ${f.wrong.length ? `<p>🖊️ Grab a pen or marker and fix these:</p>
+        <div class="chips">${f.wrong.map(n => `<span class="chip">#${n}</span>`).join('')}</div>
+        ${answerKey(t, f.wrong)}` : `<p>🎉 Every answer is right!</p>`}
+      <button class="btn" onclick="packetFinish()">${f.wrong.length ? 'I fixed them' : 'Done'}</button>`;
+  else if (f.step === 'key') inner = `<h2>Answer key</h2>
+      ${answerKey(t)}
+      <p>🖊️ With a pen or marker, check each answer and fix any mistakes.</p>
+      <button class="btn" onclick="packetStep('count')">I checked and fixed my work</button>`;
+  else inner = `<h2>How many did you get right?</h2>
+      <div class="counter"><button class="btn ghost" onclick="packetCount(-1)" aria-label="One fewer">−</button>
+        <div><span id="rightcount">${f.right}</span><small>out of ${t.questions}</small></div>
+        <button class="btn ghost" onclick="packetCount(1)" aria-label="One more">+</button></div>
+      <button class="btn" onclick="packetFinish()">Done</button>`;
+  return `<div class="scrim" style="--c:${s.color}"><div class="chooser packet">${inner}</div></div>`;
+}
+
+/* Jimothy piggy bank */
+const PIGGY = `<svg class="piggy" viewBox="0 0 130 96" aria-hidden="true">
+  <g transform="rotate(-20 22 52)"><rect x="2" y="46" width="34" height="13" rx="6.5" fill="#8d939c"/><rect x="8" y="46" width="6" height="13" fill="#2d2f35"/><rect x="20" y="46" width="6" height="13" fill="#2d2f35"/></g>
+  <rect x="34" y="72" width="11" height="16" rx="5" fill="#4a4e56"/><rect x="74" y="72" width="11" height="16" rx="5" fill="#4a4e56"/>
+  <ellipse cx="62" cy="54" rx="42" ry="30" fill="#8d939c"/>
+  <ellipse cx="62" cy="62" rx="28" ry="14" fill="#b9bec5"/>
+  <rect x="48" y="25" width="24" height="5" rx="2.5" fill="#2d2f35"/>
+  <circle cx="86" cy="26" r="8" fill="#6b7079"/><circle cx="86" cy="26" r="4" fill="#e7d7cf"/>
+  <circle cx="104" cy="32" r="8" fill="#6b7079"/><circle cx="104" cy="32" r="4" fill="#e7d7cf"/>
+  <ellipse cx="96" cy="46" rx="16" ry="6.5" fill="#2d2f35"/>
+  <circle cx="90" cy="46" r="3.2" fill="#fff"/><circle cx="91" cy="46" r="1.8" fill="#111"/>
+  <circle cx="103" cy="46" r="3.2" fill="#fff"/><circle cx="104" cy="46" r="1.8" fill="#111"/>
+  <ellipse cx="110" cy="57" rx="9" ry="7" fill="#eef0f2"/><circle cx="117" cy="55" r="3.5" fill="#222"/>
+  <path d="M104 62 q5 4 10 0" stroke="#222" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+</svg>`;
+const thisMonth = () => today().slice(0, 7);
+function monthOver(){
+  const d = new Date(), last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  return (prog.month && prog.month !== thisMonth()) || d.getDate() === last;
+}
+function piggyCard(){
+  const met = SUBJECTS.filter(s => (prog.weekDone[s.id] || 0) >= targetFor(s.id)).length;
+  const canTransfer = prog.saved > 0 && (monthOver() || st.demo);
+  return `<div class="bank" id="bank">
+    <div class="piggy-wrap">${PIGGY}</div>
+    <div><div class="bank-label">Jimothy's bank · this month</div>
+    <div class="bank-total">${money(prog.saved)}</div>
+    <div class="bank-sub">This week: ${met} of ${SUBJECTS.length} classes on track · up to ${money(PAY_PER_CLASS * SUBJECTS.length)}</div>
+    ${canTransfer ? `<button class="transfer" onclick="askTransfer()">🏦 Transfer to my real account</button>`
+      : `<div class="bank-sub">Transfer to your real account at the end of the month</div>`}</div>
+  </div>`;
+}
+function askTransfer(){
+  overlay.innerHTML = `<div class="scrim" style="--c:#1f9d55"><div class="chooser">
+    <div class="piggy-wrap" style="margin:0 auto;width:120px">${PIGGY}</div>
+    <h2>Send ${money(prog.saved)} to your real account?</h2>
+    <p style="color:var(--muted)">A grown-up will get a message to move the money for you.</p>
+    <div class="controls"><button class="btn" style="--c:#1f9d55" onclick="doTransfer()">Yes, send it!</button>
+    <button class="btn ghost" onclick="renderOverlay()">Not yet</button></div></div></div>`;
+}
+function doTransfer(){
+  const amt = prog.saved;
+  (prog.transfers ||= []).push({ amount: amt, date: today() });
+  prog.saved = 0; prog.month = thisMonth(); saveProg();
+  notifyParent(`Wants to transfer ${money(amt)} from Jimothy's bank to their real account.`);
+  renderOverlay(); render(); tada();
+  say(`${money(amt)} is on its way to your real account. Great saving this month!`);
+}
+// Pay rules per class: target met in the 4 days = 25¢; missed but on task (more time needed, finished Saturday) = 15¢; missed and distracted = 0
+function weekPay(sid){
+  if ((prog.weekDone[sid] || 0) >= targetFor(sid)) return PAY_PER_CLASS;
+  return (prog.off[sid] || 0) > DISTRACTED() ? 0 : PAY_EXTRA_TIME;
+}
+function payWeek(){
+  const pays = SUBJECTS.map(s => weekPay(s.id));
+  const earned = Math.round(pays.reduce((a, b) => a + b, 0) * 100) / 100;
+  notifyParent('Week paid: ' + SUBJECTS.map((s, i) => `${s.name} ${Math.round(pays[i] * 100)}¢`).join(', '));
+  prog.saved += earned; prog.month ||= thisMonth(); prog.weekDone = {}; prog.off = {}; saveProg();
+  dlg.close(); if (!st.active) st.focus = null; save(); render();
+  const piggy = document.querySelector('.piggy-wrap'), coins = pays.filter(p => p > 0).length;
+  if (coins && piggy){
+    for (let i = 0; i < coins; i++){
+      const c = document.createElement('span'); c.className = 'coin'; c.textContent = '🪙';
+      c.style.animationDelay = (i * 0.25) + 's'; piggy.appendChild(c);
+      setTimeout(() => c.remove(), 1600 + i * 250);
+    }
+    tada();
+    say(`You earned ${Math.round(earned * 100)} cents this week! Jimothy is saving it for you.`);
+  } else say('This week is finished. Next week you can earn up to one dollar!');
+}
+
+function update(){
+  document.querySelectorAll('.wedge').forEach(w => w.setAttribute('d', wedgePath(remaining(w.dataset.id) / totalFor(w.dataset.id))));
+  document.querySelectorAll('[data-time]').forEach(t => { if (!st.done[t.dataset.time]) t.textContent = fmt(remaining(t.dataset.time)); });
+}
+function updateBreak(){
+  const p = st.active?.pause;
+  if (p?.type !== 'break') return;
+  const rem = Math.max(0, p.endAt - Date.now());
+  const count = document.getElementById('breakcount'), walker = document.getElementById('walker');
+  if (!count) return;
+  count.textContent = fmt(rem);
+  document.getElementById('breakscreen').classList.toggle('ending', rem <= 30000);
+  // Jimothy crosses the whole screen over the length of the break
+  const progress = 1 - rem / p.len;
+  walker.style.transform = `translateX(${-220 + progress * (window.innerWidth + 220)}px)`;
+}
+
+/* ---------- Actions ---------- */
+function openSubject(id){
+  if (st.done[id] || st.active) return;
+  st.focus = id; save(); render();
+}
+function back(){ if (st.active) return; st.focus = null; save(); render(); }
+function start(){
+  const dur = duration();
+  st.active ||= { id: st.focus, dur, left: dur, said: {}, breaks: 0 };
+  st.active.pause = null;
+  st.active.running = true;
+  st.active.endAt = Date.now() + st.active.left;
+  if (st.active.left === st.active.dur) say(`Let's start ${byId(st.focus).name}! You have 30 minutes.`);
+  save(); render();
+}
+function freeze(){
+  const a = st.active;
+  closeAway(a);
+  a.left = Math.max(0, a.endAt - Date.now()); a.running = false;
+}
+function resume(){
+  const a = st.active;
+  a.pause = null; a.running = true; a.endAt = Date.now() + a.left;
+}
+function choosePause(){ freeze(); st.choosing = true; save(); render(); }
+function cancelPause(){ st.choosing = false; resume(); save(); render(); }
+function needHelp(){
+  st.choosing = false; st.active.pause = { type: 'help' };
+  save(); render();
+  notifyParent(`Needs help with ${byId(st.active.id).name}.`);
+  say("Okay! Your timer is paused. A grown-up is coming to help.");
+}
+function takeBreak(){
+  if (st.active.breaks >= 1) return; // one break per subject; help is always available
+  const len = breakLen();
+  st.choosing = false; st.active.breaks = (st.active.breaks || 0) + 1;
+  st.active.pause = { type: 'break', len, endAt: Date.now() + len, warned: false };
+  save(); render();
+  say(`Break time! Jimothy will walk with you.`);
+}
+// After a break the timer waits for the child to press Start
+function endBreak(early){
+  const s = byId(st.active.id);
+  st.active.pause = { type: 'ready', since: Date.now(), notified: false };
+  save(); render();
+  say(early ? `Welcome back! Press Start to keep going with ${s.name}.` : `Break's over! Press Start to get back to ${s.name}.`);
+}
+function helpRestart(){
+  if (st.settings.helpPin) return openParent('help');
+  resume(); save(); render();
+  say(`All set! Let's keep going with ${byId(st.active.id).name}.`);
+}
+// Prototype stand-in: the real version sends this to the parent (how is still to be decided)
+function notifyParent(msg){
+  st.alerts.unshift({ at: new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }), msg });
+  save();
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = `📱 Parent notified: ${msg}`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 6000);
+}
+function finish(){
+  closeAway(st.active);
+  const s = byId(st.active.id);
+  st.done[s.id] = true; st.active = null; st.focus = null;
+  save(); render();
+  say(`Time's up! Great job on ${s.name}.`);
+}
+function setDemo(on){ st.demo = on; save(); render(); }
+
+setInterval(() => {
+  if (st.date !== today()){ st = fresh(st); save(); render(); return; }
+  const a = st.active;
+  if (!a) return;
+  if (a.pause?.type === 'break'){
+    const rem = a.pause.endAt - Date.now();
+    if (rem <= 30000 && !a.pause.warned){ a.pause.warned = true; save(); say('30 seconds left! Time to head back to your seat.'); }
+    if (rem <= 0) return endBreak(false);
+    return updateBreak();
+  }
+  if (a.pause?.type === 'ready' && !a.pause.notified && Date.now() - a.pause.since >= lateAfter()){
+    a.pause.notified = true;
+    const name = byId(a.id).name;
+    notifyParent(`${name} break ended and the timer hasn't been restarted.`);
+    say(`Time to press Start and get back to ${name}.`);
+    return render();
+  }
+  if (!a.running) return;
+  if (a.awaySince){
+    const away = Date.now() - a.awaySince, name = byId(a.id).name;
+    if (away >= NUDGE_AFTER() && !a.nudged){ a.nudged = true; save(); say(`Hey! Let's get back to ${name}.`); }
+    if (away >= TELL_PARENT_AFTER() && !a.told){ a.told = true; save(); notifyParent(`Off task during ${name} for ${fmt(away)}.`); }
+  }
+  // Focus check-ins every 5 minutes (skipping 15 and 25 minutes in, where the time-left announcements play)
+  const step = a.dur / 6, n = Math.floor((a.dur - (a.endAt - Date.now())) / step);
+  if (n >= 1 && n <= 5 && n > (a.checkins || 0)){
+    a.checkins = n;
+    if (n !== 3 && n !== 5) doCheckin(n); else save();
+  }
+  if (a.checkin){
+    const age = Date.now() - a.checkin.at;
+    if (a.checkin.ask && age >= CHECKIN_WAIT()){
+      prog.missed[a.id] = (prog.missed[a.id] || 0) + 1; saveProg();
+      a.checkin = null; save(); render();
+    } else if (!a.checkin.ask && age >= 8000){ a.checkin = null; save(); render(); }
+  }
+  // Voice check-ins: 15 and 5 minutes left (scaled proportionally in demo mode)
+  const rem = a.endAt - Date.now();
+  if (rem <= a.dur * 0.5 && !a.said.h){ a.said.h = true; save(); say('You have 15 minutes left.'); }
+  if (rem <= a.dur / 6 && !a.said.f){ a.said.f = true; save(); say('5 minutes left. Start wrapping up!'); }
+  if (rem <= 0) return finish();
+  update();
+}, 250);
+
+/* ---------- Parent panel ---------- */
+const dlg = document.getElementById('parent'), body = document.getElementById('parent-body');
+let pinPurpose = null;
+function openParent(purpose){
+  pinPurpose = purpose || null;
+  body.innerHTML = `<h3>${purpose === 'help' ? 'Grown-up: start the timer again' : 'Parent access'}</h3>
+    <input id="pin" type="password" inputmode="numeric" maxlength="8" placeholder="PIN" autocomplete="off">
+    <div class="err" id="err"></div>
+    <div class="dlg-actions"><button onclick="dlg.close()">Cancel</button><button onclick="checkPin()">${purpose === 'help' ? 'Start timer' : 'Unlock'}</button></div>`;
+  dlg.showModal();
+  const pin = document.getElementById('pin');
+  pin.focus(); pin.onkeydown = e => { if (e.key === 'Enter') checkPin(); };
+}
+function checkPin(){
+  if (document.getElementById('pin').value !== PARENT_PIN){ document.getElementById('err').textContent = 'That PIN is not right.'; return; }
+  if (pinPurpose === 'help'){
+    dlg.close(); resume(); save(); render();
+    say(`All set! Let's keep going with ${byId(st.active.id).name}.`);
+    return;
+  }
+  showParentPanel();
+}
+function showParentPanel(){
+  const breakOpts = [1,2,3,4,5].map(m => `<option value="${m}" ${st.settings.breakMin===m?'selected':''}>${m} min</option>`).join('');
+  body.innerHTML = `<h3>Parent settings</h3>
+    <h4>Pausing</h4>
+    <label class="row"><span>Kids can pause timers</span><input type="checkbox" ${st.settings.allowPause?'checked':''} onchange="setSetting('allowPause', this.checked)"></label>
+    <label class="row"><span>Break length</span><select onchange="setSetting('breakMin', +this.value)">${breakOpts}</select></label>
+    <label class="row"><span>Parent PIN to restart after help</span><input type="checkbox" ${st.settings.helpPin?'checked':''} onchange="setSetting('helpPin', this.checked)"></label>
+    ${st.alerts.length ? `<h4>Alerts today</h4>` + st.alerts.map(x => `<div class="row" style="font-size:13px"><span>${x.msg}</span><span style="color:var(--muted)">${x.at}</span></div>`).join('') : ''}
+    <h4>Today's timers</h4>` +
+    SUBJECTS.map(s => `<div class="row"><span style="color:${s.color};font-weight:900">${s.name}</span>
+      ${st.done[s.id] ? `<button onclick="allow('${s.id}')">Allow again</button>`
+        : `<span style="color:var(--muted);font-size:13px">${st.active?.id===s.id ? (st.active.pause?.type==='help' ? 'Waiting for help' : 'Running') : 'Available'}</span>`}</div>`).join('') +
+    `<h4>Lessons per week · this week so far</h4>` +
+    SUBJECTS.map(s => `<div class="row"><span>${s.name}</span><span style="font-size:13px"><select onchange="setTarget('${s.id}', +this.value)">${[1,2,3,4,5].map(n => `<option ${targetFor(s.id)===n?'selected':''}>${n}</option>`).join('')}</select> · done ${prog.weekDone[s.id] || 0} · off task ${fmt(prog.off[s.id] || 0)} · missed check-ins ${prog.missed[s.id] || 0} · ${Math.round(weekPay(s.id) * 100)}¢</span></div>`).join('') +
+    `<div class="dlg-actions"><button onclick="payWeek()">(demo) End the 4-day week</button>${st.active ? `<button onclick="stopActive()">Stop current timer</button>` : ''}<button onclick="dlg.close()">Done</button></div>`;
+}
+function setTarget(sid, n){ (prog.targets ||= {})[sid] = n; saveProg(); render(); showParentPanel(); }
+function setSetting(k, v){ st.settings[k] = v; save(); render(); }
+function allow(id){ delete st.done[id]; save(); render(); showParentPanel(); }
+function stopActive(){ st.active = null; st.focus = null; st.choosing = false; save(); render(); showParentPanel(); }
+
+render();
+</script>
+</body>
+</html>

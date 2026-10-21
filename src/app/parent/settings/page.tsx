@@ -1,9 +1,10 @@
 import ParentNav from "@/components/ParentNav";
-import { addKidAction, focusAction, resetPlacementAction, schoolYearAction, updateKidAction } from "@/app/actions";
+import { addKidAction, focusAction, miaSettingsAction, parentPinAction, resetPlacementAction, schoolYearAction, updateKidAction } from "@/app/actions";
+import { BUDDIES } from "@/content/miacademy";
 import { requireParent } from "@/lib/auth";
 import { LIMITS } from "@/lib/focus";
 import { focusPresets } from "@/lib/content";
-import { AVATARS, electivesOff, getFamily, getFocus, listKids } from "@/lib/store";
+import { AVATARS, electivesOff, getFamily, getFocus, getMiaSettings, hasParentPin, listKids } from "@/lib/store";
 
 /** Kindergarten is grade 0. */
 const GRADES = Array.from({ length: 13 }, (_, i) => i);
@@ -133,6 +134,7 @@ export default async function Settings({
             <button className="btn">Save</button>
           </form>
           <FocusForm kidId={kid.id} name={kid.name} />
+          <MiaForm kidId={kid.id} name={kid.name} />
           <form action={resetPlacementAction} style={{ marginTop: 12 }}>
             <input type="hidden" name="kidId" value={kid.id} />
             <button className="linkbtn small">Redo placement test</button>{" "}
@@ -140,6 +142,27 @@ export default async function Settings({
           </form>
         </div>
       ))}
+
+      <div className="card">
+        <h2>Parent PIN</h2>
+        <p className="muted small">
+          {hasParentPin(s.familyId) ? "A parent PIN is set. Enter a new one to change it." : "No parent PIN yet."} It restarts a
+          Miacademy timer on a kid&apos;s screen after they asked for help. Keep it secret from the kids.
+        </p>
+        <form action={parentPinAction} className="row" style={{ alignItems: "end" }}>
+          <div>
+            <label htmlFor="ppin">New PIN (4-6 digits)</label>
+            <input id="ppin" name="pin" type="password" inputMode="numeric" pattern="d{4,6}" maxLength={6} autoComplete="new-password" required />
+          </div>
+          <div>
+            <label htmlFor="ppin2">Type it again</label>
+            <input id="ppin2" name="pin2" type="password" inputMode="numeric" pattern="d{4,6}" maxLength={6} autoComplete="new-password" required />
+          </div>
+          <div>
+            <button className="btn">Save PIN</button>
+          </div>
+        </form>
+      </div>
 
       <div className="card">
         <h2>School year</h2>
@@ -196,6 +219,53 @@ function FocusForm({ kidId, name }: { kidId: number; name: string }) {
           Reset to recommended for this answer
         </button>
       </div>
+    </form>
+  );
+}
+
+function MiaForm({ kidId, name }: { kidId: number; name: string }) {
+  const m = getMiaSettings(kidId);
+  return (
+    <form action={miaSettingsAction} className="focus-box">
+      <input type="hidden" name="kidId" value={kidId} />
+      <h3>Miacademy timers</h3>
+      <p className="muted small">
+        Four 30-minute timers (Math, Language Arts, Science, History) on the right of {name}&apos;s screen while Miacademy is open.
+        Each runs once a day; you can allow another from the family overview.
+      </p>
+      <label className="small" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <input type="checkbox" name="allowPause" defaultChecked={m.allowPause} style={{ width: "auto" }} />
+        {name} can pause a timer (asks &quot;I need help&quot; or &quot;I need a break&quot;)
+      </label>
+      <label className="small" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <input type="checkbox" name="helpPin" defaultChecked={m.helpPin} style={{ width: "auto" }} />
+        Parent PIN needed to restart a timer after &quot;I need help&quot;
+      </label>
+      <div className="row">
+        <div>
+          <label>Break length (one break per subject)</label>
+          <select name="breakMinutes" defaultValue={m.breakMinutes}>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <option key={n} value={n}>
+                {n} min
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label>{name}&apos;s animal buddy</label>
+          <select name="buddy" defaultValue={m.buddy}>
+            {BUDDIES.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+      <button className="btn" style={{ flex: "0 0 auto" }}>
+        Save Miacademy settings
+      </button>
     </form>
   );
 }

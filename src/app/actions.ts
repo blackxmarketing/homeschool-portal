@@ -27,7 +27,14 @@ import {
   today,
   updateKid,
   verifyKidPin,
-  verifyParent, setElectivesOff } from "@/lib/store";
+  verifyParent, setElectivesOff,
+  dismissAlerts,
+  parentMiaReset,
+  parentMiaRestart,
+  setMiaSettings,
+  setParentPin,
+} from "@/lib/store";
+import type { MiaSettings } from "@/content/miacademy";
 
 function str(form: FormData, key: string): string {
   return String(form.get(key) ?? "").trim();
@@ -248,6 +255,57 @@ export async function reviewCourseTaskAction(form: FormData) {
     if (e instanceof PortalError) back("/parent", e.message);
     throw e;
   }
+  revalidatePath("/parent");
+  redirect("/parent");
+}
+
+// ---------------- Miacademy timers ----------------
+
+export async function miaSettingsAction(form: FormData) {
+  const kid = await ownKid(Number(form.get("kidId")));
+  setMiaSettings(kid.id, {
+    allowPause: form.get("allowPause") === "on",
+    breakMinutes: Number(form.get("breakMinutes")),
+    helpPin: form.get("helpPin") === "on",
+    buddy: str(form, "buddy") as MiaSettings["buddy"],
+  });
+  revalidatePath("/parent/settings");
+  redirect("/parent/settings?saved=1");
+}
+
+export async function parentPinAction(form: FormData) {
+  const s = await requireParent();
+  const pin = str(form, "pin");
+  if (pin !== str(form, "pin2")) back("/parent/settings", "The two PINs don't match.");
+  try {
+    setParentPin(s.familyId, pin);
+  } catch (e) {
+    if (e instanceof PortalError) back("/parent/settings", e.message);
+    throw e;
+  }
+  redirect("/parent/settings?saved=1");
+}
+
+/** Restart a timer that's waiting for help, or let a kid run a subject again today. */
+export async function miaParentAction(form: FormData) {
+  const s = await requireParent();
+  const kidId = Number(form.get("kidId"));
+  const subject = str(form, "subject");
+  try {
+    if (form.get("op") === "restart") parentMiaRestart(s.familyId, kidId, subject);
+    else parentMiaReset(s.familyId, kidId, subject);
+  } catch (e) {
+    if (e instanceof PortalError) back("/parent", e.message);
+    throw e;
+  }
+  revalidatePath("/parent");
+  redirect("/parent");
+}
+
+export async function dismissAlertAction(form: FormData) {
+  const s = await requireParent();
+  const id = form.get("alertId");
+  dismissAlerts(s.familyId, id ? Number(id) : undefined);
   revalidatePath("/parent");
   redirect("/parent");
 }

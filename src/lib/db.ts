@@ -283,6 +283,29 @@ CREATE TABLE IF NOT EXISTS concept_mastery (
   UNIQUE (kid_id, concept)
 );
 
+-- Miacademy timers (docs/MIACADEMY.md): one row per kid, day and subject. state is a JSON MiaTimerState (lib/miaTimer.ts).
+CREATE TABLE IF NOT EXISTS mia_timers (
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  day TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  state TEXT NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (kid_id, day, subject)
+);
+
+-- Things a parent should know about now (a kid needs help, is late back from a break, ...).
+CREATE TABLE IF NOT EXISTS parent_alerts (
+  id INTEGER PRIMARY KEY,
+  family_id INTEGER NOT NULL REFERENCES families(id),
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  kind TEXT NOT NULL,
+  subject TEXT,
+  message TEXT NOT NULL,
+  at INTEGER NOT NULL,
+  seen INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS parent_alerts_family ON parent_alerts (family_id, seen, at);
+
 -- Finished focus sprints (Pomodoro-style work blocks).
 CREATE TABLE IF NOT EXISTS sprint_log (
   id INTEGER PRIMARY KEY,
@@ -310,6 +333,9 @@ const ADDED_COLUMNS: { table: string; column: string; ddl: string }[] = [
   // Grades K-5 (docs/WORLDS.md): electives switched off (JSON list like ["span"]) and unlocked hero styles (JSON list of ids).
   { table: "kids", column: "electives_off", ddl: "ALTER TABLE kids ADD COLUMN electives_off TEXT" },
   { table: "kids", column: "unlocks", ddl: "ALTER TABLE kids ADD COLUMN unlocks TEXT" },
+  // Miacademy timers: each kid's settings (JSON MiaSettings, NULL = defaults) and the family's parent PIN.
+  { table: "kids", column: "mia", ddl: "ALTER TABLE kids ADD COLUMN mia TEXT" },
+  { table: "families", column: "parent_pin_hash", ddl: "ALTER TABLE families ADD COLUMN parent_pin_hash TEXT" },
 ];
 
 function migrate(conn: Database.Database): void {

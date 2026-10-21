@@ -3,7 +3,9 @@ import ParentNav from "@/components/ParentNav";
 import { requireParent } from "@/lib/auth";
 import { REQUIRED_AVG_HOURS, REQUIRED_DAYS } from "@/lib/compliance";
 import { gradeProgress } from "@/lib/engine/planner";
-import { reviewBlockAction, reviewCourseTaskAction, reviewMissionAction } from "@/app/actions";
+import { dismissAlertAction, miaParentAction, reviewBlockAction, reviewCourseTaskAction, reviewMissionAction } from "@/app/actions";
+import { MIA_SUBJECTS } from "@/content/miacademy";
+import { remaining, type MiaTimerState } from "@/lib/miaTimer";
 import { levelInfo } from "@/lib/game";
 import {
   compliance,
@@ -11,7 +13,9 @@ import {
   kidFlags,
   learnerProfiles,
   listKids,
+  miaFamilyToday,
   minutesOnDay,
+  unseenAlerts,
   pendingBlocks,
   pendingCourseTasks,
   pendingMissions,
@@ -35,6 +39,8 @@ export default async function ParentHome({ searchParams }: { searchParams: Promi
     <main className="wrap">
       <ParentNav title="Family overview" />
       {error && <div className="error">{error}</div>}
+      <MiaAlerts familyId={s.familyId} />
+      <MiaToday familyId={s.familyId} />
       {courseTasks.length > 0 && (
         <div className="card">
           <h2>📚 Projects, labs and speeches to check ({courseTasks.length})</h2>
@@ -217,5 +223,124 @@ export default async function ParentHome({ searchParams }: { searchParams: Promi
         })}
       </div>
     </main>
+  );
+}
+
+function MiaAlerts({ familyId }: { familyId: number }) {
+  const alerts = unseenAlerts(familyId);
+  if (!alerts.length) return null;
+  const time = (at: number) => new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", timeZone: process.env.APP_TIMEZONE ?? "America/Denver" }).format(at);
+  return (
+    <div className="card">
+      <h2>🔔 Alerts ({alerts.length})</h2>
+      <table>
+        <tbody>
+          {alerts.map((a) => (
+            <tr key={a.id}>
+              <td className="muted small" style={{ whiteSpace: "nowrap" }}>
+                {time(a.at)}
+              </td>
+              <td>
+                {a.avatar} {a.message}
+              </td>
+              <td style={{ whiteSpace: "nowrap" }}>
+                <form action={dismissAlertAction}>
+                  <input type="hidden" name="alertId" value={a.id} />
+                  <button className="linkbtn small">Got it</button>
+                </form>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {alerts.length > 1 && (
+        <form action={dismissAlertAction}>
+          <button className="linkbtn small">Clear all</button>
+        </form>
+      )}
+    </div>
+  );
+}
+
+function miaStatus(t: MiaTimerState | null, now: number): string {
+  if (!t) return "Not started";
+  if (t.finishedAt) return "✓ Done";
+  const left = `${Math.ceil(remaining(t, now) / 60000)} min left`;
+  switch (t.pause?.type) {
+    case "help":
+      return `✋ Needs help (${left})`;
+    case "break":
+      return "☕ On a break";
+    case "ready":
+      return `Break over, waiting to restart (${left})`;
+    case "choosing":
+      return `Paused (${left})`;
+    default:
+      return `▶ Running (${left})`;
+  }
+}
+
+function MiaToday({ familyId }: { familyId: number }) {
+  const rows = miaFamilyToday(familyId);
+  if (!rows.length) return null;
+  const now = Date.now();
+  return (
+    <div className="card">
+      <h2>⏱️ Miacademy timers today</h2>
+      <table>
+        <tbody>
+          {rows.flatMap(({ kid, timers }) =>
+            MIA_SUBJECTS.map((sub, i) => {
+              const t = timers[sub.id];
+              return (
+                <tr key={`${kid.id}-${sub.id}`}>
+                  <td>{i === 0 ? `${kid.avatar} ${kid.name}` : ""}</td>
+                  <td style={{ color: sub.color, fontWeight: 700 }}>{sub.name}</td>
+                  <td className="small">
+                    {miaStatus(t, now)}
+                    {t && (t.breaks > 0 || t.helps > 0 || t.missedCheckins > 0) && (
+                      <div className="muted small">
+                        {[t.breaks ? "took a break" : "", t.helps ? `asked for help ${t.helps}×` : "", t.missedCheckins ? `missed ${t.missedCheckins} check-in${t.missedCheckins > 1 ? "s" : ""}` : ""]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </div>
+                    )}
+                  </td>
+                  <td style={{ whiteSpace: "nowrap" }}>
+                    {t?.pause?.type === "help" && (
+                      <form action={miaParentAction} style={{ display: "inline" }}>
+                        <input type="hidden" name="kidId" value={kid.id} />
+                        <input type="hidden" name="subject" value={sub.id} />
+                        <button className="btn small" name="op" value="restart">
+                          Restart timer
+                        </button>
+                      </form>
+                    )}{" "}
+                    {t?.finishedAt && (
+                      <form action={miaParentAction} style={{ display: "inline" }}>
+                        <input type="hidden" name="kidId" value={kid.id} />
+                        <input type="hidden" name="subject" value={sub.id} />
+                        <button className="linkbtn small" name="op" value="reset">
+                          Allow again today
+                        </button>
+                      </form>
+                    )}
+                    {t && !t.finishedAt && (
+                      <form action={miaParentAction} style={{ display: "inline" }}>
+                        <input type="hidden" name="kidId" value={kid.id} />
+                        <input type="hidden" name="subject" value={sub.id} />
+                        <button className="linkbtn small" name="op" value="reset">
+                          Stop and reset
+                        </button>
+                      </form>
+                    )}
+                  </td>
+                </tr>
+              );
+            }),
+          )}
+        </tbody>
+      </table>
+    </div>
   );
 }

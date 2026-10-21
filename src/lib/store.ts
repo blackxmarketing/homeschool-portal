@@ -28,6 +28,8 @@ import { expectedSeconds, gradeProbe, probeSolution } from "./probes";
 import { adapt, buildProfile, conceptMastery, whatHelps, type Adaptation, type LearningEvent, type Profile } from "./learner";
 import { angleOf, applyEvidence, blockers, conceptOf, emptyMeter, legacyConcept, lessonMastered, type Evidence, type Meter } from "./masteryMeter";
 import type { Lesson, Probe } from "@/content/courses/types";
+import { MIA_SUBJECTS, type MiaSettings } from "@/content/miacademy";
+import { applyMia, clampMiaSettings, isOpen, MiaRuleError, newTimer, parseMiaSettings, parseMiaState, type MiaAction, type MiaTimerState } from "./miaTimer";
 
 export type Mode = "learn" | "review" | "placement";
 
@@ -2111,3 +2113,179 @@ export function logThinkResolved(kidId: number, courseId: string, lessonId: stri
     source: "think",
   });
 }
+
+// ---------------- Miacademy timers (docs/MIACADEMY.md) ----------------
+
+export function getMiaSettings(kidId: number): MiaSettings {
+  const row = getDb().prepare("SELECT mia FROM kids WHERE id = ?").get(kidId) as { mia: string | null } | undefined;
+  return parseMiaSettings(row?.mia);
+}
+
+export function setMiaSettings(kidId: number, settings: Partial<MiaSettings>): void {
+  getDb().prepare("UPDATE kids SET mia = ? WHERE id = ?").run(JSON.stringify(clampMiaSettings(settings)), kidId);
+}
+
+/** Today's timer for each subject (null = not started yet). */
+export function miaDay(kidId: number, day = today()): Record<string, MiaTimerState | null> {
+  const rows = getDb().prepare("SELECT subject, state FROM mia_timers WHERE kid_id = ? AND day = ?").all(kidId, day) as { subject: string; state: string }[];
+  const out: Record<string, MiaTimerState | null> = {};
+  for (const s of MIA_SUBJECTS) out[s.id] = null;
+  for (const r of rows) if (r.subject in out) out[r.subject] = parseMiaState(r.state);
+  return out;
+}
+
+function saveMia(kidId: number, day: string, subject: string, state: MiaTimerState): void {
+  getDb()
+    .prepare(
+      `INSERT INTO mia_timers (kid_id, day, subject, state) VALUES (?, ?, ?, ?)
+       ON CONFLICT (kid_id, day, subject) DO UPDATE SET state = excluded.state, updated_at = datetime('now')`,
+    )
+    .run(kidId, day, subject, JSON.stringify(state));
+}
+
+const miaSubjectName = (id: string) => MIA_SUBJECTS.find((s) => s.id === id)?.name ?? id;
+
+/**
+ * A kid's screen asks for a change to one subject's timer. Only one subject
+ * can be open at a time, and each runs once a day unless a parent allows more.
+ * Restarting after "I need help" needs the parent PIN when that setting is on.
+ */
+export function miaAct(
+  kidId: number,
+  subject: string,
+  action: MiaAction,
+  opts: { now?: number; demo?: boolean; pin?: string } = {},
+): Record<string, MiaTimerState | null> {
+  if (!MIA_SUBJECTS.some((s) => s.id === subject)) throw new PortalError("Unknown subject.");
+  const kid = getKid(kidId);
+  if (!kid) throw new PortalError("Unknown kid.");
+  const now = opts.now ?? Date.now();
+  const day = today();
+  const timers = miaDay(kidId, day);
+  const settings = getMiaSettings(kidId);
+  const current = timers[subject];
+
+  if (action === "start" && !current) {
+    const other = Object.entries(timers).find(([id, t]) => id !== subject && isOpen(t));
+    if (other) throw new PortalError(`Finish ${miaSubjectName(other[0])} first.`);
+    saveMia(kidId, day, subject, newTimer(now, !!opts.demo));
+    return miaDay(kidId, day);
+  }
+  if (!current) throw new PortalError("Press Start first.");
+
+  if (action === "helpResume" && settings.helpPin) {
+    const check = verifyParentPin(kid.family_id, opts.pin ?? "");
+    if (check === "unset") throw new PortalError("A parent needs to set a parent PIN in Settings first, or restart it from the parent page.");
+    if (check === "locked") throw new PortalError("Too many tries. Wait 5 minutes.");
+    if (check === "wrong") throw new PortalError("That PIN isn't right.");
+  }
+
+  let result;
+  try {
+    result = applyMia(current, action, now, settings);
+  } catch (e) {
+    if (e instanceof MiaRuleError) throw new PortalError(e.message);
+    throw e;
+  }
+  saveMia(kidId, day, subject, result.state);
+  const name = miaSubjectName(subject);
+  if (result.event === "help") addParentAlert(kid.family_id, kidId, "help", subject, `${kid.name} needs help with ${name}.`, now);
+  if (result.event === "late")
+    addParentAlert(kid.family_id, kidId, "late", subject, `${kid.name}'s ${name} break ended and the timer hasn't been restarted.`, now);
+  return miaDay(kidId, day);
+}
+
+/** Miacademy is open but no timer has been started for a while (the kid's screen reports it). */
+export function miaReminderIgnored(kidId: number, now = Date.now()): void {
+  const kid = getKid(kidId);
+  if (!kid) return;
+  // At most one of these alerts every 15 minutes.
+  const recent = getDb()
+    .prepare("SELECT 1 FROM parent_alerts WHERE kid_id = ? AND kind = 'no-timer' AND at > ?")
+    .get(kidId, now - 15 * 60 * 1000);
+  if (!recent) addParentAlert(kid.family_id, kidId, "no-timer", null, `${kid.name} is working in Miacademy without a timer running.`, now);
+}
+
+/** Parent: restart a timer that's waiting for help. */
+export function parentMiaRestart(familyId: number, kidId: number, subject: string, now = Date.now()): void {
+  const kid = getKid(kidId);
+  if (!kid || kid.family_id !== familyId) throw new PortalError("Unknown kid.");
+  const day = today();
+  const current = miaDay(kidId, day)[subject];
+  if (current?.pause?.type !== "help") throw new PortalError("That timer isn't waiting for help.");
+  saveMia(kidId, day, subject, applyMia(current, "helpResume", now, getMiaSettings(kidId)).state);
+}
+
+/** Parent: let a kid run a subject's timer again today (or stop the one that's going). */
+export function parentMiaReset(familyId: number, kidId: number, subject: string): void {
+  const kid = getKid(kidId);
+  if (!kid || kid.family_id !== familyId) throw new PortalError("Unknown kid.");
+  getDb().prepare("DELETE FROM mia_timers WHERE kid_id = ? AND day = ? AND subject = ?").run(kidId, today(), subject);
+}
+
+// ---- Parent PIN (for restarting a timer on the kid's screen) ----
+
+export function hasParentPin(familyId: number): boolean {
+  const row = getDb().prepare("SELECT parent_pin_hash FROM families WHERE id = ?").get(familyId) as { parent_pin_hash: string | null } | undefined;
+  return !!row?.parent_pin_hash;
+}
+
+export function setParentPin(familyId: number, pin: string): void {
+  if (!/^\d{4,6}$/.test(pin)) throw new PortalError("Use a PIN of 4 to 6 digits.");
+  getDb().prepare("UPDATE families SET parent_pin_hash = ? WHERE id = ?").run(bcrypt.hashSync(pin, 10), familyId);
+}
+
+const parentPinFailures = new Map<number, { count: number; until: number }>();
+
+export function verifyParentPin(familyId: number, pin: string): "ok" | "wrong" | "locked" | "unset" {
+  const f = parentPinFailures.get(familyId);
+  if (f && f.until > Date.now()) return "locked";
+  const row = getDb().prepare("SELECT parent_pin_hash FROM families WHERE id = ?").get(familyId) as { parent_pin_hash: string | null } | undefined;
+  if (!row?.parent_pin_hash) return "unset";
+  if (bcrypt.compareSync(pin, row.parent_pin_hash)) {
+    parentPinFailures.delete(familyId);
+    return "ok";
+  }
+  const count = (f?.count ?? 0) + 1;
+  parentPinFailures.set(familyId, { count, until: count >= 5 ? Date.now() + 5 * 60 * 1000 : 0 });
+  return count >= 5 ? "locked" : "wrong";
+}
+
+// ---- Parent alerts ----
+
+export interface ParentAlert {
+  id: number;
+  kid_id: number;
+  kind: string;
+  subject: string | null;
+  message: string;
+  at: number;
+  kidName: string;
+  avatar: string;
+}
+
+export function addParentAlert(familyId: number, kidId: number, kind: string, subject: string | null, message: string, at = Date.now()): void {
+  getDb()
+    .prepare("INSERT INTO parent_alerts (family_id, kid_id, kind, subject, message, at) VALUES (?, ?, ?, ?, ?, ?)")
+    .run(familyId, kidId, kind, subject, message, at);
+}
+
+export function unseenAlerts(familyId: number): ParentAlert[] {
+  return getDb()
+    .prepare(
+      `SELECT a.id, a.kid_id, a.kind, a.subject, a.message, a.at, k.name AS kidName, k.avatar
+       FROM parent_alerts a JOIN kids k ON k.id = a.kid_id WHERE a.family_id = ? AND a.seen = 0 ORDER BY a.at DESC LIMIT 50`,
+    )
+    .all(familyId) as ParentAlert[];
+}
+
+export function dismissAlerts(familyId: number, id?: number): void {
+  if (id === undefined) getDb().prepare("UPDATE parent_alerts SET seen = 1 WHERE family_id = ?").run(familyId);
+  else getDb().prepare("UPDATE parent_alerts SET seen = 1 WHERE family_id = ? AND id = ?").run(familyId, id);
+}
+
+/** Every kid's Miacademy timers today, for the parent page. */
+export function miaFamilyToday(familyId: number) {
+  return listKids(familyId).map((kid) => ({ kid, timers: miaDay(kid.id), settings: getMiaSettings(kid.id) }));
+}
+
