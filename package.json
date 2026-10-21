@@ -9,7 +9,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "ext:build": "node extension/build.mjs",
-    "ext:dev": "node extension/build.mjs --dev && node extension/dev/serve.mjs"
+    "ext:dev": "node extension/build.mjs --dev && node extension/dev/serve.mjs",
+    "ext:zip": "node extension/build.mjs && node extension/zip.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",
