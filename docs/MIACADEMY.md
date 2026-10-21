@@ -58,6 +58,33 @@ alerts.
 | 6 | **Phone notifications** for alerts | Adding the portal to a phone's home screen |
 | 7 | **Elective timers** | Which electives |
 
+## The Chrome extension ("Focus Buddy", `extension/`)
+
+- **Connecting:** a parent opens Settings → the kid → "Chrome extension" → **Make a
+  connect code** (6 letters, works once, for 15 minutes). On the kid's computer,
+  they click the Focus Buddy icon in Chrome and type the code. The extension gets
+  its own token (`mia_devices`; only a hash is kept). Settings lists connected
+  computers with **Disconnect**. Disconnecting from the extension itself needs the
+  parent PIN, so a kid can't switch it off.
+- **Parts:**
+  - `src/content.tsx` draws the same `MiaHud` strip on Miacademy pages (in a
+    shadow root, 360px wide, pushing the page over).
+  - `src/background.ts` makes every portal call with the token (`Authorization:
+    Bearer`, accepted by `/api/mia` and `/api/voice`).
+  - `src/offscreen.ts` plays the teacher's voice (the portal's natural voice,
+    or Chrome's own if that's off) and the chime.
+  - `static/popup.html` is the connect screen.
+- **Build:** `npm run ext:build` makes `extension/dist` for the live portal (this
+  is what goes to the Chrome Web Store); `extension/version.json` holds the
+  version. `--dev` also allows `http://localhost:3100`.
+- **Checking it without installing:** run `npm run ext:dev` (or the
+  `focus-buddy-dev` preview, with `portal-dev` running too) and open
+  http://localhost:3200. That's a pretend Miacademy page running the real content
+  script. Make a connect code for a demo kid, then in the page's console run
+  `__pair("CODE")`.
+- **Miacademy addresses:** `miacademy.co` and its subdomains (`build.mjs`). Check
+  these against the real site in phase 4.
+
 The page talks to whatever is hosting it through `window.miaHud` (the
 extension sets it):
 

@@ -18,7 +18,9 @@ import Buddy from "./Buddy";
 export type Timers = Record<string, MiaTimerState | null>;
 
 /** One call to the portal's /api/mia. The portal page uses fetch; the Chrome extension goes through its background worker. */
-export type MiaApi = (body: Record<string, unknown>) => Promise<{ ok: boolean; data: { timers?: Timers; serverNow?: number; error?: string } }>;
+export type MiaApi = (
+  body: Record<string, unknown>,
+) => Promise<{ ok: boolean; data: { timers?: Timers; settings?: MiaSettings; serverNow?: number; error?: string } }>;
 
 /** What hosts the page (the Chrome extension) adds. Missing in a normal browser tab. */
 interface HostBridge {
@@ -52,7 +54,7 @@ interface Checkin {
 
 export default function MiaHud({
   kidName,
-  settings,
+  settings: initialSettings,
   initialTimers,
   serverNow,
   demo,
@@ -69,6 +71,7 @@ export default function MiaHud({
   say: (text: string) => void;
 }) {
   const [timers, setTimers] = useState<Timers>(initialTimers);
+  const [settings, setSettings] = useState<MiaSettings>(initialSettings);
   const [offset, setOffset] = useState(() => serverNow - Date.now());
   const [now, setNow] = useState(serverNow);
   const [focus, setFocus] = useState<string | null>(() => MIA_SUBJECTS.find((s) => isOpen(initialTimers[s.id]))?.id ?? null);
@@ -79,6 +82,10 @@ export default function MiaHud({
   const [reminder, setReminder] = useState(false);
   const [miaOpen, setMiaOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  const openId = MIA_SUBJECTS.find((s) => isOpen(timers[s.id]))?.id ?? null;
+  const doneCount = MIA_SUBJECTS.filter((s) => timers[s.id]?.finishedAt).length;
+  const allDone = doneCount === MIA_SUBJECTS.length;
 
   const buddyName = BUDDIES.find((b) => b.id === settings.buddy)?.name ?? "Buddy";
   const subjectName = (id: string) => MIA_SUBJECTS.find((s) => s.id === id)?.name ?? id;
@@ -93,20 +100,38 @@ export default function MiaHud({
     sayRaw(text);
   };
 
-  const openId = MIA_SUBJECTS.find((s) => isOpen(timers[s.id]))?.id ?? null;
-  const doneCount = MIA_SUBJECTS.filter((s) => timers[s.id]?.finishedAt).length;
-  const allDone = doneCount === MIA_SUBJECTS.length;
-
   async function post(body: Record<string, unknown>): Promise<boolean> {
     setBusy(true);
     setError(null);
     const { ok, data } = await api({ ...body, demo });
     if (data.serverNow) setOffset(data.serverNow - Date.now());
     if (data.timers) setTimers(data.timers);
+    if (data.settings) setSettings(data.settings);
     if (!ok) setError(data.error ?? "Something went wrong.");
     setBusy(false);
     return ok;
   }
+
+  // Stay in step with the portal: a parent may restart a timer or change a setting.
+  // Every 5 seconds while waiting for a grown-up, otherwise every 30.
+  const waitingForHelp = !!openId && timers[openId]?.pause?.type === "help";
+  useEffect(() => {
+    const id = setInterval(async () => {
+      if (document.visibilityState === "hidden") return;
+      const { ok, data } = await api({ action: "sync" });
+      if (!ok) return;
+      if (data.serverNow) setOffset(data.serverNow - Date.now());
+      if (data.timers) {
+        // A parent restarted a timer from the family overview.
+        const was = live.current.openId ? live.current.timers[live.current.openId] : null;
+        const now = live.current.openId ? data.timers[live.current.openId] : null;
+        if (was?.pause?.type === "help" && now && isRunning(now)) say(fill(MIA_LINES.helpDone, live.current.openId!));
+        setTimers(data.timers);
+      }
+      if (data.settings) setSettings(data.settings);
+    }, waitingForHelp ? 5000 : 30000);
+    return () => clearInterval(id);
+  }, [api, waitingForHelp]);
   const act = (subject: string, action: string, extra: Record<string, unknown> = {}) => post({ subject, action, ...extra });
 
   // ---- The clock: announcements, check-ins, breaks, finishing, reminders ----

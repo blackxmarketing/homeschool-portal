@@ -5,6 +5,11 @@ import { MIA_DEFAULT_SETTINGS } from "@/content/miacademy";
 import {
   addKid,
   createFamily,
+  createPairCode,
+  kidFromDeviceToken,
+  miaDevices,
+  redeemPairCode,
+  removeMiaDevice,
   getKid,
   getMiaSettings,
   miaAct,
@@ -147,6 +152,29 @@ describe("Miacademy timers in the store", () => {
   it("rejects a parent PIN that isn't 4-6 digits", () => {
     expect(() => setParentPin(family, "12")).toThrow(PortalError);
     expect(() => setParentPin(family, "abcd")).toThrow(PortalError);
+  });
+
+  it("connects a kid's Chrome extension with a one-time code", () => {
+    const code = createPairCode(family, kid, 0);
+    expect(code).toMatch(/^[A-Z2-9]{6}$/);
+    const { token, kid: who } = redeemPairCode(code.toLowerCase(), 1000);
+    expect(who.id).toBe(kid);
+    expect(kidFromDeviceToken(token, 2000)?.id).toBe(kid);
+    expect(() => redeemPairCode(code, 3000)).toThrow(/didn't work/);
+    expect(kidFromDeviceToken("not-a-token")).toBeNull();
+  });
+
+  it("lets connect codes expire and parents disconnect a computer", () => {
+    const old = createPairCode(family, kid, 0);
+    expect(() => redeemPairCode(old, 16 * MIN)).toThrow(/didn't work/);
+    const { token } = redeemPairCode(createPairCode(family, kid, 20 * MIN), 20 * MIN);
+    const [device] = miaDevices(family);
+    const other = createFamily({ familyName: "Other", parentName: "Q", email: `q${Math.random()}@test.test`, password: "password1" });
+    removeMiaDevice(other, device.id);
+    expect(kidFromDeviceToken(token)).not.toBeNull();
+    removeMiaDevice(family, device.id);
+    expect(kidFromDeviceToken(token)).toBeNull();
+    expect(() => createPairCode(other, kid)).toThrow(PortalError);
   });
 
   it("tells a parent at most every 15 minutes that no timer is running", () => {

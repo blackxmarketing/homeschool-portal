@@ -293,6 +293,22 @@ CREATE TABLE IF NOT EXISTS mia_timers (
   PRIMARY KEY (kid_id, day, subject)
 );
 
+-- Kids' computers connected to the Miacademy Chrome extension. The extension keeps the token; we keep its hash.
+CREATE TABLE IF NOT EXISTS mia_devices (
+  id INTEGER PRIMARY KEY,
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  token_hash TEXT NOT NULL UNIQUE,
+  created_at INTEGER NOT NULL,
+  last_seen INTEGER NOT NULL
+);
+
+-- Short-lived codes a parent makes to connect a kid's extension.
+CREATE TABLE IF NOT EXISTS mia_pair_codes (
+  code TEXT PRIMARY KEY,
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  expires_at INTEGER NOT NULL
+);
+
 -- Things a parent should know about now (a kid needs help, is late back from a break, ...).
 CREATE TABLE IF NOT EXISTS parent_alerts (
   id INTEGER PRIMARY KEY,

@@ -1,10 +1,10 @@
 import ParentNav from "@/components/ParentNav";
-import { addKidAction, focusAction, miaSettingsAction, parentPinAction, resetPlacementAction, schoolYearAction, updateKidAction } from "@/app/actions";
+import { addKidAction, focusAction, miaPairCodeAction, miaRemoveDeviceAction, miaSettingsAction, parentPinAction, resetPlacementAction, schoolYearAction, updateKidAction } from "@/app/actions";
 import { BUDDIES } from "@/content/miacademy";
 import { requireParent } from "@/lib/auth";
 import { LIMITS } from "@/lib/focus";
 import { focusPresets } from "@/lib/content";
-import { AVATARS, electivesOff, getFamily, getFocus, getMiaSettings, hasParentPin, listKids } from "@/lib/store";
+import { AVATARS, electivesOff, getFamily, getFocus, getMiaSettings, hasParentPin, listKids, miaDevices } from "@/lib/store";
 
 /** Kindergarten is grade 0. */
 const GRADES = Array.from({ length: 13 }, (_, i) => i);
@@ -25,10 +25,10 @@ export const dynamic = "force-dynamic";
 export default async function Settings({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; saved?: string; welcome?: string }>;
+  searchParams: Promise<{ error?: string; saved?: string; welcome?: string; code?: string; codeKid?: string }>;
 }) {
   const s = await requireParent();
-  const { error, saved, welcome } = await searchParams;
+  const { error, saved, welcome, code, codeKid } = await searchParams;
   const kids = listKids(s.familyId);
   const family = getFamily(s.familyId)!;
 
@@ -135,6 +135,7 @@ export default async function Settings({
           </form>
           <FocusForm kidId={kid.id} name={kid.name} />
           <MiaForm kidId={kid.id} name={kid.name} />
+          <MiaExtension familyId={s.familyId} kidId={kid.id} name={kid.name} code={Number(codeKid) === kid.id ? code : undefined} />
           <form action={resetPlacementAction} style={{ marginTop: 12 }}>
             <input type="hidden" name="kidId" value={kid.id} />
             <button className="linkbtn small">Redo placement test</button>{" "}
@@ -267,5 +268,50 @@ function MiaForm({ kidId, name }: { kidId: number; name: string }) {
         Save Miacademy settings
       </button>
     </form>
+  );
+}
+
+function MiaExtension({ familyId, kidId, name, code }: { familyId: number; kidId: number; name: string; code?: string }) {
+  const devices = miaDevices(familyId).filter((d) => d.kid_id === kidId);
+  const when = (at: number) =>
+    new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: process.env.APP_TIMEZONE ?? "America/Denver" }).format(at);
+  return (
+    <div className="focus-box" id={`ext-${kidId}`}>
+      <h3>Chrome extension on {name}&apos;s computer</h3>
+      <p className="muted small">
+        The extension puts the timers on the right of every Miacademy page. Install it in Chrome on {name}&apos;s computer, click its
+        icon, and type a connect code from here.
+      </p>
+      {code && (
+        <div className="notice">
+          Connect code for {name}: <strong style={{ fontSize: "1.4rem", letterSpacing: "0.15em" }}>{code}</strong>
+          <div className="muted small">Works once, for the next 15 minutes.</div>
+        </div>
+      )}
+      {devices.length > 0 && (
+        <table>
+          <tbody>
+            {devices.map((d, i) => (
+              <tr key={d.id}>
+                <td>Computer {i + 1}</td>
+                <td className="muted small">
+                  connected {when(d.created_at)} · last used {when(d.last_seen)}
+                </td>
+                <td>
+                  <form action={miaRemoveDeviceAction}>
+                    <input type="hidden" name="deviceId" value={d.id} />
+                    <button className="linkbtn small">Disconnect</button>
+                  </form>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      <form action={miaPairCodeAction}>
+        <input type="hidden" name="kidId" value={kidId} />
+        <button className="btn secondary">Make a connect code</button>
+      </form>
+    </div>
   );
 }

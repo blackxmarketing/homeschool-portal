@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--", "--port", "3100"],
       "port": 3100
+    },
+    {
+      "name": "focus-buddy-dev",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["extension/dev/serve.mjs"],
+      "port": 3200
     }
   ]
 }

@@ -7,3 +7,7 @@ next-env.d.ts
 .env.local
 .claude/*
 !.claude/launch.json
+
+# Built Chrome extension (node extension/build.mjs)
+/extension/dist/
+/extension/*.zip

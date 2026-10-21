@@ -33,6 +33,8 @@ import {
   parentMiaRestart,
   setMiaSettings,
   setParentPin,
+  createPairCode,
+  removeMiaDevice,
 } from "@/lib/store";
 import type { MiaSettings } from "@/content/miacademy";
 
@@ -308,4 +310,24 @@ export async function dismissAlertAction(form: FormData) {
   dismissAlerts(s.familyId, id ? Number(id) : undefined);
   revalidatePath("/parent");
   redirect("/parent");
+}
+
+export async function miaPairCodeAction(form: FormData) {
+  const s = await requireParent();
+  const kidId = Number(form.get("kidId"));
+  let code: string;
+  try {
+    code = createPairCode(s.familyId, kidId);
+  } catch (e) {
+    if (e instanceof PortalError) back("/parent/settings", e.message);
+    throw e;
+  }
+  redirect(`/parent/settings?code=${code}&codeKid=${kidId}#ext-${kidId}`);
+}
+
+export async function miaRemoveDeviceAction(form: FormData) {
+  const s = await requireParent();
+  removeMiaDevice(s.familyId, Number(form.get("deviceId")));
+  revalidatePath("/parent/settings");
+  redirect("/parent/settings?saved=1");
 }

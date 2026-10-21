@@ -2223,6 +2223,72 @@ export function parentMiaReset(familyId: number, kidId: number, subject: string)
   getDb().prepare("DELETE FROM mia_timers WHERE kid_id = ? AND day = ? AND subject = ?").run(kidId, today(), subject);
 }
 
+// ---- Connecting a kid's Chrome extension ----
+
+const PAIR_CODE_LETTERS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O or 1/I
+const PAIR_CODE_MINUTES = 15;
+const hashToken = (token: string) => crypto.createHash("sha256").update(token).digest("hex");
+
+/** Parent: a code to type into the extension on this kid's computer (works once, for 15 minutes). */
+export function createPairCode(familyId: number, kidId: number, now = Date.now()): string {
+  const kid = getKid(kidId);
+  if (!kid || kid.family_id !== familyId) throw new PortalError("Unknown kid.");
+  const db = getDb();
+  db.prepare("DELETE FROM mia_pair_codes WHERE expires_at < ? OR kid_id = ?").run(now, kidId);
+  const bytes = crypto.randomBytes(6);
+  const code = Array.from(bytes, (b) => PAIR_CODE_LETTERS[b % PAIR_CODE_LETTERS.length]).join("");
+  db.prepare("INSERT INTO mia_pair_codes (code, kid_id, expires_at) VALUES (?, ?, ?)").run(code, kidId, now + PAIR_CODE_MINUTES * 60 * 1000);
+  return code;
+}
+
+/** The extension trades a connect code for its own long-lived token. */
+export function redeemPairCode(code: string, now = Date.now()): { token: string; kid: Kid } {
+  const db = getDb();
+  const clean = code.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const row = db.prepare("SELECT kid_id, expires_at FROM mia_pair_codes WHERE code = ?").get(clean) as { kid_id: number; expires_at: number } | undefined;
+  if (!row || row.expires_at < now) throw new PortalError("That code didn't work. Ask a parent for a new one.");
+  const kid = getKid(row.kid_id);
+  if (!kid) throw new PortalError("That code didn't work. Ask a parent for a new one.");
+  const token = crypto.randomBytes(32).toString("base64url");
+  db.transaction(() => {
+    db.prepare("DELETE FROM mia_pair_codes WHERE code = ?").run(clean);
+    db.prepare("INSERT INTO mia_devices (kid_id, token_hash, created_at, last_seen) VALUES (?, ?, ?, ?)").run(kid.id, hashToken(token), now, now);
+  })();
+  return { token, kid };
+}
+
+/** The kid a connected extension belongs to (null if the token is unknown or was disconnected). */
+export function kidFromDeviceToken(token: string, now = Date.now()): Kid | null {
+  if (!token) return null;
+  const db = getDb();
+  const row = db.prepare("SELECT id, kid_id, last_seen FROM mia_devices WHERE token_hash = ?").get(hashToken(token)) as
+    | { id: number; kid_id: number; last_seen: number }
+    | undefined;
+  if (!row) return null;
+  if (now - row.last_seen > 60 * 1000) db.prepare("UPDATE mia_devices SET last_seen = ? WHERE id = ?").run(now, row.id);
+  return getKid(row.kid_id) ?? null;
+}
+
+export function miaDevices(familyId: number): { id: number; kid_id: number; created_at: number; last_seen: number }[] {
+  return getDb()
+    .prepare(
+      `SELECT d.id, d.kid_id, d.created_at, d.last_seen FROM mia_devices d JOIN kids k ON k.id = d.kid_id
+       WHERE k.family_id = ? ORDER BY d.created_at`,
+    )
+    .all(familyId) as never;
+}
+
+/** Parent: disconnect a computer (from Settings), or the extension disconnects itself. */
+export function removeMiaDevice(familyId: number, deviceId: number): void {
+  getDb()
+    .prepare("DELETE FROM mia_devices WHERE id = ? AND kid_id IN (SELECT id FROM kids WHERE family_id = ?)")
+    .run(deviceId, familyId);
+}
+
+export function removeMiaDeviceByToken(token: string): void {
+  getDb().prepare("DELETE FROM mia_devices WHERE token_hash = ?").run(hashToken(token));
+}
+
 // ---- Parent PIN (for restarting a timer on the kid's screen) ----
 
 export function hasParentPin(familyId: number): boolean {

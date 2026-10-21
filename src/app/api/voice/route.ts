@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { currentSession } from "@/lib/auth";
+import { signedIn } from "@/lib/auth";
 import { features } from "@/lib/content";
 import { speakText, ttsEnabled } from "@/lib/tts";
 
@@ -9,7 +9,7 @@ import { speakText, ttsEnabled } from "@/lib/tts";
  * The audio itself comes from GET /api/voice/<id>.
  */
 export async function POST(req: Request) {
-  if (!(await currentSession())) return NextResponse.json({ error: "Please log in again." }, { status: 401 });
+  if (!(await signedIn(req))) return NextResponse.json({ error: "Please log in again." }, { status: 401 });
   if (!ttsEnabled() || !features().readAloud) return NextResponse.json({ off: true });
   const b = (await req.json().catch(() => ({}))) as { text?: unknown; kind?: unknown };
   const text = typeof b.text === "string" ? b.text : "";

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Focus Buddy</title>
+    <style>
+      @font-face { font-family: "Fredoka"; font-weight: 600; src: url("fonts/fredoka-600.woff2") format("woff2"); }
+      @font-face { font-family: "Fredoka"; font-weight: 500; src: url("fonts/fredoka-500.woff2") format("woff2"); }
+      body { margin: 0; width: 300px; font-family: "Fredoka", system-ui, sans-serif; font-weight: 500; color: #0c1a4b; background: #eef3ff; }
+      header { background: #2340ff; color: #fff; padding: 14px 16px; display: flex; gap: 10px; align-items: center; }
+      header img { width: 36px; height: 36px; }
+      h1 { margin: 0; font-size: 20px; font-weight: 600; }
+      main { padding: 14px 16px 16px; }
+      p { margin: 0 0 10px; font-size: 14px; color: #5a6489; }
+      label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; }
+      input { box-sizing: border-box; width: 100%; font: inherit; font-size: 16px; padding: 8px 10px; border-radius: 10px; border: 2px solid #dfe5f6; }
+      #code { font-size: 22px; letter-spacing: 0.2em; text-transform: uppercase; text-align: center; }
+      button { margin-top: 12px; width: 100%; font: inherit; font-weight: 600; font-size: 16px; padding: 10px; border: none; border-radius: 999px; background: #2340ff; color: #fff; cursor: pointer; box-shadow: 0 4px 0 #1428c8; }
+      button.quiet { background: #fff; color: #5a6489; box-shadow: none; border: 2px solid #dfe5f6; }
+      .ok { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+      .error { color: #b42318; font-size: 13px; min-height: 16px; margin-top: 6px; }
+      details { margin-top: 10px; font-size: 13px; color: #5a6489; }
+    </style>
+  </head>
+  <body>
+    <header><img src="icons/icon-128.png" alt="" /><h1>Focus Buddy</h1></header>
+    <main>
+      <form id="connect" hidden>
+        <p>Grown-ups: in the portal, open <b>Settings</b>, find this child, and press <b>Make a connect code</b>.</p>
+        <label for="code">Connect code</label>
+        <input id="code" autocomplete="off" maxlength="8" required />
+        <details>
+          <summary>Portal address</summary>
+          <input id="portal" />
+        </details>
+        <button>Connect</button>
+        <div class="error" id="error"></div>
+      </form>
+      <div id="connected" hidden>
+        <div class="ok">✅ Connected for <span id="kid"></span></div>
+        <p>The timers show up on the right of every Miacademy page.</p>
+        <form id="disconnect">
+          <label for="pin">Grown-ups: parent PIN to disconnect</label>
+          <input id="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off" />
+          <button class="quiet">Disconnect this computer</button>
+          <div class="error" id="error2"></div>
+        </form>
+      </div>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

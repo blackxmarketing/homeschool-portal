@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getDb } from "./db";
-import { getKid, type Kid } from "./store";
+import { getKid, kidFromDeviceToken, type Kid } from "./store";
 
 const COOKIE = "lp_session";
 const PARENT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -84,9 +84,25 @@ export async function requireKid(): Promise<{ session: Extract<Session, { role: 
   return { session: s, kid };
 }
 
-/** For API routes: returns the kid session or null (no redirect). */
-export async function kidFromRequest(): Promise<Kid | null> {
+/**
+ * For API routes: returns the kid session or null (no redirect). With the
+ * request, a connected Chrome extension's token ("Authorization: Bearer ...")
+ * counts too (see docs/MIACADEMY.md).
+ */
+export async function kidFromRequest(req?: Request): Promise<Kid | null> {
+  const token = bearerToken(req);
+  if (token) return kidFromDeviceToken(token);
   const s = await currentSession();
   if (s?.role !== "kid") return null;
   return getKid(s.kidId) ?? null;
+}
+
+export function bearerToken(req?: Request): string | null {
+  const h = req?.headers.get("authorization") ?? "";
+  return h.startsWith("Bearer ") ? h.slice(7).trim() || null : null;
+}
+
+/** Signed in at all: a session cookie or a connected extension. */
+export async function signedIn(req?: Request): Promise<boolean> {
+  return !!(await currentSession()) || !!(await kidFromRequest(req));
 }
