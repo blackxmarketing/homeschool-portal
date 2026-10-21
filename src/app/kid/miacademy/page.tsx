@@ -1,19 +1,20 @@
-import MiaHud from "@/components/miacademy/MiaHud";
+import PortalMiaHud from "@/components/miacademy/PortalMiaHud";
 import { requireKid } from "@/lib/auth";
 import { getMiaSettings, miaDay } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
 /**
- * The Miacademy timer strip. The desktop app shows this page in a narrow
- * window on the right of the screen while Miacademy is open
- * (docs/MIACADEMY.md). ?demo=1 runs it at demo speed in the preview.
+ * The Miacademy timer strip (docs/MIACADEMY.md). The Chrome extension shows
+ * the same screens on Miacademy pages; this page is for checking it in the
+ * portal. ?demo=1 runs it at demo speed in the preview.
  */
 export default async function MiacademyPage({ searchParams }: { searchParams: Promise<{ demo?: string }> }) {
   const { kid } = await requireKid();
   const { demo } = await searchParams;
   return (
-    <MiaHud
+    <PortalMiaHud
+      kidName={kid.name}
       settings={getMiaSettings(kid.id)}
       initialTimers={miaDay(kid.id)}
       serverNow={Date.now()}

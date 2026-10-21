@@ -40,22 +40,27 @@ a day. Separate from the 2-hour day. The design prototype is
   - Family overview: alerts, plus today's timers with Restart / Allow again today
     / Stop and reset.
 
-## The desktop app (next)
+## The build, in phases
 
-A small Windows app on each kid's computer shows `/kid/miacademy` in a narrow
-always-on-top window docked on the right. It starts with Windows, watches the
-window titles for Miacademy, and slides in when Miacademy is in front. It talks
-to the page through `window.miaHud`:
+It runs as a **Chrome extension**: the timer strip appears on the right of every
+Miacademy page by itself, and the extension can read the page, so it knows which
+lesson a kid is on. (A desktop app could only see the window title.) The portal
+keeps everything else: the timers' state, the teacher voice, settings and
+alerts.
 
-- `onMiacademy(cb)`: calls `cb(true/false)` when Miacademy opens or closes
-  (drives the reminder).
-- `setFullscreen(on)`: the page asks for full screen during a break, and back
-  afterwards.
+| Phase | What | Needs from the parents |
+|---|---|---|
+| 1 | **Kid-friendly look**: buddy greeting, big chunky buttons, stars for finished subjects | |
+| 2 | **Chrome extension**: the strip on Miacademy pages, a connect code from Settings, teacher voice, full-screen breaks, the "don't forget your timer" reminder. Tested on a pretend Miacademy page | |
+| 3 | **Go live**: portal deployed; extension published **unlisted** on the Chrome Web Store; installed and locked on each kid's computer | A Chrome Web Store developer account (one-time $5 Google fee), then installing on each computer |
+| 4 | **Miacademy connection**: reading the lesson pages; the step-by-step checklist (online lessons + packets); the packet photo check against the answer keys; alerts under 70% | A walk-through of the Miacademy pages (signed in by a parent) and where the packets and answer keys are |
+| 5 | **Weekly goals and money**: lessons per week per subject (Mon-Thu, weekend catch-up); on-task tracking (tab switching); 25¢ / 15¢ / 0¢ per class; the panda / wolf bank and the monthly transfer | Lessons per week for each subject |
+| 6 | **Phone notifications** for alerts | Adding the portal to a phone's home screen |
+| 7 | **Elective timers** | Which electives |
 
-## Still to come
+The page talks to whatever is hosting it through `window.miaHud` (the
+extension sets it):
 
-- The step-by-step checklist (Miacademy lessons + packets) and the panda/wolf
-  bank.
-- Phone notifications for alerts (today they show on the family overview).
-- Off-task tracking from the desktop app (time away from Miacademy).
-- Elective timers.
+- `onMiacademy(cb)`: calls `cb(true/false)` when Miacademy opens or closes (drives
+  the reminder).
+- `setFullscreen(on)`: asks for full screen during a break, and back afterwards.

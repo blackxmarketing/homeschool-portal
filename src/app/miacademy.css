@@ -1,231 +1,395 @@
-/* Miacademy timer strip (src/components/miacademy). Shown in the desktop app's
-   narrow window on the right of the screen; in a normal browser it sits on the right too. */
+/* Miacademy timer strip (src/components/miacademy). Shown on the right of
+   Miacademy pages by the Chrome extension; in the portal it sits on the right too.
+   Built for kids: round letters, big chunky buttons, bright colours, stars. */
 
 .mia-hud {
-  --mia-bg: #f4f1ea;
-  --mia-panel: #fffdf8;
-  --mia-ink: #2b2a33;
-  --mia-muted: #7a7785;
-  --mia-line: #e3ded2;
+  --mia-blue: #2340ff;
+  --mia-blue-dark: #1428c8;
+  --mia-ink: #0c1a4b;
+  --mia-muted: #5a6489;
+  --mia-card: #ffffff;
+  --mia-line: #dfe5f6;
+  --mia-fun: var(--font-fun), "Fredoka", "Baloo 2", "Comic Sans MS", system-ui, sans-serif;
   box-sizing: border-box;
   min-height: 100vh;
   width: 100%;
   max-width: 400px;
   margin-left: auto;
-  padding: 14px;
+  padding: 14px 14px 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  background: var(--mia-panel);
   color: var(--mia-ink);
-  border-left: 1px solid var(--mia-line);
+  font-family: var(--mia-fun);
+  font-weight: 500;
+  background:
+    radial-gradient(circle at 20px 20px, #ffffff99 3px, transparent 4px) 0 0 / 46px 46px,
+    linear-gradient(180deg, #dbe6ff 0%, #eef3ff 45%, #ffffff 100%);
+  border-left: 4px solid var(--mia-blue);
 }
 .mia-hud *,
 .mia-hud *::before,
 .mia-hud *::after {
   box-sizing: border-box;
 }
-.mia-head {
+.mia-hud button {
+  font-family: inherit;
+}
+
+/* Hello from the buddy */
+.mia-hello {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  font-weight: 900;
-  font-size: 13px;
-  color: var(--mia-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  gap: 10px;
+  background: var(--mia-blue);
+  color: #fff;
+  border-radius: 22px;
+  padding: 10px 12px;
+  box-shadow: 0 5px 0 var(--mia-blue-dark);
+  position: relative;
+}
+.mia-hello-face {
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  animation: mia-nod 3s ease-in-out infinite;
+}
+.mia-hello-face svg {
+  width: 48px;
+  height: 48px;
+  margin-top: 4px;
+}
+.mia-hi {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.mia-sub {
+  font-size: 15px;
+  opacity: 0.95;
 }
 .mia-demo {
-  border: 1px dashed var(--mia-line);
-  background: none;
-  color: var(--mia-muted);
+  position: absolute;
+  top: -8px;
+  right: 8px;
+  border: 1px dashed #fff;
+  background: var(--mia-blue-dark);
+  color: #fff;
   border-radius: 999px;
-  font: inherit;
   font-size: 10px;
-  padding: 3px 8px;
+  padding: 2px 8px;
   cursor: pointer;
 }
 
+/* Stars for finished subjects */
+.mia-stars {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 30px;
+  line-height: 1;
+  color: #d5dbee;
+  padding: 6px 14px;
+  background: #fff;
+  border: 3px solid var(--mia-line);
+  border-radius: 999px;
+}
+.mia-stars .on {
+  color: #ffc21a;
+  text-shadow: 0 2px 0 #e09b00;
+  animation: mia-pop 0.5s ease-out;
+}
+.mia-stars-text {
+  margin-left: auto;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mia-muted);
+}
+
+/* Subject cards */
 .mia-card {
   all: unset;
   box-sizing: border-box;
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
-  border-radius: 18px;
-  background: var(--mia-bg);
-  border-left: 8px solid var(--c);
+  border-radius: 24px;
+  background: var(--mia-card);
+  border: 3px solid var(--c);
+  box-shadow: 0 6px 0 color-mix(in srgb, var(--c) 70%, black);
   cursor: pointer;
-  transition: transform 0.15s, opacity 0.3s, filter 0.3s;
+  transition: transform 0.12s, box-shadow 0.12s, opacity 0.3s, filter 0.3s;
 }
 .mia-card:hover {
-  transform: translateX(-4px);
+  transform: translateY(-3px) rotate(-0.6deg);
+}
+.mia-card:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--c) 70%, black);
 }
 .mia-card:focus-visible {
-  outline: 3px solid var(--c);
-  outline-offset: 2px;
+  outline: 4px solid var(--mia-blue);
+  outline-offset: 3px;
 }
 .mia-card.done {
-  opacity: 0.35;
-  filter: grayscale(0.85);
-  cursor: not-allowed;
+  cursor: default;
+  border-color: #c9cfdf;
+  box-shadow: 0 6px 0 #aab2c8;
 }
-.mia-card.done:hover {
+.mia-card.done .mia-face,
+.mia-card.done .mia-card-text {
+  opacity: 0.5;
+  filter: grayscale(0.9);
+}
+.mia-card.done:hover,
+.mia-card.done:active {
   transform: none;
+  box-shadow: 0 6px 0 #aab2c8;
 }
 .mia-card[aria-disabled="true"]:not(.done) {
   opacity: 0.6;
   cursor: not-allowed;
 }
+.mia-card-text {
+  min-width: 0;
+}
+.mia-sticker {
+  position: absolute;
+  right: -6px;
+  top: -10px;
+  background: #ffc21a;
+  color: #5c3b00;
+  font-weight: 700;
+  font-size: 15px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  transform: rotate(8deg);
+  box-shadow: 0 3px 0 #e09b00;
+}
 .mia-face {
-  width: 84px;
-  height: 84px;
+  width: 86px;
+  height: 86px;
   flex-shrink: 0;
   color: var(--mia-ink);
 }
 .mia-face.big {
-  width: 240px;
-  height: 240px;
+  width: 250px;
+  height: 250px;
   max-width: 100%;
 }
 .mia-name {
-  font-weight: 900;
-  font-size: 20px;
+  font-weight: 700;
+  font-size: 21px;
   color: var(--c);
+  line-height: 1.15;
+}
+.mia-icon {
+  font-size: 0.95em;
 }
 .mia-time {
-  font-weight: 800;
-  font-size: 15px;
+  font-weight: 700;
+  font-size: 18px;
   font-variant-numeric: tabular-nums;
 }
 .mia-status {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--mia-muted);
+  font-weight: 600;
 }
-.mia-alldone,
+
+/* Notes and messages */
 .mia-reminder,
 .mia-error,
 .mia-checklist-soon {
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 12px 14px;
-  font-weight: 800;
+  font-weight: 600;
+  font-size: 16px;
   text-align: center;
 }
-.mia-alldone {
-  background: #22a06b22;
-  color: #1f8a5b;
-}
 .mia-reminder {
-  background: #f59e0b33;
-  color: #92400e;
-  animation: mia-pulse 1.2s infinite;
+  background: #fff3b0;
+  color: #6b4a00;
+  border: 3px solid #ffc21a;
+  box-shadow: 0 5px 0 #e0a800;
+  transform: rotate(-1deg);
+}
+.mia-wiggle {
+  display: inline-block;
+  animation: mia-wiggle 0.6s ease-in-out infinite;
 }
 .mia-error {
-  background: #e8505b22;
-  color: #b42332;
+  background: #ffe1e3;
+  color: #b42318;
+  border: 2px solid #f9a8b0;
   cursor: pointer;
 }
 .mia-checklist-soon {
-  border: 2px dashed var(--mia-line);
+  border: 3px dashed #b9c4ea;
+  background: #ffffffaa;
   color: var(--mia-muted);
-  font-size: 13px;
 }
 
+/* The open timer */
 .mia-big {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  padding: 16px;
-  border-radius: 24px;
-  background: var(--mia-bg);
-  border-top: 10px solid var(--c);
+  padding: 0 14px 18px;
+  border-radius: 28px;
+  background: var(--mia-card);
+  border: 3px solid var(--c);
+  box-shadow: 0 7px 0 color-mix(in srgb, var(--c) 70%, black);
+  overflow: hidden;
 }
-.mia-big .mia-name {
+.mia-big-head {
+  align-self: stretch;
+  margin: 0 -14px;
+  padding: 10px 14px;
+  background: var(--c);
+  color: #fff;
   font-size: 26px;
+  font-weight: 700;
+  text-align: center;
 }
 .mia-big .mia-time {
-  font-size: 40px;
-  font-weight: 900;
+  font-size: 52px;
+  line-height: 1;
 }
 .mia-row {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
+  width: 100%;
 }
 .mia-btn {
   border: none;
   border-radius: 999px;
-  padding: 10px 22px;
-  font: inherit;
-  font-weight: 900;
-  font-size: 16px;
+  padding: 11px 24px;
+  font-weight: 700;
+  font-size: 18px;
   cursor: pointer;
-  background: var(--c, #2563eb);
+  background: var(--c, var(--mia-blue));
   color: #fff;
+  box-shadow: 0 5px 0 color-mix(in srgb, var(--c, var(--mia-blue)) 70%, black);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.mia-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--c, var(--mia-blue)) 70%, black);
 }
 .mia-btn:disabled {
   opacity: 0.5;
   cursor: default;
 }
+.mia-btn.big {
+  font-size: 26px;
+  padding: 14px 40px;
+}
+.mia-btn.go {
+  --c: #16a34a;
+  animation: mia-breathe 1.6s ease-in-out infinite;
+}
+.mia-btn.soft {
+  background: #fff;
+  color: var(--mia-ink);
+  border: 3px solid var(--mia-line);
+  box-shadow: 0 5px 0 var(--mia-line);
+}
+.mia-btn.small {
+  font-size: 15px;
+  padding: 8px 16px;
+  margin-top: 8px;
+}
 .mia-btn.ghost {
   background: transparent;
   color: var(--mia-muted);
-  border: 2px solid var(--mia-line);
+  border: 3px solid var(--mia-line);
+  box-shadow: none;
+}
+.mia-link {
+  all: unset;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--mia-muted);
+  text-decoration: underline;
+  width: 100%;
+  text-align: center;
 }
 .mia-waiting {
   width: 100%;
-  font-weight: 900;
+  font-weight: 700;
+  font-size: 18px;
   color: var(--c);
   text-align: center;
 }
+
+/* The buddy's speech bubble */
 .mia-checkin {
   display: flex;
-  gap: 10px;
-  align-items: flex-start;
+  gap: 8px;
+  align-items: flex-end;
   width: 100%;
-  background: var(--mia-panel);
-  border: 2px solid var(--c);
-  border-radius: 18px 18px 18px 4px;
+  animation: mia-pop 0.4s ease-out;
+}
+.mia-checkin-face {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 50%;
+  border: 3px solid var(--c);
+}
+.mia-bubble {
+  flex: 1;
+  background: #eef3ff;
+  border: 3px solid var(--mia-blue);
+  border-radius: 20px 20px 20px 6px;
   padding: 10px 12px;
-  font-weight: 800;
-  font-size: 16px;
-}
-.mia-teacher {
-  font-size: 28px;
-}
-.mia-checkin .mia-btn {
-  margin-top: 8px;
-  font-size: 15px;
-  padding: 8px 16px;
+  font-weight: 600;
+  font-size: 17px;
+  text-align: left;
 }
 
+/* Pop-ups */
 .mia-scrim {
   position: fixed;
   inset: 0;
   z-index: 40;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(12, 26, 75, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
 }
 .mia-chooser {
-  background: var(--mia-panel);
+  background: #fff;
   color: var(--mia-ink);
-  border-radius: 28px;
+  border-radius: 30px;
+  border: 4px solid var(--mia-blue);
   padding: 24px;
   width: min(520px, 100%);
   text-align: center;
   display: flex;
   flex-direction: column;
   gap: 14px;
+  animation: mia-pop 0.35s ease-out;
 }
 .mia-chooser h2 {
   margin: 0;
-  font-size: 26px;
+  font-size: 28px;
+  font-weight: 700;
 }
 .mia-choices {
   display: grid;
@@ -236,12 +400,13 @@
   all: unset;
   box-sizing: border-box;
   cursor: pointer;
-  border-radius: 22px;
+  border-radius: 24px;
   padding: 18px 10px;
-  background: var(--mia-bg);
-  border: 3px solid var(--mia-line);
-  font-weight: 900;
-  font-size: 19px;
+  background: #f3f6ff;
+  border: 4px solid var(--mia-line);
+  box-shadow: 0 6px 0 var(--mia-line);
+  font-weight: 700;
+  font-size: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -250,59 +415,72 @@
 .mia-choice:hover,
 .mia-choice:focus-visible {
   border-color: var(--c);
+  box-shadow: 0 6px 0 color-mix(in srgb, var(--c) 70%, black);
 }
 .mia-choice:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 .mia-choice small {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--mia-muted);
-  font-weight: 700;
+  font-weight: 600;
 }
 .mia-emoji {
-  font-size: 44px;
+  font-size: 48px;
+  line-height: 1;
+}
+.mia-choice-buddy {
+  width: 54px;
+  height: 54px;
 }
 .mia-pin {
   font: inherit;
-  font-size: 24px;
+  font-size: 26px;
   letter-spacing: 0.3em;
   text-align: center;
   padding: 10px;
-  border-radius: 12px;
-  border: 2px solid var(--mia-line);
-  background: var(--mia-bg);
+  border-radius: 16px;
+  border: 3px solid var(--mia-line);
+  background: #f3f6ff;
   color: var(--mia-ink);
 }
 
+/* Break screen */
 .mia-break {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: linear-gradient(#bfe3ff 0 72%, #8fd18b 72%);
-  color: #1f2937;
+  background: linear-gradient(#9fd3ff 0%, #cfe9ff 70%, #7ccf6e 70%, #5cb54f 100%);
+  color: var(--mia-ink);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 6vh 16px 0;
   text-align: center;
   overflow: hidden;
+  font-family: var(--mia-fun);
 }
 .mia-break h1 {
   margin: 0;
-  font-size: clamp(32px, 6vw, 64px);
+  font-size: clamp(36px, 7vw, 72px);
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 4px 0 var(--mia-blue);
 }
 .mia-count {
-  font-size: clamp(64px, 14vw, 160px);
-  font-weight: 900;
+  font-size: clamp(72px, 15vw, 170px);
+  font-weight: 700;
   line-height: 1;
   font-variant-numeric: tabular-nums;
+  color: var(--mia-blue);
 }
 .mia-warn {
-  font-size: clamp(18px, 3.4vw, 34px);
-  font-weight: 900;
-  background: #ffffff55;
-  padding: 8px 20px;
+  font-size: clamp(20px, 3.6vw, 36px);
+  font-weight: 700;
+  background: #fff3b0;
+  border: 3px solid #ffc21a;
+  padding: 8px 22px;
   border-radius: 999px;
   visibility: hidden;
 }
@@ -311,12 +489,59 @@
   animation: mia-pulse 1s infinite;
 }
 .mia-break.ending .mia-count {
-  color: #e8505b;
+  color: #e11d48;
 }
 .mia-break .mia-btn {
   margin-top: 14px;
-  font-size: 20px;
-  padding: 14px 28px;
+  z-index: 1;
+}
+.mia-sun {
+  position: absolute;
+  top: 5vh;
+  right: 8vw;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: #ffd84d;
+  box-shadow: 0 0 0 14px #ffe98a88, 0 0 0 30px #fff3b044;
+}
+.mia-cloud {
+  position: absolute;
+  width: 140px;
+  height: 46px;
+  background: #fff;
+  border-radius: 999px;
+  opacity: 0.9;
+  animation: mia-drift 22s linear infinite;
+}
+.mia-cloud::before,
+.mia-cloud::after {
+  content: "";
+  position: absolute;
+  background: #fff;
+  border-radius: 50%;
+}
+.mia-cloud::before {
+  width: 60px;
+  height: 60px;
+  left: 22px;
+  top: -30px;
+}
+.mia-cloud::after {
+  width: 44px;
+  height: 44px;
+  left: 70px;
+  top: -20px;
+}
+.mia-cloud.c1 {
+  top: 14vh;
+  left: -160px;
+}
+.mia-cloud.c2 {
+  top: 34vh;
+  left: -160px;
+  animation-delay: -11s;
+  transform: scale(0.7);
 }
 .mia-walker {
   position: absolute;
@@ -327,13 +552,14 @@
 }
 .mia-tag {
   position: absolute;
-  top: -6px;
-  left: 120px;
+  top: -10px;
+  left: 118px;
   background: #fff;
-  border-radius: 10px;
-  padding: 2px 8px;
-  font-weight: 900;
-  font-size: 14px;
+  border: 3px solid var(--mia-blue);
+  border-radius: 12px;
+  padding: 1px 10px;
+  font-weight: 700;
+  font-size: 15px;
 }
 .mia-buddy {
   width: 220px;
@@ -349,6 +575,7 @@
 .mia-leg.l3 {
   animation-delay: -0.3s;
 }
+
 @keyframes mia-step {
   0%,
   100% {
@@ -365,7 +592,48 @@
 }
 @keyframes mia-pulse {
   50% {
-    transform: scale(1.04);
+    transform: scale(1.05);
+  }
+}
+@keyframes mia-breathe {
+  50% {
+    transform: scale(1.05);
+  }
+}
+@keyframes mia-pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes mia-wiggle {
+  0%,
+  100% {
+    transform: rotate(-12deg);
+  }
+  50% {
+    transform: rotate(12deg);
+  }
+}
+@keyframes mia-nod {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  50% {
+    transform: rotate(-6deg);
+  }
+}
+@keyframes mia-drift {
+  to {
+    translate: calc(100vw + 320px) 0;
   }
 }
 
@@ -375,10 +643,8 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .mia-buddy,
-  .mia-leg,
-  .mia-reminder,
-  .mia-break.ending .mia-warn {
-    animation: none;
+  .mia-hud *,
+  .mia-break * {
+    animation: none !important;
   }
 }

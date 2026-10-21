@@ -1,13 +1,22 @@
 import type { BuddyId } from "@/content/miacademy";
 
 /**
- * A kid's animal buddy, drawn in code, facing right with walking legs
- * (the .mia-leg animation lives in miacademy.css).
+ * A kid's animal buddy, drawn in code. The whole animal faces right with
+ * walking legs (the .mia-leg animation lives in miacademy.css); `head` shows
+ * just the face, for greetings and speech bubbles.
  */
-export default function Buddy({ kind, className }: { kind: BuddyId; className?: string }) {
+export default function Buddy({ kind, head = false, className }: { kind: BuddyId; head?: boolean; className?: string }) {
+  const Head = kind === "wolf" ? WolfHead : PandaHead;
+  if (head)
+    return (
+      <svg className={className} viewBox={kind === "wolf" ? "134 2 80 80" : "132 10 72 72"} aria-hidden="true">
+        <Head />
+      </svg>
+    );
   return (
     <svg className={className} viewBox="0 0 220 130" aria-hidden="true">
-      {kind === "wolf" ? <Wolf /> : <Panda />}
+      {kind === "wolf" ? <WolfBody /> : <PandaBody />}
+      <Head />
     </svg>
   );
 }
@@ -23,7 +32,7 @@ function Legs({ front, back }: { front: string; back: string }) {
   );
 }
 
-function Panda() {
+function PandaBody() {
   return (
     <>
       <circle cx="60" cy="64" r="8" fill="#f7f7f4" stroke="#d9d9d4" />
@@ -31,6 +40,13 @@ function Panda() {
       <ellipse cx="112" cy="72" rx="54" ry="32" fill="#f7f7f4" stroke="#d9d9d4" />
       {/* the black band over the shoulders */}
       <ellipse cx="138" cy="72" rx="15" ry="31" fill="#262626" />
+    </>
+  );
+}
+
+function PandaHead() {
+  return (
+    <>
       <circle cx="150" cy="28" r="11" fill="#262626" />
       <circle cx="186" cy="26" r="11" fill="#262626" />
       <circle cx="168" cy="52" r="28" fill="#f7f7f4" stroke="#d9d9d4" />
@@ -38,6 +54,7 @@ function Panda() {
       <ellipse cx="181" cy="51" rx="7" ry="9.5" fill="#262626" transform="rotate(20 181 51)" />
       <circle cx="161" cy="50" r="2.6" fill="#fff" />
       <circle cx="180" cy="50" r="2.6" fill="#fff" />
+      <ellipse cx="156" cy="63" rx="5" ry="3" fill="#ffb3c1" opacity="0.7" />
       <ellipse cx="189" cy="64" rx="10" ry="7.5" fill="#efefea" />
       <ellipse cx="196" cy="61" rx="4.5" ry="3.2" fill="#222" />
       <path d="M184 69 q6 5 12 0" stroke="#222" strokeWidth="2" fill="none" strokeLinecap="round" />
@@ -45,7 +62,7 @@ function Panda() {
   );
 }
 
-function Wolf() {
+function WolfBody() {
   return (
     <>
       <g transform="rotate(18 48 70)">
@@ -55,6 +72,13 @@ function Wolf() {
       <Legs front="#5a5f67" back="#4b5058" />
       <ellipse cx="110" cy="70" rx="54" ry="28" fill="#8a9099" />
       <ellipse cx="116" cy="84" rx="36" ry="12" fill="#d9dce0" />
+    </>
+  );
+}
+
+function WolfHead() {
+  return (
+    <>
       <polygon points="146,40 150,10 166,32" fill="#6f747c" />
       <polygon points="151,34 153,18 161,31" fill="#e0c9c0" />
       <polygon points="168,30 182,6 188,34" fill="#6f747c" />

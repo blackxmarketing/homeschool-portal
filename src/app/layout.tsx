@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Lexend, Press_Start_2P } from "next/font/google";
+import { Fraunces, Fredoka, Lexend, Press_Start_2P } from "next/font/google";
 import "./globals.css";
 import "./game.css";
 import "./teach.css";
@@ -15,6 +15,8 @@ const kidFont = Lexend({ subsets: ["latin"], variable: "--font-kid", display: "s
 // A soft, friendly serif for headings.
 // Chunky pixel letters for game titles (short text only; reading stays in Lexend).
 const pixelFont = Press_Start_2P({ subsets: ["latin"], variable: "--font-pixel", display: "swap", weight: "400" });
+// Round, bubbly letters for the Miacademy timer strip.
+const funFont = Fredoka({ subsets: ["latin"], variable: "--font-fun", display: "swap", weight: ["500", "600", "700"] });
 const displayFont = Fraunces({ subsets: ["latin"], variable: "--font-display", display: "swap", weight: ["600", "700"] });
 
 export const metadata: Metadata = {
@@ -24,7 +26,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${kidFont.variable} ${displayFont.variable} ${pixelFont.variable}`}>
+    <html lang="en" className={`${kidFont.variable} ${displayFont.variable} ${pixelFont.variable} ${funFont.variable}`}>
       <body>{children}</body>
     </html>
   );

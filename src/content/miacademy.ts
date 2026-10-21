@@ -9,14 +9,15 @@ export interface MiaSubject {
   name: string;
   /** Colour of the timer's disk. */
   color: string;
+  icon: string;
 }
 
 /** Same four subjects for every kid. Electives get added here later. */
 export const MIA_SUBJECTS: MiaSubject[] = [
-  { id: "math", name: "Math", color: "#e8505b" },
-  { id: "ela", name: "Language Arts", color: "#3b82f6" },
-  { id: "sci", name: "Science", color: "#22a06b" },
-  { id: "his", name: "History", color: "#f59e0b" },
+  { id: "math", name: "Math", color: "#f2545b", icon: "🔢" },
+  { id: "ela", name: "Language Arts", color: "#8b5cf6", icon: "📚" },
+  { id: "sci", name: "Science", color: "#16a34a", icon: "🔬" },
+  { id: "his", name: "History", color: "#f59e0b", icon: "🏛️" },
 ];
 
 export const MIA_MINUTES = 30;

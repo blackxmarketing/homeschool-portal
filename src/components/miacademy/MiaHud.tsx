@@ -10,20 +10,32 @@ import {
   MIA_REMIND_EVERY_SECONDS,
   MIA_SUBJECTS,
   type MiaSettings,
+  type MiaSubject,
 } from "@/content/miacademy";
 import { isOpen, isRunning, lateMs, remaining, type MiaTimerState } from "@/lib/miaTimer";
-import { chime, speak } from "@/components/voice";
 import Buddy from "./Buddy";
 
-type Timers = Record<string, MiaTimerState | null>;
+export type Timers = Record<string, MiaTimerState | null>;
 
-/** What the desktop app (docs/MIACADEMY.md) adds to the page. Missing in a normal browser. */
-interface DesktopBridge {
+/** One call to the portal's /api/mia. The portal page uses fetch; the Chrome extension goes through its background worker. */
+export type MiaApi = (body: Record<string, unknown>) => Promise<{ ok: boolean; data: { timers?: Timers; serverNow?: number; error?: string } }>;
+
+/** What hosts the page (the Chrome extension) adds. Missing in a normal browser tab. */
+interface HostBridge {
   onMiacademy?: (cb: (open: boolean) => void) => void;
   setFullscreen?: (on: boolean) => void;
 }
-const bridge = (): DesktopBridge | undefined =>
-  typeof window === "undefined" ? undefined : (window as unknown as { miaHud?: DesktopBridge }).miaHud;
+const bridge = (): HostBridge | undefined =>
+  typeof window === "undefined" ? undefined : (window as unknown as { miaHud?: HostBridge }).miaHud;
+
+export const portalApi: MiaApi = async (body) => {
+  try {
+    const res = await fetch("/api/mia", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+    return { ok: res.ok, data: await res.json().catch(() => ({})) };
+  } catch {
+    return { ok: false, data: { error: "Can't reach the portal. Check the internet." } };
+  }
+};
 
 const pick = <T,>(list: readonly T[]) => list[Math.floor(Math.random() * list.length)];
 
@@ -39,15 +51,22 @@ interface Checkin {
 }
 
 export default function MiaHud({
+  kidName,
   settings,
   initialTimers,
   serverNow,
   demo,
+  api = portalApi,
+  say: sayRaw,
 }: {
+  kidName: string;
   settings: MiaSettings;
   initialTimers: Timers;
   serverNow: number;
   demo: boolean;
+  api?: MiaApi;
+  /** Speaks a line in the teacher's voice. */
+  say: (text: string) => void;
 }) {
   const [timers, setTimers] = useState<Timers>(initialTimers);
   const [offset, setOffset] = useState(() => serverNow - Date.now());
@@ -61,40 +80,32 @@ export default function MiaHud({
   const [miaOpen, setMiaOpen] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const buddyName = BUDDIES.find((b) => b.id === settings.buddy)?.name ?? "Your buddy";
+  const buddyName = BUDDIES.find((b) => b.id === settings.buddy)?.name ?? "Buddy";
   const subjectName = (id: string) => MIA_SUBJECTS.find((s) => s.id === id)?.name ?? id;
   const fill = (text: string, subject?: string) =>
     text
       .replace("{subject}", subject ? subjectName(subject) : "")
       .replace("{minutes}", String(MIA_MINUTES))
       .replace("{buddy}", buddyName.toLowerCase());
+  // Only the tab the kid is looking at talks, in case Miacademy is open twice.
   const say = (text: string) => {
-    chime("pop");
-    speak(`mia-${Date.now()}`, text, { kind: "female" });
+    if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
+    sayRaw(text);
   };
 
   const openId = MIA_SUBJECTS.find((s) => isOpen(timers[s.id]))?.id ?? null;
-  const allDone = MIA_SUBJECTS.every((s) => timers[s.id]?.finishedAt);
+  const doneCount = MIA_SUBJECTS.filter((s) => timers[s.id]?.finishedAt).length;
+  const allDone = doneCount === MIA_SUBJECTS.length;
 
-  async function post(body: Record<string, unknown>): Promise<Timers | null> {
+  async function post(body: Record<string, unknown>): Promise<boolean> {
     setBusy(true);
     setError(null);
-    try {
-      const res = await fetch("/api/mia", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...body, demo }) });
-      const data = (await res.json().catch(() => ({}))) as { timers?: Timers; serverNow?: number; error?: string };
-      if (data.serverNow) setOffset(data.serverNow - Date.now());
-      if (data.timers) setTimers(data.timers);
-      if (!res.ok) {
-        setError(data.error ?? "Something went wrong.");
-        return null;
-      }
-      return data.timers ?? null;
-    } catch {
-      setError("Can't reach the portal. Check the internet.");
-      return null;
-    } finally {
-      setBusy(false);
-    }
+    const { ok, data } = await api({ ...body, demo });
+    if (data.serverNow) setOffset(data.serverNow - Date.now());
+    if (data.timers) setTimers(data.timers);
+    if (!ok) setError(data.error ?? "Something went wrong.");
+    setBusy(false);
+    return ok;
   }
   const act = (subject: string, action: string, extra: Record<string, unknown> = {}) => post({ subject, action, ...extra });
 
@@ -131,8 +142,7 @@ export default function MiaHud({
         r.since ??= t;
         const first = (demo ? 10 : MIA_REMIND_AFTER_SECONDS) * 1000;
         const every = (demo ? 15 : MIA_REMIND_EVERY_SECONDS) * 1000;
-        const due = r.count === 0 ? first : first + r.count * every;
-        if (t - r.since >= due) {
+        if (t - r.since >= first + r.count * every) {
           r.count++;
           setReminder(true);
           say(MIA_LINES.remind);
@@ -197,7 +207,7 @@ export default function MiaHud({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [demo]);
 
-  // ---- The desktop app: knows when Miacademy is open, and makes the window full screen for breaks ----
+  // ---- The host (Chrome extension): knows when Miacademy is open, and goes full screen for breaks ----
   useEffect(() => {
     bridge()?.onMiacademy?.((open) => setMiaOpen(open));
   }, []);
@@ -226,6 +236,7 @@ export default function MiaHud({
   async function helpRestart(subject: string) {
     if (settings.helpPin && !pinOpen) {
       setPin("");
+      setError(null);
       setPinOpen(true);
       return;
     }
@@ -241,31 +252,61 @@ export default function MiaHud({
 
   // ---- Screens ----
   const focused = focus ? MIA_SUBJECTS.find((s) => s.id === focus)! : null;
+  const ft = focused ? timers[focused.id] : null;
+  const hello = allDone
+    ? "You did it! All done today! 🎉"
+    : !focused
+      ? reminder
+        ? "Don't forget your timer!"
+        : "Pick a subject to start!"
+      : !ft
+        ? "Ready? Press Start!"
+        : isRunning(ft)
+          ? "You've got this!"
+          : ft.pause?.type === "help"
+            ? "Help is on the way!"
+            : "Let's get back to it!";
 
   return (
     <div className={`mia-hud ${focused ? "focus" : ""}`}>
-      <div className="mia-head">
-        <span>{focused ? "Now learning" : "Today's subjects"}</span>
+      <header className="mia-hello">
+        <div className="mia-hello-face">
+          <Buddy kind={settings.buddy} head />
+        </div>
+        <div>
+          <div className="mia-hi">Hi, {kidName}!</div>
+          <div className="mia-sub">{hello}</div>
+        </div>
         {demo && (
-          <button className="mia-demo" onClick={() => setMiaOpen((o) => !o)}>
+          <button className="mia-demo" onClick={() => setMiaOpen((o) => !o)} title="Pretend Miacademy is open or closed">
             demo: Miacademy {miaOpen ? "open" : "closed"}
           </button>
         )}
-      </div>
+      </header>
+
+      {!focused && (
+        <div className="mia-stars" aria-label={`${doneCount} of ${MIA_SUBJECTS.length} subjects done today`}>
+          {MIA_SUBJECTS.map((s, i) => (
+            <span key={s.id} className={i < doneCount ? "on" : ""}>
+              ★
+            </span>
+          ))}
+          <span className="mia-stars-text">
+            {doneCount} of {MIA_SUBJECTS.length} done today
+          </span>
+        </div>
+      )}
 
       {reminder && !openId && (
         <div className="mia-reminder" role="alert">
-          ⏰ {MIA_LINES.remind}
+          <span className="mia-wiggle">⏰</span> {MIA_LINES.remind}
         </div>
       )}
-      {error && (
+      {error && !pinOpen && (
         <div className="mia-error" role="alert" onClick={() => setError(null)}>
           {error}
         </div>
       )}
-
-      {!focused &&
-        (allDone ? <div className="mia-alldone">🎉 All four subjects are done for today!</div> : null)}
 
       {!focused &&
         MIA_SUBJECTS.map((s) => {
@@ -280,12 +321,15 @@ export default function MiaHud({
               onClick={() => !done && !blocked && setFocus(s.id)}
               aria-disabled={done || blocked}
             >
-              <Face color={s.color} fraction={t ? remaining(t, now) / t.durMs : 1} />
-              <div>
-                <div className="mia-name">{s.name}</div>
-                <div className="mia-time">{done ? "0:00" : mmss(t ? remaining(t, now) : MIA_MINUTES * 60 * 1000 * (demo ? 1 / 30 : 1))}</div>
-                <div className="mia-status">{done ? "✓ Done for today" : t ? "In progress: tap to open" : "Tap to open"}</div>
+              <Face color={s.color} fraction={done ? 0 : t ? remaining(t, now) / t.durMs : 1} />
+              <div className="mia-card-text">
+                <div className="mia-name">
+                  <span className="mia-icon">{s.icon}</span> {s.name}
+                </div>
+                <div className="mia-time">{done ? "All done!" : `${mmss(t ? remaining(t, now) : (demo ? 60 : MIA_MINUTES * 60) * 1000)}`}</div>
+                {!done && <div className="mia-status">{t ? "Keep going ▶" : blocked ? "Finish your other subject first" : "Tap to start ▶"}</div>}
               </div>
+              {done && <span className="mia-sticker">⭐ Done!</span>}
             </button>
           );
         })}
@@ -293,7 +337,7 @@ export default function MiaHud({
       {focused && (
         <FocusedTimer
           subject={focused}
-          t={timers[focused.id]}
+          t={ft}
           now={now}
           settings={settings}
           busy={busy}
@@ -307,10 +351,14 @@ export default function MiaHud({
         />
       )}
 
-      {focused && <div className="mia-checklist-soon">Your step-by-step checklist shows here once Miacademy is connected.</div>}
+      {focused && (
+        <div className="mia-checklist-soon">
+          <span>📝</span> Your step-by-step checklist will show up here soon!
+        </div>
+      )}
 
       {/* Pause: why? */}
-      {focused && timers[focused.id]?.pause?.type === "choosing" && (
+      {focused && ft?.pause?.type === "choosing" && (
         <div className="mia-scrim" style={{ ["--c" as string]: focused.color }}>
           <div className="mia-chooser">
             <h2>Why do you need to pause?</h2>
@@ -318,10 +366,13 @@ export default function MiaHud({
               <button className="mia-choice" onClick={() => chooseHelp(focused.id)} disabled={busy}>
                 <span className="mia-emoji">🙋</span>I need help<small>A grown-up will come</small>
               </button>
-              <button className="mia-choice" onClick={() => chooseBreak(focused.id)} disabled={busy || (timers[focused.id]?.breaks ?? 0) >= 1}>
-                <span className="mia-emoji">☕</span>I need a break
+              <button className="mia-choice" onClick={() => chooseBreak(focused.id)} disabled={busy || ft.breaks >= 1}>
+                <span className="mia-emoji">
+                  <Buddy kind={settings.buddy} head className="mia-choice-buddy" />
+                </span>
+                I need a break
                 <small>
-                  {(timers[focused.id]?.breaks ?? 0) >= 1
+                  {ft.breaks >= 1
                     ? `You already had your break for ${focused.name}`
                     : demo
                       ? "40 seconds (demo)"
@@ -337,8 +388,8 @@ export default function MiaHud({
       )}
 
       {/* Break: the buddy walks across the screen for the whole break */}
-      {focused && timers[focused.id]?.pause?.type === "break" && (
-        <BreakScreen t={timers[focused.id]!} now={now} buddy={settings.buddy} buddyName={buddyName} color={focused.color} onDone={() => endBreakEarly(focused.id)} />
+      {focused && ft?.pause?.type === "break" && (
+        <BreakScreen t={ft} now={now} buddy={settings.buddy} buddyName={buddyName} color={focused.color} onDone={() => endBreakEarly(focused.id)} />
       )}
 
       {/* Grown-up PIN to restart after help */}
@@ -393,7 +444,7 @@ function FocusedTimer({
   onHelpRestart,
   onAnswer,
 }: {
-  subject: (typeof MIA_SUBJECTS)[number];
+  subject: MiaSubject;
   t: MiaTimerState | null;
   now: number;
   settings: MiaSettings;
@@ -406,24 +457,24 @@ function FocusedTimer({
   onHelpRestart: () => void;
   onAnswer: () => void;
 }) {
-  const full = demo ? 60 * 1000 : MIA_MINUTES * 60 * 1000;
+  const full = (demo ? 60 : MIA_MINUTES * 60) * 1000;
   const rem = t ? remaining(t, now) : full;
   let controls: React.ReactNode;
   if (!t)
     controls = (
       <>
-        <button className="mia-btn" onClick={onStart} disabled={busy}>
-          Start
+        <button className="mia-btn big go" onClick={onStart} disabled={busy}>
+          ▶ Start!
         </button>
-        <button className="mia-btn ghost" onClick={onBack}>
-          Back
+        <button className="mia-link" onClick={onBack}>
+          ← Pick a different subject
         </button>
       </>
     );
   else if (t.pause?.type === "help")
     controls = (
       <>
-        <div className="mia-waiting">✋ Paused. A grown-up is coming to help.</div>
+        <div className="mia-waiting">✋ Paused. A grown-up is coming to help!</div>
         <button className="mia-btn" onClick={onHelpRestart} disabled={busy}>
           Grown-up: start timer
         </button>
@@ -432,33 +483,35 @@ function FocusedTimer({
   else if (t.pause?.type === "ready")
     controls = (
       <>
-        <div className="mia-waiting">Break&apos;s over! Press Start when you&apos;re in your seat.</div>
+        <div className="mia-waiting">Break&apos;s over! Press Start when you&apos;re back in your seat.</div>
         {t.pause.lateTold && <div className="mia-status">We let a grown-up know.</div>}
-        <button className="mia-btn" onClick={onStart} disabled={busy}>
-          Start
+        <button className="mia-btn big go" onClick={onStart} disabled={busy}>
+          ▶ Start!
         </button>
       </>
     );
   else if (isRunning(t))
     controls = settings.allowPause ? (
-      <button className="mia-btn" onClick={onPause} disabled={busy}>
-        Pause
+      <button className="mia-btn soft" onClick={onPause} disabled={busy}>
+        ⏸ Pause
       </button>
     ) : null;
 
   return (
     <div className="mia-big" style={{ ["--c" as string]: subject.color }}>
-      <div className="mia-name">{subject.name}</div>
+      <div className="mia-big-head">
+        <span className="mia-icon">{subject.icon}</span> {subject.name}
+      </div>
       <Face color={subject.color} fraction={t ? rem / t.durMs : 1} big />
       <div className="mia-time">{mmss(rem)}</div>
       <div className="mia-row">{controls}</div>
       {checkin && (
         <div className="mia-checkin">
-          <span className="mia-teacher">👩‍🏫</span>
-          <div>
+          <Buddy kind={settings.buddy} head className="mia-checkin-face" />
+          <div className="mia-bubble">
             <div>{checkin.text}</div>
             {checkin.ask && (
-              <button className="mia-btn" onClick={onAnswer}>
+              <button className="mia-btn small" onClick={onAnswer}>
                 👍 Yes, I&apos;m on it!
               </button>
             )}
@@ -497,10 +550,13 @@ function BreakScreen({
   const progress = 1 - rem / p.lenMs;
   return (
     <div className={`mia-break ${rem <= 30000 ? "ending" : ""}`}>
+      <div className="mia-sun" />
+      <div className="mia-cloud c1" />
+      <div className="mia-cloud c2" />
       <h1>Break time!</h1>
       <div className="mia-count">{mmss(rem)}</div>
-      <div className="mia-warn">30 seconds: head back to your seat!</div>
-      <button className="mia-btn" style={{ ["--c" as string]: color }} onClick={onDone}>
+      <div className="mia-warn">30 seconds! Head back to your seat!</div>
+      <button className="mia-btn big" style={{ ["--c" as string]: color }} onClick={onDone}>
         I&apos;m ready to go back
       </button>
       <div className="mia-walker" style={{ transform: `translateX(${-220 + progress * (width + 220)}px)` }}>
@@ -526,24 +582,25 @@ function Face({ color, fraction, big = false }: { color: string; fraction: numbe
     const major = m % 5 === 0;
     // Rounded so the server and the browser draw exactly the same numbers.
     const p = (r: number) => [+(50 - r * Math.sin(a)).toFixed(2), +(50 - r * Math.cos(a)).toFixed(2)];
-    const [x1, y1] = p(major ? 40.5 : 42);
+    const [x1, y1] = p(major ? 40 : 42);
     const [x2, y2] = p(44.5);
-    ticks.push(<line key={`t${m}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke="currentColor" strokeWidth={major ? 1.4 : 0.6} opacity={0.55} />);
+    ticks.push(<line key={`t${m}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke="currentColor" strokeWidth={major ? 1.8 : 0.7} strokeLinecap="round" opacity={0.5} />);
     if (major) {
-      const [tx, ty] = p(51);
+      const [tx, ty] = p(51.5);
       ticks.push(
-        <text key={`n${m}`} x={tx} y={ty} fontSize="7" fontWeight="800" textAnchor="middle" dominantBaseline="central" fill="currentColor" opacity={0.7}>
+        <text key={`n${m}`} x={tx} y={ty} fontSize="7.5" fontWeight="700" textAnchor="middle" dominantBaseline="central" fill="currentColor" opacity={0.75}>
           {m}
         </text>,
       );
     }
   }
   return (
-    <svg className={big ? "mia-face big" : "mia-face"} viewBox="-6 -6 112 112" aria-hidden="true">
-      <circle cx="50" cy="50" r="40" fill="#fff" stroke="#e3ded2" />
+    <svg className={big ? "mia-face big" : "mia-face"} viewBox="-7 -7 114 114" aria-hidden="true">
+      <circle cx="50" cy="50" r="46" fill="#fff" stroke={color} strokeWidth="2.5" />
+      <circle cx="50" cy="50" r="40" fill="#f3f5fb" />
       {wedge && <path d={wedge} fill={color} />}
       {ticks}
-      <circle cx="50" cy="50" r="4.5" fill="#fff" stroke="#e3ded2" />
+      <circle cx="50" cy="50" r="5" fill="#fff" stroke={color} strokeWidth="2" />
     </svg>
   );
 }
