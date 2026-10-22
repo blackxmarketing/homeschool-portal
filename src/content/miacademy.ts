@@ -75,14 +75,25 @@ export const MIA_SKIP_ITEMS = [/\boptional\b/i, /\bbonus\b/i, /\brewatch\b/i];
  * What a lesson's checklist includes. Guided notes are always done (no photo
  * check); "worksheets" are the PDF activities, checked from a photo against the
  * answer key; "practice" is Miacademy's online practice levels.
- * - Normally: the PDF activities (hands-on ones too), no online practice.
- * - Math "Wrap Up" lessons: the online practice instead of the PDF packet.
+ * - Normally: the PDF activities (hands-on ones too); online practice only when the
+ *   parent marked it in Miacademy (practiceIfMarked: known from the parent's calendar).
+ * - Math: no online practice on regular lessons, even if marked; "Wrap Up" lessons
+ *   use the online practice instead of the PDF packet.
  * - U.S. Geography: every online practice level; the packet only for the guided notes.
+ * - Other History (e.g. Ancient World History): the packet instead of online practice, even if marked.
  */
-export function miaLessonRules(subject: string, lessonTitle: string, courseTitle = ""): { practice: boolean; worksheets: boolean } {
-  if (/geograph/i.test(courseTitle)) return { practice: true, worksheets: false };
-  if (subject === "math" && /wrap[\s-]*up/i.test(lessonTitle)) return { practice: true, worksheets: false };
-  return { practice: false, worksheets: true };
+export function miaLessonRules(
+  subject: string,
+  lessonTitle: string,
+  courseTitle = "",
+): { practice: boolean; worksheets: boolean; practiceIfMarked: boolean } {
+  if (/geograph/i.test(courseTitle)) return { practice: true, worksheets: false, practiceIfMarked: true };
+  if (subject === "math")
+    return /wrap[\s-]*up/i.test(lessonTitle)
+      ? { practice: true, worksheets: false, practiceIfMarked: true }
+      : { practice: false, worksheets: true, practiceIfMarked: false };
+  if (subject === "his") return { practice: false, worksheets: true, practiceIfMarked: false };
+  return { practice: false, worksheets: true, practiceIfMarked: true };
 }
 
 /**

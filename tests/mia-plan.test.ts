@@ -65,7 +65,7 @@ describe("reading the parent's Miacademy calendar", () => {
     expect(parsePlanWeek("nonsense")).toEqual([]);
   });
 
-  it("builds Science items: video first, the packet's notes and activities, the quiz; practice and bonus left off", () => {
+  it("builds Science items: video first, the packet's notes and activities, marked practice, the quiz; bonus left off", () => {
     const [, gravity] = planLessons(parsePlanWeek(WEEK));
     const items = planLessonItems(gravity, "sci", null, GRAVITY_PDF);
     expect(items.map((i) => [i.title, i.check])).toEqual([
@@ -73,8 +73,14 @@ describe("reading the parent's Miacademy calendar", () => {
       ["Complete the guided notes", "self"],
       ["Forces Word Search", "photo"],
       ["STEM Challenge: Marble Run", "parent"],
+      ["Online practice: Level 1", "practice"], // marked in Miacademy, so it counts
       ["Quiz Assessment", "quiz"],
     ]);
+    // Regular Math lessons skip online practice even when it's marked.
+    expect(planLessonItems({ ...gravity, course: "Math: Level E" }, "math", null, GRAVITY_PDF).some((i) => i.check === "practice")).toBe(false);
+    // Ancient World History does the packet instead, even when practice is marked; U.S. Geography does every level.
+    expect(planLessonItems({ ...gravity, course: "Ancient World History" }, "his", null, GRAVITY_PDF).some((i) => i.check === "practice")).toBe(false);
+    expect(planLessonItems({ ...gravity, course: "U.S. Geography" }, "his", null, GRAVITY_PDF).some((i) => i.check === "practice")).toBe(true);
     expect(items[0].id).toBe(`task-${id(11)}`);
   });
 

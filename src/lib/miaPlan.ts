@@ -127,7 +127,8 @@ export function planLessonItems(lesson: PlanLesson, subject: string, plan: MiaCo
       if (!pdfPlaced) items.push(...fromPdf);
       pdfPlaced = true;
     } else if (t.type === "Practice") {
-      if (rules.practice) items.push(task(t, practiceName(t.name), "practice"));
+      // Everything on the calendar is marked: practice counts if the lesson's rules take marked practice.
+      if (rules.practice || rules.practiceIfMarked) items.push(task(t, practiceName(t.name), "practice"));
     } else if (t.type === "Assessment") items.push(task(t, t.name || "Online quiz", "quiz"));
   }
   if (!pdfPlaced) items.push(...fromPdf);
