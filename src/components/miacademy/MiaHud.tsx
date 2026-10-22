@@ -7,6 +7,7 @@ import {
   MIA_CHECKIN_ANSWER_SECONDS,
   MIA_LINES,
   MIA_MINUTES,
+  MIA_OVERTIME_MAX_MINUTES,
   MIA_REMIND_AFTER_SECONDS,
   MIA_REMIND_EVERY_SECONDS,
   MIA_SUBJECTS,
@@ -58,6 +59,8 @@ interface HostBridge {
   /** New checklists after the extension reports what Miacademy's pages show. */
   onChecklists?: (cb: (c: Checklists) => void) => void;
   setFullscreen?: (on: boolean) => void;
+  /** The Miacademy task (video, practice, quiz) the kid has open, or null. Only the extension knows. */
+  onTask?: (cb: (taskKey: string | null) => void) => void;
 }
 const bridge = (): HostBridge | undefined =>
   typeof window === "undefined" ? undefined : (window as unknown as { miaHud?: HostBridge }).miaHud;
@@ -148,6 +151,7 @@ export default function MiaHud({
   const [checkin, setCheckin] = useState<Checkin | null>(null);
   const [reminder, setReminder] = useState(false);
   const [miaOpen, setMiaOpen] = useState(false);
+  const [taskKey, setTaskKey] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const openId = MIA_SUBJECTS.find((s) => isOpen(timers[s.id]))?.id ?? null;
@@ -181,7 +185,7 @@ export default function MiaHud({
       const key = Date.now();
       setCoin({ ring: first.ring, cents: first.cents, key, phase: "show" });
       moneySound("ching");
-      setTimeout(() => say(`Your ${ring?.name ?? ""} ring is full! ${first.cents} cents go in your bank.`), 700);
+      if (!first.ring.startsWith("overtime:")) setTimeout(() => say(`Your ${ring?.name ?? ""} ring is full! ${first.cents} cents go in your bank.`), 700);
       setTimeout(() => {
         // Fly from the middle of the screen to the bank.
         const b = bankFace.current?.getBoundingClientRect();
@@ -240,15 +244,17 @@ export default function MiaHud({
   const act = (subject: string, action: string, extra: Record<string, unknown> = {}) => post({ subject, action, ...extra });
 
   // ---- The clock: announcements, check-ins, breaks, finishing, reminders ----
-  const live = useRef({ timers, offset, checkin, miaOpen, openId, allDone });
-  live.current = { timers, offset, checkin, miaOpen, openId, allDone };
+  const live = useRef({ timers, offset, checkin, miaOpen, openId, allDone, taskKey });
+  live.current = { timers, offset, checkin, miaOpen, openId, allDone, taskKey };
+  // The task that was open when time ran out: overtime ends when it's done (the kid moves on from it).
+  const overtimeTask = useRef<string | null>(null);
   const last = useRef<{ key: string; rem: number; brem: number } | null>(null);
   const sent = useRef(new Set<string>());
   const remind = useRef<{ since: number | null; count: number }>({ since: null, count: 0 });
 
   useEffect(() => {
     const tick = () => {
-      const { timers, offset, checkin, miaOpen, openId, allDone } = live.current;
+      const { timers, offset, checkin, miaOpen, openId, allDone, taskKey } = live.current;
       const t = Date.now() + offset;
       setNow(t);
       const once = (key: string, fn: () => void) => {
@@ -311,18 +317,19 @@ export default function MiaHud({
             say(text);
           }
         }
-        if (rem <= 0)
-          once(`${key}:finish`, async () => {
-            if (await act(openId, "finish")) {
-              setFocus(null);
-              setCheckin(null);
-              const next = MIA_SUBJECTS.find((x) => x.id !== openId && !timers[x.id]?.finishedAt);
-              if (next) {
-                setBetween({ from: openId, next: next.id, phase: "ask", day: new Date().toDateString() });
-                say(fill(MIA_LINES.between, openId).replace("{next}", next.name));
-              } else say(fill(MIA_LINES.done, openId));
-            }
-          });
+        if (rem <= 0) {
+          const finish = () => once(`${key}:finish`, () => void finishRef.current(openId));
+          if (s.overtimeSince) {
+            // Overtime ends when the task is done (they've moved on from it), or at the most we allow.
+            overtimeTask.current ??= taskKey;
+            if (taskKey !== overtimeTask.current || t - s.overtimeSince >= (demo ? 30 : MIA_OVERTIME_MAX_MINUTES * 60) * 1000) finish();
+          } else if (taskKey) {
+            once(`${key}:overtime`, async () => {
+              overtimeTask.current = taskKey;
+              if (await act(openId, "overtime")) say(MIA_LINES.overtime);
+            });
+          } else finish();
+        }
       } else if (s.pause?.type === "break") {
         if (prev && prev.brem > 30000 && brem <= 30000) say(MIA_LINES.breakWarn);
         if (brem <= 0)
@@ -345,6 +352,7 @@ export default function MiaHud({
   useEffect(() => {
     bridge()?.onMiacademy?.((open) => setMiaOpen(open));
     bridge()?.onChecklists?.((c) => setChecklists(c));
+    bridge()?.onTask?.((k) => setTaskKey(k));
   }, []);
   const onBreak = (!!openId && timers[openId]?.pause?.type === "break") || between?.phase === "break";
   useEffect(() => {
@@ -352,6 +360,21 @@ export default function MiaHud({
   }, [onBreak]);
 
   // ---- Actions ----
+  async function finishClass(subject: string) {
+    const went = timers[subject]?.overtimeSince;
+    if (!(await act(subject, "finish"))) return;
+    overtimeTask.current = null;
+    setFocus(null);
+    setCheckin(null);
+    const next = MIA_SUBJECTS.find((x) => x.id !== subject && !timers[x.id]?.finishedAt);
+    if (went) say(MIA_LINES.overtimeDone);
+    if (next) {
+      setBetween({ from: subject, next: next.id, phase: "ask", day: new Date().toDateString() });
+      say(fill(MIA_LINES.between, subject).replace("{next}", next.name));
+    } else say(fill(MIA_LINES.done, subject));
+  }
+  const finishRef = useRef(finishClass);
+  finishRef.current = finishClass;
   function keepGoing(b: Between) {
     setBetween(null);
     setFocus(b.next);
@@ -472,7 +495,7 @@ export default function MiaHud({
         >
           <span className="mia-payout-coin">🪙</span>
           <b>+{coin.cents}¢</b>
-          <small>{rings.find((r) => r.id === coin.ring)?.name} ring full!</small>
+          <small>{coin.ring.startsWith("overtime:") ? "Overtime bonus!" : `${rings.find((r) => r.id === coin.ring)?.name} ring full!`}</small>
         </div>
       )}
 
@@ -569,6 +592,7 @@ export default function MiaHud({
           onPause={() => act(focused.id, "pause")}
           onBack={() => setFocus(null)}
           onHelpRestart={(skip) => helpRestart(focused.id, skip)}
+          onFinish={() => finishClass(focused.id)}
           onAnswer={answerCheckin}
         />
       )}
@@ -733,6 +757,7 @@ function FocusedTimer({
   onBack,
   onHelpRestart,
   onAnswer,
+  onFinish,
 }: {
   subject: MiaSubject;
   t: MiaTimerState | null;
@@ -746,6 +771,7 @@ function FocusedTimer({
   onBack: () => void;
   onHelpRestart: (skip?: boolean) => void;
   onAnswer: () => void;
+  onFinish: () => void;
 }) {
   const full = (demo ? 60 : MIA_MINUTES * 60) * 1000;
   const rem = t ? remaining(t, now) : full;
@@ -792,6 +818,15 @@ function FocusedTimer({
         </button>
       </>
     );
+  else if (isRunning(t) && t.overtimeSince)
+    controls = (
+      <>
+        <div className="mia-waiting">⏱ Overtime! Finish what you&apos;re working on.</div>
+        <button className="mia-btn big go" onClick={onFinish} disabled={busy}>
+          ✓ I finished
+        </button>
+      </>
+    );
   else if (isRunning(t))
     controls = settings.allowPause ? (
       <button className="mia-btn soft" onClick={onPause} disabled={busy}>
@@ -805,7 +840,11 @@ function FocusedTimer({
         {subject.name}
       </div>
       <Face color={subject.color} fraction={t ? rem / t.durMs : 1} big />
-      <div className="mia-time">{mmss(rem)}</div>
+      {t?.overtimeSince && isRunning(t) ? (
+        <div className="mia-time mia-overtime">+{mmss(Math.max(0, now - t.overtimeSince))}</div>
+      ) : (
+        <div className="mia-time">{mmss(rem)}</div>
+      )}
       <div className="mia-row">{controls}</div>
       {checkin && (
         <div className="mia-checkin">

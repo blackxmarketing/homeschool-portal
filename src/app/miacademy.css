@@ -1272,3 +1272,8 @@ label.mia-btn {
   width: 220px;
   z-index: -1;
 }
+
+/* Overtime: the clock counts up in orange while they finish a Miacademy task. */
+.mia-time.mia-overtime {
+  color: #ea580c;
+}

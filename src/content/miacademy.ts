@@ -59,6 +59,8 @@ export const MIA_LINES = {
   checkinAsk: ["Are you on task?", "Are you staying focused?", "Quick check: are you still working on {subject}?"],
   checkinCheer: ["Keep it up!", "Stay focused. You've got this!", "Nice work. Keep going!", "You're doing great. Stay with it!"],
   checkinThanks: ["Awesome! Keep going.", "Great! You've got this.", "Nice! Back to it."],
+  overtime: "Time's up! Finish what you're working on first. Take your time.",
+  overtimeDone: "Great job finishing! You earned 5 extra cents.",
   remind: "Don't forget your timer! Pick the subject you're working on and press Start.",
   /** A class's 30 minutes are up and another class is left today: keep going, or a quick break first. */
   between: "Great job on {subject}! Are you ready to start {next}, or do you need a quick 5-minute break?",
@@ -220,4 +222,13 @@ export const MIA_RINGS: { id: string; name: string; icon: string; color: string;
 ];
 
 /** What a full ring pays into the buddy bank, in cents: on time (Monday-Thursday), or after (extra time). */
-export const MIA_PAY = { onTime: 25, extraTime: 15 };
+export const MIA_PAY = { onTime: 25, extraTime: 15, overtime: 5 };
+
+/**
+ * Time's up while the kid is in the middle of a Miacademy video, practice or
+ * quiz: they keep going (overtime) until it's done, and earn MIA_PAY.overtime
+ * for that subject that day. A parent hears about it past the alert time; it
+ * stops on its own at the max.
+ */
+export const MIA_OVERTIME_ALERT_MINUTES = 15;
+export const MIA_OVERTIME_MAX_MINUTES = 20;

@@ -30,6 +30,10 @@ export interface MiaTimerState {
   missedCheckins: number;
   startedAt: number;
   finishedAt: number | null;
+  /** Time ran out mid-task (a Miacademy video, practice or quiz): kept going from here. */
+  overtimeSince?: number | null;
+  /** How long it went over, once finished. */
+  overtimeMs?: number;
   /** Demo speed (preview only): 1 minute timer, 40 second break, 10 second late alert. */
   demo: boolean;
 }
@@ -44,6 +48,7 @@ export type MiaAction =
   | "late"
   | "helpResume"
   | "finish"
+  | "overtime"
   | "missedCheckin"
   | "supplies";
 
@@ -112,6 +117,7 @@ export function applyMia(
     case "pause":
       if (!settings.allowPause) throw new MiaRuleError("Pausing is turned off.");
       if (!isRunning(s)) throw new MiaRuleError("The timer isn't running.");
+      if (s.overtimeSince) throw new MiaRuleError("Finish what you're working on first.");
       return ok({ ...freeze(s, now), pause: { type: "choosing", at: now } });
     case "cancel":
       if (p?.type !== "choosing") throw new MiaRuleError("Nothing to cancel.");
@@ -138,9 +144,16 @@ export function applyMia(
       // Pauses on its own, whether or not the kid may pause: gathering supplies shouldn't use up the 30 minutes.
       if (!isRunning(s) || extra.lessonId === undefined || !extra.itemId) throw new MiaRuleError("The timer isn't running.");
       return ok({ ...freeze(s, now), pause: { type: "supplies", at: now, lessonId: extra.lessonId, itemId: extra.itemId } }, "supplies");
+    case "overtime":
+      // Time's up mid-task: keep going until it's done.
+      if (!isRunning(s) || remaining(s, now) > FINISH_SLACK_MS) throw new MiaRuleError("There's still time left.");
+      return ok(s.overtimeSince ? s : { ...s, overtimeSince: now });
     case "finish":
       if (!isRunning(s) || remaining(s, now) > FINISH_SLACK_MS) throw new MiaRuleError("There's still time left.");
-      return ok({ ...s, leftMs: 0, endAt: null, pause: null, finishedAt: now }, "finished");
+      return ok(
+        { ...s, leftMs: 0, endAt: null, pause: null, finishedAt: now, overtimeMs: s.overtimeSince ? Math.max(0, now - s.overtimeSince) : 0 },
+        "finished",
+      );
     case "missedCheckin":
       return ok({ ...s, missedCheckins: s.missedCheckins + 1 });
   }

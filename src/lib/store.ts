@@ -28,7 +28,7 @@ import { expectedSeconds, gradeProbe, probeSolution } from "./probes";
 import { adapt, buildProfile, conceptMastery, whatHelps, type Adaptation, type LearningEvent, type Profile } from "./learner";
 import { angleOf, applyEvidence, blockers, conceptOf, emptyMeter, legacyConcept, lessonMastered, type Evidence, type Meter } from "./masteryMeter";
 import type { Lesson, Probe } from "@/content/courses/types";
-import { MIA_COURSE_PLANS, MIA_PAY, MIA_RINGS, MIA_SUBJECTS, miaCoursePlan, miaLessonWeight, type MiaCoursePlan, type MiaSettings } from "@/content/miacademy";
+import { MIA_COURSE_PLANS, MIA_OVERTIME_ALERT_MINUTES, MIA_PAY, MIA_RINGS, MIA_SUBJECTS, miaCoursePlan, miaLessonWeight, type MiaCoursePlan, type MiaSettings } from "@/content/miacademy";
 import { applyMia, clampMiaSettings, isOpen, MiaRuleError, newTimer, parseMiaSettings, parseMiaState, type MiaAction, type MiaTimerState } from "./miaTimer";
 import {
   guessStudentPdf,
@@ -2216,6 +2216,15 @@ export function miaAct(
   if (result.event === "help") addParentAlert(kid.family_id, kidId, "help", subject, `${kid.name} needs help with ${name}.`, now);
   if (result.event === "late")
     addParentAlert(kid.family_id, kidId, "late", subject, `${kid.name}'s ${name} break ended and the timer hasn't been restarted.`, now);
+  // Stayed past the 30 minutes to finish a video, practice or quiz: a little extra in the bank (once per subject a day).
+  if (result.event === "finished" && (result.state.overtimeMs ?? 0) > 0) {
+    getDb()
+      .prepare("INSERT OR IGNORE INTO mia_bank (kid_id, week, ring, cents, at) VALUES (?, ?, ?, ?, ?)")
+      .run(kidId, weekStart(day), `overtime:${subject}:${day}`, MIA_PAY.overtime, now);
+    const minutes = Math.round(result.state.overtimeMs! / 60000);
+    if (minutes >= MIA_OVERTIME_ALERT_MINUTES)
+      addParentAlert(kid.family_id, kidId, "overtime", subject, `${kid.name} went ${minutes} minutes over in ${name} finishing a Miacademy task.`, now);
+  }
   if (result.event === "supplies") {
     const lesson = miaLesson(kidId, opts.lessonId!)!;
     const item = lesson.items!.find((i) => i.id === opts.itemId)!;

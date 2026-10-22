@@ -53,6 +53,13 @@ function scanPdfs() {
   if (urls.length) reportPdfs(urls);
 }
 
+/** A Miacademy lesson task page's task id (taskAssignment), or null anywhere else. */
+function taskKeyFromAddress(href: string): string | null {
+  if (!/Content\.Lesson/i.test(href)) return null;
+  const m = /taskAssignment=(?:%22|")?([0-9a-f-]{36})/i.exec(href);
+  return m ? m[1].toLowerCase() : null;
+}
+
 function App() {
   const [state, setState] = useState<"loading" | "unpaired" | "offline" | Loaded>("loading");
 
@@ -140,6 +147,16 @@ function mount() {
     },
     setFullscreen: () => {
       // The break screen already covers the whole page.
+    },
+    // The task (video, practice, quiz) open in Miacademy, from the address: lets a kid finish it when time runs out.
+    onTask: (cb: (taskKey: string | null) => void) => {
+      let last: string | null | undefined;
+      const check = () => {
+        const key = taskKeyFromAddress(location.href);
+        if (key !== last) cb((last = key));
+      };
+      check();
+      setInterval(check, 1000);
     },
   };
   createRoot(root).render(<App />);

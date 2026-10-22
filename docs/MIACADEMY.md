@@ -165,3 +165,18 @@ extension sets it):
 - `onMiacademy(cb)`: calls `cb(true/false)` when Miacademy opens or closes (drives
   the reminder).
 - `setFullscreen(on)`: asks for full screen during a break, and back afterwards.
+
+### Between classes, and overtime
+
+- When a class's 30 minutes are up and another class is left today, the kid
+  picks "I'm ready!" (starts the next class) or a quick 5-minute break
+  (`MIA_BETWEEN_BREAK_MINUTES`). That break uses the break screen
+  (`src/components/miacademy/BreakScene.tsx`); the buddy takes turns walking,
+  floating on its back, climbing a mountain or a tree, or riding a bike. When it
+  ends, the next class opens and the teacher says to press Start.
+- Overtime: if time runs out while the kid is on a Miacademy task page (the
+  extension reports the `taskAssignment` in the address), the timer counts up
+  instead of stopping. It finishes when they move on from that task, tap
+  "I finished", or after `MIA_OVERTIME_MAX_MINUTES` (20). Finishing after
+  overtime pays `MIA_PAY.overtime` (5¢) once per subject a day, on top of the
+  rings; past `MIA_OVERTIME_ALERT_MINUTES` (15) a parent gets a note.

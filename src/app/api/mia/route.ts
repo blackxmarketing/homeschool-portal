@@ -4,7 +4,7 @@ import type { MiaAction } from "@/lib/miaTimer";
 import { getMiaSettings, miaAct, miaDay, miaReminderIgnored, PortalError } from "@/lib/store";
 import { miaBoard } from "@/lib/miaSync";
 
-const ACTIONS: MiaAction[] = ["start", "pause", "cancel", "help", "break", "breakDone", "late", "helpResume", "finish", "missedCheckin", "supplies"];
+const ACTIONS: MiaAction[] = ["start", "pause", "cancel", "help", "break", "breakDone", "late", "helpResume", "finish", "overtime", "missedCheckin", "supplies"];
 
 /** Everything the timer strip needs to draw itself (the Chrome extension loads it this way). */
 export async function GET(req: Request) {
