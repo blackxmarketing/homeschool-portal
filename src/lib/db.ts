@@ -293,6 +293,24 @@ CREATE TABLE IF NOT EXISTS mia_timers (
   PRIMARY KEY (kid_id, day, subject)
 );
 
+-- Miacademy lessons on a kid's step-by-step checklist (lib/miaLessons.ts). mia_key is
+-- Miacademy's lesson id. items = JSON LessonItem[] read off the Student PDF;
+-- states = JSON {itemId: ItemState}. done_day is when the last item was finished.
+CREATE TABLE IF NOT EXISTS mia_lessons (
+  id INTEGER PRIMARY KEY,
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  subject TEXT NOT NULL,
+  mia_key TEXT NOT NULL,
+  title TEXT NOT NULL,
+  student_pdf TEXT,
+  items TEXT,
+  parse_state TEXT NOT NULL DEFAULT 'waiting',
+  states TEXT NOT NULL DEFAULT '{}',
+  started_at INTEGER NOT NULL,
+  done_day TEXT,
+  UNIQUE (kid_id, subject, mia_key)
+);
+
 -- Kids' computers connected to the Miacademy Chrome extension. The extension keeps the token; we keep its hash.
 CREATE TABLE IF NOT EXISTS mia_devices (
   id INTEGER PRIMARY KEY,

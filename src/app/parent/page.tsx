@@ -3,7 +3,7 @@ import ParentNav from "@/components/ParentNav";
 import { requireParent } from "@/lib/auth";
 import { REQUIRED_AVG_HOURS, REQUIRED_DAYS } from "@/lib/compliance";
 import { gradeProgress } from "@/lib/engine/planner";
-import { dismissAlertAction, miaParentAction, reviewBlockAction, reviewCourseTaskAction, reviewMissionAction } from "@/app/actions";
+import { dismissAlertAction, miaItemAction, miaParentAction, miaSuppliesAction, reviewBlockAction, reviewCourseTaskAction, reviewMissionAction } from "@/app/actions";
 import { MIA_SUBJECTS } from "@/content/miacademy";
 import { remaining, type MiaTimerState } from "@/lib/miaTimer";
 import { levelInfo } from "@/lib/game";
@@ -14,6 +14,7 @@ import {
   learnerProfiles,
   listKids,
   miaFamilyToday,
+  miaWaitingForParent,
   minutesOnDay,
   unseenAlerts,
   pendingBlocks,
@@ -40,6 +41,7 @@ export default async function ParentHome({ searchParams }: { searchParams: Promi
       <ParentNav title="Family overview" />
       {error && <div className="error">{error}</div>}
       <MiaAlerts familyId={s.familyId} />
+      <MiaApprovals familyId={s.familyId} />
       <MiaToday familyId={s.familyId} />
       {courseTasks.length > 0 && (
         <div className="card">
@@ -269,6 +271,8 @@ function miaStatus(t: MiaTimerState | null, now: number): string {
   switch (t.pause?.type) {
     case "help":
       return `✋ Needs help (${left})`;
+    case "supplies":
+      return `🧰 Paused to gather supplies (${left})`;
     case "break":
       return "☕ On a break";
     case "ready":
@@ -307,6 +311,18 @@ function MiaToday({ familyId }: { familyId: number }) {
                     )}
                   </td>
                   <td style={{ whiteSpace: "nowrap" }}>
+                    {t?.pause?.type === "supplies" && (
+                      <form action={miaSuppliesAction} style={{ display: "inline" }}>
+                        <input type="hidden" name="kidId" value={kid.id} />
+                        <input type="hidden" name="subject" value={sub.id} />
+                        <button className="btn small" name="op" value="ready">
+                          Supplies ready
+                        </button>{" "}
+                        <button className="linkbtn small" name="op" value="skip">
+                          Skip activity
+                        </button>
+                      </form>
+                    )}
                     {t?.pause?.type === "help" && (
                       <form action={miaParentAction} style={{ display: "inline" }}>
                         <input type="hidden" name="kidId" value={kid.id} />
@@ -339,6 +355,50 @@ function MiaToday({ familyId }: { familyId: number }) {
               );
             }),
           )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function MiaApprovals({ familyId }: { familyId: number }) {
+  const waiting = miaWaitingForParent(familyId);
+  if (!waiting.length) return null;
+  return (
+    <div className="card">
+      <h2>🧰 Hands-on activities to approve ({waiting.length})</h2>
+      <table>
+        <tbody>
+          {waiting.map(({ kid, lesson, item, state }) => (
+            <tr key={`${lesson.id}-${item.id}`}>
+              <td>
+                {kid.avatar} {kid.name}
+              </td>
+              <td>
+                <strong>{item.title}</strong> <span className="muted small">{lesson.title}</span>
+                {state.photo && (
+                  <div>
+                    <a href={`/api/mia/photo/${state.photo}`} target="_blank" rel="noopener">
+                      <img src={`/api/mia/photo/${state.photo}`} alt={`${kid.name}'s photo`} style={{ maxWidth: 220, maxHeight: 160, borderRadius: 8, marginTop: 6 }} />
+                    </a>
+                  </div>
+                )}
+              </td>
+              <td style={{ whiteSpace: "nowrap" }}>
+                <form action={miaItemAction}>
+                  <input type="hidden" name="kidId" value={kid.id} />
+                  <input type="hidden" name="lessonId" value={lesson.id} />
+                  <input type="hidden" name="itemId" value={item.id} />
+                  <button className="btn small" name="op" value="approve">
+                    Approve
+                  </button>{" "}
+                  <button className="linkbtn small" name="op" value="skip">
+                    Skip
+                  </button>
+                </form>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

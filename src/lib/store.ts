@@ -30,6 +30,7 @@ import { angleOf, applyEvidence, blockers, conceptOf, emptyMeter, legacyConcept,
 import type { Lesson, Probe } from "@/content/courses/types";
 import { MIA_SUBJECTS, type MiaSettings } from "@/content/miacademy";
 import { applyMia, clampMiaSettings, isOpen, MiaRuleError, newTimer, parseMiaSettings, parseMiaState, type MiaAction, type MiaTimerState } from "./miaTimer";
+import { guessStudentPdf, lessonDone, lessonTitleFromTask, remainingItems, weekStart, type ItemState, type LessonItem } from "./miaLessons";
 
 export type Mode = "learn" | "review" | "placement";
 
@@ -2154,7 +2155,7 @@ export function miaAct(
   kidId: number,
   subject: string,
   action: MiaAction,
-  opts: { now?: number; demo?: boolean; pin?: string } = {},
+  opts: { now?: number; demo?: boolean; pin?: string; lessonId?: number; itemId?: string; skip?: boolean } = {},
 ): Record<string, MiaTimerState | null> {
   if (!MIA_SUBJECTS.some((s) => s.id === subject)) throw new PortalError("Unknown subject.");
   const kid = getKid(kidId);
@@ -2173,16 +2174,27 @@ export function miaAct(
   }
   if (!current) throw new PortalError("Press Start first.");
 
-  if (action === "helpResume" && settings.helpPin) {
+  // Supplies always need a grown-up; help only when the parent turned the PIN on.
+  const forSupplies = current.pause?.type === "supplies";
+  if (action === "helpResume" && (settings.helpPin || forSupplies)) {
     const check = verifyParentPin(kid.family_id, opts.pin ?? "");
     if (check === "unset") throw new PortalError("A parent needs to set a parent PIN in Settings first, or restart it from the parent page.");
     if (check === "locked") throw new PortalError("Too many tries. Wait 5 minutes.");
     if (check === "wrong") throw new PortalError("That PIN isn't right.");
   }
 
+  if (action === "supplies") {
+    const item = miaLesson(kidId, opts.lessonId ?? -1)?.items?.find((i) => i.id === opts.itemId);
+    if (!item || item.check !== "parent") throw new PortalError("That activity doesn't need supplies.");
+  }
+  if (action === "helpResume" && current.pause?.type === "supplies") {
+    const { lessonId, itemId } = current.pause;
+    updateItem(kidId, lessonId, itemId, (s) => (opts.skip ? { ...s, done: true, skipped: true, at: now } : { ...s, suppliesReady: true }));
+  }
+
   let result;
   try {
-    result = applyMia(current, action, now, settings);
+    result = applyMia(current, action, now, settings, { lessonId: opts.lessonId, itemId: opts.itemId });
   } catch (e) {
     if (e instanceof MiaRuleError) throw new PortalError(e.message);
     throw e;
@@ -2192,6 +2204,11 @@ export function miaAct(
   if (result.event === "help") addParentAlert(kid.family_id, kidId, "help", subject, `${kid.name} needs help with ${name}.`, now);
   if (result.event === "late")
     addParentAlert(kid.family_id, kidId, "late", subject, `${kid.name}'s ${name} break ended and the timer hasn't been restarted.`, now);
+  if (result.event === "supplies") {
+    const lesson = miaLesson(kidId, opts.lessonId!)!;
+    const item = lesson.items!.find((i) => i.id === opts.itemId)!;
+    addParentAlert(kid.family_id, kidId, "supplies", subject, `${kid.name} needs supplies for ${lesson.title}: ${item.title}. The timer is paused.`, now);
+  }
   return miaDay(kidId, day);
 }
 
@@ -2355,3 +2372,285 @@ export function miaFamilyToday(familyId: number) {
   return listKids(familyId).map((kid) => ({ kid, timers: miaDay(kid.id), settings: getMiaSettings(kid.id) }));
 }
 
+
+// ---- Miacademy lessons: the step-by-step checklist ----
+
+export interface MiaLesson {
+  id: number;
+  subject: string;
+  miaKey: string;
+  title: string;
+  studentPdf: string | null;
+  items: LessonItem[] | null;
+  parseState: "waiting" | "reading" | "ready" | "failed";
+  states: Record<string, ItemState>;
+  startedAt: number;
+  doneDay: string | null;
+}
+
+interface MiaLessonRow {
+  id: number;
+  subject: string;
+  mia_key: string;
+  title: string;
+  student_pdf: string | null;
+  items: string | null;
+  parse_state: MiaLesson["parseState"];
+  states: string;
+  started_at: number;
+  done_day: string | null;
+}
+
+function toLesson(r: MiaLessonRow): MiaLesson {
+  const parse = <T>(s: string | null, d: T): T => {
+    try {
+      return s ? (JSON.parse(s) as T) : d;
+    } catch {
+      return d;
+    }
+  };
+  return {
+    id: r.id,
+    subject: r.subject,
+    miaKey: r.mia_key,
+    title: r.title,
+    studentPdf: r.student_pdf,
+    items: parse<LessonItem[] | null>(r.items, null),
+    parseState: r.parse_state,
+    states: parse<Record<string, ItemState>>(r.states, {}),
+    startedAt: r.started_at,
+    doneDay: r.done_day,
+  };
+}
+
+const LESSON_COLS = "id, subject, mia_key, title, student_pdf, items, parse_state, states, started_at, done_day";
+
+export function miaLesson(kidId: number, lessonId: number): MiaLesson | null {
+  const r = getDb().prepare(`SELECT ${LESSON_COLS} FROM mia_lessons WHERE id = ? AND kid_id = ?`).get(lessonId, kidId) as MiaLessonRow | undefined;
+  return r ? toLesson(r) : null;
+}
+
+/** Unfinished lessons for a subject, oldest first (the checklist rolls from one into the next). */
+export function miaOpenLessons(kidId: number, subject: string): MiaLesson[] {
+  return (
+    getDb()
+      .prepare(`SELECT ${LESSON_COLS} FROM mia_lessons WHERE kid_id = ? AND subject = ? AND done_day IS NULL ORDER BY started_at, id`)
+      .all(kidId, subject) as MiaLessonRow[]
+  ).map(toLesson);
+}
+
+/** Lessons finished this week (Monday to Sunday). */
+export function miaLessonsDoneThisWeek(kidId: number, subject: string, day = today()): number {
+  const row = getDb()
+    .prepare("SELECT COUNT(*) AS n FROM mia_lessons WHERE kid_id = ? AND subject = ? AND done_day >= ? AND done_day <= ?")
+    .get(kidId, subject, weekStart(day), day) as { n: number };
+  return row.n;
+}
+
+function saveLessonStates(lesson: MiaLesson, day = today()): void {
+  const done = lesson.items && lessonDone(lesson.items, lesson.states);
+  getDb()
+    .prepare("UPDATE mia_lessons SET states = ?, done_day = ? WHERE id = ?")
+    .run(JSON.stringify(lesson.states), done ? lesson.doneDay ?? day : null, lesson.id);
+}
+
+function markItems(lesson: MiaLesson, check: LessonItem["check"], now: number): boolean {
+  let changed = false;
+  for (const item of lesson.items ?? [])
+    if (item.check === check && !lesson.states[item.id]?.done) {
+      lesson.states[item.id] = { ...lesson.states[item.id], done: true, at: now };
+      changed = true;
+    }
+  return changed;
+}
+
+/** One course from the kid's Miacademy assignments page, as the extension sends it. */
+export interface MiaPathCourse {
+  subject: string;
+  courseTitle: string;
+  taskType: string | null;
+  taskTitle: string | null;
+  lessonKey: string | null;
+}
+
+/**
+ * The extension saw the kid's Miacademy assignments page. For each subject with
+ * a checklist, keep track of the lesson they're on: a new lesson starts a new
+ * checklist; reaching the quiz means the video is watched; moving to a new
+ * lesson means the last quiz is done.
+ * Returns lessons that still need their Student PDF read.
+ */
+export function miaPathSync(kidId: number, courses: MiaPathCourse[], now = Date.now()): number[] {
+  const settings = getMiaSettings(kidId);
+  const db = getDb();
+  const toRead: number[] = [];
+  for (const c of courses) {
+    if (!c.lessonKey || !(settings.lessonsPerWeek[c.subject] > 0)) continue;
+    const open = miaOpenLessons(kidId, c.subject);
+    let lesson = open.find((l) => l.miaKey === c.lessonKey) ?? null;
+    if (!lesson) {
+      // Miacademy moved on: the quizzes of the lessons before this one are done.
+      for (const older of open) if (markItems(older, "quiz", now)) saveLessonStates(older);
+      const title = (c.taskType === "Pdf" && c.taskTitle ? lessonTitleFromTask(c.taskTitle) : c.taskTitle) || c.courseTitle;
+      const known = db
+        .prepare("SELECT student_pdf, title FROM mia_lessons WHERE kid_id = ? AND subject = ? AND student_pdf IS NOT NULL ORDER BY id DESC LIMIT 1")
+        .get(kidId, c.subject) as { student_pdf: string; title: string } | undefined;
+      const guess = known ? guessStudentPdf(known.student_pdf, known.title, title) : null;
+      const res = db
+        .prepare("INSERT OR IGNORE INTO mia_lessons (kid_id, subject, mia_key, title, student_pdf, started_at) VALUES (?, ?, ?, ?, ?, ?)")
+        .run(kidId, c.subject, c.lessonKey, title, guess, now);
+      if (res.changes && guess) toRead.push(Number(res.lastInsertRowid));
+      continue;
+    }
+    // Next up is the quiz: the video is done.
+    if (c.taskType === "Assessment" && markItems(lesson, "video", now)) saveLessonStates(lesson);
+  }
+  return toRead;
+}
+
+/** The extension found the lesson's Student PDF link (the kid opened it to print). */
+export function miaSetStudentPdf(kidId: number, lessonKey: string, url: string): number | null {
+  if (!/^https:\/\/miaplaza-content\.s3[\w.-]*\.amazonaws\.com\/.+\.pdf$/i.test(url)) return null;
+  const row = getDb()
+    .prepare("SELECT id, student_pdf, parse_state FROM mia_lessons WHERE kid_id = ? AND mia_key = ? AND done_day IS NULL")
+    .get(kidId, lessonKey) as { id: number; student_pdf: string | null; parse_state: string } | undefined;
+  // Same PDF already read: nothing to do. (A read that failed, or was cut off by a restart, tries again.)
+  if (!row || (row.student_pdf === url && row.parse_state === "ready")) return null;
+  getDb().prepare("UPDATE mia_lessons SET student_pdf = ?, parse_state = 'waiting' WHERE id = ?").run(url, row.id);
+  return row.id;
+}
+
+export function miaSetParseState(lessonId: number, state: MiaLesson["parseState"], items?: LessonItem[]): void {
+  if (items) getDb().prepare("UPDATE mia_lessons SET parse_state = ?, items = ? WHERE id = ?").run(state, JSON.stringify(items), lessonId);
+  else getDb().prepare("UPDATE mia_lessons SET parse_state = ? WHERE id = ?").run(state, lessonId);
+}
+
+/** What the timer strip shows for a subject: the next items across open lessons, and the week so far. */
+export function miaChecklist(kidId: number, subject: string) {
+  const settings = getMiaSettings(kidId);
+  const target = settings.lessonsPerWeek[subject] ?? 0;
+  if (!target) return null;
+  const lessons = miaOpenLessons(kidId, subject);
+  const upcoming: { lessonId: number; lessonTitle: string; item: LessonItem; state: ItemState }[] = [];
+  let reading = false;
+  let failed = false;
+  for (const l of lessons) {
+    if (!l.items) {
+      reading = l.parseState === "reading" || (l.parseState === "waiting" && !!l.studentPdf);
+      failed = l.parseState === "failed";
+      break;
+    }
+    for (const item of remainingItems(l.items, l.states)) upcoming.push({ lessonId: l.id, lessonTitle: l.title, item, state: l.states[item.id] ?? { done: false } });
+  }
+  return {
+    subject,
+    target,
+    doneThisWeek: miaLessonsDoneThisWeek(kidId, subject),
+    upcoming: upcoming.slice(0, 3),
+    left: upcoming.length,
+    lessonTitle: lessons[0]?.title ?? null,
+    needsPdf: lessons.length > 0 && !lessons[0].studentPdf,
+    reading,
+    failed,
+  };
+}
+export type MiaChecklist = NonNullable<ReturnType<typeof miaChecklist>>;
+
+function updateItem(kidId: number, lessonId: number, itemId: string, change: (s: ItemState, item: LessonItem) => ItemState): MiaLesson {
+  const lesson = miaLesson(kidId, lessonId);
+  const item = lesson?.items?.find((i) => i.id === itemId);
+  if (!lesson || !item) throw new PortalError("That activity isn't on the checklist.");
+  lesson.states[itemId] = change(lesson.states[itemId] ?? { done: false }, item);
+  saveLessonStates(lesson);
+  return lesson;
+}
+
+/** A photo was checked against the answer key. Scores under 70% tell a parent. */
+export function miaRecordPhotoCheck(
+  kidId: number,
+  lessonId: number,
+  itemId: string,
+  result: { right: number; total: number; wrong: { question: string; answer: string }[] },
+  photo: string,
+  now = Date.now(),
+): void {
+  let first = false;
+  const lesson = updateItem(kidId, lessonId, itemId, (s) => {
+    first = s.total === undefined;
+    // The first photo's score is the one that counts; later photos (after fixing) only update what's left to fix.
+    return first
+      ? { ...s, right: result.right, total: result.total, wrong: result.wrong, photo, at: now }
+      : { ...s, wrong: result.wrong, photo, at: now };
+  });
+  const kid = getKid(kidId)!;
+  if (first && result.total > 0 && result.right / result.total < 0.7) {
+    const item = lesson.items!.find((i) => i.id === itemId)!;
+    addParentAlert(
+      kid.family_id,
+      kidId,
+      "low-score",
+      lesson.subject,
+      `${kid.name} got ${result.right} of ${result.total} on ${lesson.title}: ${item.title} (${Math.round((result.right / result.total) * 100)}%).`,
+      now,
+    );
+  }
+}
+
+/** The kid finished an activity: fixed their mistakes, or sent the photo of a hands-on one for a parent to approve. */
+export function miaFinishItem(kidId: number, lessonId: number, itemId: string, photo?: string, now = Date.now()): void {
+  const lesson = updateItem(kidId, lessonId, itemId, (s, item) => {
+    if (item.check === "parent") return { ...s, waitingForParent: true, photo: photo ?? s.photo, at: now };
+    if (item.check === "photo" && s.total === undefined) throw new PortalError("Take a photo first.");
+    if (item.check === "video" || item.check === "quiz") throw new PortalError("Miacademy checks this one off.");
+    return { ...s, done: true, at: now };
+  });
+  const item = lesson.items!.find((i) => i.id === itemId)!;
+  const stillWrong = lesson.states[itemId]?.wrong?.length ?? 0;
+  if (item.check === "photo" && stillWrong > 0) {
+    const kid = getKid(kidId)!;
+    addParentAlert(
+      kid.family_id,
+      kidId,
+      "stuck",
+      lesson.subject,
+      `${kid.name} finished ${lesson.title}: ${item.title} with ${stillWrong} answer${stillWrong > 1 ? "s" : ""} still to fix. Take a look together?`,
+      now,
+    );
+  }
+  if (item.check === "parent") {
+    const kid = getKid(kidId)!;
+    addParentAlert(kid.family_id, kidId, "approve", lesson.subject, `${kid.name} finished ${lesson.title}: ${item.title}. It's waiting for you to approve.`, now);
+  }
+}
+
+/** Parent: approve a hands-on activity, or skip an activity. */
+export function parentMiaItem(familyId: number, kidId: number, lessonId: number, itemId: string, op: "approve" | "skip", now = Date.now()): void {
+  const kid = getKid(kidId);
+  if (!kid || kid.family_id !== familyId) throw new PortalError("Unknown kid.");
+  updateItem(kidId, lessonId, itemId, (s) => ({ ...s, done: true, waitingForParent: false, skipped: op === "skip" || undefined, at: now }));
+}
+
+/** Hands-on activities waiting for a parent, for the family overview. */
+export function miaWaitingForParent(familyId: number) {
+  const out: { kid: Kid; lesson: MiaLesson; item: LessonItem; state: ItemState }[] = [];
+  for (const kid of listKids(familyId))
+    for (const subject of MIA_SUBJECTS.map((s) => s.id))
+      for (const lesson of miaOpenLessons(kid.id, subject))
+        for (const item of lesson.items ?? []) {
+          const state = lesson.states[item.id];
+          if (state?.waitingForParent && !state.done) out.push({ kid, lesson, item, state });
+        }
+  return out;
+}
+
+/** Parent: the supplies are ready, so the paused timer starts again (or the activity is skipped). */
+export function parentMiaSupplies(familyId: number, kidId: number, subject: string, op: "ready" | "skip", now = Date.now()): void {
+  const kid = getKid(kidId);
+  if (!kid || kid.family_id !== familyId) throw new PortalError("Unknown kid.");
+  const day = today();
+  const t = miaDay(kidId, day)[subject];
+  if (t?.pause?.type !== "supplies") throw new PortalError("That timer isn't waiting for supplies.");
+  const { lessonId, itemId } = t.pause;
+  updateItem(kidId, lessonId, itemId, (s) => (op === "skip" ? { ...s, done: true, skipped: true, at: now } : { ...s, suppliesReady: true }));
+  saveMia(kidId, day, subject, applyMia(t, "helpResume", now, getMiaSettings(kidId)).state);
+}

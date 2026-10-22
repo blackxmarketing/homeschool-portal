@@ -1,6 +1,6 @@
 import ParentNav from "@/components/ParentNav";
 import { addKidAction, focusAction, miaPairCodeAction, miaRemoveDeviceAction, miaSettingsAction, parentPinAction, resetPlacementAction, schoolYearAction, updateKidAction } from "@/app/actions";
-import { BUDDIES } from "@/content/miacademy";
+import { BUDDIES, MIA_SUBJECTS } from "@/content/miacademy";
 import { requireParent } from "@/lib/auth";
 import { LIMITS } from "@/lib/focus";
 import { focusPresets } from "@/lib/content";
@@ -264,6 +264,27 @@ function MiaForm({ kidId, name }: { kidId: number; name: string }) {
           </select>
         </div>
       </div>
+      <label style={{ marginTop: 10 }}>Step-by-step checklist: lessons a week</label>
+      <div className="row">
+        {MIA_SUBJECTS.map((s) => (
+          <div key={s.id}>
+            <label className="small">{s.name}</label>
+            <select name={`lessons_${s.id}`} defaultValue={m.lessonsPerWeek[s.id] ?? 0}>
+              <option value={0}>Off</option>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </div>
+        ))}
+      </div>
+      <p className="muted small">
+        The checklist follows {name}&apos;s Miacademy lessons: the activities on each lesson&apos;s PDF, minus online practice and
+        optional or bonus ones. Worksheets are checked from a photo against the answer key; anything needing supplies pauses the
+        timer and waits for you to approve it.
+      </p>
       <button className="btn" style={{ flex: "0 0 auto" }}>
         Save Miacademy settings
       </button>

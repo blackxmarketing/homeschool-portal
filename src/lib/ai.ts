@@ -422,3 +422,143 @@ answer: 2-4 short sentences, spoken aloud by you, warm and plain. If the questio
     ASK_SCHEMA,
   );
 }
+
+// ---------------- Miacademy lessons (docs/MIACADEMY.md) ----------------
+
+/** Like askStructured, but with documents and images in the message. */
+async function askStructuredContent<T>(
+  system: string,
+  content: Anthropic.Beta.BetaContentBlockParam[],
+  schema: Record<string, unknown> & { type: "object" },
+  effort: "low" | "medium",
+): Promise<T | null> {
+  const c = getClient();
+  if (!c) return null;
+  try {
+    const res = await c.beta.messages.parse({
+      model: MODEL,
+      max_tokens: 8000,
+      betas: ["server-side-fallback-2026-07-01"],
+      fallbacks: "default",
+      output_config: { effort, format: jsonSchemaOutputFormat(schema as never) },
+      system,
+      messages: [{ role: "user", content }],
+    });
+    if (res.stop_reason === "refusal") return null;
+    return (res.parsed_output as T | null) ?? null;
+  } catch (err) {
+    if (err instanceof Anthropic.APIError) console.warn(`Claude API error ${err.status} on a Miacademy lesson`);
+    else console.warn("Claude request failed on a Miacademy lesson", err);
+    return null;
+  }
+}
+
+const LESSON_PDF_SCHEMA = {
+  type: "object",
+  properties: {
+    activities: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          title: { type: "string" },
+          kind: { type: "string", enum: ["video", "quiz", "worksheet", "hands_on", "other"] },
+          pages: { type: "array", items: { type: "integer" } },
+          supplies: { type: "array", items: { type: "string" } },
+        },
+        required: ["title", "kind", "pages", "supplies"],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ["activities"],
+  additionalProperties: false,
+} as const;
+
+/**
+ * Reads the checklist box on page 1 of a Miacademy Student PDF ("Day 1:
+ * Watch the lesson video, Complete the guided notes...") into a list of
+ * activities, in order, with the pages each one uses and any supplies.
+ */
+export async function readLessonPdf(studentPdfUrl: string): Promise<ParsedActivityResult | null> {
+  return askStructuredContent<ParsedActivityResult>(
+    `You read homeschool lesson PDFs. The first page has a checklist of activities grouped by day.
+List every checklist line in order, exactly as written (keep "optional", "bonus" and "Online practice" lines too; they are filtered later).
+For each: kind = video (watching or rewatching the lesson video), quiz (the online assessment or quiz), worksheet (anything written on the PDF pages, including guided notes), hands_on (an experiment, STEM challenge, build, or anything needing materials), or other.
+pages = the PDF page numbers that activity's pages are on (look at the page headings); empty for online activities.
+supplies = the materials list for hands_on activities, short items; empty otherwise.`,
+    [
+      { type: "document", source: { type: "url", url: studentPdfUrl } },
+      { type: "text", text: "Read this lesson's checklist and match each activity to its pages." },
+    ],
+    LESSON_PDF_SCHEMA as never,
+    "low",
+  );
+}
+
+export interface ParsedActivityResult {
+  activities: { title: string; kind: "video" | "quiz" | "worksheet" | "hands_on" | "other"; pages: number[]; supplies: string[] }[];
+}
+
+const PHOTO_CHECK_SCHEMA = {
+  type: "object",
+  properties: {
+    readable: { type: "boolean" },
+    right: { type: "integer" },
+    total: { type: "integer" },
+    wrong: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: { question: { type: "string" }, answer: { type: "string" } },
+        required: ["question", "answer"],
+        additionalProperties: false,
+      },
+    },
+    message: { type: "string" },
+  },
+  required: ["readable", "right", "total", "wrong", "message"],
+  additionalProperties: false,
+} as const;
+
+export interface PhotoCheck {
+  readable: boolean;
+  right: number;
+  total: number;
+  wrong: { question: string; answer: string }[];
+  message: string;
+}
+
+/**
+ * Compares a photo of a kid's worksheet with the lesson's answer key. Blanks
+ * must match the key; "answers will vary" questions only need a sensible
+ * answer; where the key shows example numbers, it checks the kid's own math.
+ */
+export async function checkWorksheetPhoto(input: {
+  answerKeyUrl: string;
+  activity: string;
+  pages: number[];
+  image: { data: string; mediaType: "image/jpeg" | "image/png" | "image/webp" };
+}): Promise<PhotoCheck | null> {
+  return askStructuredContent<PhotoCheck>(
+    `You check a 9-12 year old's homeschool worksheet against the answer key, like a kind teacher.
+Only check the activity named, on the pages given in the answer key.
+- Fill-in blanks and clue answers must match the key's meaning (ignore spelling slips and capital letters).
+- Where the key says answers will vary, any sensible on-topic answer is right.
+- Where the key shows example numbers (for example "answers given for 100 pounds"), check the student's own calculation with their own numbers instead.
+- Count each blank or question as one. total = how many there are; right = how many are right.
+- wrong lists each one that is wrong or missing: question = a few words naming it ("blank 2", "Mars"), answer = what goes there.
+If the photo is blurry, cut off, or of a different page, set readable false.
+message: one or two short, warm sentences to the student, spoken aloud. No grades, no letters.`,
+    [
+      { type: "document", source: { type: "url", url: input.answerKeyUrl } },
+      { type: "image", source: { type: "base64", media_type: input.image.mediaType, data: input.image.data } },
+      {
+        type: "text",
+        text: `Activity: ${input.activity}${input.pages.length ? ` (pages ${input.pages.join(", ")} of the key)` : ""}. The photo is the student's work.`,
+      },
+    ],
+    PHOTO_CHECK_SCHEMA as never,
+    "medium",
+  );
+}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import MiaHud, { type MiaApi, type Timers } from "@/components/miacademy/MiaHud";
+import MiaHud, { type Checklists, type MiaApi, type Timers } from "@/components/miacademy/MiaHud";
 import type { MiaSettings } from "@/content/miacademy";
 import hudCss from "@/app/miacademy.css";
 import { send, type ApiReply } from "./messages";
@@ -14,13 +14,42 @@ import { send, type ApiReply } from "./messages";
 const WIDTH = 360;
 const FONT = "Focus Buddy Fredoka";
 
-const api: MiaApi = async (body) => {
-  const r = await send<ApiReply>({ type: "api", method: "POST", path: "/api/mia", body });
+const api: MiaApi = async (body, path = "/api/mia") => {
+  const r = await send<ApiReply>({ type: "api", method: "POST", path, body });
   return { ok: r.ok, data: r.data as Awaited<ReturnType<MiaApi>>["data"] };
 };
 const say = (text: string) => void send({ type: "say", text });
 
-type Loaded = { kidName: string; settings: MiaSettings; timers: Timers; serverNow: number };
+type Loaded = { kidName: string; settings: MiaSettings; timers: Timers; checklists: Checklists; serverNow: number };
+
+// ---- What Miacademy's own pages load (page-hook.ts), passed on to the portal ----
+
+let checklistListener: ((c: Checklists) => void) | null = null;
+async function report(body: Record<string, unknown>) {
+  const r = await send<ApiReply<{ checklists?: Checklists }>>({ type: "api", method: "POST", path: "/api/mia/path", body });
+  if (r.ok && r.data.checklists) checklistListener?.(r.data.checklists);
+}
+const sentPdfs = new Set<string>();
+function reportPdfs(urls: string[]) {
+  // Only on a lesson page, so the PDF belongs to the lesson in the address bar.
+  if (!/Content\.Lesson/i.test(location.href)) return;
+  const fresh = urls.filter((u) => !sentPdfs.has(u));
+  if (!fresh.length) return;
+  fresh.forEach((u) => sentPdfs.add(u));
+  void report({ page: location.href, pdfs: fresh });
+}
+window.addEventListener("message", (e) => {
+  if (e.source !== window || !e.data?.__focusBuddy) return;
+  if (e.data.kind === "path") void report({ courses: e.data.data });
+  if (e.data.kind === "pdfs" && Array.isArray(e.data.data)) reportPdfs(e.data.data);
+});
+// PDF links can also just be on the page (a link or an embedded viewer).
+function scanPdfs() {
+  const urls = [...document.querySelectorAll<HTMLElement>("a[href], iframe[src], embed[src], object[data]")]
+    .map((el) => el.getAttribute("href") ?? el.getAttribute("src") ?? el.getAttribute("data") ?? "")
+    .filter((u) => /miaplaza-content\.s3[\w.-]*\.amazonaws\.com\/.+\.pdf/i.test(u));
+  if (urls.length) reportPdfs(urls);
+}
 
 function App() {
   const [state, setState] = useState<"loading" | "unpaired" | "offline" | Loaded>("loading");
@@ -46,7 +75,18 @@ function App() {
   if (state === "unpaired")
     return <Note emoji="🔌" text="Ask a grown-up to connect your timers. They click the Focus Buddy icon at the top of Chrome." />;
   if (state === "offline") return <Note emoji="📡" text="Can't reach your timers right now. Check the internet, then reload the page." />;
-  return <MiaHud kidName={state.kidName} settings={state.settings} initialTimers={state.timers} serverNow={state.serverNow} demo={false} api={api} say={say} />;
+  return (
+    <MiaHud
+      kidName={state.kidName}
+      settings={state.settings}
+      initialTimers={state.timers}
+      initialChecklists={state.checklists}
+      serverNow={state.serverNow}
+      demo={false}
+      api={api}
+      say={say}
+    />
+  );
 }
 
 function Note({ emoji, text }: { emoji: string; text: string }) {
@@ -90,11 +130,17 @@ function mount() {
   // What the strip asks of its host: this page *is* Miacademy, so it's open.
   (window as unknown as { miaHud: object }).miaHud = {
     onMiacademy: (cb: (open: boolean) => void) => cb(true),
+    onChecklists: (cb: (c: Checklists) => void) => {
+      checklistListener = cb;
+    },
     setFullscreen: () => {
       // The break screen already covers the whole page.
     },
   };
   createRoot(root).render(<App />);
+
+  scanPdfs();
+  new MutationObserver(() => scanPdfs()).observe(document.documentElement, { childList: true, subtree: true });
 }
 
 mount();

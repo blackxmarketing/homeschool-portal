@@ -35,8 +35,10 @@ import {
   setParentPin,
   createPairCode,
   removeMiaDevice,
+  parentMiaItem,
+  parentMiaSupplies,
 } from "@/lib/store";
-import type { MiaSettings } from "@/content/miacademy";
+import { MIA_SUBJECTS, type MiaSettings } from "@/content/miacademy";
 
 function str(form: FormData, key: string): string {
   return String(form.get(key) ?? "").trim();
@@ -270,6 +272,7 @@ export async function miaSettingsAction(form: FormData) {
     breakMinutes: Number(form.get("breakMinutes")),
     helpPin: form.get("helpPin") === "on",
     buddy: str(form, "buddy") as MiaSettings["buddy"],
+    lessonsPerWeek: Object.fromEntries(MIA_SUBJECTS.map((s) => [s.id, Number(form.get(`lessons_${s.id}`) ?? 0)])),
   });
   revalidatePath("/parent/settings");
   redirect("/parent/settings?saved=1");
@@ -330,4 +333,30 @@ export async function miaRemoveDeviceAction(form: FormData) {
   removeMiaDevice(s.familyId, Number(form.get("deviceId")));
   revalidatePath("/parent/settings");
   redirect("/parent/settings?saved=1");
+}
+
+/** Approve a hands-on activity, or skip one, on a kid's Miacademy checklist. */
+export async function miaItemAction(form: FormData) {
+  const s = await requireParent();
+  try {
+    parentMiaItem(s.familyId, Number(form.get("kidId")), Number(form.get("lessonId")), str(form, "itemId"), form.get("op") === "skip" ? "skip" : "approve");
+  } catch (e) {
+    if (e instanceof PortalError) back("/parent", e.message);
+    throw e;
+  }
+  revalidatePath("/parent");
+  redirect("/parent");
+}
+
+/** A timer paused for supplies: the supplies are ready (timer starts again), or skip the activity. */
+export async function miaSuppliesAction(form: FormData) {
+  const s = await requireParent();
+  try {
+    parentMiaSupplies(s.familyId, Number(form.get("kidId")), str(form, "subject"), form.get("op") === "skip" ? "skip" : "ready");
+  } catch (e) {
+    if (e instanceof PortalError) back("/parent", e.message);
+    throw e;
+  }
+  revalidatePath("/parent");
+  redirect("/parent");
 }

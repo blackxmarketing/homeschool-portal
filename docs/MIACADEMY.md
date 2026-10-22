@@ -40,6 +40,40 @@ a day. Separate from the 2-hour day. The design prototype is
   - Family overview: alerts, plus today's timers with Restart / Allow again today
     / Stop and reset.
 
+## The step-by-step checklist (phase 4)
+
+Turned on per kid and subject in Settings ("lessons a week"; Off = no checklist).
+Started with Bryce's General Science, 1 lesson a week.
+
+- **Where lessons come from.** The extension's `page-hook.ts` runs in Miacademy's
+  page and passes on (read-only) the assignments data Miacademy loads for itself
+  (`LearningPathController/BatchConvertAssignedCourses`) and any lesson-PDF links.
+  It sends them to `/api/mia/path`; `miaPathSync` (store.ts) keeps track of the
+  lesson each kid is on.
+  - Only tasks a parent checked in Miacademy show up there.
+  - Reaching the quiz means the video is done; moving to a new lesson means the
+    quiz is done. Miacademy itself makes them retake a failed quiz.
+- **The items.** When a lesson's Student PDF link is known (seen on the lesson page,
+  or guessed from the last lesson's), Claude reads the checklist box on page 1
+  (`readLessonPdf` in ai.ts). Each activity becomes one item, minus online
+  practice, optional, bonus and re-watch lines (`MIA_SKIP_ITEMS`).
+  - Video / quiz: checked off by Miacademy.
+  - Worksheets: a photo, compared with the answer key (same name, "Answer Key"
+    instead of "Student PDF") by `checkWorksheetPhoto`. The app lists what to fix;
+    the kid fixes it with a pen and takes another photo until it's right. The first
+    photo's score is kept, and under 70% alerts a parent. Stuck after three tries:
+    finish, and a parent is told.
+  - Hands-on / supplies: the timer pauses by itself to gather supplies. A parent
+    restarts it (family overview, or the PIN on the kid's screen) or skips the
+    activity. Afterwards a photo goes to the parent to approve.
+- **The strip** shows the next three items (the top one big, two dim). A finished
+  item pops away and the next slides up. "This week: 0 of 1 lesson" counts lessons
+  whose every item is done, Monday to Sunday.
+- Photos are kept in `DATA_DIR/mia-photos/<kidId>/`; parents see them at
+  `/api/mia/photo/...`.
+- Preview without a Claude key: the photo check answers with a stand-in (two to
+  fix, then all fixed), so the screens can be tried. Never on the live site.
+
 ## The build, in phases
 
 It runs as a **Chrome extension**: the timer strip appears on the right of every
@@ -82,8 +116,8 @@ alerts.
   http://localhost:3200. That's a pretend Miacademy page running the real content
   script. Make a connect code for a demo kid, then in the page's console run
   `__pair("CODE")`.
-- **Miacademy addresses:** `miacademy.co` and its subdomains (`build.mjs`). Check
-  these against the real site in phase 4.
+- **Miacademy addresses:** students use `miacademy.co`; the parent site
+  (`parents.miacademy.co`) gets no timers (`build.mjs`).
 
 The page talks to whatever is hosting it through `window.miaHud` (the
 extension sets it):

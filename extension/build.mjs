@@ -23,6 +23,7 @@ await build({
   entryPoints: {
     background: path.join(here, "src/background.ts"),
     content: path.join(here, "src/content.tsx"),
+    "page-hook": path.join(here, "src/page-hook.ts"),
     offscreen: path.join(here, "src/offscreen.ts"),
     popup: path.join(here, "src/popup.ts"),
   },
@@ -46,7 +47,8 @@ for (const w of [500, 600, 700])
     path.join(out, `fonts/fredoka-${w}.woff2`),
   );
 
-const MIACADEMY = ["https://miacademy.co/*", "https://*.miacademy.co/*"];
+// Students work on miacademy.co; parents.miacademy.co is the parent site and gets no timers.
+const MIACADEMY = ["https://miacademy.co/*", "https://www.miacademy.co/*"];
 const manifest = {
   manifest_version: 3,
   name: "Focus Buddy",
@@ -58,7 +60,11 @@ const manifest = {
   background: { service_worker: "background.js" },
   permissions: ["storage", "offscreen", "tts"],
   host_permissions: [`${portal}/*`, ...(dev ? ["http://localhost:3100/*"] : [])],
-  content_scripts: [{ matches: MIACADEMY, js: ["content.js"], run_at: "document_idle" }],
+  content_scripts: [
+    // Sees the data Miacademy's pages load (read-only), see src/page-hook.ts.
+    { matches: MIACADEMY, js: ["page-hook.js"], run_at: "document_start", world: "MAIN" },
+    { matches: MIACADEMY, js: ["content.js"], run_at: "document_idle" },
+  ],
   web_accessible_resources: [{ resources: ["fonts/*.woff2"], matches: MIACADEMY }],
 };
 fs.writeFileSync(path.join(out, "manifest.json"), JSON.stringify(manifest, null, 2));

@@ -59,6 +59,21 @@ export const MIA_LINES = {
   remind: "Don't forget your timer! Pick the subject you're working on and press Start.",
 };
 
+/** Miacademy's subject names (from its course data) -> our timer subjects. */
+export const MIA_SUBJECT_MAP: Record<string, string> = {
+  Math: "math",
+  LanguageArts: "ela",
+  Science: "sci",
+  GeographyAndHistory: "his",
+  SocialStudies: "his",
+};
+
+/**
+ * Lines in a lesson PDF's checklist the kids skip: online practice (they do
+ * the PDF activities instead), re-watching, and anything marked optional or bonus.
+ */
+export const MIA_SKIP_ITEMS = [/online practice/i, /\boptional\b/i, /\bbonus\b/i, /\brewatch\b/i];
+
 export interface MiaSettings {
   /** Kids can pause a timer (for help or a break). */
   allowPause: boolean;
@@ -68,6 +83,8 @@ export interface MiaSettings {
   helpPin: boolean;
   /** The kid's animal buddy: walks across the break screen and (later) is their bank. */
   buddy: BuddyId;
+  /** Lessons a week per subject for the step-by-step checklist. 0 = no checklist for that subject yet. */
+  lessonsPerWeek: Record<string, number>;
 }
 
 export const BUDDIES = [
@@ -76,4 +93,10 @@ export const BUDDIES = [
 ] as const;
 export type BuddyId = (typeof BUDDIES)[number]["id"];
 
-export const MIA_DEFAULT_SETTINGS: MiaSettings = { allowPause: true, breakMinutes: 5, helpPin: true, buddy: "panda" };
+export const MIA_DEFAULT_SETTINGS: MiaSettings = {
+  allowPause: true,
+  breakMinutes: 5,
+  helpPin: true,
+  buddy: "panda",
+  lessonsPerWeek: { math: 0, ela: 0, sci: 0, his: 0 },
+};

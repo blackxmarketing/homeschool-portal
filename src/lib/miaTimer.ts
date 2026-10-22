@@ -14,7 +14,9 @@ export type MiaPause =
   /** On a break (the Jimothy screen). */
   | { type: "break"; at: number; endAt: number; lenMs: number }
   /** Break over: waiting for the kid to press Start. */
-  | { type: "ready"; since: number; lateTold: boolean };
+  | { type: "ready"; since: number; lateTold: boolean }
+  /** Gathering supplies for a hands-on activity: a grown-up restarts it (or skips the activity). */
+  | { type: "supplies"; at: number; lessonId: number; itemId: string };
 
 export interface MiaTimerState {
   durMs: number;
@@ -32,7 +34,18 @@ export interface MiaTimerState {
   demo: boolean;
 }
 
-export type MiaAction = "start" | "pause" | "cancel" | "help" | "break" | "breakDone" | "late" | "helpResume" | "finish" | "missedCheckin";
+export type MiaAction =
+  | "start"
+  | "pause"
+  | "cancel"
+  | "help"
+  | "break"
+  | "breakDone"
+  | "late"
+  | "helpResume"
+  | "finish"
+  | "missedCheckin"
+  | "supplies";
 
 export class MiaRuleError extends Error {}
 
@@ -74,7 +87,7 @@ function resume(s: MiaTimerState, now: number): MiaTimerState {
 }
 
 /** What happened, so the server knows when to tell a parent. */
-export type MiaEvent = "help" | "late" | "finished" | null;
+export type MiaEvent = "help" | "late" | "finished" | "supplies" | null;
 
 /**
  * Applies one action. Throws MiaRuleError when it isn't allowed right now.
@@ -85,6 +98,7 @@ export function applyMia(
   action: MiaAction,
   now: number,
   settings: MiaSettings = MIA_DEFAULT_SETTINGS,
+  extra: { lessonId?: number; itemId?: string } = {},
 ): { state: MiaTimerState; event: MiaEvent } {
   if (s.finishedAt !== null) throw new MiaRuleError("This timer is done for today.");
   const p = s.pause;
@@ -118,8 +132,12 @@ export function applyMia(
       if (p?.type !== "ready" || p.lateTold || now - p.since < lateMs(s)) return ok(s);
       return ok({ ...s, pause: { ...p, lateTold: true } }, "late");
     case "helpResume":
-      if (p?.type !== "help") throw new MiaRuleError("This timer isn't waiting for help.");
+      if (p?.type !== "help" && p?.type !== "supplies") throw new MiaRuleError("This timer isn't waiting for a grown-up.");
       return ok(resume(s, now));
+    case "supplies":
+      // Pauses on its own, whether or not the kid may pause: gathering supplies shouldn't use up the 30 minutes.
+      if (!isRunning(s) || extra.lessonId === undefined || !extra.itemId) throw new MiaRuleError("The timer isn't running.");
+      return ok({ ...freeze(s, now), pause: { type: "supplies", at: now, lessonId: extra.lessonId, itemId: extra.itemId } }, "supplies");
     case "finish":
       if (!isRunning(s) || remaining(s, now) > FINISH_SLACK_MS) throw new MiaRuleError("There's still time left.");
       return ok({ ...s, leftMs: 0, endAt: null, pause: null, finishedAt: now }, "finished");
@@ -136,6 +154,12 @@ export function clampMiaSettings(raw: Partial<MiaSettings> | null | undefined): 
     breakMinutes: Number.isFinite(mins) ? Math.min(5, Math.max(1, mins)) : d.breakMinutes,
     helpPin: typeof raw?.helpPin === "boolean" ? raw.helpPin : d.helpPin,
     buddy: BUDDIES.find((b) => b.id === raw?.buddy)?.id ?? d.buddy,
+    lessonsPerWeek: Object.fromEntries(
+      Object.keys(d.lessonsPerWeek).map((s) => {
+        const n = Math.round(Number(raw?.lessonsPerWeek?.[s]));
+        return [s, Number.isFinite(n) ? Math.min(10, Math.max(0, n)) : d.lessonsPerWeek[s]];
+      }),
+    ),
   };
 }
 

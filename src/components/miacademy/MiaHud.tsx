@@ -14,25 +14,35 @@ import {
 } from "@/content/miacademy";
 import { isOpen, isRunning, lateMs, remaining, type MiaTimerState } from "@/lib/miaTimer";
 import Buddy from "./Buddy";
+import Checklist from "./Checklist";
+import type { MiaChecklist } from "@/lib/store";
 
 export type Timers = Record<string, MiaTimerState | null>;
 
 /** One call to the portal's /api/mia. The portal page uses fetch; the Chrome extension goes through its background worker. */
+/** One call to the portal (default /api/mia). The portal page uses fetch; the Chrome extension goes through its background worker. */
 export type MiaApi = (
   body: Record<string, unknown>,
-) => Promise<{ ok: boolean; data: { timers?: Timers; settings?: MiaSettings; serverNow?: number; error?: string } }>;
+  path?: string,
+) => Promise<{
+  ok: boolean;
+  data: { timers?: Timers; settings?: MiaSettings; checklists?: Checklists; serverNow?: number; error?: string } & Record<string, unknown>;
+}>;
+export type Checklists = Record<string, MiaChecklist | null>;
 
 /** What hosts the page (the Chrome extension) adds. Missing in a normal browser tab. */
 interface HostBridge {
   onMiacademy?: (cb: (open: boolean) => void) => void;
+  /** New checklists after the extension reports what Miacademy's pages show. */
+  onChecklists?: (cb: (c: Checklists) => void) => void;
   setFullscreen?: (on: boolean) => void;
 }
 const bridge = (): HostBridge | undefined =>
   typeof window === "undefined" ? undefined : (window as unknown as { miaHud?: HostBridge }).miaHud;
 
-export const portalApi: MiaApi = async (body) => {
+export const portalApi: MiaApi = async (body, path = "/api/mia") => {
   try {
-    const res = await fetch("/api/mia", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+    const res = await fetch(path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
     return { ok: res.ok, data: await res.json().catch(() => ({})) };
   } catch {
     return { ok: false, data: { error: "Can't reach the portal. Check the internet." } };
@@ -56,6 +66,7 @@ export default function MiaHud({
   kidName,
   settings: initialSettings,
   initialTimers,
+  initialChecklists = {},
   serverNow,
   demo,
   api = portalApi,
@@ -64,6 +75,7 @@ export default function MiaHud({
   kidName: string;
   settings: MiaSettings;
   initialTimers: Timers;
+  initialChecklists?: Checklists;
   serverNow: number;
   demo: boolean;
   api?: MiaApi;
@@ -72,6 +84,8 @@ export default function MiaHud({
 }) {
   const [timers, setTimers] = useState<Timers>(initialTimers);
   const [settings, setSettings] = useState<MiaSettings>(initialSettings);
+  const [checklists, setChecklists] = useState<Checklists>(initialChecklists);
+  const [skipMode, setSkipMode] = useState(false);
   const [offset, setOffset] = useState(() => serverNow - Date.now());
   const [now, setNow] = useState(serverNow);
   const [focus, setFocus] = useState<string | null>(() => MIA_SUBJECTS.find((s) => isOpen(initialTimers[s.id]))?.id ?? null);
@@ -107,6 +121,7 @@ export default function MiaHud({
     if (data.serverNow) setOffset(data.serverNow - Date.now());
     if (data.timers) setTimers(data.timers);
     if (data.settings) setSettings(data.settings);
+    if (data.checklists) setChecklists(data.checklists);
     if (!ok) setError(data.error ?? "Something went wrong.");
     setBusy(false);
     return ok;
@@ -114,7 +129,7 @@ export default function MiaHud({
 
   // Stay in step with the portal: a parent may restart a timer or change a setting.
   // Every 5 seconds while waiting for a grown-up, otherwise every 30.
-  const waitingForHelp = !!openId && timers[openId]?.pause?.type === "help";
+  const waitingForHelp = !!openId && (timers[openId]?.pause?.type === "help" || timers[openId]?.pause?.type === "supplies");
   useEffect(() => {
     const id = setInterval(async () => {
       if (document.visibilityState === "hidden") return;
@@ -125,10 +140,11 @@ export default function MiaHud({
         // A parent restarted a timer from the family overview.
         const was = live.current.openId ? live.current.timers[live.current.openId] : null;
         const now = live.current.openId ? data.timers[live.current.openId] : null;
-        if (was?.pause?.type === "help" && now && isRunning(now)) say(fill(MIA_LINES.helpDone, live.current.openId!));
+        if ((was?.pause?.type === "help" || was?.pause?.type === "supplies") && now && isRunning(now)) say(fill(MIA_LINES.helpDone, live.current.openId!));
         setTimers(data.timers);
       }
       if (data.settings) setSettings(data.settings);
+      if (data.checklists) setChecklists(data.checklists);
     }, waitingForHelp ? 5000 : 30000);
     return () => clearInterval(id);
   }, [api, waitingForHelp]);
@@ -235,6 +251,7 @@ export default function MiaHud({
   // ---- The host (Chrome extension): knows when Miacademy is open, and goes full screen for breaks ----
   useEffect(() => {
     bridge()?.onMiacademy?.((open) => setMiaOpen(open));
+    bridge()?.onChecklists?.((c) => setChecklists(c));
   }, []);
   const onBreak = !!openId && timers[openId]?.pause?.type === "break";
   useEffect(() => {
@@ -258,16 +275,18 @@ export default function MiaHud({
   async function endBreakEarly(subject: string) {
     if (await act(subject, "breakDone")) say(fill(MIA_LINES.breakEarly, subject));
   }
-  async function helpRestart(subject: string) {
-    if (settings.helpPin && !pinOpen) {
+  async function helpRestart(subject: string, skip = false) {
+    const needPin = settings.helpPin || timers[subject]?.pause?.type === "supplies";
+    if (needPin && !pinOpen) {
       setPin("");
       setError(null);
+      setSkipMode(skip);
       setPinOpen(true);
       return;
     }
-    if (await act(subject, "helpResume", settings.helpPin ? { pin } : {})) {
+    if (await act(subject, "helpResume", { ...(needPin ? { pin } : {}), skip: skipMode || skip })) {
       setPinOpen(false);
-      say(fill(MIA_LINES.helpDone, subject));
+      say(skipMode || skip ? `Okay! On to the next activity in ${subjectName(subject)}.` : fill(MIA_LINES.helpDone, subject));
     }
   }
   function answerCheckin() {
@@ -371,16 +390,27 @@ export default function MiaHud({
           onStart={() => start(focused.id)}
           onPause={() => act(focused.id, "pause")}
           onBack={() => setFocus(null)}
-          onHelpRestart={() => helpRestart(focused.id)}
+          onHelpRestart={(skip) => helpRestart(focused.id, skip)}
           onAnswer={answerCheckin}
         />
       )}
 
-      {focused && (
-        <div className="mia-checklist-soon">
-          <span>📝</span> Your step-by-step checklist will show up here soon!
-        </div>
-      )}
+      {focused &&
+        (checklists[focused.id] ? (
+          <Checklist
+            checklist={checklists[focused.id]!}
+            color={focused.color}
+            running={isRunning(ft)}
+            api={api}
+            say={say}
+            onChecklists={setChecklists}
+            onSupplies={(lessonId, itemId) => void act(focused.id, "supplies", { lessonId, itemId })}
+          />
+        ) : (
+          <div className="mia-checklist-soon">
+            <span>📝</span> Your step-by-step checklist will show up here soon!
+          </div>
+        ))}
 
       {/* Pause: why? */}
       {focused && ft?.pause?.type === "choosing" && (
@@ -427,7 +457,7 @@ export default function MiaHud({
               void helpRestart(focused.id);
             }}
           >
-            <h2>Grown-up: start the timer again</h2>
+            <h2>{skipMode ? "Grown-up: skip this activity" : "Grown-up: start the timer again"}</h2>
             <input
               className="mia-pin"
               type="password"
@@ -445,7 +475,7 @@ export default function MiaHud({
                 Cancel
               </button>
               <button className="mia-btn" disabled={busy || pin.length < 4}>
-                Start timer
+                {skipMode ? "Skip it" : "Start timer"}
               </button>
             </div>
           </form>
@@ -479,7 +509,7 @@ function FocusedTimer({
   onStart: () => void;
   onPause: () => void;
   onBack: () => void;
-  onHelpRestart: () => void;
+  onHelpRestart: (skip?: boolean) => void;
   onAnswer: () => void;
 }) {
   const full = (demo ? 60 : MIA_MINUTES * 60) * 1000;
@@ -500,8 +530,20 @@ function FocusedTimer({
     controls = (
       <>
         <div className="mia-waiting">✋ Paused. A grown-up is coming to help!</div>
-        <button className="mia-btn" onClick={onHelpRestart} disabled={busy}>
+        <button className="mia-btn" onClick={() => onHelpRestart()} disabled={busy}>
           Grown-up: start timer
+        </button>
+      </>
+    );
+  else if (t.pause?.type === "supplies")
+    controls = (
+      <>
+        <div className="mia-waiting">🧰 Timer paused. Gather your supplies with a grown-up!</div>
+        <button className="mia-btn" onClick={() => onHelpRestart()} disabled={busy}>
+          Grown-up: supplies ready
+        </button>
+        <button className="mia-btn ghost" onClick={() => onHelpRestart(true)} disabled={busy}>
+          Grown-up: skip it
         </button>
       </>
     );
