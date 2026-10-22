@@ -24,6 +24,7 @@ await build({
     background: path.join(here, "src/background.ts"),
     content: path.join(here, "src/content.tsx"),
     "page-hook": path.join(here, "src/page-hook.ts"),
+    parent: path.join(here, "src/parent.ts"),
     offscreen: path.join(here, "src/offscreen.ts"),
     popup: path.join(here, "src/popup.ts"),
   },
@@ -64,6 +65,8 @@ const manifest = {
     // Sees the data Miacademy's pages load (read-only), see src/page-hook.ts.
     { matches: MIACADEMY, js: ["page-hook.js"], run_at: "document_start", world: "MAIN" },
     { matches: MIACADEMY, js: ["content.js"], run_at: "document_idle" },
+    // Parent mode: reads the calendar on the parent's Miacademy pages (src/parent.ts).
+    { matches: ["https://parents.miacademy.co/*"], js: ["parent.js"], run_at: "document_idle" },
   ],
   web_accessible_resources: [{ resources: ["fonts/*.woff2"], matches: MIACADEMY }],
 };

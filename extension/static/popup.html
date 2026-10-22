@@ -26,7 +26,7 @@
     <header><img src="icons/icon-128.png" alt="" /><h1>Focus Buddy</h1></header>
     <main>
       <form id="connect" hidden>
-        <p>Grown-ups: in the portal, open <b>Settings</b>, find this child, and press <b>Make a connect code</b>.</p>
+        <p>Grown-ups: in the portal, open <b>Settings</b>. On a child's computer, press <b>Make a connect code</b> for that child; on your own computer, press <b>Make a parent connect code</b>.</p>
         <label for="code">Connect code</label>
         <input id="code" autocomplete="off" maxlength="8" required />
         <details>
@@ -38,7 +38,8 @@
       </form>
       <div id="connected" hidden>
         <div class="ok">✅ Connected for <span id="kid"></span></div>
-        <p>The timers show up on the right of every Miacademy page.</p>
+        <p id="kid-note">The timers show up on the right of every Miacademy page.</p>
+        <p id="parent-note" hidden>Parent mode: open each child's page in your Miacademy parent account about once a week, and their checklists stay up to date.</p>
         <form id="disconnect">
           <label for="pin">Grown-ups: parent PIN to disconnect</label>
           <input id="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off" />

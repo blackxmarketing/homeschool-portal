@@ -9,6 +9,7 @@ import {
   miaLesson,
   miaSetBigLesson,
   miaSetParseState,
+  miaSetPdfParsed,
   type MiaChecklist,
   type MiaPathCourse,
 } from "./store";
@@ -37,11 +38,13 @@ export function readLessonInBackground(kidId: number, lessonId: number): void {
       const next = nextPdf && (await exists(nextPdf)) ? nextPdf : undefined;
       const parsed = await readLessonPdf(lesson.studentPdf!, next);
       // A guessed PDF has to be this lesson's; if not, wait for the real link (when the kid opens the lesson).
-      if (parsed && !sameLesson(parsed.lessonTitle, lesson.title, lesson.course)) {
+      // (Lessons from the parent's calendar have Miacademy's own link, so no check is needed.)
+      if (parsed && !lesson.miaKey.startsWith("plan:") && !sameLesson(parsed.lessonTitle, lesson.title, lesson.course)) {
         miaClearStudentPdf(lessonId);
         return;
       }
       if (parsed?.nextIsUnitAssessment) miaSetBigLesson(lessonId, 2);
+      if (parsed) miaSetPdfParsed(lessonId, parsed.activities);
       const items = parsed ? buildItems(parsed.activities, lesson.subject, lesson.title, lesson.course) : [];
       miaSetParseState(lessonId, items.length ? "ready" : "failed", items.length ? items : undefined);
       if (!items.length) {
@@ -117,7 +120,9 @@ export function parsePathCourses(raw: unknown): MiaPathCourse[] {
   return out;
 }
 
-/** Each subject's checklist (null when the parent hasn't turned one on). */
+/** Each subject's checklist (null when the parent hasn't turned one on). Starts reading any Student PDF it still needs. */
 export function miaChecklists(kidId: number): Record<string, MiaChecklist | null> {
-  return Object.fromEntries(MIA_SUBJECTS.map((s) => [s.id, miaChecklist(kidId, s.id)]));
+  const all = Object.fromEntries(MIA_SUBJECTS.map((s) => [s.id, miaChecklist(kidId, s.id)]));
+  for (const c of Object.values(all)) for (const part of c?.parts ?? []) for (const id of part.toRead) readLessonInBackground(kidId, id);
+  return all;
 }

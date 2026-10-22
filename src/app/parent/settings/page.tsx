@@ -1,10 +1,10 @@
 import ParentNav from "@/components/ParentNav";
-import { addKidAction, focusAction, miaPairCodeAction, miaRemoveDeviceAction, miaSettingsAction, parentPinAction, resetPlacementAction, schoolYearAction, updateKidAction } from "@/app/actions";
+import { addKidAction, focusAction, miaChildAction, miaPairCodeAction, miaParentCodeAction, miaParentDeviceAction, miaRemoveDeviceAction, miaSettingsAction, parentPinAction, resetPlacementAction, schoolYearAction, updateKidAction } from "@/app/actions";
 import { BUDDIES, MIA_SUBJECTS } from "@/content/miacademy";
 import { requireParent } from "@/lib/auth";
 import { LIMITS } from "@/lib/focus";
 import { focusPresets } from "@/lib/content";
-import { AVATARS, electivesOff, getFamily, getFocus, getMiaSettings, hasParentPin, listKids, miaDevices } from "@/lib/store";
+import { AVATARS, electivesOff, getFamily, getFocus, getMiaSettings, hasParentPin, listKids, miaChildren, miaDevices, miaParentDevices } from "@/lib/store";
 
 /** Kindergarten is grade 0. */
 const GRADES = Array.from({ length: 13 }, (_, i) => i);
@@ -25,10 +25,10 @@ export const dynamic = "force-dynamic";
 export default async function Settings({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; saved?: string; welcome?: string; code?: string; codeKid?: string }>;
+  searchParams: Promise<{ error?: string; saved?: string; welcome?: string; code?: string; codeKid?: string; pcode?: string }>;
 }) {
   const s = await requireParent();
-  const { error, saved, welcome, code, codeKid } = await searchParams;
+  const { error, saved, welcome, code, codeKid, pcode } = await searchParams;
   const kids = listKids(s.familyId);
   const family = getFamily(s.familyId)!;
 
@@ -143,6 +143,8 @@ export default async function Settings({
           </form>
         </div>
       ))}
+
+      <ParentMode familyId={s.familyId} code={pcode} kids={kids.map((k) => ({ id: k.id, name: k.name }))} />
 
       <div className="card">
         <h2>Parent PIN</h2>
@@ -338,6 +340,81 @@ function MiaExtension({ familyId, kidId, name, code }: { familyId: number; kidId
         <input type="hidden" name="kidId" value={kidId} />
         <button className="btn secondary">Make a connect code</button>
       </form>
+    </div>
+  );
+}
+
+function ParentMode({ familyId, code, kids }: { familyId: number; code?: string; kids: { id: number; name: string }[] }) {
+  const devices = miaParentDevices(familyId);
+  const children = miaChildren(familyId);
+  const when = (at: number) =>
+    new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: process.env.APP_TIMEZONE ?? "America/Denver" }).format(at);
+  return (
+    <div className="card" id="focus-buddy-parent">
+      <h2>Focus Buddy on a parent&apos;s computer</h2>
+      <p className="muted small">
+        With Focus Buddy installed on your computer too, opening your Miacademy parent page lets it read (never change) each child&apos;s
+        calendar for this week and the next two. The kids&apos; checklists then come straight from the tasks you marked in Miacademy,
+        with every lesson&apos;s videos, practice levels, quiz and PDF known ahead. Open each child&apos;s page about once a week.
+      </p>
+      {code && (
+        <div className="notice">
+          Parent connect code: <strong style={{ fontSize: "1.4rem", letterSpacing: "0.15em" }}>{code}</strong>
+          <div className="muted small">Type it into Focus Buddy on your computer. Works once, for the next 15 minutes.</div>
+        </div>
+      )}
+      {devices.length > 0 && (
+        <table>
+          <tbody>
+            {devices.map((d, i) => (
+              <tr key={d.id}>
+                <td>Parent computer {i + 1}</td>
+                <td className="muted small">
+                  connected {when(d.created_at)} · last used {when(d.last_seen)}
+                </td>
+                <td>
+                  <form action={miaParentDeviceAction}>
+                    <input type="hidden" name="deviceId" value={d.id} />
+                    <button className="linkbtn small">Disconnect</button>
+                  </form>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      <form action={miaParentCodeAction}>
+        <button className="btn secondary">Make a parent connect code</button>
+      </form>
+      {children.length > 0 && (
+        <>
+          <h3 style={{ marginTop: 16 }}>Miacademy students</h3>
+          <table>
+            <tbody>
+              {children.map((c) => (
+                <tr key={c.child}>
+                  <td>{c.name}</td>
+                  <td className="muted small">calendar read {when(c.seen_at)}</td>
+                  <td>
+                    <form action={miaChildAction} className="row" style={{ alignItems: "center", gap: 6 }}>
+                      <input type="hidden" name="child" value={c.child} />
+                      <select name="kidId" defaultValue={c.kid_id ?? ""}>
+                        <option value="">Not matched</option>
+                        {kids.map((k) => (
+                          <option key={k.id} value={k.id}>
+                            {k.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button className="linkbtn small">Save</button>
+                    </form>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
     </div>
   );
 }

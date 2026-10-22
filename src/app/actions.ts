@@ -37,6 +37,9 @@ import {
   removeMiaDevice,
   parentMiaItem,
   parentMiaSupplies,
+  createParentPairCode,
+  removeMiaParentDevice,
+  setMiaChild,
 } from "@/lib/store";
 import { MIA_SUBJECTS, type MiaSettings } from "@/content/miacademy";
 
@@ -359,4 +362,32 @@ export async function miaSuppliesAction(form: FormData) {
   }
   revalidatePath("/parent");
   redirect("/parent");
+}
+
+/** A code to connect Focus Buddy on a parent's computer (parent mode reads the Miacademy calendar). */
+export async function miaParentCodeAction() {
+  const s = await requireParent();
+  const code = createParentPairCode(s.familyId);
+  redirect(`/parent/settings?pcode=${code}#focus-buddy-parent`);
+}
+
+export async function miaParentDeviceAction(form: FormData) {
+  const s = await requireParent();
+  removeMiaParentDevice(s.familyId, Number(form.get("deviceId")));
+  revalidatePath("/parent/settings");
+  redirect("/parent/settings?saved=1#focus-buddy-parent");
+}
+
+/** Which portal kid a Miacademy student is. */
+export async function miaChildAction(form: FormData) {
+  const s = await requireParent();
+  const kid = str(form, "kidId");
+  try {
+    setMiaChild(s.familyId, str(form, "child"), kid ? Number(kid) : null);
+  } catch (e) {
+    if (e instanceof PortalError) back("/parent/settings", e.message);
+    throw e;
+  }
+  revalidatePath("/parent/settings");
+  redirect("/parent/settings?saved=1#focus-buddy-parent");
 }

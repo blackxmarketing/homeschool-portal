@@ -14,6 +14,8 @@ export interface ApiReply<T = Record<string, unknown>> {
 
 export interface Status {
   connected: boolean;
+  /** "kid": the timers for one kid. "parent": parent mode (reads the Miacademy calendar). */
+  kind: "kid" | "parent";
   kidName: string | null;
   portal: string;
 }

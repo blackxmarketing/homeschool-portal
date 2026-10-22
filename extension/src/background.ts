@@ -6,9 +6,9 @@ import type { ApiReply, ExtMessage, Status } from "./messages";
  * Miacademy pages, and plays the teacher's voice through an offscreen page.
  */
 
-async function config(): Promise<{ portal: string; token: string | null; kidName: string | null }> {
-  const c = (await chrome.storage.local.get(["portal", "token", "kidName"])) as { portal?: string; token?: string; kidName?: string };
-  return { portal: c.portal || __PORTAL__, token: c.token ?? null, kidName: c.kidName ?? null };
+async function config(): Promise<{ portal: string; token: string | null; kidName: string | null; kind: "kid" | "parent" }> {
+  const c = (await chrome.storage.local.get(["portal", "token", "kidName", "kind"])) as { portal?: string; token?: string; kidName?: string; kind?: string };
+  return { portal: c.portal || __PORTAL__, token: c.token ?? null, kidName: c.kidName ?? null, kind: c.kind === "parent" ? "parent" : "kid" };
 }
 
 async function call(method: string, path: string, body?: unknown): Promise<ApiReply> {
@@ -21,8 +21,8 @@ async function call(method: string, path: string, body?: unknown): Promise<ApiRe
       body: body === undefined ? undefined : JSON.stringify(body),
     });
     const data = (await res.json().catch(() => ({}))) as ApiReply["data"];
-    // A parent disconnected this computer in Settings.
-    if (res.status === 401) await chrome.storage.local.remove(["token", "kidName"]);
+    // A parent disconnected this computer in Settings. (A parent-mode connection is only cleared by its own pages.)
+    if (res.status === 401 && path.startsWith("/api/mia") && (await config()).kind === "kid") await chrome.storage.local.remove(["token", "kidName", "kind"]);
     return { ok: res.ok, status: res.status, data };
   } catch {
     return { ok: false, status: 0, data: { error: "Can't reach the portal. Check the internet." } };
@@ -87,8 +87,8 @@ async function say(text: string) {
 async function handle(msg: ExtMessage): Promise<unknown> {
   switch (msg.type) {
     case "status": {
-      const { portal, token, kidName } = await config();
-      return { connected: !!token, kidName, portal } satisfies Status;
+      const { portal, token, kidName, kind } = await config();
+      return { connected: !!token, kind, kidName, portal } satisfies Status;
     }
     case "pair": {
       const portal = msg.portal.trim().replace(/\/+$/, "") || __PORTAL__;
@@ -98,9 +98,9 @@ async function handle(msg: ExtMessage): Promise<unknown> {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ code: msg.code }),
         });
-        const data = (await res.json().catch(() => ({}))) as { token?: string; kidName?: string; error?: string };
+        const data = (await res.json().catch(() => ({}))) as { token?: string; kidName?: string; kind?: string; error?: string };
         if (!res.ok || !data.token) return { ok: false, error: data.error ?? "That code didn't work." };
-        await chrome.storage.local.set({ portal, token: data.token, kidName: data.kidName ?? null });
+        await chrome.storage.local.set({ portal, token: data.token, kidName: data.kidName ?? null, kind: data.kind === "parent" ? "parent" : "kid" });
         return { ok: true, kidName: data.kidName };
       } catch {
         return { ok: false, error: "Can't reach the portal. Check the address and the internet." };
@@ -109,7 +109,7 @@ async function handle(msg: ExtMessage): Promise<unknown> {
     case "unpair": {
       const r = await call("DELETE", "/api/mia/pair", { pin: msg.pin });
       if (!r.ok && r.status !== 401) return { ok: false, error: r.data.error ?? "Couldn't disconnect." };
-      await chrome.storage.local.remove(["token", "kidName"]);
+      await chrome.storage.local.remove(["token", "kidName", "kind"]);
       return { ok: true };
     }
     case "api":

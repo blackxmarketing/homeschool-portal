@@ -8,7 +8,9 @@ async function show() {
   const s = await send<Status>({ type: "status" });
   $("connected").hidden = !s.connected;
   $("connect").hidden = s.connected;
-  $("kid").textContent = s.kidName ?? "";
+  $("kid").textContent = s.kind === "parent" ? `parents (${s.kidName ?? "your family"})` : s.kidName ?? "";
+  $("parent-note").hidden = s.kind !== "parent";
+  $("kid-note").hidden = s.kind === "parent";
   $<HTMLInputElement>("portal").value = s.portal;
 }
 

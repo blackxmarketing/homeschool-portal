@@ -143,4 +143,7 @@ function mount() {
   new MutationObserver(() => scanPdfs()).observe(document.documentElement, { childList: true, subtree: true });
 }
 
-mount();
+// A parent's computer (parent mode) gets no kid timers.
+void send<{ kind?: string; connected?: boolean }>({ type: "status" }).then((s) => {
+  if (!(s.connected && s.kind === "parent")) mount();
+});

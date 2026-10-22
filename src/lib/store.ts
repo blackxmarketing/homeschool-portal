@@ -40,7 +40,9 @@ import {
   weekStart,
   type ItemState,
   type LessonItem,
+  type ParsedActivity,
 } from "./miaLessons";
+import { planLessonItems, planLessons, type PlanTask } from "./miaPlan";
 
 export type Mode = "learn" | "review" | "placement";
 
@@ -2514,7 +2516,10 @@ export function miaPathSync(kidId: number, courses: MiaPathCourse[], now = Date.
   const db = getDb();
   const toRead: number[] = [];
   for (const c of courses) {
+    if (c.taskKey)
+      db.prepare("INSERT OR REPLACE INTO mia_path (kid_id, course, task_id, task_type, at) VALUES (?, ?, ?, ?, ?)").run(kidId, c.courseTitle, c.taskKey, c.taskType, now);
     if (!c.lessonKey || !(settings.lessonsPerWeek[c.subject] > 0)) continue;
+    if (miaHasPlan(kidId, c.courseTitle)) continue;
     const plan = miaCoursePlan(c.subject, c.courseTitle);
     // A subject made of several classes only follows the classes it has a plan for.
     if (MIA_COURSE_PLANS[c.subject] && !plan) continue;
@@ -2627,7 +2632,9 @@ export function miaSetBigLesson(lessonId: number, weight: number): void {
 
 /** One class's checklist: the next items across its open lessons, and its week so far. */
 function courseChecklist(kidId: number, subject: string, plan: MiaCoursePlan | null, target: number) {
-  const lessons = miaOpenLessons(kidId, subject, plan);
+  const fromPlan = miaPlanLessons(kidId, subject, plan);
+  const lessons = fromPlan ? fromPlan.lessons.filter((l) => !l.doneDay) : miaOpenLessons(kidId, subject, plan);
+  const toRead = fromPlan?.toRead ?? [];
   const doneThisWeek = miaLessonsDoneThisWeek(kidId, subject, today(), plan);
   const weekDone = !!plan?.stopWhenDone && doneThisWeek >= target;
   const upcoming: { lessonId: number; lessonTitle: string; item: LessonItem; state: ItemState }[] = [];
@@ -2636,7 +2643,11 @@ function courseChecklist(kidId: number, subject: string, plan: MiaCoursePlan | n
   // A class that's done for the week shows nothing more (Miacademy may already list next week's lesson).
   if (!weekDone)
     for (const l of lessons) {
-      if (!l.items) {
+      const waitingForPdf = fromPlan && !plan?.onlineOnly && !!l.studentPdf && l.parseState !== "ready";
+      if (!l.items || waitingForPdf) {
+        // Its packet isn't read yet: show the video meanwhile, nothing past it.
+        for (const item of remainingItems(l.items ?? [], l.states).filter((i) => i.check === "video"))
+          upcoming.push({ lessonId: l.id, lessonTitle: l.title, item, state: l.states[item.id] ?? { done: false } });
         reading = l.parseState === "reading" || (l.parseState === "waiting" && !!l.studentPdf);
         failed = l.parseState === "failed";
         break;
@@ -2660,6 +2671,10 @@ function courseChecklist(kidId: number, subject: string, plan: MiaCoursePlan | n
     needsPdf: !weekDone && !plan?.onlineOnly && !!current && !current.studentPdf,
     reading,
     failed,
+    /** Lessons whose Student PDF should be read now (miaSync starts it). */
+    toRead,
+    /** The checklist comes from the parent's Miacademy calendar. */
+    fromCalendar: !!fromPlan,
   };
 }
 export type MiaCourseChecklist = ReturnType<typeof courseChecklist>;
@@ -2780,4 +2795,227 @@ export function parentMiaSupplies(familyId: number, kidId: number, subject: stri
   const { lessonId, itemId } = t.pause;
   updateItem(kidId, lessonId, itemId, (s) => (op === "skip" ? { ...s, done: true, skipped: true, at: now } : { ...s, suppliesReady: true }));
   saveMia(kidId, day, subject, applyMia(t, "helpResume", now, getMiaSettings(kidId)).state);
+}
+
+// ---- Focus Buddy parent mode: the parent's Miacademy calendar ----
+
+/** Parent: a code to connect Focus Buddy on a parent's computer (works once, for 15 minutes). */
+export function createParentPairCode(familyId: number, now = Date.now()): string {
+  const db = getDb();
+  db.prepare("DELETE FROM mia_parent_codes WHERE expires_at < ? OR family_id = ?").run(now, familyId);
+  const code = "P" + Array.from(crypto.randomBytes(5), (b) => PAIR_CODE_LETTERS[b % PAIR_CODE_LETTERS.length]).join("");
+  db.prepare("INSERT INTO mia_parent_codes (code, family_id, expires_at) VALUES (?, ?, ?)").run(code, familyId, now + PAIR_CODE_MINUTES * 60 * 1000);
+  return code;
+}
+
+/** A kid's or a parent's connect code -> the extension's own token. */
+export function redeemAnyPairCode(code: string, now = Date.now()): { kind: "kid"; token: string; name: string } | { kind: "parent"; token: string; name: string } {
+  const clean = code.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const db = getDb();
+  const row = db.prepare("SELECT family_id, expires_at FROM mia_parent_codes WHERE code = ?").get(clean) as { family_id: number; expires_at: number } | undefined;
+  if (!row) {
+    const { token, kid } = redeemPairCode(clean, now);
+    return { kind: "kid", token, name: kid.name };
+  }
+  if (row.expires_at < now) throw new PortalError("That code didn't work. Make a new one in Settings.");
+  const token = crypto.randomBytes(32).toString("base64url");
+  db.transaction(() => {
+    db.prepare("DELETE FROM mia_parent_codes WHERE code = ?").run(clean);
+    db.prepare("INSERT INTO mia_parent_devices (family_id, token_hash, created_at, last_seen) VALUES (?, ?, ?, ?)").run(row.family_id, hashToken(token), now, now);
+  })();
+  return { kind: "parent", token, name: getFamily(row.family_id)?.name ?? "your family" };
+}
+
+/** The family a connected parent computer belongs to (null if unknown or disconnected). */
+export function familyFromParentToken(token: string, now = Date.now()): number | null {
+  if (!token) return null;
+  const db = getDb();
+  const row = db.prepare("SELECT id, family_id, last_seen FROM mia_parent_devices WHERE token_hash = ?").get(hashToken(token)) as
+    | { id: number; family_id: number; last_seen: number }
+    | undefined;
+  if (!row) return null;
+  if (now - row.last_seen > 60 * 1000) db.prepare("UPDATE mia_parent_devices SET last_seen = ? WHERE id = ?").run(now, row.id);
+  return row.family_id;
+}
+
+export function miaParentDevices(familyId: number): { id: number; created_at: number; last_seen: number }[] {
+  return getDb().prepare("SELECT id, created_at, last_seen FROM mia_parent_devices WHERE family_id = ? ORDER BY created_at").all(familyId) as never;
+}
+
+export function removeMiaParentDevice(familyId: number, id: number): void {
+  getDb().prepare("DELETE FROM mia_parent_devices WHERE id = ? AND family_id = ?").run(id, familyId);
+}
+
+export function removeMiaParentDeviceByToken(token: string): void {
+  getDb().prepare("DELETE FROM mia_parent_devices WHERE token_hash = ?").run(hashToken(token));
+}
+
+/** Miacademy students seen on the parent's calendar, and the portal kid each one is. */
+export function miaChildren(familyId: number): { child: string; name: string; kid_id: number | null; seen_at: number }[] {
+  return getDb().prepare("SELECT child, name, kid_id, seen_at FROM mia_children WHERE family_id = ? ORDER BY name").all(familyId) as never;
+}
+
+export function setMiaChild(familyId: number, child: string, kidId: number | null): void {
+  if (kidId !== null) {
+    const kid = getKid(kidId);
+    if (!kid || kid.family_id !== familyId) throw new PortalError("Unknown kid.");
+  }
+  getDb().prepare("UPDATE mia_children SET kid_id = ? WHERE family_id = ? AND child = ?").run(kidId, familyId, child);
+}
+
+/**
+ * Parent mode read some weeks of a child's Miacademy calendar. Each week replaces
+ * what was saved for those days (Miacademy moves tasks around). A new child is
+ * matched to a portal kid by first name; Settings can change it.
+ */
+export function miaSavePlan(familyId: number, child: { id: string; name: string }, weeks: PlanTask[][], now = Date.now()): { kidId: number | null; tasks: number } {
+  const db = getDb();
+  const id = child.id.toLowerCase();
+  const existing = db.prepare("SELECT kid_id FROM mia_children WHERE family_id = ? AND child = ?").get(familyId, id) as { kid_id: number | null } | undefined;
+  let kidId = existing?.kid_id ?? null;
+  if (!existing) {
+    const first = (s: string) => s.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
+    kidId = listKids(familyId).find((k) => first(k.name) === first(child.name))?.id ?? null;
+    db.prepare("INSERT INTO mia_children (family_id, child, name, kid_id, seen_at) VALUES (?, ?, ?, ?, ?)").run(familyId, id, child.name.slice(0, 60), kidId, now);
+  } else db.prepare("UPDATE mia_children SET name = ?, seen_at = ? WHERE family_id = ? AND child = ?").run(child.name.slice(0, 60), now, familyId, id);
+  if (kidId === null) return { kidId, tasks: 0 };
+  let count = 0;
+  db.transaction(() => {
+    for (const week of weeks) {
+      const days = [...new Set(week.map((t) => t.day))];
+      if (!days.length) continue;
+      const from = days.reduce((a, b) => (a < b ? a : b));
+      const to = days.reduce((a, b) => (a > b ? a : b));
+      db.prepare("DELETE FROM mia_plan_tasks WHERE kid_id = ? AND day >= ? AND day <= ?").run(kidId, from, to);
+      const ins = db.prepare(
+        `INSERT OR REPLACE INTO mia_plan_tasks (kid_id, task_id, day, unit_title, course, subject, lesson_title, name, type, status, pdf_url, sort, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      );
+      for (const t of week) {
+        if (!t.subject) continue;
+        // sort: by day, then Miacademy's order within the day.
+        ins.run(kidId, t.taskId, t.day, t.unitTitle, t.course, t.subject, t.lessonTitle, t.name, t.type, t.status, t.pdfUrl, t.order % 1_000_000, now);
+        count++;
+      }
+    }
+  })();
+  return { kidId, tasks: count };
+}
+
+function planTasks(kidId: number, subject: string, plan: MiaCoursePlan | null): PlanTask[] {
+  return (
+    getDb()
+      .prepare(
+        `SELECT task_id, day, unit_title, course, subject, lesson_title, name, type, status, pdf_url, sort FROM mia_plan_tasks
+         WHERE kid_id = ? AND subject = ? ORDER BY day, sort`,
+      )
+      .all(kidId, subject) as {
+      task_id: string;
+      day: string;
+      unit_title: string;
+      course: string;
+      subject: string;
+      lesson_title: string;
+      name: string;
+      type: string;
+      status: string;
+      pdf_url: string | null;
+      sort: number;
+    }[]
+  )
+    .filter((r) => !plan || plan.match.test(r.course))
+    .map((r, i) => ({
+      taskId: r.task_id,
+      day: r.day,
+      unitTitle: r.unit_title,
+      course: r.course,
+      subject: r.subject,
+      lessonTitle: r.lesson_title,
+      name: r.name,
+      type: r.type,
+      status: r.status,
+      pdfUrl: r.pdf_url,
+      order: i,
+    }));
+}
+
+/** The kid's calendar has this class (so the checklist comes from it, not from guessing). */
+export function miaHasPlan(kidId: number, course: string): boolean {
+  return !!getDb().prepare("SELECT 1 FROM mia_plan_tasks WHERE kid_id = ? AND course = ? LIMIT 1").get(kidId, course);
+}
+
+/**
+ * Lessons from the parent's calendar for one class: rows in mia_lessons (so
+ * photos, taps and approvals are kept), with items rebuilt from the calendar
+ * every time. A task is done when Miacademy says so, or when the kid's
+ * assignments page has moved past it. Returns the lessons in order, and the
+ * ones whose Student PDF still needs reading.
+ */
+export function miaPlanLessons(kidId: number, subject: string, plan: MiaCoursePlan | null, now = Date.now()): { lessons: MiaLesson[]; toRead: number[] } | null {
+  const tasks = planTasks(kidId, subject, plan);
+  if (!tasks.length) return null;
+  const db = getDb();
+  const current = new Map(
+    (db.prepare("SELECT course, task_id FROM mia_path WHERE kid_id = ?").all(kidId) as { course: string; task_id: string }[]).map((r) => [r.course, r.task_id]),
+  );
+  // How far along each class is: the calendar position of the task the kid is on now.
+  const reached = new Map<string, number>();
+  for (const [course, taskId] of current) {
+    const at = tasks.find((t) => t.course === course && t.taskId === taskId);
+    if (at) reached.set(course, at.order);
+  }
+  const lessons: MiaLesson[] = [];
+  const toRead: number[] = [];
+  for (const pl of planLessons(tasks)) {
+    const key = `plan:${pl.key}`;
+    const coursePlan = plan ?? miaCoursePlan(subject, pl.course);
+    const needsPdf = !coursePlan?.onlineOnly && !!pl.pdfUrl;
+    db.prepare(
+      `INSERT OR IGNORE INTO mia_lessons (kid_id, subject, mia_key, title, student_pdf, items, parse_state, started_at, course)
+       VALUES (?, ?, ?, ?, ?, '[]', ?, ?, ?)`,
+    ).run(kidId, subject, key, pl.title, pl.pdfUrl, needsPdf ? "waiting" : "ready", now, pl.course);
+    const row = db.prepare(`SELECT ${LESSON_COLS}, pdf_parsed FROM mia_lessons WHERE kid_id = ? AND mia_key = ?`).get(kidId, key) as MiaLessonRow & {
+      pdf_parsed: string | null;
+    };
+    const lesson = toLesson(row);
+    // Read once; a failed read waits until the kid opens the lesson (miaSetStudentPdf) rather than retrying on every look.
+    if (needsPdf && !row.pdf_parsed && lesson.parseState === "waiting") toRead.push(lesson.id);
+    let parsed: ParsedActivity[] | null = null;
+    try {
+      parsed = row.pdf_parsed ? (JSON.parse(row.pdf_parsed) as ParsedActivity[]) : null;
+    } catch {
+      parsed = null;
+    }
+    const items = planLessonItems(pl, subject, coursePlan, parsed);
+    // Online tasks: done when Miacademy says so, or once the kid has moved past them.
+    const at = reached.get(pl.course);
+    for (const t of pl.tasks) {
+      const id = `task-${t.taskId}`;
+      if (!items.some((i) => i.id === id) || lesson.states[id]?.done) continue;
+      if (t.status === "Completed" || (at !== undefined && t.order < at)) lesson.states[id] = { ...lesson.states[id], done: true, at: now };
+    }
+    lesson.items = items;
+    // Waiting for its PDF: not done yet, even if every online task is.
+    const done = items.length > 0 && lessonDone(items, lesson.states) && (!needsPdf || !!parsed);
+    if (done && !lesson.doneDay) {
+      // Finished before the calendar was read (every task already "Completed"): count it on the day it was scheduled.
+      const allEarlier = pl.tasks.every((t) => t.status === "Completed") && pl.tasks.at(-1)!.day < today();
+      lesson.doneDay = allEarlier ? pl.tasks.at(-1)!.day : today();
+    }
+    if (!done) lesson.doneDay = null;
+    db.prepare("UPDATE mia_lessons SET items = ?, states = ?, done_day = ?, student_pdf = COALESCE(student_pdf, ?) WHERE id = ?").run(
+      JSON.stringify(items),
+      JSON.stringify(lesson.states),
+      lesson.doneDay,
+      pl.pdfUrl,
+      lesson.id,
+    );
+    lessons.push(lesson);
+  }
+  return { lessons, toRead };
+}
+
+/** What Claude read off a lesson's Student PDF, kept for lessons built from the calendar. */
+export function miaSetPdfParsed(lessonId: number, parsed: ParsedActivity[]): void {
+  getDb().prepare("UPDATE mia_lessons SET pdf_parsed = ? WHERE id = ?").run(JSON.stringify(parsed), lessonId);
 }

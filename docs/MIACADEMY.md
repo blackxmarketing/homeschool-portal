@@ -92,6 +92,22 @@ Started with Bryce's General Science, 1 lesson a week.
     reading the next numbered PDF) gets 4 school days and counts as a whole week.
   - Online-only classes list each Miacademy task as it comes up (no PDF items).
 
+### Parent mode: the checklist from the parent's Miacademy calendar
+
+Focus Buddy on a parent's computer (Settings → "Focus Buddy on a parent's
+computer" → parent connect code). When the parent opens a child's **Calendar**
+tab on parents.miacademy.co, `extension/src/parent.ts` reads (GET only) that
+child's calendar for this week and the next two and sends it to `/api/mia/plan`.
+
+- `lib/miaPlan.ts` turns it into tasks (`mia_plan_tasks`): only marked tasks are
+  on it, each with its lesson, type, status and exact PDF link. Students are
+  matched to kids by first name; Settings → "Miacademy students" can change it.
+- `miaPlanLessons` builds each lesson's items from those tasks (video, practice
+  levels, quiz by task id; guided notes and activities read off the exact PDF),
+  with the same rules as before. A task is done when Miacademy says so, or when
+  the kid's assignments page (`mia_path`) has moved past it.
+- Classes not on the calendar yet fall back to learning from the kid's pages.
+
 ## The build, in phases
 
 It runs as a **Chrome extension**: the timer strip appears on the right of every

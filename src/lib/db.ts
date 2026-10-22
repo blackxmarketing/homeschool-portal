@@ -311,6 +311,59 @@ CREATE TABLE IF NOT EXISTS mia_lessons (
   UNIQUE (kid_id, subject, mia_key)
 );
 
+-- The parent's Miacademy calendar (lib/miaPlan.ts), read by Focus Buddy's parent mode:
+-- every marked (assigned) task, with its day, lesson, type, status and PDF.
+CREATE TABLE IF NOT EXISTS mia_plan_tasks (
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  task_id TEXT NOT NULL,
+  day TEXT NOT NULL,
+  unit_title TEXT NOT NULL,
+  course TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  lesson_title TEXT NOT NULL,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL,
+  status TEXT NOT NULL,
+  pdf_url TEXT,
+  sort INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  PRIMARY KEY (kid_id, task_id)
+);
+
+-- Miacademy students seen on the parent's calendar, and which portal kid each one is.
+CREATE TABLE IF NOT EXISTS mia_children (
+  family_id INTEGER NOT NULL REFERENCES families(id),
+  child TEXT NOT NULL,
+  name TEXT NOT NULL,
+  kid_id INTEGER REFERENCES kids(id),
+  seen_at INTEGER NOT NULL,
+  PRIMARY KEY (family_id, child)
+);
+
+-- Where each kid is in each Miacademy class right now (the task their assignments page shows next).
+CREATE TABLE IF NOT EXISTS mia_path (
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  course TEXT NOT NULL,
+  task_id TEXT NOT NULL,
+  task_type TEXT,
+  at INTEGER NOT NULL,
+  PRIMARY KEY (kid_id, course)
+);
+
+-- Parents' computers connected to Focus Buddy (parent mode: reads the Miacademy calendar).
+CREATE TABLE IF NOT EXISTS mia_parent_devices (
+  id INTEGER PRIMARY KEY,
+  family_id INTEGER NOT NULL REFERENCES families(id),
+  token_hash TEXT NOT NULL UNIQUE,
+  created_at INTEGER NOT NULL,
+  last_seen INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS mia_parent_codes (
+  code TEXT PRIMARY KEY,
+  family_id INTEGER NOT NULL REFERENCES families(id),
+  expires_at INTEGER NOT NULL
+);
+
 -- Kids' computers connected to the Miacademy Chrome extension. The extension keeps the token; we keep its hash.
 CREATE TABLE IF NOT EXISTS mia_devices (
   id INTEGER PRIMARY KEY,
@@ -377,6 +430,8 @@ const ADDED_COLUMNS: { table: string; column: string; ddl: string }[] = [
   { table: "mia_lessons", column: "course", ddl: "ALTER TABLE mia_lessons ADD COLUMN course TEXT" },
   // 2 for the lesson before a unit assessment: it gets 4 school days and counts as a whole week of lessons.
   { table: "mia_lessons", column: "weight", ddl: "ALTER TABLE mia_lessons ADD COLUMN weight INTEGER NOT NULL DEFAULT 1" },
+  // What Claude read off the lesson's Student PDF (JSON ParsedActivity[]), for lessons built from the parent's calendar.
+  { table: "mia_lessons", column: "pdf_parsed", ddl: "ALTER TABLE mia_lessons ADD COLUMN pdf_parsed TEXT" },
 ];
 
 function migrate(conn: Database.Database): void {
