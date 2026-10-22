@@ -48,7 +48,7 @@ export const MIA_LINES = {
   done: "Time's up! Great job on {subject}.",
   help: "Okay! Your timer is paused. A grown-up is coming to help.",
   helpDone: "All set! Let's keep going with {subject}.",
-  breakStart: "Break time! Your {buddy} will walk with you.",
+  breakStart: "Break time! It's time to move your body and walk around.",
   breakWarn: "30 seconds left! Time to head back to your seat.",
   breakEarly: "Welcome back! Press Start to keep going with {subject}.",
   breakOver: "Break's over! Press Start to get back to {subject}.",
