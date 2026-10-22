@@ -444,7 +444,7 @@ export default function MiaHud({
             </span>
             <span>
               {/* The new money counts once its coin lands. */}
-              <b>${((bank.monthCents - (coin && coin.phase !== "landed" ? coin.cents : 0)) / 100).toFixed(2)}</b> in your bank this month
+              <b key={coin?.phase === "landed" ? coin.key : "total"} className={coin?.phase === "landed" ? "mia-bank-bump" : undefined}>${((bank.monthCents - (coin && coin.phase !== "landed" ? coin.cents : 0)) / 100).toFixed(2)}</b> in your bank this month
             </span>
             {coin?.phase === "landed" && <span className="mia-bank-plus">+{coin.cents}¢</span>}
           </div>

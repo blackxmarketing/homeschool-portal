@@ -1190,3 +1190,14 @@ label.mia-btn {
   font-family: var(--mia-pixel);
   font-size: 11px;
 }
+
+/* The bank total bounces as a ring's pay lands in it. */
+.mia-bank-bump {
+  display: inline-block;
+  animation: mia-bank-bump 0.6s ease-out;
+}
+@keyframes mia-bank-bump {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.5); color: #16a34a; }
+  100% { transform: scale(1); }
+}
