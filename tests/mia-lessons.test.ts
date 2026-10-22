@@ -388,12 +388,12 @@ describe("a kid's Science checklist", () => {
       const lid = miaSetStudentPdf(kid, id(4), la(13))!;
       miaSetBigLesson(lid, 2);
       miaSetParseState(lid, "ready", buildItems([{ title: "Video and Guided Notes", kind: "notes", pages: [2], supplies: [] }, { title: "Quiz", kind: "quiz", pages: [], supplies: [] }], "ela", "Book Talk", LAR));
-      expect(miaChecklist(kid, "ela")!.parts[2]).toMatchObject({ bigLesson: true, doneThisWeek: 0, target: 2 });
+      expect(miaChecklist(kid, "ela")!.parts.find((p) => p.name === "Language Arts")).toMatchObject({ bigLesson: true, doneThisWeek: 0, target: 2 });
       miaPathSync(kid, parsePathCourses([course(LAR, "LanguageArts", id(4), "Assessment", id(41), null)]));
       miaFinishItem(kid, lid, "complete-the-guided-notes");
       // Quiz done (Miacademy moved on): the 4-day lesson fills the week. The next PDF is guessed by number.
       const toRead = miaPathSync(kid, parsePathCourses([course(LAR, "LanguageArts", id(5), "Pdf", id(50), "Unit 2 Assessment Student PDF")]));
-      expect(miaChecklist(kid, "ela")!.parts[2]).toMatchObject({ doneThisWeek: 2 });
+      expect(miaChecklist(kid, "ela")!.parts.find((p) => p.name === "Language Arts")).toMatchObject({ doneThisWeek: 2 });
       expect(miaLesson(kid, toRead[0])!.studentPdf).toBe(la(14));
     });
   });

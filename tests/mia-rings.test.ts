@@ -28,7 +28,8 @@ describe("the six weekly rings", () => {
   it("shows a ring for each class that's on, filling with each activity", () => {
     miaSavePlan(family, { id: id(90), name: "Bryce" }, [parsePlanWeek(week("NotStarted"))]);
     const rings = miaRings(kid, "2026-10-20");
-    expect(rings.map((r) => r.id)).toEqual(["math", "reading", "writing", "grammar"]);
+    // Only the Language Arts classes this kid takes get a ring (here: Edition 1 = Grammar).
+    expect(rings.map((r) => r.id)).toEqual(["math", "grammar"]);
     expect(rings.find((r) => r.id === "grammar")).toMatchObject({ progress: 0.5, full: false });
     expect(miaBank(kid, "2026-10-20").thisWeek).toEqual([]);
   });

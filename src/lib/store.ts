@@ -28,7 +28,7 @@ import { expectedSeconds, gradeProbe, probeSolution } from "./probes";
 import { adapt, buildProfile, conceptMastery, whatHelps, type Adaptation, type LearningEvent, type Profile } from "./learner";
 import { angleOf, applyEvidence, blockers, conceptOf, emptyMeter, legacyConcept, lessonMastered, type Evidence, type Meter } from "./masteryMeter";
 import type { Lesson, Probe } from "@/content/courses/types";
-import { MIA_COURSE_PLANS, MIA_PAY, MIA_RINGS, MIA_SUBJECTS, miaCoursePlan, type MiaCoursePlan, type MiaSettings } from "@/content/miacademy";
+import { MIA_COURSE_PLANS, MIA_PAY, MIA_RINGS, MIA_SUBJECTS, miaCoursePlan, miaLessonWeight, type MiaCoursePlan, type MiaSettings } from "@/content/miacademy";
 import { applyMia, clampMiaSettings, isOpen, MiaRuleError, newTimer, parseMiaSettings, parseMiaState, type MiaAction, type MiaTimerState } from "./miaTimer";
 import {
   guessStudentPdf,
@@ -2439,7 +2439,7 @@ function toLesson(r: MiaLessonRow): MiaLesson {
     startedAt: r.started_at,
     doneDay: r.done_day,
     course: r.course ?? "",
-    weight: r.weight ?? 1,
+    weight: miaLessonWeight(r.subject, r.course ?? "", r.title, r.weight ?? 1),
   };
 }
 
@@ -2468,9 +2468,23 @@ export function miaOpenLessons(kidId: number, subject: string, plan?: MiaCourseP
  */
 export function miaLessonsDoneThisWeek(kidId: number, subject: string, day = today(), plan?: MiaCoursePlan | null): number {
   const rows = getDb()
-    .prepare("SELECT course, weight FROM mia_lessons WHERE kid_id = ? AND subject = ? AND done_day >= ? AND done_day <= ?")
-    .all(kidId, subject, weekStart(day), day) as { course: string | null; weight: number }[];
-  return rows.filter((r) => !plan || plan.match.test(r.course ?? "")).reduce((n, r) => n + (r.weight || 1), 0);
+    .prepare("SELECT course, title, weight FROM mia_lessons WHERE kid_id = ? AND subject = ? AND done_day >= ? AND done_day <= ?")
+    .all(kidId, subject, weekStart(day), day) as { course: string | null; title: string; weight: number }[];
+  return rows
+    .filter((r) => !plan || plan.match.test(r.course ?? ""))
+    .reduce((n, r) => n + miaLessonWeight(subject, r.course ?? "", r.title, r.weight || 1), 0);
+}
+
+/** The kid's Miacademy classes seen so far (calendar, assignments page, lessons). */
+function miaKidCourses(kidId: number): string[] {
+  return (
+    getDb()
+      .prepare(
+        `SELECT course FROM mia_plan_tasks WHERE kid_id = ? UNION SELECT course FROM mia_path WHERE kid_id = ?
+         UNION SELECT course FROM mia_lessons WHERE kid_id = ? AND course IS NOT NULL`,
+      )
+      .all(kidId, kidId, kidId) as { course: string }[]
+  ).map((r) => r.course);
 }
 
 function saveLessonStates(lesson: MiaLesson, day = today()): void {
@@ -2690,7 +2704,11 @@ export function miaChecklist(kidId: number, subject: string, day = today()) {
   const settings = getMiaSettings(kidId);
   const on = settings.lessonsPerWeek[subject] ?? 0;
   if (!on) return null;
-  const plans = MIA_COURSE_PLANS[subject];
+  const allPlans = MIA_COURSE_PLANS[subject];
+  // Only the classes this kid takes (each kid has their own mix); all of them until Miacademy's been seen.
+  const courses = allPlans ? miaKidCourses(kidId) : [];
+  const theirs = allPlans?.filter((p) => courses.some((c) => p.match.test(c)));
+  const plans = theirs?.length ? theirs : allPlans?.filter((p, i) => allPlans.findIndex((q) => q.name === p.name) === i);
   if (!plans) return { subject, parts: [courseChecklist(kidId, subject, null, on, day)], firstToday: null as number | null };
   const parts = plans.map((p) => courseChecklist(kidId, subject, p, p.lessonsPerWeek, day));
   // Monday = 1 ... Sunday = 7. A first class not finished on its day carries over to the next day, before the next class.

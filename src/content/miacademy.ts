@@ -119,6 +119,8 @@ export interface MiaCoursePlan {
   readPdf?: string;
   /** The lesson right before each unit assessment gets 4 school days and counts as a whole week's lessons. */
   bigLessonBeforeUnitTest?: boolean;
+  /** Lessons whose title matches (a unit's project or portfolio) get 4 school days and count as a whole week's lessons. */
+  bigLessonTitle?: RegExp;
 }
 
 export const MIA_COURSE_PLANS: Record<string, MiaCoursePlan[]> = {
@@ -144,11 +146,27 @@ export const MIA_COURSE_PLANS: Record<string, MiaCoursePlan[]> = {
       onlineOnly: false,
       bigLessonBeforeUnitTest: true,
     },
+    // Plain "Language Arts: Level G" (no edition): the unit's project/portfolio lesson is the 4-day one.
+    {
+      match: /^Language Arts: Level [A-Z](?!.*\((Revised|Edition))/i,
+      name: "Language Arts",
+      lessonsPerWeek: 2,
+      slot: "main",
+      days: [1, 2, 3, 4],
+      stopWhenDone: false,
+      onlineOnly: false,
+      bigLessonTitle: /\b(project|portfolio)\b/i,
+    },
   ],
 };
 
 export function miaCoursePlan(subject: string, courseTitle: string): MiaCoursePlan | null {
   return MIA_COURSE_PLANS[subject]?.find((p) => p.match.test(courseTitle)) ?? null;
+}
+
+/** How many of the week's lessons a lesson counts as: 2 (the whole week) for a 4-day lesson. */
+export function miaLessonWeight(subject: string, courseTitle: string, lessonTitle: string, stored = 1): number {
+  return miaCoursePlan(subject, courseTitle)?.bigLessonTitle?.test(lessonTitle) ? Math.max(2, stored) : stored || 1;
 }
 
 export interface MiaSettings {

@@ -91,6 +91,12 @@ Started with Bryce's General Science, 1 lesson a week.
     ahead into next week. The lesson before each unit assessment (spotted by
     reading the next numbered PDF) gets 4 school days and counts as a whole week.
   - Online-only classes list each Miacademy task as it comes up (no PDF items).
+  - Plain Level G (no edition, Emme): 2 lessons a week, keeps going ahead. A unit
+    project or portfolio lesson (by its title) gets 4 school days and counts as a whole week.
+  - Each kid only gets the classes Focus Buddy has seen them take (calendar,
+    assignments page or lessons); with none seen yet, one of each.
+- Ancient World History: video, guided notes, PDF activities, quiz; never online practice.
+- Science: online practice only when the parent marked it in Miacademy.
 
 ### Parent mode: the checklist from the parent's Miacademy calendar
 
