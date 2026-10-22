@@ -297,6 +297,24 @@ export default function MiaHud({
   // ---- Screens ----
   const focused = focus ? MIA_SUBJECTS.find((s) => s.id === focus)! : null;
   const ft = focused ? timers[focused.id] : null;
+
+  // Subjects with two classes a day: the first 15 minutes go to today's first class
+  // (until it's done for the week), then the main class gets the rest.
+  const fc = focused ? checklists[focused.id] : null;
+  const mainPart = fc ? Math.max(0, fc.parts.findIndex((p) => p.slot === "main")) : 0;
+  const halfOver = !!ft && ft.durMs - remaining(ft, now) >= ft.durMs / 2;
+  const partIndex = fc && fc.firstToday !== null && !halfOver ? fc.firstToday : mainPart;
+  const twoClasses = !!fc && fc.parts.length > 1;
+  const prevPart = useRef<{ subject: string | null; part: number }>({ subject: null, part: -1 });
+  useEffect(() => {
+    const prev = prevPart.current;
+    prevPart.current = { subject: focused?.id ?? null, part: partIndex };
+    if (!fc || !twoClasses || !isRunning(ft) || prev.subject !== focused?.id || prev.part === partIndex || prev.part < 0) return;
+    const was = fc.parts[prev.part]?.name ?? "your first class";
+    const next = fc.parts[partIndex]?.name ?? "your next class";
+    say(halfOver ? `Time to switch! Now work on ${next}.` : `Great job finishing ${was}! Now switch to ${next}.`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [partIndex, focused?.id]);
   const hello = allDone
     ? "You did it! All done today! 🎉"
     : !focused
@@ -395,10 +413,27 @@ export default function MiaHud({
         />
       )}
 
+      {focused && fc && twoClasses && (
+        <div className="mia-classes">
+          {fc.firstToday !== null && (
+            <span className={partIndex === fc.firstToday ? "on" : "done"}>
+              {partIndex === fc.firstToday ? "▶" : "✓"} First 15 min: {fc.parts[fc.firstToday].name}
+            </span>
+          )}
+          <span className={partIndex === mainPart ? "on" : ""}>
+            {partIndex === mainPart ? "▶ " : ""}
+            {fc.firstToday !== null ? "Then: " : "All 30 min: "}
+            {fc.parts[mainPart].name}
+          </span>
+        </div>
+      )}
+
       {focused &&
-        (checklists[focused.id] ? (
+        (fc ? (
           <Checklist
-            checklist={checklists[focused.id]!}
+            key={`${focused.id}-${partIndex}`}
+            checklist={fc.parts[partIndex]}
+            part={partIndex}
             color={focused.color}
             running={isRunning(ft)}
             api={api}

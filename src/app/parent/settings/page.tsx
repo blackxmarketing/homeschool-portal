@@ -281,6 +281,11 @@ function MiaForm({ kidId, name }: { kidId: number; name: string }) {
         ))}
       </div>
       <p className="muted small">
+        Language Arts follows its own plan once it&apos;s on (any number): Reading Comprehension 1 lesson a week (Mondays, first 15
+        minutes), Edition 1 1 lesson a week (Tuesday-Thursday, first 15 minutes), and Level E (Revised) 2 lessons a week the rest
+        of the time; the lesson before each unit assessment gets 4 days.
+      </p>
+      <p className="muted small">
         The checklist follows {name}&apos;s Miacademy lessons: the activities on each lesson&apos;s PDF, minus online practice and
         optional or bonus ones. Worksheets are checked from a photo against the answer key; anything needing supplies pauses the
         timer and waits for you to approve it.

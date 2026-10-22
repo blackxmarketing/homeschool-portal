@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { LessonItem } from "@/lib/miaLessons";
-import type { MiaChecklist } from "@/lib/store";
+import type { MiaChecklist, MiaCourseChecklist } from "@/lib/store";
 import type { MiaApi } from "./MiaHud";
 
 /**
@@ -11,12 +11,13 @@ import type { MiaApi } from "./MiaHud";
  * Finishing one makes it pop away and the next one slides up.
  */
 
-const ICON: Record<LessonItem["check"], string> = { video: "🎬", practice: "🎮", self: "📝", quiz: "✏️", photo: "📄", parent: "🧰" };
+const ICON: Record<LessonItem["check"], string> = { video: "🎬", practice: "🎮", self: "📝", quiz: "✏️", photo: "📄", parent: "🧰", online: "💻" };
 
-type Entry = MiaChecklist["upcoming"][number];
+type Entry = MiaCourseChecklist["upcoming"][number];
 
 export default function Checklist({
   checklist,
+  part,
   color,
   running,
   api,
@@ -24,7 +25,9 @@ export default function Checklist({
   onChecklists,
   onSupplies,
 }: {
-  checklist: MiaChecklist;
+  checklist: MiaCourseChecklist;
+  /** Which of the subject's classes this is (to find it again in new checklists). */
+  part: number;
   color: string;
   /** The subject's timer is running (activities can be checked off). */
   running: boolean;
@@ -55,7 +58,7 @@ export default function Checklist({
   // Pop the finished activity away, then show the new list.
   async function finished(entry: Entry, next: Record<string, MiaChecklist | null>) {
     setLeaving(`${entry.lessonId}:${entry.item.id}`);
-    say(nextLine(next[checklist.subject]));
+    say(nextLine(next[checklist.subject]?.parts[part]));
     await new Promise((r) => setTimeout(r, 650));
     setLeaving(null);
     onChecklists(next);
@@ -74,6 +77,7 @@ export default function Checklist({
         <span>
           {Math.min(checklist.doneThisWeek, checklist.target)} of {checklist.target} lesson{checklist.target > 1 ? "s" : ""}
           {checklist.doneThisWeek >= checklist.target ? " ✓" : ""}
+          {checklist.doneThisWeek > checklist.target ? ` (+${checklist.doneThisWeek - checklist.target} ahead!)` : ""}
         </span>
       </div>
       <div className="mia-bar">
@@ -83,7 +87,9 @@ export default function Checklist({
   );
 
   let body: React.ReactNode;
-  if (checklist.needsPdf)
+  if (checklist.weekDone) body = <div className="mia-cl-note">✅ Done for this week! Great job.</div>;
+  else if (checklist.onlineOnly && !top) body = <div className="mia-cl-note">💻 Open your next {checklist.name ?? "lesson"} activity in Miacademy.</div>;
+  else if (checklist.needsPdf)
     body = <div className="mia-cl-note">📄 Open your Student PDF in Miacademy, and your checklist will show up here.</div>;
   else if (checklist.reading && !top) body = <div className="mia-cl-note">⏳ Getting your checklist ready…</div>;
   else if (checklist.failed && !top)
@@ -117,9 +123,13 @@ export default function Checklist({
   return (
     <div className="mia-checklist" style={{ ["--c" as string]: color }}>
       <div className="mia-cl-head">
-        <span>📝 {checklist.lessonTitle ?? "Your checklist"}</span>
+        <span>
+          {checklist.name && <span className="mia-cl-class">{checklist.name}</span>}
+          {checklist.lessonTitle && checklist.lessonTitle !== checklist.name && <>📝 {checklist.lessonTitle}</>}
+        </span>
         {checklist.left > 0 && <span className="mia-cl-left">{checklist.left} to go</span>}
       </div>
+      {checklist.bigLesson && <div className="mia-cl-big">🗓️ This lesson gets 4 days. Take your time and do it well!</div>}
       {body}
       {week}
       {photoFor && (
@@ -140,7 +150,7 @@ export default function Checklist({
   );
 }
 
-function nextLine(next: MiaChecklist | null | undefined): string {
+function nextLine(next: MiaCourseChecklist | null | undefined): string {
   const top = next?.upcoming.find((e) => !e.state.waitingForParent);
   return top ? `Nice! Next up: ${top.item.title}.` : "Nice! You finished every activity in this lesson!";
 }
@@ -149,8 +159,8 @@ function TopTask({ entry, running, onPhoto, onSelf }: { entry: Entry; running: b
   const { item, state } = entry;
   const pages = item.pages.length ? ` · page${item.pages.length > 1 ? "s" : ""} ${item.pages[0]}${item.pages.length > 1 ? `-${item.pages.at(-1)}` : ""}` : "";
   const kind =
-    item.check === "video"
-      ? "🎬 Online in Miacademy"
+    item.check === "video" || item.check === "online"
+      ? "💻 Online in Miacademy"
       : item.check === "practice"
         ? "🎮 Online practice in Miacademy"
         : item.check === "quiz"
@@ -162,6 +172,7 @@ function TopTask({ entry, running, onPhoto, onSelf }: { entry: Entry; running: b
               : `📄 PDF${pages}`;
   let action: React.ReactNode = null;
   if (item.check === "video") action = <div className="mia-hint">Watch it in Miacademy. It checks off by itself!</div>;
+  else if (item.check === "online") action = <div className="mia-hint">Do it in Miacademy. It checks off by itself!</div>;
   else if (item.check === "practice") action = <div className="mia-hint">Play this level in Miacademy. It checks off by itself!</div>;
   else if (item.check === "quiz") action = <div className="mia-hint">Take the quiz in Miacademy. It checks off when you finish.</div>;
   else if (item.check === "parent" && !state.suppliesReady)

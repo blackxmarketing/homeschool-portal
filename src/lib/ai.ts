@@ -470,8 +470,10 @@ const LESSON_PDF_SCHEMA = {
         additionalProperties: false,
       },
     },
+    lessonTitle: { type: "string" },
+    nextIsUnitAssessment: { type: "boolean" },
   },
-  required: ["activities"],
+  required: ["activities", "lessonTitle", "nextIsUnitAssessment"],
   additionalProperties: false,
 } as const;
 
@@ -480,7 +482,13 @@ const LESSON_PDF_SCHEMA = {
  * Watch the lesson video, Complete the guided notes...") into a list of
  * activities, in order, with the pages each one uses and any supplies.
  */
-export async function readLessonPdf(studentPdfUrl: string): Promise<ParsedActivityResult | null> {
+export async function readLessonPdf(studentPdfUrl: string, nextLessonPdfUrl?: string): Promise<ParsedActivityResult | null> {
+  const next: Anthropic.Beta.BetaContentBlockParam[] = nextLessonPdfUrl
+    ? [
+        { type: "document", source: { type: "url", url: nextLessonPdfUrl } },
+        { type: "text", text: "The second document is the NEXT lesson's PDF. Only use it to decide nextIsUnitAssessment." },
+      ]
+    : [];
   return askStructuredContent<ParsedActivityResult>(
     `You read homeschool lesson PDFs. The first page has a checklist of activities grouped by day.
 List every checklist line in order, exactly as written (keep "optional", "bonus" and "Online practice" lines too; they are filtered later).
@@ -488,9 +496,13 @@ For each: kind = video (watching or rewatching the lesson video), quiz (the onli
 If one line combines the video and the guided notes, list it as written; it is split later.
 If the packet has no checklist (only note-taking pages and extension ideas), list its note-taking or "listening sheet" pages as notes, and every other activity or extension idea as other.
 pages = the PDF page numbers that activity's pages are on (look at the page headings); empty for online activities.
-supplies = the materials list for hands_on activities, short items; empty otherwise.`,
+supplies = the materials list for hands_on activities, short items; empty otherwise.
+A study guide, self-reflection or confidence check counts as notes.
+lessonTitle = the lesson's title as printed on page 1 (for example "Forces: Gravity").
+nextIsUnitAssessment = true only if a second document (the next lesson) is given and it is a unit assessment or unit test lesson.`,
     [
       { type: "document", source: { type: "url", url: studentPdfUrl } },
+      ...next,
       { type: "text", text: "Read this lesson's checklist and match each activity to its pages." },
     ],
     LESSON_PDF_SCHEMA as never,
@@ -500,6 +512,8 @@ supplies = the materials list for hands_on activities, short items; empty otherw
 
 export interface ParsedActivityResult {
   activities: { title: string; kind: "video" | "quiz" | "practice" | "notes" | "worksheet" | "hands_on" | "other"; pages: number[]; supplies: string[] }[];
+  lessonTitle: string;
+  nextIsUnitAssessment: boolean;
 }
 
 const PHOTO_CHECK_SCHEMA = {

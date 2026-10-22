@@ -1,7 +1,17 @@
 import { readLessonPdf } from "./ai";
-import { MIA_SUBJECT_MAP } from "@/content/miacademy";
-import { buildItems, taskKeyFromLink } from "./miaLessons";
-import { addParentAlert, getKid, miaChecklist, miaLesson, miaSetParseState, type MiaChecklist, type MiaPathCourse } from "./store";
+import { MIA_SUBJECT_MAP, miaCoursePlan } from "@/content/miacademy";
+import { buildItems, nextNumberedPdfs, taskKeyFromLink } from "./miaLessons";
+import {
+  addParentAlert,
+  getKid,
+  miaChecklist,
+  miaClearStudentPdf,
+  miaLesson,
+  miaSetBigLesson,
+  miaSetParseState,
+  type MiaChecklist,
+  type MiaPathCourse,
+} from "./store";
 import { MIA_SUBJECTS } from "@/content/miacademy";
 
 /**
@@ -21,7 +31,17 @@ export function readLessonInBackground(kidId: number, lessonId: number): void {
   miaSetParseState(lessonId, "reading");
   void (async () => {
     try {
-      const parsed = await readLessonPdf(lesson.studentPdf!);
+      // Level E (Revised): also look at the next lesson's PDF, to spot the lesson before a unit assessment.
+      const plan = miaCoursePlan(lesson.subject, lesson.course);
+      const nextPdf = plan?.bigLessonBeforeUnitTest ? nextNumberedPdfs(lesson.studentPdf!)[0] : undefined;
+      const next = nextPdf && (await exists(nextPdf)) ? nextPdf : undefined;
+      const parsed = await readLessonPdf(lesson.studentPdf!, next);
+      // A guessed PDF has to be this lesson's; if not, wait for the real link (when the kid opens the lesson).
+      if (parsed && !sameLesson(parsed.lessonTitle, lesson.title, lesson.course)) {
+        miaClearStudentPdf(lessonId);
+        return;
+      }
+      if (parsed?.nextIsUnitAssessment) miaSetBigLesson(lessonId, 2);
       const items = parsed ? buildItems(parsed.activities, lesson.subject, lesson.title, lesson.course) : [];
       miaSetParseState(lessonId, items.length ? "ready" : "failed", items.length ? items : undefined);
       if (!items.length) {
@@ -35,6 +55,30 @@ export function readLessonInBackground(kidId: number, lessonId: number): void {
       reading.delete(lessonId);
     }
   })();
+}
+
+async function exists(url: string): Promise<boolean> {
+  try {
+    return (await fetch(url, { method: "HEAD" })).ok;
+  } catch {
+    return false;
+  }
+}
+
+/** Does a PDF's printed title belong to the lesson Miacademy shows? (Loose: punctuation and short words don't matter.) */
+export function sameLesson(pdfTitle: string, lessonTitle: string, courseTitle = ""): boolean {
+  const words = (t: string) =>
+    t
+      .toLowerCase()
+      .replace(/[^a-z0-9 ]+/g, " ")
+      .split(/\s+/)
+      .filter((w) => w.length > 2);
+  const a = words(pdfTitle);
+  const b = words(lessonTitle);
+  // Nothing to compare (the lesson is only known by its course name so far): trust the PDF.
+  if (!a.length || !b.length || lessonTitle === courseTitle) return true;
+  const shared = b.filter((w) => a.includes(w)).length;
+  return shared >= Math.ceil(Math.min(a.length, b.length) / 2);
 }
 
 /** One entry of Miacademy's LearningPathController/BatchConvertAssignedCourses answer. */
@@ -67,6 +111,7 @@ export function parsePathCourses(raw: unknown): MiaPathCourse[] {
       taskTitle: str(t?.ThumbnailTitle) ?? video,
       lessonKey: lessonKeyFromLink(str(t?.Link) ?? ""),
       taskKey: taskKeyFromLink(str(t?.Link) ?? ""),
+      taskDescription: str(t?.Description),
     });
   }
   return out;

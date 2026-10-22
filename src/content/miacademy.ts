@@ -85,6 +85,50 @@ export function miaLessonRules(subject: string, lessonTitle: string, courseTitle
   return { practice: false, worksheets: true };
 }
 
+/**
+ * Subjects made of more than one Miacademy class share their 30-minute timer:
+ * the first 15 minutes go to that day's "first" class (while it still has work
+ * this week), then the "main" class. Matched by Miacademy course title.
+ */
+export interface MiaCoursePlan {
+  /** Matches the Miacademy course title. */
+  match: RegExp;
+  /** Short name on the strip. */
+  name: string;
+  lessonsPerWeek: number;
+  /** "first": the first 15 minutes on its days. "main": the rest of the time (and all of it once the first class is done). */
+  slot: "first" | "main";
+  /** Days it's the first class (1 = Monday ... 4 = Thursday). Not finished? It carries over to the next day, before the next class. */
+  days: number[];
+  /** No more lessons that week once its lessons are done (otherwise they keep going, ahead into next week). */
+  stopWhenDone: boolean;
+  /** No PDF: the checklist is Miacademy's tasks, each one as she reaches it. */
+  onlineOnly: boolean;
+  /** The lesson right before each unit assessment gets 4 school days and counts as a whole week's lessons. */
+  bigLessonBeforeUnitTest?: boolean;
+}
+
+export const MIA_COURSE_PLANS: Record<string, MiaCoursePlan[]> = {
+  ela: [
+    { match: /^Reading Comprehension/i, name: "Reading Comprehension", lessonsPerWeek: 1, slot: "first", days: [1], stopWhenDone: true, onlineOnly: true },
+    { match: /\(Edition 1\)/i, name: "Writing (Edition 1)", lessonsPerWeek: 1, slot: "first", days: [2, 3, 4], stopWhenDone: true, onlineOnly: true },
+    {
+      match: /^Language Arts: Level [A-Z] \(Revised/i,
+      name: "Language Arts",
+      lessonsPerWeek: 2,
+      slot: "main",
+      days: [1, 2, 3, 4],
+      stopWhenDone: false,
+      onlineOnly: false,
+      bigLessonBeforeUnitTest: true,
+    },
+  ],
+};
+
+export function miaCoursePlan(subject: string, courseTitle: string): MiaCoursePlan | null {
+  return MIA_COURSE_PLANS[subject]?.find((p) => p.match.test(courseTitle)) ?? null;
+}
+
 export interface MiaSettings {
   /** Kids can pause a timer (for help or a break). */
   allowPause: boolean;

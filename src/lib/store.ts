@@ -28,9 +28,19 @@ import { expectedSeconds, gradeProbe, probeSolution } from "./probes";
 import { adapt, buildProfile, conceptMastery, whatHelps, type Adaptation, type LearningEvent, type Profile } from "./learner";
 import { angleOf, applyEvidence, blockers, conceptOf, emptyMeter, legacyConcept, lessonMastered, type Evidence, type Meter } from "./masteryMeter";
 import type { Lesson, Probe } from "@/content/courses/types";
-import { MIA_SUBJECTS, type MiaSettings } from "@/content/miacademy";
+import { MIA_COURSE_PLANS, MIA_SUBJECTS, miaCoursePlan, type MiaCoursePlan, type MiaSettings } from "@/content/miacademy";
 import { applyMia, clampMiaSettings, isOpen, MiaRuleError, newTimer, parseMiaSettings, parseMiaState, type MiaAction, type MiaTimerState } from "./miaTimer";
-import { guessStudentPdf, lessonDone, lessonTitleFromTask, remainingItems, weekStart, type ItemState, type LessonItem } from "./miaLessons";
+import {
+  guessStudentPdf,
+  lessonDone,
+  lessonTitleFromTask,
+  nextNumberedPdfs,
+  onlineTaskTitle,
+  remainingItems,
+  weekStart,
+  type ItemState,
+  type LessonItem,
+} from "./miaLessons";
 
 export type Mode = "learn" | "review" | "placement";
 
@@ -2388,6 +2398,8 @@ export interface MiaLesson {
   doneDay: string | null;
   /** Miacademy course title, e.g. "U.S. Geography". */
   course: string;
+  /** 2 for the lesson before a unit assessment (counts as a whole week), else 1. */
+  weight: number;
 }
 
 interface MiaLessonRow {
@@ -2402,6 +2414,7 @@ interface MiaLessonRow {
   started_at: number;
   done_day: string | null;
   course: string | null;
+  weight: number | null;
 }
 
 function toLesson(r: MiaLessonRow): MiaLesson {
@@ -2424,31 +2437,38 @@ function toLesson(r: MiaLessonRow): MiaLesson {
     startedAt: r.started_at,
     doneDay: r.done_day,
     course: r.course ?? "",
+    weight: r.weight ?? 1,
   };
 }
 
-const LESSON_COLS = "id, subject, mia_key, title, student_pdf, items, parse_state, states, started_at, done_day, course";
+const LESSON_COLS = "id, subject, mia_key, title, student_pdf, items, parse_state, states, started_at, done_day, course, weight";
 
 export function miaLesson(kidId: number, lessonId: number): MiaLesson | null {
   const r = getDb().prepare(`SELECT ${LESSON_COLS} FROM mia_lessons WHERE id = ? AND kid_id = ?`).get(lessonId, kidId) as MiaLessonRow | undefined;
   return r ? toLesson(r) : null;
 }
 
-/** Unfinished lessons for a subject, oldest first (the checklist rolls from one into the next). */
-export function miaOpenLessons(kidId: number, subject: string): MiaLesson[] {
+/** Unfinished lessons for a subject (or one class in it), oldest first (the checklist rolls from one into the next). */
+export function miaOpenLessons(kidId: number, subject: string, plan?: MiaCoursePlan | null): MiaLesson[] {
   return (
     getDb()
       .prepare(`SELECT ${LESSON_COLS} FROM mia_lessons WHERE kid_id = ? AND subject = ? AND done_day IS NULL ORDER BY started_at, id`)
       .all(kidId, subject) as MiaLessonRow[]
-  ).map(toLesson);
+  )
+    .map(toLesson)
+    .filter((l) => !plan || plan.match.test(l.course));
 }
 
-/** Lessons finished this week (Monday to Sunday). */
-export function miaLessonsDoneThisWeek(kidId: number, subject: string, day = today()): number {
-  const row = getDb()
-    .prepare("SELECT COUNT(*) AS n FROM mia_lessons WHERE kid_id = ? AND subject = ? AND done_day >= ? AND done_day <= ?")
-    .get(kidId, subject, weekStart(day), day) as { n: number };
-  return row.n;
+/**
+ * Lessons finished this week (Monday to Sunday), for a subject or one class in
+ * it. A lesson's weight counts: the 4-day lesson before a unit assessment counts
+ * as a whole week of lessons.
+ */
+export function miaLessonsDoneThisWeek(kidId: number, subject: string, day = today(), plan?: MiaCoursePlan | null): number {
+  const rows = getDb()
+    .prepare("SELECT course, weight FROM mia_lessons WHERE kid_id = ? AND subject = ? AND done_day >= ? AND done_day <= ?")
+    .all(kidId, subject, weekStart(day), day) as { course: string | null; weight: number }[];
+  return rows.filter((r) => !plan || plan.match.test(r.course ?? "")).reduce((n, r) => n + (r.weight || 1), 0);
 }
 
 function saveLessonStates(lesson: MiaLesson, day = today()): void {
@@ -2476,13 +2496,17 @@ export interface MiaPathCourse {
   taskTitle: string | null;
   lessonKey: string | null;
   taskKey?: string | null;
+  taskDescription?: string | null;
 }
 
 /**
- * The extension saw the kid's Miacademy assignments page. For each subject with
- * a checklist, keep track of the lesson they're on: a new lesson starts a new
- * checklist; reaching the quiz means the video is watched; moving to a new
- * lesson means the last quiz is done.
+ * The extension saw the kid's Miacademy assignments page. For each class with a
+ * checklist, keep track of the lesson they're on.
+ * - PDF classes: a new lesson starts a new checklist (read off its Student PDF);
+ *   practice or the quiz next means the video is watched; each new practice level
+ *   means one more is done; moving to a new lesson means the last quiz is done.
+ * - Online-only classes: each Miacademy task becomes an item as it comes up and is
+ *   done when Miacademy moves past it; moving to a new lesson finishes the last one.
  * Returns lessons that still need their Student PDF read.
  */
 export function miaPathSync(kidId: number, courses: MiaPathCourse[], now = Date.now()): number[] {
@@ -2491,10 +2515,48 @@ export function miaPathSync(kidId: number, courses: MiaPathCourse[], now = Date.
   const toRead: number[] = [];
   for (const c of courses) {
     if (!c.lessonKey || !(settings.lessonsPerWeek[c.subject] > 0)) continue;
-    const open = miaOpenLessons(kidId, c.subject);
+    const plan = miaCoursePlan(c.subject, c.courseTitle);
+    // A subject made of several classes only follows the classes it has a plan for.
+    if (MIA_COURSE_PLANS[c.subject] && !plan) continue;
+    const open = miaOpenLessons(kidId, c.subject, plan ?? undefined).filter((l) => plan || !MIA_COURSE_PLANS[c.subject]);
     let lesson = open.find((l) => l.miaKey === c.lessonKey) ?? null;
+    const last = lesson
+      ? (db.prepare("SELECT last_task, last_type FROM mia_lessons WHERE id = ?").get(lesson.id) as { last_task: string | null; last_type: string | null })
+      : null;
+
+    if (plan?.onlineOnly) {
+      if (!lesson) {
+        // Miacademy moved on to a new lesson: the lessons before it are done.
+        for (const older of open) {
+          for (const item of older.items ?? []) older.states[item.id] = { ...older.states[item.id], done: true, at: older.states[item.id]?.at ?? now };
+          db.prepare("UPDATE mia_lessons SET states = ?, done_day = ? WHERE id = ?").run(JSON.stringify(older.states), today(), older.id);
+        }
+        const res = db
+          .prepare(
+            "INSERT OR IGNORE INTO mia_lessons (kid_id, subject, mia_key, title, items, parse_state, started_at, course) VALUES (?, ?, ?, ?, '[]', 'ready', ?, ?)",
+          )
+          .run(kidId, c.subject, c.lessonKey, c.taskType === "Pdf" && c.taskTitle ? lessonTitleFromTask(c.taskTitle) : plan.name, now, c.courseTitle);
+        lesson = miaLesson(kidId, Number(res.lastInsertRowid));
+        if (!lesson) continue;
+      }
+      if (c.taskKey && c.taskKey !== last?.last_task) {
+        // A new task: the ones before it are done. PDFs aren't part of online-only classes.
+        for (const item of lesson.items ?? []) if (!lesson.states[item.id]?.done) lesson.states[item.id] = { ...lesson.states[item.id], done: true, at: now };
+        const id = `task-${c.taskKey}`;
+        if (c.taskType !== "Pdf" && !(lesson.items ?? []).some((i) => i.id === id)) {
+          lesson.items = [
+            ...(lesson.items ?? []),
+            { id, title: onlineTaskTitle(c.taskType, c.taskTitle, c.taskDescription ?? null), check: "online", pages: [], supplies: [] },
+          ];
+          db.prepare("UPDATE mia_lessons SET items = ? WHERE id = ?").run(JSON.stringify(lesson.items), lesson.id);
+        }
+        db.prepare("UPDATE mia_lessons SET states = ?, last_task = ?, last_type = ? WHERE id = ?").run(JSON.stringify(lesson.states), c.taskKey, c.taskType, lesson.id);
+      }
+      continue;
+    }
+
     if (!lesson) {
-      // Miacademy moved on: the quizzes of the lessons before this one are done.
+      // Miacademy moved on: the online parts of the lessons before this one are done.
       for (const older of open) {
         const a = markItems(older, "video", now);
         const b = markItems(older, "practice", now);
@@ -2502,9 +2564,10 @@ export function miaPathSync(kidId: number, courses: MiaPathCourse[], now = Date.
       }
       const title = (c.taskType === "Pdf" && c.taskTitle ? lessonTitleFromTask(c.taskTitle) : c.taskTitle) || c.courseTitle;
       const known = db
-        .prepare("SELECT student_pdf, title FROM mia_lessons WHERE kid_id = ? AND subject = ? AND student_pdf IS NOT NULL ORDER BY id DESC LIMIT 1")
-        .get(kidId, c.subject) as { student_pdf: string; title: string } | undefined;
-      const guess = known ? guessStudentPdf(known.student_pdf, known.title, title) : null;
+        .prepare("SELECT student_pdf, title FROM mia_lessons WHERE kid_id = ? AND subject = ? AND course = ? AND student_pdf IS NOT NULL ORDER BY id DESC LIMIT 1")
+        .get(kidId, c.subject, c.courseTitle) as { student_pdf: string; title: string } | undefined;
+      // Named after the lesson ("SC4 Forces Gravity ...") or numbered ("LS4 2.13.1 ..."); a guess is checked against the PDF's title when it's read.
+      const guess = known ? guessStudentPdf(known.student_pdf, known.title, title) ?? nextNumberedPdfs(known.student_pdf)[0] ?? null : null;
       const res = db
         .prepare(
           "INSERT OR IGNORE INTO mia_lessons (kid_id, subject, mia_key, title, student_pdf, started_at, last_task, last_type, course) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -2515,11 +2578,10 @@ export function miaPathSync(kidId: number, courses: MiaPathCourse[], now = Date.
     }
     // Miacademy's order is PDF, video, practice levels, quiz. Practice or the quiz next: the video is done.
     // The quiz next: every practice level is done. A different practice level next: one more level is done.
-    const last = db.prepare("SELECT last_task, last_type FROM mia_lessons WHERE id = ?").get(lesson.id) as { last_task: string | null; last_type: string | null };
     let changed = false;
     if (c.taskType === "Practice" || c.taskType === "Assessment") changed = markItems(lesson, "video", now) || changed;
     if (c.taskType === "Assessment") changed = markItems(lesson, "practice", now) || changed;
-    if (c.taskType === "Practice" && last.last_type === "Practice" && last.last_task && c.taskKey && last.last_task !== c.taskKey) {
+    if (c.taskType === "Practice" && last?.last_type === "Practice" && last.last_task && c.taskKey && last.last_task !== c.taskKey) {
       const level = (lesson.items ?? []).find((i) => i.check === "practice" && !i.allLevels && !lesson!.states[i.id]?.done);
       if (level) {
         lesson.states[level.id] = { ...lesson.states[level.id], done: true, at: now };
@@ -2527,7 +2589,7 @@ export function miaPathSync(kidId: number, courses: MiaPathCourse[], now = Date.
       }
     }
     if (changed) saveLessonStates(lesson);
-    if (c.taskKey && c.taskKey !== last.last_task) db.prepare("UPDATE mia_lessons SET last_task = ?, last_type = ? WHERE id = ?").run(c.taskKey, c.taskType, lesson.id);
+    if (c.taskKey && c.taskKey !== last?.last_task) db.prepare("UPDATE mia_lessons SET last_task = ?, last_type = ? WHERE id = ?").run(c.taskKey, c.taskType, lesson.id);
   }
   return toRead;
 }
@@ -2549,34 +2611,71 @@ export function miaSetParseState(lessonId: number, state: MiaLesson["parseState"
   else getDb().prepare("UPDATE mia_lessons SET parse_state = ? WHERE id = ?").run(state, lessonId);
 }
 
-/** What the timer strip shows for a subject: the next items across open lessons, and the week so far. */
-export function miaChecklist(kidId: number, subject: string) {
-  const settings = getMiaSettings(kidId);
-  const target = settings.lessonsPerWeek[subject] ?? 0;
-  if (!target) return null;
-  const lessons = miaOpenLessons(kidId, subject);
+/** A guessed Student PDF turned out to be another lesson's: forget it and wait for the real one. */
+export function miaClearStudentPdf(lessonId: number): void {
+  getDb().prepare("UPDATE mia_lessons SET student_pdf = NULL, parse_state = 'waiting' WHERE id = ?").run(lessonId);
+}
+
+/** The lesson before a unit assessment: 4 school days, and it counts as a whole week of lessons. */
+export function miaSetBigLesson(lessonId: number, weight: number): void {
+  getDb().prepare("UPDATE mia_lessons SET weight = ? WHERE id = ?").run(weight, lessonId);
+}
+
+/** One class's checklist: the next items across its open lessons, and its week so far. */
+function courseChecklist(kidId: number, subject: string, plan: MiaCoursePlan | null, target: number) {
+  const lessons = miaOpenLessons(kidId, subject, plan);
+  const doneThisWeek = miaLessonsDoneThisWeek(kidId, subject, today(), plan);
+  const weekDone = !!plan?.stopWhenDone && doneThisWeek >= target;
   const upcoming: { lessonId: number; lessonTitle: string; item: LessonItem; state: ItemState }[] = [];
   let reading = false;
   let failed = false;
-  for (const l of lessons) {
-    if (!l.items) {
-      reading = l.parseState === "reading" || (l.parseState === "waiting" && !!l.studentPdf);
-      failed = l.parseState === "failed";
-      break;
+  // A class that's done for the week shows nothing more (Miacademy may already list next week's lesson).
+  if (!weekDone)
+    for (const l of lessons) {
+      if (!l.items) {
+        reading = l.parseState === "reading" || (l.parseState === "waiting" && !!l.studentPdf);
+        failed = l.parseState === "failed";
+        break;
+      }
+      for (const item of remainingItems(l.items, l.states)) upcoming.push({ lessonId: l.id, lessonTitle: l.title, item, state: l.states[item.id] ?? { done: false } });
     }
-    for (const item of remainingItems(l.items, l.states)) upcoming.push({ lessonId: l.id, lessonTitle: l.title, item, state: l.states[item.id] ?? { done: false } });
-  }
+  const current = lessons[0];
   return {
     subject,
+    name: plan?.name ?? null,
+    slot: plan?.slot ?? "main",
+    onlineOnly: !!plan?.onlineOnly,
     target,
-    doneThisWeek: miaLessonsDoneThisWeek(kidId, subject),
+    doneThisWeek,
+    weekDone,
     upcoming: upcoming.slice(0, 3),
     left: upcoming.length,
-    lessonTitle: lessons[0]?.title ?? null,
-    needsPdf: lessons.length > 0 && !lessons[0].studentPdf,
+    lessonTitle: weekDone ? null : current?.title ?? null,
+    /** The current lesson is the 4-day one before a unit assessment. */
+    bigLesson: !weekDone && (current?.weight ?? 1) > 1,
+    needsPdf: !weekDone && !plan?.onlineOnly && !!current && !current.studentPdf,
     reading,
     failed,
   };
+}
+export type MiaCourseChecklist = ReturnType<typeof courseChecklist>;
+
+/**
+ * What the timer strip shows for a subject: one part per class. For a subject
+ * with several classes, `firstToday` is the class for today's first 15 minutes
+ * (null when there's none left this week, so the main class gets all 30).
+ */
+export function miaChecklist(kidId: number, subject: string, day = today()) {
+  const settings = getMiaSettings(kidId);
+  const on = settings.lessonsPerWeek[subject] ?? 0;
+  if (!on) return null;
+  const plans = MIA_COURSE_PLANS[subject];
+  if (!plans) return { subject, parts: [courseChecklist(kidId, subject, null, on)], firstToday: null as number | null };
+  const parts = plans.map((p) => courseChecklist(kidId, subject, p, p.lessonsPerWeek));
+  // Monday = 1 ... Sunday = 7. A first class not finished on its day carries over to the next day, before the next class.
+  const weekday = ((new Date(`${day}T12:00:00Z`).getUTCDay() + 6) % 7) + 1;
+  const first = plans.findIndex((p, i) => p.slot === "first" && Math.min(...p.days) <= weekday && weekday <= 4 && !parts[i].weekDone);
+  return { subject, parts, firstToday: first >= 0 ? first : null };
 }
 export type MiaChecklist = NonNullable<ReturnType<typeof miaChecklist>>;
 

@@ -14,6 +14,8 @@ export type ItemCheck =
   | "practice"
   /** The kid taps "I finished" (guided notes: done in the packet, not photo-checked). */
   | "self"
+  /** A Miacademy task in an online-only class: done when Miacademy moves past it. */
+  | "online"
   /** Miacademy marks the quiz done (it makes them retake a failed quiz itself). */
   | "quiz"
   /** A photo of the page, compared with the answer key. */
@@ -164,6 +166,31 @@ export function weekStart(day: string): string {
   const back = (d.getUTCDay() + 6) % 7;
   d.setUTCDate(d.getUTCDate() - back);
   return d.toISOString().slice(0, 10);
+}
+
+/**
+ * A kid-friendly name for a Miacademy task in an online-only class, from its
+ * description ("Can you watch all of this learning video: X?" -> "Watch the video: X").
+ */
+export function onlineTaskTitle(type: string | null, title: string | null, description: string | null): string {
+  const d = (description ?? "").trim().replace(/\?+$/, "");
+  const video = /video:\s*(.+)$/i.exec(d)?.[1];
+  if (type === "Video" || video) return `Watch the video: ${video ?? title ?? "lesson"}`;
+  if (type === "Assessment") return title ? `Quiz: ${title}` : "Take the quiz";
+  const ask = /^can you (.+)$/i.exec(d)?.[1];
+  if (ask) return ask.charAt(0).toUpperCase() + ask.slice(1);
+  return title || d || "Miacademy activity";
+}
+
+/**
+ * Math and Language Arts PDFs are numbered ("LS4 2.13.1 Student PDF.pdf"): the
+ * next lesson is the next number in the unit, or the first of the next unit.
+ */
+export function nextNumberedPdfs(pdf: string): string[] {
+  const m = /^(.*[+ ])(\d+)\.(\d+)\.1([+ ]Student[+ ]PDF\.pdf)$/i.exec(pdf);
+  if (!m) return [];
+  const [, head, unit, lesson, tail] = m;
+  return [`${head}${unit}.${Number(lesson) + 1}.1${tail}`, `${head}${Number(unit) + 1}.1.1${tail}`];
 }
 
 /** Miacademy's task id from a task link ("...&taskAssignment=%22<uuid>%22..."). */

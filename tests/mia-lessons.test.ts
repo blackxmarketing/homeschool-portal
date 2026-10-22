@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { openDb, setDb } from "@/lib/db";
-import { answerKeyUrl, buildItems, guessStudentPdf, lessonTitleFromTask, weekStart, type ParsedActivity } from "@/lib/miaLessons";
-import { lessonKeyFromLink, parsePathCourses } from "@/lib/miaSync";
+import { answerKeyUrl, buildItems, guessStudentPdf, lessonTitleFromTask, nextNumberedPdfs, onlineTaskTitle, weekStart, type ParsedActivity } from "@/lib/miaLessons";
+import { lessonKeyFromLink, parsePathCourses, sameLesson } from "@/lib/miaSync";
 import {
   addKid,
   createFamily,
@@ -14,6 +14,7 @@ import {
   miaPathSync,
   miaRecordPhotoCheck,
   miaSetParseState,
+  miaSetBigLesson,
   miaSetStudentPdf,
   miaWaitingForParent,
   parentMiaItem,
@@ -157,9 +158,23 @@ describe("building a lesson checklist", () => {
         taskTitle: "Forces: Gravity Student PDF",
         lessonKey: GRAVITY_ID,
         taskKey: "33e3a3b5-10ec-46cf-b859-8d3576e0e996",
+        taskDescription: "Explore this activity!",
       },
     ]);
     expect(parsePathCourses("nonsense")).toEqual([]);
+  });
+
+  it("names online tasks for kids and guesses numbered PDFs", () => {
+    expect(onlineTaskTitle("Video", null, "Can you watch all of this learning video: The Writing Process: Getting Started?")).toBe(
+      "Watch the video: The Writing Process: Getting Started",
+    );
+    expect(onlineTaskTitle("Practice", null, "Can you earn a bronze medal in Sentences 2?")).toBe("Earn a bronze medal in Sentences 2");
+    const la = "https://miaplaza-content.s3.us-west-2.amazonaws.com/Language+Arts/LS4+(Revised+2026)/LS4+2.13.1+Student+PDF.pdf";
+    expect(nextNumberedPdfs(la)).toEqual([la.replace("2.13.1", "2.14.1"), la.replace("2.13.1", "3.1.1")]);
+    expect(nextNumberedPdfs(PDF)).toEqual([]);
+    expect(sameLesson("Book Talk: Revising and Editing", "Book Talk: Revising and Editing")).toBe(true);
+    expect(sameLesson("Unit 2 Assessment", "Book Talk: Revising and Editing")).toBe(false);
+    expect(sameLesson("Anything", "Language Arts: Level E (Revised 2026)", "Language Arts: Level E (Revised 2026)")).toBe(true);
   });
 
   it("starts the week on Monday", () => {
@@ -172,7 +187,7 @@ describe("building a lesson checklist", () => {
 describe("a kid's Science checklist", () => {
   let kid: number;
   let family: number;
-  const lessonOf = () => miaChecklist(kid, "sci")!.upcoming[0].lessonId;
+  const lessonOf = () => miaChecklist(kid, "sci")!.parts[0].upcoming[0].lessonId;
   beforeEach(() => {
     setDb(openDb(":memory:"));
     family = createFamily({ familyName: "Test", parentName: "P", email: `p${Math.random()}@test.test`, password: "password1" });
@@ -195,11 +210,11 @@ describe("a kid's Science checklist", () => {
 
   it("waits for the Student PDF, then shows three activities at a time", () => {
     miaPathSync(kid, parsePathCourses(path(GRAVITY_ID, "Pdf", "Forces: Gravity Student PDF")));
-    expect(miaChecklist(kid, "sci")).toMatchObject({ needsPdf: true, upcoming: [], lessonTitle: "Forces: Gravity" });
+    expect(miaChecklist(kid, "sci")!.parts[0]).toMatchObject({ needsPdf: true, upcoming: [], lessonTitle: "Forces: Gravity" });
     expect(miaSetStudentPdf(kid, GRAVITY_ID, "https://evil.example/x.pdf")).toBeNull();
     const id = miaSetStudentPdf(kid, GRAVITY_ID, PDF)!;
     miaSetParseState(id, "ready", buildItems(GRAVITY));
-    const c = miaChecklist(kid, "sci")!;
+    const c = miaChecklist(kid, "sci")!.parts[0];
     expect(c.upcoming.map((u) => u.item.title)).toEqual(["Watch the lesson video", "Complete the guided notes", "Forces Word Search"]);
     expect(c).toMatchObject({ left: 6, target: 1, doneThisWeek: 0 });
   });
@@ -207,7 +222,7 @@ describe("a kid's Science checklist", () => {
   it("checks off the video when Miacademy moves on to the quiz", () => {
     startGravity();
     miaPathSync(kid, parsePathCourses(path(GRAVITY_ID, "Assessment", null)));
-    expect(miaChecklist(kid, "sci")!.upcoming[0].item.title).toBe("Complete the guided notes");
+    expect(miaChecklist(kid, "sci")!.parts[0].upcoming[0].item.title).toBe("Complete the guided notes");
   });
 
   it("keeps the first photo's score, re-checks fixes, and tells a parent about low scores", () => {
@@ -263,11 +278,11 @@ describe("a kid's Science checklist", () => {
     }
     parentMiaItem(family, kid, id, "stem-challenge-marble-run", "skip");
     miaPathSync(kid, parsePathCourses(path(GRAVITY_ID, "Assessment", null)));
-    expect(miaChecklist(kid, "sci")!.upcoming.map((u) => u.item.title)).toEqual(["Online assessment"]);
+    expect(miaChecklist(kid, "sci")!.parts[0].upcoming.map((u) => u.item.title)).toEqual(["Online assessment"]);
     // Quiz done in Miacademy: it moves on to the next lesson, and guesses that lesson's PDF.
     const toRead = miaPathSync(kid, parsePathCourses(path(MAGNETISM_ID, "Pdf", "Forces: Magnetism Student PDF")));
     expect(miaLesson(kid, id)!.doneDay).not.toBeNull();
-    expect(miaChecklist(kid, "sci")).toMatchObject({ doneThisWeek: 1, lessonTitle: "Forces: Magnetism" });
+    expect(miaChecklist(kid, "sci")!.parts[0]).toMatchObject({ doneThisWeek: 1, lessonTitle: "Forces: Magnetism" });
     expect(toRead).toHaveLength(1);
     expect(miaLesson(kid, toRead[0])!.studentPdf).toBe(PDF.replace("Forces+Gravity", "Forces+Magnetism"));
     expect(lessonOf).toThrow(); // nothing to show until the new PDF is read
@@ -304,7 +319,7 @@ describe("a kid's Science checklist", () => {
         "Unit 4 Wrap Up",
       ),
     );
-    const titles = () => miaChecklist(kid, "math")!.upcoming.map((u) => u.item.title);
+    const titles = () => miaChecklist(kid, "math")!.parts[0].upcoming.map((u) => u.item.title);
     miaPathSync(kid, parsePathCourses(wrap("Video", T(2))));
     expect(titles()[0]).toBe("Watch the lesson video");
     miaPathSync(kid, parsePathCourses(wrap("Practice", T(3))));
@@ -313,5 +328,72 @@ describe("a kid's Science checklist", () => {
     expect(titles()[0]).toBe("Online practice: Level 2");
     miaPathSync(kid, parsePathCourses(wrap("Assessment", T(5))));
     expect(titles()).toEqual(["Online assessment"]);
+  });
+
+  describe("Language Arts: three classes", () => {
+    const course = (title: string, bg: string, lesson: string, type: string, task: string, thumb: string | null, description = "x") => ({
+      Title: title,
+      LearningPathTask: {
+        TaskType: type,
+        ThumbnailTitle: thumb,
+        Description: description,
+        Thumbnail: { OriginalUrl: `https://miacademy.co/x/lessons/backgrounds/${bg}.svg` },
+        Link: `/Content.Lesson/page?lesson=%22${lesson}%22&taskAssignment=%22${task}%22&_=`,
+      },
+    });
+    const id = (n: number) => `00000000-0000-0000-0000-0000000000${String(n).padStart(2, "0")}`;
+    const RC = "Reading Comprehension: Level E";
+    const ED1 = "Language Arts: Level E (Edition 1)";
+    const LAR = "Language Arts: Level E (Revised 2026)";
+    beforeEach(() => setMiaSettings(kid, { ...getMiaSettings(kid), lessonsPerWeek: { math: 0, ela: 1, sci: 0, his: 0 } }));
+
+    it("puts Reading Comprehension first on Monday and Edition 1 first Tuesday to Thursday", () => {
+      const monday = miaChecklist(kid, "ela", "2026-10-19")!;
+      expect(monday.parts.map((p) => [p.name, p.slot, p.target])).toEqual([
+        ["Reading Comprehension", "first", 1],
+        ["Writing (Edition 1)", "first", 1],
+        ["Language Arts", "main", 2],
+      ]);
+      expect(monday.firstToday).toBe(0);
+      // Not finished Monday: Reading Comprehension still comes first on Tuesday.
+      expect(miaChecklist(kid, "ela", "2026-10-20")!.firstToday).toBe(0);
+      // No first class on Friday.
+      expect(miaChecklist(kid, "ela", "2026-10-23")!.firstToday).toBeNull();
+    });
+
+    it("lists online-only tasks as they come, and stops after the week's lesson", () => {
+      miaPathSync(kid, parsePathCourses([course(RC, "LanguageArts", id(1), "Pdf", id(10), "Opossum")]));
+      expect(miaChecklist(kid, "ela")!.parts[0].upcoming).toEqual([]); // the passage PDF isn't on the list
+      miaPathSync(kid, parsePathCourses([course(RC, "LanguageArts", id(1), "Practice", id(11), null, "Can you earn a bronze medal in Opossum?")]));
+      expect(miaChecklist(kid, "ela")!.parts[0].upcoming.map((u) => [u.item.title, u.item.check])).toEqual([["Earn a bronze medal in Opossum", "online"]]);
+      miaPathSync(kid, parsePathCourses([course(RC, "LanguageArts", id(1), "Assessment", id(12), null)]));
+      expect(miaChecklist(kid, "ela")!.parts[0].upcoming.map((u) => u.item.title)).toEqual(["Take the quiz"]);
+      // Miacademy moves on to the next lesson: this week's Reading Comprehension is done; nothing more until next week.
+      miaPathSync(kid, parsePathCourses([course(RC, "LanguageArts", id(2), "Pdf", id(20), "Katherine")]));
+      const c = miaChecklist(kid, "ela", "2026-10-19")!;
+      expect(c.parts[0]).toMatchObject({ doneThisWeek: 1, weekDone: true, upcoming: [] });
+      expect(c.firstToday).toBeNull(); // Monday: the rest of the time goes to Level E (Revised)
+      expect(miaChecklist(kid, "ela", "2026-10-20")!.firstToday).toBe(1); // Tuesday: Edition 1 first
+    });
+
+    it("ignores Language Arts classes without a plan", () => {
+      miaPathSync(kid, parsePathCourses([course("Vocabulary", "LanguageArts", id(3), "Practice", id(30), null)]));
+      expect(miaChecklist(kid, "ela")!.parts.every((p) => p.upcoming.length === 0)).toBe(true);
+    });
+
+    it("counts the lesson before a unit assessment as a whole week, and keeps Level E going ahead", () => {
+      const la = (n: number) => `https://miaplaza-content.s3.us-west-2.amazonaws.com/Language+Arts/LS4+(Revised+2026)/LS4+2.${n}.1+Student+PDF.pdf`;
+      miaPathSync(kid, parsePathCourses([course(LAR, "LanguageArts", id(4), "Pdf", id(40), "Book Talk: Revising and Editing Student PDF")]));
+      const lid = miaSetStudentPdf(kid, id(4), la(13))!;
+      miaSetBigLesson(lid, 2);
+      miaSetParseState(lid, "ready", buildItems([{ title: "Video and Guided Notes", kind: "notes", pages: [2], supplies: [] }, { title: "Quiz", kind: "quiz", pages: [], supplies: [] }], "ela", "Book Talk", LAR));
+      expect(miaChecklist(kid, "ela")!.parts[2]).toMatchObject({ bigLesson: true, doneThisWeek: 0, target: 2 });
+      miaPathSync(kid, parsePathCourses([course(LAR, "LanguageArts", id(4), "Assessment", id(41), null)]));
+      miaFinishItem(kid, lid, "complete-the-guided-notes");
+      // Quiz done (Miacademy moved on): the 4-day lesson fills the week. The next PDF is guessed by number.
+      const toRead = miaPathSync(kid, parsePathCourses([course(LAR, "LanguageArts", id(5), "Pdf", id(50), "Unit 2 Assessment Student PDF")]));
+      expect(miaChecklist(kid, "ela")!.parts[2]).toMatchObject({ doneThisWeek: 2 });
+      expect(miaLesson(kid, toRead[0])!.studentPdf).toBe(la(14));
+    });
   });
 });

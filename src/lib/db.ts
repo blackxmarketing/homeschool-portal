@@ -375,6 +375,8 @@ const ADDED_COLUMNS: { table: string; column: string; ddl: string }[] = [
   { table: "mia_lessons", column: "last_type", ddl: "ALTER TABLE mia_lessons ADD COLUMN last_type TEXT" },
   // The Miacademy course a lesson belongs to ("U.S. Geography" has its own rules, see miaLessonRules).
   { table: "mia_lessons", column: "course", ddl: "ALTER TABLE mia_lessons ADD COLUMN course TEXT" },
+  // 2 for the lesson before a unit assessment: it gets 4 school days and counts as a whole week of lessons.
+  { table: "mia_lessons", column: "weight", ddl: "ALTER TABLE mia_lessons ADD COLUMN weight INTEGER NOT NULL DEFAULT 1" },
 ];
 
 function migrate(conn: Database.Database): void {

@@ -74,6 +74,24 @@ Started with Bryce's General Science, 1 lesson a week.
 - Preview without a Claude key: the photo check answers with a stand-in (two to
   fix, then all fixed), so the screens can be tried. Never on the live site.
 
+### Rules per lesson (miaLessonRules, MIA_COURSE_PLANS in src/content/miacademy.ts)
+
+- Guided notes are always done in the packet and checked off with a tap; only
+  PDF activities are photo-checked. Optional and bonus lines are always left off.
+- Science, Math: video, guided notes, PDF activities, quiz (no online practice).
+  Math "Wrap Up" lessons: online practice levels instead of the packet.
+- U.S. Geography (History): video, guided notes (Listening Sheet), every online
+  practice level (one "all levels" item, since its packet has no checklist), quiz.
+- Language Arts is three classes sharing one 30-minute timer. Today's first class
+  gets the first 15 minutes (until it's done for the week), then Level E (Revised):
+  - Reading Comprehension: 1 lesson a week, Mondays (carries over to the next day if
+    unfinished), online only.
+  - Edition 1: 1 lesson a week, Tuesday-Thursday, online only.
+  - Level E (Revised 2026): 2 lessons a week, the rest of the time, and keeps going
+    ahead into next week. The lesson before each unit assessment (spotted by
+    reading the next numbered PDF) gets 4 school days and counts as a whole week.
+  - Online-only classes list each Miacademy task as it comes up (no PDF items).
+
 ## The build, in phases
 
 It runs as a **Chrome extension**: the timer strip appears on the right of every
