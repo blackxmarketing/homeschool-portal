@@ -2377,11 +2377,13 @@ export function miaVocab(kidId: number, day = today()): { done: boolean; tasks: 
     /vocabulary/i.test(r.course),
   );
   if (!all.length && !path) return null;
-  const todays = all.filter((t) => t.day === day);
-  if (all.length && !todays.length) return null;
   // Where the assignments page is now: everything before it on the calendar is done.
   const at = path ? all.findIndex((t) => t.task_id === path.task_id) : -1;
-  const tasks = todays.map((t) => ({ title: t.name, lesson: t.lesson_title, done: t.status === "Completed" || (at >= 0 && all.indexOf(t) < at) }));
+  const isDone = (t: (typeof all)[number]) => t.status === "Completed" || (at >= 0 && all.indexOf(t) < at);
+  // Today's tasks, plus any from earlier days still not done (Miacademy moves those to the next day).
+  const todays = all.filter((t) => t.day === day || (t.day < day && !isDone(t)));
+  if (all.length && !todays.length) return null;
+  const tasks = todays.map((t) => ({ title: t.name, lesson: t.lesson_title, done: isDone(t) }));
   const said = db.prepare("SELECT 1 FROM mia_daily WHERE kid_id = ? AND day = ? AND step = 'vocab'").get(kidId, day);
   return { done: !!said || (tasks.length > 0 && tasks.every((t) => t.done)), tasks };
 }

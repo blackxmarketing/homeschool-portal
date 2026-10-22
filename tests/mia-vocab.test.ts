@@ -45,8 +45,7 @@ describe("Vocabulary first each school day", () => {
         { title: "Level 1", lesson: "Word Study", done: false },
       ],
     });
-    // Nothing marked Wednesday, and no school on Friday.
-    expect(miaVocab(kid, "2026-10-21")).toBeNull();
+    // No school on Friday.
     expect(miaVocab(kid, "2026-10-23")).toBeNull();
   });
 
@@ -73,6 +72,20 @@ describe("Vocabulary first each school day", () => {
     expect(miaVocab(kid, TUESDAY)?.done).toBe(false);
     miaVocabDone(kid, TUESDAY);
     expect(miaVocab(kid, TUESDAY)?.done).toBe(true);
+  });
+
+  it("carries unfinished vocabulary over to the next day, like Miacademy does", () => {
+    miaSavePlan(family, { id: id(90), name: "Emme" }, [parsePlanWeek(week())]);
+    // Monday's two tasks weren't done: Tuesday lists them before Tuesday's own.
+    expect(miaVocab(kid, TUESDAY)?.tasks.map((t) => t.title)).toEqual(["Word Study: Video Lesson", "Level 1", "Level 2"]);
+    // Nothing marked Wednesday, but the leftovers still come first.
+    expect(miaVocab(kid, "2026-10-21")?.done).toBe(false);
+    // Once Monday's are done they drop off.
+    miaSavePlan(family, { id: id(90), name: "Emme" }, [
+      parsePlanWeek({ ...week(), TaskAssignmentConversions: week().TaskAssignmentConversions.map((t) => (t.TaskAssignmentId === id(3) ? t : { ...t, Status: "Completed" })) }),
+    ]);
+    expect(miaVocab(kid, TUESDAY)?.tasks.map((t) => t.title)).toEqual(["Level 2"]);
+    expect(miaVocab(kid, "2026-10-21")?.tasks.map((t) => t.title)).toEqual(["Level 2"]);
   });
 
   it("kids without a Vocabulary class have no step", () => {
