@@ -43,4 +43,23 @@ describe("the six weekly rings", () => {
     expect(miaBank(kid, "2026-10-20").thisWeek).toEqual([{ ring: "grammar", cents: 25 }]);
     expect(() => miaFinishItem(kid, 999, "x")).toThrow();
   });
+
+  it("gives Bryce six rings and Emme five (no Grammar: she doesn't take Edition 1)", () => {
+    const allOn = { math: 2, ela: 1, sci: 1, his: 1 };
+    const classes = (titles: string[]) => ({
+      Days: [{ Date: "2026-10-20", UnitTasks: titles.map((_, i) => ({ Unit: `u${i}`, TaskAssignments: [id(10 + i)] })) }],
+      UnitConversions: titles.map((t, i) => ({ UnitId: `u${i}`, Subject: "LanguageArts", Title: "Unit 1", CourseTitle: t })),
+      TaskAssignmentConversions: titles.map((_, i) => ({ TaskAssignmentId: id(10 + i), Name: "Level 1", Type: "Practice", Status: "NotStarted", PreviewData: { Title: `Lesson ${i}` } })),
+    });
+    setMiaSettings(kid, { ...getMiaSettings(kid), lessonsPerWeek: allOn });
+    miaSavePlan(family, { id: id(90), name: "Bryce" }, [
+      parsePlanWeek(classes(["Reading Comprehension: Level E", "Language Arts: Level E (Edition 1)", "Language Arts: Level E (Revised 2026)"])),
+    ]);
+    expect(miaRings(kid, "2026-10-20").map((r) => r.id)).toEqual(["math", "sci", "his", "reading", "writing", "grammar"]);
+
+    const emme = addKid(family, { name: "Emme", avatar: "🐼", grade: 6, pin: "2222", dailyGoal: 45 });
+    setMiaSettings(emme, { ...getMiaSettings(emme), lessonsPerWeek: allOn });
+    miaSavePlan(family, { id: id(91), name: "Emme" }, [parsePlanWeek(classes(["Reading Comprehension: Level G", "Language Arts: Level G"]))]);
+    expect(miaRings(emme, "2026-10-20").map((r) => r.id)).toEqual(["math", "sci", "his", "reading", "writing"]);
+  });
 });
