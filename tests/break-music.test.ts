@@ -37,7 +37,7 @@ class FakeCtx {
   }
 }
 
-describe("break music", () => {
+describe("break music and money sounds", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     FakeCtx.notes = [];
@@ -68,5 +68,14 @@ describe("break music", () => {
     const { breakMusic } = await import("@/components/voice");
     breakMusic()();
     expect(FakeCtx.notes).toEqual([]);
+  });
+
+  it("rings the register when a ring fills, and clinks when the coin lands", async () => {
+    const { moneySound } = await import("@/components/voice");
+    moneySound("ching");
+    const ching = FakeCtx.notes.length;
+    expect(ching).toBeGreaterThan(4);
+    moneySound("clink");
+    expect(FakeCtx.notes.length - ching).toBe(2);
   });
 });

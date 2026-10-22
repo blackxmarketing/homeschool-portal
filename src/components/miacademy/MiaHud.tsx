@@ -16,7 +16,7 @@ import { isOpen, isRunning, lateMs, remaining, type MiaTimerState } from "@/lib/
 import Buddy, { GrownUp } from "./Buddy";
 import { ringGrid } from "@/lib/pixel/miaRings";
 import Checklist from "./Checklist";
-import { breakMusic } from "@/components/voice";
+import { breakMusic, moneySound } from "@/components/voice";
 import type { MiaChecklist, MiaRing } from "@/lib/store";
 
 export interface MiaBankView {
@@ -106,7 +106,8 @@ export default function MiaHud({
   const [checklists, setChecklists] = useState<Checklists>(initialChecklists);
   const [rings, setRings] = useState<MiaRing[]>(initialRings);
   const [bank, setBank] = useState<MiaBankView>(initialBank);
-  const [coin, setCoin] = useState<{ ring: string; cents: number; key: number } | null>(null);
+  // A full ring's pay: shown over the ring ("show"), dropped into the bank ("drop"), then counted ("landed").
+  const [coin, setCoin] = useState<{ ring: string; cents: number; key: number; phase: "show" | "drop" | "landed" } | null>(null);
   const [skipMode, setSkipMode] = useState(false);
   const [offset, setOffset] = useState(() => serverNow - Date.now());
   const [now, setNow] = useState(serverNow);
@@ -147,9 +148,16 @@ export default function MiaHud({
     const first = fresh[0];
     if (first) {
       const ring = (data.rings ?? rings).find((r) => r.id === first.ring);
-      setCoin({ ring: first.ring, cents: first.cents, key: Date.now() });
-      say(`Your ${ring?.name ?? ""} ring is full! ${first.cents} cents go in your bank. Cha-ching!`);
-      setTimeout(() => setCoin(null), 2600);
+      const key = Date.now();
+      setCoin({ ring: first.ring, cents: first.cents, key, phase: "show" });
+      moneySound("ching");
+      setTimeout(() => say(`Your ${ring?.name ?? ""} ring is full! ${first.cents} cents go in your bank.`), 700);
+      setTimeout(() => setCoin((c) => (c?.key === key ? { ...c, phase: "drop" } : c)), 1600);
+      setTimeout(() => {
+        setCoin((c) => (c?.key === key ? { ...c, phase: "landed" } : c));
+        moneySound("clink");
+      }, 2700);
+      setTimeout(() => setCoin((c) => (c?.key === key ? null : c)), 4800);
     }
   }
   // After a checklist change, fetch the rings and bank too.
@@ -408,22 +416,28 @@ export default function MiaHud({
                 <span className="mia-ring-icon">{r.full ? "✓" : r.icon}</span>
                 <span className="mia-ring-name">{r.name}</span>
                 {r.ahead > 0 && <span className="mia-ring-ahead">+{r.ahead}</span>}
+                {coin?.ring === r.id && coin.phase === "show" && (
+                  <span key={coin.key} className="mia-ring-pay">
+                    +{coin.cents}¢
+                  </span>
+                )}
               </div>
             ))}
           </div>
           <div className="mia-bank">
             <span className="mia-bank-face">
               <Buddy kind={settings.buddy} head />
-              {coin && (
+              {coin?.phase === "drop" && (
                 <span key={coin.key} className="mia-coin">
                   🪙
                 </span>
               )}
             </span>
             <span>
-              <b>${(bank.monthCents / 100).toFixed(2)}</b> in your bank this month
+              {/* The new money counts once its coin lands. */}
+              <b>${((bank.monthCents - (coin && coin.phase !== "landed" ? coin.cents : 0)) / 100).toFixed(2)}</b> in your bank this month
             </span>
-            {coin && <span className="mia-bank-plus">+{coin.cents}¢</span>}
+            {coin?.phase === "landed" && <span className="mia-bank-plus">+{coin.cents}¢</span>}
           </div>
         </div>
       )}

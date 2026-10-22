@@ -1151,3 +1151,33 @@ label.mia-btn {
   font-size: 8px;
   line-height: 1.7;
 }
+
+/* A full ring's pay pops up over the ring before it drops into the bank. */
+.mia-ring-pay {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  z-index: 2;
+  font-family: var(--mia-pixel);
+  font-size: 13px;
+  line-height: 1;
+  color: #14532d;
+  background: #ffd43b;
+  border: 3px solid var(--mia-outline);
+  border-radius: 4px;
+  padding: 5px 6px;
+  white-space: nowrap;
+  box-shadow: 0 3px 0 var(--mia-outline);
+  animation: mia-pay-pop 1.6s ease-out both;
+}
+@keyframes mia-pay-pop {
+  0% { transform: translate(-50%, 10px) scale(0.3); opacity: 0; }
+  15% { transform: translate(-50%, -14px) scale(1.25); opacity: 1; }
+  25% { transform: translate(-50%, -10px) scale(1); }
+  80% { transform: translate(-50%, -10px) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, 20px) scale(0.6); opacity: 0; }
+}
+.mia-bank-plus {
+  font-family: var(--mia-pixel);
+  font-size: 11px;
+}

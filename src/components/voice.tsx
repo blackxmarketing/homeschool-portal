@@ -792,3 +792,44 @@ export function breakMusic(): () => void {
     window.setTimeout(() => out.disconnect(), 400);
   };
 }
+
+/**
+ * Money sounds for the buddy bank: "ching" (a cash register, when a weekly
+ * ring fills) and "clink" (the coin landing in the bank).
+ */
+export function moneySound(kind: "ching" | "clink") {
+  if (typeof window === "undefined" || !loadPrefs().sounds) return;
+  try {
+    const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!Ctx) return;
+    audio ??= new Ctx();
+    const ctx = audio;
+    void ctx.resume();
+    const t = ctx.currentTime;
+    const ping = (hz: number, at: number, len: number, vol: number, type: OscillatorType = "square") => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(hz, at);
+      g.gain.setValueAtTime(0.0001, at);
+      g.gain.exponentialRampToValueAtTime(vol, at + 0.005);
+      g.gain.exponentialRampToValueAtTime(0.0001, at + len);
+      o.connect(g).connect(ctx.destination);
+      o.start(at);
+      o.stop(at + len + 0.02);
+    };
+    if (kind === "clink") {
+      ping(1976, t, 0.12, 0.05);
+      ping(2637, t + 0.06, 0.25, 0.04);
+      return;
+    }
+    // "Cha-": the drawer's short rattle; "-ching!": a bright bell with a shimmer.
+    for (let i = 0; i < 4; i++) ping(180 + i * 40, t + i * 0.025, 0.04, 0.05);
+    ping(1319, t + 0.14, 0.5, 0.06);
+    ping(1760, t + 0.14, 0.6, 0.05);
+    ping(2637, t + 0.2, 0.7, 0.03, "triangle");
+    ping(3136, t + 0.26, 0.5, 0.02, "triangle");
+  } catch {
+    // No sound is fine.
+  }
+}
