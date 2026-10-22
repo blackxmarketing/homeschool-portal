@@ -472,7 +472,7 @@ export default function MiaHud({
               <Face color={s.color} fraction={done ? 0 : t ? remaining(t, now) / t.durMs : 1} />
               <div className="mia-card-text">
                 <div className="mia-name">
-                  <span className="mia-icon">{s.icon}</span> {s.name}
+                  {s.name}
                 </div>
                 <div className="mia-time">{done ? "All done!" : `${mmss(t ? remaining(t, now) : (demo ? 60 : MIA_MINUTES * 60) * 1000)}`}</div>
                 {!done && <div className="mia-status">{t ? "Keep going ▶" : blocked ? "Finish your other subject first" : "Tap to start ▶"}</div>}
@@ -691,7 +691,7 @@ function FocusedTimer({
   return (
     <div className="mia-big" style={{ ["--c" as string]: subject.color }}>
       <div className="mia-big-head">
-        <span className="mia-icon">{subject.icon}</span> {subject.name}
+        {subject.name}
       </div>
       <Face color={subject.color} fraction={t ? rem / t.durMs : 1} big />
       <div className="mia-time">{mmss(rem)}</div>
