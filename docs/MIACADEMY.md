@@ -180,3 +180,14 @@ extension sets it):
   "I finished", or after `MIA_OVERTIME_MAX_MINUTES` (20). Finishing after
   overtime pays `MIA_PAY.overtime` (5¢) once per subject a day, on top of the
   rings; past `MIA_OVERTIME_ALERT_MINUTES` (15) a parent gets a note.
+
+### Vocabulary first
+
+Each school day (Monday-Thursday) a kid who takes a Miacademy Vocabulary class
+starts with it: the strip shows "First: Vocabulary" with today's marked
+vocabulary tasks from the parent's calendar, and the core timers wait ("After
+Vocabulary"; the server refuses to start one too). It's done when Miacademy
+marks today's tasks complete, when the kid's assignments page has moved past
+them, or when the kid taps "I finished Vocabulary" (`mia_daily`). No timer, no
+pay. The calendar files any course with "Vocabulary" in its title under its own
+subject, `vocab`, so it never joins Language Arts. `miaVocab` in `store.ts`.

@@ -22,6 +22,7 @@ export default async function MiacademyPage({ searchParams }: { searchParams: Pr
       initialChecklists={board.checklists}
       initialRings={board.rings}
       initialBank={board.bank}
+      initialVocab={board.vocab}
       serverNow={Date.now()}
       demo={demo === "1" && process.env.NODE_ENV !== "production"}
     />

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { kidFromRequest } from "@/lib/auth";
 import type { MiaAction } from "@/lib/miaTimer";
-import { getMiaSettings, miaAct, miaDay, miaReminderIgnored, PortalError } from "@/lib/store";
+import { getMiaSettings, miaAct, miaDay, miaReminderIgnored, miaVocabDone, PortalError } from "@/lib/store";
 import { miaBoard } from "@/lib/miaSync";
 
 const ACTIONS: MiaAction[] = ["start", "pause", "cancel", "help", "break", "breakDone", "late", "helpResume", "finish", "overtime", "missedCheckin", "supplies"];
@@ -23,6 +23,7 @@ export async function GET(req: Request) {
  * The Miacademy timer strip:
  *   { subject, action, pin?, demo? } changes one subject's timer;
  *   { action: "remindIgnored" } says Miacademy has been open a while with no timer;
+ *   { action: "vocabDone" } says today's Vocabulary is finished (the core classes can start);
  *   { action: "sync" } just asks for the latest (a parent may have restarted a timer).
  * Answers with today's timers, the settings and the server's clock.
  */
@@ -45,6 +46,10 @@ export async function POST(req: Request) {
     );
   try {
     if (body.action === "sync") return reply();
+    if (body.action === "vocabDone") {
+      miaVocabDone(kid.id);
+      return reply();
+    }
     if (body.action === "remindIgnored") {
       miaReminderIgnored(kid.id);
       return reply();

@@ -13,7 +13,7 @@ export interface PlanTask {
   day: string;
   unitTitle: string;
   course: string;
-  /** Our subject id (math, ela, sci, his), or "" for subjects we don't time. */
+  /** Our subject id (math, ela, sci, his), "vocab" for the Vocabulary class done first each day, or "" for subjects we don't time. */
   subject: string;
   lessonTitle: string;
   name: string;
@@ -53,7 +53,7 @@ export function parsePlanWeek(raw: unknown): PlanTask[] {
           day,
           unitTitle: String(unit.Title ?? ""),
           course: String(unit.CourseTitle ?? ""),
-          subject: MIA_SUBJECT_MAP[String(unit.Subject ?? "")] ?? "",
+          subject: /vocabulary/i.test(String(unit.CourseTitle ?? "")) ? "vocab" : MIA_SUBJECT_MAP[String(unit.Subject ?? "")] ?? "",
           lessonTitle: String(t.PreviewData?.Title ?? "") || lessonTitleFromTask(name),
           name,
           type: String(t.Type ?? ""),

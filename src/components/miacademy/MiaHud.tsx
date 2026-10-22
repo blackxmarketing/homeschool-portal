@@ -20,7 +20,7 @@ import { ringGrid } from "@/lib/pixel/miaRings";
 import Checklist from "./Checklist";
 import { moneySound } from "@/components/voice";
 import BreakScene, { nextActivity, type BreakActivity } from "./BreakScene";
-import type { MiaChecklist, MiaRing } from "@/lib/store";
+import type { MiaChecklist, MiaRing, MiaVocab } from "@/lib/store";
 
 export interface MiaBankView {
   monthCents: number;
@@ -94,6 +94,7 @@ export default function MiaHud({
   initialChecklists = {},
   initialRings = [],
   initialBank = { monthCents: 0, thisWeek: [] },
+  initialVocab = null,
   serverNow,
   demo,
   api = portalApi,
@@ -105,6 +106,8 @@ export default function MiaHud({
   initialChecklists?: Checklists;
   initialRings?: MiaRing[];
   initialBank?: MiaBankView;
+  /** Today's Vocabulary step (done first, before the core classes), or null. */
+  initialVocab?: MiaVocab | null;
   serverNow: number;
   demo: boolean;
   api?: MiaApi;
@@ -151,6 +154,8 @@ export default function MiaHud({
   const [checkin, setCheckin] = useState<Checkin | null>(null);
   const [reminder, setReminder] = useState(false);
   const [miaOpen, setMiaOpen] = useState(false);
+  const [vocab, setVocab] = useState<MiaVocab | null>(initialVocab);
+  const vocabFirst = !!vocab && !vocab.done;
   const [taskKey, setTaskKey] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -171,9 +176,27 @@ export default function MiaHud({
     sayRaw(text);
   };
 
+  // Vocabulary comes first each school day; the teacher says so once when the strip opens.
+  const vocabRef = useRef(initialVocab);
+  useEffect(() => {
+    if (initialVocab && !initialVocab.done) {
+      const t = setTimeout(() => say(MIA_LINES.vocabStart), 1500);
+      return () => clearTimeout(t);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  async function vocabFinished() {
+    await post({ action: "vocabDone" });
+  }
+
   // A ring filled up this week: drop its money into the buddy bank (once per ring).
   const paid = useRef(new Set(initialBank.thisWeek.map((p) => p.ring)));
-  function applyBoard(data: { rings?: MiaRing[]; bank?: MiaBankView }) {
+  function applyBoard(data: { rings?: MiaRing[]; bank?: MiaBankView; vocab?: MiaVocab | null }) {
+    if (data.vocab !== undefined) {
+      if (vocabRef.current && !vocabRef.current.done && data.vocab?.done) say(MIA_LINES.vocabDone);
+      vocabRef.current = data.vocab;
+      setVocab(data.vocab);
+    }
     if (data.rings) setRings(data.rings);
     if (!data.bank) return;
     setBank(data.bank);
@@ -244,8 +267,8 @@ export default function MiaHud({
   const act = (subject: string, action: string, extra: Record<string, unknown> = {}) => post({ subject, action, ...extra });
 
   // ---- The clock: announcements, check-ins, breaks, finishing, reminders ----
-  const live = useRef({ timers, offset, checkin, miaOpen, openId, allDone, taskKey });
-  live.current = { timers, offset, checkin, miaOpen, openId, allDone, taskKey };
+  const live = useRef({ timers, offset, checkin, miaOpen, openId, allDone, taskKey, vocabFirst });
+  live.current = { timers, offset, checkin, miaOpen, openId, allDone, taskKey, vocabFirst };
   // The task that was open when time ran out: overtime ends when it's done (the kid moves on from it).
   const overtimeTask = useRef<string | null>(null);
   const last = useRef<{ key: string; rem: number; brem: number } | null>(null);
@@ -254,7 +277,7 @@ export default function MiaHud({
 
   useEffect(() => {
     const tick = () => {
-      const { timers, offset, checkin, miaOpen, openId, allDone, taskKey } = live.current;
+      const { timers, offset, checkin, miaOpen, openId, allDone, taskKey, vocabFirst } = live.current;
       const t = Date.now() + offset;
       setNow(t);
       const once = (key: string, fn: () => void) => {
@@ -273,7 +296,7 @@ export default function MiaHud({
       }
 
       // Reminder: Miacademy is open but no timer is going
-      if (miaOpen && !openId && !allDone) {
+      if (miaOpen && !openId && !allDone && !vocabFirst) {
         const r = remind.current;
         r.since ??= t;
         const first = (demo ? 10 : MIA_REMIND_AFTER_SECONDS) * 1000;
@@ -457,6 +480,8 @@ export default function MiaHud({
   }, [allDone]);
   const hello = allDone
     ? "Core classes done! Now your electives. 🎉"
+    : vocabFirst && !focused
+      ? "Start with Vocabulary!"
     : !focused
       ? reminder
         ? "Don't forget your timer!"
@@ -553,11 +578,32 @@ export default function MiaHud({
         </div>
       )}
 
+      {vocabFirst && !focused && (
+        <div className="mia-vocab" role="status">
+          <div className="mia-vocab-head">First: Vocabulary</div>
+          <p>Do today&apos;s Vocabulary in Miacademy. Your core classes start after that.</p>
+          {vocab!.tasks.length > 0 && (
+            <ul>
+              {vocab!.tasks.map((t, i) => (
+                <li key={i} className={t.done ? "done" : ""}>
+                  <span className="mia-vocab-box">{t.done ? "✓" : ""}</span>
+                  {t.title}
+                </li>
+              ))}
+            </ul>
+          )}
+          <button className="mia-btn big go" onClick={vocabFinished} disabled={busy}>
+            ✓ I finished Vocabulary
+          </button>
+        </div>
+      )}
+
       {!focused &&
         MIA_SUBJECTS.map((s) => {
           const t = timers[s.id];
           const done = !!t?.finishedAt;
-          const blocked = !done && !!openId && openId !== s.id;
+          const waiting = !done && !t && vocabFirst;
+          const blocked = (!done && !!openId && openId !== s.id) || waiting;
           return (
             <button
               key={s.id}
@@ -572,7 +618,7 @@ export default function MiaHud({
                   {s.name}
                 </div>
                 <div className="mia-time">{done ? "All done!" : `${mmss(t ? remaining(t, now) : (demo ? 60 : MIA_MINUTES * 60) * 1000)}`}</div>
-                {!done && <div className="mia-status">{t ? "Keep going ▶" : blocked ? "Finish your other subject first" : "Tap to start ▶"}</div>}
+                {!done && <div className="mia-status">{t ? "Keep going ▶" : waiting ? "After Vocabulary" : blocked ? "Finish your other subject first" : "Tap to start ▶"}</div>}
               </div>
               {done && <span className="mia-sticker">⭐ Done!</span>}
             </button>

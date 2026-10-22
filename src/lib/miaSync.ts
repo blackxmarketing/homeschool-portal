@@ -12,6 +12,7 @@ import {
   miaSetPdfParsed,
   miaBank,
   miaRings,
+  miaVocab,
   type MiaChecklist,
   type MiaPathCourse,
 } from "./store";
@@ -132,5 +133,5 @@ export function miaChecklists(kidId: number): Record<string, MiaChecklist | null
 /** Everything the strip shows besides the timers: the checklists, the six weekly rings and the buddy bank. */
 export function miaBoard(kidId: number) {
   const checklists = miaChecklists(kidId);
-  return { checklists, rings: miaRings(kidId), bank: miaBank(kidId) };
+  return { checklists, rings: miaRings(kidId), bank: miaBank(kidId), vocab: miaVocab(kidId) };
 }

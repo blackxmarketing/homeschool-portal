@@ -365,6 +365,15 @@ CREATE TABLE IF NOT EXISTS mia_parent_codes (
 );
 
 -- Money earned in the weekly rings (one row per kid, week and ring), for the buddy bank.
+-- Steps a kid finished for the day outside the timers (Vocabulary, done first each school day).
+CREATE TABLE IF NOT EXISTS mia_daily (
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  day TEXT NOT NULL,
+  step TEXT NOT NULL,
+  at INTEGER NOT NULL,
+  PRIMARY KEY (kid_id, day, step)
+);
+
 CREATE TABLE IF NOT EXISTS mia_bank (
   kid_id INTEGER NOT NULL REFERENCES kids(id),
   week TEXT NOT NULL,

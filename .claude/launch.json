@@ -8,6 +8,12 @@
       "port": 3100
     },
     {
+      "name": "portal-built",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start", "--", "--port", "3300"],
+      "port": 3300
+    },
+    {
       "name": "focus-buddy-dev",
       "runtimeExecutable": "node",
       "runtimeArgs": ["extension/dev/serve.mjs"],
