@@ -568,7 +568,7 @@ export default function MiaHud({
 
       {/* Break: the buddy walks across the screen for the whole break */}
       {focused && ft?.pause?.type === "break" && (
-        <BreakScreen t={ft} now={now} buddy={settings.buddy} buddyName={buddyName} color={focused.color} onDone={() => endBreakEarly(focused.id)} />
+        <BreakScreen t={ft} now={now} buddy={settings.buddy} color={focused.color} onDone={() => endBreakEarly(focused.id)} />
       )}
 
       {/* Grown-up PIN to restart after help */}
@@ -717,14 +717,12 @@ function BreakScreen({
   t,
   now,
   buddy,
-  buddyName,
   color,
   onDone,
 }: {
   t: MiaTimerState;
   now: number;
   buddy: MiaSettings["buddy"];
-  buddyName: string;
   color: string;
   onDone: () => void;
 }) {
@@ -751,7 +749,6 @@ function BreakScreen({
         I&apos;m ready to go back
       </button>
       <div className="mia-walker" style={{ transform: `translateX(${-220 + progress * (width + 220)}px)` }}>
-        <span className="mia-tag">{buddyName}</span>
         <Buddy kind={buddy} className="mia-buddy" />
       </div>
     </div>

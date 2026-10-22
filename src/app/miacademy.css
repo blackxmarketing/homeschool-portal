@@ -556,17 +556,6 @@
   width: 220px;
   will-change: transform;
 }
-.mia-tag {
-  position: absolute;
-  top: -10px;
-  left: 118px;
-  background: #fff;
-  border: 3px solid var(--mia-blue);
-  border-radius: 12px;
-  padding: 1px 10px;
-  font-weight: 700;
-  font-size: 15px;
-}
 .mia-buddy {
   width: 220px;
   display: block;
@@ -980,9 +969,7 @@ label.mia-btn {
 .mia-ring-ahead,
 .mia-bank b,
 .mia-sticker,
-.mia-tag,
 .mia-cl-left,
-.mia-warn,
 .mia-hud .mia-btn,
 .mia-big-time,
 .mia-classes span {
@@ -1016,9 +1003,7 @@ label.mia-btn {
   font-size: 12px;
 }
 .mia-sticker,
-.mia-tag,
-.mia-cl-left,
-.mia-warn {
+.mia-cl-left {
   font-size: 9px;
   line-height: 1.6;
 }
@@ -1046,7 +1031,6 @@ label.mia-btn {
 .mia-reminder,
 .mia-error,
 .mia-checklist-soon,
-.mia-tag,
 .mia-cl-big,
 .mia-fix,
 .mia-shot {
@@ -1112,5 +1096,37 @@ label.mia-btn {
   font-family: var(--mia-pixel);
   font-weight: 400;
   font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Break screen: all pixel font. */
+.mia-break {
+  --mia-pixel: var(--font-pixel), "Press Start 2P", monospace;
+  font-family: var(--mia-pixel);
+}
+.mia-break h1,
+.mia-count,
+.mia-warn,
+.mia-break .mia-btn {
+  font-family: var(--mia-pixel);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.mia-break h1 {
+  font-size: clamp(22px, 4.5vw, 48px);
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+.mia-count {
+  font-size: clamp(48px, 11vw, 128px);
+  margin: 8px 0 14px;
+}
+.mia-warn {
+  font-size: clamp(11px, 2.2vw, 20px);
+  line-height: 1.6;
+  border-radius: 4px;
+}
+.mia-break .mia-btn {
+  font-size: clamp(12px, 2vw, 18px);
   line-height: 1.5;
 }
