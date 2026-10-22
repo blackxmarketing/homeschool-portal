@@ -57,6 +57,8 @@ export const MIA_LINES = {
   checkinCheer: ["Keep it up!", "Stay focused. You've got this!", "Nice work. Keep going!", "You're doing great. Stay with it!"],
   checkinThanks: ["Awesome! Keep going.", "Great! You've got this.", "Nice! Back to it."],
   remind: "Don't forget your timer! Pick the subject you're working on and press Start.",
+  /** All four core timers are done for the day: electives have no timer or checklist, just this reminder. */
+  electives: "Great job finishing your core classes! Now go complete your elective classes.",
 };
 
 /** Miacademy's subject names (from its course data) -> our timer subjects. */

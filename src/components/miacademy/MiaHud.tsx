@@ -359,8 +359,15 @@ export default function MiaHud({
     say(halfOver ? `Time to switch! Now work on ${next}.` : `Great job finishing ${was}! Now switch to ${next}.`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [partIndex, focused?.id]);
+  // The last core timer just finished: time for electives (said once, after the "time's up" line).
+  const wasAllDone = useRef(allDone);
+  useEffect(() => {
+    if (allDone && !wasAllDone.current) window.setTimeout(() => say(MIA_LINES.electives), 4000);
+    wasAllDone.current = allDone;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allDone]);
   const hello = allDone
-    ? "You did it! All done today! 🎉"
+    ? "Core classes done! Now your electives. 🎉"
     : !focused
       ? reminder
         ? "Don't forget your timer!"
@@ -445,6 +452,11 @@ export default function MiaHud({
         </div>
       )}
 
+      {allDone && (
+        <div className="mia-reminder mia-electives" role="status">
+          <span className="mia-wiggle">🎨</span> {MIA_LINES.electives}
+        </div>
+      )}
       {reminder && !openId && (
         <div className="mia-reminder" role="alert">
           <span className="mia-wiggle">⏰</span> {MIA_LINES.remind}
