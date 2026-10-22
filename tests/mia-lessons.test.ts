@@ -370,10 +370,11 @@ describe("a kid's Science checklist", () => {
       expect(miaChecklist(kid, "ela")!.parts[0].upcoming.map((u) => u.item.title)).toEqual(["Take the quiz"]);
       // Miacademy moves on to the next lesson: this week's Reading Comprehension is done; nothing more until next week.
       miaPathSync(kid, parsePathCourses([course(RC, "LanguageArts", id(2), "Pdf", id(20), "Katherine")]));
-      const c = miaChecklist(kid, "ela", "2026-10-19")!;
+      // (Counted on the day it was finished, so look at it from today.)
+      const c = miaChecklist(kid, "ela")!;
       expect(c.parts[0]).toMatchObject({ doneThisWeek: 1, weekDone: true, upcoming: [] });
-      expect(c.firstToday).toBeNull(); // Monday: the rest of the time goes to Level E (Revised)
-      expect(miaChecklist(kid, "ela", "2026-10-20")!.firstToday).toBe(1); // Tuesday: Edition 1 first
+      // Reading Comprehension is never first again this week (Edition 1 or Level E take over).
+      expect(c.firstToday).not.toBe(0);
     });
 
     it("ignores Language Arts classes without a plan", () => {

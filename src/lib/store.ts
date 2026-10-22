@@ -28,7 +28,7 @@ import { expectedSeconds, gradeProbe, probeSolution } from "./probes";
 import { adapt, buildProfile, conceptMastery, whatHelps, type Adaptation, type LearningEvent, type Profile } from "./learner";
 import { angleOf, applyEvidence, blockers, conceptOf, emptyMeter, legacyConcept, lessonMastered, type Evidence, type Meter } from "./masteryMeter";
 import type { Lesson, Probe } from "@/content/courses/types";
-import { MIA_COURSE_PLANS, MIA_SUBJECTS, miaCoursePlan, type MiaCoursePlan, type MiaSettings } from "@/content/miacademy";
+import { MIA_COURSE_PLANS, MIA_PAY, MIA_RINGS, MIA_SUBJECTS, miaCoursePlan, type MiaCoursePlan, type MiaSettings } from "@/content/miacademy";
 import { applyMia, clampMiaSettings, isOpen, MiaRuleError, newTimer, parseMiaSettings, parseMiaState, type MiaAction, type MiaTimerState } from "./miaTimer";
 import {
   guessStudentPdf,
@@ -2631,11 +2631,11 @@ export function miaSetBigLesson(lessonId: number, weight: number): void {
 }
 
 /** One class's checklist: the next items across its open lessons, and its week so far. */
-function courseChecklist(kidId: number, subject: string, plan: MiaCoursePlan | null, target: number) {
+function courseChecklist(kidId: number, subject: string, plan: MiaCoursePlan | null, target: number, day = today()) {
   const fromPlan = miaPlanLessons(kidId, subject, plan);
   const lessons = fromPlan ? fromPlan.lessons.filter((l) => !l.doneDay) : miaOpenLessons(kidId, subject, plan);
   const toRead = fromPlan?.toRead ?? [];
-  const doneThisWeek = miaLessonsDoneThisWeek(kidId, subject, today(), plan);
+  const doneThisWeek = miaLessonsDoneThisWeek(kidId, subject, day, plan);
   const weekDone = !!plan?.stopWhenDone && doneThisWeek >= target;
   const upcoming: { lessonId: number; lessonTitle: string; item: LessonItem; state: ItemState }[] = [];
   let reading = false;
@@ -2675,6 +2675,8 @@ function courseChecklist(kidId: number, subject: string, plan: MiaCoursePlan | n
     toRead,
     /** The checklist comes from the parent's Miacademy calendar. */
     fromCalendar: !!fromPlan,
+    /** How much of the current lesson is done (0-1), for the weekly rings. */
+    lessonProgress: current?.items?.length ? current.items.filter((i) => current.states[i.id]?.done).length / current.items.length : 0,
   };
 }
 export type MiaCourseChecklist = ReturnType<typeof courseChecklist>;
@@ -2689,8 +2691,8 @@ export function miaChecklist(kidId: number, subject: string, day = today()) {
   const on = settings.lessonsPerWeek[subject] ?? 0;
   if (!on) return null;
   const plans = MIA_COURSE_PLANS[subject];
-  if (!plans) return { subject, parts: [courseChecklist(kidId, subject, null, on)], firstToday: null as number | null };
-  const parts = plans.map((p) => courseChecklist(kidId, subject, p, p.lessonsPerWeek));
+  if (!plans) return { subject, parts: [courseChecklist(kidId, subject, null, on, day)], firstToday: null as number | null };
+  const parts = plans.map((p) => courseChecklist(kidId, subject, p, p.lessonsPerWeek, day));
   // Monday = 1 ... Sunday = 7. A first class not finished on its day carries over to the next day, before the next class.
   const weekday = ((new Date(`${day}T12:00:00Z`).getUTCDay() + 6) % 7) + 1;
   const first = plans.findIndex((p, i) => p.slot === "first" && Math.min(...p.days) <= weekday && weekday <= 4 && !parts[i].weekDone);
@@ -3018,4 +3020,46 @@ export function miaPlanLessons(kidId: number, subject: string, plan: MiaCoursePl
 /** What Claude read off a lesson's Student PDF, kept for lessons built from the calendar. */
 export function miaSetPdfParsed(lessonId: number, parsed: ParsedActivity[]): void {
   getDb().prepare("UPDATE mia_lessons SET pdf_parsed = ? WHERE id = ?").run(JSON.stringify(parsed), lessonId);
+}
+
+// ---- The six weekly rings and the buddy bank ----
+
+/**
+ * One ring per class: how much of the week's lessons are done, counting each
+ * finished activity of the current lesson. A full ring pays into the buddy bank
+ * once a week: 25 cents Monday to Thursday, 15 cents after (the extra-time rate).
+ */
+export function miaRings(kidId: number, day = today(), now = Date.now()) {
+  const rings: { id: string; name: string; icon: string; color: string; progress: number; full: boolean; ahead: number }[] = [];
+  for (const r of MIA_RINGS) {
+    const c = miaChecklist(kidId, r.subject, day);
+    const part = r.className ? c?.parts.find((p) => p.name === r.className) : c?.parts[0];
+    if (!c || !part) continue;
+    const progress = Math.min(1, (part.doneThisWeek + (part.doneThisWeek < part.target ? part.lessonProgress : 0)) / part.target);
+    const full = part.doneThisWeek >= part.target;
+    rings.push({ id: r.id, name: r.name, icon: r.icon, color: r.color, progress, full, ahead: Math.max(0, part.doneThisWeek - part.target) });
+    if (full) {
+      const weekday = ((new Date(`${day}T12:00:00Z`).getUTCDay() + 6) % 7) + 1;
+      getDb()
+        .prepare("INSERT OR IGNORE INTO mia_bank (kid_id, week, ring, cents, at) VALUES (?, ?, ?, ?, ?)")
+        .run(kidId, weekStart(day), r.id, weekday <= 4 ? MIA_PAY.onTime : MIA_PAY.extraTime, now);
+    }
+  }
+  return rings;
+}
+export type MiaRing = ReturnType<typeof miaRings>[number];
+
+/** The buddy bank: money this month, and this week's payments (so the strip can drop coins for new ones). */
+export function miaBank(kidId: number, day = today()) {
+  const month = day.slice(0, 7);
+  const rows = getDb().prepare("SELECT week, ring, cents, at FROM mia_bank WHERE kid_id = ? ORDER BY at").all(kidId) as {
+    week: string;
+    ring: string;
+    cents: number;
+    at: number;
+  }[];
+  return {
+    monthCents: rows.filter((r) => new Date(r.at).toISOString().slice(0, 7) === month || r.week.slice(0, 7) === month).reduce((n, r) => n + r.cents, 0),
+    thisWeek: rows.filter((r) => r.week === weekStart(day)).map((r) => ({ ring: r.ring, cents: r.cents })),
+  };
 }

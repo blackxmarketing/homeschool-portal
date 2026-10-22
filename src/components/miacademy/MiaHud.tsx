@@ -15,7 +15,12 @@ import {
 import { isOpen, isRunning, lateMs, remaining, type MiaTimerState } from "@/lib/miaTimer";
 import Buddy from "./Buddy";
 import Checklist from "./Checklist";
-import type { MiaChecklist } from "@/lib/store";
+import type { MiaChecklist, MiaRing } from "@/lib/store";
+
+export interface MiaBankView {
+  monthCents: number;
+  thisWeek: { ring: string; cents: number }[];
+}
 
 export type Timers = Record<string, MiaTimerState | null>;
 
@@ -26,7 +31,15 @@ export type MiaApi = (
   path?: string,
 ) => Promise<{
   ok: boolean;
-  data: { timers?: Timers; settings?: MiaSettings; checklists?: Checklists; serverNow?: number; error?: string } & Record<string, unknown>;
+  data: {
+    timers?: Timers;
+    settings?: MiaSettings;
+    checklists?: Checklists;
+    rings?: MiaRing[];
+    bank?: MiaBankView;
+    serverNow?: number;
+    error?: string;
+  } & Record<string, unknown>;
 }>;
 export type Checklists = Record<string, MiaChecklist | null>;
 
@@ -67,6 +80,8 @@ export default function MiaHud({
   settings: initialSettings,
   initialTimers,
   initialChecklists = {},
+  initialRings = [],
+  initialBank = { monthCents: 0, thisWeek: [] },
   serverNow,
   demo,
   api = portalApi,
@@ -76,6 +91,8 @@ export default function MiaHud({
   settings: MiaSettings;
   initialTimers: Timers;
   initialChecklists?: Checklists;
+  initialRings?: MiaRing[];
+  initialBank?: MiaBankView;
   serverNow: number;
   demo: boolean;
   api?: MiaApi;
@@ -85,6 +102,9 @@ export default function MiaHud({
   const [timers, setTimers] = useState<Timers>(initialTimers);
   const [settings, setSettings] = useState<MiaSettings>(initialSettings);
   const [checklists, setChecklists] = useState<Checklists>(initialChecklists);
+  const [rings, setRings] = useState<MiaRing[]>(initialRings);
+  const [bank, setBank] = useState<MiaBankView>(initialBank);
+  const [coin, setCoin] = useState<{ ring: string; cents: number; key: number } | null>(null);
   const [skipMode, setSkipMode] = useState(false);
   const [offset, setOffset] = useState(() => serverNow - Date.now());
   const [now, setNow] = useState(serverNow);
@@ -114,6 +134,28 @@ export default function MiaHud({
     sayRaw(text);
   };
 
+  // A ring filled up this week: drop its money into the buddy bank (once per ring).
+  const paid = useRef(new Set(initialBank.thisWeek.map((p) => p.ring)));
+  function applyBoard(data: { rings?: MiaRing[]; bank?: MiaBankView }) {
+    if (data.rings) setRings(data.rings);
+    if (!data.bank) return;
+    setBank(data.bank);
+    const fresh = data.bank.thisWeek.filter((p) => !paid.current.has(p.ring));
+    fresh.forEach((p) => paid.current.add(p.ring));
+    const first = fresh[0];
+    if (first) {
+      const ring = (data.rings ?? rings).find((r) => r.id === first.ring);
+      setCoin({ ring: first.ring, cents: first.cents, key: Date.now() });
+      say(`Your ${ring?.name ?? ""} ring is full! ${first.cents} cents go in your bank. Cha-ching!`);
+      setTimeout(() => setCoin(null), 2600);
+    }
+  }
+  // After a checklist change, fetch the rings and bank too.
+  async function refreshBoard() {
+    const { ok, data } = await api({ action: "sync" });
+    if (ok) applyBoard(data);
+  }
+
   async function post(body: Record<string, unknown>): Promise<boolean> {
     setBusy(true);
     setError(null);
@@ -122,6 +164,7 @@ export default function MiaHud({
     if (data.timers) setTimers(data.timers);
     if (data.settings) setSettings(data.settings);
     if (data.checklists) setChecklists(data.checklists);
+    applyBoard(data);
     if (!ok) setError(data.error ?? "Something went wrong.");
     setBusy(false);
     return ok;
@@ -145,6 +188,7 @@ export default function MiaHud({
       }
       if (data.settings) setSettings(data.settings);
       if (data.checklists) setChecklists(data.checklists);
+      applyBoard(data);
     }, waitingForHelp ? 5000 : 30000);
     return () => clearInterval(id);
   }, [api, waitingForHelp]);
@@ -346,6 +390,48 @@ export default function MiaHud({
         )}
       </header>
 
+      {rings.length > 0 && (
+        <div className="mia-week-board">
+          <div className="mia-rings">
+            {rings.map((r) => (
+              <div key={r.id} className={`mia-ring ${r.full ? "full" : ""}`} title={`${r.name}: ${Math.round(r.progress * 100)}%`}>
+                <svg viewBox="0 0 44 44" aria-hidden="true">
+                  <circle cx="22" cy="22" r="18" fill="none" stroke="#e4e9f7" strokeWidth="6" />
+                  <circle
+                    cx="22"
+                    cy="22"
+                    r="18"
+                    fill="none"
+                    stroke={r.color}
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                    strokeDasharray={`${(r.progress * 113.1).toFixed(1)} 113.1`}
+                    transform="rotate(-90 22 22)"
+                  />
+                </svg>
+                <span className="mia-ring-icon">{r.full ? "✓" : r.icon}</span>
+                <span className="mia-ring-name">{r.name}</span>
+                {r.ahead > 0 && <span className="mia-ring-ahead">+{r.ahead}</span>}
+              </div>
+            ))}
+          </div>
+          <div className="mia-bank">
+            <span className="mia-bank-face">
+              <Buddy kind={settings.buddy} head />
+              {coin && (
+                <span key={coin.key} className="mia-coin">
+                  🪙
+                </span>
+              )}
+            </span>
+            <span>
+              <b>${(bank.monthCents / 100).toFixed(2)}</b> in your bank this month
+            </span>
+            {coin && <span className="mia-bank-plus">+{coin.cents}¢</span>}
+          </div>
+        </div>
+      )}
+
       {!focused && (
         <div className="mia-stars" aria-label={`${doneCount} of ${MIA_SUBJECTS.length} subjects done today`}>
           {MIA_SUBJECTS.map((s, i) => (
@@ -438,7 +524,10 @@ export default function MiaHud({
             running={isRunning(ft)}
             api={api}
             say={say}
-            onChecklists={setChecklists}
+            onChecklists={(c) => {
+              setChecklists(c);
+              void refreshBoard();
+            }}
             onSupplies={(lessonId, itemId) => void act(focused.id, "supplies", { lessonId, itemId })}
           />
         ) : (

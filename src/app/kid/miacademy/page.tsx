@@ -1,7 +1,7 @@
 import PortalMiaHud from "@/components/miacademy/PortalMiaHud";
 import { requireKid } from "@/lib/auth";
 import { getMiaSettings, miaDay } from "@/lib/store";
-import { miaChecklists } from "@/lib/miaSync";
+import { miaBoard } from "@/lib/miaSync";
 
 export const dynamic = "force-dynamic";
 
@@ -13,12 +13,15 @@ export const dynamic = "force-dynamic";
 export default async function MiacademyPage({ searchParams }: { searchParams: Promise<{ demo?: string }> }) {
   const { kid } = await requireKid();
   const { demo } = await searchParams;
+  const board = miaBoard(kid.id);
   return (
     <PortalMiaHud
       kidName={kid.name}
       settings={getMiaSettings(kid.id)}
       initialTimers={miaDay(kid.id)}
-      initialChecklists={miaChecklists(kid.id)}
+      initialChecklists={board.checklists}
+      initialRings={board.rings}
+      initialBank={board.bank}
       serverNow={Date.now()}
       demo={demo === "1" && process.env.NODE_ENV !== "production"}
     />

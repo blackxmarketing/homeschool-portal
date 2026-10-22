@@ -166,3 +166,20 @@ export const MIA_DEFAULT_SETTINGS: MiaSettings = {
   buddy: "panda",
   lessonsPerWeek: { math: 0, ela: 0, sci: 0, his: 0 },
 };
+
+/**
+ * The six weekly rings at the top of the timer strip, one per class. Language
+ * Arts' three classes each get their own: Reading = Reading Comprehension,
+ * Writing = Level E (Revised), Grammar = Edition 1 (by the class plan's name).
+ */
+export const MIA_RINGS: { id: string; name: string; icon: string; color: string; subject: string; className?: string }[] = [
+  { id: "math", name: "Math", icon: "🔢", color: "#f2545b", subject: "math" },
+  { id: "sci", name: "Science", icon: "🔬", color: "#16a34a", subject: "sci" },
+  { id: "his", name: "History", icon: "🏛️", color: "#f59e0b", subject: "his" },
+  { id: "reading", name: "Reading", icon: "📖", color: "#8b5cf6", subject: "ela", className: "Reading Comprehension" },
+  { id: "writing", name: "Writing", icon: "✍️", color: "#0ea5e9", subject: "ela", className: "Language Arts" },
+  { id: "grammar", name: "Grammar", icon: "🔤", color: "#ec4899", subject: "ela", className: "Writing (Edition 1)" },
+];
+
+/** What a full ring pays into the buddy bank, in cents: on time (Monday-Thursday), or after (extra time). */
+export const MIA_PAY = { onTime: 25, extraTime: 15 };

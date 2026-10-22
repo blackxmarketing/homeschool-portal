@@ -866,3 +866,103 @@ label.mia-btn {
   border-radius: 12px;
   padding: 6px 10px;
 }
+
+/* The six weekly rings and the buddy bank */
+.mia-week-board {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fff;
+  border: 3px solid var(--mia-line);
+  border-radius: 22px;
+  padding: 10px;
+}
+.mia-rings {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2px;
+}
+.mia-ring {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mia-ring svg {
+  width: 44px;
+  height: 44px;
+}
+.mia-ring svg circle:last-child {
+  transition: stroke-dasharray 0.8s ease-out;
+}
+.mia-ring-icon {
+  position: absolute;
+  top: 12px;
+  font-size: 16px;
+  line-height: 20px;
+}
+.mia-ring.full .mia-ring-icon {
+  font-weight: 700;
+  color: var(--mia-ink);
+}
+.mia-ring.full svg {
+  animation: mia-pop 0.5s ease-out;
+}
+.mia-ring-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--mia-muted);
+}
+.mia-ring-ahead {
+  position: absolute;
+  top: -4px;
+  right: 0;
+  background: #ffc21a;
+  color: #5c3b00;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0 4px;
+}
+.mia-bank {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--mia-muted);
+}
+.mia-bank b {
+  color: #1f9d55;
+  font-size: 18px;
+}
+.mia-bank-face {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f3f6ff;
+  display: grid;
+  place-items: center;
+}
+.mia-bank-face svg {
+  width: 30px;
+  height: 30px;
+}
+.mia-coin {
+  position: absolute;
+  top: -34px;
+  font-size: 20px;
+  animation: mia-coin-drop 1.2s ease-in both;
+}
+.mia-bank-plus {
+  margin-left: auto;
+  font-weight: 700;
+  color: #1f9d55;
+  animation: mia-pop 0.5s ease-out;
+}
+@keyframes mia-coin-drop {
+  0% { transform: translateY(-20px); opacity: 0; }
+  20% { opacity: 1; }
+  80% { transform: translateY(26px); opacity: 1; }
+  100% { transform: translateY(30px); opacity: 0; }
+}

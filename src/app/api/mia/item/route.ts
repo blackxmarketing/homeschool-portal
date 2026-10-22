@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { kidFromRequest } from "@/lib/auth";
-import { miaChecklists } from "@/lib/miaSync";
+import { miaBoard } from "@/lib/miaSync";
 import { miaFinishItem, PortalError } from "@/lib/store";
 
 /** The kid finished an activity (after fixing mistakes from the photo check): { lessonId, itemId }. */
@@ -11,9 +11,9 @@ export async function POST(req: Request) {
   if (typeof body.lessonId !== "number" || typeof body.itemId !== "string") return NextResponse.json({ error: "Bad request." }, { status: 400 });
   try {
     miaFinishItem(kid.id, body.lessonId, body.itemId);
-    return NextResponse.json({ checklists: miaChecklists(kid.id) });
+    return NextResponse.json({ ...miaBoard(kid.id) });
   } catch (e) {
-    if (e instanceof PortalError) return NextResponse.json({ error: e.message, checklists: miaChecklists(kid.id) }, { status: 400 });
+    if (e instanceof PortalError) return NextResponse.json({ error: e.message, ...miaBoard(kid.id) }, { status: 400 });
     throw e;
   }
 }

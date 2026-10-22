@@ -5,7 +5,7 @@ import { kidFromRequest } from "@/lib/auth";
 import { aiEnabled, checkWorksheetPhoto, type PhotoCheck } from "@/lib/ai";
 import { answerKeyUrl } from "@/lib/miaLessons";
 import { miaPhotoDir } from "@/lib/miaPhotos";
-import { miaChecklists } from "@/lib/miaSync";
+import { miaBoard } from "@/lib/miaSync";
 import { miaFinishItem, miaLesson, miaRecordPhotoCheck, PortalError } from "@/lib/store";
 
 const TYPES = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" } as const;
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
   try {
     if (item.check === "parent") {
       miaFinishItem(kid.id, lesson.id, item.id, photo);
-      return NextResponse.json({ waitingForParent: true, checklists: miaChecklists(kid.id) });
+      return NextResponse.json({ waitingForParent: true, ...miaBoard(kid.id) });
     }
     const key = lesson.studentPdf ? answerKeyUrl(lesson.studentPdf) : null;
     if (!key) return NextResponse.json({ error: "There's no answer key for this one yet. Ask a grown-up." }, { status: 400 });
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     if (!result) return NextResponse.json({ error: "I couldn't check that right now. Try again in a minute." }, { status: 503 });
     if (!result.readable) return NextResponse.json({ readable: false, message: result.message });
     miaRecordPhotoCheck(kid.id, lesson.id, item.id, result, photo);
-    return NextResponse.json({ ...result, checklists: miaChecklists(kid.id) });
+    return NextResponse.json({ ...result, ...miaBoard(kid.id) });
   } catch (e) {
     if (e instanceof PortalError) return NextResponse.json({ error: e.message }, { status: 400 });
     throw e;

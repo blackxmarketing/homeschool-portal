@@ -364,6 +364,16 @@ CREATE TABLE IF NOT EXISTS mia_parent_codes (
   expires_at INTEGER NOT NULL
 );
 
+-- Money earned in the weekly rings (one row per kid, week and ring), for the buddy bank.
+CREATE TABLE IF NOT EXISTS mia_bank (
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  week TEXT NOT NULL,
+  ring TEXT NOT NULL,
+  cents INTEGER NOT NULL,
+  at INTEGER NOT NULL,
+  PRIMARY KEY (kid_id, week, ring)
+);
+
 -- Kids' computers connected to the Miacademy Chrome extension. The extension keeps the token; we keep its hash.
 CREATE TABLE IF NOT EXISTS mia_devices (
   id INTEGER PRIMARY KEY,

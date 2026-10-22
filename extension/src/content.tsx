@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import MiaHud, { type Checklists, type MiaApi, type Timers } from "@/components/miacademy/MiaHud";
+import MiaHud, { type Checklists, type MiaApi, type MiaBankView, type Timers } from "@/components/miacademy/MiaHud";
+import type { MiaRing } from "@/lib/store";
 import type { MiaSettings } from "@/content/miacademy";
 import hudCss from "@/app/miacademy.css";
 import { send, type ApiReply } from "./messages";
@@ -20,7 +21,7 @@ const api: MiaApi = async (body, path = "/api/mia") => {
 };
 const say = (text: string) => void send({ type: "say", text });
 
-type Loaded = { kidName: string; settings: MiaSettings; timers: Timers; checklists: Checklists; serverNow: number };
+type Loaded = { kidName: string; settings: MiaSettings; timers: Timers; checklists: Checklists; rings: MiaRing[]; bank: MiaBankView; serverNow: number };
 
 // ---- What Miacademy's own pages load (page-hook.ts), passed on to the portal ----
 
@@ -81,6 +82,8 @@ function App() {
       settings={state.settings}
       initialTimers={state.timers}
       initialChecklists={state.checklists}
+      initialRings={state.rings}
+      initialBank={state.bank}
       serverNow={state.serverNow}
       demo={false}
       api={api}

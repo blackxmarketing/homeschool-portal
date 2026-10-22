@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { kidFromRequest } from "@/lib/auth";
 import type { MiaAction } from "@/lib/miaTimer";
 import { getMiaSettings, miaAct, miaDay, miaReminderIgnored, PortalError } from "@/lib/store";
-import { miaChecklists } from "@/lib/miaSync";
+import { miaBoard } from "@/lib/miaSync";
 
 const ACTIONS: MiaAction[] = ["start", "pause", "cancel", "help", "break", "breakDone", "late", "helpResume", "finish", "missedCheckin", "supplies"];
 
@@ -14,7 +14,7 @@ export async function GET(req: Request) {
     kidName: kid.name,
     settings: getMiaSettings(kid.id),
     timers: miaDay(kid.id),
-    checklists: miaChecklists(kid.id),
+    ...miaBoard(kid.id),
     serverNow: Date.now(),
   });
 }
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
   };
   const reply = (extra: object = {}, status = 200) =>
     NextResponse.json(
-      { ...extra, timers: miaDay(kid.id), settings: getMiaSettings(kid.id), checklists: miaChecklists(kid.id), serverNow: Date.now() },
+      { ...extra, timers: miaDay(kid.id), settings: getMiaSettings(kid.id), ...miaBoard(kid.id), serverNow: Date.now() },
       { status },
     );
   try {

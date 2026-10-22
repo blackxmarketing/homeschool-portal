@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { kidFromRequest } from "@/lib/auth";
 import { miaPathSync, miaSetStudentPdf } from "@/lib/store";
-import { lessonKeyFromLink, miaChecklists, parsePathCourses, readLessonInBackground } from "@/lib/miaSync";
+import { lessonKeyFromLink, miaBoard, parsePathCourses, readLessonInBackground } from "@/lib/miaSync";
 
 /**
  * What the Chrome extension sees on the kid's Miacademy pages:
@@ -24,5 +24,5 @@ export async function POST(req: Request) {
     }
   }
   for (const id of toRead) readLessonInBackground(kid.id, id);
-  return NextResponse.json({ checklists: miaChecklists(kid.id) });
+  return NextResponse.json({ ...miaBoard(kid.id) });
 }

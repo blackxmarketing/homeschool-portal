@@ -10,6 +10,8 @@ import {
   miaSetBigLesson,
   miaSetParseState,
   miaSetPdfParsed,
+  miaBank,
+  miaRings,
   type MiaChecklist,
   type MiaPathCourse,
 } from "./store";
@@ -125,4 +127,10 @@ export function miaChecklists(kidId: number): Record<string, MiaChecklist | null
   const all = Object.fromEntries(MIA_SUBJECTS.map((s) => [s.id, miaChecklist(kidId, s.id)]));
   for (const c of Object.values(all)) for (const part of c?.parts ?? []) for (const id of part.toRead) readLessonInBackground(kidId, id);
   return all;
+}
+
+/** Everything the strip shows besides the timers: the checklists, the six weekly rings and the buddy bank. */
+export function miaBoard(kidId: number) {
+  const checklists = miaChecklists(kidId);
+  return { checklists, rings: miaRings(kidId), bank: miaBank(kidId) };
 }
