@@ -363,7 +363,7 @@ describe("a kid's Science checklist", () => {
 
     it("lists online-only tasks as they come, and stops after the week's lesson", () => {
       miaPathSync(kid, parsePathCourses([course(RC, "LanguageArts", id(1), "Pdf", id(10), "Opossum")]));
-      expect(miaChecklist(kid, "ela")!.parts[0].upcoming).toEqual([]); // the passage PDF isn't on the list
+      expect(miaChecklist(kid, "ela")!.parts[0].upcoming.map((u) => [u.item.title, u.item.check])).toEqual([["Read the story: Opossum", "self"]]);
       miaPathSync(kid, parsePathCourses([course(RC, "LanguageArts", id(1), "Practice", id(11), null, "Can you earn a bronze medal in Opossum?")]));
       expect(miaChecklist(kid, "ela")!.parts[0].upcoming.map((u) => [u.item.title, u.item.check])).toEqual([["Earn a bronze medal in Opossum", "online"]]);
       miaPathSync(kid, parsePathCourses([course(RC, "LanguageArts", id(1), "Assessment", id(12), null)]));

@@ -2543,10 +2543,14 @@ export function miaPathSync(kidId: number, courses: MiaPathCourse[], now = Date.
         // A new task: the ones before it are done. PDFs aren't part of online-only classes.
         for (const item of lesson.items ?? []) if (!lesson.states[item.id]?.done) lesson.states[item.id] = { ...lesson.states[item.id], done: true, at: now };
         const id = `task-${c.taskKey}`;
-        if (c.taskType !== "Pdf" && !(lesson.items ?? []).some((i) => i.id === id)) {
+        // A story to read (Reading Comprehension): a tap when it's read. Other PDFs aren't part of online-only classes.
+        const story = c.taskType === "Pdf" && plan.readPdf;
+        if ((c.taskType !== "Pdf" || story) && !(lesson.items ?? []).some((i) => i.id === id)) {
           lesson.items = [
             ...(lesson.items ?? []),
-            { id, title: onlineTaskTitle(c.taskType, c.taskTitle, c.taskDescription ?? null), check: "online", pages: [], supplies: [] },
+            story
+              ? { id, title: `${plan.readPdf}: ${lessonTitleFromTask(c.taskTitle ?? "") || lesson.title}`, check: "self" as const, pages: [], supplies: [] }
+              : { id, title: onlineTaskTitle(c.taskType, c.taskTitle, c.taskDescription ?? null), check: "online" as const, pages: [], supplies: [] },
           ];
           db.prepare("UPDATE mia_lessons SET items = ? WHERE id = ?").run(JSON.stringify(lesson.items), lesson.id);
         }

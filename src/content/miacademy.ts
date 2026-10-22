@@ -102,15 +102,26 @@ export interface MiaCoursePlan {
   days: number[];
   /** No more lessons that week once its lessons are done (otherwise they keep going, ahead into next week). */
   stopWhenDone: boolean;
-  /** No PDF: the checklist is Miacademy's tasks, each one as she reaches it. */
+  /** No PDF packet: the checklist is Miacademy's tasks, each one as she reaches it. */
   onlineOnly: boolean;
+  /** For online-only classes whose PDF is something to read (a story): the item's label, checked off with a tap. Otherwise PDFs are left off. */
+  readPdf?: string;
   /** The lesson right before each unit assessment gets 4 school days and counts as a whole week's lessons. */
   bigLessonBeforeUnitTest?: boolean;
 }
 
 export const MIA_COURSE_PLANS: Record<string, MiaCoursePlan[]> = {
   ela: [
-    { match: /^Reading Comprehension/i, name: "Reading Comprehension", lessonsPerWeek: 1, slot: "first", days: [1], stopWhenDone: true, onlineOnly: true },
+    {
+      match: /^Reading Comprehension/i,
+      name: "Reading Comprehension",
+      lessonsPerWeek: 1,
+      slot: "first",
+      days: [1],
+      stopWhenDone: true,
+      onlineOnly: true,
+      readPdf: "Read the story",
+    },
     { match: /\(Edition 1\)/i, name: "Writing (Edition 1)", lessonsPerWeek: 1, slot: "first", days: [2, 3, 4], stopWhenDone: true, onlineOnly: true },
     {
       match: /^Language Arts: Level [A-Z] \(Revised/i,
