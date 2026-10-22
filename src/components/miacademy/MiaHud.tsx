@@ -106,8 +106,9 @@ export default function MiaHud({
   const [checklists, setChecklists] = useState<Checklists>(initialChecklists);
   const [rings, setRings] = useState<MiaRing[]>(initialRings);
   const [bank, setBank] = useState<MiaBankView>(initialBank);
-  // A full ring's pay: shown over the ring ("show"), dropped into the bank ("drop"), then counted ("landed").
-  const [coin, setCoin] = useState<{ ring: string; cents: number; key: number; phase: "show" | "drop" | "landed" } | null>(null);
+  // A full ring's pay: pops up in the middle of the screen ("show"), flies into the bank ("drop"), then counts ("landed").
+  const [coin, setCoin] = useState<{ ring: string; cents: number; key: number; phase: "show" | "drop" | "landed"; to?: { x: number; y: number } } | null>(null);
+  const bankFace = useRef<HTMLSpanElement>(null);
   const [skipMode, setSkipMode] = useState(false);
   const [offset, setOffset] = useState(() => serverNow - Date.now());
   const [now, setNow] = useState(serverNow);
@@ -152,11 +153,16 @@ export default function MiaHud({
       setCoin({ ring: first.ring, cents: first.cents, key, phase: "show" });
       moneySound("ching");
       setTimeout(() => say(`Your ${ring?.name ?? ""} ring is full! ${first.cents} cents go in your bank.`), 700);
-      setTimeout(() => setCoin((c) => (c?.key === key ? { ...c, phase: "drop" } : c)), 1600);
+      setTimeout(() => {
+        // Fly from the middle of the screen to the bank.
+        const b = bankFace.current?.getBoundingClientRect();
+        const to = b ? { x: Math.round(b.left + b.width / 2 - window.innerWidth / 2), y: Math.round(b.top + b.height / 2 - window.innerHeight / 2) } : undefined;
+        setCoin((c) => (c?.key === key ? { ...c, phase: "drop", to } : c));
+      }, 1800);
       setTimeout(() => {
         setCoin((c) => (c?.key === key ? { ...c, phase: "landed" } : c));
         moneySound("clink");
-      }, 2700);
+      }, 2700 + 200);
       setTimeout(() => setCoin((c) => (c?.key === key ? null : c)), 4800);
     }
   }
@@ -407,6 +413,19 @@ export default function MiaHud({
         )}
       </header>
 
+      {coin && coin.phase !== "landed" && (
+        <div
+          key={coin.key}
+          className={`mia-payout ${coin.phase}`}
+          style={{ ["--dx" as string]: `${coin.to?.x ?? 0}px`, ["--dy" as string]: `${coin.to?.y ?? 0}px` }}
+          aria-live="polite"
+        >
+          <span className="mia-payout-coin">🪙</span>
+          <b>+{coin.cents}¢</b>
+          <small>{rings.find((r) => r.id === coin.ring)?.name} ring full!</small>
+        </div>
+      )}
+
       {rings.length > 0 && (
         <div className="mia-week-board">
           <div className="mia-rings">
@@ -416,22 +435,12 @@ export default function MiaHud({
                 <span className="mia-ring-icon">{r.full ? "✓" : r.icon}</span>
                 <span className="mia-ring-name">{r.name}</span>
                 {r.ahead > 0 && <span className="mia-ring-ahead">+{r.ahead}</span>}
-                {coin?.ring === r.id && coin.phase === "show" && (
-                  <span key={coin.key} className="mia-ring-pay">
-                    +{coin.cents}¢
-                  </span>
-                )}
               </div>
             ))}
           </div>
           <div className="mia-bank">
-            <span className="mia-bank-face">
+            <span className="mia-bank-face" ref={bankFace}>
               <Buddy kind={settings.buddy} head />
-              {coin?.phase === "drop" && (
-                <span key={coin.key} className="mia-coin">
-                  🪙
-                </span>
-              )}
             </span>
             <span>
               {/* The new money counts once its coin lands. */}
