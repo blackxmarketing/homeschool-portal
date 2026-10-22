@@ -1,4 +1,4 @@
-import { MIA_SKIP_ITEMS } from "@/content/miacademy";
+import { MIA_SKIP_ITEMS, miaLessonRules } from "@/content/miacademy";
 
 /**
  * The step-by-step checklist for one Miacademy lesson (docs/MIACADEMY.md).
@@ -10,6 +10,10 @@ import { MIA_SKIP_ITEMS } from "@/content/miacademy";
 export type ItemCheck =
   /** Miacademy marks the video done. */
   | "video"
+  /** Miacademy marks an online practice level done. */
+  | "practice"
+  /** The kid taps "I finished" (guided notes: done in the packet, not photo-checked). */
+  | "self"
   /** Miacademy marks the quiz done (it makes them retake a failed quiz itself). */
   | "quiz"
   /** A photo of the page, compared with the answer key. */
@@ -30,7 +34,7 @@ export interface LessonItem {
 /** What Claude reads off the PDF's checklist and pages. */
 export interface ParsedActivity {
   title: string;
-  kind: "video" | "quiz" | "worksheet" | "hands_on" | "other";
+  kind: "video" | "quiz" | "practice" | "notes" | "worksheet" | "hands_on" | "other";
   pages: number[];
   supplies: string[];
 }
@@ -58,18 +62,35 @@ const slug = (s: string) =>
     .replace(/^-|-$/g, "")
     .slice(0, 40) || "item";
 
-/** Turns what was read off the PDF into checklist items, in order, without the ones the kids skip. */
-export function buildItems(parsed: ParsedActivity[]): LessonItem[] {
+/**
+ * Turns what was read off the PDF into checklist items, in order, without the
+ * ones the kids skip: optional and bonus lines always, and online practice or
+ * PDF activities depending on the lesson (miaLessonRules).
+ */
+export function buildItems(parsed: ParsedActivity[], subject = "sci", lessonTitle = "", courseTitle = ""): LessonItem[] {
+  const rules = miaLessonRules(subject, lessonTitle, courseTitle);
   const seen = new Set<string>();
   const items: LessonItem[] = [];
   for (const a of parsed) {
     const title = a.title.trim();
     if (!title || MIA_SKIP_ITEMS.some((re) => re.test(title))) continue;
+    const practice = a.kind === "practice" || /online practice/i.test(title);
+    if (practice && !rules.practice) continue;
+    if ((a.kind === "worksheet" || a.kind === "hands_on" || a.kind === "other") && !rules.worksheets) continue;
     let id = slug(title);
     for (let n = 2; seen.has(id); n++) id = `${slug(title)}-${n}`;
     seen.add(id);
-    const check: ItemCheck =
-      a.kind === "video" ? "video" : a.kind === "quiz" ? "quiz" : a.kind === "hands_on" || a.supplies.length > 0 ? "parent" : "photo";
+    const check: ItemCheck = practice
+      ? "practice"
+      : a.kind === "video"
+        ? "video"
+        : a.kind === "quiz"
+          ? "quiz"
+          : a.kind === "notes" || /guided notes/i.test(title)
+            ? "self"
+            : a.kind === "hands_on" || a.supplies.length > 0
+              ? "parent"
+              : "photo";
     items.push({ id, title, check, pages: a.pages.filter((p) => Number.isInteger(p) && p > 0), supplies: a.supplies.slice(0, 12) });
   }
   return items;
@@ -114,6 +135,12 @@ export function weekStart(day: string): string {
   const back = (d.getUTCDay() + 6) % 7;
   d.setUTCDate(d.getUTCDate() - back);
   return d.toISOString().slice(0, 10);
+}
+
+/** Miacademy's task id from a task link ("...&taskAssignment=%22<uuid>%22..."). */
+export function taskKeyFromLink(link: string): string | null {
+  const m = /[?&]taskAssignment=(?:%22|")?([0-9a-f-]{36})/i.exec(link);
+  return m ? m[1].toLowerCase() : null;
 }
 
 /** "Forces: Gravity Student PDF" -> "Forces: Gravity". */

@@ -68,11 +68,22 @@ export const MIA_SUBJECT_MAP: Record<string, string> = {
   SocialStudies: "his",
 };
 
+/** Lines in a lesson PDF's checklist the kids always skip: re-watching, and anything optional or bonus. */
+export const MIA_SKIP_ITEMS = [/\boptional\b/i, /\bbonus\b/i, /\brewatch\b/i];
+
 /**
- * Lines in a lesson PDF's checklist the kids skip: online practice (they do
- * the PDF activities instead), re-watching, and anything marked optional or bonus.
+ * What a lesson's checklist includes. Guided notes are always done (no photo
+ * check); "worksheets" are the PDF activities, checked from a photo against the
+ * answer key; "practice" is Miacademy's online practice levels.
+ * - Normally: the PDF activities (hands-on ones too), no online practice.
+ * - Math "Wrap Up" lessons: the online practice instead of the PDF packet.
+ * - U.S. Geography: every online practice level; the packet only for the guided notes.
  */
-export const MIA_SKIP_ITEMS = [/online practice/i, /\boptional\b/i, /\bbonus\b/i, /\brewatch\b/i];
+export function miaLessonRules(subject: string, lessonTitle: string, courseTitle = ""): { practice: boolean; worksheets: boolean } {
+  if (/geograph/i.test(courseTitle)) return { practice: true, worksheets: false };
+  if (subject === "math" && /wrap[\s-]*up/i.test(lessonTitle)) return { practice: true, worksheets: false };
+  return { practice: false, worksheets: true };
+}
 
 export interface MiaSettings {
   /** Kids can pause a timer (for help or a break). */

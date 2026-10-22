@@ -462,7 +462,7 @@ const LESSON_PDF_SCHEMA = {
         type: "object",
         properties: {
           title: { type: "string" },
-          kind: { type: "string", enum: ["video", "quiz", "worksheet", "hands_on", "other"] },
+          kind: { type: "string", enum: ["video", "quiz", "practice", "notes", "worksheet", "hands_on", "other"] },
           pages: { type: "array", items: { type: "integer" } },
           supplies: { type: "array", items: { type: "string" } },
         },
@@ -484,7 +484,7 @@ export async function readLessonPdf(studentPdfUrl: string): Promise<ParsedActivi
   return askStructuredContent<ParsedActivityResult>(
     `You read homeschool lesson PDFs. The first page has a checklist of activities grouped by day.
 List every checklist line in order, exactly as written (keep "optional", "bonus" and "Online practice" lines too; they are filtered later).
-For each: kind = video (watching or rewatching the lesson video), quiz (the online assessment or quiz), worksheet (anything written on the PDF pages, including guided notes), hands_on (an experiment, STEM challenge, build, or anything needing materials), or other.
+For each: kind = video (watching or rewatching the lesson video), quiz (the online assessment or quiz), practice (an online practice level), notes (the guided notes), worksheet (any other activity written on the PDF pages), hands_on (an experiment, STEM challenge, build, or anything needing materials), or other.
 pages = the PDF page numbers that activity's pages are on (look at the page headings); empty for online activities.
 supplies = the materials list for hands_on activities, short items; empty otherwise.`,
     [
@@ -497,7 +497,7 @@ supplies = the materials list for hands_on activities, short items; empty otherw
 }
 
 export interface ParsedActivityResult {
-  activities: { title: string; kind: "video" | "quiz" | "worksheet" | "hands_on" | "other"; pages: number[]; supplies: string[] }[];
+  activities: { title: string; kind: "video" | "quiz" | "practice" | "notes" | "worksheet" | "hands_on" | "other"; pages: number[]; supplies: string[] }[];
 }
 
 const PHOTO_CHECK_SCHEMA = {

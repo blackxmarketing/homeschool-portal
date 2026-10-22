@@ -11,7 +11,7 @@ import type { MiaApi } from "./MiaHud";
  * Finishing one makes it pop away and the next one slides up.
  */
 
-const ICON: Record<LessonItem["check"], string> = { video: "🎬", quiz: "✏️", photo: "📝", parent: "🧰" };
+const ICON: Record<LessonItem["check"], string> = { video: "🎬", practice: "🎮", self: "📝", quiz: "✏️", photo: "📄", parent: "🧰" };
 
 type Entry = MiaChecklist["upcoming"][number];
 
@@ -102,7 +102,7 @@ export default function Checklist({
             );
           return (
             <div key={key} className={`mia-task top ${leaving === key ? "poof" : ""}`} style={{ ["--c" as string]: color }}>
-              <TopTask entry={e} running={running} onPhoto={() => setPhotoFor(e)} />
+              <TopTask entry={e} running={running} onPhoto={() => setPhotoFor(e)} onSelf={() => void done(e)} />
             </div>
           );
         })}
@@ -145,13 +145,24 @@ function nextLine(next: MiaChecklist | null | undefined): string {
   return top ? `Nice! Next up: ${top.item.title}.` : "Nice! You finished every activity in this lesson!";
 }
 
-function TopTask({ entry, running, onPhoto }: { entry: Entry; running: boolean; onPhoto: () => void }) {
+function TopTask({ entry, running, onPhoto, onSelf }: { entry: Entry; running: boolean; onPhoto: () => void; onSelf: () => void }) {
   const { item, state } = entry;
   const pages = item.pages.length ? ` · page${item.pages.length > 1 ? "s" : ""} ${item.pages[0]}${item.pages.length > 1 ? `-${item.pages.at(-1)}` : ""}` : "";
   const kind =
-    item.check === "video" ? "🎬 Online in Miacademy" : item.check === "quiz" ? "✏️ Online quiz" : item.check === "parent" ? `🧰 Hands-on${pages}` : `📄 PDF${pages}`;
+    item.check === "video"
+      ? "🎬 Online in Miacademy"
+      : item.check === "practice"
+        ? "🎮 Online practice in Miacademy"
+        : item.check === "quiz"
+          ? "✏️ Online quiz"
+          : item.check === "parent"
+            ? `🧰 Hands-on${pages}`
+            : item.check === "self"
+              ? `📝 Guided notes${pages}`
+              : `📄 PDF${pages}`;
   let action: React.ReactNode = null;
   if (item.check === "video") action = <div className="mia-hint">Watch it in Miacademy. It checks off by itself!</div>;
+  else if (item.check === "practice") action = <div className="mia-hint">Play this level in Miacademy. It checks off by itself!</div>;
   else if (item.check === "quiz") action = <div className="mia-hint">Take the quiz in Miacademy. It checks off when you finish.</div>;
   else if (item.check === "parent" && !state.suppliesReady)
     action = (
@@ -160,6 +171,12 @@ function TopTask({ entry, running, onPhoto }: { entry: Entry; running: boolean; 
       </div>
     );
   else if (!running) action = <div className="mia-hint">Press Start to work on this.</div>;
+  else if (item.check === "self")
+    action = (
+      <button className="mia-btn small" onClick={onSelf}>
+        ✓ I finished my notes
+      </button>
+    );
   else
     action = (
       <button className="mia-btn small" onClick={onPhoto}>

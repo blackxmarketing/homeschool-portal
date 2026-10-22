@@ -370,6 +370,11 @@ const ADDED_COLUMNS: { table: string; column: string; ddl: string }[] = [
   // Miacademy timers: each kid's settings (JSON MiaSettings, NULL = defaults) and the family's parent PIN.
   { table: "kids", column: "mia", ddl: "ALTER TABLE kids ADD COLUMN mia TEXT" },
   { table: "families", column: "parent_pin_hash", ddl: "ALTER TABLE families ADD COLUMN parent_pin_hash TEXT" },
+  // Miacademy's task the kid was on last (id and type), to count practice levels as they're finished.
+  { table: "mia_lessons", column: "last_task", ddl: "ALTER TABLE mia_lessons ADD COLUMN last_task TEXT" },
+  { table: "mia_lessons", column: "last_type", ddl: "ALTER TABLE mia_lessons ADD COLUMN last_type TEXT" },
+  // The Miacademy course a lesson belongs to ("U.S. Geography" has its own rules, see miaLessonRules).
+  { table: "mia_lessons", column: "course", ddl: "ALTER TABLE mia_lessons ADD COLUMN course TEXT" },
 ];
 
 function migrate(conn: Database.Database): void {

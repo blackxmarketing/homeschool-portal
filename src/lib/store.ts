@@ -2386,6 +2386,8 @@ export interface MiaLesson {
   states: Record<string, ItemState>;
   startedAt: number;
   doneDay: string | null;
+  /** Miacademy course title, e.g. "U.S. Geography". */
+  course: string;
 }
 
 interface MiaLessonRow {
@@ -2399,6 +2401,7 @@ interface MiaLessonRow {
   states: string;
   started_at: number;
   done_day: string | null;
+  course: string | null;
 }
 
 function toLesson(r: MiaLessonRow): MiaLesson {
@@ -2420,10 +2423,11 @@ function toLesson(r: MiaLessonRow): MiaLesson {
     states: parse<Record<string, ItemState>>(r.states, {}),
     startedAt: r.started_at,
     doneDay: r.done_day,
+    course: r.course ?? "",
   };
 }
 
-const LESSON_COLS = "id, subject, mia_key, title, student_pdf, items, parse_state, states, started_at, done_day";
+const LESSON_COLS = "id, subject, mia_key, title, student_pdf, items, parse_state, states, started_at, done_day, course";
 
 export function miaLesson(kidId: number, lessonId: number): MiaLesson | null {
   const r = getDb().prepare(`SELECT ${LESSON_COLS} FROM mia_lessons WHERE id = ? AND kid_id = ?`).get(lessonId, kidId) as MiaLessonRow | undefined;
@@ -2471,6 +2475,7 @@ export interface MiaPathCourse {
   taskType: string | null;
   taskTitle: string | null;
   lessonKey: string | null;
+  taskKey?: string | null;
 }
 
 /**
@@ -2490,20 +2495,39 @@ export function miaPathSync(kidId: number, courses: MiaPathCourse[], now = Date.
     let lesson = open.find((l) => l.miaKey === c.lessonKey) ?? null;
     if (!lesson) {
       // Miacademy moved on: the quizzes of the lessons before this one are done.
-      for (const older of open) if (markItems(older, "quiz", now)) saveLessonStates(older);
+      for (const older of open) {
+        const a = markItems(older, "video", now);
+        const b = markItems(older, "practice", now);
+        if (markItems(older, "quiz", now) || a || b) saveLessonStates(older);
+      }
       const title = (c.taskType === "Pdf" && c.taskTitle ? lessonTitleFromTask(c.taskTitle) : c.taskTitle) || c.courseTitle;
       const known = db
         .prepare("SELECT student_pdf, title FROM mia_lessons WHERE kid_id = ? AND subject = ? AND student_pdf IS NOT NULL ORDER BY id DESC LIMIT 1")
         .get(kidId, c.subject) as { student_pdf: string; title: string } | undefined;
       const guess = known ? guessStudentPdf(known.student_pdf, known.title, title) : null;
       const res = db
-        .prepare("INSERT OR IGNORE INTO mia_lessons (kid_id, subject, mia_key, title, student_pdf, started_at) VALUES (?, ?, ?, ?, ?, ?)")
-        .run(kidId, c.subject, c.lessonKey, title, guess, now);
+        .prepare(
+          "INSERT OR IGNORE INTO mia_lessons (kid_id, subject, mia_key, title, student_pdf, started_at, last_task, last_type, course) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        )
+        .run(kidId, c.subject, c.lessonKey, title, guess, now, c.taskKey ?? null, c.taskType, c.courseTitle);
       if (res.changes && guess) toRead.push(Number(res.lastInsertRowid));
       continue;
     }
-    // Next up is the quiz: the video is done.
-    if (c.taskType === "Assessment" && markItems(lesson, "video", now)) saveLessonStates(lesson);
+    // Miacademy's order is PDF, video, practice levels, quiz. Practice or the quiz next: the video is done.
+    // The quiz next: every practice level is done. A different practice level next: one more level is done.
+    const last = db.prepare("SELECT last_task, last_type FROM mia_lessons WHERE id = ?").get(lesson.id) as { last_task: string | null; last_type: string | null };
+    let changed = false;
+    if (c.taskType === "Practice" || c.taskType === "Assessment") changed = markItems(lesson, "video", now) || changed;
+    if (c.taskType === "Assessment") changed = markItems(lesson, "practice", now) || changed;
+    if (c.taskType === "Practice" && last.last_type === "Practice" && last.last_task && c.taskKey && last.last_task !== c.taskKey) {
+      const level = (lesson.items ?? []).find((i) => i.check === "practice" && !lesson!.states[i.id]?.done);
+      if (level) {
+        lesson.states[level.id] = { ...lesson.states[level.id], done: true, at: now };
+        changed = true;
+      }
+    }
+    if (changed) saveLessonStates(lesson);
+    if (c.taskKey && c.taskKey !== last.last_task) db.prepare("UPDATE mia_lessons SET last_task = ?, last_type = ? WHERE id = ?").run(c.taskKey, c.taskType, lesson.id);
   }
   return toRead;
 }
@@ -2601,7 +2625,7 @@ export function miaFinishItem(kidId: number, lessonId: number, itemId: string, p
   const lesson = updateItem(kidId, lessonId, itemId, (s, item) => {
     if (item.check === "parent") return { ...s, waitingForParent: true, photo: photo ?? s.photo, at: now };
     if (item.check === "photo" && s.total === undefined) throw new PortalError("Take a photo first.");
-    if (item.check === "video" || item.check === "quiz") throw new PortalError("Miacademy checks this one off.");
+    if (item.check === "video" || item.check === "quiz" || item.check === "practice") throw new PortalError("Miacademy checks this one off.");
     return { ...s, done: true, at: now };
   });
   const item = lesson.items!.find((i) => i.id === itemId)!;

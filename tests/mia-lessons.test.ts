@@ -28,15 +28,15 @@ const PDF = "https://miaplaza-content.s3.us-west-2.amazonaws.com/Science/General
 /** The checklist on page 1 of the "Forces: Gravity" Student PDF, as read off the PDF. */
 const GRAVITY: ParsedActivity[] = [
   { title: "Watch the lesson video", kind: "video", pages: [], supplies: [] },
-  { title: "Complete the guided notes", kind: "worksheet", pages: [3], supplies: [] },
-  { title: "Online practice: Level 1", kind: "other", pages: [], supplies: [] },
+  { title: "Complete the guided notes", kind: "notes", pages: [3], supplies: [] },
+  { title: "Online practice: Level 1", kind: "practice", pages: [], supplies: [] },
   { title: "Rewatch the lesson video (optional)", kind: "video", pages: [], supplies: [] },
   { title: "Forces Word Search", kind: "worksheet", pages: [4, 5], supplies: [] },
-  { title: "Online practice: Level 2", kind: "other", pages: [], supplies: [] },
+  { title: "Online practice: Level 2", kind: "practice", pages: [], supplies: [] },
   { title: "Out of This World", kind: "worksheet", pages: [6, 7], supplies: [] },
-  { title: "Online practice Level 3", kind: "other", pages: [], supplies: [] },
+  { title: "Online practice Level 3", kind: "practice", pages: [], supplies: [] },
   { title: "STEM Challenge: Marble Run", kind: "hands_on", pages: [8, 9, 10, 11, 12], supplies: ["Cardboard", "Stopwatch", "Marbles", "Tubing", "Tape"] },
-  { title: "Online practice: Level 4", kind: "other", pages: [], supplies: [] },
+  { title: "Online practice: Level 4", kind: "practice", pages: [], supplies: [] },
   { title: "Online assessment", kind: "quiz", pages: [], supplies: [] },
 ];
 
@@ -62,7 +62,7 @@ describe("building a lesson checklist", () => {
     const items = buildItems(GRAVITY);
     expect(items.map((i) => [i.title, i.check])).toEqual([
       ["Watch the lesson video", "video"],
-      ["Complete the guided notes", "photo"],
+      ["Complete the guided notes", "self"],
       ["Forces Word Search", "photo"],
       ["Out of This World", "photo"],
       ["STEM Challenge: Marble Run", "parent"],
@@ -70,6 +70,31 @@ describe("building a lesson checklist", () => {
     ]);
     expect(items[4].supplies).toContain("Marbles");
     expect(new Set(items.map((i) => i.id)).size).toBe(items.length);
+  });
+
+  it("does the PDF activities in Math too, but online practice instead on Wrap Up lessons", () => {
+    const math: ParsedActivity[] = [
+      { title: "Watch the lesson video", kind: "video", pages: [], supplies: [] },
+      { title: "Complete the guided notes", kind: "notes", pages: [2], supplies: [] },
+      { title: "Fraction Match", kind: "worksheet", pages: [3], supplies: [] },
+      { title: "Bonus: Fraction Art", kind: "worksheet", pages: [4], supplies: [] },
+      { title: "Online practice: Level 1", kind: "practice", pages: [], supplies: [] },
+      { title: "Online practice: Level 2", kind: "practice", pages: [], supplies: [] },
+      { title: "Online assessment", kind: "quiz", pages: [], supplies: [] },
+    ];
+    expect(buildItems(math, "math", "Mixed Numbers").map((i) => i.check)).toEqual(["video", "self", "photo", "quiz"]);
+    expect(buildItems(math, "math", "Unit 4 Wrap Up").map((i) => [i.title, i.check])).toEqual([
+      ["Watch the lesson video", "video"],
+      ["Complete the guided notes", "self"],
+      ["Online practice: Level 1", "practice"],
+      ["Online practice: Level 2", "practice"],
+      ["Online assessment", "quiz"],
+    ]);
+    // U.S. Geography: guided notes and every practice level, no packet activities.
+    expect(buildItems(math, "his", "The South", "U.S. Geography").map((i) => i.check)).toEqual(["video", "self", "practice", "practice", "quiz"]);
+    expect(buildItems(math, "his", "What Is Government?", "U.S Government (Revised 2026)").map((i) => i.check)).toEqual(["video", "self", "photo", "quiz"]);
+    // Wrap Up only changes Math.
+    expect(buildItems(math, "sci", "Unit 4 Wrap-Up").map((i) => i.check)).toEqual(["video", "self", "photo", "quiz"]);
   });
 
   it("finds the answer key next to the Student PDF", () => {
@@ -86,7 +111,14 @@ describe("building a lesson checklist", () => {
     expect(lessonTitleFromTask("Forces: Gravity Student PDF")).toBe("Forces: Gravity");
     expect(lessonKeyFromLink(path(GRAVITY_ID, "Pdf", "x")[0].LearningPathTask.Link)).toBe(GRAVITY_ID);
     expect(parsePathCourses(path(GRAVITY_ID, "Pdf", "Forces: Gravity Student PDF"))).toEqual([
-      { subject: "sci", courseTitle: "General Science", taskType: "Pdf", taskTitle: "Forces: Gravity Student PDF", lessonKey: GRAVITY_ID },
+      {
+        subject: "sci",
+        courseTitle: "General Science",
+        taskType: "Pdf",
+        taskTitle: "Forces: Gravity Student PDF",
+        lessonKey: GRAVITY_ID,
+        taskKey: "33e3a3b5-10ec-46cf-b859-8d3576e0e996",
+      },
     ]);
     expect(parsePathCourses("nonsense")).toEqual([]);
   });
@@ -141,13 +173,16 @@ describe("a kid's Science checklist", () => {
 
   it("keeps the first photo's score, re-checks fixes, and tells a parent about low scores", () => {
     const id = startGravity();
-    miaRecordPhotoCheck(kid, id, "complete-the-guided-notes", { right: 2, total: 6, wrong: [{ question: "blank 1", answer: "attraction" }] }, "1/a.jpg");
+    miaRecordPhotoCheck(kid, id, "forces-word-search", { right: 2, total: 6, wrong: [{ question: "clue 1", answer: "force" }] }, "1/a.jpg");
     expect(unseenAlerts(family).map((a) => a.kind)).toEqual(["low-score"]);
-    miaRecordPhotoCheck(kid, id, "complete-the-guided-notes", { right: 6, total: 6, wrong: [] }, "1/b.jpg");
-    expect(miaLesson(kid, id)!.states["complete-the-guided-notes"]).toMatchObject({ right: 2, total: 6, wrong: [] });
+    miaRecordPhotoCheck(kid, id, "forces-word-search", { right: 6, total: 6, wrong: [] }, "1/b.jpg");
+    expect(miaLesson(kid, id)!.states["forces-word-search"]).toMatchObject({ right: 2, total: 6, wrong: [] });
+    miaFinishItem(kid, id, "forces-word-search");
+    expect(miaLesson(kid, id)!.states["forces-word-search"].done).toBe(true);
+    expect(() => miaFinishItem(kid, id, "out-of-this-world")).toThrow(/photo first/);
+    // Guided notes: just a tap.
     miaFinishItem(kid, id, "complete-the-guided-notes");
     expect(miaLesson(kid, id)!.states["complete-the-guided-notes"].done).toBe(true);
-    expect(() => miaFinishItem(kid, id, "forces-word-search")).toThrow(/photo first/);
   });
 
   it("pauses the timer for supplies; a parent restarts it, then approves the activity", () => {
@@ -182,7 +217,8 @@ describe("a kid's Science checklist", () => {
 
   it("finishes the lesson when Miacademy moves to the next one, and counts it for the week", () => {
     const id = startGravity();
-    for (const item of ["complete-the-guided-notes", "forces-word-search", "out-of-this-world"]) {
+    miaFinishItem(kid, id, "complete-the-guided-notes");
+    for (const item of ["forces-word-search", "out-of-this-world"]) {
       miaRecordPhotoCheck(kid, id, item, { right: 5, total: 5, wrong: [] }, "1/x.jpg");
       miaFinishItem(kid, id, item);
     }
@@ -196,5 +232,47 @@ describe("a kid's Science checklist", () => {
     expect(toRead).toHaveLength(1);
     expect(miaLesson(kid, toRead[0])!.studentPdf).toBe(PDF.replace("Forces+Gravity", "Forces+Magnetism"));
     expect(lessonOf).toThrow(); // nothing to show until the new PDF is read
+  });
+
+  it("checks off practice levels one at a time as Miacademy moves through them", () => {
+    setMiaSettings(kid, { ...getMiaSettings(kid), lessonsPerWeek: { math: 2, ela: 0, sci: 0, his: 0 } });
+    const wrap = (type: string, task: string) => [
+      {
+        Title: "Math: Level E",
+        LearningPathTask: {
+          TaskType: type,
+          ThumbnailTitle: type === "Pdf" ? "Unit 4 Wrap Up Student PDF" : null,
+          Description: "x",
+          Thumbnail: { OriginalUrl: "https://miacademy.co/x/lessons/backgrounds/Math.svg" },
+          Link: `/Content.Lesson/page?lesson=%22${GRAVITY_ID}%22&taskAssignment=%22${task}%22&_=`,
+        },
+      },
+    ];
+    const T = (n: number) => `00000000-0000-0000-0000-00000000000${n}`;
+    miaPathSync(kid, parsePathCourses(wrap("Pdf", T(1))));
+    const id = miaSetStudentPdf(kid, GRAVITY_ID, PDF.replace("Forces+Gravity", "Unit+4+Wrap+Up"))!;
+    miaSetParseState(
+      id,
+      "ready",
+      buildItems(
+        [
+          { title: "Watch the lesson video", kind: "video", pages: [], supplies: [] },
+          { title: "Online practice: Level 1", kind: "practice", pages: [], supplies: [] },
+          { title: "Online practice: Level 2", kind: "practice", pages: [], supplies: [] },
+          { title: "Online assessment", kind: "quiz", pages: [], supplies: [] },
+        ],
+        "math",
+        "Unit 4 Wrap Up",
+      ),
+    );
+    const titles = () => miaChecklist(kid, "math")!.upcoming.map((u) => u.item.title);
+    miaPathSync(kid, parsePathCourses(wrap("Video", T(2))));
+    expect(titles()[0]).toBe("Watch the lesson video");
+    miaPathSync(kid, parsePathCourses(wrap("Practice", T(3))));
+    expect(titles()[0]).toBe("Online practice: Level 1");
+    miaPathSync(kid, parsePathCourses(wrap("Practice", T(4))));
+    expect(titles()[0]).toBe("Online practice: Level 2");
+    miaPathSync(kid, parsePathCourses(wrap("Assessment", T(5))));
+    expect(titles()).toEqual(["Online assessment"]);
   });
 });

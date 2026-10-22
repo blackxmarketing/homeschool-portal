@@ -1,6 +1,6 @@
 import { readLessonPdf } from "./ai";
 import { MIA_SUBJECT_MAP } from "@/content/miacademy";
-import { buildItems } from "./miaLessons";
+import { buildItems, taskKeyFromLink } from "./miaLessons";
 import { addParentAlert, getKid, miaChecklist, miaLesson, miaSetParseState, type MiaChecklist, type MiaPathCourse } from "./store";
 import { MIA_SUBJECTS } from "@/content/miacademy";
 
@@ -22,7 +22,7 @@ export function readLessonInBackground(kidId: number, lessonId: number): void {
   void (async () => {
     try {
       const parsed = await readLessonPdf(lesson.studentPdf!);
-      const items = parsed ? buildItems(parsed.activities) : [];
+      const items = parsed ? buildItems(parsed.activities, lesson.subject, lesson.title, lesson.course) : [];
       miaSetParseState(lessonId, items.length ? "ready" : "failed", items.length ? items : undefined);
       if (!items.length) {
         const kid = getKid(kidId);
@@ -66,6 +66,7 @@ export function parsePathCourses(raw: unknown): MiaPathCourse[] {
       taskType: str(t?.TaskType),
       taskTitle: str(t?.ThumbnailTitle) ?? video,
       lessonKey: lessonKeyFromLink(str(t?.Link) ?? ""),
+      taskKey: taskKeyFromLink(str(t?.Link) ?? ""),
     });
   }
   return out;
