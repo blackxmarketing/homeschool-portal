@@ -2,12 +2,12 @@ import { send, type ApiReply, type Status } from "./messages";
 
 /**
  * Parent mode, on the parent's Miacademy pages (parents.miacademy.co): reads the
- * calendar of the child being viewed - this week and the next two - and sends it
+ * calendar of the child being viewed - this week and the next five - and sends it
  * to the portal, so the kids' checklists come straight from the tasks the parent
  * marked. It only reads (the same calendar Miacademy shows); it never changes anything.
  */
 
-const WEEKS = 3;
+const WEEKS = 6;
 const EVERY_MS = 10 * 60 * 1000;
 
 /** Monday of the week, n weeks from now, as YYYY-MM-DD. */

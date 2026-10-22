@@ -103,7 +103,7 @@ Started with Bryce's General Science, 1 lesson a week.
 Focus Buddy on a parent's computer (Settings → "Focus Buddy on a parent's
 computer" → parent connect code). When the parent opens a child's **Calendar**
 tab on parents.miacademy.co, `extension/src/parent.ts` reads (GET only) that
-child's calendar for this week and the next two and sends it to `/api/mia/plan`.
+child's calendar for this week and the next five and sends it to `/api/mia/plan`.
 
 - `lib/miaPlan.ts` turns it into tasks (`mia_plan_tasks`): only marked tasks are
   on it, each with its lesson, type, status and exact PDF link. Students are
