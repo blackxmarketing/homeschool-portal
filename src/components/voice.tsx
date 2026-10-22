@@ -736,3 +736,59 @@ export function chime(kind: "right" | "streak" | "oops" | "caught" | "growl" | "
     // Sound is a bonus; never let it break the lesson.
   }
 }
+
+/**
+ * A cheerful little chiptune that loops while a Miacademy break is on (an
+ * original tune, played by the browser: square-wave melody, triangle bass).
+ * Quiet, so the teacher's "30 seconds left" still comes through. Returns stop().
+ */
+export function breakMusic(): () => void {
+  if (typeof window === "undefined" || !loadPrefs().sounds) return () => {};
+  const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!Ctx) return () => {};
+  audio ??= new Ctx();
+  const ctx = audio;
+  void ctx.resume();
+  // MIDI notes, one per eighth note (null = rest); bass is one note per quarter.
+  const MELODY = [72, 76, 79, 76, 74, 77, 81, 77, 76, 79, 84, 79, 77, 76, 74, null, 72, 76, 79, 76, 74, 77, 81, 79, 84, 83, 81, 79, 77, 74, 72, null];
+  const BASS = [48, 55, 48, 55, 53, 48, 55, 43, 48, 55, 48, 55, 53, 55, 48, 48];
+  const STEP = 0.2;
+  const hz = (n: number) => 440 * 2 ** ((n - 69) / 12);
+  const out = ctx.createGain();
+  out.gain.setValueAtTime(0.0001, ctx.currentTime);
+  out.gain.exponentialRampToValueAtTime(1, ctx.currentTime + 0.6);
+  out.connect(ctx.destination);
+  const note = (type: OscillatorType, n: number, at: number, len: number, vol: number) => {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(hz(n), at);
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.exponentialRampToValueAtTime(vol, at + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + len);
+    o.connect(g).connect(out);
+    o.start(at);
+    o.stop(at + len + 0.02);
+  };
+  let step = 0;
+  let next = ctx.currentTime + 0.1;
+  const tick = () => {
+    while (next < ctx.currentTime + 0.3) {
+      const m = MELODY[step % MELODY.length];
+      if (m !== null) note("square", m, next, STEP * 0.8, 0.025);
+      if (step % 2 === 0) note("triangle", BASS[(step / 2) % BASS.length], next, STEP * 1.8, 0.06);
+      step++;
+      next += STEP;
+    }
+  };
+  tick();
+  const timer = window.setInterval(tick, 50);
+  return () => {
+    window.clearInterval(timer);
+    const t = ctx.currentTime;
+    out.gain.cancelScheduledValues(t);
+    out.gain.setValueAtTime(Math.max(out.gain.value, 0.0001), t);
+    out.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+    window.setTimeout(() => out.disconnect(), 400);
+  };
+}

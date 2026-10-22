@@ -16,6 +16,7 @@ import { isOpen, isRunning, lateMs, remaining, type MiaTimerState } from "@/lib/
 import Buddy, { GrownUp } from "./Buddy";
 import { ringGrid } from "@/lib/pixel/miaRings";
 import Checklist from "./Checklist";
+import { breakMusic } from "@/components/voice";
 import type { MiaChecklist, MiaRing } from "@/lib/store";
 
 export interface MiaBankView {
@@ -731,6 +732,8 @@ function BreakScreen({
 }) {
   const p = t.pause?.type === "break" ? t.pause : null;
   const [width, setWidth] = useState(1000);
+  // A little tune while the buddy walks; it stops when the break ends.
+  useEffect(() => breakMusic(), []);
   useEffect(() => {
     const set = () => setWidth(window.innerWidth);
     set();
