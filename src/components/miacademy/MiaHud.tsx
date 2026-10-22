@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BUDDIES,
   MIA_CHECKIN_ANSWER_SECONDS,
@@ -14,6 +14,7 @@ import {
 } from "@/content/miacademy";
 import { isOpen, isRunning, lateMs, remaining, type MiaTimerState } from "@/lib/miaTimer";
 import Buddy from "./Buddy";
+import { ringGrid } from "@/lib/pixel/miaRings";
 import Checklist from "./Checklist";
 import type { MiaChecklist, MiaRing } from "@/lib/store";
 
@@ -402,20 +403,7 @@ export default function MiaHud({
           <div className="mia-rings">
             {rings.map((r) => (
               <div key={r.id} className={`mia-ring ${r.full ? "full" : ""}`} title={`${r.name}: ${Math.round(r.progress * 100)}%`}>
-                <svg viewBox="0 0 44 44" aria-hidden="true">
-                  <circle cx="22" cy="22" r="18" fill="none" stroke="#e4e9f7" strokeWidth="6" />
-                  <circle
-                    cx="22"
-                    cy="22"
-                    r="18"
-                    fill="none"
-                    stroke={r.color}
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                    strokeDasharray={`${(r.progress * 113.1).toFixed(1)} 113.1`}
-                    transform="rotate(-90 22 22)"
-                  />
-                </svg>
+                <PixelRing color={r.color} progress={r.progress} />
                 <span className="mia-ring-icon">{r.full ? "✓" : r.icon}</span>
                 <span className="mia-ring-name">{r.name}</span>
                 {r.ahead > 0 && <span className="mia-ring-ahead">+{r.ahead}</span>}
@@ -791,7 +779,7 @@ function Face({ color, fraction, big = false }: { color: string; fraction: numbe
     if (major) {
       const [tx, ty] = p(51.5);
       ticks.push(
-        <text key={`n${m}`} x={tx} y={ty} fontSize="7.5" fontWeight="700" textAnchor="middle" dominantBaseline="central" fill="currentColor" opacity={0.75}>
+        <text key={`n${m}`} className="mia-face-num" x={tx} y={ty} textAnchor="middle" dominantBaseline="central" fill="currentColor" opacity={0.75}>
           {m}
         </text>,
       );
@@ -804,6 +792,17 @@ function Face({ color, fraction, big = false }: { color: string; fraction: numbe
       {wedge && <path d={wedge} fill={color} />}
       {ticks}
       <circle cx="50" cy="50" r="5" fill="#fff" stroke={color} strokeWidth="2" />
+    </svg>
+  );
+}
+
+function PixelRing({ color, progress }: { color: string; progress: number }) {
+  const runs = useMemo(() => ringGrid(color, progress).runs(), [color, progress]);
+  return (
+    <svg className="mia-pixel" viewBox="0 0 22 22" shapeRendering="crispEdges" aria-hidden="true">
+      {runs.map((r, i) => (
+        <rect key={i} x={r.x} y={r.y} width={r.w} height={1} fill={r.c} />
+      ))}
     </svg>
   );
 }

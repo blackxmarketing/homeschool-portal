@@ -572,24 +572,8 @@
   display: block;
   animation: mia-bob 0.3s infinite alternate ease-in-out;
 }
-.mia-leg {
-  transform-box: fill-box;
-  transform-origin: 50% 0;
-  animation: mia-step 0.6s infinite ease-in-out;
-}
-.mia-leg.l2,
-.mia-leg.l3 {
-  animation-delay: -0.3s;
-}
-
-@keyframes mia-step {
-  0%,
-  100% {
-    transform: rotate(20deg);
-  }
-  50% {
-    transform: rotate(-20deg);
-  }
+.mia-pixel {
+  image-rendering: pixelated;
 }
 @keyframes mia-bob {
   to {
@@ -971,4 +955,162 @@ label.mia-btn {
   20% { opacity: 1; }
   80% { transform: translateY(26px); opacity: 1; }
   100% { transform: translateY(30px); opacity: 0; }
+}
+
+/* ---- Pixel skin: matches the portal's pixel game (Lumina) ----
+   Press Start 2P for titles, numbers and buttons; square-ish corners and hard
+   dark shadows like the game's sprites (outline #1b1530). Body text stays round
+   so longer lines are easy to read. */
+.mia-hud {
+  --mia-pixel: var(--font-pixel), "Press Start 2P", monospace;
+  --mia-outline: #1b1530;
+  background:
+    linear-gradient(90deg, #ffffff66 4px, transparent 4px) 0 0 / 40px 40px,
+    linear-gradient(#ffffff66 4px, transparent 4px) 0 0 / 40px 40px,
+    linear-gradient(180deg, #dbe6ff 0%, #eef3ff 45%, #ffffff 100%);
+}
+.mia-hud .mia-pixel {
+  image-rendering: pixelated;
+}
+.mia-hi,
+.mia-name,
+.mia-time,
+.mia-stars-text,
+.mia-ring-name,
+.mia-ring-ahead,
+.mia-bank b,
+.mia-sticker,
+.mia-tag,
+.mia-cl-left,
+.mia-warn,
+.mia-hud .mia-btn,
+.mia-big-time,
+.mia-classes span {
+  font-family: var(--mia-pixel);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.mia-hi {
+  font-size: 15px;
+  line-height: 1.4;
+}
+.mia-name {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.mia-time {
+  font-size: 13px;
+  margin: 2px 0;
+}
+.mia-stars-text {
+  font-size: 9px;
+}
+.mia-ring-name {
+  font-size: 7px;
+}
+.mia-ring-ahead,
+.mia-classes span {
+  font-size: 8px;
+}
+.mia-bank b {
+  font-size: 12px;
+}
+.mia-sticker,
+.mia-tag,
+.mia-cl-left,
+.mia-warn {
+  font-size: 9px;
+  line-height: 1.6;
+}
+.mia-hud .mia-btn {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.mia-face-num {
+  font-family: var(--mia-pixel);
+  font-size: 6px;
+  fill: currentColor;
+  opacity: 0.75;
+}
+
+/* Square-ish corners and hard shadows. */
+.mia-hello,
+.mia-card,
+.mia-big,
+.mia-checklist,
+.mia-task,
+.mia-week-board,
+.mia-chooser,
+.mia-choice,
+.mia-pin,
+.mia-reminder,
+.mia-error,
+.mia-checklist-soon,
+.mia-tag,
+.mia-cl-big,
+.mia-fix,
+.mia-shot {
+  border-radius: 6px;
+}
+.mia-bubble {
+  border-radius: 6px 6px 6px 0;
+}
+.mia-demo,
+.mia-stars,
+.mia-sticker,
+.mia-btn,
+.mia-warn,
+.mia-cl-left,
+.mia-classes span,
+.mia-ring-ahead,
+.mia-bar,
+.mia-bar i,
+.mia-cloud,
+.mia-cloud::after {
+  border-radius: 4px;
+}
+.mia-hello-face,
+.mia-bank-face,
+.mia-checkin-face {
+  border-radius: 6px;
+}
+.mia-hello,
+.mia-week-board,
+.mia-checklist,
+.mia-pin,
+.mia-chooser {
+  border: 3px solid var(--mia-outline);
+  box-shadow: 0 4px 0 var(--mia-outline);
+}
+.mia-card,
+.mia-task.top,
+.mia-choice,
+.mia-btn {
+  box-shadow: 0 4px 0 var(--mia-outline);
+}
+.mia-card:active,
+.mia-btn:active {
+  box-shadow: 0 1px 0 var(--mia-outline);
+}
+.mia-card.done,
+.mia-card.done:hover,
+.mia-card.done:active {
+  box-shadow: 0 4px 0 #aab2c8;
+}
+.mia-btn.ghost {
+  box-shadow: none;
+}
+.mia-sticker {
+  box-shadow: 0 3px 0 var(--mia-outline);
+  border: 2px solid var(--mia-outline);
+}
+.mia-reminder,
+.mia-electives {
+  box-shadow: 0 4px 0 var(--mia-outline);
+}
+.mia-big-head {
+  font-family: var(--mia-pixel);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.5;
 }

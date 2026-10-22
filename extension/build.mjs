@@ -47,6 +47,11 @@ for (const w of [500, 600, 700])
     path.join(root, `node_modules/@fontsource/fredoka/files/fredoka-latin-${w}-normal.woff2`),
     path.join(out, `fonts/fredoka-${w}.woff2`),
   );
+// The pixel font for titles and buttons (matches the portal's pixel game).
+fs.copyFileSync(
+  path.join(root, "node_modules/@fontsource/press-start-2p/files/press-start-2p-latin-400-normal.woff2"),
+  path.join(out, "fonts/press-start-2p.woff2"),
+);
 
 // Students work on miacademy.co; parents.miacademy.co is the parent site and gets no timers.
 const MIACADEMY = ["https://miacademy.co/*", "https://www.miacademy.co/*"];

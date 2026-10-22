@@ -14,6 +14,7 @@ import { send, type ApiReply } from "./messages";
 
 const WIDTH = 360;
 const FONT = "Focus Buddy Fredoka";
+const PIXEL_FONT = "Focus Buddy Pixel";
 
 const api: MiaApi = async (body, path = "/api/mia") => {
   const r = await send<ApiReply>({ type: "api", method: "POST", path, body });
@@ -110,7 +111,8 @@ function mount() {
   const fonts = document.createElement("style");
   fonts.textContent = [500, 600, 700]
     .map((w) => `@font-face{font-family:"${FONT}";font-weight:${w};font-display:swap;src:url("${chrome.runtime.getURL(`fonts/fredoka-${w}.woff2`)}") format("woff2");}`)
-    .join("");
+    .join("") +
+    `@font-face{font-family:"${PIXEL_FONT}";font-weight:400;font-display:swap;src:url("${chrome.runtime.getURL("fonts/press-start-2p.woff2")}") format("woff2");}`;
   document.head.appendChild(fonts);
 
   const host = document.createElement("div");
@@ -122,7 +124,7 @@ function mount() {
   const shadow = host.attachShadow({ mode: "open" });
   const style = document.createElement("style");
   style.textContent = `
-    :host { all: initial; --font-fun: "${FONT}"; }
+    :host { all: initial; --font-fun: "${FONT}"; --font-pixel: "${PIXEL_FONT}"; }
     ${hudCss}
     .mia-hud { height: 100vh; min-height: 0; max-width: none; overflow-y: auto; font-size: 16px; line-height: 1.3; }
   `;
