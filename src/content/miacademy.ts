@@ -22,6 +22,9 @@ export const MIA_SUBJECTS: MiaSubject[] = [
 
 export const MIA_MINUTES = 30;
 
+/** The quick break a kid can take between two classes. */
+export const MIA_BETWEEN_BREAK_MINUTES = 5;
+
 /** Time after a break ends before a parent hears the kid hasn't pressed Start. */
 export const MIA_LATE_SECONDS = 60;
 
@@ -57,6 +60,10 @@ export const MIA_LINES = {
   checkinCheer: ["Keep it up!", "Stay focused. You've got this!", "Nice work. Keep going!", "You're doing great. Stay with it!"],
   checkinThanks: ["Awesome! Keep going.", "Great! You've got this.", "Nice! Back to it."],
   remind: "Don't forget your timer! Pick the subject you're working on and press Start.",
+  /** A class's 30 minutes are up and another class is left today: keep going, or a quick break first. */
+  between: "Great job on {subject}! Are you ready to start {next}, or do you need a quick 5-minute break?",
+  betweenBreak: "Quick break! It's time to move your body.",
+  betweenOver: "Break's over! Time for {next}. Press Start when you're ready.",
   /** All four core timers are done for the day: electives have no timer or checklist, just this reminder. */
   electives: "Great job finishing your core classes! Now go complete your elective classes.",
 };

@@ -551,7 +551,7 @@
 }
 .mia-walker {
   position: absolute;
-  bottom: 22%;
+  bottom: 0;
   left: 0;
   width: 220px;
   will-change: transform;
@@ -1200,4 +1200,75 @@ label.mia-btn {
   0% { transform: scale(1); }
   35% { transform: scale(1.5); color: #16a34a; }
   100% { transform: scale(1); }
+}
+
+/* Between-classes break scenery: the buddy swims, climbs or rides. */
+.mia-break h1,
+.mia-count,
+.mia-warn,
+.mia-break-caption,
+.mia-break .mia-btn {
+  position: relative;
+  z-index: 2;
+}
+.mia-break-caption {
+  font-family: var(--mia-pixel);
+  font-size: clamp(11px, 2vw, 18px);
+  line-height: 1.6;
+  color: #fff;
+  text-shadow: 0 3px 0 var(--mia-outline, #1b1530);
+  margin-bottom: 8px;
+}
+.mia-walker {
+  z-index: 1;
+}
+.mia-scene-water {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 38%;
+  background:
+    linear-gradient(90deg, #ffffff88 12px, transparent 12px) 0 6px / 48px 4px repeat-x,
+    linear-gradient(#4dabf7, #1c7ed6);
+  border-top: 4px solid #1b1530;
+}
+.mia-scene-mountain {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 55%;
+}
+.mia-scene-tree {
+  position: absolute;
+  left: 50%;
+  bottom: 8%;
+  width: min(200px, 22vh);
+  height: min(400px, 44vh);
+  transform: translateX(-50%);
+}
+.mia-break.mountain,
+.mia-break.swim {
+  background: linear-gradient(#9fd3ff 0%, #cfe9ff 100%);
+}
+.mia-break.mountain::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 6%;
+  background: #5cb54f;
+}
+.mia-walker.on-back .mia-buddy {
+  animation: none;
+  transform: scaleY(-1);
+}
+.mia-bike {
+  position: absolute;
+  left: 0;
+  top: 52%;
+  width: 220px;
+  z-index: -1;
 }

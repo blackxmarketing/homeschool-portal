@@ -27,10 +27,17 @@ export function GrownUp({ className }: { className?: string }) {
   return <PixelSvg grid={grid} className={className} />;
 }
 
-function PixelSvg({ grid, className }: { grid: Grid; className?: string }) {
+/** Any pixel grid as a crisp SVG; `stretch` lets scenery fill its box. */
+export function PixelSvg({ grid, className, stretch = false }: { grid: Grid; className?: string; stretch?: boolean }) {
   const runs = useMemo(() => grid.runs(), [grid]);
   return (
-    <svg className={`mia-pixel ${className ?? ""}`} viewBox={`0 0 ${grid.w} ${grid.h}`} shapeRendering="crispEdges" aria-hidden="true">
+    <svg
+      className={`mia-pixel ${className ?? ""}`}
+      viewBox={`0 0 ${grid.w} ${grid.h}`}
+      preserveAspectRatio={stretch ? "none" : undefined}
+      shapeRendering="crispEdges"
+      aria-hidden="true"
+    >
       {runs.map((r, i) => (
         <rect key={i} x={r.x} y={r.y} width={r.w} height={1} fill={r.c} />
       ))}

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BUDDIES,
+  MIA_BETWEEN_BREAK_MINUTES,
   MIA_CHECKIN_ANSWER_SECONDS,
   MIA_LINES,
   MIA_MINUTES,
@@ -16,7 +17,8 @@ import { isOpen, isRunning, lateMs, remaining, type MiaTimerState } from "@/lib/
 import Buddy, { GrownUp } from "./Buddy";
 import { ringGrid } from "@/lib/pixel/miaRings";
 import Checklist from "./Checklist";
-import { breakMusic, moneySound } from "@/components/voice";
+import { moneySound } from "@/components/voice";
+import BreakScene, { nextActivity, type BreakActivity } from "./BreakScene";
 import type { MiaChecklist, MiaRing } from "@/lib/store";
 
 export interface MiaBankView {
@@ -25,6 +27,11 @@ export interface MiaBankView {
 }
 
 export type Timers = Record<string, MiaTimerState | null>;
+
+/** Between two classes: the question, then (maybe) a quick break. */
+type Between =
+  | { from: string; next: string; day: string; phase: "ask" }
+  | { from: string; next: string; day: string; phase: "break"; activity: BreakActivity; lenMs: number; endAt: number };
 
 /** One call to the portal's /api/mia. The portal page uses fetch; the Chrome extension goes through its background worker. */
 /** One call to the portal (default /api/mia). The portal page uses fetch; the Chrome extension goes through its background worker. */
@@ -109,6 +116,28 @@ export default function MiaHud({
   // A full ring's pay: pops up in the middle of the screen ("show"), flies into the bank ("drop"), then counts ("landed").
   const [coin, setCoin] = useState<{ ring: string; cents: number; key: number; phase: "show" | "drop" | "landed"; to?: { x: number; y: number } } | null>(null);
   const bankFace = useRef<HTMLSpanElement>(null);
+  // Between two classes: ask "keep going or a quick break?", then the break itself. Kept in this browser so a reload doesn't lose it.
+  const [between, setBetweenState] = useState<Between | null>(null);
+  const betweenKey = `mia-between-${kidName}`;
+  const setBetween = (b: Between | null) => {
+    setBetweenState(b);
+    try {
+      if (b) localStorage.setItem(betweenKey, JSON.stringify(b));
+      else localStorage.removeItem(betweenKey);
+    } catch {
+      // Storage can be blocked; it just won't survive a reload.
+    }
+  };
+  useEffect(() => {
+    try {
+      const b = JSON.parse(localStorage.getItem(betweenKey) ?? "null") as Between | null;
+      if (b && b.day === new Date().toDateString()) setBetweenState(b);
+    } catch {
+      // Nothing saved.
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const lastActivity = useRef<BreakActivity | null>(null);
   const [skipMode, setSkipMode] = useState(false);
   const [offset, setOffset] = useState(() => serverNow - Date.now());
   const [now, setNow] = useState(serverNow);
@@ -287,7 +316,11 @@ export default function MiaHud({
             if (await act(openId, "finish")) {
               setFocus(null);
               setCheckin(null);
-              say(fill(MIA_LINES.done, openId));
+              const next = MIA_SUBJECTS.find((x) => x.id !== openId && !timers[x.id]?.finishedAt);
+              if (next) {
+                setBetween({ from: openId, next: next.id, phase: "ask", day: new Date().toDateString() });
+                say(fill(MIA_LINES.between, openId).replace("{next}", next.name));
+              } else say(fill(MIA_LINES.done, openId));
             }
           });
       } else if (s.pause?.type === "break") {
@@ -313,12 +346,29 @@ export default function MiaHud({
     bridge()?.onMiacademy?.((open) => setMiaOpen(open));
     bridge()?.onChecklists?.((c) => setChecklists(c));
   }, []);
-  const onBreak = !!openId && timers[openId]?.pause?.type === "break";
+  const onBreak = (!!openId && timers[openId]?.pause?.type === "break") || between?.phase === "break";
   useEffect(() => {
     bridge()?.setFullscreen?.(onBreak);
   }, [onBreak]);
 
   // ---- Actions ----
+  function keepGoing(b: Between) {
+    setBetween(null);
+    setFocus(b.next);
+    void start(b.next);
+  }
+  function quickBreak(b: Between) {
+    const activity = nextActivity(lastActivity.current);
+    lastActivity.current = activity;
+    const lenMs = (demo ? 40 : MIA_BETWEEN_BREAK_MINUTES * 60) * 1000;
+    setBetween({ ...b, phase: "break", activity, lenMs, endAt: Date.now() + offset + lenMs });
+    say(MIA_LINES.betweenBreak);
+  }
+  function betweenOver(b: Between) {
+    setBetween(null);
+    setFocus(b.next);
+    say(MIA_LINES.betweenOver.replace("{next}", subjectName(b.next)));
+  }
   async function start(subject: string) {
     const fresh = !timers[subject];
     if (await act(subject, "start")) {
@@ -593,6 +643,40 @@ export default function MiaHud({
         </div>
       )}
 
+      {/* Between classes: keep going, or a quick break first */}
+      {between?.phase === "ask" && !openId && (
+        <div className="mia-scrim" style={{ ["--c" as string]: MIA_SUBJECTS.find((x) => x.id === between.next)?.color }}>
+          <div className="mia-chooser">
+            <h2>Great job on {subjectName(between.from)}!</h2>
+            <div className="mia-choices">
+              <button className="mia-choice" onClick={() => keepGoing(between)} disabled={busy}>
+                <span className="mia-emoji">▶</span>I&apos;m ready!<small>Start {subjectName(between.next)}</small>
+              </button>
+              <button className="mia-choice" onClick={() => quickBreak(between)} disabled={busy}>
+                <span className="mia-emoji">
+                  <Buddy kind={settings.buddy} head className="mia-choice-buddy" />
+                </span>
+                Quick break<small>{demo ? "40 seconds (demo)" : `${MIA_BETWEEN_BREAK_MINUTES} minutes`}</small>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {between?.phase === "break" && (
+        <BreakScene
+          endAt={between.endAt}
+          lenMs={between.lenMs}
+          now={now}
+          buddy={settings.buddy}
+          color={MIA_SUBJECTS.find((x) => x.id === between.next)?.color ?? "#2340ff"}
+          activity={between.activity}
+          title="Quick break!"
+          onDone={() => betweenOver(between)}
+          onWarn={() => say(MIA_LINES.breakWarn)}
+          onTimeUp={() => betweenOver(between)}
+        />
+      )}
+
       {/* Break: the buddy walks across the screen for the whole break */}
       {focused && ft?.pause?.type === "break" && (
         <BreakScreen t={ft} now={now} buddy={settings.buddy} color={focused.color} onDone={() => endBreakEarly(focused.id)} />
@@ -740,48 +824,10 @@ function FocusedTimer({
   );
 }
 
-function BreakScreen({
-  t,
-  now,
-  buddy,
-  color,
-  onDone,
-}: {
-  t: MiaTimerState;
-  now: number;
-  buddy: MiaSettings["buddy"];
-  color: string;
-  onDone: () => void;
-}) {
+function BreakScreen({ t, now, buddy, color, onDone }: { t: MiaTimerState; now: number; buddy: MiaSettings["buddy"]; color: string; onDone: () => void }) {
   const p = t.pause?.type === "break" ? t.pause : null;
-  const [width, setWidth] = useState(1000);
-  // A little tune while the buddy walks; it stops when the break ends.
-  useEffect(() => breakMusic(), []);
-  useEffect(() => {
-    const set = () => setWidth(window.innerWidth);
-    set();
-    window.addEventListener("resize", set);
-    return () => window.removeEventListener("resize", set);
-  }, []);
   if (!p) return null;
-  const rem = Math.max(0, p.endAt - now);
-  const progress = 1 - rem / p.lenMs;
-  return (
-    <div className={`mia-break ${rem <= 30000 ? "ending" : ""}`}>
-      <div className="mia-sun" />
-      <div className="mia-cloud c1" />
-      <div className="mia-cloud c2" />
-      <h1>Break time!</h1>
-      <div className="mia-count">{mmss(rem)}</div>
-      <div className="mia-warn">30 seconds! Head back to your seat!</div>
-      <button className="mia-btn big" style={{ ["--c" as string]: color }} onClick={onDone}>
-        I&apos;m ready to go back
-      </button>
-      <div className="mia-walker" style={{ transform: `translateX(${-220 + progress * (width + 220)}px)` }}>
-        <Buddy kind={buddy} className="mia-buddy" />
-      </div>
-    </div>
-  );
+  return <BreakScene endAt={p.endAt} lenMs={p.lenMs} now={now} buddy={buddy} color={color} onDone={onDone} />;
 }
 
 /** A 30-minute visual timer: the coloured disk shrinks back toward 0. */

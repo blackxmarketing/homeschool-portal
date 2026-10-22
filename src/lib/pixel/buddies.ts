@@ -90,3 +90,50 @@ export function grownUpGrid(): Grid {
   g.set(8, 11, "#9a4a44").set(9, 12, "#9a4a44").set(10, 11, "#9a4a44").set(6, 10, "#f2a0a0").set(12, 10, "#f2a0a0");
   return g.outline("#1b1530");
 }
+
+// ---- Scenery for the between-classes break (the buddy rides, climbs, swims) ----
+
+/** A bike under the walking buddy, 34x16; the spokes turn between frames. */
+export function bikeGrid(frame = 0): Grid {
+  const g = new Grid(34, 16);
+  const tire = "#2b2b2f";
+  const frameColor = "#e8492f";
+  const wheel = (cx: number) => {
+    for (let y = 0; y < 16; y++)
+      for (let x = cx - 6; x <= cx + 6; x++) {
+        const d = Math.hypot(x + 0.5 - cx, y + 0.5 - 10);
+        if (d <= 5.6 && d >= 4.3) g.set(x, y, tire);
+      }
+    // Spokes: a plus or an x, so the wheels look like they're turning.
+    const spokes = frame === 0 ? [[0, -1], [0, 1], [-1, 0], [1, 0], [0, -2], [0, 2], [-2, 0], [2, 0], [0, -3], [0, 3], [-3, 0], [3, 0]] : [[-1, -1], [1, 1], [-1, 1], [1, -1], [-2, -2], [2, 2], [-2, 2], [2, -2]];
+    for (const [dx, dy] of spokes) g.set(Math.floor(cx) + dx, 10 + dy, "#9aa1ab");
+    g.set(Math.floor(cx), 10, "#9aa1ab");
+  };
+  wheel(7);
+  wheel(27);
+  // Frame: back wheel up to the seat, across to the handlebars, down to the front wheel.
+  for (let i = 0; i <= 9; i++) g.set(7 + i, 10 - Math.round(i * 0.6), frameColor);
+  g.rect(16, 4, 9, 1, frameColor);
+  for (let i = 0; i <= 6; i++) g.set(25 + Math.round(i / 3), 4 + i, frameColor);
+  g.rect(14, 2, 5, 1, "#2b2b2f").rect(24, 1, 3, 1, "#2b2b2f").set(25, 2, frameColor).set(25, 3, frameColor);
+  return g.outline(OUTLINE);
+}
+
+/** A big tree to climb, 30x60. */
+export function treeGrid(): Grid {
+  const g = new Grid(30, 60);
+  g.rect(12, 22, 7, 38, "#8a5a2b").rect(13, 22, 2, 38, "#a8743f").rect(18, 30, 1, 30, "#6e4520");
+  g.rect(6, 34, 6, 2, "#8a5a2b").rect(19, 28, 6, 2, "#8a5a2b");
+  g.disc(15, 13, 11, "#2f9e44").disc(7, 19, 6, "#2f9e44").disc(23, 18, 6, "#2f9e44").disc(15, 6, 6, "#40c057");
+  g.disc(11, 10, 3, "#51cf66").disc(20, 14, 2.5, "#51cf66").set(9, 18, "#e8492f").set(21, 9, "#e8492f").set(16, 20, "#e8492f");
+  return g.outline(OUTLINE);
+}
+
+/** A mountain to climb, 64x40, with a snowy top; its peak is at the middle. */
+export function mountainGrid(): Grid {
+  const g = new Grid(64, 40);
+  g.tri(32, 3, 40, 34, "#7d8597").tri(32, 3, 40, 16, "#8f97a8");
+  g.tri(32, 3, 12, 7, "#f8f9fa").set(28, 12, "#f8f9fa").set(36, 11, "#f8f9fa");
+  g.tri(50, 20, 40, 16, "#6b7385");
+  return g.outline(OUTLINE);
+}
