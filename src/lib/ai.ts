@@ -485,6 +485,8 @@ export async function readLessonPdf(studentPdfUrl: string): Promise<ParsedActivi
     `You read homeschool lesson PDFs. The first page has a checklist of activities grouped by day.
 List every checklist line in order, exactly as written (keep "optional", "bonus" and "Online practice" lines too; they are filtered later).
 For each: kind = video (watching or rewatching the lesson video), quiz (the online assessment or quiz), practice (an online practice level), notes (the guided notes), worksheet (any other activity written on the PDF pages), hands_on (an experiment, STEM challenge, build, or anything needing materials), or other.
+If one line combines the video and the guided notes, list it as written; it is split later.
+If the packet has no checklist (only note-taking pages and extension ideas), list its note-taking or "listening sheet" pages as notes, and every other activity or extension idea as other.
 pages = the PDF page numbers that activity's pages are on (look at the page headings); empty for online activities.
 supplies = the materials list for hands_on activities, short items; empty otherwise.`,
     [

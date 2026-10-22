@@ -97,6 +97,45 @@ describe("building a lesson checklist", () => {
     expect(buildItems(math, "sci", "Unit 4 Wrap-Up").map((i) => i.check)).toEqual(["video", "self", "photo", "quiz"]);
   });
 
+  it("reads a real Math checklist: video and notes on one line, practice dropped", () => {
+    // Page 1 of "Improper Fractions" (MAE 4.6.1).
+    const improper: ParsedActivity[] = [
+      { title: "Video and Guided Notes", kind: "notes", pages: [2, 3], supplies: [] },
+      { title: "Practice - Level 1", kind: "practice", pages: [], supplies: [] },
+      { title: "Practice - Level 2", kind: "practice", pages: [], supplies: [] },
+      { title: "Identify It", kind: "worksheet", pages: [4], supplies: [] },
+      { title: "Practice - Level 3", kind: "practice", pages: [], supplies: [] },
+      { title: "Practice - Level 4", kind: "practice", pages: [], supplies: [] },
+      { title: "Fraction Forms", kind: "worksheet", pages: [5], supplies: [] },
+      { title: "Assessment", kind: "quiz", pages: [], supplies: [] },
+    ];
+    expect(buildItems(improper, "math", "Improper Fractions", "Math: Level E").map((i) => [i.title, i.check, i.pages.join(",")])).toEqual([
+      ["Watch the lesson video", "video", ""],
+      ["Complete the guided notes", "self", "2,3"],
+      ["Identify It", "photo", "4"],
+      ["Fraction Forms", "photo", "5"],
+      ["Assessment", "quiz", ""],
+    ]);
+  });
+
+  it("builds U.S. Geography from Miacademy when the packet has no checklist", () => {
+    // "Great Smoky Mountains National Park" (USG 3.4.1): note pages and extension ideas only.
+    const smoky: ParsedActivity[] = [
+      { title: "Listening Sheet", kind: "notes", pages: [3, 4], supplies: [] },
+      { title: "Coloring and Labeling: The Smoky Mountains", kind: "other", pages: [5], supplies: [] },
+      { title: "Model cabin", kind: "hands_on", pages: [], supplies: ["Popsicle sticks", "Glue"] },
+      { title: "Operation Exploration Investigation", kind: "other", pages: [6], supplies: [] },
+    ];
+    const items = buildItems(smoky, "his", "Great Smoky Mountains National Park", "U.S. Geography");
+    expect(items.map((i) => [i.title, i.check])).toEqual([
+      ["Watch the lesson video", "video"],
+      ["Listening Sheet", "self"],
+      ["Online practice (all levels)", "practice"],
+      ["Online quiz", "quiz"],
+    ]);
+    expect(items[2].allLevels).toBe(true);
+  });
+
   it("finds the answer key next to the Student PDF", () => {
     expect(answerKeyUrl(PDF)).toBe(PDF.replace("Student+PDF.pdf", "Answer+Key.pdf"));
     expect(answerKeyUrl("https://x/y.pdf")).toBeNull();

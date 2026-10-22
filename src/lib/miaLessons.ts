@@ -29,6 +29,8 @@ export interface LessonItem {
   pages: number[];
   /** What to gather, for "parent" items. */
   supplies: string[];
+  /** A practice item standing for every level (when the PDF doesn't list them): done when Miacademy reaches the quiz. */
+  allLevels?: boolean;
 }
 
 /** What Claude reads off the PDF's checklist and pages. */
@@ -74,9 +76,15 @@ export function buildItems(parsed: ParsedActivity[], subject = "sci", lessonTitl
   for (const a of parsed) {
     const title = a.title.trim();
     if (!title || MIA_SKIP_ITEMS.some((re) => re.test(title))) continue;
-    const practice = a.kind === "practice" || /online practice/i.test(title);
+    const practice = a.kind === "practice" || /online practice|^practice/i.test(title);
     if (practice && !rules.practice) continue;
     if ((a.kind === "worksheet" || a.kind === "hands_on" || a.kind === "other") && !rules.worksheets) continue;
+    // "Video and Guided Notes" on one line (Math): two items, so the notes aren't lost.
+    if (!practice && /video/i.test(title) && /guided notes|notes/i.test(title) && a.kind !== "hands_on") {
+      push(items, seen, { id: "", title: "Watch the lesson video", check: "video", pages: [], supplies: [] });
+      push(items, seen, { id: "", title: "Complete the guided notes", check: "self", pages: a.pages, supplies: [] });
+      continue;
+    }
     let id = slug(title);
     for (let n = 2; seen.has(id); n++) id = `${slug(title)}-${n}`;
     seen.add(id);
@@ -93,7 +101,28 @@ export function buildItems(parsed: ParsedActivity[], subject = "sci", lessonTitl
               : "photo";
     items.push({ id, title, check, pages: a.pages.filter((p) => Number.isInteger(p) && p > 0), supplies: a.supplies.slice(0, 12) });
   }
+  // Some packets (U.S. Geography) have no checklist, only note pages: the online parts come from Miacademy.
+  if (!items.some((i) => i.check === "video")) items.unshift({ id: uniqueId(seen, "Watch the lesson video"), title: "Watch the lesson video", check: "video", pages: [], supplies: [] });
+  const quizAt = items.findIndex((i) => i.check === "quiz");
+  if (rules.practice && !items.some((i) => i.check === "practice")) {
+    const all: LessonItem = { id: uniqueId(seen, "Online practice"), title: "Online practice (all levels)", check: "practice", pages: [], supplies: [], allLevels: true };
+    if (quizAt >= 0) items.splice(quizAt, 0, all);
+    else items.push(all);
+  }
+  if (!items.some((i) => i.check === "quiz")) items.push({ id: uniqueId(seen, "Online quiz"), title: "Online quiz", check: "quiz", pages: [], supplies: [] });
   return items;
+}
+
+function uniqueId(seen: Set<string>, title: string): string {
+  let id = slug(title);
+  for (let n = 2; seen.has(id); n++) id = `${slug(title)}-${n}`;
+  seen.add(id);
+  return id;
+}
+
+function push(items: LessonItem[], seen: Set<string>, item: LessonItem): void {
+  if (item.check === "video" && items.some((i) => i.check === "video")) return;
+  items.push({ ...item, id: uniqueId(seen, item.title) });
 }
 
 /** Items still to do, in order. */

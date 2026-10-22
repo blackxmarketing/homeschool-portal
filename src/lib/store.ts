@@ -2520,7 +2520,7 @@ export function miaPathSync(kidId: number, courses: MiaPathCourse[], now = Date.
     if (c.taskType === "Practice" || c.taskType === "Assessment") changed = markItems(lesson, "video", now) || changed;
     if (c.taskType === "Assessment") changed = markItems(lesson, "practice", now) || changed;
     if (c.taskType === "Practice" && last.last_type === "Practice" && last.last_task && c.taskKey && last.last_task !== c.taskKey) {
-      const level = (lesson.items ?? []).find((i) => i.check === "practice" && !lesson!.states[i.id]?.done);
+      const level = (lesson.items ?? []).find((i) => i.check === "practice" && !i.allLevels && !lesson!.states[i.id]?.done);
       if (level) {
         lesson.states[level.id] = { ...lesson.states[level.id], done: true, at: now };
         changed = true;
