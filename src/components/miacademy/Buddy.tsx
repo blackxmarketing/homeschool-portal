@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { BuddyId } from "@/content/miacademy";
 import type { Grid } from "@/lib/pixel/grid";
-import { buddyHead, buddyWalk } from "@/lib/pixel/buddies";
+import { buddyHead, buddyWalk, grownUpGrid } from "@/lib/pixel/buddies";
 
 /**
  * A kid's animal buddy in the portal's pixel style (src/lib/pixel/buddies.ts).
@@ -19,6 +19,12 @@ export default function Buddy({ kind, head = false, className }: { kind: BuddyId
   }, [head]);
   const grids = useMemo(() => (head ? [buddyHead(kind)] : [buddyWalk(kind, 0), buddyWalk(kind, 1)]), [kind, head]);
   return <PixelSvg grid={grids[head ? 0 : frame]} className={className} />;
+}
+
+/** The grown-up who comes to help, in the same pixel style. */
+export function GrownUp({ className }: { className?: string }) {
+  const grid = useMemo(() => grownUpGrid(), []);
+  return <PixelSvg grid={grid} className={className} />;
 }
 
 function PixelSvg({ grid, className }: { grid: Grid; className?: string }) {

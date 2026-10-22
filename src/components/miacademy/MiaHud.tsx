@@ -13,7 +13,7 @@ import {
   type MiaSubject,
 } from "@/content/miacademy";
 import { isOpen, isRunning, lateMs, remaining, type MiaTimerState } from "@/lib/miaTimer";
-import Buddy from "./Buddy";
+import Buddy, { GrownUp } from "./Buddy";
 import { ringGrid } from "@/lib/pixel/miaRings";
 import Checklist from "./Checklist";
 import type { MiaChecklist, MiaRing } from "@/lib/store";
@@ -543,7 +543,10 @@ export default function MiaHud({
             <h2>Why do you need to pause?</h2>
             <div className="mia-choices">
               <button className="mia-choice" onClick={() => chooseHelp(focused.id)} disabled={busy}>
-                <span className="mia-emoji">🙋</span>I need help<small>A grown-up will come</small>
+                <span className="mia-emoji">
+                  <GrownUp className="mia-choice-buddy" />
+                </span>
+                I need help<small>A grown-up will come</small>
               </button>
               <button className="mia-choice" onClick={() => chooseBreak(focused.id)} disabled={busy || ft.breaks >= 1}>
                 <span className="mia-emoji">

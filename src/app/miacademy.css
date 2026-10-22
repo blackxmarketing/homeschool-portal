@@ -1130,3 +1130,24 @@ label.mia-btn {
   font-size: clamp(12px, 2vw, 18px);
   line-height: 1.5;
 }
+
+/* The pause question: pixel font too. */
+.mia-chooser h2,
+.mia-hud .mia-choice,
+.mia-choice small {
+  font-family: var(--mia-pixel);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.mia-chooser h2 {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.mia-hud .mia-choice {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.mia-choice small {
+  font-size: 8px;
+  line-height: 1.7;
+}

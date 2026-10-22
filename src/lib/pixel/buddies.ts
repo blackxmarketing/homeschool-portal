@@ -69,3 +69,24 @@ export function buddyWalk(kind: BuddyKind, frame = 0): Grid {
   }
   return g.outline(OUTLINE);
 }
+
+/** The grown-up on the "I need help" button: a woman with long brown hair, waving. 20x22. */
+export function grownUpGrid(): Grid {
+  const g = new Grid(20, 22);
+  const skin = "#eebf98";
+  const hair = "#7a4a26";
+  const hairDark = "#5a3418";
+  const shirt = "#2f8fd8";
+  const shirtDark = "#2272b0";
+  // Long hair behind the face and over the shoulders.
+  g.disc(9, 8, 6, hair).rect(3, 8, 3, 9, hair).rect(12, 8, 3, 9, hair).rect(3, 16, 2, 1, hairDark).rect(13, 16, 2, 1, hairDark);
+  // Shirt, with the waving arm raised on the right.
+  g.rect(4, 15, 11, 6, shirt).rect(5, 14, 9, 1, shirt).rect(6, 20, 7, 1, shirtDark);
+  g.rect(15, 9, 2, 7, shirt).rect(14, 14, 1, 2, shirt).rect(15, 5, 3, 4, skin).set(18, 6, skin).set(14, 6, skin);
+  // Face, bangs, eyes, smile.
+  g.rect(6, 6, 7, 7, skin).rect(7, 13, 5, 1, skin).rect(8, 14, 3, 1, skin);
+  g.rect(5, 3, 9, 3, hair).rect(6, 2, 7, 1, hair).set(6, 6, hair).set(12, 6, hairDark).rect(9, 3, 4, 1, hairDark);
+  g.set(7, 9, "#1b1530").set(11, 9, "#1b1530").set(7, 8, "#ffffff").set(11, 8, "#ffffff");
+  g.set(8, 11, "#9a4a44").set(9, 12, "#9a4a44").set(10, 11, "#9a4a44").set(6, 10, "#f2a0a0").set(12, 10, "#f2a0a0");
+  return g.outline("#1b1530");
+}
