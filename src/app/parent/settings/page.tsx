@@ -96,6 +96,22 @@ export default async function Settings({
         </form>
       </div>
 
+      <div className="card">
+        <h2>Install Focus Buddy</h2>
+        <p className="muted small">
+          The Chrome extension with the Miacademy timers. Do this on each kid&apos;s computer and on yours, signed in here as a parent.
+        </p>
+        <a className="btn" href="/focus-buddy/download">
+          Download Focus Buddy
+        </a>
+        <ol className="small" style={{ marginTop: 12 }}>
+          <li>Open the downloaded zip&apos;s folder, right-click it, choose Extract All, and extract it into a folder named Focus Buddy in Documents. Keep that folder.</li>
+          <li>In Chrome, go to chrome://extensions and turn on Developer mode.</li>
+          <li>Click Load unpacked and pick the Focus Buddy folder.</li>
+          <li>Pin Focus Buddy (puzzle-piece menu), click it, and type a connect code from below: each kid&apos;s own code on their computer, the parent code on yours.</li>
+        </ol>
+      </div>
+
       {kids.map((kid) => (
         <div className="card" key={kid.id}>
           <h2>

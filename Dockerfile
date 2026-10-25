@@ -10,6 +10,9 @@ COPY . .
 # every deploy once the app grew. Slower, but it finishes.
 ENV NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS=--max-old-space-size=1536
 RUN npm run build
+# Focus Buddy (the Chrome extension) as a zip, for the download on the parent Settings page.
+# Never blocks a deploy: if it fails, the portal still ships without the download.
+RUN mkdir -p /app/downloads && ((node extension/build.mjs && node extension/zip.mjs && cp extension/focus-buddy-*.zip /app/downloads/) || echo "Focus Buddy zip skipped")
 
 FROM node:22-slim
 WORKDIR /app
@@ -18,6 +21,7 @@ COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 # Teacher portraits and clips (Next serves public/ only if it is copied in).
 COPY --from=build /app/public ./public
+COPY --from=build /app/downloads ./downloads
 RUN mkdir -p /data
 VOLUME /data
 EXPOSE 3000
