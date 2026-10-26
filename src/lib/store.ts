@@ -2263,6 +2263,26 @@ export function parentMiaReset(familyId: number, kidId: number, subject: string)
   getDb().prepare("DELETE FROM mia_timers WHERE kid_id = ? AND day = ? AND subject = ?").run(kidId, today(), subject);
 }
 
+/**
+ * Parent: a weekly ring that filled by mistake. Its lessons counted this week
+ * move to last week (they were finished before), and this week's money for it
+ * comes out of the buddy bank.
+ */
+export function parentMiaResetRing(familyId: number, kidId: number, ringId: string, day = today()): void {
+  const kid = getKid(kidId);
+  if (!kid || kid.family_id !== familyId) throw new PortalError("Unknown kid.");
+  const ring = MIA_RINGS.find((r) => r.id === ringId);
+  if (!ring) throw new PortalError("Unknown ring.");
+  const plans = ring.className ? (MIA_COURSE_PLANS[ring.subject] ?? []).filter((p) => p.name === ring.className) : [];
+  const db = getDb();
+  const rows = db
+    .prepare("SELECT id, course FROM mia_lessons WHERE kid_id = ? AND subject = ? AND done_day >= ? AND done_day <= ?")
+    .all(kidId, ring.subject, weekStart(day), day) as { id: number; course: string | null }[];
+  const move = db.prepare("UPDATE mia_lessons SET done_day = ? WHERE id = ?");
+  for (const r of rows) if (!ring.className || plans.some((p) => p.match.test(r.course ?? ""))) move.run(lastWeekDay(day), r.id);
+  db.prepare("DELETE FROM mia_bank WHERE kid_id = ? AND week = ? AND ring = ?").run(kidId, weekStart(day), ringId);
+}
+
 // ---- Connecting a kid's Chrome extension ----
 
 const PAIR_CODE_LETTERS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O or 1/I
@@ -2535,6 +2555,32 @@ function miaKidCourses(kidId: number): string[] {
   ).map((r) => r.course);
 }
 
+/** A timestamp's day (YYYY-MM-DD) in the family's time zone. */
+function dayOf(ms: number): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: TIMEZONE }).format(new Date(ms));
+}
+
+/** The Sunday before this week: where a lesson really finished before this week is counted. */
+function lastWeekDay(day = today()): string {
+  const d = new Date(`${weekStart(day)}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Something was done in this lesson this week (before Focus Buddy noticed Miacademy moved on). */
+function workedOnThisWeek(states: Record<string, ItemState>, day = today()): boolean {
+  return Object.values(states).some((s) => s.done && typeof s.at === "number" && dayOf(s.at) >= weekStart(day));
+}
+
+/**
+ * Miacademy has moved past a lesson, so it was finished by now. A lesson from an
+ * earlier week that nobody touched this week was finished back then: it counts
+ * for last week, not today (otherwise last week's story fills this week's ring).
+ */
+function movedOnDay(lesson: MiaLesson, day = today()): string {
+  return workedOnThisWeek(lesson.states, day) || dayOf(lesson.startedAt) >= weekStart(day) ? day : lastWeekDay(day);
+}
+
 function saveLessonStates(lesson: MiaLesson, day = today()): void {
   const done = lesson.items && lessonDone(lesson.items, lesson.states);
   getDb()
@@ -2595,8 +2641,9 @@ export function miaPathSync(kidId: number, courses: MiaPathCourse[], now = Date.
       if (!lesson) {
         // Miacademy moved on to a new lesson: the lessons before it are done.
         for (const older of open) {
+          const doneDay = movedOnDay(older);
           for (const item of older.items ?? []) older.states[item.id] = { ...older.states[item.id], done: true, at: older.states[item.id]?.at ?? now };
-          db.prepare("UPDATE mia_lessons SET states = ?, done_day = ? WHERE id = ?").run(JSON.stringify(older.states), today(), older.id);
+          db.prepare("UPDATE mia_lessons SET states = ?, done_day = ? WHERE id = ?").run(JSON.stringify(older.states), doneDay, older.id);
         }
         const res = db
           .prepare(
@@ -2629,9 +2676,10 @@ export function miaPathSync(kidId: number, courses: MiaPathCourse[], now = Date.
     if (!lesson) {
       // Miacademy moved on: the online parts of the lessons before this one are done.
       for (const older of open) {
+        const doneDay = movedOnDay(older);
         const a = markItems(older, "video", now);
         const b = markItems(older, "practice", now);
-        if (markItems(older, "quiz", now) || a || b) saveLessonStates(older);
+        if (markItems(older, "quiz", now) || a || b) saveLessonStates(older, doneDay);
       }
       const title = (c.taskType === "Pdf" && c.taskTitle ? lessonTitleFromTask(c.taskTitle) : c.taskTitle) || c.courseTitle;
       const known = db
@@ -3057,6 +3105,7 @@ export function miaPlanLessons(kidId: number, subject: string, plan: MiaCoursePl
     const items = planLessonItems(pl, subject, coursePlan, parsed);
     // Online tasks: done when Miacademy says so, or once the kid has moved past them.
     const at = reached.get(pl.course);
+    const workedThisWeek = workedOnThisWeek(lesson.states);
     for (const t of pl.tasks) {
       const id = `task-${t.taskId}`;
       if (!items.some((i) => i.id === id) || lesson.states[id]?.done) continue;
@@ -3067,8 +3116,12 @@ export function miaPlanLessons(kidId: number, subject: string, plan: MiaCoursePl
     const done = items.length > 0 && lessonDone(items, lesson.states) && (!needsPdf || !!parsed);
     if (done && !lesson.doneDay) {
       // Finished before the calendar was read (every task already "Completed"): count it on the day it was scheduled.
-      const allEarlier = pl.tasks.every((t) => t.status === "Completed") && pl.tasks.at(-1)!.day < today();
-      lesson.doneDay = allEarlier ? pl.tasks.at(-1)!.day : today();
+      // Also when it was scheduled before this week and not worked on in it: Miacademy moves unfinished
+      // work forward, so a lesson still dated in an earlier week was finished back then.
+      const lastDay = pl.tasks.at(-1)!.day;
+      const allEarlier = pl.tasks.every((t) => t.status === "Completed") && lastDay < today();
+      const earlierWeek = lastDay < weekStart(today()) && !workedThisWeek;
+      lesson.doneDay = allEarlier || earlierWeek ? lastDay : today();
     }
     if (!done) lesson.doneDay = null;
     db.prepare("UPDATE mia_lessons SET items = ?, states = ?, done_day = ?, student_pdf = COALESCE(student_pdf, ?) WHERE id = ?").run(

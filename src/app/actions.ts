@@ -30,6 +30,7 @@ import {
   verifyParent, setElectivesOff,
   dismissAlerts,
   parentMiaReset,
+  parentMiaResetRing,
   parentMiaRestart,
   setMiaSettings,
   setParentPin,
@@ -302,6 +303,18 @@ export async function miaParentAction(form: FormData) {
   try {
     if (form.get("op") === "restart") parentMiaRestart(s.familyId, kidId, subject);
     else parentMiaReset(s.familyId, kidId, subject);
+  } catch (e) {
+    if (e instanceof PortalError) back("/parent", e.message);
+    throw e;
+  }
+  revalidatePath("/parent");
+  redirect("/parent");
+}
+
+export async function miaResetRingAction(form: FormData) {
+  const s = await requireParent();
+  try {
+    parentMiaResetRing(s.familyId, Number(form.get("kidId")), str(form, "ring"));
   } catch (e) {
     if (e instanceof PortalError) back("/parent", e.message);
     throw e;

@@ -3,7 +3,7 @@ import ParentNav from "@/components/ParentNav";
 import { requireParent } from "@/lib/auth";
 import { REQUIRED_AVG_HOURS, REQUIRED_DAYS } from "@/lib/compliance";
 import { gradeProgress } from "@/lib/engine/planner";
-import { dismissAlertAction, miaItemAction, miaParentAction, miaSuppliesAction, reviewBlockAction, reviewCourseTaskAction, reviewMissionAction } from "@/app/actions";
+import { dismissAlertAction, miaItemAction, miaParentAction, miaResetRingAction, miaSuppliesAction, reviewBlockAction, reviewCourseTaskAction, reviewMissionAction } from "@/app/actions";
 import { MIA_SUBJECTS } from "@/content/miacademy";
 import { remaining, type MiaTimerState } from "@/lib/miaTimer";
 import { levelInfo } from "@/lib/game";
@@ -14,6 +14,7 @@ import {
   learnerProfiles,
   listKids,
   miaFamilyToday,
+  miaRings,
   miaWaitingForParent,
   minutesOnDay,
   unseenAlerts,
@@ -43,6 +44,7 @@ export default async function ParentHome({ searchParams }: { searchParams: Promi
       <MiaAlerts familyId={s.familyId} />
       <MiaApprovals familyId={s.familyId} />
       <MiaToday familyId={s.familyId} />
+      <MiaWeekRings familyId={s.familyId} />
       {courseTasks.length > 0 && (
         <div className="card">
           <h2>📚 Projects, labs and speeches to check ({courseTasks.length})</h2>
@@ -354,6 +356,45 @@ function MiaToday({ familyId }: { familyId: number }) {
                 </tr>
               );
             }),
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/** This week's rings for each kid, with a reset for one that filled by mistake. */
+function MiaWeekRings({ familyId }: { familyId: number }) {
+  const rows = miaFamilyToday(familyId)
+    .map(({ kid }) => ({ kid, rings: miaRings(kid.id) }))
+    .filter((r) => r.rings.length);
+  if (!rows.length) return null;
+  return (
+    <div className="card">
+      <h2>💍 This week&apos;s rings</h2>
+      <p className="muted small">
+        A ring fills as the week&apos;s lessons for that class get done, and pays into the buddy bank. If one filled by mistake, Reset
+        takes its money back out and stops counting its lessons this week.
+      </p>
+      <table>
+        <tbody>
+          {rows.flatMap(({ kid, rings }) =>
+            rings.map((r, i) => (
+              <tr key={`${kid.id}-${r.id}`}>
+                <td>{i === 0 ? `${kid.avatar} ${kid.name}` : ""}</td>
+                <td style={{ color: r.color, fontWeight: 700 }}>{r.name}</td>
+                <td className="small">{r.full ? "Full" : `${Math.round(r.progress * 100)}%`}</td>
+                <td>
+                  {r.full && (
+                    <form action={miaResetRingAction} style={{ display: "inline" }}>
+                      <input type="hidden" name="kidId" value={kid.id} />
+                      <input type="hidden" name="ring" value={r.id} />
+                      <button className="linkbtn small">Reset</button>
+                    </form>
+                  )}
+                </td>
+              </tr>
+            )),
           )}
         </tbody>
       </table>
