@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { openDb, setDb } from "@/lib/db";
 import { parsePlanWeek, planLessonItems, planLessons } from "@/lib/miaPlan";
-import { MIA_COURSE_PLANS } from "@/content/miacademy";
+import { MIA_COURSE_PLANS, miaCoursePlan } from "@/content/miacademy";
+import { answerKeyCandidates } from "@/lib/miaLessons";
 import { parsePathCourses } from "@/lib/miaSync";
 import type { ParsedActivity } from "@/lib/miaLessons";
 import {
@@ -86,12 +87,66 @@ describe("reading the parent's Miacademy calendar", () => {
 
   it("builds online-only classes from Miacademy's tasks (the story is a tap)", () => {
     const [opossum] = planLessons(parsePlanWeek(WEEK));
-    const items = planLessonItems(opossum, "ela", MIA_COURSE_PLANS.ela[0], null);
+    const items = planLessonItems(opossum, "ela", miaCoursePlan("ela", opossum.course), null);
     expect(items.map((i) => [i.title, i.check])).toEqual([
       ["Read the story: Opossum", "self"],
       ["Online practice: Level 1", "online"],
       ["Quiz Assessment", "online"],
     ]);
+  });
+});
+
+describe("Reading Comprehension with a reading guide (Level G and up)", () => {
+  it("lists each step of the guide: written answers get the photo check, reading is a tap, the video and quiz come from Miacademy", () => {
+    const course = "Reading Comprehension: Level G";
+    expect(miaCoursePlan("ela", course)).toMatchObject({ name: "Reading Comprehension", onlineOnly: false, tapGuide: true });
+    expect(miaCoursePlan("ela", "Reading Comprehension: Level E")).toMatchObject({ onlineOnly: true, readPdf: "Read the story" });
+    const guide = [
+      { title: "Watch the video.", kind: "video" as const, pages: [], supplies: [] },
+      { title: "Complete the Vocabulary Activity.", kind: "worksheet" as const, pages: [4], supplies: [] },
+      { title: "Read some information about today's passage.", kind: "other" as const, pages: [5], supplies: [] },
+      { title: "Start thinking about the topics in the passage by answering the questions.", kind: "worksheet" as const, pages: [5], supplies: [] },
+      { title: "Read the passage.", kind: "other" as const, pages: [6], supplies: [] },
+      { title: "Reflect on what you have read by answering the questions.", kind: "worksheet" as const, pages: [7], supplies: [] },
+      { title: "Complete the Online Assessment questions.", kind: "quiz" as const, pages: [], supplies: [] },
+    ];
+    const lesson = {
+      key: "k",
+      course,
+      unitTitle: "Unit 5",
+      title: "Finding the Central Idea",
+      pdfUrl: "https://miaplaza-content.s3.us-west-2.amazonaws.com/x/RC6+5.1.1+Student+PDF.pdf",
+      tasks: parsePlanWeek({
+        Days: [{ Date: "2026-10-28", UnitTasks: [{ Unit: "u", TaskAssignments: [id(1), id(2), id(3)] }] }],
+        UnitConversions: [{ UnitId: "u", Subject: "LanguageArts", Title: "Unit 5", CourseTitle: course }],
+        TaskAssignmentConversions: [
+          { TaskAssignmentId: id(1), Name: "Finding the Central Idea Student PDF", Type: "Pdf", Status: "None", PreviewData: { Title: "Finding the Central Idea", Url: "https://miaplaza-content.s3.us-west-2.amazonaws.com/x/RC6+5.1.1+Student+PDF.pdf" } },
+          { TaskAssignmentId: id(2), Name: "Finding the Central Idea", Type: "Video", Status: "None", PreviewData: { Title: "Finding the Central Idea" } },
+          { TaskAssignmentId: id(3), Name: "Quiz Assessment", Type: "Assessment", Status: "None", PreviewData: { Title: "Finding the Central Idea" } },
+        ],
+      }),
+    };
+    const items = planLessonItems(lesson, "ela", miaCoursePlan("ela", course), guide);
+    expect(items.map((i) => [i.title, i.check])).toEqual([
+      ["Watch the lesson video", "video"],
+      ["Complete the Vocabulary Activity.", "photo"],
+      ["Read some information about today's passage.", "self"],
+      ["Start thinking about the topics in the passage by answering the questions.", "photo"],
+      ["Read the passage.", "self"],
+      ["Reflect on what you have read by answering the questions.", "photo"],
+      ["Quiz Assessment", "quiz"],
+    ]);
+  });
+});
+
+describe("answer keys", () => {
+  it("tries the Student PDF's own number first, then the lesson's other numbers (Reading Comprehension keys are numbered differently)", () => {
+    const rc = "https://miaplaza-content.s3.us-west-2.amazonaws.com/Language+Arts/RC6+(K8)/RC6+4.4.1+Student+PDF.pdf";
+    const c = answerKeyCandidates(rc);
+    expect(c[0]).toBe("https://miaplaza-content.s3.us-west-2.amazonaws.com/Language+Arts/RC6+(K8)/RC6+4.4.1+Answer+Key.pdf");
+    expect(c).toContain("https://miaplaza-content.s3.us-west-2.amazonaws.com/Language+Arts/RC6+(K8)/RC6+4.4.3+Answer+Key.pdf");
+    expect(new Set(c).size).toBe(9);
+    expect(answerKeyCandidates("https://x/Science/Gravity+Student+PDF.pdf")).toEqual(["https://x/Science/Gravity+Answer+Key.pdf"]);
   });
 });
 

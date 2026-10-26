@@ -191,3 +191,18 @@ marks today's tasks complete, when the kid's assignments page has moved past
 them, or when the kid taps "I finished Vocabulary" (`mia_daily`). No timer, no
 pay. The calendar files any course with "Vocabulary" in its title under its own
 subject, `vocab`, so it never joins Language Arts. `miaVocab` in `store.ts`.
+
+### Reading Comprehension with a reading guide, answer keys, choice boards
+
+- Reading Comprehension Level G and up (Emme) is a packet class: its Student PDF
+  starts with a "Student Reading Guide" (before, during, after reading). Each
+  step is a checklist item: written answers (questions, Vocabulary Activity)
+  get the photo check, reading and annotating steps are a tap; the video,
+  online practice and quiz come from Miacademy. Lower levels (Bryce) stay
+  online only (the PDF is just the story). `tapGuide` in `MIA_COURSE_PLANS`.
+- Answer keys: `findAnswerKey` tries the Student PDF's own number first, then
+  the lesson's other numbers (Reading Comprehension: "RC6 4.4.1 Student PDF"
+  -> "RC6 4.4.3 Answer Key"), and remembers the one that's there.
+- A choice board is one activity ("(pick one)"); the photo check grades the
+  choice the kid did. Bonus and optional activities are always left off.
+- Every photo-checked mistake comes with what goes there and a short why.

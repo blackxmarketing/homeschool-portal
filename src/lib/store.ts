@@ -3094,6 +3094,12 @@ export function miaPlanLessons(kidId: number, subject: string, plan: MiaCoursePl
       pdf_parsed: string | null;
     };
     const lesson = toLesson(row);
+    // Saved before its class had a packet (Reading Comprehension Level G was online-only): read the PDF now.
+    if (needsPdf && !row.pdf_parsed && lesson.parseState === "ready") {
+      db.prepare("UPDATE mia_lessons SET parse_state = 'waiting', student_pdf = COALESCE(student_pdf, ?) WHERE id = ?").run(pl.pdfUrl, lesson.id);
+      lesson.parseState = "waiting";
+      lesson.studentPdf ??= pl.pdfUrl;
+    }
     // Read once; a failed read waits until the kid opens the lesson (miaSetStudentPdf) rather than retrying on every look.
     if (needsPdf && !row.pdf_parsed && lesson.parseState === "waiting") toRead.push(lesson.id);
     let parsed: ParsedActivity[] | null = null;

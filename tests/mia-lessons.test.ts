@@ -58,6 +58,13 @@ const path = (lessonId: string, type: string, title: string | null, description 
 const GRAVITY_ID = "b2086720-4a09-4c3f-a96b-502b984d3143";
 const MAGNETISM_ID = "c3086720-4a09-4c3f-a96b-502b984d3144";
 
+describe("choice boards", () => {
+  it("are one activity: pick one", () => {
+    const items = buildItems([{ title: "Choice Board", kind: "worksheet", pages: [8], supplies: [] }], "sci", "Forces", "General Science");
+    expect(items.filter((i) => i.check === "photo").map((i) => i.title)).toEqual(["Choice Board (pick one)"]);
+  });
+});
+
 describe("building a lesson checklist", () => {
   it("keeps each activity as its own item, minus practice and optional ones", () => {
     const items = buildItems(GRAVITY);

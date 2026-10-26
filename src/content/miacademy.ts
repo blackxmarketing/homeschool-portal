@@ -132,14 +132,28 @@ export interface MiaCoursePlan {
   readPdf?: string;
   /** The lesson right before each unit assessment gets 4 school days and counts as a whole week's lessons. */
   bigLessonBeforeUnitTest?: boolean;
+  /** The packet's checklist is a reading guide: every step is a tap to check off (no photo check); online steps come from Miacademy. */
+  tapGuide?: boolean;
   /** Lessons whose title matches (a unit's project or portfolio) get 4 school days and count as a whole week's lessons. */
   bigLessonTitle?: RegExp;
 }
 
 export const MIA_COURSE_PLANS: Record<string, MiaCoursePlan[]> = {
   ela: [
+    // Level G and up (Emme): a Student PDF with a reading guide (before, during and after reading) and an online quiz.
     {
-      match: /^Reading Comprehension/i,
+      match: /^Reading Comprehension: Level [G-Z]/i,
+      name: "Reading Comprehension",
+      lessonsPerWeek: 1,
+      slot: "first",
+      days: [1],
+      stopWhenDone: true,
+      onlineOnly: false,
+      tapGuide: true,
+    },
+    // Lower levels (Bryce): online only; the PDF is just the story.
+    {
+      match: /^Reading Comprehension(?!: Level [G-Z])/i,
       name: "Reading Comprehension",
       lessonsPerWeek: 1,
       slot: "first",

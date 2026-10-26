@@ -498,6 +498,7 @@ If the packet has no checklist (only note-taking pages and extension ideas), lis
 pages = the PDF page numbers that activity's pages are on (look at the page headings); empty for online activities.
 supplies = the materials list for hands_on activities, short items; empty otherwise.
 A study guide, self-reflection or confidence check counts as notes.
+A choice board (several activities where the student picks one) is ONE activity: list it once, titled as written, not each choice.
 lessonTitle = the lesson's title as printed on page 1 (for example "Forces: Gravity").
 nextIsUnitAssessment = true only if a second document (the next lesson) is given and it is a unit assessment or unit test lesson.`,
     [
@@ -561,9 +562,11 @@ export async function checkWorksheetPhoto(input: {
 Only check the activity named, on the pages given in the answer key.
 - Fill-in blanks and clue answers must match the key's meaning (ignore spelling slips and capital letters).
 - Where the key says answers will vary, any sensible on-topic answer is right.
+- A choice board (pick one): the student did just one of the choices. Find which one in the photo and check only that one; the others aren't missing.
+- Questions that ask the student to write or draw their own thoughts (before or after reading) have no single answer: it's right if it answers the question, fits the passage and is complete; a fitting drawing counts.
 - Where the key shows example numbers (for example "answers given for 100 pounds"), check the student's own calculation with their own numbers instead.
 - Count each blank or question as one. total = how many there are; right = how many are right.
-- wrong lists each one that is wrong or missing: question = a few words naming it ("blank 2", "Mars"), answer = what goes there.
+- wrong lists each one that is wrong or missing: question = a few words naming it ("blank 2", "Mars"), answer = what goes there and, in a few kid-friendly words, why (for example "c, because nonfiction is based on real facts").
 If the photo is blurry, cut off, or of a different page, set readable false.
 message: one or two short, warm sentences to the student, spoken aloud. No grades, no letters.`,
     [

@@ -3,9 +3,8 @@ import path from "node:path";
 import { NextResponse } from "next/server";
 import { kidFromRequest } from "@/lib/auth";
 import { aiEnabled, checkWorksheetPhoto, type PhotoCheck } from "@/lib/ai";
-import { answerKeyUrl } from "@/lib/miaLessons";
 import { miaPhotoDir } from "@/lib/miaPhotos";
-import { miaBoard } from "@/lib/miaSync";
+import { findAnswerKey, miaBoard } from "@/lib/miaSync";
 import { miaFinishItem, miaLesson, miaRecordPhotoCheck, PortalError } from "@/lib/store";
 
 const TYPES = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" } as const;
@@ -41,7 +40,7 @@ export async function POST(req: Request) {
       miaFinishItem(kid.id, lesson.id, item.id, photo);
       return NextResponse.json({ waitingForParent: true, ...miaBoard(kid.id) });
     }
-    const key = lesson.studentPdf ? answerKeyUrl(lesson.studentPdf) : null;
+    const key = lesson.studentPdf ? await findAnswerKey(lesson.studentPdf) : null;
     if (!key) return NextResponse.json({ error: "There's no answer key for this one yet. Ask a grown-up." }, { status: 400 });
     const result =
       !aiEnabled() && process.env.NODE_ENV !== "production"

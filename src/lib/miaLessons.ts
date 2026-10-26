@@ -1,4 +1,4 @@
-import { MIA_SKIP_ITEMS, miaLessonRules } from "@/content/miacademy";
+import { MIA_SKIP_ITEMS, miaCoursePlan, miaLessonRules } from "@/content/miacademy";
 
 /**
  * The step-by-step checklist for one Miacademy lesson (docs/MIACADEMY.md).
@@ -73,12 +73,14 @@ const slug = (s: string) =>
  */
 export function buildItems(parsed: ParsedActivity[], subject = "sci", lessonTitle = "", courseTitle = ""): LessonItem[] {
   const rules = miaLessonRules(subject, lessonTitle, courseTitle);
+  // A reading guide (Reading Comprehension, Level G and up): each step is a tap; the video and quiz come from Miacademy.
+  const guide = !!miaCoursePlan(subject, courseTitle)?.tapGuide;
   const seen = new Set<string>();
   const items: LessonItem[] = [];
   for (const a of parsed) {
-    const title = a.title.trim();
+    let title = a.title.trim();
     if (!title || MIA_SKIP_ITEMS.some((re) => re.test(title))) continue;
-    const practice = a.kind === "practice" || /online practice|^practice/i.test(title);
+    const practice = a.kind === "practice" || /online practice|^practice\b/i.test(title);
     if (practice && !rules.practice) continue;
     if ((a.kind === "worksheet" || a.kind === "hands_on" || a.kind === "other") && !rules.worksheets) continue;
     // "Video and Guided Notes" on one line (Math): two items, so the notes aren't lost.
@@ -87,6 +89,8 @@ export function buildItems(parsed: ParsedActivity[], subject = "sci", lessonTitl
       push(items, seen, { id: "", title: "Complete the guided notes", check: "self", pages: a.pages, supplies: [] });
       continue;
     }
+    // A choice board: they only do one of its activities.
+    if (/choice board|choose one|pick one/i.test(title) && !/pick one/i.test(title)) title = `${title} (pick one)`;
     let id = slug(title);
     for (let n = 2; seen.has(id); n++) id = `${slug(title)}-${n}`;
     seen.add(id);
@@ -101,10 +105,16 @@ export function buildItems(parsed: ParsedActivity[], subject = "sci", lessonTitl
             : a.kind === "hands_on" || a.supplies.length > 0
               ? "parent"
               : "photo";
-    items.push({ id, title, check, pages: a.pages.filter((p) => Number.isInteger(p) && p > 0), supplies: a.supplies.slice(0, 12) });
+    items.push({
+      id,
+      title,
+      check: guide && (check === "photo" || check === "parent" || check === "self") ? (GUIDE_WRITTEN.test(title) ? "photo" : "self") : check,
+      pages: a.pages.filter((p) => Number.isInteger(p) && p > 0),
+      supplies: guide ? [] : a.supplies.slice(0, 12),
+    });
   }
   // Some packets (U.S. Geography) have no checklist, only note pages: the online parts come from Miacademy.
-  if (!items.some((i) => i.check === "video")) items.unshift({ id: uniqueId(seen, "Watch the lesson video"), title: "Watch the lesson video", check: "video", pages: [], supplies: [] });
+  if (!guide && !items.some((i) => i.check === "video")) items.unshift({ id: uniqueId(seen, "Watch the lesson video"), title: "Watch the lesson video", check: "video", pages: [], supplies: [] });
   const quizAt = items.findIndex((i) => i.check === "quiz");
   if (rules.practice && !items.some((i) => i.check === "practice")) {
     const all: LessonItem = { id: uniqueId(seen, "Online practice"), title: "Online practice (all levels)", check: "practice", pages: [], supplies: [], allLevels: true };
@@ -140,6 +150,23 @@ export function lessonDone(items: LessonItem[], states: Record<string, ItemState
  * The answer key sits next to the Student PDF with the same name:
  * ".../SC4 Forces Gravity Student PDF.pdf" -> ".../SC4 Forces Gravity Answer Key.pdf".
  */
+/** Reading-guide steps with written answers (checked from a photo); the rest (reading, annotating) are a tap. */
+const GUIDE_WRITTEN = /\b(answer|answering|questions?|vocabulary activity|reflect|write)\b/i;
+
+/**
+ * Where a lesson's answer key might be, most likely first. Usually the Student
+ * PDF's name with "Answer Key", but some classes number it differently
+ * (Reading Comprehension: "RC6 4.4.1 Student PDF" -> "RC6 4.4.3 Answer Key").
+ */
+export function answerKeyCandidates(studentPdf: string): string[] {
+  const same = answerKeyUrl(studentPdf);
+  if (!same) return [];
+  const m = /^(.*\d+\.\d+\.)(\d+)((?:\+|%20| )Answer(?:\+|%20| )Key\.pdf)$/i.exec(same);
+  if (!m) return [same];
+  const others = [1, 2, 3, 4, 5, 6, 7, 8, 9].filter((n) => String(n) !== m[2]).map((n) => `${m[1]}${n}${m[3]}`);
+  return [same, ...others];
+}
+
 export function answerKeyUrl(studentPdf: string): string | null {
   return /Student(\+|%20| )PDF\.pdf$/i.test(studentPdf) ? studentPdf.replace(/Student(\+|%20| )PDF\.pdf$/i, (_m, sep) => `Answer${sep}Key.pdf`) : null;
 }

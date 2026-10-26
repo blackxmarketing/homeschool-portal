@@ -1,6 +1,6 @@
 import { readLessonPdf } from "./ai";
 import { MIA_SUBJECT_MAP, miaCoursePlan } from "@/content/miacademy";
-import { buildItems, nextNumberedPdfs, taskKeyFromLink } from "./miaLessons";
+import { answerKeyCandidates, buildItems, nextNumberedPdfs, taskKeyFromLink } from "./miaLessons";
 import {
   addParentAlert,
   getKid,
@@ -61,6 +61,22 @@ export function readLessonInBackground(kidId: number, lessonId: number): void {
       reading.delete(lessonId);
     }
   })();
+}
+
+const answerKeys = new Map<string, string | null>();
+
+/** A lesson's answer key: the first of its possible names that's really there (remembered). */
+export async function findAnswerKey(studentPdf: string): Promise<string | null> {
+  if (answerKeys.has(studentPdf)) return answerKeys.get(studentPdf)!;
+  let found: string | null = null;
+  for (const url of answerKeyCandidates(studentPdf))
+    if (await exists(url)) {
+      found = url;
+      break;
+    }
+  // Only remember a miss for a while, in case the network was down.
+  if (found) answerKeys.set(studentPdf, found);
+  return found;
 }
 
 async function exists(url: string): Promise<boolean> {
