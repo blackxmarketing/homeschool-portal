@@ -144,13 +144,10 @@ export default function MiaHud({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const lastActivity = useRef<BreakActivity | null>(null);
-  const [skipMode, setSkipMode] = useState(false);
   const [offset, setOffset] = useState(() => serverNow - Date.now());
   const [now, setNow] = useState(serverNow);
   const [focus, setFocus] = useState<string | null>(() => MIA_SUBJECTS.find((s) => isOpen(initialTimers[s.id]))?.id ?? null);
   const [error, setError] = useState<string | null>(null);
-  const [pinOpen, setPinOpen] = useState(false);
-  const [pin, setPin] = useState("");
   const [checkin, setCheckin] = useState<Checkin | null>(null);
   const [reminder, setReminder] = useState(false);
   const [miaOpen, setMiaOpen] = useState(false);
@@ -431,19 +428,9 @@ export default function MiaHud({
   async function endBreakEarly(subject: string) {
     if (await act(subject, "breakDone")) say(fill(MIA_LINES.breakEarly, subject));
   }
+  // Done getting help (the kid presses Start), or the supplies are ready / skipped. No PIN.
   async function helpRestart(subject: string, skip = false) {
-    const needPin = settings.helpPin || timers[subject]?.pause?.type === "supplies";
-    if (needPin && !pinOpen) {
-      setPin("");
-      setError(null);
-      setSkipMode(skip);
-      setPinOpen(true);
-      return;
-    }
-    if (await act(subject, "helpResume", { ...(needPin ? { pin } : {}), skip: skipMode || skip })) {
-      setPinOpen(false);
-      say(skipMode || skip ? `Okay! On to the next activity in ${subjectName(subject)}.` : fill(MIA_LINES.helpDone, subject));
-    }
+    if (await act(subject, "helpResume", { skip })) say(skip ? `Okay! On to the next activity in ${subjectName(subject)}.` : fill(MIA_LINES.helpDone, subject));
   }
   function answerCheckin() {
     setCheckin(null);
@@ -575,7 +562,7 @@ export default function MiaHud({
           <span className="mia-wiggle">⏰</span> {MIA_LINES.remind}
         </div>
       )}
-      {error && !pinOpen && (
+      {error && (
         <div className="mia-error" role="alert" onClick={() => setError(null)}>
           {error}
         </div>
@@ -755,40 +742,6 @@ export default function MiaHud({
         <BreakScreen t={ft} now={now} buddy={settings.buddy} color={focused.color} onDone={() => endBreakEarly(focused.id)} />
       )}
 
-      {/* Grown-up PIN to restart after help */}
-      {pinOpen && focused && (
-        <div className="mia-scrim">
-          <form
-            className="mia-chooser"
-            onSubmit={(e) => {
-              e.preventDefault();
-              void helpRestart(focused.id);
-            }}
-          >
-            <h2>{skipMode ? "Grown-up: skip this activity" : "Grown-up: start the timer again"}</h2>
-            <input
-              className="mia-pin"
-              type="password"
-              inputMode="numeric"
-              autoComplete="off"
-              maxLength={6}
-              value={pin}
-              onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-              placeholder="Parent PIN"
-              autoFocus
-            />
-            {error && <div className="mia-error">{error}</div>}
-            <div className="mia-row">
-              <button type="button" className="mia-btn ghost" onClick={() => setPinOpen(false)}>
-                Cancel
-              </button>
-              <button className="mia-btn" disabled={busy || pin.length < 4}>
-                {skipMode ? "Skip it" : "Start timer"}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
     </div>
   );
 }
@@ -839,9 +792,9 @@ function FocusedTimer({
   else if (t.pause?.type === "help")
     controls = (
       <>
-        <div className="mia-waiting">✋ Paused. A grown-up is coming to help!</div>
-        <button className="mia-btn" onClick={() => onHelpRestart()} disabled={busy}>
-          Grown-up: start timer
+        <div className="mia-waiting">✋ Paused while you get help. When you&apos;re ready, press Start!</div>
+        <button className="mia-btn big go" onClick={() => onHelpRestart()} disabled={busy}>
+          ▶ Start!
         </button>
       </>
     );

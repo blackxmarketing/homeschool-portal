@@ -112,15 +112,12 @@ describe("Miacademy timers in the store", () => {
     expect(isOpen(miaDay(kid).math)).toBe(true);
   });
 
-  it("alerts the parent for help and needs the parent PIN to restart", () => {
+  it("alerts the parent for help; the kid presses Start again when done (no PIN)", () => {
     miaAct(kid, "ela", "start", { now: 0 });
     miaAct(kid, "ela", "pause", { now: MIN });
     miaAct(kid, "ela", "help", { now: MIN });
     expect(unseenAlerts(family).map((a) => a.kind)).toEqual(["help"]);
-    expect(() => miaAct(kid, "ela", "helpResume", { now: 2 * MIN, pin: "1234" })).toThrow(/set a parent PIN/);
-    setParentPin(family, "4321");
-    expect(() => miaAct(kid, "ela", "helpResume", { now: 2 * MIN, pin: "1234" })).toThrow(/isn't right/);
-    miaAct(kid, "ela", "helpResume", { now: 2 * MIN, pin: "4321" });
+    miaAct(kid, "ela", "helpResume", { now: 2 * MIN });
     expect(miaDay(kid).ela?.pause).toBeNull();
   });
 

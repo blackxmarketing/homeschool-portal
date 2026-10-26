@@ -254,8 +254,6 @@ describe("a kid's Science checklist", () => {
     miaAct(kid, "sci", "supplies", { now: 60_000, lessonId: id, itemId: "stem-challenge-marble-run" });
     expect(miaDay(kid).sci?.pause?.type).toBe("supplies");
     expect(unseenAlerts(family).map((a) => a.kind)).toContain("supplies");
-    // On the kid's screen it always takes the parent PIN.
-    expect(() => miaAct(kid, "sci", "helpResume", { now: 120_000 })).toThrow(/isn't right/);
     parentMiaSupplies(family, kid, "sci", "ready", 120_000);
     expect(miaDay(kid).sci?.pause).toBeNull();
     expect(miaLesson(kid, id)!.states["stem-challenge-marble-run"].suppliesReady).toBe(true);
@@ -266,12 +264,11 @@ describe("a kid's Science checklist", () => {
     expect(miaLesson(kid, id)!.states["stem-challenge-marble-run"].done).toBe(true);
   });
 
-  it("lets a parent skip a supplies activity with the PIN on the kid's screen", () => {
+  it("lets a grown-up skip a supplies activity on the kid's screen (no PIN)", () => {
     const id = startGravity();
-    setParentPin(family, "2468");
     miaAct(kid, "sci", "start", { now: 0 });
     miaAct(kid, "sci", "supplies", { now: 1000, lessonId: id, itemId: "stem-challenge-marble-run" });
-    miaAct(kid, "sci", "helpResume", { now: 2000, pin: "2468", skip: true });
+    miaAct(kid, "sci", "helpResume", { now: 2000, skip: true });
     expect(miaLesson(kid, id)!.states["stem-challenge-marble-run"]).toMatchObject({ done: true, skipped: true });
     expect(miaDay(kid).sci?.pause).toBeNull();
   });

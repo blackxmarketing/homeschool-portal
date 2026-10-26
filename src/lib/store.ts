@@ -2188,14 +2188,7 @@ export function miaAct(
   }
   if (!current) throw new PortalError("Press Start first.");
 
-  // Supplies always need a grown-up; help only when the parent turned the PIN on.
-  const forSupplies = current.pause?.type === "supplies";
-  if (action === "helpResume" && (settings.helpPin || forSupplies)) {
-    const check = verifyParentPin(kid.family_id, opts.pin ?? "");
-    if (check === "unset") throw new PortalError("A parent needs to set a parent PIN in Settings first, or restart it from the parent page.");
-    if (check === "locked") throw new PortalError("Too many tries. Wait 5 minutes.");
-    if (check === "wrong") throw new PortalError("That PIN isn't right.");
-  }
+  // No parent PIN: after help the kid presses Start again; supplies are "ready" or "skip" (a grown-up taps it).
 
   if (action === "supplies") {
     const item = miaLesson(kidId, opts.lessonId ?? -1)?.items?.find((i) => i.id === opts.itemId);
