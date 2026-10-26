@@ -13,7 +13,10 @@ import type { MiaApi } from "./MiaHud";
  * next one slides up. Online activities light up once Miacademy has them done.
  */
 
-const ICON: Record<LessonItem["check"], string> = { video: "🎬", practice: "🎮", self: "📝", quiz: "✏️", photo: "📄", parent: "🧰", online: "💻" };
+/** A pencil for work in the packet, a computer for work in Miacademy. */
+const PACKET = "✏️";
+const COMPUTER = "💻";
+const ICON: Record<LessonItem["check"], string> = { video: COMPUTER, practice: COMPUTER, quiz: COMPUTER, online: COMPUTER, self: PACKET, photo: PACKET, parent: PACKET };
 
 type Entry = MiaCourseChecklist["upcoming"][number];
 
@@ -141,7 +144,7 @@ export default function Checklist({
             {checklist.later.map((e) => (
               <div key={`l${e.lessonId}:${e.item.id}`} className="mia-later-row">
                 <span>
-                  🧰 {e.item.title}
+                  {PACKET} {e.item.title}
                   {e.lessonTitle !== checklist.lessonTitle && <span className="mia-later-lesson"> · {e.lessonTitle}</span>}
                 </span>
                 {e.state.waitingForParent ? (
@@ -214,18 +217,19 @@ function TopTask({
 }) {
   const { item, state } = entry;
   const pages = item.pages.length ? ` · page${item.pages.length > 1 ? "s" : ""} ${item.pages[0]}${item.pages.length > 1 ? `-${item.pages.at(-1)}` : ""}` : "";
-  const kind =
+  const kind = `${ICON[item.check]} ${
     item.check === "video" || item.check === "online"
-      ? "💻 Online in Miacademy"
+      ? "Online in Miacademy"
       : item.check === "practice"
-        ? "🎮 Online practice in Miacademy"
+        ? "Online practice in Miacademy"
         : item.check === "quiz"
-          ? "✏️ Online quiz"
+          ? "Online quiz"
           : item.check === "parent"
-            ? `🧰 Hands-on${pages}`
+            ? `Hands-on in your packet${pages}`
             : item.check === "self"
-              ? `📝 Guided notes${pages}`
-              : `📄 PDF${pages}`;
+              ? `Guided notes in your packet${pages}`
+              : `In your packet${pages}`
+  }`;
   const online = item.check === "video" || item.check === "online" || item.check === "practice" || item.check === "quiz";
   // What the box does, and the hint under the activity.
   let canCheck = running;
