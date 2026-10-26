@@ -67,23 +67,21 @@ describe("reading the parent's Miacademy calendar", () => {
     expect(parsePlanWeek("nonsense")).toEqual([]);
   });
 
-  it("builds Science items: video first, the packet's notes and activities, marked practice, the quiz; bonus left off", () => {
+  it("follows the parent's checks: online practice checked means practice instead of the packet's activities", () => {
     const [, gravity] = planLessons(parsePlanWeek(WEEK));
     const items = planLessonItems(gravity, "sci", null, GRAVITY_PDF);
+    // Level 1 is checked (the bonus level is left off): the guided notes stay, the PDF activities don't.
     expect(items.map((i) => [i.title, i.check])).toEqual([
       ["Watch the lesson video", "video"],
       ["Complete the guided notes", "self"],
-      ["Forces Word Search", "photo"],
-      ["STEM Challenge: Marble Run", "parent"],
-      ["Online practice: Level 1", "practice"], // marked in Miacademy, so it counts
+      ["Online practice: Level 1", "practice"],
       ["Quiz Assessment", "quiz"],
     ]);
-    // Regular Math lessons skip online practice even when it's marked.
-    expect(planLessonItems({ ...gravity, course: "Math: Level E" }, "math", null, GRAVITY_PDF).some((i) => i.check === "practice")).toBe(false);
-    // Ancient World History does the packet instead, even when practice is marked; U.S. Geography does every level.
-    expect(planLessonItems({ ...gravity, course: "Ancient World History" }, "his", null, GRAVITY_PDF).some((i) => i.check === "practice")).toBe(false);
-    expect(planLessonItems({ ...gravity, course: "U.S. Geography" }, "his", null, GRAVITY_PDF).some((i) => i.check === "practice")).toBe(true);
     expect(items[0].id).toBe(`task-${id(11)}`);
+    // No practice checked: the packet's activities instead, in any class.
+    const noPractice = { ...gravity, tasks: gravity.tasks.filter((t) => t.type !== "Practice") };
+    for (const [subject, course] of [["sci", "General Science"], ["math", "Math: Level E"], ["his", "U.S. Geography"], ["his", "Ancient World History"]])
+      expect(planLessonItems({ ...noPractice, course }, subject, null, GRAVITY_PDF).map((i) => i.check)).toEqual(["video", "self", "photo", "parent", "quiz"]);
   });
 
   it("builds online-only classes from Miacademy's tasks (the story is a tap)", () => {
@@ -188,7 +186,8 @@ describe("parent mode in the store", () => {
     miaSetPdfParsed(sci.toRead[0], GRAVITY_PDF);
     miaSetParseState(sci.toRead[0], "ready");
     sci = miaChecklist(kid, "sci")!.parts[0];
-    expect(sci.upcoming.map((u) => u.item.title)).toEqual(["Watch the lesson video", "Complete the guided notes", "Forces Word Search"]);
+    // Online practice is checked for this lesson, so it's practice instead of the PDF activities.
+    expect(sci.upcoming.map((u) => u.item.title)).toEqual(["Watch the lesson video", "Complete the guided notes", "Online practice: Level 1"]);
     // On Bryce's assignments page the Science task is now the quiz: the video is done.
     miaPathSync(kid, parsePathCourses([
       {

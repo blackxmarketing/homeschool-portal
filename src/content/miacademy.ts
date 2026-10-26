@@ -187,6 +187,22 @@ export const MIA_COURSE_PLANS: Record<string, MiaCoursePlan[]> = {
   ],
 };
 
+/**
+ * The core classes the timers follow, by Miacademy course title. Other courses
+ * in the same subjects (Spelling, U.S. Government, ...) are left out even if
+ * something in them is checked. Language Arts: the classes in MIA_COURSE_PLANS.
+ */
+export const MIA_CORE_COURSES: Record<string, RegExp> = {
+  math: /^Math\b/i,
+  sci: /science/i,
+  his: /geograph|world history/i,
+  vocab: /vocabulary/i,
+};
+
+export function miaIsCoreCourse(subject: string, courseTitle: string): boolean {
+  return MIA_COURSE_PLANS[subject] ? !!miaCoursePlan(subject, courseTitle) : !!MIA_CORE_COURSES[subject]?.test(courseTitle);
+}
+
 export function miaCoursePlan(subject: string, courseTitle: string): MiaCoursePlan | null {
   return MIA_COURSE_PLANS[subject]?.find((p) => p.match.test(courseTitle)) ?? null;
 }

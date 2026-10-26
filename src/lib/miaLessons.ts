@@ -73,8 +73,15 @@ const slug = (s: string) =>
  * ones the kids skip: optional and bonus lines always, and online practice or
  * PDF activities depending on the lesson (miaLessonRules).
  */
-export function buildItems(parsed: ParsedActivity[], subject = "sci", lessonTitle = "", courseTitle = ""): LessonItem[] {
-  const rules = miaLessonRules(subject, lessonTitle, courseTitle);
+export function buildItems(
+  parsed: ParsedActivity[],
+  subject = "sci",
+  lessonTitle = "",
+  courseTitle = "",
+  /** The parent's checks decide practice vs. packet (the caller picks): keep every packet activity here. */
+  byChecks = false,
+): LessonItem[] {
+  const rules = byChecks ? { practice: false, worksheets: true, practiceIfMarked: false } : miaLessonRules(subject, lessonTitle, courseTitle);
   // A reading guide (Reading Comprehension, Level G and up): each step is a tap; the video and quiz come from Miacademy.
   const guide = !!miaCoursePlan(subject, courseTitle)?.tapGuide;
   const seen = new Set<string>();

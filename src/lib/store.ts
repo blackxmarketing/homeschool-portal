@@ -28,7 +28,7 @@ import { expectedSeconds, gradeProbe, probeSolution } from "./probes";
 import { adapt, buildProfile, conceptMastery, whatHelps, type Adaptation, type LearningEvent, type Profile } from "./learner";
 import { angleOf, applyEvidence, blockers, conceptOf, emptyMeter, legacyConcept, lessonMastered, type Evidence, type Meter } from "./masteryMeter";
 import type { Lesson, Probe } from "@/content/courses/types";
-import { MIA_COURSE_PLANS, MIA_MINUTES, MIA_OVERTIME_ALERT_MINUTES, MIA_PAY, MIA_RINGS, MIA_SUBJECTS, miaCoursePlan, miaLessonWeight, type MiaCoursePlan, type MiaSettings } from "@/content/miacademy";
+import { MIA_COURSE_PLANS, MIA_MINUTES, MIA_OVERTIME_ALERT_MINUTES, MIA_PAY, MIA_RINGS, MIA_SUBJECTS, miaCoursePlan, miaIsCoreCourse, miaLessonWeight, type MiaCoursePlan, type MiaSettings } from "@/content/miacademy";
 import { applyMia, clampMiaSettings, isOpen, MiaRuleError, newTimer, parseMiaSettings, parseMiaState, type MiaAction, type MiaTimerState } from "./miaTimer";
 import {
   guessStudentPdf,
@@ -2660,7 +2660,7 @@ export function miaPathSync(kidId: number, courses: MiaPathCourse[], now = Date.
   for (const c of courses) {
     if (c.taskKey)
       db.prepare("INSERT OR REPLACE INTO mia_path (kid_id, course, task_id, task_type, at) VALUES (?, ?, ?, ?, ?)").run(kidId, c.courseTitle, c.taskKey, c.taskType, now);
-    if (!c.lessonKey || !(settings.lessonsPerWeek[c.subject] > 0)) continue;
+    if (!c.lessonKey || !(settings.lessonsPerWeek[c.subject] > 0) || !miaIsCoreCourse(c.subject, c.courseTitle)) continue;
     if (miaHasPlan(kidId, c.courseTitle)) continue;
     const plan = miaCoursePlan(c.subject, c.courseTitle);
     // A subject made of several classes only follows the classes it has a plan for.
@@ -3044,7 +3044,7 @@ export function miaSavePlan(familyId: number, child: { id: string; name: string 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       );
       for (const t of week) {
-        if (!t.subject) continue;
+        if (!t.subject || !miaIsCoreCourse(t.subject, t.course)) continue;
         // sort: by day, then Miacademy's order within the day.
         ins.run(kidId, t.taskId, t.day, t.unitTitle, t.course, t.subject, t.lessonTitle, t.name, t.type, t.status, t.pdfUrl, t.order % 1_000_000, now);
         count++;
@@ -3066,7 +3066,7 @@ export function miaSaveCourses(kidId: number, tasks: PlanTask[], now = Date.now(
       r.day,
     ]),
   );
-  const keep = tasks.filter((t) => t.subject);
+  const keep = tasks.filter((t) => t.subject && miaIsCoreCourse(t.subject, t.course));
   db.transaction(() => {
     for (const course of new Set(keep.map((t) => t.course))) db.prepare("DELETE FROM mia_plan_tasks WHERE kid_id = ? AND course = ?").run(kidId, course);
     const ins = db.prepare(
@@ -3102,7 +3102,7 @@ function planTasks(kidId: number, subject: string, plan: MiaCoursePlan | null): 
       key_url: string | null;
     }[]
   )
-    .filter((r) => !plan || plan.match.test(r.course))
+    .filter((r) => (!plan || plan.match.test(r.course)) && miaIsCoreCourse(r.subject, r.course))
     // Tasks from the course pages go in course order; calendar-only ones by day.
     .sort((a, b) =>
       a.seq !== null && b.seq !== null

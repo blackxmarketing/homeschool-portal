@@ -1,4 +1,4 @@
-import { MIA_SKIP_ITEMS, MIA_SUBJECT_MAP, miaLessonRules, type MiaCoursePlan } from "@/content/miacademy";
+import { MIA_SKIP_ITEMS, MIA_SUBJECT_MAP, miaCoursePlan, type MiaCoursePlan } from "@/content/miacademy";
 import { buildItems, lessonTitleFromTask, type LessonItem, type ParsedActivity } from "./miaLessons";
 
 /**
@@ -153,7 +153,6 @@ const practiceName = (name: string) => (/level/i.test(name) ? `Online practice: 
  * Which ones count follows the same rules as before (miaLessonRules / the class plan).
  */
 export function planLessonItems(lesson: PlanLesson, subject: string, plan: MiaCoursePlan | null, pdf: ParsedActivity[] | null): LessonItem[] {
-  const rules = miaLessonRules(subject, lesson.title, lesson.course);
   const items: LessonItem[] = [];
   const task = (t: PlanTask, title: string, check: LessonItem["check"]): LessonItem => ({ id: `task-${t.taskId}`, title, check, pages: [], supplies: [] });
   const skip = (name: string) => MIA_SKIP_ITEMS.some((re) => re.test(name));
@@ -171,8 +170,16 @@ export function planLessonItems(lesson: PlanLesson, subject: string, plan: MiaCo
     return items;
   }
 
-  // The packet's own items: guided notes always, activities when the lesson uses the packet.
-  const fromPdf = pdf ? buildItems(pdf, subject, lesson.title, lesson.course).filter((i) => i.check === "self" || i.check === "photo" || i.check === "parent") : [];
+  // The parent's checks decide: online practice checked for this lesson means practice instead of the
+  // packet's activities; not checked means the packet's activities. Guided notes are always done.
+  // (A reading guide lists both, so it keeps every step.)
+  const checkedPractice = lesson.tasks.some((t) => t.type === "Practice" && !skip(t.name));
+  const guide = !!miaCoursePlan(subject, lesson.course)?.tapGuide;
+  const fromPdf = pdf
+    ? buildItems(pdf, subject, lesson.title, lesson.course, true).filter(
+        (i) => i.check === "self" || ((guide || !checkedPractice) && (i.check === "photo" || i.check === "parent")),
+      )
+    : [];
   let pdfPlaced = false;
   for (const t of lesson.tasks) {
     if (skip(t.name)) continue;
@@ -180,10 +187,7 @@ export function planLessonItems(lesson: PlanLesson, subject: string, plan: MiaCo
     else if (t.type === "Pdf") {
       if (!pdfPlaced) items.push(...fromPdf);
       pdfPlaced = true;
-    } else if (t.type === "Practice") {
-      // Everything on the calendar is marked: practice counts if the lesson's rules take marked practice.
-      if (rules.practice || rules.practiceIfMarked) items.push(task(t, practiceName(t.name), "practice"));
-    } else if (t.type === "Assessment") items.push(task(t, t.name || "Online quiz", "quiz"));
+    } else if (t.type === "Practice") items.push(task(t, practiceName(t.name), "practice")); else if (t.type === "Assessment") items.push(task(t, t.name || "Online quiz", "quiz"));
   }
   if (!pdfPlaced) items.push(...fromPdf);
   // Miacademy's order is PDF then video; the checklist does the video (and its notes) first.
