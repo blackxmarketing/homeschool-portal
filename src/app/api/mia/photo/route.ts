@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       miaFinishItem(kid.id, lesson.id, item.id, photo);
       return NextResponse.json({ waitingForParent: true, ...miaBoard(kid.id) });
     }
-    const key = lesson.studentPdf ? await findAnswerKey(lesson.studentPdf) : null;
+    const key = lesson.answerKey ?? (lesson.studentPdf ? await findAnswerKey(lesson.studentPdf) : null);
     if (!key) return NextResponse.json({ error: "There's no answer key for this one yet. Ask a grown-up." }, { status: 400 });
     const result =
       !aiEnabled() && process.env.NODE_ENV !== "production"

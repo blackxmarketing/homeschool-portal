@@ -451,6 +451,11 @@ const ADDED_COLUMNS: { table: string; column: string; ddl: string }[] = [
   { table: "mia_lessons", column: "weight", ddl: "ALTER TABLE mia_lessons ADD COLUMN weight INTEGER NOT NULL DEFAULT 1" },
   // What Claude read off the lesson's Student PDF (JSON ParsedActivity[]), for lessons built from the parent's calendar.
   { table: "mia_lessons", column: "pdf_parsed", ddl: "ALTER TABLE mia_lessons ADD COLUMN pdf_parsed TEXT" },
+  // The lesson's answer key, as listed on the parent's course page ("PDFs and Answer Keys").
+  { table: "mia_lessons", column: "answer_key", ddl: "ALTER TABLE mia_lessons ADD COLUMN answer_key TEXT" },
+  // Tasks read from the parent's course pages: their place in the course, and the lesson's answer key.
+  { table: "mia_plan_tasks", column: "seq", ddl: "ALTER TABLE mia_plan_tasks ADD COLUMN seq INTEGER" },
+  { table: "mia_plan_tasks", column: "key_url", ddl: "ALTER TABLE mia_plan_tasks ADD COLUMN key_url TEXT" },
 ];
 
 function migrate(conn: Database.Database): void {

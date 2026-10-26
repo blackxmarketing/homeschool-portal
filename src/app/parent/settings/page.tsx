@@ -371,7 +371,7 @@ function ParentMode({ familyId, code, kids }: { familyId: number; code?: string;
       <h2>Focus Buddy on a parent&apos;s computer</h2>
       <p className="muted small">
         With Focus Buddy installed on your computer too, opening your Miacademy parent page lets it read (never change) each child&apos;s
-        calendar for this week and the next five. The kids&apos; checklists then come straight from the tasks you marked in Miacademy,
+        calendar for this week and the next five, and every course page (each lesson you checked, with its PDF and answer key). The kids&apos; checklists then come straight from the tasks you marked in Miacademy, the whole class ahead of time,
         with every lesson&apos;s videos, practice levels, quiz and PDF known ahead. Open each child&apos;s page about once a week.
       </p>
       {code && (

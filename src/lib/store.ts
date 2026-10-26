@@ -2482,6 +2482,8 @@ export interface MiaLesson {
   course: string;
   /** 2 for the lesson before a unit assessment (counts as a whole week), else 1. */
   weight: number;
+  /** Its answer key from the parent's course page, when known (otherwise found from the Student PDF's name). */
+  answerKey: string | null;
 }
 
 interface MiaLessonRow {
@@ -2497,6 +2499,7 @@ interface MiaLessonRow {
   done_day: string | null;
   course: string | null;
   weight: number | null;
+  answer_key: string | null;
 }
 
 function toLesson(r: MiaLessonRow): MiaLesson {
@@ -2520,10 +2523,11 @@ function toLesson(r: MiaLessonRow): MiaLesson {
     doneDay: r.done_day,
     course: r.course ?? "",
     weight: miaLessonWeight(r.subject, r.course ?? "", r.title, r.weight ?? 1),
+    answerKey: r.answer_key ?? null,
   };
 }
 
-const LESSON_COLS = "id, subject, mia_key, title, student_pdf, items, parse_state, states, started_at, done_day, course, weight";
+const LESSON_COLS = "id, subject, mia_key, title, student_pdf, items, parse_state, states, started_at, done_day, course, weight, answer_key";
 
 export function miaLesson(kidId: number, lessonId: number): MiaLesson | null {
   const r = getDb().prepare(`SELECT ${LESSON_COLS} FROM mia_lessons WHERE id = ? AND kid_id = ?`).get(lessonId, kidId) as MiaLessonRow | undefined;
@@ -3030,11 +3034,36 @@ export function miaSavePlan(familyId: number, child: { id: string; name: string 
   return { kidId, tasks: count };
 }
 
+/**
+ * Parent mode read the child's course pages: each course's assigned tasks
+ * replace what the calendar said for that course (keeping the calendar's dates).
+ */
+export function miaSaveCourses(kidId: number, tasks: PlanTask[], now = Date.now()): number {
+  const db = getDb();
+  const days = new Map(
+    (db.prepare("SELECT task_id, day FROM mia_plan_tasks WHERE kid_id = ? AND day != ''").all(kidId) as { task_id: string; day: string }[]).map((r) => [
+      r.task_id,
+      r.day,
+    ]),
+  );
+  const keep = tasks.filter((t) => t.subject);
+  db.transaction(() => {
+    for (const course of new Set(keep.map((t) => t.course))) db.prepare("DELETE FROM mia_plan_tasks WHERE kid_id = ? AND course = ?").run(kidId, course);
+    const ins = db.prepare(
+      `INSERT OR REPLACE INTO mia_plan_tasks (kid_id, task_id, day, unit_title, course, subject, lesson_title, name, type, status, pdf_url, sort, updated_at, seq, key_url)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)`,
+    );
+    for (const t of keep)
+      ins.run(kidId, t.taskId, days.get(t.taskId) ?? "", t.unitTitle, t.course, t.subject, t.lessonTitle, t.name, t.type, t.status, t.pdfUrl, now, t.order, t.keyUrl ?? null);
+  })();
+  return keep.length;
+}
+
 function planTasks(kidId: number, subject: string, plan: MiaCoursePlan | null): PlanTask[] {
   return (
     getDb()
       .prepare(
-        `SELECT task_id, day, unit_title, course, subject, lesson_title, name, type, status, pdf_url, sort FROM mia_plan_tasks
+        `SELECT task_id, day, unit_title, course, subject, lesson_title, name, type, status, pdf_url, sort, seq, key_url FROM mia_plan_tasks
          WHERE kid_id = ? AND subject = ? ORDER BY day, sort`,
       )
       .all(kidId, subject) as {
@@ -3049,9 +3078,21 @@ function planTasks(kidId: number, subject: string, plan: MiaCoursePlan | null): 
       status: string;
       pdf_url: string | null;
       sort: number;
+      seq: number | null;
+      key_url: string | null;
     }[]
   )
     .filter((r) => !plan || plan.match.test(r.course))
+    // Tasks from the course pages go in course order; calendar-only ones by day.
+    .sort((a, b) =>
+      a.seq !== null && b.seq !== null
+        ? a.course.localeCompare(b.course) || a.seq - b.seq
+        : a.seq !== null
+          ? -1
+          : b.seq !== null
+            ? 1
+            : a.day.localeCompare(b.day) || a.sort - b.sort,
+    )
     .map((r, i) => ({
       taskId: r.task_id,
       day: r.day,
@@ -3063,6 +3104,7 @@ function planTasks(kidId: number, subject: string, plan: MiaCoursePlan | null): 
       type: r.type,
       status: r.status,
       pdfUrl: r.pdf_url,
+      keyUrl: r.key_url,
       order: i,
     }));
 }
@@ -3098,6 +3140,10 @@ export function miaPlanLessons(kidId: number, subject: string, plan: MiaCoursePl
     const key = `plan:${pl.key}`;
     const coursePlan = plan ?? miaCoursePlan(subject, pl.course);
     const needsPdf = !coursePlan?.onlineOnly && !!pl.pdfUrl;
+    // From the course page (no dates) and already finished before Focus Buddy saw it: not part of the checklist.
+    const undated = pl.tasks.every((t) => !t.day);
+    if (undated && pl.tasks.every((t) => t.status === "Completed") && !db.prepare("SELECT 1 FROM mia_lessons WHERE kid_id = ? AND mia_key = ?").get(kidId, key))
+      continue;
     db.prepare(
       `INSERT OR IGNORE INTO mia_lessons (kid_id, subject, mia_key, title, student_pdf, items, parse_state, started_at, course)
        VALUES (?, ?, ?, ?, ?, '[]', ?, ?, ?)`,
@@ -3105,6 +3151,10 @@ export function miaPlanLessons(kidId: number, subject: string, plan: MiaCoursePl
     const row = db.prepare(`SELECT ${LESSON_COLS}, pdf_parsed FROM mia_lessons WHERE kid_id = ? AND mia_key = ?`).get(kidId, key) as MiaLessonRow & {
       pdf_parsed: string | null;
     };
+    if (pl.keyUrl && row.answer_key !== pl.keyUrl) {
+      db.prepare("UPDATE mia_lessons SET answer_key = ? WHERE id = ?").run(pl.keyUrl, row.id);
+      row.answer_key = pl.keyUrl;
+    }
     const lesson = toLesson(row);
     // Saved before its class had a packet (Reading Comprehension Level G was online-only): read the PDF now.
     if (needsPdf && !row.pdf_parsed && lesson.parseState === "ready") {
@@ -3139,7 +3189,8 @@ export function miaPlanLessons(kidId: number, subject: string, plan: MiaCoursePl
       const lastDay = pl.tasks.at(-1)!.day;
       const allEarlier = pl.tasks.every((t) => t.status === "Completed") && lastDay < today();
       const earlierWeek = lastDay < weekStart(today()) && !workedThisWeek;
-      lesson.doneDay = allEarlier || earlierWeek ? lastDay : today();
+      // No date (from the course page): it was on the checklist until now, so it's finished today.
+      lesson.doneDay = lastDay && (allEarlier || earlierWeek) ? lastDay : today();
     }
     if (!done) lesson.doneDay = null;
     db.prepare("UPDATE mia_lessons SET items = ?, states = ?, done_day = ?, student_pdf = COALESCE(student_pdf, ?) WHERE id = ?").run(

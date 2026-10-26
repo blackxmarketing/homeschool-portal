@@ -116,6 +116,7 @@ describe("Reading Comprehension with a reading guide (Level G and up)", () => {
       unitTitle: "Unit 5",
       title: "Finding the Central Idea",
       pdfUrl: "https://miaplaza-content.s3.us-west-2.amazonaws.com/x/RC6+5.1.1+Student+PDF.pdf",
+      keyUrl: null,
       tasks: parsePlanWeek({
         Days: [{ Date: "2026-10-28", UnitTasks: [{ Unit: "u", TaskAssignments: [id(1), id(2), id(3)] }] }],
         UnitConversions: [{ UnitId: "u", Subject: "LanguageArts", Title: "Unit 5", CourseTitle: course }],

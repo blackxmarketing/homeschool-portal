@@ -21,8 +21,10 @@ export interface PlanTask {
   type: string;
   status: string;
   pdfUrl: string | null;
-  /** Order on the calendar (day, then the order Miacademy lists them). */
+  /** Order on the calendar (day, then the order Miacademy lists them), or in the course. */
   order: number;
+  /** The lesson's answer key (from the parent's course page), when known. */
+  keyUrl?: string | null;
 }
 
 interface RawWeek {
@@ -67,6 +69,55 @@ export function parsePlanWeek(raw: unknown): PlanTask[] {
   return out;
 }
 
+/** A task from the parent's course page (what Focus Buddy's parent mode sends). */
+interface RawCourseTask {
+  taskId?: unknown;
+  course?: unknown;
+  subject?: unknown;
+  unitTitle?: unknown;
+  lessonTitle?: unknown;
+  name?: unknown;
+  type?: unknown;
+  completed?: unknown;
+  pdfUrl?: unknown;
+  keyUrl?: unknown;
+  seq?: unknown;
+}
+
+/**
+ * The parent's course pages: every task the parent checked (assigned) in each
+ * course, in course order, with whether it's done and the lesson's answer key.
+ * No dates: the calendar adds those where it knows them.
+ */
+export function parseCourseTasks(raw: unknown): PlanTask[] {
+  if (!Array.isArray(raw)) return [];
+  const str = (v: unknown, max = 300) => (typeof v === "string" ? v.trim().slice(0, max) : "");
+  const out: PlanTask[] = [];
+  for (const r of raw.slice(0, 20000) as RawCourseTask[]) {
+    const taskId = str(r?.taskId).toLowerCase();
+    const course = str(r?.course, 160);
+    if (!/^[0-9a-f-]{36}$/.test(taskId) || !course || typeof r.seq !== "number" || !Number.isFinite(r.seq)) continue;
+    const type = str(r.type, 40);
+    const pdf = str(r.pdfUrl, 600);
+    const key = str(r.keyUrl, 600);
+    out.push({
+      taskId,
+      day: "",
+      unitTitle: str(r.unitTitle, 160),
+      course,
+      subject: /vocabulary/i.test(course) ? "vocab" : (MIA_SUBJECT_MAP[str(r.subject, 60)] ?? ""),
+      lessonTitle: str(r.lessonTitle, 200),
+      name: str(r.name, 200),
+      type,
+      status: r.completed === true ? "Completed" : "Assigned",
+      pdfUrl: type === "Pdf" && PDF_URL.test(pdf) ? pdf : null,
+      keyUrl: PDF_URL.test(key) ? key : null,
+      order: r.seq,
+    });
+  }
+  return out;
+}
+
 export interface PlanLesson {
   key: string;
   course: string;
@@ -75,6 +126,8 @@ export interface PlanLesson {
   tasks: PlanTask[];
   /** The lesson's Student PDF, when it has one. */
   pdfUrl: string | null;
+  /** Its answer key, when the parent's course page listed one. */
+  keyUrl: string | null;
 }
 
 /** Groups a class's tasks into lessons, in calendar order. */
@@ -83,9 +136,10 @@ export function planLessons(tasks: PlanTask[]): PlanLesson[] {
   for (const t of [...tasks].sort((a, b) => a.order - b.order)) {
     const key = `${t.course}|${t.unitTitle}|${t.lessonTitle}`;
     let l = byKey.get(key);
-    if (!l) byKey.set(key, (l = { key, course: t.course, unitTitle: t.unitTitle, title: t.lessonTitle, tasks: [], pdfUrl: null }));
+    if (!l) byKey.set(key, (l = { key, course: t.course, unitTitle: t.unitTitle, title: t.lessonTitle, tasks: [], pdfUrl: null, keyUrl: null }));
     l.tasks.push(t);
     if (!l.pdfUrl && t.pdfUrl) l.pdfUrl = t.pdfUrl;
+    if (!l.keyUrl && t.keyUrl) l.keyUrl = t.keyUrl;
   }
   return [...byKey.values()];
 }

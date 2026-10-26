@@ -206,3 +206,18 @@ subject, `vocab`, so it never joins Language Arts. `miaVocab` in `store.ts`.
 - A choice board is one activity ("(pick one)"); the photo check grades the
   choice the kid did. Bonus and optional activities are always left off.
 - Every photo-checked mistake comes with what goes there and a short why.
+
+### The whole class from the parent's course pages
+
+Parent mode (`extension/src/parent.ts`) also reads each course page of the child
+being viewed, every few hours and gently (one request at a time, about 0.3 s
+apart, waiting and retrying if Miacademy says "too many requests"):
+GetEnrolledCourses -> ConvertEnrolledCourses (course ids and titles) -> each
+course's units (GetUnits; only units with something assigned) -> ConvertUnit
+(lesson PDFs and their answer keys) -> GetLessons / ConvertLesson -> each
+assigned lesson's tasks (GetConvertedTasks: type, name, assigned / completed /
+excused). The portal (`parseCourseTasks`, `miaSaveCourses`) replaces that
+course's calendar rows with these, in course order, keeping the calendar's dates
+where it knows them. Lessons already finished before Focus Buddy saw them are
+skipped (they don't fill this week's rings). Each lesson keeps its answer key
+from the course page (`mia_lessons.answer_key`), which the photo check uses first.
