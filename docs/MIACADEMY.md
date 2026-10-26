@@ -63,9 +63,12 @@ Started with Bryce's General Science, 1 lesson a week.
     the kid fixes it with a pen and takes another photo until it's right. The first
     photo's score is kept, and under 70% alerts a parent. Stuck after three tries:
     finish, and a parent is told.
-  - Hands-on / supplies: the timer pauses by itself to gather supplies. A parent
-    restarts it (family overview, or the PIN on the kid's screen) or skips the
-    activity. Afterwards a photo goes to the parent to approve.
+  - Hands-on / supplies: the kid picks **Do it now** (the timer pauses to gather
+    supplies; a grown-up restarts it or skips the activity) or **Save for later**
+    (the checklist moves on, and the lesson counts without it). Saved activities
+    stay in a "Saved for later" box under the checklist, even after Miacademy
+    moves on, until the kid taps "I did it!" and sends a photo. Either way, the
+    photo goes to the parent to approve (parent page: Checklists or approvals).
 - **The strip** shows the next three items (the top one big, two dim). A finished
   item pops away and the next slides up. "This week: 0 of 1 lesson" counts lessons
   whose every item is done, Monday to Sunday.

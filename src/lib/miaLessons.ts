@@ -61,6 +61,8 @@ export interface ItemState {
   waitingForParent?: boolean;
   /** A parent said the supplies are ready (so the timer doesn't pause again). */
   suppliesReady?: boolean;
+  /** A hands-on activity the kid saved for later (when): off the checklist, still to do, and the lesson can count without it. */
+  later?: number;
   photo?: string;
 }
 
@@ -149,9 +151,9 @@ function push(items: LessonItem[], seen: Set<string>, item: LessonItem): void {
   items.push({ ...item, id: uniqueId(seen, item.title) });
 }
 
-/** Items still to do, in order. */
+/** Items still to do, in order (not the ones saved for later). */
 export function remainingItems(items: LessonItem[], states: Record<string, ItemState>): LessonItem[] {
-  return items.filter((i) => !states[i.id]?.done);
+  return items.filter((i) => !states[i.id]?.done && !states[i.id]?.later);
 }
 
 export function lessonDone(items: LessonItem[], states: Record<string, ItemState>): boolean {

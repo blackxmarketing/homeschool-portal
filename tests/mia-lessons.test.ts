@@ -13,6 +13,7 @@ import {
   miaLesson,
   miaPathSync,
   miaRecordPhotoCheck,
+  miaSaveForLater,
   miaSetParseState,
   miaSetBigLesson,
   miaSetStudentPdf,
@@ -288,6 +289,33 @@ describe("a kid's Science checklist", () => {
     miaAct(kid, "sci", "helpResume", { now: 2000, skip: true });
     expect(miaLesson(kid, id)!.states["stem-challenge-marble-run"]).toMatchObject({ done: true, skipped: true });
     expect(miaDay(kid).sci?.pause).toBeNull();
+  });
+
+  it("lets the kid save a hands-on activity for later: the lesson counts without it, and it waits until it's done", () => {
+    const id = startGravity();
+    expect(() => miaSaveForLater(kid, id, "forces-word-search")).toThrow(/Only hands-on/);
+    miaSaveForLater(kid, id, "stem-challenge-marble-run");
+    const part = () => miaChecklist(kid, "sci")!.parts[0];
+    expect(part().upcoming.map((u) => u.item.id)).not.toContain("stem-challenge-marble-run");
+    expect(part().later.map((u) => u.item.id)).toEqual(["stem-challenge-marble-run"]);
+    // Everything else done, and Miacademy moves on: the lesson counts, the experiment is still saved.
+    miaFinishItem(kid, id, "complete-the-guided-notes");
+    for (const [item, pages] of [["forces-word-search", [4, 5]], ["out-of-this-world", [6, 7]]] as const) {
+      for (const page of pages) miaRecordPhotoCheck(kid, id, item, { right: 5, total: 5, wrong: [] }, "1/x.jpg", 1, page);
+      miaFinishItem(kid, id, item);
+    }
+    miaPathSync(kid, parsePathCourses(path(GRAVITY_ID, "Assessment", null)));
+    miaFinishItem(kid, id, "watch-the-lesson-video");
+    miaPathSync(kid, parsePathCourses(path(MAGNETISM_ID, "Pdf", "Forces: Magnetism Student PDF")));
+    expect(miaLesson(kid, id)!.doneDay).not.toBeNull();
+    expect(part()).toMatchObject({ doneThisWeek: 1, lessonTitle: "Forces: Magnetism" });
+    expect(part().later).toMatchObject([{ lessonId: id, lessonTitle: "Forces: Gravity", item: { id: "stem-challenge-marble-run" } }]);
+    // Done another day: the photo goes to a parent, who approves it.
+    miaFinishItem(kid, id, "stem-challenge-marble-run", "1/run.jpg");
+    expect(miaWaitingForParent(family)).toHaveLength(1);
+    parentMiaItem(family, kid, id, "stem-challenge-marble-run", "approve");
+    expect(part().later).toEqual([]);
+    expect(miaLesson(kid, id)!.doneDay).not.toBeNull();
   });
 
   it("finishes the lesson when Miacademy moves to the next one, and counts it for the week", () => {

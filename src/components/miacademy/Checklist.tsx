@@ -47,16 +47,18 @@ export default function Checklist({
   const todo = checklist.upcoming.filter((e) => !e.state.waitingForParent);
   const top = todo[0];
 
-  // Hands-on activities: pause the timer while supplies are gathered (once; a grown-up restarts it).
-  const askedSupplies = useRef(new Set<string>());
-  useEffect(() => {
-    if (!running || !top || top.item.check !== "parent" || top.state.suppliesReady) return;
-    const key = `${top.lessonId}:${top.item.id}`;
-    if (askedSupplies.current.has(key)) return;
-    askedSupplies.current.add(key);
-    onSupplies(top.lessonId, top.item.id);
-    say(`Time to gather your supplies for ${top.item.title}. Your timer is paused, and a grown-up will help.`);
-  }, [running, top, onSupplies, say]);
+  // Hands-on activities: do it now (the timer pauses while supplies are gathered with a grown-up) or save it for later.
+  function doNow(entry: Entry) {
+    onSupplies(entry.lessonId, entry.item.id);
+    say(`Time to gather your supplies for ${entry.item.title}. Your timer is paused, and a grown-up will help.`);
+  }
+  async function saveForLater(entry: Entry) {
+    const { ok, data } = await api({ lessonId: entry.lessonId, itemId: entry.item.id, later: true }, "/api/mia/item");
+    const next = (data as { checklists?: Record<string, MiaChecklist | null> }).checklists;
+    if (!ok || !next) return;
+    say(`Saved for later: ${entry.item.title}. ${nextLine(next[checklist.subject]?.parts[part]).replace(/^Nice! /, "")}`);
+    onChecklists(next);
+  }
 
   // Pop the finished activity away, then show the new list.
   async function finished(entry: Entry, next: Record<string, MiaChecklist | null>) {
@@ -101,7 +103,8 @@ export default function Checklist({
   else if (checklist.reading && !top) body = <div className="mia-cl-note">⏳ Getting your checklist ready…</div>;
   else if (checklist.failed && !top)
     body = <div className="mia-cl-note">😕 I couldn&apos;t load this lesson&apos;s checklist. Open your Student PDF in Miacademy again, or ask a grown-up.</div>;
-  else if (!top && !waiting.length) body = <div className="mia-cl-note">🎉 You finished every activity! Pick your next lesson in Miacademy.</div>;
+  else if (!top && !waiting.length && !checklist.later.length)
+    body = <div className="mia-cl-note">🎉 You finished every activity! Pick your next lesson in Miacademy.</div>;
   else
     body = (
       <div className="mia-tasks">
@@ -115,7 +118,15 @@ export default function Checklist({
             );
           return (
             <div key={key} className={`mia-task top ${leaving === key ? "poof" : ""}`} style={{ ["--c" as string]: color }}>
-              <TopTask entry={e} running={running} checked={checking === key || leaving === key} onPhoto={() => setPhotoFor(e)} onCheck={() => void done(e)} />
+              <TopTask
+                entry={e}
+                running={running}
+                checked={checking === key || leaving === key}
+                onPhoto={() => setPhotoFor(e)}
+                onCheck={() => void done(e)}
+                onNow={() => doNow(e)}
+                onLater={() => void saveForLater(e)}
+              />
             </div>
           );
         })}
@@ -124,6 +135,26 @@ export default function Checklist({
             ⏳ {e.item.title}: waiting for a grown-up to approve
           </div>
         ))}
+        {checklist.later.length > 0 && (
+          <div className="mia-later">
+            <div className="mia-later-head">⏭️ Saved for later</div>
+            {checklist.later.map((e) => (
+              <div key={`l${e.lessonId}:${e.item.id}`} className="mia-later-row">
+                <span>
+                  🧰 {e.item.title}
+                  {e.lessonTitle !== checklist.lessonTitle && <span className="mia-later-lesson"> · {e.lessonTitle}</span>}
+                </span>
+                {e.state.waitingForParent ? (
+                  <span className="mia-later-wait">⏳ Grown-up checking</span>
+                ) : (
+                  <button className="mia-btn mia-later-btn" onClick={() => setPhotoFor(e)}>
+                    📷 I did it!
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
 
@@ -168,12 +199,18 @@ function TopTask({
   checked,
   onPhoto,
   onCheck,
+  onNow,
+  onLater,
 }: {
   entry: Entry;
   running: boolean;
   checked: boolean;
   onPhoto: () => void;
   onCheck: () => void;
+  /** Hands-on: gather the supplies now (pauses the timer). */
+  onNow: () => void;
+  /** Hands-on: save it for later. */
+  onLater: () => void;
 }) {
   const { item, state } = entry;
   const pages = item.pages.length ? ` · page${item.pages.length > 1 ? "s" : ""} ${item.pages[0]}${item.pages.length > 1 ? `-${item.pages.at(-1)}` : ""}` : "";
@@ -207,7 +244,15 @@ function TopTask({
     canCheck = false;
     hint = (
       <>
-        <b>Gather:</b> {item.supplies.length ? item.supplies.join(", ") : "your supplies"}
+        <b>Needs:</b> {item.supplies.length ? item.supplies.join(", ") : "supplies"}
+        <div className="mia-row mia-now-later">
+          <button className="mia-btn" onClick={onNow} disabled={!running} title={running ? undefined : "Press Start first"}>
+            🧰 Do it now
+          </button>
+          <button className="mia-btn ghost" onClick={onLater}>
+            ⏭️ Save for later
+          </button>
+        </div>
       </>
     );
   } else if (!running) hint = "Press Start to work on this.";

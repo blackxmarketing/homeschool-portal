@@ -1464,3 +1464,44 @@ label.mia-btn {
   display: inline-block;
   text-align: center;
 }
+
+/* Hands-on activities: do it now or save it for later. */
+.mia-now-later {
+  margin-top: 8px;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.mia-now-later .mia-btn {
+  font-size: 12px;
+  padding: 8px 10px;
+}
+.mia-later {
+  margin-top: 10px;
+  padding: 8px;
+  border: 3px dashed #1b1530;
+  border-radius: 8px;
+  background: #fff8e1;
+}
+.mia-later-head {
+  font-family: var(--font-pixel), "Press Start 2P", monospace;
+  font-size: 10px;
+  margin-bottom: 6px;
+}
+.mia-later-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 14px;
+  padding: 4px 0;
+}
+.mia-later-lesson,
+.mia-later-wait {
+  font-size: 12px;
+  opacity: 0.75;
+}
+.mia-hud .mia-later-btn {
+  font-size: 11px;
+  padding: 6px 8px;
+  flex-shrink: 0;
+}

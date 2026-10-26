@@ -379,7 +379,7 @@ function MiaChecklists({ familyId }: { familyId: number }) {
   const rows = miaFamilyToday(familyId).flatMap(({ kid }) =>
     MIA_SUBJECTS.flatMap((sub) =>
       (miaChecklist(kid.id, sub.id)?.parts ?? [])
-        .filter((p) => p.upcoming.length)
+        .filter((p) => p.upcoming.length || p.later.length)
         .map((p) => ({ kid, sub, part: p })),
     ),
   );
@@ -387,7 +387,10 @@ function MiaChecklists({ familyId }: { familyId: number }) {
   return (
     <div className="card">
       <h2>📝 Checklists</h2>
-      <p className="muted small">The next activities on each checklist. Mark one done if it was finished away from the timer.</p>
+      <p className="muted small">
+        The next activities on each checklist, and hands-on activities saved for later. Mark one done if it was finished away from
+        the timer.
+      </p>
       <table>
         <tbody>
           {rows.map(({ kid, sub, part }) => (
@@ -400,12 +403,16 @@ function MiaChecklists({ familyId }: { familyId: number }) {
                 {part.lessonTitle && <div className="muted small">{part.lessonTitle}</div>}
               </td>
               <td>
-                {part.upcoming.map((u) => (
+                {[...part.upcoming, ...part.later].map((u) => (
                   <form key={`${u.lessonId}-${u.item.id}`} action={miaItemAction} style={{ marginBottom: 4 }}>
                     <input type="hidden" name="kidId" value={kid.id} />
                     <input type="hidden" name="lessonId" value={u.lessonId} />
                     <input type="hidden" name="itemId" value={u.item.id} />
-                    <span className="small">{u.item.title}</span>{" "}
+                    <span className="small">
+                      {u.state.later ? "⏭️ Saved for later: " : ""}
+                      {u.item.title}
+                      {u.state.later && u.lessonTitle !== part.lessonTitle ? ` (${u.lessonTitle})` : ""}
+                    </span>{" "}
                     <button className="linkbtn small" name="op" value="approve">
                       Mark done
                     </button>

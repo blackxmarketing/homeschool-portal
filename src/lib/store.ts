@@ -2787,6 +2787,8 @@ function courseChecklist(kidId: number, subject: string, plan: MiaCoursePlan | n
   const current = lessons[0];
   return {
     subject,
+    /** Hands-on activities saved for later (still to do, off the list above). */
+    later: miaLaterItems(kidId, subject, plan),
     name: plan?.name ?? null,
     slot: plan?.slot ?? "main",
     onlineOnly: !!plan?.onlineOnly,
@@ -2897,6 +2899,34 @@ export function miaAskGrownUp(kidId: number, lessonId: number, itemId: string, n
   );
 }
 
+/** Lessons with a hands-on activity saved for later and not done yet (the lesson itself may be finished). */
+function miaLessonsWithLater(kidId: number, subject?: string): MiaLesson[] {
+  return (
+    getDb()
+      .prepare(`SELECT ${LESSON_COLS} FROM mia_lessons WHERE kid_id = ? AND (? IS NULL OR subject = ?) AND states LIKE '%"later":%' ORDER BY started_at, id`)
+      .all(kidId, subject ?? null, subject ?? null) as MiaLessonRow[]
+  ).map(toLesson);
+}
+
+/** A class's hands-on activities saved for later, oldest first. */
+export function miaLaterItems(kidId: number, subject: string, plan?: MiaCoursePlan | null) {
+  const out: { lessonId: number; lessonTitle: string; item: LessonItem; state: ItemState }[] = [];
+  for (const l of miaLessonsWithLater(kidId, subject).filter((l) => !plan || plan.match.test(l.course)))
+    for (const item of l.items ?? []) {
+      const state = l.states[item.id];
+      if (state?.later && !state.done) out.push({ lessonId: l.id, lessonTitle: l.title, item, state });
+    }
+  return out;
+}
+
+/** The kid saved a hands-on activity for later (no supplies right now): the checklist moves on without it. */
+export function miaSaveForLater(kidId: number, lessonId: number, itemId: string, now = Date.now()): void {
+  updateItem(kidId, lessonId, itemId, (s, item) => {
+    if (item.check !== "parent") throw new PortalError("Only hands-on activities can be saved for later.");
+    return { ...s, later: now };
+  });
+}
+
 /** The kid finished an activity: fixed their mistakes, or sent the photo of a hands-on one for a parent to approve. */
 export function miaFinishItem(kidId: number, lessonId: number, itemId: string, photo?: string, now = Date.now()): void {
   const lesson = updateItem(kidId, lessonId, itemId, (s, item) => {
@@ -2941,7 +2971,7 @@ export function miaWaitingForParent(familyId: number) {
   const out: { kid: Kid; lesson: MiaLesson; item: LessonItem; state: ItemState }[] = [];
   for (const kid of listKids(familyId))
     for (const subject of MIA_SUBJECTS.map((s) => s.id))
-      for (const lesson of miaOpenLessons(kid.id, subject))
+      for (const lesson of [...miaOpenLessons(kid.id, subject), ...miaLessonsWithLater(kid.id, subject).filter((l) => l.doneDay)])
         for (const item of lesson.items ?? []) {
           const state = lesson.states[item.id];
           if (state?.waitingForParent && !state.done) out.push({ kid, lesson, item, state });
