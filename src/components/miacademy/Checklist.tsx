@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { LessonItem } from "@/lib/miaLessons";
+import { itemMaterials, needsMaterials, type LessonItem } from "@/lib/miaLessons";
 import type { MiaChecklist, MiaCourseChecklist } from "@/lib/store";
 import { checkSound } from "@/components/voice";
 import type { MiaApi } from "./MiaHud";
@@ -244,11 +244,12 @@ function TopTask({
           : item.check === "quiz"
             ? "Take the quiz in Miacademy. Then check it off here!"
             : "Do it in Miacademy. Then check it off here!";
-  } else if (item.check === "parent" && !state.suppliesReady) {
+  } else if (needsMaterials(item) && !state.suppliesReady) {
+    // Only the activity that needs materials: do it now, or save just this one for later.
     canCheck = false;
     hint = (
       <>
-        <b>Needs:</b> {item.supplies.length ? item.supplies.join(", ") : "supplies"}
+        <b>Needs:</b> {itemMaterials(item).join(", ")}
         <div className="mia-row mia-now-later">
           <button className="mia-btn" onClick={onNow} disabled={!running} title={running ? undefined : "Press Start first"}>
             🧰 Do it now

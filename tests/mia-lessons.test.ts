@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { openDb, setDb } from "@/lib/db";
-import { answerKeyUrl, buildItems, guessStudentPdf, lessonTitleFromTask, nextNumberedPdfs, onlineTaskTitle, weekStart, type ParsedActivity } from "@/lib/miaLessons";
+import { answerKeyUrl, buildItems, guessStudentPdf, lessonTitleFromTask, needsMaterials, nextNumberedPdfs, onlineTaskTitle, weekStart, type ParsedActivity } from "@/lib/miaLessons";
 import { lessonKeyFromLink, parsePathCourses, sameLesson } from "@/lib/miaSync";
 import {
   addKid,
@@ -293,7 +293,13 @@ describe("a kid's Science checklist", () => {
 
   it("lets the kid save a hands-on activity for later: the lesson counts without it, and it waits until it's done", () => {
     const id = startGravity();
-    expect(() => miaSaveForLater(kid, id, "forces-word-search")).toThrow(/Only hands-on/);
+    // Only the activity with materials: not a packet page, not one that needs just a pencil.
+    expect(() => miaSaveForLater(kid, id, "forces-word-search")).toThrow(/needs materials/);
+    expect(buildItems([{ title: "Draw a diagram", kind: "hands_on", pages: [3], supplies: ["Pencil", "Crayons", "Paper"] }]).map((i) => needsMaterials(i))).toEqual([
+      false,
+      false,
+      false,
+    ]);
     miaSaveForLater(kid, id, "stem-challenge-marble-run");
     const part = () => miaChecklist(kid, "sci")!.parts[0];
     expect(part().upcoming.map((u) => u.item.id)).not.toContain("stem-challenge-marble-run");

@@ -151,6 +151,19 @@ function push(items: LessonItem[], seen: Set<string>, item: LessonItem): void {
   items.push({ ...item, id: uniqueId(seen, item.title) });
 }
 
+/** Everyday school supplies: not "materials" (a kid always has them, so nothing to gather or save for later). */
+const EVERYDAY = /^(a |an |your |some )?(pencils?|pens?|crayons?|colou?red pencils?|markers?|highlighters?|erasers?|scissors|glue( sticks?)?|paper|lined paper|notebook( paper)?|ruler|student pdf|(the )?packet|worksheet|computer|internet)$/i;
+
+/** The materials an activity needs, without everyday school supplies. */
+export function itemMaterials(item: LessonItem): string[] {
+  return item.supplies.filter((s) => !EVERYDAY.test(s.trim()));
+}
+
+/** A hands-on activity that needs materials: only these can pause the timer to gather them, or be saved for later. */
+export function needsMaterials(item: LessonItem): boolean {
+  return item.check === "parent" && itemMaterials(item).length > 0;
+}
+
 /** Items still to do, in order (not the ones saved for later). */
 export function remainingItems(items: LessonItem[], states: Record<string, ItemState>): LessonItem[] {
   return items.filter((i) => !states[i.id]?.done && !states[i.id]?.later);

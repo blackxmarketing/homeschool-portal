@@ -894,12 +894,15 @@ function FocusedTimer({
       <div className="mia-big-head">
         {subject.name}
       </div>
-      <Face color={subject.color} fraction={t ? rem / t.durMs : 1} big />
-      {t?.overtimeSince && isRunning(t) ? (
-        <div className="mia-time mia-overtime">+{mmss(Math.max(0, now - t.overtimeSince))}</div>
-      ) : (
-        <div className="mia-time">{mmss(rem)}</div>
-      )}
+      {/* Clock and countdown side by side, so the checklist below fits on the screen. */}
+      <div className="mia-big-clock">
+        <Face color={subject.color} fraction={t ? rem / t.durMs : 1} big />
+        {t?.overtimeSince && isRunning(t) ? (
+          <div className="mia-time mia-overtime">+{mmss(Math.max(0, now - t.overtimeSince))}</div>
+        ) : (
+          <div className="mia-time">{mmss(rem)}</div>
+        )}
+      </div>
       <div className="mia-row">{controls}</div>
       {checkin && (
         <div className="mia-checkin">

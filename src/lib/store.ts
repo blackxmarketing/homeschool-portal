@@ -37,6 +37,7 @@ import {
   nextNumberedPdfs,
   onlineTaskTitle,
   remainingItems,
+  needsMaterials,
   weekStart,
   type ItemState,
   type LessonItem,
@@ -2211,7 +2212,7 @@ export function miaAct(
 
   if (action === "supplies") {
     const item = miaLesson(kidId, opts.lessonId ?? -1)?.items?.find((i) => i.id === opts.itemId);
-    if (!item || item.check !== "parent") throw new PortalError("That activity doesn't need supplies.");
+    if (!item || !needsMaterials(item)) throw new PortalError("That activity doesn't need supplies.");
   }
   if (action === "helpResume" && current.pause?.type === "supplies") {
     const { lessonId, itemId } = current.pause;
@@ -2795,7 +2796,8 @@ function courseChecklist(kidId: number, subject: string, plan: MiaCoursePlan | n
     target,
     doneThisWeek,
     weekDone,
-    upcoming: upcoming.slice(0, 3),
+    // The one they're on and the next two (activities waiting for a parent's approval don't take a spot).
+    upcoming: [...upcoming.filter((u) => !u.state.waitingForParent).slice(0, 3), ...upcoming.filter((u) => u.state.waitingForParent)],
     left: upcoming.length,
     lessonTitle: weekDone ? null : current?.title ?? null,
     /** The current lesson is the 4-day one before a unit assessment. */
@@ -2922,7 +2924,7 @@ export function miaLaterItems(kidId: number, subject: string, plan?: MiaCoursePl
 /** The kid saved a hands-on activity for later (no supplies right now): the checklist moves on without it. */
 export function miaSaveForLater(kidId: number, lessonId: number, itemId: string, now = Date.now()): void {
   updateItem(kidId, lessonId, itemId, (s, item) => {
-    if (item.check !== "parent") throw new PortalError("Only hands-on activities can be saved for later.");
+    if (!needsMaterials(item)) throw new PortalError("Only an activity that needs materials can be saved for later.");
     return { ...s, later: now };
   });
 }

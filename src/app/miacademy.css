@@ -1505,3 +1505,46 @@ label.mia-btn {
   padding: 6px 8px;
   flex-shrink: 0;
 }
+
+/* The open timer: clock and countdown side by side, so the checklist's three activities fit below. */
+.mia-big-clock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+}
+.mia-big-clock .mia-face.big {
+  width: min(150px, 22vh);
+  height: min(150px, 22vh);
+}
+.mia-big .mia-big-clock .mia-time {
+  font-size: 40px;
+}
+.mia-big-clock .mia-face.big {
+  width: min(110px, 16vh);
+  height: min(110px, 16vh);
+}
+.mia-big .mia-big-clock .mia-time {
+  font-size: 34px;
+  white-space: nowrap;
+}
+.mia-now-later {
+  flex-wrap: nowrap;
+}
+.mia-hud .mia-now-later .mia-btn {
+  flex: 1;
+  min-width: 0;
+  font-size: 10px;
+  padding: 7px 6px;
+  white-space: nowrap;
+}
+.mia-hud .mia-now-later {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+.mia-hud .mia-now-later .mia-btn {
+  flex: none;
+  white-space: normal;
+}

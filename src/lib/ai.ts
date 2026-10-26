@@ -496,7 +496,7 @@ For each: kind = video (watching or rewatching the lesson video), quiz (the onli
 If one line combines the video and the guided notes, list it as written; it is split later.
 If the packet has no checklist (only note-taking pages and extension ideas), list its note-taking or "listening sheet" pages as notes, and every other activity or extension idea as other.
 pages = the PDF page numbers that activity's pages are on (look at the page headings); empty for online activities.
-supplies = the materials list for hands_on activities, short items; empty otherwise.
+supplies = the materials list for hands_on activities, short items, not everyday school supplies (pencil, crayons, paper, scissors, glue); empty otherwise.
 A study guide, self-reflection or confidence check counts as notes.
 A choice board (several activities where the student picks one) is ONE activity: list it once, titled as written, not each choice.
 lessonTitle = the lesson's title as printed on page 1 (for example "Forces: Gravity").
