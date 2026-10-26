@@ -171,11 +171,11 @@ export default async function Settings({
         <form action={parentPinAction} className="row" style={{ alignItems: "end" }}>
           <div>
             <label htmlFor="ppin">New PIN (4-6 digits)</label>
-            <input id="ppin" name="pin" type="password" inputMode="numeric" pattern="d{4,6}" maxLength={6} autoComplete="new-password" required />
+            <input id="ppin" name="pin" type="password" inputMode="numeric" pattern="\d{4,6}" maxLength={6} autoComplete="new-password" required />
           </div>
           <div>
             <label htmlFor="ppin2">Type it again</label>
-            <input id="ppin2" name="pin2" type="password" inputMode="numeric" pattern="d{4,6}" maxLength={6} autoComplete="new-password" required />
+            <input id="ppin2" name="pin2" type="password" inputMode="numeric" pattern="\d{4,6}" maxLength={6} autoComplete="new-password" required />
           </div>
           <div>
             <button className="btn">Save PIN</button>
