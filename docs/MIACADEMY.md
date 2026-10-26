@@ -235,3 +235,18 @@ The checklists only follow the core classes (`miaIsCoreCourse`): Math, Science,
 U.S. Geography / Ancient World History, and the Language Arts classes in
 `MIA_COURSE_PLANS`. When a kid finishes a level, the parent checks the next one
 in Miacademy and the checklist follows it.
+
+### Photo check, page by page
+
+A PDF activity is checked one page at a time: the kid takes a photo of the top
+half of the page, then the bottom half (a whole page from arm's length is too
+small to read). Both go to `/api/mia/photo` with the page number and are graded
+together against that page of the answer key (`checkWorksheetPhoto`, `images`).
+Anything wrong is explained right away (what goes there and why); the kid fixes
+it with a pen and retakes that page's two photos. The next page, and checking
+the activity off, wait until the page is right (`pagesDone`; `miaFinishItem`
+refuses otherwise). Each page's first photos are its score (`pageScores`); the
+activity's score is their sum, and a parent hears about it under 70% once every
+page has a first score. After three tries on a page, "Get a grown-up" sends the
+parent a note (`miaAskGrownUp`); the parent can mark it done on the parent page.
+Hands-on activities stay one photo for a grown-up.

@@ -555,7 +555,8 @@ export async function checkWorksheetPhoto(input: {
   answerKeyUrl: string;
   activity: string;
   pages: number[];
-  image: { data: string; mediaType: "image/jpeg" | "image/png" | "image/webp" };
+  /** One page, usually two photos: its top half and its bottom half. */
+  images: { data: string; mediaType: "image/jpeg" | "image/png" | "image/webp" }[];
 }): Promise<PhotoCheck | null> {
   return askStructuredContent<PhotoCheck>(
     `You check a 9-12 year old's homeschool worksheet against the answer key, like a kind teacher.
@@ -567,14 +568,15 @@ Only check the activity named, on the pages given in the answer key.
 - Where the key shows example numbers (for example "answers given for 100 pounds"), check the student's own calculation with their own numbers instead.
 - Count each blank or question as one. total = how many there are; right = how many are right.
 - wrong lists each one that is wrong or missing: question = a few words naming it ("blank 2", "Mars"), answer = what goes there and, in a few kid-friendly words, why (for example "c, because nonfiction is based on real facts").
-If the photo is blurry, cut off, or of a different page, set readable false.
+The photos are one page of the student's work: when there are two, the first is the top half and the second the bottom half. Check only the questions on that page.
+If the photos are blurry, cut off, or of a different page, set readable false.
 message: one or two short, warm sentences to the student, spoken aloud. No grades, no letters.`,
     [
       { type: "document", source: { type: "url", url: input.answerKeyUrl } },
-      { type: "image", source: { type: "base64", media_type: input.image.mediaType, data: input.image.data } },
+      ...input.images.map((image) => ({ type: "image" as const, source: { type: "base64" as const, media_type: image.mediaType, data: image.data } })),
       {
         type: "text",
-        text: `Activity: ${input.activity}${input.pages.length ? ` (pages ${input.pages.join(", ")} of the key)` : ""}. The photo is the student's work.`,
+        text: `Activity: ${input.activity}${input.pages.length ? ` (page${input.pages.length > 1 ? "s" : ""} ${input.pages.join(", ")} of the key)` : ""}. The photos are the student's work${input.images.length > 1 ? " (top half, then bottom half)" : ""}.`,
       },
     ],
     PHOTO_CHECK_SCHEMA as never,

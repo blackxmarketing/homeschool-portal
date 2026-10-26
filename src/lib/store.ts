@@ -2851,34 +2851,61 @@ export function miaRecordPhotoCheck(
   result: { right: number; total: number; wrong: { question: string; answer: string }[] },
   photo: string,
   now = Date.now(),
+  /** The page these photos are of (0 when the activity's pages aren't known). */
+  page = 0,
 ): void {
   let first = false;
-  const lesson = updateItem(kidId, lessonId, itemId, (s) => {
-    first = s.total === undefined;
-    // The first photo's score is the one that counts; later photos (after fixing) only update what's left to fix.
-    return first
-      ? { ...s, right: result.right, total: result.total, wrong: result.wrong, photo, at: now }
-      : { ...s, wrong: result.wrong, photo, at: now };
+  let score = { right: 0, total: 0 };
+  const lesson = updateItem(kidId, lessonId, itemId, (s, item) => {
+    // Each page's first photos are its score; later photos (after fixing) only update what's left to fix.
+    first = !s.pageScores?.[page];
+    const pageScores = first ? { ...s.pageScores, [page]: { right: result.right, total: result.total } } : (s.pageScores ?? {});
+    score = Object.values(pageScores).reduce((a, p) => ({ right: a.right + p.right, total: a.total + p.total }), { right: 0, total: 0 });
+    const pagesDone = result.wrong.length ? (s.pagesDone ?? []).filter((p) => p !== page) : [...new Set([...(s.pagesDone ?? []), page])];
+    return { ...s, pageScores, pagesDone, right: score.right, total: score.total, wrong: result.wrong, photo, at: now };
   });
   const kid = getKid(kidId)!;
-  if (first && result.total > 0 && result.right / result.total < 0.7) {
-    const item = lesson.items!.find((i) => i.id === itemId)!;
+  const item = lesson.items!.find((i) => i.id === itemId)!;
+  const allSeen = (item.pages.length ? item.pages : [0]).every((p) => lesson.states[itemId]?.pageScores?.[p]);
+  // Under 70% tells a parent, once every page has its first score.
+  if (first && allSeen && score.total > 0 && score.right / score.total < 0.7) {
     addParentAlert(
       kid.family_id,
       kidId,
       "low-score",
       lesson.subject,
-      `${kid.name} got ${result.right} of ${result.total} on ${lesson.title}: ${item.title} (${Math.round((result.right / result.total) * 100)}%).`,
+      `${kid.name} got ${score.right} of ${score.total} on ${lesson.title}: ${item.title} (${Math.round((score.right / score.total) * 100)}%).`,
       now,
     );
   }
+}
+
+/** The kid tried a page three times and still has answers to fix: a parent takes a look (and can mark it done). */
+export function miaAskGrownUp(kidId: number, lessonId: number, itemId: string, now = Date.now()): void {
+  const lesson = miaLesson(kidId, lessonId);
+  const item = lesson?.items?.find((i) => i.id === itemId);
+  const kid = getKid(kidId);
+  if (!lesson || !item || !kid) throw new PortalError("That activity isn't on the checklist.");
+  const left = lesson.states[itemId]?.wrong?.length ?? 0;
+  addParentAlert(
+    kid.family_id,
+    kidId,
+    "stuck",
+    lesson.subject,
+    `${kid.name} is stuck on ${lesson.title}: ${item.title}${left ? ` (${left} answer${left > 1 ? "s" : ""} still to fix)` : ""}. Take a look together, then mark it done on the parent page.`,
+    now,
+  );
 }
 
 /** The kid finished an activity: fixed their mistakes, or sent the photo of a hands-on one for a parent to approve. */
 export function miaFinishItem(kidId: number, lessonId: number, itemId: string, photo?: string, now = Date.now()): void {
   const lesson = updateItem(kidId, lessonId, itemId, (s, item) => {
     if (item.check === "parent") return { ...s, waitingForParent: true, photo: photo ?? s.photo, at: now };
-    if (item.check === "photo" && s.total === undefined) throw new PortalError("Take a photo first.");
+    if (item.check === "photo") {
+      const pages = item.pages.length ? item.pages : [0];
+      if (s.total === undefined) throw new PortalError("Take a photo first.");
+      if (!pages.every((p) => s.pagesDone?.includes(p))) throw new PortalError("Fix your answers first, then check again.");
+    }
     if ((item.check === "video" || item.check === "quiz" || item.check === "practice" || item.check === "online") && !s.ready)
       throw new PortalError("Finish it in Miacademy first, then check it off.");
     return { ...s, done: true, at: now };

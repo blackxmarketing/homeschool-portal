@@ -50,7 +50,10 @@ export interface ItemState {
   ready?: boolean;
   /** Skipped by a parent. */
   skipped?: boolean;
-  /** Photo check result: right/total from the first photo; wrong = what's still left to fix. */
+  /** Photo check, page by page: each page's first score, and the pages that are all right now. */
+  pageScores?: Record<string, { right: number; total: number }>;
+  pagesDone?: number[];
+  /** Photo check result: right/total from the first photos (all pages so far); wrong = what's still left to fix. */
   right?: number;
   total?: number;
   wrong?: { question: string; answer: string }[];

@@ -235,7 +235,13 @@ function TopTask({
   );
 }
 
-/** Take a photo of the work, then: worksheets are checked against the answer key; hands-on ones go to a grown-up. */
+/**
+ * Photos of the work. A worksheet goes page by page: a photo of the top half and
+ * one of the bottom half (close enough to read), checked right away against that
+ * page of the answer key. Anything to fix is explained, and the page is checked
+ * again before the next one. After three tries a grown-up takes a look.
+ * A hands-on activity is one photo for a grown-up.
+ */
 function PhotoCheck({
   entry,
   color,
@@ -252,44 +258,72 @@ function PhotoCheck({
   onDone: (next: Record<string, MiaChecklist | null> | null, fixed: boolean) => void;
 }) {
   type Result = { right: number; total: number; wrong: { question: string; answer: string }[]; message: string };
-  const [step, setStep] = useState<"camera" | "checking" | "result" | "sent" | "unreadable">("camera");
+  const worksheet = entry.item.check === "photo";
+  const pages = worksheet && entry.item.pages.length ? entry.item.pages : [0];
+  const firstLeft = Math.max(0, pages.findIndex((pg) => !entry.state.pagesDone?.includes(pg)));
+  const [pageIdx, setPageIdx] = useState(firstLeft);
+  const [halves, setHalves] = useState<string[]>([]);
+  const [step, setStep] = useState<"camera" | "checking" | "result" | "sent" | "unreadable" | "grownUp">("camera");
   const [result, setResult] = useState<Result | null>(null);
   const [message, setMessage] = useState("");
   const [camError, setCamError] = useState(false);
-  const [shot, setShot] = useState<string | null>(null);
   const [next, setNext] = useState<Record<string, MiaChecklist | null> | null>(null);
   const [tries, setTries] = useState(0);
   const video = useRef<HTMLVideoElement>(null);
   const stream = useRef<MediaStream | null>(null);
+
+  const page = pages[pageIdx];
+  const pageName = page ? `page ${page}` : "your page";
+  const half = worksheet ? (halves.length === 0 ? "top" : "bottom") : null;
+  const lastPage = pageIdx >= pages.length - 1;
 
   useEffect(() => {
     if (step !== "camera") return;
     let cancelled = false;
     navigator.mediaDevices
       ?.getUserMedia({ video: { facingMode: "environment", width: { ideal: 1920 } } })
-      .then((s) => {
-        if (cancelled) return s.getTracks().forEach((t) => t.stop());
-        stream.current = s;
-        if (video.current) video.current.srcObject = s;
+      .then((st) => {
+        if (cancelled) return st.getTracks().forEach((t) => t.stop());
+        stream.current = st;
+        if (video.current) video.current.srcObject = st;
       })
       .catch(() => setCamError(true));
     if (!navigator.mediaDevices) setCamError(true);
-    say(entry.item.check === "parent" ? "Show your work to the camera and take a photo for a grown-up." : "Hold your page up to the camera, nice and flat.");
     return () => {
       cancelled = true;
       stream.current?.getTracks().forEach((t) => t.stop());
       stream.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step]);
+  }, [step, pageIdx]);
 
-  async function send(dataUrl: string) {
-    setShot(dataUrl);
+  // Say what to photograph next.
+  useEffect(() => {
+    if (step !== "camera") return;
+    if (!worksheet) say("Show your work to the camera and take a photo for a grown-up.");
+    else if (halves.length === 0) say(`Take a photo of the top half of ${pageName}. Hold it close so I can read it.`);
+    else say(`Now the bottom half of ${pageName}.`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, pageIdx, halves.length]);
+
+  /** A photo was taken: a worksheet needs both halves of the page before it's checked. */
+  function took(dataUrl: string) {
+    if (worksheet && halves.length === 0) {
+      setHalves([dataUrl]);
+      return;
+    }
+    void send(worksheet ? [...halves, dataUrl] : [dataUrl]);
+  }
+
+  async function send(shots: string[]) {
+    setHalves(shots);
     setStep("checking");
     stream.current?.getTracks().forEach((t) => t.stop());
-    const [head, data] = dataUrl.split(",");
-    const mediaType = /image\/(png|webp)/.exec(head)?.[0] ?? "image/jpeg";
-    const { ok, data: res } = await api({ lessonId: entry.lessonId, itemId: entry.item.id, image: data, mediaType }, "/api/mia/photo");
+    const images = shots.map((url) => {
+      const [head, data] = url.split(",");
+      return { image: data, mediaType: /image\/(png|webp)/.exec(head)?.[0] ?? "image/jpeg" };
+    });
+    const { ok, data: res } = await api({ lessonId: entry.lessonId, itemId: entry.item.id, images, page }, "/api/mia/photo");
     const r = res as Partial<Result> & { readable?: boolean; waitingForParent?: boolean; error?: string; checklists?: Record<string, MiaChecklist | null> };
     if (r.checklists) setNext(r.checklists);
     if (!ok) {
@@ -299,9 +333,9 @@ function PhotoCheck({
       setStep("sent");
       say("Sent to a grown-up! Great work.");
     } else if (r.readable === false) {
-      setMessage(r.message ?? "I couldn't read that. Try again with the whole page showing.");
+      setMessage(r.message ?? "I couldn't read that. Hold the page closer and take the two photos again.");
       setStep("unreadable");
-      say(r.message ?? "I couldn't read that. Let's try again.");
+      say(r.message ?? "I couldn't read that. Let's take the photos again, a little closer.");
     } else {
       setResult(r as Result);
       setTries((t) => t + 1);
@@ -309,12 +343,31 @@ function PhotoCheck({
       say(
         (r.message ? `${r.message} ` : "") +
           (r.wrong?.length
-            ? `Grab your pen and fix ${r.wrong.map((w) => w.question).join(", ")}. Then take another photo so I can check.`
-            : tries > 0
-              ? "All fixed! Great job."
-              : "Every answer is right!"),
+            ? `Grab your pen and fix ${r.wrong.map((w) => w.question).join(", ")}. Then take the two photos again so I can check.`
+            : lastPage
+              ? "Every answer is right! Great job."
+              : `${pageName} is all right! On to the next page.`),
       );
     }
+  }
+
+  function again() {
+    setHalves([]);
+    setStep("camera");
+  }
+
+  function nextPage() {
+    setPageIdx((i) => i + 1);
+    setTries(0);
+    setResult(null);
+    setHalves([]);
+    setStep("camera");
+  }
+
+  async function askGrownUp() {
+    await api({ lessonId: entry.lessonId, itemId: entry.item.id, grownUp: true }, "/api/mia/item");
+    setStep("grownUp");
+    say("Okay! A grown-up will come take a look with you.");
   }
 
   function snap() {
@@ -325,7 +378,7 @@ function PhotoCheck({
     c.width = Math.round(v.videoWidth * scale);
     c.height = Math.round(v.videoHeight * scale);
     c.getContext("2d")!.drawImage(v, 0, 0, c.width, c.height);
-    void send(c.toDataURL("image/jpeg", 0.85));
+    took(c.toDataURL("image/jpeg", 0.85));
   }
 
   function pickFile(f: File | undefined) {
@@ -338,21 +391,48 @@ function PhotoCheck({
       c.height = Math.round(img.height * scale);
       c.getContext("2d")!.drawImage(img, 0, 0, c.width, c.height);
       URL.revokeObjectURL(img.src);
-      void send(c.toDataURL("image/jpeg", 0.85));
+      took(c.toDataURL("image/jpeg", 0.85));
     };
     img.src = URL.createObjectURL(f);
   }
+
+  const progress =
+    worksheet && pages.length > 1 ? (
+      <div className="mia-photo-pages">
+        Page {pageIdx + 1} of {pages.length}
+      </div>
+    ) : null;
 
   let inner: React.ReactNode;
   if (step === "camera")
     inner = (
       <>
         <h2>📸 {entry.item.title}</h2>
-        {!camError ? <video ref={video} className="mia-cam" autoPlay playsInline muted /> : <p className="mia-cl-note">The camera isn&apos;t working, so pick a photo instead.</p>}
+        {progress}
+        {worksheet && (
+          <div className="mia-photo-half">
+            <span className={half === "top" ? "on" : "done"}>{half === "top" ? "▶" : "✓"} Top half</span>
+            <span className={half === "bottom" ? "on" : ""}>{half === "bottom" ? "▶ " : ""}Bottom half</span>
+          </div>
+        )}
+        <p className="mia-cl-note">
+          {worksheet ? (
+            <>
+              Take a photo of the <b>{half} half</b> of {pageName}. Hold it close so every answer shows.
+            </>
+          ) : (
+            "Show your work to the camera."
+          )}
+        </p>
+        {!camError ? (
+          <video ref={video} className="mia-cam" autoPlay playsInline muted />
+        ) : (
+          <p className="mia-cl-note">The camera isn&apos;t working, so pick a photo instead.</p>
+        )}
         <div className="mia-row">
           {!camError && (
             <button className="mia-btn big" onClick={snap}>
-              Take the photo
+              {worksheet ? `Take the ${half} half` : "Take the photo"}
             </button>
           )}
           <label className="mia-btn ghost">
@@ -368,8 +448,12 @@ function PhotoCheck({
   else if (step === "checking")
     inner = (
       <>
-        {shot && <img className="mia-shot" src={shot} alt="Your photo" />}
-        <h2>Checking your work…</h2>
+        <div className="mia-photo-shots">
+          {halves.map((h, i) => (
+            <img key={i} className="mia-shot small" src={h} alt={i === 0 ? "Top half" : "Bottom half"} />
+          ))}
+        </div>
+        <h2>Checking {pageName}…</h2>
         <div className="mia-spinner" />
       </>
     );
@@ -383,14 +467,24 @@ function PhotoCheck({
         </button>
       </>
     );
+  else if (step === "grownUp")
+    inner = (
+      <>
+        <h2>🙋 A grown-up is coming</h2>
+        <p>They&apos;ll look at it with you and check it off when it&apos;s fixed.</p>
+        <button className="mia-btn big" onClick={() => onDone(next, false)}>
+          OK!
+        </button>
+      </>
+    );
   else if (step === "unreadable")
     inner = (
       <>
         <h2>Let&apos;s try that again</h2>
         <p>{message}</p>
         <div className="mia-row">
-          <button className="mia-btn" onClick={() => setStep("camera")}>
-            Take another photo
+          <button className="mia-btn" onClick={again}>
+            📸 Take the photos again
           </button>
           <button className="mia-link" onClick={onClose}>
             Not yet
@@ -401,8 +495,16 @@ function PhotoCheck({
   else if (result)
     inner = (
       <>
-        {shot && <img className="mia-shot small" src={shot} alt="Your photo" />}
-        <h2>{tries > 1 ? (result.wrong.length ? "Almost there!" : "All fixed!") : `You got ${result.right} of ${result.total} right!`}</h2>
+        {progress}
+        <h2>
+          {result.wrong.length
+            ? tries > 1
+              ? "Almost there!"
+              : `You got ${result.right} of ${result.total} right on ${pageName}!`
+            : tries > 1
+              ? `${pageName[0].toUpperCase()}${pageName.slice(1)} is all fixed!`
+              : `Every answer on ${pageName} is right!`}
+        </h2>
         {result.wrong.length ? (
           <>
             <p>🖊️ Grab a pen or marker and fix {tries > 1 ? "these ones still" : "these"}:</p>
@@ -413,20 +515,27 @@ function PhotoCheck({
                 </div>
               ))}
             </div>
-            <button className="mia-btn big" onClick={() => setStep("camera")}>
-              📸 I fixed them. Check again!
+            <button className="mia-btn big" onClick={again}>
+              📸 I fixed them. Check {pageName} again!
             </button>
             {tries >= 3 && (
-              <button className="mia-link" onClick={() => onDone(next, true)}>
-                Still stuck? Finish, and a grown-up will look at it
+              <button className="mia-link" onClick={() => void askGrownUp()}>
+                Still stuck? Get a grown-up
               </button>
             )}
           </>
-        ) : (
+        ) : lastPage ? (
           <>
-            <p>🎉 {tries > 1 ? "You fixed everything!" : "Every answer is right!"}</p>
+            <p>🎉 {tries > 1 ? "You fixed everything!" : "Great work!"}</p>
             <button className="mia-btn big" onClick={() => onDone(next, true)}>
               Done ✓
+            </button>
+          </>
+        ) : (
+          <>
+            <p>🎉 On to the next page.</p>
+            <button className="mia-btn big" onClick={nextPage}>
+              Next page →
             </button>
           </>
         )}

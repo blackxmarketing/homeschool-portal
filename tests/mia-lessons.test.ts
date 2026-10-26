@@ -239,14 +239,24 @@ describe("a kid's Science checklist", () => {
     expect(miaChecklist(kid, "sci")!.parts[0].upcoming[0].item.title).toBe("Complete the guided notes");
   });
 
-  it("keeps the first photo's score, re-checks fixes, and tells a parent about low scores", () => {
+  it("checks page by page: each page fixed before it's done, the first tries' score kept, a parent told under 70%", () => {
     const id = startGravity();
-    miaRecordPhotoCheck(kid, id, "forces-word-search", { right: 2, total: 6, wrong: [{ question: "clue 1", answer: "force" }] }, "1/a.jpg");
+    const state = () => miaLesson(kid, id)!.states["forces-word-search"];
+    // The Word Search is pages 4 and 5. Page 4: two to fix.
+    miaRecordPhotoCheck(kid, id, "forces-word-search", { right: 2, total: 6, wrong: [{ question: "clue 1", answer: "force" }] }, "1/a.jpg", 1, 4);
+    expect(unseenAlerts(family)).toEqual([]); // told once every page has its first score
+    miaRecordPhotoCheck(kid, id, "forces-word-search", { right: 6, total: 6, wrong: [] }, "1/b.jpg", 2, 4);
+    expect(state()).toMatchObject({ pagesDone: [4], wrong: [] });
+    // Page 5 isn't checked yet: not done.
+    expect(() => miaFinishItem(kid, id, "forces-word-search")).toThrow(/Fix your answers first/);
+    miaRecordPhotoCheck(kid, id, "forces-word-search", { right: 3, total: 4, wrong: [{ question: "clue 9", answer: "gravity" }] }, "1/c.jpg", 3, 5);
+    // First tries: 2 of 6 and 3 of 4 = 5 of 10, under 70%.
     expect(unseenAlerts(family).map((a) => a.kind)).toEqual(["low-score"]);
-    miaRecordPhotoCheck(kid, id, "forces-word-search", { right: 6, total: 6, wrong: [] }, "1/b.jpg");
-    expect(miaLesson(kid, id)!.states["forces-word-search"]).toMatchObject({ right: 2, total: 6, wrong: [] });
+    expect(() => miaFinishItem(kid, id, "forces-word-search")).toThrow(/Fix your answers first/);
+    miaRecordPhotoCheck(kid, id, "forces-word-search", { right: 4, total: 4, wrong: [] }, "1/d.jpg", 4, 5);
+    expect(state()).toMatchObject({ right: 5, total: 10, wrong: [], pagesDone: [4, 5] });
     miaFinishItem(kid, id, "forces-word-search");
-    expect(miaLesson(kid, id)!.states["forces-word-search"].done).toBe(true);
+    expect(state().done).toBe(true);
     expect(() => miaFinishItem(kid, id, "out-of-this-world")).toThrow(/photo first/);
     // Guided notes: just a tap.
     miaFinishItem(kid, id, "complete-the-guided-notes");
@@ -283,8 +293,8 @@ describe("a kid's Science checklist", () => {
   it("finishes the lesson when Miacademy moves to the next one, and counts it for the week", () => {
     const id = startGravity();
     miaFinishItem(kid, id, "complete-the-guided-notes");
-    for (const item of ["forces-word-search", "out-of-this-world"]) {
-      miaRecordPhotoCheck(kid, id, item, { right: 5, total: 5, wrong: [] }, "1/x.jpg");
+    for (const [item, pages] of [["forces-word-search", [4, 5]], ["out-of-this-world", [6, 7]]] as const) {
+      for (const page of pages) miaRecordPhotoCheck(kid, id, item, { right: 5, total: 5, wrong: [] }, "1/x.jpg", 1, page);
       miaFinishItem(kid, id, item);
     }
     parentMiaItem(family, kid, id, "stem-challenge-marble-run", "skip");
