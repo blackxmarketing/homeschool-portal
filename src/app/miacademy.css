@@ -1340,3 +1340,51 @@ label.mia-btn {
   width: min(250px, 30vh);
   height: min(250px, 30vh);
 }
+
+/* The checklist's big checkbox: the kid taps it to check an activity off. */
+.mia-task-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mia-task-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.mia-check {
+  flex-shrink: 0;
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border: 4px solid var(--mia-outline, #1b1530);
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 4px 0 var(--mia-outline, #1b1530);
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  cursor: pointer;
+}
+.mia-check:disabled {
+  cursor: default;
+  opacity: 0.45;
+  box-shadow: none;
+}
+.mia-check.on {
+  background: var(--c, #16a34a);
+  opacity: 1;
+  animation: mia-check-pop 0.3s ease-out;
+}
+.mia-check.ready:not(.on) {
+  animation: mia-check-glow 1.2s ease-in-out infinite;
+}
+@keyframes mia-check-pop {
+  50% { transform: scale(1.18); }
+}
+@keyframes mia-check-glow {
+  50% { box-shadow: 0 4px 0 var(--mia-outline, #1b1530), 0 0 0 6px color-mix(in srgb, var(--c, #16a34a) 45%, transparent); }
+}

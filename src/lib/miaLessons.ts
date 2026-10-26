@@ -46,6 +46,8 @@ export interface ParsedActivity {
 export interface ItemState {
   done: boolean;
   at?: number;
+  /** Miacademy says this online activity is done: the box lights up for the kid to check it off. */
+  ready?: boolean;
   /** Skipped by a parent. */
   skipped?: boolean;
   /** Photo check result: right/total from the first photo; wrong = what's still left to fix. */

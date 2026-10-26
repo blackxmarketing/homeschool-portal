@@ -30,7 +30,11 @@ describe("the six weekly rings", () => {
     const rings = miaRings(kid, "2026-10-20");
     // Only the Language Arts classes this kid takes get a ring (here: Edition 1 = Grammar).
     expect(rings.map((r) => r.id)).toEqual(["math", "grammar"]);
-    expect(rings.find((r) => r.id === "grammar")).toMatchObject({ progress: 0.5, full: false });
+    // The video is done in Miacademy: it fills the ring once Bryce checks it off.
+    expect(rings.find((r) => r.id === "grammar")).toMatchObject({ progress: 0, full: false });
+    const top = miaChecklist(kid, "ela", "2026-10-20")!.parts.find((p) => p.name === "Writing (Edition 1)")!.upcoming[0];
+    miaFinishItem(kid, top.lessonId, top.item.id);
+    expect(miaRings(kid, "2026-10-20").find((r) => r.id === "grammar")).toMatchObject({ progress: 0.5, full: false });
     expect(miaBank(kid, "2026-10-20").thisWeek).toEqual([]);
   });
 

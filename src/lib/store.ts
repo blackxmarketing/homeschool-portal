@@ -2616,13 +2616,19 @@ function saveLessonStates(lesson: MiaLesson, day = today()): void {
     .run(JSON.stringify(lesson.states), done ? lesson.doneDay ?? day : null, lesson.id);
 }
 
-function markItems(lesson: MiaLesson, check: LessonItem["check"], now: number): boolean {
+/**
+ * Miacademy finished a lesson's online activities of one kind. In the lesson the
+ * kid is on they light up ("ready") for the kid to check off; in lessons Miacademy
+ * has moved past, they're done.
+ */
+function markItems(lesson: MiaLesson, check: LessonItem["check"], now: number, ready = false): boolean {
   let changed = false;
-  for (const item of lesson.items ?? [])
-    if (item.check === check && !lesson.states[item.id]?.done) {
-      lesson.states[item.id] = { ...lesson.states[item.id], done: true, at: now };
-      changed = true;
-    }
+  for (const item of lesson.items ?? []) {
+    const s = lesson.states[item.id];
+    if (item.check !== check || s?.done || (ready && s?.ready)) continue;
+    lesson.states[item.id] = ready ? { ...s, done: false, ready: true } : { ...s, done: true, at: now };
+    changed = true;
+  }
   return changed;
 }
 
@@ -2682,8 +2688,9 @@ export function miaPathSync(kidId: number, courses: MiaPathCourse[], now = Date.
         if (!lesson) continue;
       }
       if (c.taskKey && c.taskKey !== last?.last_task) {
-        // A new task: the ones before it are done. PDFs aren't part of online-only classes.
-        for (const item of lesson.items ?? []) if (!lesson.states[item.id]?.done) lesson.states[item.id] = { ...lesson.states[item.id], done: true, at: now };
+        // A new task: the ones before it are done in Miacademy, so they light up for the kid to check off.
+        for (const item of lesson.items ?? [])
+          if (!lesson.states[item.id]?.done) lesson.states[item.id] = { ...lesson.states[item.id], done: false, ready: true };
         const id = `task-${c.taskKey}`;
         // A story to read (Reading Comprehension): a tap when it's read. Other PDFs aren't part of online-only classes.
         const story = c.taskType === "Pdf" && plan.readPdf;
@@ -2726,12 +2733,12 @@ export function miaPathSync(kidId: number, courses: MiaPathCourse[], now = Date.
     // Miacademy's order is PDF, video, practice levels, quiz. Practice or the quiz next: the video is done.
     // The quiz next: every practice level is done. A different practice level next: one more level is done.
     let changed = false;
-    if (c.taskType === "Practice" || c.taskType === "Assessment") changed = markItems(lesson, "video", now) || changed;
-    if (c.taskType === "Assessment") changed = markItems(lesson, "practice", now) || changed;
+    if (c.taskType === "Practice" || c.taskType === "Assessment") changed = markItems(lesson, "video", now, true) || changed;
+    if (c.taskType === "Assessment") changed = markItems(lesson, "practice", now, true) || changed;
     if (c.taskType === "Practice" && last?.last_type === "Practice" && last.last_task && c.taskKey && last.last_task !== c.taskKey) {
-      const level = (lesson.items ?? []).find((i) => i.check === "practice" && !i.allLevels && !lesson!.states[i.id]?.done);
+      const level = (lesson.items ?? []).find((i) => i.check === "practice" && !i.allLevels && !lesson!.states[i.id]?.done && !lesson!.states[i.id]?.ready);
       if (level) {
-        lesson.states[level.id] = { ...lesson.states[level.id], done: true, at: now };
+        lesson.states[level.id] = { ...lesson.states[level.id], done: false, ready: true };
         changed = true;
       }
     }
@@ -2887,7 +2894,8 @@ export function miaFinishItem(kidId: number, lessonId: number, itemId: string, p
   const lesson = updateItem(kidId, lessonId, itemId, (s, item) => {
     if (item.check === "parent") return { ...s, waitingForParent: true, photo: photo ?? s.photo, at: now };
     if (item.check === "photo" && s.total === undefined) throw new PortalError("Take a photo first.");
-    if (item.check === "video" || item.check === "quiz" || item.check === "practice") throw new PortalError("Miacademy checks this one off.");
+    if ((item.check === "video" || item.check === "quiz" || item.check === "practice" || item.check === "online") && !s.ready)
+      throw new PortalError("Finish it in Miacademy first, then check it off.");
     return { ...s, done: true, at: now };
   });
   const item = lesson.items!.find((i) => i.id === itemId)!;
@@ -3186,10 +3194,13 @@ export function miaPlanLessons(kidId: number, subject: string, plan: MiaCoursePl
     // Online tasks: done when Miacademy says so, or once the kid has moved past them.
     const at = reached.get(pl.course);
     const workedThisWeek = workedOnThisWeek(lesson.states);
+    // A lesson from an earlier day that Miacademy finished checks itself off; otherwise the kid checks off each one.
+    const finishedBefore = pl.tasks.every((t) => t.status === "Completed") && !!pl.tasks.at(-1)!.day && pl.tasks.at(-1)!.day < today();
     for (const t of pl.tasks) {
       const id = `task-${t.taskId}`;
       if (!items.some((i) => i.id === id) || lesson.states[id]?.done) continue;
-      if (t.status === "Completed" || (at !== undefined && t.order < at)) lesson.states[id] = { ...lesson.states[id], done: true, at: now };
+      if (t.status === "Completed" || (at !== undefined && t.order < at))
+        lesson.states[id] = finishedBefore ? { ...lesson.states[id], done: true, at: now } : { ...lesson.states[id], done: false, ready: true };
     }
     lesson.items = items;
     // Waiting for its PDF: not done yet, even if every online task is.

@@ -3,12 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import type { LessonItem } from "@/lib/miaLessons";
 import type { MiaChecklist, MiaCourseChecklist } from "@/lib/store";
+import { checkSound } from "@/components/voice";
 import type { MiaApi } from "./MiaHud";
 
 /**
  * The step-by-step checklist under an open timer: the next three activities
  * of the kid's Miacademy lesson, the top one big and bright, the other two dim.
- * Finishing one makes it pop away and the next one slides up.
+ * The kid taps the big box to check one off (a "ding"), it pops away, and the
+ * next one slides up. Online activities light up once Miacademy has them done.
  */
 
 const ICON: Record<LessonItem["check"], string> = { video: "🎬", practice: "🎮", self: "📝", quiz: "✏️", photo: "📄", parent: "🧰", online: "💻" };
@@ -39,6 +41,7 @@ export default function Checklist({
 }) {
   const [photoFor, setPhotoFor] = useState<Entry | null>(null);
   const [leaving, setLeaving] = useState<string | null>(null);
+  const [checking, setChecking] = useState<string | null>(null);
 
   const waiting = checklist.upcoming.filter((e) => e.state.waitingForParent);
   const todo = checklist.upcoming.filter((e) => !e.state.waitingForParent);
@@ -57,6 +60,8 @@ export default function Checklist({
 
   // Pop the finished activity away, then show the new list.
   async function finished(entry: Entry, next: Record<string, MiaChecklist | null>) {
+    checkSound();
+    setChecking(null);
     setLeaving(`${entry.lessonId}:${entry.item.id}`);
     say(nextLine(next[checklist.subject]?.parts[part]));
     await new Promise((r) => setTimeout(r, 650));
@@ -65,9 +70,11 @@ export default function Checklist({
   }
 
   async function done(entry: Entry) {
+    setChecking(`${entry.lessonId}:${entry.item.id}`);
     const { ok, data } = await api({ lessonId: entry.lessonId, itemId: entry.item.id }, "/api/mia/item");
     const next = (data as { checklists?: Record<string, MiaChecklist | null> }).checklists;
     if (ok && next) await finished(entry, next);
+    else setChecking(null);
   }
 
   const week = (
@@ -108,7 +115,7 @@ export default function Checklist({
             );
           return (
             <div key={key} className={`mia-task top ${leaving === key ? "poof" : ""}`} style={{ ["--c" as string]: color }}>
-              <TopTask entry={e} running={running} onPhoto={() => setPhotoFor(e)} onSelf={() => void done(e)} />
+              <TopTask entry={e} running={running} checked={checking === key || leaving === key} onPhoto={() => setPhotoFor(e)} onCheck={() => void done(e)} />
             </div>
           );
         })}
@@ -155,7 +162,19 @@ function nextLine(next: MiaCourseChecklist | null | undefined): string {
   return top ? `Nice! Next up: ${top.item.title}.` : "Nice! You finished every activity in this lesson!";
 }
 
-function TopTask({ entry, running, onPhoto, onSelf }: { entry: Entry; running: boolean; onPhoto: () => void; onSelf: () => void }) {
+function TopTask({
+  entry,
+  running,
+  checked,
+  onPhoto,
+  onCheck,
+}: {
+  entry: Entry;
+  running: boolean;
+  checked: boolean;
+  onPhoto: () => void;
+  onCheck: () => void;
+}) {
   const { item, state } = entry;
   const pages = item.pages.length ? ` · page${item.pages.length > 1 ? "s" : ""} ${item.pages[0]}${item.pages.length > 1 ? `-${item.pages.at(-1)}` : ""}` : "";
   const kind =
@@ -170,36 +189,49 @@ function TopTask({ entry, running, onPhoto, onSelf }: { entry: Entry; running: b
             : item.check === "self"
               ? `📝 Guided notes${pages}`
               : `📄 PDF${pages}`;
-  let action: React.ReactNode = null;
-  if (item.check === "video") action = <div className="mia-hint">Watch it in Miacademy. It checks off by itself!</div>;
-  else if (item.check === "online") action = <div className="mia-hint">Do it in Miacademy. It checks off by itself!</div>;
-  else if (item.check === "practice") action = <div className="mia-hint">Play this level in Miacademy. It checks off by itself!</div>;
-  else if (item.check === "quiz") action = <div className="mia-hint">Take the quiz in Miacademy. It checks off when you finish.</div>;
-  else if (item.check === "parent" && !state.suppliesReady)
-    action = (
-      <div className="mia-hint">
+  const online = item.check === "video" || item.check === "online" || item.check === "practice" || item.check === "quiz";
+  // What the box does, and the hint under the activity.
+  let canCheck = running;
+  let hint: React.ReactNode;
+  if (online && !state.ready) {
+    canCheck = false;
+    hint =
+      item.check === "video"
+        ? "Watch it in Miacademy. Then check it off here!"
+        : item.check === "practice"
+          ? "Play this level in Miacademy. Then check it off here!"
+          : item.check === "quiz"
+            ? "Take the quiz in Miacademy. Then check it off here!"
+            : "Do it in Miacademy. Then check it off here!";
+  } else if (item.check === "parent" && !state.suppliesReady) {
+    canCheck = false;
+    hint = (
+      <>
         <b>Gather:</b> {item.supplies.length ? item.supplies.join(", ") : "your supplies"}
-      </div>
+      </>
     );
-  else if (!running) action = <div className="mia-hint">Press Start to work on this.</div>;
-  else if (item.check === "self")
-    action = (
-      <button className="mia-btn small" onClick={onSelf}>
-        ✓ I finished my notes
-      </button>
-    );
-  else
-    action = (
-      <button className="mia-btn small" onClick={onPhoto}>
-        📸 {item.check === "parent" ? "I'm done! Take a photo" : "I'm done! Check my work"}
-      </button>
-    );
+  } else if (!running) hint = "Press Start to work on this.";
+  else if (online) hint = <b>Done in Miacademy! Check it off ✓</b>;
+  else if (item.check === "self") hint = "Tap the box when you're done.";
+  else if (item.check === "parent") hint = "Tap the box when you're done, then take a photo for a grown-up.";
+  else hint = "Tap the box when you're done, then take a photo to check your work.";
+  const tap = () => (item.check === "photo" || item.check === "parent" ? onPhoto() : onCheck());
   return (
-    <>
-      <div className="mia-kind">{kind}</div>
-      <div className="mia-task-title">{item.title}</div>
-      {action}
-    </>
+    <div className="mia-task-row">
+      <button
+        className={`mia-check ${checked ? "on" : ""} ${canCheck && online ? "ready" : ""}`}
+        onClick={tap}
+        disabled={!canCheck || checked}
+        aria-label={`Check off: ${item.title}`}
+      >
+        {checked ? "✓" : ""}
+      </button>
+      <div className="mia-task-text">
+        <div className="mia-kind">{kind}</div>
+        <div className="mia-task-title">{item.title}</div>
+        <div className="mia-hint">{hint}</div>
+      </div>
+    </div>
   );
 }
 

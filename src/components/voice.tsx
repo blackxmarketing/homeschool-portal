@@ -833,3 +833,33 @@ export function moneySound(kind: "ching" | "clink") {
     // No sound is fine.
   }
 }
+
+/** The checklist's "check!": a quick tick and a bright two-note ding. */
+export function checkSound() {
+  if (typeof window === "undefined" || !loadPrefs().sounds) return;
+  try {
+    const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!Ctx) return;
+    audio ??= new Ctx();
+    const ctx = audio;
+    void ctx.resume();
+    const t = ctx.currentTime;
+    const ping = (hz: number, at: number, len: number, vol: number, type: OscillatorType) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(hz, at);
+      g.gain.setValueAtTime(0.0001, at);
+      g.gain.exponentialRampToValueAtTime(vol, at + 0.005);
+      g.gain.exponentialRampToValueAtTime(0.0001, at + len);
+      o.connect(g).connect(ctx.destination);
+      o.start(at);
+      o.stop(at + len + 0.02);
+    };
+    ping(220, t, 0.04, 0.06, "square");
+    ping(1047, t + 0.05, 0.18, 0.06, "square");
+    ping(1568, t + 0.13, 0.35, 0.06, "square");
+  } catch {
+    // No sound is fine.
+  }
+}

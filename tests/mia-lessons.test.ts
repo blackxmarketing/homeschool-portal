@@ -226,9 +226,13 @@ describe("a kid's Science checklist", () => {
     expect(c).toMatchObject({ left: 6, target: 1, doneThisWeek: 0 });
   });
 
-  it("checks off the video when Miacademy moves on to the quiz", () => {
-    startGravity();
+  it("lights up the video when Miacademy moves on to the quiz; the kid checks it off", () => {
+    const id = startGravity();
+    expect(() => miaFinishItem(kid, id, "watch-the-lesson-video")).toThrow(/Finish it in Miacademy first/);
     miaPathSync(kid, parsePathCourses(path(GRAVITY_ID, "Assessment", null)));
+    const top = miaChecklist(kid, "sci")!.parts[0].upcoming[0];
+    expect(top).toMatchObject({ item: { title: "Watch the lesson video" }, state: { done: false, ready: true } });
+    miaFinishItem(kid, id, "watch-the-lesson-video");
     expect(miaChecklist(kid, "sci")!.parts[0].upcoming[0].item.title).toBe("Complete the guided notes");
   });
 
@@ -282,6 +286,8 @@ describe("a kid's Science checklist", () => {
     }
     parentMiaItem(family, kid, id, "stem-challenge-marble-run", "skip");
     miaPathSync(kid, parsePathCourses(path(GRAVITY_ID, "Assessment", null)));
+    expect(miaChecklist(kid, "sci")!.parts[0].upcoming.map((u) => u.item.title)).toEqual(["Watch the lesson video", "Online assessment"]);
+    miaFinishItem(kid, id, "watch-the-lesson-video");
     expect(miaChecklist(kid, "sci")!.parts[0].upcoming.map((u) => u.item.title)).toEqual(["Online assessment"]);
     // Quiz done in Miacademy: it moves on to the next lesson, and guesses that lesson's PDF.
     const toRead = miaPathSync(kid, parsePathCourses(path(MAGNETISM_ID, "Pdf", "Forces: Magnetism Student PDF")));
@@ -324,13 +330,22 @@ describe("a kid's Science checklist", () => {
       ),
     );
     const titles = () => miaChecklist(kid, "math")!.parts[0].upcoming.map((u) => u.item.title);
+    // Each one lights up as Miacademy moves past it, and the kid checks it off.
+    const checkTop = () => {
+      const top = miaChecklist(kid, "math")!.parts[0].upcoming[0];
+      expect(top.state.ready).toBe(true);
+      miaFinishItem(kid, id, top.item.id);
+    };
     miaPathSync(kid, parsePathCourses(wrap("Video", T(2))));
     expect(titles()[0]).toBe("Watch the lesson video");
     miaPathSync(kid, parsePathCourses(wrap("Practice", T(3))));
+    checkTop();
     expect(titles()[0]).toBe("Online practice: Level 1");
     miaPathSync(kid, parsePathCourses(wrap("Practice", T(4))));
+    checkTop();
     expect(titles()[0]).toBe("Online practice: Level 2");
     miaPathSync(kid, parsePathCourses(wrap("Assessment", T(5))));
+    checkTop();
     expect(titles()).toEqual(["Online assessment"]);
   });
 
@@ -369,9 +384,18 @@ describe("a kid's Science checklist", () => {
       miaPathSync(kid, parsePathCourses([course(RC, "LanguageArts", id(1), "Pdf", id(10), "Opossum")]));
       expect(miaChecklist(kid, "ela")!.parts[0].upcoming.map((u) => [u.item.title, u.item.check])).toEqual([["Read the story: Opossum", "self"]]);
       miaPathSync(kid, parsePathCourses([course(RC, "LanguageArts", id(1), "Practice", id(11), null, "Can you earn a bronze medal in Opossum?")]));
-      expect(miaChecklist(kid, "ela")!.parts[0].upcoming.map((u) => [u.item.title, u.item.check])).toEqual([["Earn a bronze medal in Opossum", "online"]]);
+      const rc = () => miaChecklist(kid, "ela")!.parts[0];
+      // The story stays until the kid checks it off; the practice shows up after it.
+      expect(rc().upcoming.map((u) => [u.item.title, u.item.check])).toEqual([
+        ["Read the story: Opossum", "self"],
+        ["Earn a bronze medal in Opossum", "online"],
+      ]);
+      miaFinishItem(kid, rc().upcoming[0].lessonId, rc().upcoming[0].item.id);
       miaPathSync(kid, parsePathCourses([course(RC, "LanguageArts", id(1), "Assessment", id(12), null)]));
-      expect(miaChecklist(kid, "ela")!.parts[0].upcoming.map((u) => u.item.title)).toEqual(["Take the quiz"]);
+      // The practice is done in Miacademy: it lights up for the kid to check off.
+      expect(rc().upcoming[0]).toMatchObject({ item: { title: "Earn a bronze medal in Opossum" }, state: { ready: true } });
+      miaFinishItem(kid, rc().upcoming[0].lessonId, rc().upcoming[0].item.id);
+      expect(rc().upcoming.map((u) => u.item.title)).toEqual(["Take the quiz"]);
       // Miacademy moves on to the next lesson: this week's Reading Comprehension is done; nothing more until next week.
       miaPathSync(kid, parsePathCourses([course(RC, "LanguageArts", id(2), "Pdf", id(20), "Katherine")]));
       // (Counted on the day it was finished, so look at it from today.)

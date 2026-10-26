@@ -20,6 +20,7 @@ import {
   redeemAnyPairCode,
   setMiaChild,
   setMiaSettings,
+  miaFinishItem,
 } from "@/lib/store";
 
 const SCI_PDF = "https://miaplaza-content.s3.us-west-2.amazonaws.com/Science/General+Science+(SC)+(K8)/SC4+Forces+Gravity+Student+PDF.pdf";
@@ -199,8 +200,11 @@ describe("parent mode in the store", () => {
         },
       },
     ]));
+    // The video lights up for Bryce to check off.
     sci = miaChecklist(kid, "sci")!.parts[0];
-    expect(sci.upcoming[0].item.title).toBe("Complete the guided notes");
+    expect(sci.upcoming[0]).toMatchObject({ item: { title: "Watch the lesson video" }, state: { ready: true } });
+    miaFinishItem(kid, sci.upcoming[0].lessonId, sci.upcoming[0].item.id);
+    expect(miaChecklist(kid, "sci")!.parts[0].upcoming[0].item.title).toBe("Complete the guided notes");
   });
 
   it("finishes an online-only lesson once Miacademy marks its tasks done", () => {
