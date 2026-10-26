@@ -1329,3 +1329,14 @@ label.mia-btn {
   color: #16a34a;
   background: #fff;
 }
+
+/* Inside Miacademy the strip is exactly one screen tall and scrolls. Never let the
+   checklist squeeze the timer (it would hide the clock and the Start button):
+   nothing shrinks, the strip scrolls instead, and the big clock fits short screens. */
+.mia-hud > * {
+  flex-shrink: 0;
+}
+.mia-face.big {
+  width: min(250px, 30vh);
+  height: min(250px, 30vh);
+}

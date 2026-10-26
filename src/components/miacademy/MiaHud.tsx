@@ -496,20 +496,23 @@ export default function MiaHud({
 
   return (
     <div className={`mia-hud ${focused ? "focus" : ""}`}>
-      <header className="mia-hello">
-        <div className="mia-hello-face">
-          <Buddy kind={settings.buddy} head />
-        </div>
-        <div>
-          <div className="mia-hi">Hi, {kidName}!</div>
-          <div className="mia-sub">{hello}</div>
-        </div>
-        {demo && (
-          <button className="mia-demo" onClick={() => setMiaOpen((o) => !o)} title="Pretend Miacademy is open or closed">
-            demo: Miacademy {miaOpen ? "open" : "closed"}
-          </button>
-        )}
-      </header>
+      {/* With a class open, only its timer and checklist show; the rest comes back when it's done. */}
+      {!focused && (
+        <header className="mia-hello">
+          <div className="mia-hello-face">
+            <Buddy kind={settings.buddy} head />
+          </div>
+          <div>
+            <div className="mia-hi">Hi, {kidName}!</div>
+            <div className="mia-sub">{hello}</div>
+          </div>
+          {demo && (
+            <button className="mia-demo" onClick={() => setMiaOpen((o) => !o)} title="Pretend Miacademy is open or closed">
+              demo: Miacademy {miaOpen ? "open" : "closed"}
+            </button>
+          )}
+        </header>
+      )}
 
       {coin && coin.phase !== "landed" && (
         <div
@@ -524,7 +527,7 @@ export default function MiaHud({
         </div>
       )}
 
-      {rings.length > 0 && (
+      {rings.length > 0 && !focused && (
         <div className="mia-week-board">
           <div className="mia-rings">
             {rings.map((r) => (
