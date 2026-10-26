@@ -59,6 +59,8 @@ interface HostBridge {
   /** New checklists after the extension reports what Miacademy's pages show. */
   onChecklists?: (cb: (c: Checklists) => void) => void;
   setFullscreen?: (on: boolean) => void;
+  /** Slide the strip away to a small tab on the edge (or bring it back). Only the extension can. */
+  setCollapsed?: (on: boolean) => void;
   /** The Miacademy task (video, practice, quiz) the kid has open, or null. Only the extension knows. */
   onTask?: (cb: (taskKey: string | null) => void) => void;
 }
@@ -152,8 +154,31 @@ export default function MiaHud({
   const [reminder, setReminder] = useState(false);
   const [miaOpen, setMiaOpen] = useState(false);
   const [vocab, setVocab] = useState<MiaVocab | null>(initialVocab);
-  const vocabFirst = !!vocab && !vocab.done;
+  // (Not once the core classes are done for the day, e.g. marked done by a parent.)
+  const vocabFirst = !!vocab && !vocab.done && !MIA_SUBJECTS.every((s) => timers[s.id]?.finishedAt);
   const [taskKey, setTaskKey] = useState<string | null>(null);
+  // Slid away for the rest of the day (remembered in this browser until tomorrow).
+  const collapseKey = `mia-collapsed-${kidName}`;
+  const [collapsed, setCollapsed] = useState(false);
+  const [canCollapse, setCanCollapse] = useState(false);
+  useEffect(() => {
+    setCanCollapse(!!bridge()?.setCollapsed);
+    try {
+      if (localStorage.getItem(collapseKey) === new Date().toDateString()) setCollapsed(true);
+    } catch {
+      // Storage can be blocked; the strip just starts open.
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  function setCollapsedSaved(on: boolean) {
+    setCollapsed(on);
+    try {
+      if (on) localStorage.setItem(collapseKey, new Date().toDateString());
+      else localStorage.removeItem(collapseKey);
+    } catch {
+      // Not remembered; fine.
+    }
+  }
   const [busy, setBusy] = useState(false);
 
   const openId = MIA_SUBJECTS.find((s) => isOpen(timers[s.id]))?.id ?? null;
@@ -378,6 +403,10 @@ export default function MiaHud({
   useEffect(() => {
     bridge()?.setFullscreen?.(onBreak);
   }, [onBreak]);
+  const slidAway = collapsed && allDone && !openId;
+  useEffect(() => {
+    bridge()?.setCollapsed?.(slidAway);
+  }, [slidAway]);
 
   // ---- Actions ----
   async function finishClass(subject: string) {
@@ -481,6 +510,17 @@ export default function MiaHud({
             ? "Help is on the way!"
             : "Let's get back to it!";
 
+  // Done for the day: the strip can slide away to a small tab (until tomorrow, or until a timer is going again).
+  if (collapsed && allDone && !openId)
+    return (
+      <button className="mia-tab" onClick={() => setCollapsedSaved(false)} title="Show my timers">
+        <span className="mia-tab-face">
+          <Buddy kind={settings.buddy} head />
+        </span>
+        <span className="mia-tab-text">Timers</span>
+      </button>
+    );
+
   return (
     <div className={`mia-hud ${focused ? "focus" : ""}`}>
       {/* With a class open, only its timer and checklist show; the rest comes back when it's done. */}
@@ -555,6 +595,19 @@ export default function MiaHud({
       {allDone && (
         <div className="mia-reminder mia-electives" role="status">
           <span className="mia-wiggle">🎨</span> {MIA_LINES.electives}
+        </div>
+      )}
+      {allDone && !focused && (
+        <div className="mia-row">
+          {canCollapse ? (
+            <button className="mia-btn" onClick={() => setCollapsedSaved(true)}>
+              ↦ Slide my timers away
+            </button>
+          ) : (
+            <a className="mia-btn" href="/kid">
+              🌍 Go to my world
+            </a>
+          )}
         </div>
       )}
       {reminder && !openId && (

@@ -13,6 +13,8 @@ import { send, type ApiReply } from "./messages";
  */
 
 const WIDTH = 360;
+/** The tab left on the edge when the timers slide away. */
+const TAB_WIDTH = 64;
 const FONT = "Focus Buddy Fredoka";
 const PIXEL_FONT = "Focus Buddy Pixel";
 
@@ -148,6 +150,11 @@ function mount() {
     },
     setFullscreen: () => {
       // The break screen already covers the whole page.
+    },
+    // Done for the day: just a small tab on the edge, and Miacademy gets the whole screen back.
+    setCollapsed: (on: boolean) => {
+      host.style.width = `${on ? TAB_WIDTH : WIDTH}px`;
+      document.documentElement.style.setProperty("margin-right", on ? "0px" : `${WIDTH}px`, "important");
     },
     // The task (video, practice, quiz) open in Miacademy, from the address: lets a kid finish it when time runs out.
     onTask: (cb: (taskKey: string | null) => void) => {
