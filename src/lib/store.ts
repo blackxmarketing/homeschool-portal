@@ -28,7 +28,7 @@ import { expectedSeconds, gradeProbe, probeSolution } from "./probes";
 import { adapt, buildProfile, conceptMastery, whatHelps, type Adaptation, type LearningEvent, type Profile } from "./learner";
 import { angleOf, applyEvidence, blockers, conceptOf, emptyMeter, legacyConcept, lessonMastered, type Evidence, type Meter } from "./masteryMeter";
 import type { Lesson, Probe } from "@/content/courses/types";
-import { MIA_COURSE_PLANS, MIA_OVERTIME_ALERT_MINUTES, MIA_PAY, MIA_RINGS, MIA_SUBJECTS, miaCoursePlan, miaLessonWeight, type MiaCoursePlan, type MiaSettings } from "@/content/miacademy";
+import { MIA_COURSE_PLANS, MIA_MINUTES, MIA_OVERTIME_ALERT_MINUTES, MIA_PAY, MIA_RINGS, MIA_SUBJECTS, miaCoursePlan, miaLessonWeight, type MiaCoursePlan, type MiaSettings } from "@/content/miacademy";
 import { applyMia, clampMiaSettings, isOpen, MiaRuleError, newTimer, parseMiaSettings, parseMiaState, type MiaAction, type MiaTimerState } from "./miaTimer";
 import {
   guessStudentPdf,
@@ -2254,6 +2254,18 @@ export function parentMiaRestart(familyId: number, kidId: number, subject: strin
   const current = miaDay(kidId, day)[subject];
   if (current?.pause?.type !== "help") throw new PortalError("That timer isn't waiting for help.");
   saveMia(kidId, day, subject, applyMia(current, "helpResume", now, getMiaSettings(kidId)).state);
+}
+
+/** Parent: a subject's 30 minutes were done today without the timer (or it should count as done). */
+export function parentMiaMarkTimerDone(familyId: number, kidId: number, subject: string, now = Date.now()): void {
+  const kid = getKid(kidId);
+  if (!kid || kid.family_id !== familyId) throw new PortalError("Unknown kid.");
+  if (!MIA_SUBJECTS.some((s) => s.id === subject)) throw new PortalError("Unknown subject.");
+  const day = today();
+  const t = miaDay(kidId, day)[subject];
+  if (t?.finishedAt) return;
+  const base = t ?? newTimer(now - MIA_MINUTES * 60 * 1000);
+  saveMia(kidId, day, subject, { ...base, leftMs: 0, endAt: null, pause: null, finishedAt: now });
 }
 
 /** Parent: let a kid run a subject's timer again today (or stop the one that's going). */

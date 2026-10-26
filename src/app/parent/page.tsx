@@ -13,6 +13,7 @@ import {
   kidFlags,
   learnerProfiles,
   listKids,
+  miaChecklist,
   miaFamilyToday,
   miaRings,
   miaWaitingForParent,
@@ -45,6 +46,7 @@ export default async function ParentHome({ searchParams }: { searchParams: Promi
       <MiaApprovals familyId={s.familyId} />
       <MiaToday familyId={s.familyId} />
       <MiaWeekRings familyId={s.familyId} />
+      <MiaChecklists familyId={s.familyId} />
       {courseTasks.length > 0 && (
         <div className="card">
           <h2>📚 Projects, labs and speeches to check ({courseTasks.length})</h2>
@@ -343,6 +345,15 @@ function MiaToday({ familyId }: { familyId: number }) {
                         </button>
                       </form>
                     )}
+                    {!t?.finishedAt && (
+                      <form action={miaParentAction} style={{ display: "inline" }}>
+                        <input type="hidden" name="kidId" value={kid.id} />
+                        <input type="hidden" name="subject" value={sub.id} />
+                        <button className="linkbtn small" name="op" value="done">
+                          Mark done
+                        </button>
+                      </form>
+                    )}{" "}
                     {t && !t.finishedAt && (
                       <form action={miaParentAction} style={{ display: "inline" }}>
                         <input type="hidden" name="kidId" value={kid.id} />
@@ -357,6 +368,52 @@ function MiaToday({ familyId }: { familyId: number }) {
               );
             }),
           )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/** Each kid's next checklist activities, so a parent can check off work done away from the timer. */
+function MiaChecklists({ familyId }: { familyId: number }) {
+  const rows = miaFamilyToday(familyId).flatMap(({ kid }) =>
+    MIA_SUBJECTS.flatMap((sub) =>
+      (miaChecklist(kid.id, sub.id)?.parts ?? [])
+        .filter((p) => p.upcoming.length)
+        .map((p) => ({ kid, sub, part: p })),
+    ),
+  );
+  if (!rows.length) return null;
+  return (
+    <div className="card">
+      <h2>📝 Checklists</h2>
+      <p className="muted small">The next activities on each checklist. Mark one done if it was finished away from the timer.</p>
+      <table>
+        <tbody>
+          {rows.map(({ kid, sub, part }) => (
+            <tr key={`${kid.id}-${sub.id}-${part.name ?? ""}`}>
+              <td>
+                {kid.avatar} {kid.name}
+              </td>
+              <td style={{ color: sub.color, fontWeight: 700 }}>
+                {part.name ?? sub.name}
+                {part.lessonTitle && <div className="muted small">{part.lessonTitle}</div>}
+              </td>
+              <td>
+                {part.upcoming.map((u) => (
+                  <form key={`${u.lessonId}-${u.item.id}`} action={miaItemAction} style={{ marginBottom: 4 }}>
+                    <input type="hidden" name="kidId" value={kid.id} />
+                    <input type="hidden" name="lessonId" value={u.lessonId} />
+                    <input type="hidden" name="itemId" value={u.item.id} />
+                    <span className="small">{u.item.title}</span>{" "}
+                    <button className="linkbtn small" name="op" value="approve">
+                      Mark done
+                    </button>
+                  </form>
+                ))}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

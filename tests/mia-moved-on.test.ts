@@ -58,3 +58,23 @@ describe("a lesson Miacademy moved past counts in its own week", () => {
     expect(() => parentMiaResetRing(family + 1, kid, "reading")).toThrow();
   });
 });
+
+describe("parent catch-up controls", () => {
+  it("marks a timer done for today, and a checklist activity done", async () => {
+    const { parentMiaMarkTimerDone, parentMiaItem, miaDay } = await import("@/lib/store");
+    setDb(openDb(":memory:"));
+    const family = createFamily({ familyName: "T", parentName: "P", email: `p${Math.random()}@test.test`, password: "password1" });
+    const kid = addKid(family, { name: "Bryce", avatar: "🐺", grade: 6, pin: "1111", dailyGoal: 45 });
+    setMiaSettings(kid, { ...getMiaSettings(kid), lessonsPerWeek: { math: 0, ela: 1, sci: 0, his: 0 } });
+
+    parentMiaMarkTimerDone(family, kid, "ela");
+    expect(miaDay(kid).ela?.finishedAt).toBeTypeOf("number");
+    expect(() => parentMiaMarkTimerDone(family + 1, kid, "ela")).toThrow();
+
+    miaPathSync(kid, parsePathCourses([course(1, 10, "Pdf", "Opossum")]));
+    const reading = () => miaChecklist(kid, "ela")!.parts.find((p) => p.name === "Reading Comprehension")!;
+    const top = reading().upcoming[0];
+    parentMiaItem(family, kid, top.lessonId, top.item.id, "approve");
+    expect(reading().upcoming.some((u) => u.item.id === top.item.id)).toBe(false);
+  });
+});

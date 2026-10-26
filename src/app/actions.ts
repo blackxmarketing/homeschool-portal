@@ -30,6 +30,7 @@ import {
   verifyParent, setElectivesOff,
   dismissAlerts,
   parentMiaReset,
+  parentMiaMarkTimerDone,
   parentMiaResetRing,
   parentMiaRestart,
   setMiaSettings,
@@ -302,6 +303,7 @@ export async function miaParentAction(form: FormData) {
   const subject = str(form, "subject");
   try {
     if (form.get("op") === "restart") parentMiaRestart(s.familyId, kidId, subject);
+    else if (form.get("op") === "done") parentMiaMarkTimerDone(s.familyId, kidId, subject);
     else parentMiaReset(s.familyId, kidId, subject);
   } catch (e) {
     if (e instanceof PortalError) back("/parent", e.message);
