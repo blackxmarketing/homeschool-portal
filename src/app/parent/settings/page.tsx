@@ -1,5 +1,5 @@
 import ParentNav from "@/components/ParentNav";
-import { addKidAction, focusAction, miaChildAction, miaPairCodeAction, miaParentCodeAction, miaParentDeviceAction, miaRemoveDeviceAction, miaSettingsAction, resetPlacementAction, schoolYearAction, updateKidAction } from "@/app/actions";
+import { addKidAction, focusAction, miaChildAction, miaPairCodeAction, miaParentCodeAction, miaParentDeviceAction, miaRemoveDeviceAction, miaSettingsAction, removeKidAction, resetPlacementAction, schoolYearAction, updateKidAction } from "@/app/actions";
 import { BUDDIES, MIA_SUBJECTS } from "@/content/miacademy";
 import { requireParent } from "@/lib/auth";
 import { LIMITS } from "@/lib/focus";
@@ -157,6 +157,21 @@ export default async function Settings({
             <button className="linkbtn small">Redo placement test</button>{" "}
             <span className="muted small">(keeps skills already mastered)</span>
           </form>
+          <details style={{ marginTop: 12 }}>
+            <summary className="small muted">Remove {kid.name}</summary>
+            <form action={removeKidAction} className="row" style={{ alignItems: "end", marginTop: 8 }}>
+              <input type="hidden" name="kidId" value={kid.id} />
+              <div>
+                <label className="small">
+                  This deletes {kid.avatar} {kid.name} and everything saved for them, for good. Type {kid.name} to confirm.
+                </label>
+                <input name="confirm" autoComplete="off" required />
+              </div>
+              <div>
+                <button className="btn secondary">Remove {kid.name}</button>
+              </div>
+            </form>
+          </details>
         </div>
       ))}
 

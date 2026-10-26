@@ -58,6 +58,25 @@ export function today(): string {
 
 // ---------------- Families, parents, kids ----------------
 
+/**
+ * Parent: remove a kid and everything saved for them, from every table with a
+ * kid_id. It can't be undone; the parent confirms by typing the kid's name.
+ */
+export function removeKid(familyId: number, kidId: number): void {
+  const kid = getKid(kidId);
+  if (!kid || kid.family_id !== familyId) throw new PortalError("Unknown kid.");
+  const db = getDb();
+  const tables = (db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all() as { name: string }[])
+    .map((t) => t.name)
+    .filter((t) => t !== "kids" && (db.prepare(`PRAGMA table_info("${t}")`).all() as { name: string }[]).some((c) => c.name === "kid_id"));
+  db.transaction(() => {
+    // Rows can point at each other; check the links once everything is gone.
+    db.pragma("defer_foreign_keys = ON");
+    for (const t of tables) db.prepare(`DELETE FROM "${t}" WHERE kid_id = ?`).run(kidId);
+    db.prepare("DELETE FROM kids WHERE id = ?").run(kidId);
+  })();
+}
+
 export interface Kid {
   id: number;
   family_id: number;

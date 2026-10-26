@@ -30,6 +30,7 @@ import {
   verifyParent, setElectivesOff,
   dismissAlerts,
   parentMiaReset,
+  removeKid,
   parentMiaMarkTimerDone,
   parentMiaResetRing,
   parentMiaRestart,
@@ -297,6 +298,18 @@ export async function parentPinAction(form: FormData) {
 }
 
 /** Restart a timer that's waiting for help, or let a kid run a subject again today. */
+/** Remove a kid for good: the parent types the kid's name to confirm. */
+export async function removeKidAction(form: FormData) {
+  const s = await requireParent();
+  const kid = getKid(Number(form.get("kidId")));
+  if (!kid || kid.family_id !== s.familyId) back("/parent/settings", "Unknown kid.");
+  if (str(form, "confirm").trim().toLowerCase() !== kid!.name.trim().toLowerCase())
+    back("/parent/settings", `To remove ${kid!.name}, type their name in the box first.`);
+  removeKid(s.familyId, kid!.id);
+  revalidatePath("/parent");
+  redirect("/parent/settings?saved=1");
+}
+
 export async function miaParentAction(form: FormData) {
   const s = await requireParent();
   const kidId = Number(form.get("kidId"));
