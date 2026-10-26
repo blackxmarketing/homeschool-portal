@@ -62,8 +62,8 @@ export const MIA_LINES = {
   overtime: "Time's up! Finish what you're working on first. Take your time.",
   overtimeDone: "Great job finishing! You earned 5 extra cents.",
   remind: "Don't forget your timer! Pick the subject you're working on and press Start.",
-  vocabStart: "Good morning! Start your day with Vocabulary in Miacademy.",
-  vocabDone: "Vocabulary done! Great start. Now pick a core class and press Start.",
+  vocabStart: "Good morning! Start your day with Vocabulary and Spelling in Miacademy.",
+  vocabDone: "Vocabulary and Spelling done! Great start. Now pick a core class and press Start.",
   /** A class's 30 minutes are up and another class is left today: keep going, or a quick break first. */
   between: "Great job on {subject}! Are you ready to start {next}, or do you need a quick 5-minute break?",
   betweenBreak: "Quick break! It's time to move your body.",

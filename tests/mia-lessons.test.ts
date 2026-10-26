@@ -22,6 +22,7 @@ import {
   setMiaSettings,
   setParentPin,
   unseenAlerts,
+  miaVocabDone,
 } from "@/lib/store";
 
 const PDF = "https://miaplaza-content.s3.us-west-2.amazonaws.com/Science/General+Science+(SC)+(K8)/SC4+Forces+Gravity+Student+PDF.pdf";
@@ -200,6 +201,8 @@ describe("a kid's Science checklist", () => {
     family = createFamily({ familyName: "Test", parentName: "P", email: `p${Math.random()}@test.test`, password: "password1" });
     kid = addKid(family, { name: "Kid", avatar: "🙂", grade: 4, pin: "1111", dailyGoal: 45 });
     setMiaSettings(kid, { ...getMiaSettings(kid), lessonsPerWeek: { math: 0, ela: 0, sci: 1, his: 0 } });
+    // Vocabulary & Spelling come first each school day.
+    miaVocabDone(kid);
   });
 
   function startGravity() {

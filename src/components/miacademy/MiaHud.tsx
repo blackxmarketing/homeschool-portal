@@ -468,7 +468,7 @@ export default function MiaHud({
   const hello = allDone
     ? "Core classes done! Now your electives. 🎉"
     : vocabFirst && !focused
-      ? "Start with Vocabulary!"
+      ? "Start with Vocabulary & Spelling!"
     : !focused
       ? reminder
         ? "Don't forget your timer!"
@@ -570,8 +570,8 @@ export default function MiaHud({
 
       {vocabFirst && !focused && (
         <div className="mia-vocab" role="status">
-          <div className="mia-vocab-head">First: Vocabulary</div>
-          <p>Do today&apos;s Vocabulary in Miacademy. Your core classes start after that.</p>
+          <div className="mia-vocab-head">First: Vocabulary &amp; Spelling</div>
+          <p>Do today&apos;s Vocabulary and Spelling in Miacademy. Your core classes start after that.</p>
           {vocab!.tasks.length > 0 && (
             <ul>
               {vocab!.tasks.map((t, i) => (
@@ -583,7 +583,7 @@ export default function MiaHud({
             </ul>
           )}
           <button className="mia-btn big go" onClick={vocabFinished} disabled={busy}>
-            ✓ I finished Vocabulary
+            ✓ I finished Vocabulary &amp; Spelling
           </button>
         </div>
       )}
@@ -608,7 +608,7 @@ export default function MiaHud({
                   {s.name}
                 </div>
                 <div className="mia-time">{done ? "All done!" : `${mmss(t ? remaining(t, now) : (demo ? 60 : MIA_MINUTES * 60) * 1000)}`}</div>
-                {!done && <div className="mia-status">{t ? "Keep going ▶" : waiting ? "After Vocabulary" : blocked ? "Finish your other subject first" : "Tap to start ▶"}</div>}
+                {!done && <div className="mia-status">{t ? "Keep going ▶" : waiting ? "After Vocabulary & Spelling" : blocked ? "Finish your other subject first" : "Tap to start ▶"}</div>}
               </div>
               {done && <span className="mia-sticker">⭐ Done!</span>}
             </button>

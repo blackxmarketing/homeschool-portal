@@ -221,3 +221,17 @@ course's calendar rows with these, in course order, keeping the calendar's dates
 where it knows them. Lessons already finished before Focus Buddy saw them are
 skipped (they don't fill this week's rings). Each lesson keeps its answer key
 from the course page (`mia_lessons.answer_key`), which the photo check uses first.
+
+### Update: Vocabulary & Spelling (replaces "Vocabulary first" above)
+
+In Miacademy vocabulary is a daily practice (not a class) and spelling isn't on
+the checklist. So the day's first step is a reminder with no timer and no list:
+"First: Vocabulary & Spelling" every school day (Monday-Thursday) for a kid with
+Miacademy timers on, until they tap "I finished Vocabulary & Spelling". The core
+timers wait for it. Electives come after the core classes (the electives
+reminder); they aren't on the checklist either.
+
+The checklists only follow the core classes (`miaIsCoreCourse`): Math, Science,
+U.S. Geography / Ancient World History, and the Language Arts classes in
+`MIA_COURSE_PLANS`. When a kid finishes a level, the parent checks the next one
+in Miacademy and the checklist follows it.

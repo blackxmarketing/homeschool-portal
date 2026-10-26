@@ -2199,7 +2199,7 @@ export function miaAct(
 
   if (action === "start" && !current) {
     const vocab = miaVocab(kidId, day);
-    if (vocab && !vocab.done) throw new PortalError("Start with Vocabulary first.");
+    if (vocab && !vocab.done) throw new PortalError("Start with Vocabulary and Spelling first.");
     const other = Object.entries(timers).find(([id, t]) => id !== subject && isOpen(t));
     if (other) throw new PortalError(`Finish ${miaSubjectName(other[0])} first.`);
     saveMia(kidId, day, subject, newTimer(now, !!opts.demo));
@@ -2404,36 +2404,21 @@ export function verifyParentPin(familyId: number, pin: string): "ok" | "wrong" |
 // ---- Vocabulary: done first each school day, before the core classes ----
 
 /**
- * Today's Vocabulary step, or null when there isn't one: not a school day
- * (Monday-Thursday), the kid doesn't take a Vocabulary class, or nothing is
- * marked for today. Its tasks come from the parent's Miacademy calendar; a task
- * is done when Miacademy says so or the kid's assignments page has moved past
- * it. The kid can also say they finished (a "vocab" row in mia_daily).
+ * The day's first step, Vocabulary & Spelling, before the core classes: every
+ * school day (Monday-Thursday) for a kid with Miacademy timers on. In Miacademy
+ * vocabulary is a daily practice (not a class) and spelling isn't on the
+ * checklist, so it's a reminder the kid checks off ("vocab" in mia_daily).
  */
 export function miaVocab(kidId: number, day = today()): { done: boolean; tasks: { title: string; lesson: string; done: boolean }[] } | null {
   const weekday = ((new Date(`${day}T12:00:00Z`).getUTCDay() + 6) % 7) + 1;
   if (weekday > 4) return null;
-  const db = getDb();
-  const all = db
-    .prepare("SELECT task_id, day, name, lesson_title, status FROM mia_plan_tasks WHERE kid_id = ? AND subject = 'vocab' ORDER BY day, sort")
-    .all(kidId) as { task_id: string; day: string; name: string; lesson_title: string; status: string }[];
-  const path = (db.prepare("SELECT course, task_id FROM mia_path WHERE kid_id = ?").all(kidId) as { course: string; task_id: string }[]).find((r) =>
-    /vocabulary/i.test(r.course),
-  );
-  if (!all.length && !path) return null;
-  // Where the assignments page is now: everything before it on the calendar is done.
-  const at = path ? all.findIndex((t) => t.task_id === path.task_id) : -1;
-  const isDone = (t: (typeof all)[number]) => t.status === "Completed" || (at >= 0 && all.indexOf(t) < at);
-  // Today's tasks, plus any from earlier days still not done (Miacademy moves those to the next day).
-  const todays = all.filter((t) => t.day === day || (t.day < day && !isDone(t)));
-  if (all.length && !todays.length) return null;
-  const tasks = todays.map((t) => ({ title: t.name, lesson: t.lesson_title, done: isDone(t) }));
-  const said = db.prepare("SELECT 1 FROM mia_daily WHERE kid_id = ? AND day = ? AND step = 'vocab'").get(kidId, day);
-  return { done: !!said || (tasks.length > 0 && tasks.every((t) => t.done)), tasks };
+  if (!Object.values(getMiaSettings(kidId).lessonsPerWeek).some((n) => n > 0)) return null;
+  const said = getDb().prepare("SELECT 1 FROM mia_daily WHERE kid_id = ? AND day = ? AND step = 'vocab'").get(kidId, day);
+  return { done: !!said, tasks: [] };
 }
 export type MiaVocab = NonNullable<ReturnType<typeof miaVocab>>;
 
-/** The kid says Vocabulary is done for today. */
+/** The kid says Vocabulary & Spelling are done for today. */
 export function miaVocabDone(kidId: number, day = today(), now = Date.now()): void {
   getDb().prepare("INSERT OR IGNORE INTO mia_daily (kid_id, day, step, at) VALUES (?, ?, 'vocab', ?)").run(kidId, day, now);
 }
