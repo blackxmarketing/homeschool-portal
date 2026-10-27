@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { openDb, setDb } from "@/lib/db";
+import { getDb, openDb, setDb } from "@/lib/db";
 import { parseCourseTasks, parsePlanWeek } from "@/lib/miaPlan";
 import { addKid, createFamily, getMiaSettings, miaChecklist, miaLesson, miaSaveCourses, miaSavePlan, setMiaSettings } from "@/lib/store";
 
@@ -72,5 +72,22 @@ describe("the checklist from the parent's course pages", () => {
     const his = miaChecklist(kid, "his")!.parts[0];
     expect(his.lessonTitle).toBe("The Great Plains");
     expect(his.upcoming.length).toBeGreaterThan(0);
+  });
+
+  it("follows the class on the kid's assignments page, and forgets a class the parent removed", () => {
+    // Also enrolled in Government (first on the parent's class list), but working on The Midwest.
+    const gov = [
+      { ...task(50, "Branches of Government", "Video", "Branches of Government", false, 0), course: "Geography and Government", unitTitle: "Unit 1" },
+      { ...task(51, "Branches of Government", "Assessment", "Quiz", false, 1), course: "Geography and Government", unitTitle: "Unit 1" },
+    ];
+    const geo = COURSE.map((t) => ({ ...t, seq: 1_000_000 + t.seq }));
+    miaSaveCourses(kid, parseCourseTasks([...gov, ...geo]));
+    expect(miaChecklist(kid, "his")!.parts[0].lessonTitle).toBe("Branches of Government");
+    getDb().prepare("INSERT INTO mia_path (kid_id, course, task_id, task_type, at) VALUES (?, 'U.S. Geography', ?, 'Video', 1)").run(kid, id(10));
+    expect(miaChecklist(kid, "his")!.parts[0].lessonTitle).toBe("The Great Plains");
+    // The parent removes Government in Miacademy: the next read of the course pages drops it.
+    miaSaveCourses(kid, parseCourseTasks(geo));
+    const courses = getDb().prepare("SELECT DISTINCT course FROM mia_plan_tasks WHERE kid_id = ?").all(kid) as { course: string }[];
+    expect(courses.map((c) => c.course)).toEqual(["U.S. Geography"]);
   });
 });

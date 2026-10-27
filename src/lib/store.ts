@@ -3159,6 +3159,12 @@ export function miaSaveCourses(kidId: number, tasks: PlanTask[], now = Date.now(
   );
   const keep = tasks.filter((t) => t.subject && miaIsCoreCourse(t.subject, t.course));
   db.transaction(() => {
+    // This is every class the kid is enrolled in: one a parent removed in Miacademy goes from here too.
+    if (keep.length) {
+      const enrolled = new Set(keep.map((t) => t.course));
+      const stored = db.prepare("SELECT DISTINCT course FROM mia_plan_tasks WHERE kid_id = ?").all(kidId) as { course: string }[];
+      for (const { course } of stored) if (!enrolled.has(course)) db.prepare("DELETE FROM mia_plan_tasks WHERE kid_id = ? AND course = ?").run(kidId, course);
+    }
     for (const course of new Set(keep.map((t) => t.course))) db.prepare("DELETE FROM mia_plan_tasks WHERE kid_id = ? AND course = ?").run(kidId, course);
     const ins = db.prepare(
       `INSERT OR REPLACE INTO mia_plan_tasks (kid_id, task_id, day, unit_title, course, subject, lesson_title, name, type, status, pdf_url, sort, updated_at, seq, key_url)
@@ -3171,7 +3177,10 @@ export function miaSaveCourses(kidId: number, tasks: PlanTask[], now = Date.now(
 }
 
 function planTasks(kidId: number, subject: string, plan: MiaCoursePlan | null): PlanTask[] {
-  return (
+  // The classes on the kid's own assignments page are the ones they're taking. A subject with
+  // other enrolled classes (History: Government next to The Midwest) follows only those.
+  const taking = new Set((getDb().prepare("SELECT course FROM mia_path WHERE kid_id = ?").all(kidId) as { course: string }[]).map((r) => r.course));
+  const rows = (
     getDb()
       .prepare(
         `SELECT task_id, day, unit_title, course, subject, lesson_title, name, type, status, pdf_url, sort, seq, key_url FROM mia_plan_tasks
@@ -3192,12 +3201,13 @@ function planTasks(kidId: number, subject: string, plan: MiaCoursePlan | null): 
       seq: number | null;
       key_url: string | null;
     }[]
-  )
-    .filter((r) => (!plan || plan.match.test(r.course)) && miaIsCoreCourse(r.subject, r.course))
-    // Tasks from the course pages go in course order; calendar-only ones by day.
+  ).filter((r) => (!plan || plan.match.test(r.course)) && miaIsCoreCourse(r.subject, r.course));
+  return (rows.some((r) => taking.has(r.course)) ? rows.filter((r) => taking.has(r.course)) : rows)
+    // Tasks from the course pages go in the order of the parent's class list (classes, then units,
+    // lessons and tasks, as Miacademy shows them; never alphabetical); calendar-only ones by day.
     .sort((a, b) =>
       a.seq !== null && b.seq !== null
-        ? a.course.localeCompare(b.course) || a.seq - b.seq
+        ? a.seq - b.seq
         : a.seq !== null
           ? -1
           : b.seq !== null
