@@ -2941,6 +2941,21 @@ export function miaSaveForLater(kidId: number, lessonId: number, itemId: string,
 }
 
 /** The kid finished an activity: fixed their mistakes, or sent the photo of a hands-on one for a parent to approve. */
+/** A packet page with no answer key to check it against: the photo goes to a parent, and the kid moves on. */
+export function miaPhotoToParent(kidId: number, lessonId: number, itemId: string, photo: string, now = Date.now()): void {
+  const lesson = updateItem(kidId, lessonId, itemId, (s) => ({ ...s, waitingForParent: true, photo, at: now }));
+  const item = lesson.items!.find((i) => i.id === itemId)!;
+  const kid = getKid(kidId)!;
+  addParentAlert(
+    kid.family_id,
+    kidId,
+    "approve",
+    lesson.subject,
+    `${kid.name} finished ${lesson.title}: ${item.title}. There's no answer key for it, so it's waiting for you to look over.`,
+    now,
+  );
+}
+
 export function miaFinishItem(kidId: number, lessonId: number, itemId: string, photo?: string, now = Date.now()): void {
   const lesson = updateItem(kidId, lessonId, itemId, (s, item) => {
     if (item.check === "parent") return { ...s, waitingForParent: true, photo: photo ?? s.photo, at: now };

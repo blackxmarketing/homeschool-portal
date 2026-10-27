@@ -5,7 +5,7 @@ import { kidFromRequest } from "@/lib/auth";
 import { aiEnabled, checkWorksheetPhoto, type PhotoCheck } from "@/lib/ai";
 import { miaPhotoDir } from "@/lib/miaPhotos";
 import { findAnswerKey, miaBoard } from "@/lib/miaSync";
-import { miaFinishItem, miaLesson, miaRecordPhotoCheck, PortalError } from "@/lib/store";
+import { miaFinishItem, miaLesson, miaPhotoToParent, miaRecordPhotoCheck, PortalError } from "@/lib/store";
 
 const TYPES = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" } as const;
 const MAX_BYTES = 8 * 1024 * 1024;
@@ -60,7 +60,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ waitingForParent: true, ...miaBoard(kid.id) });
     }
     const key = lesson.answerKey ?? (lesson.studentPdf ? await findAnswerKey(lesson.studentPdf) : null);
-    if (!key) return NextResponse.json({ error: "There's no answer key for this one yet. Ask a grown-up." }, { status: 400 });
+    if (!key) {
+      // Nothing to check it against (a creative page, or a key Miacademy doesn't have): a grown-up looks it over.
+      miaPhotoToParent(kid.id, lesson.id, item.id, photo);
+      return NextResponse.json({ waitingForParent: true, ...miaBoard(kid.id) });
+    }
     const result =
       !aiEnabled() && process.env.NODE_ENV !== "production"
         ? previewCheck(!lesson.states[item.id]?.pageScores?.[page])

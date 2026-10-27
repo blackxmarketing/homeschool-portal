@@ -12,6 +12,7 @@ import {
   miaFinishItem,
   miaLesson,
   miaPathSync,
+  miaPhotoToParent,
   miaRecordPhotoCheck,
   miaSaveForLater,
   miaSetParseState,
@@ -322,6 +323,19 @@ describe("a kid's Science checklist", () => {
     parentMiaItem(family, kid, id, "stem-challenge-marble-run", "approve");
     expect(part().later).toEqual([]);
     expect(miaLesson(kid, id)!.doneDay).not.toBeNull();
+  });
+
+  it("sends a packet page with no answer key to a parent, and the kid moves on", () => {
+    const id = startGravity();
+    miaFinishItem(kid, id, "complete-the-guided-notes");
+    miaPhotoToParent(kid, id, "forces-word-search", "1/ws.jpg");
+    const part = () => miaChecklist(kid, "sci")!.parts[0];
+    const todo = part().upcoming.filter((u) => !u.state.waitingForParent).map((u) => u.item.id);
+    expect(todo).toContain("out-of-this-world");
+    expect(todo).not.toContain("forces-word-search");
+    expect(miaWaitingForParent(family).map((w) => w.item.id)).toEqual(["forces-word-search"]);
+    parentMiaItem(family, kid, id, "forces-word-search", "approve");
+    expect(miaLesson(kid, id)!.states["forces-word-search"]).toMatchObject({ done: true, waitingForParent: false });
   });
 
   it("finishes the lesson when Miacademy moves to the next one, and counts it for the week", () => {
