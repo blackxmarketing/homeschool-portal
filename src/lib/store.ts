@@ -2558,14 +2558,35 @@ export function miaOpenLessons(kidId: number, subject: string, plan?: MiaCourseP
  * Lessons finished this week (Monday to Sunday), for a subject or one class in
  * it. A lesson's weight counts: the 4-day lesson before a unit assessment counts
  * as a whole week of lessons.
+ *
+ * Lessons that were already finished the first time Focus Buddy saw them (from
+ * the calendar, dated this week but maybe done long before) only fill the week
+ * up to its target: they can't count as lessons ahead.
  */
-export function miaLessonsDoneThisWeek(kidId: number, subject: string, day = today(), plan?: MiaCoursePlan | null): number {
+export function miaLessonsDoneThisWeek(kidId: number, subject: string, day = today(), plan?: MiaCoursePlan | null, target = Infinity): number {
   const rows = getDb()
-    .prepare("SELECT course, title, weight FROM mia_lessons WHERE kid_id = ? AND subject = ? AND done_day >= ? AND done_day <= ?")
-    .all(kidId, subject, weekStart(day), day) as { course: string | null; title: string; weight: number }[];
-  return rows
-    .filter((r) => !plan || plan.match.test(r.course ?? ""))
-    .reduce((n, r) => n + miaLessonWeight(subject, r.course ?? "", r.title, r.weight || 1), 0);
+    .prepare("SELECT course, title, weight, states, started_at FROM mia_lessons WHERE kid_id = ? AND subject = ? AND done_day >= ? AND done_day <= ?")
+    .all(kidId, subject, weekStart(day), day) as { course: string | null; title: string; weight: number; states: string; started_at: number }[];
+  let seen = 0;
+  let backlog = 0;
+  for (const r of rows.filter((r) => !plan || plan.match.test(r.course ?? ""))) {
+    const w = miaLessonWeight(subject, r.course ?? "", r.title, r.weight || 1);
+    if (finishedWhenFirstSeen(r.states, r.started_at)) backlog += w;
+    else seen += w;
+  }
+  return seen + Math.min(backlog, Math.max(0, target - seen));
+}
+
+/** Every item was checked off by Focus Buddy itself the moment it first saw the lesson (Miacademy already said "Completed"). */
+function finishedWhenFirstSeen(statesJson: string, startedAt: number): boolean {
+  let states: Record<string, ItemState>;
+  try {
+    states = JSON.parse(statesJson) as Record<string, ItemState>;
+  } catch {
+    return false;
+  }
+  const all = Object.values(states);
+  return all.length > 0 && all.every((s) => s.done && s.at === startedAt && !s.photo && !s.pageScores);
 }
 
 /** The kid's Miacademy classes seen so far (calendar, assignments page, lessons). */
@@ -2777,7 +2798,7 @@ function courseChecklist(kidId: number, subject: string, plan: MiaCoursePlan | n
   const fromPlan = miaPlanLessons(kidId, subject, plan);
   const lessons = fromPlan ? fromPlan.lessons.filter((l) => !l.doneDay) : miaOpenLessons(kidId, subject, plan);
   const toRead = fromPlan?.toRead ?? [];
-  const doneThisWeek = miaLessonsDoneThisWeek(kidId, subject, day, plan);
+  const doneThisWeek = miaLessonsDoneThisWeek(kidId, subject, day, plan, target);
   const weekDone = !!plan?.stopWhenDone && doneThisWeek >= target;
   const upcoming: { lessonId: number; lessonTitle: string; item: LessonItem; state: ItemState }[] = [];
   let reading = false;
@@ -3234,10 +3255,13 @@ export function miaPlanLessons(kidId: number, subject: string, plan: MiaCoursePl
     const undated = pl.tasks.every((t) => !t.day);
     if (undated && pl.tasks.every((t) => t.status === "Completed") && !db.prepare("SELECT 1 FROM mia_lessons WHERE kid_id = ? AND mia_key = ?").get(kidId, key))
       continue;
-    db.prepare(
-      `INSERT OR IGNORE INTO mia_lessons (kid_id, subject, mia_key, title, student_pdf, items, parse_state, started_at, course)
+    const isNew =
+      db
+        .prepare(
+          `INSERT OR IGNORE INTO mia_lessons (kid_id, subject, mia_key, title, student_pdf, items, parse_state, started_at, course)
        VALUES (?, ?, ?, ?, ?, '[]', ?, ?, ?)`,
-    ).run(kidId, subject, key, pl.title, pl.pdfUrl, needsPdf ? "waiting" : "ready", now, pl.course);
+        )
+        .run(kidId, subject, key, pl.title, pl.pdfUrl, needsPdf ? "waiting" : "ready", now, pl.course).changes > 0;
     const row = db.prepare(`SELECT ${LESSON_COLS}, pdf_parsed FROM mia_lessons WHERE kid_id = ? AND mia_key = ?`).get(kidId, key) as MiaLessonRow & {
       pdf_parsed: string | null;
     };
@@ -3263,9 +3287,10 @@ export function miaPlanLessons(kidId: number, subject: string, plan: MiaCoursePl
     const items = planLessonItems(pl, subject, coursePlan, parsed);
     // Online tasks: done when Miacademy says so, or once the kid has moved past them.
     const at = reached.get(pl.course);
-    const workedThisWeek = workedOnThisWeek(lesson.states);
-    // A lesson from an earlier day that Miacademy finished checks itself off; otherwise the kid checks off each one.
-    const finishedBefore = pl.tasks.every((t) => t.status === "Completed") && !!pl.tasks.at(-1)!.day && pl.tasks.at(-1)!.day < today();
+    // A lesson Miacademy had already finished when Focus Buddy first saw it, or one the kid has since moved
+    // past, checks itself off; otherwise the kid checks off each one. (Not by its calendar date: parents move those.)
+    const finishedBefore =
+      pl.tasks.every((t) => t.status === "Completed") && (isNew || (at !== undefined && pl.tasks.every((t) => t.order < at)));
     for (const t of pl.tasks) {
       const id = `task-${t.taskId}`;
       if (!items.some((i) => i.id === id) || lesson.states[id]?.done) continue;
@@ -3276,14 +3301,11 @@ export function miaPlanLessons(kidId: number, subject: string, plan: MiaCoursePl
     // Waiting for its PDF: not done yet, even if every online task is.
     const done = items.length > 0 && lessonDone(items, lesson.states) && (!needsPdf || !!parsed);
     if (done && !lesson.doneDay) {
-      // Finished before the calendar was read (every task already "Completed"): count it on the day it was scheduled.
-      // Also when it was scheduled before this week and not worked on in it: Miacademy moves unfinished
-      // work forward, so a lesson still dated in an earlier week was finished back then.
-      const lastDay = pl.tasks.at(-1)!.day;
-      const allEarlier = pl.tasks.every((t) => t.status === "Completed") && lastDay < today();
-      const earlierWeek = lastDay < weekStart(today()) && !workedThisWeek;
-      // No date (from the course page): it was on the checklist until now, so it's finished today.
-      lesson.doneDay = lastDay && (allEarlier || earlierWeek) ? lastDay : today();
+      // Calendar dates mean nothing here (parents move them so lessons open early). Already finished
+      // the first time Focus Buddy saw it: done before, so it counts for last week, not this one.
+      // Otherwise it was on the checklist until now, so it's finished today.
+      const seenFinished = isNew && pl.tasks.every((t) => t.status === "Completed");
+      lesson.doneDay = seenFinished ? lastWeekDay() : today();
     }
     if (!done) lesson.doneDay = null;
     db.prepare("UPDATE mia_lessons SET items = ?, states = ?, done_day = ?, student_pdf = COALESCE(student_pdf, ?) WHERE id = ?").run(

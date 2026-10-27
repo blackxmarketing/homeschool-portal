@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { openDb, setDb } from "@/lib/db";
 import { parsePlanWeek } from "@/lib/miaPlan";
 import { addKid, createFamily, getMiaSettings, miaBank, miaChecklist, miaFinishItem, miaRings, miaSavePlan, setMiaSettings } from "@/lib/store";
@@ -38,14 +38,43 @@ describe("the six weekly rings", () => {
     expect(miaBank(kid, "2026-10-20").thisWeek).toEqual([]);
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("pays 25 cents once when a ring fills Monday to Thursday, 15 cents after", () => {
-    // Every task was finished in Miacademy before the calendar was read: the lesson counts on its day (Tuesday).
-    miaSavePlan(family, { id: id(90), name: "Bryce" }, [parsePlanWeek(week("Completed"))]);
+    // A Tuesday: the kid checks the lesson off today.
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-20T18:00:00Z"));
+    // Focus Buddy sees the lesson, then Miacademy finishes it and the kid checks both off.
+    miaSavePlan(family, { id: id(90), name: "Bryce" }, [parsePlanWeek(week("NotStarted"))]);
     miaChecklist(kid, "ela", "2026-10-20");
+    miaSavePlan(family, { id: id(90), name: "Bryce" }, [parsePlanWeek(week("Completed"))]);
+    for (const u of miaChecklist(kid, "ela", "2026-10-20")!.parts.find((p) => p.name === "Writing (Edition 1)")!.upcoming) miaFinishItem(kid, u.lessonId, u.item.id);
     expect(miaRings(kid, "2026-10-20").find((r) => r.id === "grammar")).toMatchObject({ progress: 1, full: true });
     miaRings(kid, "2026-10-20");
     expect(miaBank(kid, "2026-10-20").thisWeek).toEqual([{ ring: "grammar", cents: 25 }]);
     expect(() => miaFinishItem(kid, 999, "x")).toThrow();
+  });
+
+  it("doesn't count lessons finished before Focus Buddy saw them, whatever their calendar date", () => {
+    // Fifteen Grammar lessons Miacademy already says are Completed, all dated this week (parents move the dates).
+    const n = 15;
+    miaSavePlan(family, { id: id(90), name: "Bryce" }, [
+      parsePlanWeek({
+        Days: [{ Date: "2026-10-20", UnitTasks: [{ Unit: "u", TaskAssignments: Array.from({ length: n }, (_, i) => id(20 + i)) }] }],
+        UnitConversions: [{ UnitId: "u", Subject: "LanguageArts", Title: "Unit", CourseTitle: "Language Arts: Level E (Edition 1)" }],
+        TaskAssignmentConversions: Array.from({ length: n }, (_, i) => ({
+          TaskAssignmentId: id(20 + i),
+          Name: "Level 1",
+          Type: "Practice",
+          Status: "Completed",
+          PreviewData: { Title: `Story ${i}` },
+        })),
+      }),
+    ]);
+    miaChecklist(kid, "ela", "2026-10-20");
+    expect(miaRings(kid, "2026-10-20").find((r) => r.id === "grammar")).toMatchObject({ progress: 0, full: false, ahead: 0 });
   });
 
   it("gives Bryce six rings and Emme five (no Grammar: she doesn't take Edition 1)", () => {
