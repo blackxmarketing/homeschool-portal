@@ -63,8 +63,10 @@ interface HostBridge {
   setCollapsed?: (on: boolean) => void;
   /** The Miacademy task (video, practice, quiz) the kid has open, or null. Only the extension knows. */
   onTask?: (cb: (taskKey: string | null) => void) => void;
+  /** Read the kid's Miacademy assignments again now (new checklists come through onChecklists). False if it can't yet. */
+  refreshPath?: () => boolean;
 }
-const bridge = (): HostBridge | undefined =>
+export const bridge = (): HostBridge | undefined =>
   typeof window === "undefined" ? undefined : (window as unknown as { miaHud?: HostBridge }).miaHud;
 
 export const portalApi: MiaApi = async (body, path = "/api/mia") => {

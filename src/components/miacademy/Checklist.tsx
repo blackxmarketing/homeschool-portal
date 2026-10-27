@@ -3,15 +3,21 @@
 import { useEffect, useRef, useState } from "react";
 import { itemMaterials, needsMaterials, type LessonItem } from "@/lib/miaLessons";
 import type { MiaChecklist, MiaCourseChecklist } from "@/lib/store";
-import { checkSound } from "@/components/voice";
-import type { MiaApi } from "./MiaHud";
+import { checkSound, primeSound } from "@/components/voice";
+import { bridge, type MiaApi } from "./MiaHud";
 
 /**
  * The step-by-step checklist under an open timer: the next three activities
  * of the kid's Miacademy lesson, the top one big and bright, the other two dim.
  * The kid taps the big box to check one off (a "ding"), it pops away, and the
- * next one slides up. Online activities light up once Miacademy has them done.
+ * next one slides up. Online activities light up once Miacademy has them done:
+ * tapping one that isn't lit yet reads Miacademy again, and if it's done there it
+ * checks itself off.
  */
+
+const isOnline = (item: LessonItem) => item.check === "video" || item.check === "online" || item.check === "practice" || item.check === "quiz";
+/** While the timer runs and the next activity is online, look at Miacademy again this often. */
+const LOOK_EVERY_MS = 45_000;
 
 /** A pencil for work in the packet, a computer for work in Miacademy. */
 const PACKET = "✏️";
@@ -45,10 +51,51 @@ export default function Checklist({
   const [photoFor, setPhotoFor] = useState<Entry | null>(null);
   const [leaving, setLeaving] = useState<string | null>(null);
   const [checking, setChecking] = useState<string | null>(null);
+  /** The online activity the kid tapped before Miacademy showed it done: we're reading Miacademy again. */
+  const [looking, setLooking] = useState<string | null>(null);
 
   const waiting = checklist.upcoming.filter((e) => e.state.waitingForParent);
   const todo = checklist.upcoming.filter((e) => !e.state.waitingForParent);
   const top = todo[0];
+
+  const topKey = top ? `${top.lessonId}:${top.item.id}` : null;
+  const topWaits = !!top && isOnline(top.item) && !top.state.ready;
+
+  // The kid tapped it and Miacademy now says it's done: check it off for them.
+  useEffect(() => {
+    if (looking && looking === topKey && top?.state.ready) {
+      setLooking(null);
+      void done(top);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [looking, topKey, top?.state.ready]);
+
+  // Still not done after a few seconds: say what to do.
+  useEffect(() => {
+    if (!looking) return;
+    const t = setTimeout(() => {
+      setLooking(null);
+      say("Miacademy doesn't show that one finished yet. Finish it there, then tap the box again.");
+    }, 8000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [looking]);
+
+  // While the timer runs, keep an eye on Miacademy so the box lights up on its own.
+  useEffect(() => {
+    if (!running || !topWaits) return;
+    const t = setInterval(() => bridge()?.refreshPath?.(), LOOK_EVERY_MS);
+    return () => clearInterval(t);
+  }, [running, topWaits]);
+
+  function lookAgain(entry: Entry) {
+    primeSound();
+    if (!bridge()?.refreshPath?.()) {
+      say("Go to your Miacademy assignments page for a moment, so I can see it's done. Then tap the box.");
+      return;
+    }
+    setLooking(`${entry.lessonId}:${entry.item.id}`);
+  }
 
   // Hands-on activities: do it now (the timer pauses while supplies are gathered with a grown-up) or save it for later.
   function doNow(entry: Entry) {
@@ -75,6 +122,7 @@ export default function Checklist({
   }
 
   async function done(entry: Entry) {
+    primeSound();
     setChecking(`${entry.lessonId}:${entry.item.id}`);
     const { ok, data } = await api({ lessonId: entry.lessonId, itemId: entry.item.id }, "/api/mia/item");
     const next = (data as { checklists?: Record<string, MiaChecklist | null> }).checklists;
@@ -125,8 +173,10 @@ export default function Checklist({
                 entry={e}
                 running={running}
                 checked={checking === key || leaving === key}
+                looking={looking === key}
                 onPhoto={() => setPhotoFor(e)}
                 onCheck={() => void done(e)}
+                onLook={() => lookAgain(e)}
                 onNow={() => doNow(e)}
                 onLater={() => void saveForLater(e)}
               />
@@ -200,14 +250,20 @@ function TopTask({
   entry,
   running,
   checked,
+  looking,
   onPhoto,
   onCheck,
+  onLook,
   onNow,
   onLater,
 }: {
   entry: Entry;
   running: boolean;
   checked: boolean;
+  /** Reading Miacademy again to see if it's done. */
+  looking: boolean;
+  /** Not lit yet: read Miacademy again. */
+  onLook: () => void;
   onPhoto: () => void;
   onCheck: () => void;
   /** Hands-on: gather the supplies now (pauses the timer). */
@@ -230,20 +286,24 @@ function TopTask({
               ? `Guided notes in your packet${pages}`
               : `In your packet${pages}`
   }`;
-  const online = item.check === "video" || item.check === "online" || item.check === "practice" || item.check === "quiz";
+  const online = isOnline(item);
   // What the box does, and the hint under the activity.
   let canCheck = running;
   let hint: React.ReactNode;
+  // Not lit yet: while the timer runs, the box asks Miacademy again.
+  const look = online && !state.ready && running;
   if (online && !state.ready) {
-    canCheck = false;
-    hint =
-      item.check === "video"
-        ? "Watch it in Miacademy. Then check it off here!"
+    canCheck = running;
+    hint = looking
+      ? "🔎 Checking Miacademy…"
+      : item.check === "video"
+        ? "Watch it in Miacademy. Then tap the box!"
         : item.check === "practice"
-          ? "Play this level in Miacademy. Then check it off here!"
+          ? "Play this level in Miacademy. Then tap the box!"
           : item.check === "quiz"
-            ? "Take the quiz in Miacademy. Then check it off here!"
-            : "Do it in Miacademy. Then check it off here!";
+            ? "Take the quiz in Miacademy. Then tap the box!"
+            : "Do it in Miacademy. Then tap the box!";
+    if (!running) hint = "Press Start to work on this.";
   } else if (needsMaterials(item) && !state.suppliesReady) {
     // Only the activity that needs materials: do it now, or save just this one for later.
     canCheck = false;
@@ -265,13 +325,18 @@ function TopTask({
   else if (item.check === "self") hint = "Tap the box when you're done.";
   else if (item.check === "parent") hint = "Tap the box when you're done, then take a photo for a grown-up.";
   else hint = "Tap the box when you're done, then take a photo to check your work.";
-  const tap = () => (item.check === "photo" || item.check === "parent" ? onPhoto() : onCheck());
+  const tap = () => {
+    primeSound();
+    if (look) onLook();
+    else if (item.check === "photo" || item.check === "parent") onPhoto();
+    else onCheck();
+  };
   return (
     <div className="mia-task-row">
       <button
         className={`mia-check ${checked ? "on" : ""} ${canCheck && online ? "ready" : ""}`}
         onClick={tap}
-        disabled={!canCheck || checked}
+        disabled={!canCheck || checked || looking}
         aria-label={`Check off: ${item.title}`}
       >
         {checked ? "✓" : ""}

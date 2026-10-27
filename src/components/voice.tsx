@@ -835,6 +835,19 @@ export function moneySound(kind: "ching" | "clink") {
 }
 
 /** The checklist's "check!": a quick tick and a bright two-note ding. */
+/** On a tap: get sound ready, so a "ding" that comes after a network wait still plays. */
+export function primeSound() {
+  if (typeof window === "undefined") return;
+  try {
+    const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!Ctx) return;
+    audio ??= new Ctx();
+    void audio.resume();
+  } catch {
+    // No sound is fine.
+  }
+}
+
 export function checkSound() {
   if (typeof window === "undefined" || !loadPrefs().sounds) return;
   try {

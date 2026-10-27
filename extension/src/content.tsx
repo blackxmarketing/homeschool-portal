@@ -42,8 +42,27 @@ function reportPdfs(urls: string[]) {
   fresh.forEach((u) => sentPdfs.add(u));
   void report({ page: location.href, pdfs: fresh });
 }
+// How Miacademy asks for the assignments list, kept so any Miacademy page can read it again.
+const PATH_REQUEST = "pathRequest";
+let havePathRequest = false;
+void chrome.storage.local.get(PATH_REQUEST).then((v) => {
+  if (!v[PATH_REQUEST]) return;
+  havePathRequest = true;
+  window.postMessage({ __focusBuddy: true, kind: "knownPathRequest", data: v[PATH_REQUEST] }, location.origin);
+});
+/** Read the kid's assignments again (the answer comes back as a "path" message). */
+function refreshPath(): boolean {
+  if (!havePathRequest) return false;
+  window.postMessage({ __focusBuddy: true, kind: "refreshPath" }, location.origin);
+  return true;
+}
+
 window.addEventListener("message", (e) => {
   if (e.source !== window || !e.data?.__focusBuddy) return;
+  if (e.data.kind === "pathRequest" && e.data.data?.url) {
+    havePathRequest = true;
+    void chrome.storage.local.set({ [PATH_REQUEST]: e.data.data });
+  }
   if (e.data.kind === "path") void report({ courses: e.data.data });
   if (e.data.kind === "pdfs" && Array.isArray(e.data.data)) reportPdfs(e.data.data);
 });
@@ -156,6 +175,7 @@ function mount() {
       host.style.width = `${on ? TAB_WIDTH : WIDTH}px`;
       document.documentElement.style.setProperty("margin-right", on ? "0px" : `${WIDTH}px`, "important");
     },
+    refreshPath,
     // The task (video, practice, quiz) open in Miacademy, from the address: lets a kid finish it when time runs out.
     onTask: (cb: (taskKey: string | null) => void) => {
       let last: string | null | undefined;
