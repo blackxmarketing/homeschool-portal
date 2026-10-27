@@ -15,6 +15,7 @@ import {
   listKids,
   miaChecklist,
   miaFamilyToday,
+  miaRingLessons,
   miaRings,
   miaWaitingForParent,
   minutesOnDay,
@@ -447,7 +448,26 @@ function MiaWeekRings({ familyId }: { familyId: number }) {
               <tr key={`${kid.id}-${r.id}`}>
                 <td>{i === 0 ? `${kid.avatar} ${kid.name}` : ""}</td>
                 <td style={{ color: r.color, fontWeight: 700 }}>{r.name}</td>
-                <td className="small">{r.full ? "Full" : `${Math.round(r.progress * 100)}%`}</td>
+                <td className="small">
+                  {r.full ? "Full" : `${Math.round(r.progress * 100)}%`}
+                  {(() => {
+                    const counted = miaRingLessons(kid.id, r.id);
+                    return counted.length ? (
+                      <details>
+                        <summary>
+                          {counted.length} lesson{counted.length === 1 ? "" : "s"} counted
+                        </summary>
+                        <ul>
+                          {counted.map((l, j) => (
+                            <li key={j}>
+                              {l.title} ({l.doneDay})
+                            </li>
+                          ))}
+                        </ul>
+                      </details>
+                    ) : null;
+                  })()}
+                </td>
                 <td>
                   {r.full && (
                     <form action={miaResetRingAction} style={{ display: "inline" }}>

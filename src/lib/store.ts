@@ -2308,6 +2308,17 @@ export function parentMiaResetRing(familyId: number, kidId: number, ringId: stri
   db.prepare("DELETE FROM mia_bank WHERE kid_id = ? AND week = ? AND ring = ?").run(kidId, weekStart(day), ringId);
 }
 
+/** Parent: the lessons a ring is counting this week (title and the day each was finished). */
+export function miaRingLessons(kidId: number, ringId: string, day = today()): { title: string; doneDay: string }[] {
+  const ring = MIA_RINGS.find((r) => r.id === ringId);
+  if (!ring) return [];
+  const plans = ring.className ? (MIA_COURSE_PLANS[ring.subject] ?? []).filter((p) => p.name === ring.className) : [];
+  const rows = getDb()
+    .prepare("SELECT title, course, done_day FROM mia_lessons WHERE kid_id = ? AND subject = ? AND done_day >= ? AND done_day <= ? ORDER BY done_day, id")
+    .all(kidId, ring.subject, weekStart(day), day) as { title: string; course: string | null; done_day: string }[];
+  return rows.filter((r) => !ring.className || plans.some((p) => p.match.test(r.course ?? ""))).map((r) => ({ title: r.title, doneDay: r.done_day }));
+}
+
 // ---- Connecting a kid's Chrome extension ----
 
 const PAIR_CODE_LETTERS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O or 1/I
