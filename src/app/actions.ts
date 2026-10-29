@@ -319,11 +319,11 @@ export async function miaParentAction(form: FormData) {
     else if (form.get("op") === "done") parentMiaMarkTimerDone(s.familyId, kidId, subject);
     else parentMiaReset(s.familyId, kidId, subject);
   } catch (e) {
-    if (e instanceof PortalError) back("/parent", e.message);
+    if (e instanceof PortalError) back("/parent/focus", e.message);
     throw e;
   }
-  revalidatePath("/parent");
-  redirect("/parent");
+  revalidatePath("/parent/focus");
+  redirect("/parent/focus");
 }
 
 export async function miaResetRingAction(form: FormData) {
@@ -331,19 +331,19 @@ export async function miaResetRingAction(form: FormData) {
   try {
     parentMiaResetRing(s.familyId, Number(form.get("kidId")), str(form, "ring"));
   } catch (e) {
-    if (e instanceof PortalError) back("/parent", e.message);
+    if (e instanceof PortalError) back("/parent/focus", e.message);
     throw e;
   }
-  revalidatePath("/parent");
-  redirect("/parent");
+  revalidatePath("/parent/focus");
+  redirect("/parent/focus");
 }
 
 export async function dismissAlertAction(form: FormData) {
   const s = await requireParent();
   const id = form.get("alertId");
   dismissAlerts(s.familyId, id ? Number(id) : undefined);
-  revalidatePath("/parent");
-  redirect("/parent");
+  revalidatePath("/parent/focus");
+  redirect("/parent/focus");
 }
 
 export async function miaPairCodeAction(form: FormData) {
@@ -372,11 +372,11 @@ export async function miaItemAction(form: FormData) {
   try {
     parentMiaItem(s.familyId, Number(form.get("kidId")), Number(form.get("lessonId")), str(form, "itemId"), form.get("op") === "skip" ? "skip" : "approve");
   } catch (e) {
-    if (e instanceof PortalError) back("/parent", e.message);
+    if (e instanceof PortalError) back("/parent/focus", e.message);
     throw e;
   }
-  revalidatePath("/parent");
-  redirect("/parent");
+  revalidatePath("/parent/focus");
+  redirect("/parent/focus");
 }
 
 /** A timer paused for supplies: the supplies are ready (timer starts again), or skip the activity. */
@@ -385,11 +385,11 @@ export async function miaSuppliesAction(form: FormData) {
   try {
     parentMiaSupplies(s.familyId, Number(form.get("kidId")), str(form, "subject"), form.get("op") === "skip" ? "skip" : "ready");
   } catch (e) {
-    if (e instanceof PortalError) back("/parent", e.message);
+    if (e instanceof PortalError) back("/parent/focus", e.message);
     throw e;
   }
-  revalidatePath("/parent");
-  redirect("/parent");
+  revalidatePath("/parent/focus");
+  redirect("/parent/focus");
 }
 
 /** A code to connect Focus Buddy on a parent's computer (parent mode reads the Miacademy calendar). */

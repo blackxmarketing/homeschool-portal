@@ -29,7 +29,7 @@ import { adapt, buildProfile, conceptMastery, whatHelps, type Adaptation, type L
 import { angleOf, applyEvidence, blockers, conceptOf, emptyMeter, legacyConcept, lessonMastered, type Evidence, type Meter } from "./masteryMeter";
 import type { Lesson, Probe } from "@/content/courses/types";
 import { MIA_COURSE_PLANS, MIA_MINUTES, MIA_OVERTIME_ALERT_MINUTES, MIA_PAY, MIA_RINGS, MIA_SUBJECTS, miaCoursePlan, miaIsCoreCourse, miaLessonWeight, type MiaCoursePlan, type MiaSettings } from "@/content/miacademy";
-import { applyMia, clampMiaSettings, isOpen, MiaRuleError, newTimer, parseMiaSettings, parseMiaState, type MiaAction, type MiaTimerState } from "./miaTimer";
+import { applyMia, clampMiaSettings, isOpen, MiaRuleError, newTimer, parseMiaSettings, parseMiaState, remaining, type MiaAction, type MiaTimerState } from "./miaTimer";
 import {
   guessStudentPdf,
   lessonDone,
@@ -2870,6 +2870,128 @@ export function miaChecklist(kidId: number, subject: string, day = today()) {
 }
 export type MiaChecklist = NonNullable<ReturnType<typeof miaChecklist>>;
 
+export interface MiaCurriculumItem {
+  title: string;
+  check: LessonItem["check"];
+  done: boolean;
+  skipped: boolean;
+  waitingForParent: boolean;
+  later: boolean;
+  /** When it was checked off. */
+  at: number | null;
+  /** Timer time it took (see ItemState.workMs); null when it wasn't done on a timer. */
+  workMs: number | null;
+}
+export interface MiaCurriculumLesson {
+  id: number;
+  title: string;
+  unit: string;
+  doneDay: string | null;
+  items: MiaCurriculumItem[];
+  workMs: number;
+}
+export interface MiaCurriculumClass {
+  subject: string;
+  course: string;
+  units: { title: string; lessons: MiaCurriculumLesson[] }[];
+  lessonsDone: number;
+  lessonsTotal: number;
+}
+
+/**
+ * Parent: each class a kid is taking, like Miacademy's curriculum page (units,
+ * then lessons, in the class list's order), with every checklist item: done or
+ * not, and how long it took on the timer.
+ */
+export function miaCurriculum(kidId: number): MiaCurriculumClass[] {
+  const rows = getDb()
+    .prepare(`SELECT ${LESSON_COLS} FROM mia_lessons WHERE kid_id = ? ORDER BY started_at, id`)
+    .all(kidId) as MiaLessonRow[];
+  const byKey = new Map(rows.map((r) => [r.mia_key, toLesson(r)]));
+  const used = new Set<number>();
+  const out: MiaCurriculumClass[] = [];
+  const toView = (l: MiaLesson, unit: string): MiaCurriculumLesson => {
+    const items = (l.items ?? []).map((i) => {
+      const s = l.states[i.id] ?? { done: false };
+      return {
+        title: i.title,
+        check: i.check,
+        done: !!s.done,
+        skipped: !!s.skipped,
+        waitingForParent: !!s.waitingForParent && !s.done,
+        later: !!s.later && !s.done,
+        at: s.done || s.waitingForParent ? (s.at ?? null) : null,
+        workMs: s.workMs ?? null,
+      };
+    });
+    return { id: l.id, title: l.title, unit, doneDay: l.doneDay, items, workMs: items.reduce((n, i) => n + (i.workMs ?? 0), 0) };
+  };
+  const addClass = (subject: string, course: string, lessons: MiaCurriculumLesson[]) => {
+    if (!lessons.length) return;
+    const units: MiaCurriculumClass["units"] = [];
+    for (const l of lessons) {
+      const last = units.at(-1);
+      if (last && last.title === l.unit) last.lessons.push(l);
+      else units.push({ title: l.unit, lessons: [l] });
+    }
+    out.push({ subject, course, units, lessonsDone: lessons.filter((l) => l.doneDay).length, lessonsTotal: lessons.length });
+  };
+  for (const { id: subject } of MIA_SUBJECTS) {
+    // Classes from the parent's course pages and calendar: in the class list's order.
+    const byCourse = new Map<string, MiaCurriculumLesson[]>();
+    for (const pl of planLessons(planTasks(kidId, subject, null))) {
+      const l = byKey.get(`plan:${pl.key}`);
+      if (!l) continue;
+      used.add(l.id);
+      const list = byCourse.get(pl.course) ?? [];
+      list.push(toView(l, pl.unitTitle));
+      byCourse.set(pl.course, list);
+    }
+    for (const [course, lessons] of byCourse) addClass(subject, course, lessons);
+    // Classes followed from the kid's assignments page only.
+    const other = new Map<string, MiaCurriculumLesson[]>();
+    for (const l of byKey.values()) {
+      if (l.subject !== subject || used.has(l.id) || l.miaKey.startsWith("plan:")) continue;
+      const course = l.course || miaSubjectName(subject);
+      if (byCourse.has(course)) continue;
+      const list = other.get(course) ?? [];
+      list.push(toView(l, ""));
+      other.set(course, list);
+    }
+    for (const [course, lessons] of other) addClass(subject, course, lessons);
+  }
+  return out;
+}
+
+/** How long today's timer for a subject has been working (not paused, no breaks), or null before it starts. */
+function timerWorkedMs(kidId: number, subject: string, now: number): number | null {
+  const t = miaDay(kidId)[subject];
+  if (!t) return null;
+  const over = t.overtimeSince ? now - t.overtimeSince : (t.overtimeMs ?? 0);
+  return Math.max(0, t.durMs - remaining(t, now)) + Math.max(0, over);
+}
+
+/**
+ * The kid checked an activity off: how long it took on the timer, from the
+ * last check-off in that subject today (or the timer's start).
+ */
+function stampWork(kidId: number, lesson: MiaLesson, itemId: string, now: number): void {
+  const s = lesson.states[itemId];
+  if (!s || s.workMs !== undefined) return;
+  const worked = timerWorkedMs(kidId, lesson.subject, now);
+  if (worked === null) return;
+  const day = today();
+  const rows = getDb()
+    .prepare("SELECT states FROM mia_lessons WHERE kid_id = ? AND subject = ? AND states LIKE ?")
+    .all(kidId, lesson.subject, `%"workDay":"${day}"%`) as { states: string }[];
+  let last = 0;
+  for (const r of rows)
+    for (const st of Object.values(JSON.parse(r.states) as Record<string, ItemState>))
+      if (st.workDay === day && typeof st.workAt === "number" && st.workAt <= worked) last = Math.max(last, st.workAt);
+  lesson.states[itemId] = { ...s, workMs: worked - last, workAt: worked, workDay: day };
+  saveLessonStates(lesson);
+}
+
 function updateItem(kidId: number, lessonId: number, itemId: string, change: (s: ItemState, item: LessonItem) => ItemState): MiaLesson {
   const lesson = miaLesson(kidId, lessonId);
   const item = lesson?.items?.find((i) => i.id === itemId);
@@ -2965,6 +3087,7 @@ export function miaSaveForLater(kidId: number, lessonId: number, itemId: string,
 /** A packet page with no answer key to check it against: the photo goes to a parent, and the kid moves on. */
 export function miaPhotoToParent(kidId: number, lessonId: number, itemId: string, photo: string, now = Date.now()): void {
   const lesson = updateItem(kidId, lessonId, itemId, (s) => ({ ...s, waitingForParent: true, photo, at: now }));
+  stampWork(kidId, lesson, itemId, now);
   const item = lesson.items!.find((i) => i.id === itemId)!;
   const kid = getKid(kidId)!;
   addParentAlert(
@@ -2989,6 +3112,7 @@ export function miaFinishItem(kidId: number, lessonId: number, itemId: string, p
       throw new PortalError("Finish it in Miacademy first, then check it off.");
     return { ...s, done: true, at: now };
   });
+  stampWork(kidId, lesson, itemId, now);
   const item = lesson.items!.find((i) => i.id === itemId)!;
   const stillWrong = lesson.states[itemId]?.wrong?.length ?? 0;
   if (item.check === "photo" && stillWrong > 0) {

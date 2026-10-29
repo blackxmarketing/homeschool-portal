@@ -147,3 +147,32 @@ th { color: var(--muted); font-weight: 600; }
   body { background: #fff; color: #000; }
   .card { border: 1px solid #ccc; }
 }
+
+/* Focus Buddy parent tab (/parent/focus) */
+.fb-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: -8px 0 18px; }
+.fb-tabs a { padding: 8px 14px; border-radius: 999px; border: 2px solid var(--brand); text-decoration: none; font-weight: 600; }
+.fb-tabs a.on { background: var(--brand); color: var(--brand-ink); }
+.fb-class h2 { color: var(--c, var(--ink)); }
+.fb-bar { height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.fb-bar i { display: block; height: 100%; background: var(--c, var(--brand)); }
+.fb-unit { border-top: 1px solid var(--line); padding: 8px 0; }
+.fb-unit > summary, .fb-lesson > summary { display: flex; justify-content: space-between; gap: 10px; cursor: pointer; flex-wrap: wrap; }
+.fb-unit > summary { font-weight: 700; }
+.fb-lesson { margin: 6px 0 6px 14px; padding: 6px 10px; border-radius: 10px; }
+.fb-lesson.current { background: var(--warn-bg); }
+.fb-now { font-size: .8rem; font-weight: 700; color: var(--warn); margin-left: 8px; }
+.fb-items td { padding: 4px 6px; vertical-align: top; }
+.fb-items tr.done td:nth-child(2) { color: var(--muted); }
+.fb-time { white-space: nowrap; text-align: right; font-weight: 600; }
+.fb-kid-rings { margin-top: 12px; }
+.fb-kid-name { font-weight: 700; margin-bottom: 6px; }
+.fb-rings { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+.fb-ring { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.fb-ring-art { position: relative; width: 72px; height: 72px; }
+.fb-ring-art svg { width: 72px; height: 72px; image-rendering: pixelated; }
+.fb-ring-icon { position: absolute; inset: 0; display: grid; place-items: center; font-size: 24px; font-weight: 700; }
+.fb-ring-ahead { position: absolute; top: -4px; right: -6px; background: #ffc21a; color: #5c3b00; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 6px; }
+.fb-ring-name { font-weight: 700; font-size: .95rem; }
+.fb-ring.full .fb-ring-art { animation: fb-pop .5s ease-out; }
+@keyframes fb-pop { 50% { transform: scale(1.08); } }
+.fb-ring details ul { text-align: left; padding-left: 18px; margin: 4px 0; }

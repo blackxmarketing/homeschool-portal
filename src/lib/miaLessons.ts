@@ -64,6 +64,11 @@ export interface ItemState {
   /** A hands-on activity the kid saved for later (when): off the checklist, still to do, and the lesson can count without it. */
   later?: number;
   photo?: string;
+  /** Timer time spent on it: the subject timer's working time (no pauses or breaks) since the last check-off that day. */
+  workMs?: number;
+  /** The timer's working time when it was checked off, and that day (to measure the next one from). */
+  workAt?: number;
+  workDay?: string;
 }
 
 const slug = (s: string) =>

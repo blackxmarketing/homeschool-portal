@@ -8,6 +8,7 @@ import {
   getMiaSettings,
   miaAct,
   miaChecklist,
+  miaCurriculum,
   miaDay,
   miaFinishItem,
   miaLesson,
@@ -323,6 +324,22 @@ describe("a kid's Science checklist", () => {
     parentMiaItem(family, kid, id, "stem-challenge-marble-run", "approve");
     expect(part().later).toEqual([]);
     expect(miaLesson(kid, id)!.doneDay).not.toBeNull();
+  });
+
+  it("times each activity on the timer, and shows them on the parent's class page", () => {
+    const id = startGravity();
+    miaAct(kid, "sci", "start", { now: 0 });
+    miaFinishItem(kid, id, "complete-the-guided-notes", undefined, 5 * 60_000);
+    for (const page of [4, 5]) miaRecordPhotoCheck(kid, id, "forces-word-search", { right: 5, total: 5, wrong: [] }, "1/x.jpg", 1, page);
+    miaFinishItem(kid, id, "forces-word-search", undefined, 12 * 60_000);
+    const states = miaLesson(kid, id)!.states;
+    expect(states["complete-the-guided-notes"].workMs).toBe(5 * 60_000);
+    expect(states["forces-word-search"].workMs).toBe(7 * 60_000);
+    const sci = miaCurriculum(kid).find((c) => c.subject === "sci")!;
+    const lesson = sci.units[0].lessons[0];
+    expect(lesson).toMatchObject({ title: "Forces: Gravity", workMs: 12 * 60_000 });
+    expect(lesson.items.find((i) => i.title === "Complete the guided notes")).toMatchObject({ done: true, workMs: 5 * 60_000 });
+    expect(lesson.items.find((i) => i.title === "Watch the lesson video")).toMatchObject({ done: false, workMs: null });
   });
 
   it("sends a packet page with no answer key to a parent, and the kid moves on", () => {
