@@ -42,26 +42,45 @@ function reportPdfs(urls: string[]) {
   fresh.forEach((u) => sentPdfs.add(u));
   void report({ page: location.href, pdfs: fresh });
 }
-// How Miacademy asks for the assignments list, kept so any Miacademy page can read it again.
+// How Miacademy asks for the assignments list (and the page that does), kept so any Miacademy page can read it again.
 const PATH_REQUEST = "pathRequest";
-let havePathRequest = false;
-void chrome.storage.local.get(PATH_REQUEST).then((v) => {
-  if (!v[PATH_REQUEST]) return;
-  havePathRequest = true;
-  window.postMessage({ __focusBuddy: true, kind: "knownPathRequest", data: v[PATH_REQUEST] }, location.origin);
+const PATH_PAGE = "pathPage";
+/** Each Miacademy task's page (taskAssignment id -> address), to send a kid back to it. */
+const TASK_PAGES = "taskPages";
+let pathRequest: unknown = null;
+let pathPage: string | null = null;
+let taskPages: Record<string, string> = {};
+void chrome.storage.local.get([PATH_REQUEST, PATH_PAGE, TASK_PAGES]).then((v) => {
+  pathRequest ??= v[PATH_REQUEST] ?? null;
+  pathPage ??= (v[PATH_PAGE] as string | undefined) ?? null;
+  taskPages = { ...((v[TASK_PAGES] as Record<string, string> | undefined) ?? {}), ...taskPages };
 });
-/** Read the kid's assignments again (the answer comes back as a "path" message). */
+/** Read the kid's assignments again (the answer comes back as a "path" message). The request goes along: a lesson page never loads it. */
 function refreshPath(): boolean {
-  if (!havePathRequest) return false;
-  window.postMessage({ __focusBuddy: true, kind: "refreshPath" }, location.origin);
+  if (!pathRequest) return false;
+  window.postMessage({ __focusBuddy: true, kind: "refreshPath", data: pathRequest }, location.origin);
   return true;
+}
+/** Back to a task in Miacademy (or the assignments page when its address isn't known). */
+function openTask(taskKey: string | null): boolean {
+  const to = (taskKey && taskPages[taskKey]) || pathPage;
+  if (!to) return false;
+  if (to !== location.href) location.href = to;
+  return true;
+}
+function rememberTaskPage(taskKey: string, href: string) {
+  if (taskPages[taskKey] === href) return;
+  const entries = Object.entries({ ...taskPages, [taskKey]: href }).slice(-60);
+  taskPages = Object.fromEntries(entries);
+  void chrome.storage.local.set({ [TASK_PAGES]: taskPages });
 }
 
 window.addEventListener("message", (e) => {
   if (e.source !== window || !e.data?.__focusBuddy) return;
   if (e.data.kind === "pathRequest" && e.data.data?.url) {
-    havePathRequest = true;
-    void chrome.storage.local.set({ [PATH_REQUEST]: e.data.data });
+    pathRequest = e.data.data;
+    pathPage = location.href;
+    void chrome.storage.local.set({ [PATH_REQUEST]: e.data.data, [PATH_PAGE]: location.href });
   }
   if (e.data.kind === "path") void report({ courses: e.data.data });
   if (e.data.kind === "pdfs" && Array.isArray(e.data.data)) reportPdfs(e.data.data);
@@ -176,12 +195,18 @@ function mount() {
       document.documentElement.style.setProperty("margin-right", on ? "0px" : `${WIDTH}px`, "important");
     },
     refreshPath,
+    openTask,
     // The task (video, practice, quiz) open in Miacademy, from the address: lets a kid finish it when time runs out.
     onTask: (cb: (taskKey: string | null) => void) => {
       let last: string | null | undefined;
       const check = () => {
         const key = taskKeyFromAddress(location.href);
-        if (key !== last) cb((last = key));
+        if (key) rememberTaskPage(key, location.href);
+        if (key !== last) {
+          // Left a task (video, practice, quiz): Miacademy has just marked it, so look again.
+          if (last) setTimeout(refreshPath, 2500);
+          cb((last = key));
+        }
       };
       check();
       setInterval(check, 1000);

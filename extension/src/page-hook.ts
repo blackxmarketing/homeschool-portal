@@ -72,10 +72,10 @@
 
   window.addEventListener("message", (e) => {
     if (e.source !== window || !e.data?.__focusBuddy) return;
-    // The extension remembers the request from an earlier page.
-    if (e.data.kind === "knownPathRequest" && !pathRequest && e.data.data?.url) pathRequest = e.data.data as PathRequest;
-    if (e.data.kind === "refreshPath" && pathRequest && new URL(pathRequest.url).origin === location.origin) {
-      const r = pathRequest;
+    // The extension sends the request it remembers (a lesson page never loads the list itself).
+    if (e.data.kind === "refreshPath") {
+      const r = pathRequest ?? (e.data.data?.url ? (e.data.data as PathRequest) : null);
+      if (!r || new URL(r.url).origin !== location.origin) return;
       void fetch0(r.url, { method: r.method, body: r.method === "GET" ? undefined : r.body, credentials: "include", headers: !r.body || r.method === "GET" ? undefined : { "Content-Type": /^[[{]/.test(r.body) ? "application/json" : "application/x-www-form-urlencoded" } })
         .then((res) => res.text())
         .then((t) => look(r.url, t))

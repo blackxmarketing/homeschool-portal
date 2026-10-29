@@ -65,6 +65,8 @@ interface HostBridge {
   onTask?: (cb: (taskKey: string | null) => void) => void;
   /** Read the kid's Miacademy assignments again now (new checklists come through onChecklists). False if it can't yet. */
   refreshPath?: () => boolean;
+  /** Go to a Miacademy task's page (or the assignments page). False if neither is known yet. */
+  openTask?: (taskKey: string | null) => boolean;
 }
 export const bridge = (): HostBridge | undefined =>
   typeof window === "undefined" ? undefined : (window as unknown as { miaHud?: HostBridge }).miaHud;

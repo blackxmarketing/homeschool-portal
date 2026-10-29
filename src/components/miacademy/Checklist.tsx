@@ -53,6 +53,8 @@ export default function Checklist({
   const [checking, setChecking] = useState<string | null>(null);
   /** The online activity the kid tapped before Miacademy showed it done: we're reading Miacademy again. */
   const [looking, setLooking] = useState<string | null>(null);
+  /** Looked, and Miacademy doesn't show it done yet: offer to go back to it. */
+  const [notYet, setNotYet] = useState<string | null>(null);
 
   const waiting = checklist.upcoming.filter((e) => e.state.waitingForParent);
   const todo = checklist.upcoming.filter((e) => !e.state.waitingForParent);
@@ -65,6 +67,7 @@ export default function Checklist({
   useEffect(() => {
     if (looking && looking === topKey && top?.state.ready) {
       setLooking(null);
+      setNotYet(null);
       void done(top);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -74,8 +77,9 @@ export default function Checklist({
   useEffect(() => {
     if (!looking) return;
     const t = setTimeout(() => {
+      setNotYet(looking);
       setLooking(null);
-      say("Miacademy doesn't show that one finished yet. Finish it there, then tap the box again.");
+      say("Miacademy doesn't show that one finished yet. Let's go back to it.");
     }, 8000);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -174,6 +178,12 @@ export default function Checklist({
                 running={running}
                 checked={checking === key || leaving === key}
                 looking={looking === key}
+                notYet={notYet === key && !e.state.ready}
+                onBack={() => {
+                  setNotYet(null);
+                  if (!bridge()?.openTask?.(/^task-([0-9a-f-]{36})$/.exec(e.item.id)?.[1] ?? null))
+                    say("Open it in Miacademy, finish it, then tap the box again.");
+                }}
                 onPhoto={() => setPhotoFor(e)}
                 onCheck={() => void done(e)}
                 onLook={() => lookAgain(e)}
@@ -251,6 +261,8 @@ function TopTask({
   running,
   checked,
   looking,
+  notYet,
+  onBack,
   onPhoto,
   onCheck,
   onLook,
@@ -264,6 +276,10 @@ function TopTask({
   looking: boolean;
   /** Not lit yet: read Miacademy again. */
   onLook: () => void;
+  /** Miacademy doesn't show it done yet. */
+  notYet: boolean;
+  /** Go back to it in Miacademy. */
+  onBack: () => void;
   onPhoto: () => void;
   onCheck: () => void;
   /** Hands-on: gather the supplies now (pauses the timer). */
@@ -304,6 +320,17 @@ function TopTask({
             ? "Take the quiz in Miacademy. Then tap the box!"
             : "Do it in Miacademy. Then tap the box!";
     if (!running) hint = "Press Start to work on this.";
+    else if (notYet)
+      hint = (
+        <>
+          Miacademy doesn&apos;t show it finished yet.
+          <div className="mia-row">
+            <button className="mia-btn" onClick={onBack}>
+              ↩️ Go back to it in Miacademy
+            </button>
+          </div>
+        </>
+      );
   } else if (needsMaterials(item) && !state.suppliesReady) {
     // Only the activity that needs materials: do it now, or save just this one for later.
     canCheck = false;
