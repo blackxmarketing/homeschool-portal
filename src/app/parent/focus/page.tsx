@@ -4,8 +4,10 @@ import { requireParent } from "@/lib/auth";
 import { dismissAlertAction, miaItemAction, miaParentAction, miaResetRingAction, miaSuppliesAction } from "@/app/actions";
 import { MIA_SUBJECTS } from "@/content/miacademy";
 import { remaining, type MiaTimerState } from "@/lib/miaTimer";
+import { buddyHead } from "@/lib/pixel/buddies";
 import { ringGrid } from "@/lib/pixel/miaRings";
 import {
+  getMiaSettings,
   listKids,
   miaChecklist,
   miaCurriculum,
@@ -42,7 +44,7 @@ export default async function FocusBuddyPage({ searchParams }: { searchParams: P
         </Link>
         {kids.map((k) => (
           <Link key={k.id} href={`/parent/focus?view=classes&kid=${k.id}`} className={classes && shown?.id === k.id ? "on" : ""}>
-            {k.avatar} {k.name}&apos;s classes
+            <Buddy kidId={k.id} /> {k.name}&apos;s classes
           </Link>
         ))}
       </div>
@@ -66,6 +68,18 @@ export default async function FocusBuddyPage({ searchParams }: { searchParams: P
         </>
       )}
     </main>
+  );
+}
+
+/** The kid's Focus Buddy animal (panda, wolf), drawn like the face on their timer. */
+function Buddy({ kidId }: { kidId: number }) {
+  const g = buddyHead(getMiaSettings(kidId).buddy);
+  return (
+    <svg className="fb-buddy" viewBox={`0 0 ${g.w} ${g.h}`} shapeRendering="crispEdges" aria-hidden="true">
+      {g.runs().map((r, i) => (
+        <rect key={i} x={r.x} y={r.y} width={r.w} height={1} fill={r.c} />
+      ))}
+    </svg>
   );
 }
 
@@ -178,7 +192,7 @@ function MiaAlerts({ familyId }: { familyId: number }) {
                 {time(a.at)}
               </td>
               <td>
-                {a.avatar} {a.message}
+                <Buddy kidId={a.kid_id} /> {a.message}
               </td>
               <td style={{ whiteSpace: "nowrap" }}>
                 <form action={dismissAlertAction}>
@@ -233,7 +247,11 @@ function MiaToday({ familyId }: { familyId: number }) {
               const t = timers[sub.id];
               return (
                 <tr key={`${kid.id}-${sub.id}`}>
-                  <td>{i === 0 ? `${kid.avatar} ${kid.name}` : ""}</td>
+                  <td>{i === 0 && (
+                  <>
+                    <Buddy kidId={kid.id} /> {kid.name}
+                  </>
+                )}</td>
                   <td style={{ color: sub.color, fontWeight: 700 }}>{sub.name}</td>
                   <td className="small">
                     {miaStatus(t, now)}
@@ -327,7 +345,7 @@ function MiaChecklists({ familyId }: { familyId: number }) {
           {rows.map(({ kid, sub, part }) => (
             <tr key={`${kid.id}-${sub.id}-${part.name ?? ""}`}>
               <td>
-                {kid.avatar} {kid.name}
+                <Buddy kidId={kid.id} /> {kid.name}
               </td>
               <td style={{ color: sub.color, fontWeight: 700 }}>
                 {part.name ?? sub.name}
@@ -374,7 +392,7 @@ function MiaWeekRings({ familyId }: { familyId: number }) {
       {rows.map(({ kid, rings }) => (
         <div key={kid.id} className="fb-kid-rings">
           <div className="fb-kid-name">
-            {kid.avatar} {kid.name}
+            <Buddy kidId={kid.id} /> {kid.name}
           </div>
           <KidRings kidId={kid.id} rings={rings} />
         </div>
@@ -445,7 +463,7 @@ function MiaApprovals({ familyId }: { familyId: number }) {
           {waiting.map(({ kid, lesson, item, state }) => (
             <tr key={`${lesson.id}-${item.id}`}>
               <td>
-                {kid.avatar} {kid.name}
+                <Buddy kidId={kid.id} /> {kid.name}
               </td>
               <td>
                 <strong>{item.title}</strong> <span className="muted small">{lesson.title}</span>

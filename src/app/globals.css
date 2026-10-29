@@ -176,3 +176,4 @@ th { color: var(--muted); font-weight: 600; }
 .fb-ring.full .fb-ring-art { animation: fb-pop .5s ease-out; }
 @keyframes fb-pop { 50% { transform: scale(1.08); } }
 .fb-ring details ul { text-align: left; padding-left: 18px; margin: 4px 0; }
+.fb-buddy { width: 1.4em; height: 1.4em; vertical-align: -0.3em; image-rendering: pixelated; }
