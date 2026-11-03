@@ -10,9 +10,9 @@ import { bridge, type MiaApi } from "./MiaHud";
  * The step-by-step checklist under an open timer: the next three activities
  * of the kid's Miacademy lesson, the top one big and bright, the other two dim.
  * The kid taps the big box to check one off (a "ding"), it pops away, and the
- * next one slides up. Online activities light up once Miacademy has them done:
- * tapping one that isn't lit yet reads Miacademy again, and if it's done there it
- * checks itself off.
+ * next one slides up. Videos and practice can be checked off any time the timer
+ * runs. The test waits for Miacademy: tapping it before it's lit reads Miacademy
+ * again, and if it's done there it checks itself off.
  */
 
 const isOnline = (item: LessonItem) => item.check === "video" || item.check === "online" || item.check === "practice" || item.check === "quiz";
@@ -61,7 +61,7 @@ export default function Checklist({
   const top = todo[0];
 
   const topKey = top ? `${top.lessonId}:${top.item.id}` : null;
-  const topWaits = !!top && isOnline(top.item) && !top.state.ready;
+  const topWaits = !!top && top.item.check === "quiz" && !top.state.ready;
 
   // The kid tapped it and Miacademy now says it's done: check it off for them.
   useEffect(() => {
@@ -163,6 +163,7 @@ export default function Checklist({
   else
     body = (
       <div className="mia-tasks">
+        {todo.some((e) => e.state.held) && <div className="mia-cl-big">✏️ Finish your packet first, before your test or your next lesson.</div>}
         {todo.map((e, i) => {
           const key = `${e.lessonId}:${e.item.id}`;
           if (i > 0)
@@ -306,8 +307,8 @@ function TopTask({
   // What the box does, and the hint under the activity.
   let canCheck = running;
   let hint: React.ReactNode;
-  // Not lit yet: while the timer runs, the box asks Miacademy again.
-  const look = online && !state.ready && running;
+  // The test, not lit yet: while the timer runs, the box asks Miacademy again.
+  const look = item.check === "quiz" && !state.ready && running;
   if (online && !state.ready) {
     canCheck = running;
     hint = looking

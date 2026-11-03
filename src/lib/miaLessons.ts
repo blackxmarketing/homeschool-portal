@@ -64,6 +64,10 @@ export interface ItemState {
   /** A hands-on activity the kid saved for later (when): off the checklist, still to do, and the lesson can count without it. */
   later?: number;
   photo?: string;
+  /** A parent marked it done (so the lesson can count without Miacademy saying so). */
+  byParent?: boolean;
+  /** Packet work the kid moved on from (took the test or started the next lesson): the checklist holds here. */
+  held?: boolean;
   /** Timer time spent on it: the subject timer's working time (no pauses or breaks) since the last check-off that day. */
   workMs?: number;
   /** The timer's working time when it was checked off, and that day (to measure the next one from). */

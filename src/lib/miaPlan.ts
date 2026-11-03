@@ -158,7 +158,8 @@ export function planLessonItems(lesson: PlanLesson, subject: string, plan: MiaCo
   const skip = (name: string) => MIA_SKIP_ITEMS.some((re) => re.test(name));
 
   if (plan?.onlineOnly) {
-    for (const t of lesson.tasks) {
+    // The test comes last.
+    for (const t of [...lesson.tasks.filter((x) => x.type !== "Assessment"), ...lesson.tasks.filter((x) => x.type === "Assessment")]) {
       if (skip(t.name)) continue;
       if (t.type === "Pdf") {
         if (plan.readPdf) items.push(task(t, `${plan.readPdf}: ${lesson.title}`, "self"));
@@ -193,5 +194,6 @@ export function planLessonItems(lesson: PlanLesson, subject: string, plan: MiaCo
   // Miacademy's order is PDF then video; the checklist does the video (and its notes) first.
   const video = items.findIndex((i) => i.check === "video");
   if (video > 0) items.unshift(...items.splice(video, 1));
-  return items;
+  // The packet comes before the test, whatever Miacademy's order.
+  return [...items.filter((i) => i.check !== "quiz"), ...items.filter((i) => i.check === "quiz")];
 }

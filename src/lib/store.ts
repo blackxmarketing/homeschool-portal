@@ -3122,8 +3122,8 @@ export function miaFinishItem(kidId: number, lessonId: number, itemId: string, p
       if (s.total === undefined) throw new PortalError("Take a photo first.");
       if (!pages.every((p) => s.pagesDone?.includes(p))) throw new PortalError("Fix your answers first, then check again.");
     }
-    if ((item.check === "video" || item.check === "quiz" || item.check === "practice" || item.check === "online") && !s.ready)
-      throw new PortalError("Finish it in Miacademy first, then check it off.");
+    // Videos and practice are the kid's word; the test waits for Miacademy.
+    if (item.check === "quiz" && !s.ready) throw new PortalError("Finish it in Miacademy first, then check it off.");
     return { ...s, done: true, at: now };
   });
   stampWork(kidId, lesson, itemId, now);
@@ -3150,7 +3150,7 @@ export function miaFinishItem(kidId: number, lessonId: number, itemId: string, p
 export function parentMiaItem(familyId: number, kidId: number, lessonId: number, itemId: string, op: "approve" | "skip", now = Date.now()): void {
   const kid = getKid(kidId);
   if (!kid || kid.family_id !== familyId) throw new PortalError("Unknown kid.");
-  updateItem(kidId, lessonId, itemId, (s) => ({ ...s, done: true, waitingForParent: false, skipped: op === "skip" || undefined, at: now }));
+  updateItem(kidId, lessonId, itemId, (s) => ({ ...s, done: true, waitingForParent: false, skipped: op === "skip" || undefined, byParent: true, at: now }));
 }
 
 /** Hands-on activities waiting for a parent, for the family overview. */
@@ -3432,7 +3432,10 @@ export function miaPlanLessons(kidId: number, subject: string, plan: MiaCoursePl
     }
     // Read once; a failed read waits until the kid opens the lesson (miaSetStudentPdf) rather than retrying on every look.
     const movedPast = passed(pl);
-    if (needsPdf && !row.pdf_parsed && lesson.parseState === "waiting" && !movedPast) toRead.push(lesson.id);
+    // The lesson the kid just left (the next one is where they are). Anything further back is catching up.
+    const next = all[all.indexOf(pl) + 1];
+    const justLeft = movedPast && !isNew && (!next || next.course !== pl.course || !passed(next));
+    if (needsPdf && !row.pdf_parsed && lesson.parseState === "waiting" && (!movedPast || justLeft)) toRead.push(lesson.id);
     let parsed: ParsedActivity[] | null = null;
     try {
       parsed = row.pdf_parsed ? (JSON.parse(row.pdf_parsed) as ParsedActivity[]) : null;
@@ -3455,21 +3458,38 @@ export function miaPlanLessons(kidId: number, subject: string, plan: MiaCoursePl
         lesson.states[id] = finishedBefore ? { ...lesson.states[id], done: true, at: now } : { ...lesson.states[id], done: false, ready: true };
     }
     lesson.items = items;
-    // Moved past: the packet work closes too, except an experiment saved for later or a photo waiting for a parent.
-    if (movedPast)
+    // Far behind where the kid is: catching up, so it all closes, except an experiment saved for later or a photo waiting for a parent.
+    if (movedPast && !justLeft)
       for (const item of items) {
         const s = lesson.states[item.id];
         if (!s?.done && !s?.later && !s?.waitingForParent) lesson.states[item.id] = { ...s, done: true, at: s?.at ?? now };
       }
+    // The packet comes first: took the test or moved to the next lesson with packet work open, and the checklist holds on it.
+    const onTest = at !== undefined && pl.tasks.some((t) => t.order === at && t.type === "Assessment");
+    if (justLeft || onTest) {
+      const open = items.filter((i) => i.check !== "quiz" && !i.id.startsWith("task-") && !lesson.states[i.id]?.done && !lesson.states[i.id]?.later && !lesson.states[i.id]?.waitingForParent);
+      if (open.length && !open.some((i) => lesson.states[i.id]?.held)) {
+        const kid = getKid(kidId)!;
+        addParentAlert(
+          kid.family_id,
+          kidId,
+          "stuck",
+          subject,
+          `${kid.name} moved on in Miacademy before finishing the packet for ${lesson.title}: ${open.map((i) => i.title).join(", ")}.`,
+          now,
+        );
+      }
+      for (const i of open) lesson.states[i.id] = { ...(lesson.states[i.id] ?? { done: false }), held: true };
+    }
+    // A lesson is finished once its test is done or the new lesson appears: Miacademy says so, not the check-offs alone.
+    const confirmed = movedPast || allCompleted || !!lesson.states[items.at(-1)?.id ?? ""]?.byParent;
     // Waiting for its PDF: not done yet, even if every online task is.
-    const done = items.length > 0 && lessonDone(items, lesson.states) && (!needsPdf || !!parsed || movedPast);
+    const done = items.length > 0 && lessonDone(items, lesson.states) && confirmed && (!needsPdf || !!parsed || (movedPast && !justLeft));
     if (done && !lesson.doneDay) {
       // Calendar dates mean nothing here (parents move them so lessons open early). Already finished
       // the first time Focus Buddy saw it: done before, so it counts for last week, not this one. So does
       // a lesson far behind where the kid is that nobody touched this week (catching up, not new work).
       // Otherwise it was on the checklist until now, so it's finished today.
-      const next = all[all.indexOf(pl) + 1];
-      const justLeft = !next || next.course !== pl.course || !passed(next);
       const seenFinished = isNew && (allCompleted || movedPast);
       lesson.doneDay = seenFinished || (movedPast && !workedBefore && !justLeft) ? lastWeekDay() : today();
     }

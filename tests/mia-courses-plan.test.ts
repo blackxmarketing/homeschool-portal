@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { getDb, openDb, setDb } from "@/lib/db";
 import { parseCourseTasks, parsePlanWeek } from "@/lib/miaPlan";
-import { addKid, createFamily, getMiaSettings, miaChecklist, miaLesson, miaSaveCourses, miaSavePlan, setMiaSettings } from "@/lib/store";
+import { addKid, createFamily, getMiaSettings, miaChecklist, miaFinishItem, miaLesson, miaSaveCourses, miaSavePlan, miaSetParseState, miaSetPdfParsed, setMiaSettings, unseenAlerts } from "@/lib/store";
 
 const id = (n: number) => `00000000-0000-4000-8000-0000000000${String(n).padStart(2, "0")}`;
 const S3 = "https://miaplaza-content.s3.us-west-2.amazonaws.com/Social+Studies/US+Geography";
@@ -75,13 +75,73 @@ describe("the checklist from the parent's course pages", () => {
   });
 
   it("moves on when the kid does in Miacademy, even before the parent's course pages catch up", () => {
-    miaSaveCourses(kid, parseCourseTasks(COURSE));
+    miaSaveCourses(kid, parseCourseTasks(COURSE.filter((t) => t.type !== "Pdf")));
     expect(miaChecklist(kid, "his")!.parts[0].lessonTitle).toBe("The Great Plains");
     // The kid is on Mississippi River's quiz; the course pages still say The Great Plains isn't done.
     getDb().prepare("INSERT INTO mia_path (kid_id, course, task_id, task_type, at) VALUES (?, 'U.S. Geography', ?, 'Assessment', 1)").run(kid, id(21));
     const his = miaChecklist(kid, "his")!.parts[0];
     expect(his.lessonTitle).toBe("Mississippi River");
     expect(his.doneThisWeek).toBe(1);
+  });
+
+  const atTask = (n: number) =>
+    getDb().prepare("INSERT OR REPLACE INTO mia_path (kid_id, course, task_id, task_type, at) VALUES (?, 'U.S. Geography', ?, 'Video', 1)").run(kid, id(n));
+  const notes = [{ title: "Complete the guided notes", kind: "notes" as const, pages: [2], supplies: [] }];
+  /** The Great Plains with its packet read, and no practice (so the packet's activities count). */
+  function withPacket() {
+    miaSaveCourses(kid, parseCourseTasks(COURSE.filter((t) => t.type !== "Practice")));
+    const lessonId = miaChecklist(kid, "his")!.parts[0].upcoming[0].lessonId;
+    miaSetPdfParsed(lessonId, notes);
+    miaSetParseState(lessonId, "ready");
+    return lessonId;
+  }
+  const notesId = (lessonId: number) => miaLesson(kid, lessonId)!.items!.find((i) => i.check === "self")!.id;
+
+  it("puts the packet before the test, whatever Miacademy's order", () => {
+    const quizFirst = COURSE.map((t) => (t.taskId === id(13) ? { ...t, seq: 10.5 } : t));
+    miaSaveCourses(kid, parseCourseTasks(quizFirst));
+    const lessonId = miaChecklist(kid, "his")!.parts[0].upcoming[0].lessonId;
+    miaSetPdfParsed(lessonId, notes);
+    miaChecklist(kid, "his");
+    expect(miaLesson(kid, lessonId)!.items!.at(-1)!.check).toBe("quiz");
+  });
+
+  it("holds on the packet when the kid moves on without it, tells a parent once, and counts the lesson when it's done", () => {
+    const lessonId = withPacket();
+    miaChecklist(kid, "his");
+    atTask(20);
+    const his = () => miaChecklist(kid, "his")!.parts[0];
+    expect(his()).toMatchObject({ lessonTitle: "The Great Plains", doneThisWeek: 0 });
+    expect(his().upcoming[0]).toMatchObject({ item: { check: "self" }, state: { held: true } });
+    expect(unseenAlerts(family).filter((a) => /before finishing the packet/.test(a.message))).toHaveLength(1);
+    miaFinishItem(kid, lessonId, notesId(lessonId));
+    expect(his()).toMatchObject({ lessonTitle: "Mississippi River", doneThisWeek: 1 });
+  });
+
+  it("holds when the kid opens the test with the packet open", () => {
+    const lessonId = withPacket();
+    miaChecklist(kid, "his");
+    atTask(13);
+    expect(miaChecklist(kid, "his")!.parts[0].upcoming.find((u) => u.item.check === "self")).toMatchObject({ lessonId, state: { held: true } });
+  });
+
+  it("closes a lesson far behind where the kid is, packet and all (catching up)", () => {
+    withPacket();
+    miaChecklist(kid, "his");
+    const later = { ...task(30, "Ohio River", "Video", "Ohio River", false, 30) };
+    miaSaveCourses(kid, parseCourseTasks([...COURSE.filter((t) => t.type !== "Practice"), later]));
+    atTask(30);
+    expect(miaChecklist(kid, "his")!.parts[0].lessonTitle).not.toBe("The Great Plains");
+  });
+
+  it("counts a lesson only once Miacademy shows it finished, not on the check-offs alone", () => {
+    miaSaveCourses(kid, parseCourseTasks(COURSE.filter((t) => t.type === "Video" || t.taskId === id(1))));
+    const his = () => miaChecklist(kid, "his")!.parts[0];
+    const top = his().upcoming[0];
+    miaFinishItem(kid, top.lessonId, top.item.id);
+    expect(his().doneThisWeek).toBe(0);
+    atTask(20);
+    expect(his().doneThisWeek).toBe(1);
   });
 
   it("follows the class on the kid's assignments page, and forgets a class the parent removed", () => {

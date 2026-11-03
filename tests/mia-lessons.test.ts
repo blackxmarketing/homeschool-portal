@@ -232,9 +232,15 @@ describe("a kid's Science checklist", () => {
     expect(c).toMatchObject({ left: 6, target: 1, doneThisWeek: 0 });
   });
 
+  it("lets the kid check off the video on their word; the test waits for Miacademy", () => {
+    const id = startGravity();
+    miaFinishItem(kid, id, "watch-the-lesson-video");
+    expect(miaLesson(kid, id)!.states["watch-the-lesson-video"].done).toBe(true);
+    expect(() => miaFinishItem(kid, id, "online-assessment")).toThrow(/Finish it in Miacademy first/);
+  });
+
   it("lights up the video when Miacademy moves on to the quiz; the kid checks it off", () => {
     const id = startGravity();
-    expect(() => miaFinishItem(kid, id, "watch-the-lesson-video")).toThrow(/Finish it in Miacademy first/);
     miaPathSync(kid, parsePathCourses(path(GRAVITY_ID, "Assessment", null)));
     const top = miaChecklist(kid, "sci")!.parts[0].upcoming[0];
     expect(top).toMatchObject({ item: { title: "Watch the lesson video" }, state: { done: false, ready: true } });
