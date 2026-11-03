@@ -1,7 +1,7 @@
 import Link from "next/link";
 import ParentNav from "@/components/ParentNav";
 import { requireParent } from "@/lib/auth";
-import { dismissAlertAction, miaItemAction, miaParentAction, miaResetRingAction, miaSuppliesAction } from "@/app/actions";
+import { dismissAlertAction, miaItemAction, miaParentAction, miaResetRingAction, miaSuppliesAction, miaTransferAction } from "@/app/actions";
 import { MIA_SUBJECTS } from "@/content/miacademy";
 import { remaining, type MiaTimerState } from "@/lib/miaTimer";
 import { buddyHead } from "@/lib/pixel/buddies";
@@ -13,7 +13,9 @@ import {
   miaCurriculum,
   miaFamilyToday,
   miaRingLessons,
+  miaBank,
   miaRings,
+  miaTransfersWaiting,
   miaWaitingForParent,
   today,
   unseenAlerts,
@@ -61,6 +63,7 @@ export default async function FocusBuddyPage({ searchParams }: { searchParams: P
       ) : (
         <>
           <MiaAlerts familyId={s.familyId} />
+          <MiaTransfers familyId={s.familyId} />
           <MiaApprovals familyId={s.familyId} />
           <MiaToday familyId={s.familyId} />
           <MiaWeekRings familyId={s.familyId} />
@@ -117,6 +120,18 @@ function MiaClasses({ classes }: { classes: MiaCurriculumClass[] }) {
             <p className="muted small">
               {c.lessonsDone} of {c.lessonsTotal} lessons done
             </p>
+            {c.miaNow && (
+              <p className="small">
+                {c.miaNow.lessonTitle ? (
+                  <>
+                    📍 Miacademy says: <strong>{c.miaNow.lessonTitle}</strong> · {c.miaNow.taskName}
+                  </>
+                ) : (
+                  <>⚠️ Miacademy&apos;s next task isn&apos;t on this class list yet. Open this kid&apos;s Miacademy parent page to update it.</>
+                )}{" "}
+                <span className="muted">(seen {when(c.miaNow.at)})</span>
+              </p>
+            )}
             {c.units.map((u, ui) => {
               const unitDone = u.lessons.every((l) => l.doneDay);
               return (
@@ -392,11 +407,76 @@ function MiaWeekRings({ familyId }: { familyId: number }) {
       {rows.map(({ kid, rings }) => (
         <div key={kid.id} className="fb-kid-rings">
           <div className="fb-kid-name">
-            <Buddy kidId={kid.id} /> {kid.name}
+            <Buddy kidId={kid.id} /> {kid.name} · ${(miaBank(kid.id).balanceCents / 100).toFixed(2)} in their bank
           </div>
           <KidRings kidId={kid.id} rings={rings} />
         </div>
       ))}
+    </div>
+  );
+}
+
+/** A kid asked to move their bank to their real account: the parent moves the money, then says so. */
+function MiaTransfers({ familyId }: { familyId: number }) {
+  const waiting = miaTransfersWaiting(familyId);
+  const banks = miaFamilyToday(familyId).map(({ kid }) => ({ kid, bank: miaBank(kid.id) }));
+  const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+  return (
+    <div className="card">
+      <h2>💰 What they&apos;ve earned</h2>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Earned</th>
+            <th>In their bank</th>
+            <th>Moved to their account</th>
+          </tr>
+        </thead>
+        <tbody>
+          {banks.map(({ kid, bank }) => (
+            <tr key={kid.id}>
+              <td>
+                <Buddy kidId={kid.id} /> {kid.name}
+              </td>
+              <td>{money(bank.earnedCents)}</td>
+              <td>{money(bank.balanceCents)}</td>
+              <td>{money(bank.paidCents)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {waiting.length > 0 && (
+        <>
+          <h2 style={{ marginTop: 16 }}>💸 Money to transfer ({waiting.length})</h2>
+          <p className="muted small">Move the money to their real account, then press Done. It leaves their bank when you do. Not now puts it back in their bank.</p>
+        </>
+      )}
+      <table>
+        <tbody>
+          {waiting.map((t) => (
+            <tr key={t.id}>
+              <td>
+                <Buddy kidId={t.kidId} /> {t.kidName}
+              </td>
+              <td>
+                <strong>${(t.cents / 100).toFixed(2)}</strong> <span className="muted small">asked {when(t.askedAt)}</span>
+              </td>
+              <td style={{ whiteSpace: "nowrap" }}>
+                <form action={miaTransferAction} style={{ display: "inline" }}>
+                  <input type="hidden" name="transferId" value={t.id} />
+                  <button className="btn" name="op" value="paid">
+                    Done
+                  </button>{" "}
+                  <button className="btn secondary" name="op" value="later">
+                    Not now
+                  </button>
+                </form>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

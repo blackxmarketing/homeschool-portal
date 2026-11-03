@@ -23,8 +23,13 @@ import BreakScene, { nextActivity, type BreakActivity } from "./BreakScene";
 import type { MiaChecklist, MiaRing, MiaVocab } from "@/lib/store";
 
 export interface MiaBankView {
-  monthCents: number;
+  balanceCents: number;
+  earnedCents: number;
+  paidCents: number;
   thisWeek: { ring: string; cents: number }[];
+  /** Asked to transfer, waiting for a grown-up. */
+  transferCents: number;
+  canTransfer: boolean;
 }
 
 export type Timers = Record<string, MiaTimerState | null>;
@@ -99,7 +104,7 @@ export default function MiaHud({
   initialTimers,
   initialChecklists = {},
   initialRings = [],
-  initialBank = { monthCents: 0, thisWeek: [] },
+  initialBank = { balanceCents: 0, earnedCents: 0, paidCents: 0, thisWeek: [], transferCents: 0, canTransfer: false },
   initialVocab = null,
   serverNow,
   demo,
@@ -125,6 +130,24 @@ export default function MiaHud({
   const [checklists, setChecklists] = useState<Checklists>(initialChecklists);
   const [rings, setRings] = useState<MiaRing[]>(initialRings);
   const [bank, setBank] = useState<MiaBankView>(initialBank);
+  // The transfer pops up once a month. Kept in this browser so a reload doesn't bring it back.
+  const transferKey = `mia-transfer-${kidName}-${new Date().toISOString().slice(0, 7)}`;
+  const [transferSeen, setTransferSeen] = useState(false);
+  useEffect(() => {
+    try {
+      setTransferSeen(!!localStorage.getItem(transferKey));
+    } catch {
+      // Then it just asks again.
+    }
+  }, [transferKey]);
+  const closeTransfer = () => {
+    setTransferSeen(true);
+    try {
+      localStorage.setItem(transferKey, "1");
+    } catch {
+      // Then it just asks again.
+    }
+  };
   // A full ring's pay: pops up in the middle of the screen ("show"), flies into the bank ("drop"), then counts ("landed").
   const [coin, setCoin] = useState<{ ring: string; cents: number; key: number; phase: "show" | "drop" | "landed"; to?: { x: number; y: number } } | null>(null);
   const bankFace = useRef<HTMLSpanElement>(null);
@@ -514,8 +537,19 @@ export default function MiaHud({
             ? "Help is on the way!"
             : "Let's get back to it!";
 
+  // The last class of the month is finished: ask once, right then. The button under the bank stays for later.
+  const transferPop = bank.canTransfer && allDone && !openId && !transferSeen;
+  async function askTransfer() {
+    closeTransfer();
+    const { ok, data } = await api({ action: "transfer" });
+    if (ok && data.bank) {
+      setBank(data.bank);
+      say("I sent your money to a grown-up to move to your real account!");
+    }
+  }
+
   // Done for the day: the strip can slide away to a small tab (until tomorrow, or until a timer is going again).
-  if (collapsed && allDone && !openId)
+  if (collapsed && allDone && !openId && !transferPop)
     return (
       <button className="mia-tab" onClick={() => setCollapsedSaved(false)} title="Show my timers">
         <span className="mia-tab-face">
@@ -576,10 +610,19 @@ export default function MiaHud({
             </span>
             <span>
               {/* The new money counts once its coin lands. */}
-              <b key={coin?.phase === "landed" ? coin.key : "total"} className={coin?.phase === "landed" ? "mia-bank-bump" : undefined}>${((bank.monthCents - (coin && coin.phase !== "landed" ? coin.cents : 0)) / 100).toFixed(2)}</b> in your bank this month
+              <b key={coin?.phase === "landed" ? coin.key : "total"} className={coin?.phase === "landed" ? "mia-bank-bump" : undefined}>${((bank.balanceCents - (coin && coin.phase !== "landed" ? coin.cents : 0)) / 100).toFixed(2)}</b> in your bank
             </span>
             {coin?.phase === "landed" && <span className="mia-bank-plus">+{coin.cents}¢</span>}
           </div>
+          {bank.canTransfer && (
+            <button
+              className="mia-btn mia-transfer"
+              onClick={() => void askTransfer()}
+            >
+              💸 Transfer my money
+            </button>
+          )}
+          {bank.transferCents > 0 && <div className="mia-transfer-wait">⏳ ${(bank.transferCents / 100).toFixed(2)} on its way to your account</div>}
         </div>
       )}
 
@@ -596,6 +639,19 @@ export default function MiaHud({
         </div>
       )}
 
+      {transferPop && (
+        <div className="mia-transfer-pop" role="dialog" aria-label="Transfer your money">
+          <span className="mia-payout-coin">🪙</span>
+          <div>You finished the month!</div>
+          <b>${(bank.balanceCents / 100).toFixed(2)}</b>
+          <button className="mia-btn" onClick={() => void askTransfer()}>
+            💸 Transfer my money
+          </button>
+          <button className="mia-btn ghost" onClick={closeTransfer}>
+            Keep it in my bank
+          </button>
+        </div>
+      )}
       {allDone && (
         <div className="mia-reminder mia-electives" role="status">
           <span className="mia-wiggle">🎨</span> {MIA_LINES.electives}

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { openDb, setDb } from "@/lib/db";
+import { getDb, openDb, setDb } from "@/lib/db";
 import { parsePlanWeek } from "@/lib/miaPlan";
-import { addKid, createFamily, getMiaSettings, miaBank, miaChecklist, miaFinishItem, miaRings, miaSavePlan, setMiaSettings } from "@/lib/store";
+import { addKid, createFamily, getMiaSettings, miaAskTransfer, miaBank, miaChecklist, miaFinishItem, miaRings, miaSavePlan, miaTransfersWaiting, parentMiaTransfer, setMiaSettings } from "@/lib/store";
 
 const id = (n: number) => `00000000-0000-4000-8000-0000000000${String(n).padStart(2, "0")}`;
 
@@ -75,6 +75,35 @@ describe("the six weekly rings", () => {
     ]);
     miaChecklist(kid, "ela", "2026-10-20");
     expect(miaRings(kid, "2026-10-20").find((r) => r.id === "grammar")).toMatchObject({ progress: 0, full: false, ahead: 0 });
+  });
+
+  it("keeps the bank from month to month, and transfers only when asked, in the window, once a parent moves it", () => {
+    getDb().prepare("INSERT INTO mia_bank (kid_id, week, ring, cents, at) VALUES (?, '2026-10-26', 'reading', 25, 1)").run(kid);
+    // A new month: the money is still there. October's money stays in until the first transfer, at the end of November.
+    expect(miaBank(kid, "2026-11-03")).toMatchObject({ balanceCents: 25, canTransfer: false });
+    expect(() => miaAskTransfer(kid, "2026-11-03")).toThrow(/can't be transferred/);
+    expect(miaBank(kid, "2026-11-15").canTransfer).toBe(false);
+    // The last school day of the month (Monday the 30th): only once the last class is finished.
+    expect(miaBank(kid, "2026-11-30").canTransfer).toBe(false);
+    const finish = getDb().prepare("INSERT INTO mia_timers (kid_id, day, subject, state) VALUES (?, '2026-11-30', ?, ?)");
+    const finished = JSON.stringify({ durMs: 1, leftMs: 0, endAt: null, pause: null, breaks: 0, helps: 0, missedCheckins: 0, startedAt: 1, finishedAt: 2, demo: false });
+    for (const s of ["math", "ela", "sci"]) finish.run(kid, s, finished);
+    expect(miaBank(kid, "2026-11-30").canTransfer).toBe(false);
+    finish.run(kid, "his", finished);
+    expect(miaBank(kid, "2026-11-30").canTransfer).toBe(true);
+    // Missed it: it stays open the first week of the next month.
+    expect(miaBank(kid, "2026-12-07").canTransfer).toBe(true);
+    expect(miaBank(kid, "2026-12-08").canTransfer).toBe(false);
+    // Asked: it waits for a parent. Not now: it's back in the bank.
+    miaAskTransfer(kid, "2026-11-30");
+    expect(miaBank(kid, "2026-11-30")).toMatchObject({ balanceCents: 0, transferCents: 25, canTransfer: false });
+    parentMiaTransfer(family, miaTransfersWaiting(family)[0].id, false);
+    expect(miaBank(kid, "2026-11-30")).toMatchObject({ balanceCents: 25, transferCents: 0, canTransfer: true });
+    // Done: the money has left the bank.
+    miaAskTransfer(kid, "2026-11-30");
+    parentMiaTransfer(family, miaTransfersWaiting(family)[0].id, true);
+    expect(miaBank(kid, "2026-12-01")).toMatchObject({ balanceCents: 0, earnedCents: 25, paidCents: 25, transferCents: 0, canTransfer: false });
+    expect(miaTransfersWaiting(family)).toEqual([]);
   });
 
   it("gives Bryce six rings and Emme five (no Grammar: she doesn't take Edition 1)", () => {

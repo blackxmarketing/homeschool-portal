@@ -44,7 +44,7 @@ describe("overtime: finishing a Miacademy task after the 30 minutes", () => {
       expect(unseenAlerts(family).filter((a) => a.kind === "overtime").map((a) => a.message)).toEqual([
         "Bryce went 17 minutes over in Science finishing a Miacademy task.",
       ]);
-      expect(miaBank(kid).monthCents).toBeGreaterThanOrEqual(10);
+      expect(miaBank(kid).balanceCents).toBeGreaterThanOrEqual(10);
     });
 
     it("pays nothing extra without overtime", () => {

@@ -22,6 +22,11 @@ export const MIA_SUBJECTS: MiaSubject[] = [
 
 export const MIA_MINUTES = 30;
 
+/** The first day a kid can transfer their bank (school started at the end of October: that money stays in). */
+export const MIA_TRANSFER_FIRST_DAY = "2026-11-28";
+/** Missed it on the last school day of the month? It stays open the first days of the next month. */
+export const MIA_TRANSFER_FIRST_DAYS = 7;
+
 /** The quick break a kid can take between two classes. */
 export const MIA_BETWEEN_BREAK_MINUTES = 5;
 

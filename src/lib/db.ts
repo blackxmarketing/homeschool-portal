@@ -383,6 +383,15 @@ CREATE TABLE IF NOT EXISTS mia_bank (
   PRIMARY KEY (kid_id, week, ring)
 );
 
+-- A kid asked to move their buddy bank into their real account. paid_at: a parent moved the money.
+CREATE TABLE IF NOT EXISTS mia_transfers (
+  id INTEGER PRIMARY KEY,
+  kid_id INTEGER NOT NULL REFERENCES kids(id),
+  cents INTEGER NOT NULL,
+  asked_at INTEGER NOT NULL,
+  paid_at INTEGER
+);
+
 -- Kids' computers connected to the Miacademy Chrome extension. The extension keeps the token; we keep its hash.
 CREATE TABLE IF NOT EXISTS mia_devices (
   id INTEGER PRIMARY KEY,

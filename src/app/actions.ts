@@ -33,6 +33,7 @@ import {
   removeKid,
   parentMiaMarkTimerDone,
   parentMiaResetRing,
+  parentMiaTransfer,
   parentMiaRestart,
   setMiaSettings,
   setParentPin,
@@ -364,6 +365,19 @@ export async function miaRemoveDeviceAction(form: FormData) {
   removeMiaDevice(s.familyId, Number(form.get("deviceId")));
   revalidatePath("/parent/settings");
   redirect("/parent/settings?saved=1");
+}
+
+/** A kid's bank transfer: the real money was moved, or not now (it goes back in their bank). */
+export async function miaTransferAction(form: FormData) {
+  const s = await requireParent();
+  try {
+    parentMiaTransfer(s.familyId, Number(form.get("transferId")), form.get("op") === "paid");
+  } catch (e) {
+    if (e instanceof PortalError) back("/parent/focus", e.message);
+    throw e;
+  }
+  revalidatePath("/parent/focus");
+  redirect("/parent/focus");
 }
 
 /** Approve a hands-on activity, or skip one, on a kid's Miacademy checklist. */

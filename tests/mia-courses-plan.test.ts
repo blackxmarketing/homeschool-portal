@@ -74,6 +74,16 @@ describe("the checklist from the parent's course pages", () => {
     expect(his.upcoming.length).toBeGreaterThan(0);
   });
 
+  it("moves on when the kid does in Miacademy, even before the parent's course pages catch up", () => {
+    miaSaveCourses(kid, parseCourseTasks(COURSE));
+    expect(miaChecklist(kid, "his")!.parts[0].lessonTitle).toBe("The Great Plains");
+    // The kid is on Mississippi River's quiz; the course pages still say The Great Plains isn't done.
+    getDb().prepare("INSERT INTO mia_path (kid_id, course, task_id, task_type, at) VALUES (?, 'U.S. Geography', ?, 'Assessment', 1)").run(kid, id(21));
+    const his = miaChecklist(kid, "his")!.parts[0];
+    expect(his.lessonTitle).toBe("Mississippi River");
+    expect(his.doneThisWeek).toBe(1);
+  });
+
   it("follows the class on the kid's assignments page, and forgets a class the parent removed", () => {
     // Also enrolled in Government (first on the parent's class list), but working on The Midwest.
     const gov = [

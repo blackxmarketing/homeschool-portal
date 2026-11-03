@@ -28,7 +28,7 @@ import { expectedSeconds, gradeProbe, probeSolution } from "./probes";
 import { adapt, buildProfile, conceptMastery, whatHelps, type Adaptation, type LearningEvent, type Profile } from "./learner";
 import { angleOf, applyEvidence, blockers, conceptOf, emptyMeter, legacyConcept, lessonMastered, type Evidence, type Meter } from "./masteryMeter";
 import type { Lesson, Probe } from "@/content/courses/types";
-import { MIA_COURSE_PLANS, MIA_MINUTES, MIA_OVERTIME_ALERT_MINUTES, MIA_PAY, MIA_RINGS, MIA_SUBJECTS, miaCoursePlan, miaIsCoreCourse, miaLessonWeight, type MiaCoursePlan, type MiaSettings } from "@/content/miacademy";
+import { MIA_COURSE_PLANS, MIA_MINUTES, MIA_OVERTIME_ALERT_MINUTES, MIA_PAY, MIA_RINGS, MIA_SUBJECTS, MIA_TRANSFER_FIRST_DAY, MIA_TRANSFER_FIRST_DAYS, miaCoursePlan, miaIsCoreCourse, miaLessonWeight, type MiaCoursePlan, type MiaSettings } from "@/content/miacademy";
 import { applyMia, clampMiaSettings, isOpen, MiaRuleError, newTimer, parseMiaSettings, parseMiaState, remaining, type MiaAction, type MiaTimerState } from "./miaTimer";
 import {
   guessStudentPdf,
@@ -2896,6 +2896,8 @@ export interface MiaCurriculumClass {
   units: { title: string; lessons: MiaCurriculumLesson[] }[];
   lessonsDone: number;
   lessonsTotal: number;
+  /** Where Miacademy says the kid is in this class; null before their assignments page has been seen. */
+  miaNow: { lessonTitle: string | null; taskName: string | null; at: number } | null;
 }
 
 /**
@@ -2926,15 +2928,27 @@ export function miaCurriculum(kidId: number): MiaCurriculumClass[] {
     });
     return { id: l.id, title: l.title, unit, doneDay: l.doneDay, items, workMs: items.reduce((n, i) => n + (i.workMs ?? 0), 0) };
   };
+  const path = new Map(
+    (getDb().prepare("SELECT course, task_id, at FROM mia_path WHERE kid_id = ?").all(kidId) as { course: string; task_id: string; at: number }[]).map((r) => [r.course, r]),
+  );
   const addClass = (subject: string, course: string, lessons: MiaCurriculumLesson[]) => {
     if (!lessons.length) return;
+    const seen = path.get(course);
+    const task = seen ? planTasks(kidId, subject, null).find((t) => t.course === course && t.taskId === seen.task_id) : undefined;
     const units: MiaCurriculumClass["units"] = [];
     for (const l of lessons) {
       const last = units.at(-1);
       if (last && last.title === l.unit) last.lessons.push(l);
       else units.push({ title: l.unit, lessons: [l] });
     }
-    out.push({ subject, course, units, lessonsDone: lessons.filter((l) => l.doneDay).length, lessonsTotal: lessons.length });
+    out.push({
+      subject,
+      course,
+      units,
+      lessonsDone: lessons.filter((l) => l.doneDay).length,
+      lessonsTotal: lessons.length,
+      miaNow: seen ? { lessonTitle: task?.lessonTitle ?? null, taskName: task?.name ?? null, at: seen.at } : null,
+    });
   };
   for (const { id: subject } of MIA_SUBJECTS) {
     // Classes from the parent's course pages and calendar: in the class list's order.
@@ -3381,7 +3395,13 @@ export function miaPlanLessons(kidId: number, subject: string, plan: MiaCoursePl
   }
   const lessons: MiaLesson[] = [];
   const toRead: number[] = [];
-  for (const pl of planLessons(tasks)) {
+  const all = planLessons(tasks);
+  /** The kid is on a later lesson of this class in Miacademy. */
+  const passed = (pl: (typeof all)[number]) => {
+    const at = reached.get(pl.course);
+    return at !== undefined && pl.tasks.every((t) => t.order < at);
+  };
+  for (const pl of all) {
     const key = `plan:${pl.key}`;
     const coursePlan = plan ?? miaCoursePlan(subject, pl.course);
     const needsPdf = !coursePlan?.onlineOnly && !!pl.pdfUrl;
@@ -3411,7 +3431,8 @@ export function miaPlanLessons(kidId: number, subject: string, plan: MiaCoursePl
       lesson.studentPdf ??= pl.pdfUrl;
     }
     // Read once; a failed read waits until the kid opens the lesson (miaSetStudentPdf) rather than retrying on every look.
-    if (needsPdf && !row.pdf_parsed && lesson.parseState === "waiting") toRead.push(lesson.id);
+    const movedPast = passed(pl);
+    if (needsPdf && !row.pdf_parsed && lesson.parseState === "waiting" && !movedPast) toRead.push(lesson.id);
     let parsed: ParsedActivity[] | null = null;
     try {
       parsed = row.pdf_parsed ? (JSON.parse(row.pdf_parsed) as ParsedActivity[]) : null;
@@ -3421,10 +3442,12 @@ export function miaPlanLessons(kidId: number, subject: string, plan: MiaCoursePl
     const items = planLessonItems(pl, subject, coursePlan, parsed);
     // Online tasks: done when Miacademy says so, or once the kid has moved past them.
     const at = reached.get(pl.course);
-    // A lesson Miacademy had already finished when Focus Buddy first saw it, or one the kid has since moved
-    // past, checks itself off; otherwise the kid checks off each one. (Not by its calendar date: parents move those.)
-    const finishedBefore =
-      pl.tasks.every((t) => t.status === "Completed") && (isNew || (at !== undefined && pl.tasks.every((t) => t.order < at)));
+    const workedBefore = workedOnThisWeek(lesson.states);
+    // A lesson Miacademy had already finished when Focus Buddy first saw it, or one the kid has moved past in
+    // Miacademy, checks itself off; otherwise the kid checks off each one. Where the kid is decides, not the
+    // parent's course pages (read only every few hours) and not calendar dates (parents move those).
+    const allCompleted = pl.tasks.every((t) => t.status === "Completed");
+    const finishedBefore = movedPast || (allCompleted && isNew);
     for (const t of pl.tasks) {
       const id = `task-${t.taskId}`;
       if (!items.some((i) => i.id === id) || lesson.states[id]?.done) continue;
@@ -3432,14 +3455,23 @@ export function miaPlanLessons(kidId: number, subject: string, plan: MiaCoursePl
         lesson.states[id] = finishedBefore ? { ...lesson.states[id], done: true, at: now } : { ...lesson.states[id], done: false, ready: true };
     }
     lesson.items = items;
+    // Moved past: the packet work closes too, except an experiment saved for later or a photo waiting for a parent.
+    if (movedPast)
+      for (const item of items) {
+        const s = lesson.states[item.id];
+        if (!s?.done && !s?.later && !s?.waitingForParent) lesson.states[item.id] = { ...s, done: true, at: s?.at ?? now };
+      }
     // Waiting for its PDF: not done yet, even if every online task is.
-    const done = items.length > 0 && lessonDone(items, lesson.states) && (!needsPdf || !!parsed);
+    const done = items.length > 0 && lessonDone(items, lesson.states) && (!needsPdf || !!parsed || movedPast);
     if (done && !lesson.doneDay) {
       // Calendar dates mean nothing here (parents move them so lessons open early). Already finished
-      // the first time Focus Buddy saw it: done before, so it counts for last week, not this one.
+      // the first time Focus Buddy saw it: done before, so it counts for last week, not this one. So does
+      // a lesson far behind where the kid is that nobody touched this week (catching up, not new work).
       // Otherwise it was on the checklist until now, so it's finished today.
-      const seenFinished = isNew && pl.tasks.every((t) => t.status === "Completed");
-      lesson.doneDay = seenFinished ? lastWeekDay() : today();
+      const next = all[all.indexOf(pl) + 1];
+      const justLeft = !next || next.course !== pl.course || !passed(next);
+      const seenFinished = isNew && (allCompleted || movedPast);
+      lesson.doneDay = seenFinished || (movedPast && !workedBefore && !justLeft) ? lastWeekDay() : today();
     }
     if (!done) lesson.doneDay = null;
     db.prepare("UPDATE mia_lessons SET items = ?, states = ?, done_day = ?, student_pdf = COALESCE(student_pdf, ?) WHERE id = ?").run(
@@ -3486,17 +3518,72 @@ export function miaRings(kidId: number, day = today(), now = Date.now()) {
 }
 export type MiaRing = ReturnType<typeof miaRings>[number];
 
-/** The buddy bank: money this month, and this week's payments (so the strip can drop coins for new ones). */
+/** The month's last weekday. */
+function lastSchoolDay(day: string): string {
+  const [y, m] = day.split("-").map(Number);
+  const d = new Date(Date.UTC(y, m, 0));
+  while (d.getUTCDay() === 0 || d.getUTCDay() === 6) d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
+/** The transfer opens when the last class of the month is finished, and stays open the first days of the next month. */
+function transferOpen(kidId: number, day: string): boolean {
+  if (day < MIA_TRANSFER_FIRST_DAY) return false;
+  if (Number(day.slice(8)) <= MIA_TRANSFER_FIRST_DAYS) return true;
+  return day === lastSchoolDay(day) && Object.values(miaDay(kidId, day)).every((t) => t?.finishedAt);
+}
+
+/**
+ * The buddy bank: everything earned that hasn't been transferred (it carries
+ * over from month to month), this week's payments (so the strip can drop coins
+ * for new ones), and the monthly transfer.
+ */
 export function miaBank(kidId: number, day = today()) {
-  const month = day.slice(0, 7);
-  const rows = getDb().prepare("SELECT week, ring, cents, at FROM mia_bank WHERE kid_id = ? ORDER BY at").all(kidId) as {
+  const db = getDb();
+  const rows = db.prepare("SELECT week, ring, cents, at FROM mia_bank WHERE kid_id = ? ORDER BY at").all(kidId) as {
     week: string;
     ring: string;
     cents: number;
     at: number;
   }[];
+  const transfers = db.prepare("SELECT cents, paid_at FROM mia_transfers WHERE kid_id = ?").all(kidId) as { cents: number; paid_at: number | null }[];
+  const earnedCents = rows.reduce((n, r) => n + r.cents, 0);
+  const balanceCents = Math.max(0, earnedCents - transfers.reduce((n, t) => n + t.cents, 0));
+  const transferCents = transfers.filter((t) => t.paid_at === null).reduce((n, t) => n + t.cents, 0);
   return {
-    monthCents: rows.filter((r) => new Date(r.at).toISOString().slice(0, 7) === month || r.week.slice(0, 7) === month).reduce((n, r) => n + r.cents, 0),
+    balanceCents,
+    /** Everything ever earned, and what's been moved to their real account. */
+    earnedCents,
+    paidCents: transfers.filter((t) => t.paid_at !== null).reduce((n, t) => n + t.cents, 0),
     thisWeek: rows.filter((r) => r.week === weekStart(day)).map((r) => ({ ring: r.ring, cents: r.cents })),
+    /** Asked for, waiting for a parent to move it. */
+    transferCents,
+    canTransfer: balanceCents > 0 && !transferCents && transferOpen(kidId, day),
   };
+}
+
+/** The kid asks to move their whole bank into their real account: a parent does that, then confirms. */
+export function miaAskTransfer(kidId: number, day = today(), now = Date.now()): void {
+  const bank = miaBank(kidId, day);
+  if (!bank.canTransfer) throw new PortalError("Your bank can't be transferred right now.");
+  getDb().prepare("INSERT INTO mia_transfers (kid_id, cents, asked_at) VALUES (?, ?, ?)").run(kidId, bank.balanceCents, now);
+  const kid = getKid(kidId)!;
+  addParentAlert(kid.family_id, kidId, "approve", "bank", `${kid.name} asked to transfer $${(bank.balanceCents / 100).toFixed(2)} from their bank to their real account.`, now);
+}
+
+/** Parent: transfers waiting for the real money to be moved. */
+export function miaTransfersWaiting(familyId: number): { id: number; kidId: number; kidName: string; cents: number; askedAt: number }[] {
+  return getDb()
+    .prepare(
+      `SELECT t.id, t.kid_id AS kidId, k.name AS kidName, t.cents, t.asked_at AS askedAt FROM mia_transfers t
+       JOIN kids k ON k.id = t.kid_id WHERE k.family_id = ? AND t.paid_at IS NULL ORDER BY t.asked_at`,
+    )
+    .all(familyId) as { id: number; kidId: number; kidName: string; cents: number; askedAt: number }[];
+}
+
+/** Parent: the money was moved (it leaves the bank for good), or not now (it goes back in the bank). */
+export function parentMiaTransfer(familyId: number, transferId: number, paid: boolean, now = Date.now()): void {
+  if (!miaTransfersWaiting(familyId).some((t) => t.id === transferId)) throw new PortalError("Unknown transfer.");
+  if (paid) getDb().prepare("UPDATE mia_transfers SET paid_at = ? WHERE id = ?").run(now, transferId);
+  else getDb().prepare("DELETE FROM mia_transfers WHERE id = ?").run(transferId);
 }
