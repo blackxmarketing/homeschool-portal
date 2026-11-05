@@ -3572,6 +3572,8 @@ export function miaBank(kidId: number, day = today()) {
   const transferCents = transfers.filter((t) => t.paid_at === null).reduce((n, t) => n + t.cents, 0);
   return {
     balanceCents,
+    /** The old name: Focus Buddy before 0.5.11 reads this, and shows NaN without it. */
+    monthCents: balanceCents,
     /** Everything ever earned, and what's been moved to their real account. */
     earnedCents,
     paidCents: transfers.filter((t) => t.paid_at !== null).reduce((n, t) => n + t.cents, 0),

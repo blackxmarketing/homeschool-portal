@@ -80,7 +80,7 @@ describe("the six weekly rings", () => {
   it("keeps the bank from month to month, and transfers only when asked, in the window, once a parent moves it", () => {
     getDb().prepare("INSERT INTO mia_bank (kid_id, week, ring, cents, at) VALUES (?, '2026-10-26', 'reading', 25, 1)").run(kid);
     // A new month: the money is still there. October's money stays in until the first transfer, at the end of November.
-    expect(miaBank(kid, "2026-11-03")).toMatchObject({ balanceCents: 25, canTransfer: false });
+    expect(miaBank(kid, "2026-11-03")).toMatchObject({ balanceCents: 25, monthCents: 25, canTransfer: false });
     expect(() => miaAskTransfer(kid, "2026-11-03")).toThrow(/can't be transferred/);
     expect(miaBank(kid, "2026-11-15").canTransfer).toBe(false);
     // The last school day of the month (Monday the 30th): only once the last class is finished.
